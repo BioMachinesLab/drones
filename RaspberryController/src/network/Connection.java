@@ -74,6 +74,7 @@ public class Connection extends Thread {
 			} catch (IOException e) {
 				System.out
 						.println("Unable to close connection... there is an open connection?");
+				e.printStackTrace();
 			}
 		}
 	}
@@ -95,6 +96,7 @@ public class Connection extends Thread {
 		} catch (IOException e) {
 			System.out
 					.println("Unable to send data... there is an open connection?");
+			e.printStackTrace();
 		}
 	}
 

@@ -1,12 +1,15 @@
 package dataObjects;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.text.ParseException;
 
 import com.pi4j.system.NetworkInfo;
 import com.pi4j.system.SystemInfo;
 
-public class SystemInformationsData {
+public class SystemInformationsData implements Serializable {
+	private static final long serialVersionUID = 8860499614818991291L;
+
 	// Hardware Informations
 	private String serialNumber;
 	private String cpuRevision;

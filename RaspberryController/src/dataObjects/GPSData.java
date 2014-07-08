@@ -1,5 +1,7 @@
 package dataObjects;
 
+import java.io.Serializable;
+
 import org.joda.time.LocalDateTime;
 
 /**
@@ -8,7 +10,8 @@ import org.joda.time.LocalDateTime;
  * @author Vasco Craveiro Costa
  * 
  */
-public class GPSData {
+public class GPSData implements Serializable {
+	private static final long serialVersionUID = -2077018378793167250L;
 	private final static int NUMBER_OF_PARAMETERS = 15;
 	private long PRINT_NUMBER = 0;
 
@@ -54,7 +57,7 @@ public class GPSData {
 		groundSpeedKmh = -1;
 		orientation = -1;
 
-		date = new LocalDateTime(0, 0, 0, 0, 0, 0, 0);
+		date = new LocalDateTime(1, 1, 1, 1, 1, 1, 1);
 	}
 
 	public int getNumberOfParameters() {
