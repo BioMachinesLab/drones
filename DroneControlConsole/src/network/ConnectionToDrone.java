@@ -60,11 +60,12 @@ public class ConnectionToDrone extends Thread {
 			socket = new Socket(destHost, port);
 			out = new ObjectOutputStream(socket.getOutputStream());
 			in = new ObjectInputStream(socket.getInputStream());
+
 			out.writeObject(InetAddress.getLocalHost().getHostName());
 			out.flush();
 
 			destHostName = (String) in.readObject();
-			System.out.println("Destination name: " + destHostName);
+			System.out.println("Connected to: " + destHostName);
 
 			while (true) {
 				try {
@@ -76,15 +77,14 @@ public class ConnectionToDrone extends Thread {
 				}
 			}
 		} catch (IOException e) {
-			if (!socket.isClosed()) {
-				System.out.println("Drone Controller closed the connection");
-			}
+			System.out.println("Drone Controller closed the connection");
 		} catch (ClassNotFoundException e) {
 			System.out.println("I didn't reveived a correct name from "
 					+ socket.getInetAddress().getHostAddress());
 		} finally {
 			try {
-				socket.close();
+				if (socket != null)
+					socket.close();
 			} catch (IOException e) {
 				System.out
 						.println("Unable to close connection... there is an open connection?");
@@ -97,7 +97,7 @@ public class ConnectionToDrone extends Thread {
 	}
 
 	public void closeConnection() {
-		if (socket!=null && !socket.isClosed()) {
+		if (socket != null && !socket.isClosed()) {
 			System.out.println("Closing Connection.... ");
 			try {
 				socket.close();

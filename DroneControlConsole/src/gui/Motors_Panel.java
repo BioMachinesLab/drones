@@ -22,6 +22,7 @@ import javax.swing.JCheckBox;
 
 public class Motors_Panel extends JPanel {
 	private static final long serialVersionUID = 7086609300323189722L;
+	private GUI gui;
 	private boolean locked = false;
 	private JCheckBox chckbxLockControl;
 
@@ -35,7 +36,8 @@ public class Motors_Panel extends JPanel {
 	private JProgressBar rightProgressBar;
 	private JButton btnStopRight;
 
-	public Motors_Panel() {
+	public Motors_Panel(GUI gui) {
+		this.gui = gui;
 		setBorder(BorderFactory.createTitledBorder("Motors Control"));
 		setLayout(null);
 
@@ -44,7 +46,6 @@ public class Motors_Panel extends JPanel {
 
 		chckbxLockControl = new JCheckBox("Lock Control");
 		chckbxLockControl.setBounds(107, 270, 97, 23);
-		// chckbxLockControl.is
 		chckbxLockControl.addActionListener(new ActionListener() {
 
 			@Override
@@ -56,8 +57,9 @@ public class Motors_Panel extends JPanel {
 				}
 			}
 		});
-
 		add(chckbxLockControl);
+
+		this.setVisible(true);
 	}
 
 	private void buildLeftPanel() {

@@ -10,11 +10,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class IPandPortNumberRequest extends Panel {
+public class IPandPortNumberRequestToUser extends Panel {
 	private InetAddress ip = null;
 	private int portNumber = -1;
 
-	public IPandPortNumberRequest() {
+	public IPandPortNumberRequestToUser() {
 		JPanel dialogJPane = new JPanel(new GridLayout(2, 1));
 
 		// JTextFields Construction
