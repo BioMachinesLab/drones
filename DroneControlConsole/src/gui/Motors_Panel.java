@@ -1,27 +1,30 @@
 package gui;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+
 import javax.swing.BorderFactory;
-import javax.swing.JFrame;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
+import network.messages.MotorMessage;
 
 public class Motors_Panel extends JPanel {
 	private static final long serialVersionUID = 7086609300323189722L;
+	private static final int KEY_CONTROL_INCREMENT = 5;
 	private GUI gui;
 	private boolean locked = false;
 	private JCheckBox chckbxLockControl;
@@ -40,6 +43,8 @@ public class Motors_Panel extends JPanel {
 		this.gui = gui;
 		setBorder(BorderFactory.createTitledBorder("Motors Control"));
 		setLayout(null);
+		setMinimumSize(new Dimension(300, 300));
+		setPreferredSize(new Dimension(300, 300));
 
 		buildLeftPanel();
 		buildRightPanel();
@@ -59,7 +64,66 @@ public class Motors_Panel extends JPanel {
 		});
 		add(chckbxLockControl);
 
-		this.setVisible(true);
+		gui.getFrame().addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent arg0) {
+				int val;
+				switch (arg0.getKeyChar()) {
+				case 'w':
+					val = leftSlider.getValue() + KEY_CONTROL_INCREMENT;
+					if (val > leftSlider.getMaximum()) {
+						val = leftSlider.getMaximum();
+					}
+					leftSlider.setValue(val);
+
+					if (locked)
+						rightSlider.setValue(val);
+					break;
+				case 's':
+					val = leftSlider.getValue() - KEY_CONTROL_INCREMENT;
+					if (val < leftSlider.getMinimum()) {
+						val = leftSlider.getMinimum();
+					}
+					leftSlider.setValue(val);
+
+					if (locked)
+						rightSlider.setValue(val);
+					break;
+				case 'o':
+					val = rightSlider.getValue() + KEY_CONTROL_INCREMENT;
+					if (val > rightSlider.getMaximum()) {
+						val = rightSlider.getMaximum();
+					}
+					rightSlider.setValue(val);
+
+					if (locked)
+						leftSlider.setValue(val);
+					break;
+				case 'k':
+					val = rightSlider.getValue() - KEY_CONTROL_INCREMENT;
+					if (val < rightSlider.getMinimum()) {
+						val = rightSlider.getMinimum();
+					}
+					rightSlider.setValue(val);
+
+					if (locked)
+						leftSlider.setValue(val);
+					break;
+				default:
+					break;
+				}
+				sendPowerMessage();
+			}
+
+			@Override
+			public void keyReleased(KeyEvent arg0) {
+			}
+
+			@Override
+			public void keyPressed(KeyEvent arg0) {
+			}
+		});
 	}
 
 	private void buildLeftPanel() {
@@ -90,6 +154,7 @@ public class Motors_Panel extends JPanel {
 				}
 
 				leftProgressBar.setValue(leftSlider.getValue());
+				sendPowerMessage();
 			}
 		});
 		leftPanel.add(leftSlider);
@@ -149,6 +214,7 @@ public class Motors_Panel extends JPanel {
 				}
 
 				rightProgressBar.setValue(rightSlider.getValue());
+				sendPowerMessage();
 			}
 		});
 		rightPanel.add(rightSlider);
@@ -188,5 +254,12 @@ public class Motors_Panel extends JPanel {
 	public void changeRightMotorPower(int value) {
 		rightSlider.setValue(value);
 		rightProgressBar.setValue(value);
+	}
+
+	public void sendPowerMessage() {
+		double leftPower = ((double) leftSlider.getValue()) / 100;
+		double rightPower = ((double) rightSlider.getValue()) / 100;
+
+		gui.getConnector().sendData(new MotorMessage(leftPower, rightPower));
 	}
 }

@@ -1,7 +1,7 @@
 package gui;
 
 import java.awt.Container;
-import java.net.InetAddress;
+import java.awt.FlowLayout;
 
 import javax.swing.JFrame;
 import javax.swing.UIManager;
@@ -10,11 +10,10 @@ import javax.swing.UnsupportedLookAndFeelException;
 import network.ConnectionToDrone;
 import network.messages.GPSMessage;
 import network.messages.Message;
+import network.messages.MotorMessage;
 
 public class GUI {
 	// Connections Objects
-	private InetAddress ip;
-	private int portNumber = -1;
 	private ConnectionToDrone connector;
 
 	// GUI Objects
@@ -28,6 +27,9 @@ public class GUI {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
 				if (connector != null) {
+					if (motorsPanel != null) {
+						connector.sendData(new MotorMessage(0, 0));
+					}
 					connector.closeConnection();
 				}
 			}
@@ -51,34 +53,30 @@ public class GUI {
 				form.getPortNumber());
 		connector.start();
 
-		// try {
-		// for (int i = 0; i < 5; i++) {
-		// connector.sendData(new InformationRequest(Message_Type.GPS));
-		// Thread.sleep(500);
-		// }
-		// } catch (InterruptedException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-
 		buildGUI();
 		display();
+
+		Thread gpsThread = new Thread(gpsPanel);
+		gpsThread.start();
 	}
 
 	private void buildGUI() {
 		frame = new JFrame();
-		frame.setTitle("HANCAD/ CORATAM Project - Drone Remote Console - ");
-		frame.setBounds(100, 100, 800, 450);
+		frame.setTitle("HANCAD/ CORATAM Project - Drone Remote Console - "
+				+ connector.getDestInetAddress().getHostAddress());
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setResizable(false);
+		frame.setResizable(true);
 
 		contentPane = frame.getContentPane();
-		contentPane.setLayout(null);
+		contentPane.setLayout(new FlowLayout());
 
 		motorsPanel = new Motors_Panel(this);
-		motorsPanel.setBounds(0, 318, 385, -318);
 		contentPane.add(motorsPanel);
-		frame.repaint();
+
+		gpsPanel = new GPS_Panel(this);
+		contentPane.add(gpsPanel);
+
+		frame.pack();
 	}
 
 	public void display() {
@@ -87,11 +85,19 @@ public class GUI {
 
 	public void processMessage(Message message) {
 		if (message instanceof GPSMessage) {
-			System.out.println("GPS MESSAGE:"
-					+ ((GPSMessage) message).getGPSData().toString());
+			System.out.println("Received GPS data");
+			gpsPanel.displayData(((GPSMessage) message).getGPSData());
 		} else {
 			System.out.println("Received Message: "
 					+ message.getClass().toString());
 		}
+	}
+
+	protected ConnectionToDrone getConnector() {
+		return connector;
+	}
+
+	public JFrame getFrame() {
+		return frame;
 	}
 }

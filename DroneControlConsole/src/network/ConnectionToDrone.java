@@ -9,6 +9,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import javax.swing.JOptionPane;
+
 import network.messages.Message;
 
 public class ConnectionToDrone extends Thread {
@@ -46,8 +48,11 @@ public class ConnectionToDrone extends Thread {
 
 	public void sendData(Object data) {
 		try {
-			out.writeObject(data);
-			out.flush();
+			if (socket != null) {
+				System.out.println("Sent " + data);
+				out.writeObject(data);
+				out.flush();
+			}
 		} catch (IOException e) {
 			System.out
 					.println("Unable to send data... there is an open connection?");
@@ -61,39 +66,55 @@ public class ConnectionToDrone extends Thread {
 			out = new ObjectOutputStream(socket.getOutputStream());
 			in = new ObjectInputStream(socket.getInputStream());
 
-			out.writeObject(InetAddress.getLocalHost().getHostName());
-			out.flush();
+			try {
+				out.writeObject(InetAddress.getLocalHost().getHostName());
+				out.flush();
 
-			destHostName = (String) in.readObject();
-			System.out.println("Connected to: " + destHostName);
+				destHostName = (String) in.readObject();
+				System.out.println("Connected to " + destHost.getHostAddress()
+						+ " (" + destHostName + ")");
 
-			while (true) {
+				while (true) {
+					try {
+						Message message = (Message) in.readObject();
+						gui.processMessage(message);
+					} catch (ClassNotFoundException e) {
+						System.out
+								.println("Received class of unknown type from "
+										+ destHostName
+										+ ", so it was discarded....");
+					}
+				}
+			} catch (IOException e) {
+				System.out.println("Drone Controller closed the connection");
+			} catch (ClassNotFoundException e) {
+				System.out.println("I didn't reveived a correct name from "
+						+ socket.getInetAddress().getHostAddress());
+			} finally {
 				try {
-					Message message = (Message) in.readObject();
-					gui.processMessage(message);
-				} catch (ClassNotFoundException e) {
-					System.out.println("Received class of unknown type from "
-							+ destHostName + ", so it was discarded....");
+					if (socket != null)
+						socket.close();
+				} catch (IOException e) {
+					System.out
+							.println("Unable to close connection... there is an open connection?");
 				}
 			}
-		} catch (IOException e) {
-			System.out.println("Drone Controller closed the connection");
-		} catch (ClassNotFoundException e) {
-			System.out.println("I didn't reveived a correct name from "
-					+ socket.getInetAddress().getHostAddress());
-		} finally {
-			try {
-				if (socket != null)
-					socket.close();
-			} catch (IOException e) {
-				System.out
-						.println("Unable to close connection... there is an open connection?");
-			}
+		} catch (IOException e1) {
+			JOptionPane.showMessageDialog(
+					null,
+					"Unable to open a connection to "
+							+ destHost.getHostAddress(), "Connection Error",
+					JOptionPane.ERROR_MESSAGE);
+			System.exit(0);
 		}
 	}
 
 	public String getDestHostName() {
 		return destHostName;
+	}
+
+	public InetAddress getDestInetAddress() {
+		return destHost;
 	}
 
 	public void closeConnection() {

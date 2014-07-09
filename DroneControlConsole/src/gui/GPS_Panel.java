@@ -1,18 +1,25 @@
 package gui;
 
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.DefaultComboBoxModel;
+
+import network.messages.InformationRequest;
+import network.messages.InformationRequest.Message_Type;
 
 import org.joda.time.LocalDateTime;
 
 import dataObjects.GPSData;
 
-public class GPS_Panel extends JPanel {
+public class GPS_Panel extends JPanel implements Runnable {
 	private static final long serialVersionUID = 6535539451990270799L;
 	private JTextField textFieldLatitude;
 	private JTextField textFieldLongitude;
@@ -30,10 +37,17 @@ public class GPS_Panel extends JPanel {
 	private JTextField textFieldGPSSource;
 	private JTextField textFieldTime;
 	private JTextField textFieldDate;
+	private JComboBox<String> comboBox;
 
-	public GPS_Panel() {
+	private GUI gui;
+	private int debugCounter = 0;
+
+	public GPS_Panel(GUI gui) {
+		this.gui = gui;
 		setBorder(BorderFactory.createTitledBorder("GPS Data"));
 		setLayout(null);
+		setMinimumSize(new Dimension(390, 350));
+		setPreferredSize(new Dimension(390, 350));
 
 		buildCoordinatesPanel();
 		buildNavitationInformationsPanel();
@@ -42,9 +56,16 @@ public class GPS_Panel extends JPanel {
 
 		JButton btnRefresh = new JButton("Refresh");
 		btnRefresh.setBounds(246, 316, 89, 23);
+		btnRefresh.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				requestGPSData();
+			}
+		});
 		add(btnRefresh);
 
-		JComboBox<String> comboBox = new JComboBox<String>();
+		comboBox = new JComboBox<String>();
 		comboBox.setModel(new DefaultComboBoxModel<String>(new String[] {
 				"10 Hz", "5 Hz", "1 Hz", "0.1Hz" }));
 		comboBox.setSelectedIndex(2);
@@ -254,15 +275,16 @@ public class GPS_Panel extends JPanel {
 	public void displayData(GPSData data) {
 		textFieldLatitude.setText(data.getLatitude());
 		textFieldLongitude.setText(data.getLongitude());
-		textFieldAltitude.setText(Double.toString(data.getAltitude()));
+
+		textFieldAltitude.setText(Integer.toString(debugCounter));
+		debugCounter++;
+		// textFieldAltitude.setText(Double.toString(data.getAltitude()));
 
 		textFieldHasFix.setText(Boolean.toString(data.isFix()));
 		textFieldSatelittesView.setText(Integer.toString(data
 				.getNumberOfSatellitesInView()));
-		;
 		textFieldSatelittesUsed.setText(Integer.toString(data
 				.getNumberOfSatellitesInUse()));
-		;
 		textFieldHDOP.setText(Double.toString(data.getHDOP()));
 		textFieldPDOP.setText(Double.toString(data.getPDOP()));
 		textFieldVDOP.setText(Double.toString(data.getVDOP()));
@@ -295,9 +317,7 @@ public class GPS_Panel extends JPanel {
 
 		textFieldVelKmh.setText(Double.toString(data.getGroundSpeedKmh()));
 		textFieldVelKnots.setText(Double.toString(data.getGroundSpeedKnts()));
-		;
 		textFieldOrientation.setText(Double.toString(data.getOrientation()));
-		;
 
 		LocalDateTime date = data.getDate();
 		textFieldTime.setText(date.getHourOfDay() + ":"
@@ -305,5 +325,43 @@ public class GPS_Panel extends JPanel {
 				+ date.getMillisOfSecond());
 		textFieldDate.setText(date.getDayOfMonth() + "/"
 				+ date.getMonthOfYear() + "/" + date.getYear());
+
+		this.repaint();
+	}
+
+	private void requestGPSData() {
+		gui.getConnector().sendData(new InformationRequest(Message_Type.GPS));
+	}
+
+	@Override
+	public void run() {
+		while (true) {
+			requestGPSData();
+
+			int sleepTime = 0;
+			switch (comboBox.getSelectedIndex()) {
+			case 0:
+				sleepTime = 100;
+				break;
+			case 1:
+				sleepTime = 200;
+				break;
+			case 2:
+				sleepTime = 1000;
+				break;
+			case 3:
+				sleepTime = 10000;
+				break;
+			default:
+				sleepTime = 1000;
+				break;
+			}
+			try {
+				Thread.sleep(sleepTime);
+			} catch (InterruptedException e) {
+				System.out.println("GPS Panel thread was interrupted....");
+				e.printStackTrace();
+			}
+		}
 	}
 }
