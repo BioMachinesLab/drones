@@ -9,9 +9,9 @@ JCC = javac
 .SUFFIXES: .java .class
 
 default: 
-	make clean && make all && make run
+	make clean && make build && make run
 
-all:
+build:
 	mkdir $(JDEST) && $(JCC) $(CLASSPATH) $(JSOURCEPATH) -d $(JDEST) $(ROOT_FILE)
 
 clean:

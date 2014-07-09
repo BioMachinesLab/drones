@@ -3,7 +3,6 @@ package main;
 import input.BatteryManagerInput;
 import input.CompassModuleInput;
 import input.GPSModuleInput;
-import input.SystemInformationsInput;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -15,7 +14,7 @@ import network.messages.InformationRequest;
 import network.messages.Message;
 import network.messages.MotorMessage;
 import network.messages.SystemInformationsMessage;
-import output.ESCManagerOutput;
+import output.ESCManagerOutputThreaded;
 
 import com.pi4j.io.serial.SerialPortException;
 
@@ -24,8 +23,7 @@ import dataObjects.SystemInformationsData;
 public class Controller {
 	private GPSModuleInput gpsModule;
 	private BatteryManagerInput batteryManager;
-	private SystemInformationsInput sysInformations;
-	private ESCManagerOutput escManager;
+	private ESCManagerOutputThreaded escManagerThreaded;
 	private CompassModuleInput compassModule;
 	private ConnectionHandler networkConnector;
 
@@ -38,14 +36,15 @@ public class Controller {
 			public void run() {
 				if (networkConnector != null) {
 					networkConnector.closeConnections();
-					escManager.disableMotors();
+					escManagerThreaded.disableMotors();
 				}
 			}
 		});
 
 		System.out.println("######################################");
 		System.out.print("Initializing ESC modules");
-		escManager = new ESCManagerOutput();
+		escManagerThreaded = new ESCManagerOutputThreaded();
+		escManagerThreaded.start();
 
 		System.out.print(", GPS module");
 		gpsModule = new GPSModuleInput();
@@ -54,20 +53,18 @@ public class Controller {
 		networkConnector = new ConnectionHandler(this);
 		networkConnector.initConnector();
 
-		// sysInformations = new SystemInformationsInput();
 		// batteryManager = new BatteryManagerInput();
 		// compassModule = new CompassModuleInput();
 	}
 
 	public void processMotorMessage(MotorMessage message, Connection conn) {
-		escManager.setValue(0, message.getLeftMotor());
-		escManager.setValue(1, message.getRightMotor());
+		escManagerThreaded.setValue(0, message.getLeftMotor());
+		escManagerThreaded.setValue(1, message.getRightMotor());
 	}
 
 	public void processInformationRequest(InformationRequest request,
 			Connection conn) {
 		Message msg;
-
 		switch (request.getMessageTypeQuery()) {
 		case BATTERY:
 			// TODO
