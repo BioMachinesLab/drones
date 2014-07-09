@@ -60,7 +60,7 @@ public class SystemInformationsData implements Serializable {
 	private long pwmClockFrequency;
 	private long emmcClockFrequency;
 	private long hdmiClockFrequency;
-	private long dpiClockFrequenvy;
+	private long dpiClockFrequency;
 
 	public SystemInformationsData() throws IOException, InterruptedException,
 			ParseException {
@@ -113,7 +113,7 @@ public class SystemInformationsData implements Serializable {
 		pwmClockFrequency = SystemInfo.getClockFrequencyPWM();
 		emmcClockFrequency = SystemInfo.getClockFrequencyEMMC();
 		hdmiClockFrequency = SystemInfo.getClockFrequencyHDMI();
-		dpiClockFrequenvy = SystemInfo.getClockFrequencyDPI();
+		dpiClockFrequency = SystemInfo.getClockFrequencyDPI();
 	}
 
 	public String getSerialNumber() {
@@ -272,7 +272,7 @@ public class SystemInformationsData implements Serializable {
 		return hdmiClockFrequency;
 	}
 
-	public long getDpiClockFrequenvy() {
-		return dpiClockFrequenvy;
+	public long getDpiClockFrequency() {
+		return dpiClockFrequency;
 	}
 }
