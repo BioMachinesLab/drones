@@ -43,38 +43,30 @@ public class Controller {
 			}
 		});
 
-		try {
-			System.out.println("######################################");
-			System.out.print("Initializing ESC modules");
-			escManager = new ESCManagerOutput();
+		System.out.println("######################################");
+		System.out.print("Initializing ESC modules");
+		escManager = new ESCManagerOutput();
 
-			System.out.print(", GPS module");
-			gpsModule = new GPSModuleInput();
+		System.out.print(", GPS module");
+		gpsModule = new GPSModuleInput();
 
-			System.out.println(", network connections");
-			networkConnector = new ConnectionHandler(this);
-			networkConnector.initConnector();
+		System.out.println(", network connections");
+		networkConnector = new ConnectionHandler(this);
+		networkConnector.initConnector();
 
-			// sysInformations = new SystemInformationsInput();
-			// batteryManager = new BatteryManagerInput();
-			// compassModule = new CompassModuleInput();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		// sysInformations = new SystemInformationsInput();
+		// batteryManager = new BatteryManagerInput();
+		// compassModule = new CompassModuleInput();
 	}
 
 	public void processMotorMessage(MotorMessage message, Connection conn) {
 		escManager.setValue(0, message.getLeftMotor());
 		escManager.setValue(1, message.getRightMotor());
-		System.out.println("New velocity: L-" + message.getLeftMotor() + " R-"
-				+ message.getRightMotor());
 	}
 
 	public void processInformationRequest(InformationRequest request,
 			Connection conn) {
 		Message msg;
-		System.out.println("Client "+conn.getSocket().getInetAddress().getHostAddress()+" requested " + request.getMessageTypeQuery()+" information");
 
 		switch (request.getMessageTypeQuery()) {
 		case BATTERY:

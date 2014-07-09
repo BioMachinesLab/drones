@@ -17,21 +17,35 @@ public class ConnectionHandler {
 		this.controller = controller;
 	}
 
-	public void initConnector() throws IOException {
-		ServerSocket serverSocket = new ServerSocket(SOCKET_PORT);
+	public void initConnector() {
+		ServerSocket serverSocket;
 		try {
-			System.out.println("Connection Handler Initialized on "
-					+ InetAddress.getLocalHost().getHostAddress() + ":"
-					+ SOCKET_PORT);
-			System.out.println("Waiting for connection requests!");
-			while (true) {
-				Socket socket = serverSocket.accept();
-				Connection conn = new Connection(socket, controller, this);
-				connections.add(conn);
-				conn.start();
+			serverSocket = new ServerSocket(SOCKET_PORT);
+
+			try {
+				System.out.println("Connection Handler Initialized on "
+						+ InetAddress.getLocalHost().getHostAddress() + ":"
+						+ SOCKET_PORT);
+				System.out.println("Waiting for connection requests!");
+				while (true) {
+					Socket socket = serverSocket.accept();
+					Connection conn = new Connection(socket, controller, this);
+					connections.add(conn);
+					conn.start();
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				try {
+					serverSocket.close();
+				} catch (IOException e) {
+					System.out
+							.println("Unable to close server socket.... there was an open socket?");
+				}
 			}
-		} finally {
-			serverSocket.close();
+		} catch (IOException e) {
+			System.out.println("Unable to init socket!");
 		}
 	}
 
