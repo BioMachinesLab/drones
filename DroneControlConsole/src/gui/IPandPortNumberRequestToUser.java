@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 public class IPandPortNumberRequestToUser extends Panel {
+	private static final long serialVersionUID = 1919821842077609484L;
 	private InetAddress ip = null;
 	private int portNumber = -1;
 

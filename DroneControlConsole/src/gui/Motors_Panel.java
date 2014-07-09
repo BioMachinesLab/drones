@@ -2,10 +2,11 @@ package gui;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.KeyEventPostProcessor;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -64,66 +65,130 @@ public class Motors_Panel extends JPanel {
 		});
 		add(chckbxLockControl);
 
-		gui.getFrame().addKeyListener(new KeyListener() {
+		KeyboardFocusManager.getCurrentKeyboardFocusManager()
+				.addKeyEventPostProcessor(new KeyEventPostProcessor() {
 
-			@Override
-			public void keyTyped(KeyEvent arg0) {
-				int val;
-				switch (arg0.getKeyChar()) {
-				case 'w':
-					val = leftSlider.getValue() + KEY_CONTROL_INCREMENT;
-					if (val > leftSlider.getMaximum()) {
-						val = leftSlider.getMaximum();
+					@Override
+					public boolean postProcessKeyEvent(KeyEvent arg0) {
+						if (arg0.getID() == KeyEvent.KEY_PRESSED) {
+							int val;
+							switch (arg0.getKeyChar()) {
+							case 'w':
+								val = leftSlider.getValue()
+										+ KEY_CONTROL_INCREMENT;
+								if (val > leftSlider.getMaximum()) {
+									val = leftSlider.getMaximum();
+								}
+								leftSlider.setValue(val);
+
+								if (locked)
+									rightSlider.setValue(val);
+								break;
+							case 's':
+								val = leftSlider.getValue()
+										- KEY_CONTROL_INCREMENT;
+								if (val < leftSlider.getMinimum()) {
+									val = leftSlider.getMinimum();
+								}
+								leftSlider.setValue(val);
+
+								if (locked)
+									rightSlider.setValue(val);
+								break;
+							case 'o':
+								val = rightSlider.getValue()
+										+ KEY_CONTROL_INCREMENT;
+								if (val > rightSlider.getMaximum()) {
+									val = rightSlider.getMaximum();
+								}
+								rightSlider.setValue(val);
+
+								if (locked)
+									leftSlider.setValue(val);
+								break;
+							case 'k':
+								val = rightSlider.getValue()
+										- KEY_CONTROL_INCREMENT;
+								if (val < rightSlider.getMinimum()) {
+									val = rightSlider.getMinimum();
+								}
+								rightSlider.setValue(val);
+
+								if (locked)
+									leftSlider.setValue(val);
+								break;
+							default:
+								break;
+							}
+							sendPowerMessage();
+							return true;
+						} else {
+							return false;
+						}
 					}
-					leftSlider.setValue(val);
+				});
 
-					if (locked)
-						rightSlider.setValue(val);
-					break;
-				case 's':
-					val = leftSlider.getValue() - KEY_CONTROL_INCREMENT;
-					if (val < leftSlider.getMinimum()) {
-						val = leftSlider.getMinimum();
-					}
-					leftSlider.setValue(val);
-
-					if (locked)
-						rightSlider.setValue(val);
-					break;
-				case 'o':
-					val = rightSlider.getValue() + KEY_CONTROL_INCREMENT;
-					if (val > rightSlider.getMaximum()) {
-						val = rightSlider.getMaximum();
-					}
-					rightSlider.setValue(val);
-
-					if (locked)
-						leftSlider.setValue(val);
-					break;
-				case 'k':
-					val = rightSlider.getValue() - KEY_CONTROL_INCREMENT;
-					if (val < rightSlider.getMinimum()) {
-						val = rightSlider.getMinimum();
-					}
-					rightSlider.setValue(val);
-
-					if (locked)
-						leftSlider.setValue(val);
-					break;
-				default:
-					break;
-				}
-				sendPowerMessage();
-			}
-
-			@Override
-			public void keyReleased(KeyEvent arg0) {
-			}
-
-			@Override
-			public void keyPressed(KeyEvent arg0) {
-			}
-		});
+		// gui.getFrame().addKeyListener(new KeyListener() {
+		//
+		// @Override
+		// public void keyTyped(KeyEvent arg0) {
+		// System.out.println("oioi");
+		// int val;
+		// switch (arg0.getKeyChar()) {
+		// case 'w':
+		// val = leftSlider.getValue() + KEY_CONTROL_INCREMENT;
+		// if (val > leftSlider.getMaximum()) {
+		// val = leftSlider.getMaximum();
+		// }
+		// leftSlider.setValue(val);
+		//
+		// if (locked)
+		// rightSlider.setValue(val);
+		// break;
+		// case 's':
+		// val = leftSlider.getValue() - KEY_CONTROL_INCREMENT;
+		// if (val < leftSlider.getMinimum()) {
+		// val = leftSlider.getMinimum();
+		// }
+		// leftSlider.setValue(val);
+		//
+		// if (locked)
+		// rightSlider.setValue(val);
+		// break;
+		// case 'o':
+		// val = rightSlider.getValue() + KEY_CONTROL_INCREMENT;
+		// if (val > rightSlider.getMaximum()) {
+		// val = rightSlider.getMaximum();
+		// }
+		// rightSlider.setValue(val);
+		//
+		// if (locked)
+		// leftSlider.setValue(val);
+		// break;
+		// case 'k':
+		// val = rightSlider.getValue() - KEY_CONTROL_INCREMENT;
+		// if (val < rightSlider.getMinimum()) {
+		// val = rightSlider.getMinimum();
+		// }
+		// rightSlider.setValue(val);
+		//
+		// if (locked)
+		// leftSlider.setValue(val);
+		// break;
+		// default:
+		// break;
+		// }
+		// sendPowerMessage();
+		// }
+		//
+		// @Override
+		// public void keyReleased(KeyEvent arg0) {
+		// }
+		//
+		// @Override
+		// public void keyPressed(KeyEvent arg0) {
+		// }
+		// });
 	}
 
 	private void buildLeftPanel() {

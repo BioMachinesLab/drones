@@ -9,8 +9,11 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import network.ConnectionToDrone;
 import network.messages.GPSMessage;
+import network.messages.InformationRequest;
 import network.messages.Message;
 import network.messages.MotorMessage;
+import network.messages.SystemInformationsMessage;
+import network.messages.InformationRequest.Message_Type;
 
 public class GUI {
 	// Connections Objects
@@ -66,6 +69,7 @@ public class GUI {
 				+ connector.getDestInetAddress().getHostAddress());
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(true);
+		frame.setFocusable(true);
 
 		contentPane = frame.getContentPane();
 		contentPane.setLayout(new FlowLayout());
@@ -76,6 +80,10 @@ public class GUI {
 		gpsPanel = new GPS_Panel(this);
 		contentPane.add(gpsPanel);
 
+		sysInfoPanel = new SystemInfo_Panel(this);
+		connector.sendData(new InformationRequest(Message_Type.SYSTEM));
+		contentPane.add(sysInfoPanel);
+
 		frame.pack();
 	}
 
@@ -85,11 +93,15 @@ public class GUI {
 
 	public void processMessage(Message message) {
 		if (message instanceof GPSMessage) {
-			System.out.println("Received GPS data");
 			gpsPanel.displayData(((GPSMessage) message).getGPSData());
 		} else {
-			System.out.println("Received Message: "
-					+ message.getClass().toString());
+			if (message instanceof SystemInformationsMessage) {
+				sysInfoPanel.displayData(((SystemInformationsMessage) message)
+						.getSysInformations());
+			} else {
+				System.out.println("Received Message: "
+						+ message.getClass().toString());
+			}
 		}
 	}
 

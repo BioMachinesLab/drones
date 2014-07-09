@@ -326,7 +326,7 @@ public class GPS_Panel extends JPanel implements Runnable {
 		textFieldDate.setText(date.getDayOfMonth() + "/"
 				+ date.getMonthOfYear() + "/" + date.getYear());
 
-		this.repaint();
+		repaint();
 	}
 
 	private void requestGPSData() {

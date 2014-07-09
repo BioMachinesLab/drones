@@ -49,7 +49,6 @@ public class ConnectionToDrone extends Thread {
 	public void sendData(Object data) {
 		try {
 			if (socket != null) {
-				System.out.println("Sent " + data);
 				out.writeObject(data);
 				out.flush();
 			}
