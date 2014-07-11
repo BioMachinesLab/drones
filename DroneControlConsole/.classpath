@@ -20,5 +20,10 @@
 	<classpathentry kind="lib" path="/Pi4J_IT_Version/lib/pi4j-service-javadoc.jar"/>
 	<classpathentry kind="lib" path="/Pi4J_IT_Version/lib/pi4j-service-sources.jar"/>
 	<classpathentry kind="lib" path="/Pi4J_IT_Version/lib/pi4j-service.jar"/>
+	<classpathentry kind="lib" path="lib/jinput.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="DroneControlConsole/lib"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

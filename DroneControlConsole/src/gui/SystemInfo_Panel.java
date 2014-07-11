@@ -3,6 +3,8 @@ package gui;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -577,26 +579,36 @@ public class SystemInfo_Panel extends JPanel {
 		textFieldCPURevision.setText(data.getCpuRevision());
 		textFieldCPUArchitect.setText(data.getCpuArchitecture());
 		textFieldCPUPartNumb.setText(data.getCpuPart());
-		textFieldCPUTemp.setText(data.getCpuTemperature() + "ºC");
-		textFieldCPUVoltage.setText(data.getCpuVoltage() + "V");
+		textFieldCPUTemp.setText(data.getCpuTemperature() + " ºC");
+		textFieldCPUVoltage.setText(data.getCpuVoltage() + " Volt");
 		textFieldIsHardFloatAbi
 				.setText(Boolean.toString(data.isHardFloatAbi()));
 		textFieldBoardType.setText(data.getBoardType());
 		textFieldHardwareRevision.setText(data.getHardwareRevision());
 
 		// Memory
-		textFieldTotalMemory.setText(Long.toString(data.getTotalMemory()));
-		textFieldUsedMemory.setText(Long.toString(data.getUsedMemory()));
-		textFieldFreeMemory.setText(Long.toString(data.getFreeMemory()));
-		textFieldSharedMemory.setText(Long.toString(data.getSharedMemory()));
-		textFieldMemoryBuffers.setText(Long.toString(data.getMemoryBuffers()));
-		textFieldCachedMemory.setText(Long.toString(data.getCachedMemory()));
-		textFieldSDRAM_c_voltage.setText(Float.toString(data
-				.getSdram_c_voltage()));
-		textFieldSDRAM_i_voltage.setText(Float.toString(data
-				.getSdram_i_voltage()));
-		textFieldSDRAM_p_voltage.setText(Float.toString(data
-				.getSdram_p_voltage()));
+		NumberFormat formatter = new DecimalFormat("#0.00");
+		textFieldTotalMemory.setText(formatter.format(data.getTotalMemory()
+				/ (double) (1024 * 1024))
+				+ " MBytes");
+		textFieldUsedMemory.setText(formatter.format(data.getUsedMemory()
+				/ (double) (1024 * 1024))
+				+ " MBytes");
+		textFieldFreeMemory.setText(formatter.format(data.getFreeMemory()
+				/ (double) (1024 * 1024))
+				+ " MBytes");
+		textFieldSharedMemory.setText(formatter.format(data.getSharedMemory()
+				/ (double) (1024 * 1024))
+				+ " MBytes");
+		textFieldMemoryBuffers.setText(formatter.format(data.getMemoryBuffers()
+				/ (double) (1024 * 1024))
+				+ " MBytes");
+		textFieldCachedMemory.setText(formatter.format(data.getCachedMemory()
+				/ (double) (1024 * 1024))
+				+ " MBytes");
+		textFieldSDRAM_c_voltage.setText(data.getSdram_c_voltage() + " Volt");
+		textFieldSDRAM_i_voltage.setText(data.getSdram_i_voltage() + " Volt");
+		textFieldSDRAM_p_voltage.setText(data.getSdram_p_voltage() + " Volt");
 
 		// Operative System
 		textFieldOSName.setText(data.getOsName());
@@ -631,14 +643,14 @@ public class SystemInfo_Panel extends JPanel {
 		textFieldNameServers.setText(nameServers);
 
 		// Clock
-		textFieldARMFreq.setText(data.getArmClockFrequency() + "Hz");
-		textFieldCoreFreq.setText(data.getCoreClockFrequency() + "Hz");
-		textFieldISPFreq.setText(data.getIspClockFrequency() + "Hz");
-		textFieldUARTFreq.setText(data.getUartClockFrequency() + "Hz");
-		textFieldPWMFreq.setText(data.getPwmClockFrequency() + "Hz");
-		textFieldEMMCFreq.setText(data.getEmmcClockFrequency() + "Hz");
-		textFieldHDMIFreq.setText(data.getHdmiClockFrequency() + "Hz");
-		textFieldDPIFreq.setText(data.getDpiClockFrequency() + "Hz");
+		textFieldARMFreq.setText(data.getArmClockFrequency() / 1E6 + " MHz");
+		textFieldCoreFreq.setText(data.getCoreClockFrequency() / 1E6 + " MHz");
+		textFieldISPFreq.setText(data.getIspClockFrequency() / 1E6 + " MHz");
+		textFieldUARTFreq.setText(data.getUartClockFrequency() / 1E6 + " MHz");
+		textFieldPWMFreq.setText(data.getPwmClockFrequency() / 1E3 + " KHz");
+		textFieldEMMCFreq.setText(data.getEmmcClockFrequency() / 1E6 + " MHz");
+		textFieldHDMIFreq.setText(data.getHdmiClockFrequency() / 1E6 + " MHz");
+		textFieldDPIFreq.setText(data.getDpiClockFrequency() / 1E6 + " MHz");
 
 		repaint();
 	}
