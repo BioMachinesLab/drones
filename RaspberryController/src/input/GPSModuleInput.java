@@ -1,5 +1,7 @@
 package input;
 
+import io.UnavailableDeviceException;
+
 import java.io.NotActiveException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -40,7 +42,7 @@ public class GPSModuleInput extends Thread implements ControllerInput,
 	private List<String> ackResponses = Collections
 			.synchronizedList(new ArrayList<String>());
 
-	public GPSModuleInput() throws SerialPortException {
+	public GPSModuleInput() throws UnavailableDeviceException {
 		serial = SerialFactory.createInstance();
 
 		serial.addListener(new SerialDataListener() {
@@ -56,17 +58,26 @@ public class GPSModuleInput extends Thread implements ControllerInput,
 		});
 
 		print("Initializing GPS!", false);
-		serial.open(COM_PORT, DEFAULT_BAUD_RATE);
+		try {
+			serial.open(COM_PORT, DEFAULT_BAUD_RATE);
+		} catch (SerialPortException e) {
+			throw new UnavailableDeviceException(
+					"Unable to open serial connections");
+		}
 
 		try {
 			setupGPSReceiver();
 		} catch (NotActiveException | IllegalArgumentException
 				| InterruptedException e) {
 			serial.close();
-			print("Serial port not sucessfully configured and closed", true);
-			print(e.getMessage(), true);
-			System.exit(1);
+			throw new UnavailableDeviceException(
+					"Serial port not sucessfully configured and was closed, caused by\n"
+							+ e.getMessage());
 		}
+	}
+
+	public void closeSerial() {
+		serial.close();
 	}
 
 	@Override
@@ -86,14 +97,16 @@ public class GPSModuleInput extends Thread implements ControllerInput,
 		String command = "$PMTK251," + TARGET_BAUD_RATE + "*";
 		int checkSum = nmeaUtils.calculateNMEAChecksum(command);
 		command += Integer.toHexString(checkSum).toUpperCase() + "\r\n";
-		serial.printf(command);
-		serial.close();
+		serial.write(command);
+		print("[COMMAND] " + command, false);
 
+		// Closing old velocity serial
+		serial.close();
 		serial.flush();
 		receivedDataBuffer = "";
 		ackResponses.clear();
+		Thread.sleep(1000);
 
-		print("Started new baud rate!", false);
 		serial.addListener(new SerialDataListener() {
 			@Override
 			public void dataReceived(SerialDataEvent event) {
@@ -106,34 +119,38 @@ public class GPSModuleInput extends Thread implements ControllerInput,
 			}
 		});
 		serial.open(COM_PORT, TARGET_BAUD_RATE);
+		print("Started new baud rate!", false);
+		Thread.sleep(1000);
 
 		// Change Update Frequency
 		command = "$PMTK220," + UPDATE_DELAY + "*";
 		checkSum = nmeaUtils.calculateNMEAChecksum(command);
 		command += Integer.toHexString(checkSum).toUpperCase() + "\r\n";
-		serial.printf(command);
+		serial.write(command);
+		print("[COMMAND] " + command, false);
 
 		Thread.sleep(1000);
 		int index = ackResponses.lastIndexOf("$PMTK001,220,3*30");
-		if (index == -1)
+		if (index == -1) {
 			throw new NotActiveException(
 					"The update frequency was not succefully changed");
-		else
+		} else {
 			ackResponses.remove(index);
+		}
 		ackResponses.clear();
 
 		// Set navigation speed threshold to 0
 		command = "$PMTK397,0*23\r\n";
-		serial.printf(command);
+		serial.write(command);
 
 		Thread.sleep(1000);
 		index = ackResponses.lastIndexOf("$PMTK001,397,3*3D");
-
-		if (index == -1)
+		if (index == -1) {
 			throw new NotActiveException(
 					"The navigation speed threshold was not succefully changed");
-		else
+		} else {
 			ackResponses.remove(index);
+		}
 		ackResponses.clear();
 	}
 
@@ -229,6 +246,7 @@ public class GPSModuleInput extends Thread implements ControllerInput,
 	private void parsePMTKData(String data) {
 		data = data.replace("\n", "").replace("\r", "");
 		if (nmeaUtils.checkNMEAChecksum(data)) {
+			print("[Parsing PMTK]", false);
 			ackResponses.add(data);
 			print("[ACK] " + data, false);
 		}
@@ -376,7 +394,7 @@ public class GPSModuleInput extends Thread implements ControllerInput,
 
 	// GPS Functions
 	public String getReleaseVersion() throws InterruptedException {
-		serial.printf("$PMTK605*31\r\n");
+		serial.write("$PMTK605*31\r\n");
 
 		Thread.sleep(1000);
 		int index = -1;
@@ -396,7 +414,7 @@ public class GPSModuleInput extends Thread implements ControllerInput,
 	}
 
 	public boolean startLog() throws InterruptedException {
-		serial.printf("$PMTK185,0*22\r\n");
+		serial.write("$PMTK185,0*22\r\n");
 
 		Thread.sleep(1000);
 		int index = ackResponses.lastIndexOf("$PMTK001,185,3*3C");
@@ -410,7 +428,7 @@ public class GPSModuleInput extends Thread implements ControllerInput,
 	}
 
 	public boolean stopLog() throws InterruptedException {
-		serial.printf("$PMTK185,1*23\r\n");
+		serial.write("$PMTK185,1*23\r\n");
 
 		Thread.sleep(1000);
 		int index = ackResponses.lastIndexOf("$PMTK001,185,3*3C");
@@ -423,7 +441,7 @@ public class GPSModuleInput extends Thread implements ControllerInput,
 	}
 
 	public boolean eraseLog() throws InterruptedException {
-		serial.printf("$PMTK184,1*22\r\n");
+		serial.write("$PMTK184,1*22\r\n");
 
 		Thread.sleep(1000);
 		int index = ackResponses.lastIndexOf("$PMTK001,184,3*3D");
@@ -436,7 +454,7 @@ public class GPSModuleInput extends Thread implements ControllerInput,
 	}
 
 	public boolean enableAlwaysLocateStandby() throws InterruptedException {
-		serial.printf("$PMTK225,8*23\r\n");
+		serial.write("$PMTK225,8*23\r\n");
 
 		Thread.sleep(1000);
 		int index = ackResponses.lastIndexOf("$PMTK001,225,3*35");
@@ -449,7 +467,7 @@ public class GPSModuleInput extends Thread implements ControllerInput,
 	}
 
 	public boolean disableAlwaysLocateStandby() throws InterruptedException {
-		serial.printf("$PMTK225,0*2B\r\n");
+		serial.write("$PMTK225,0*2B\r\n");
 
 		Thread.sleep(1000);
 		int index = ackResponses.lastIndexOf("$PMTK001,225,3*35");
@@ -462,7 +480,7 @@ public class GPSModuleInput extends Thread implements ControllerInput,
 	}
 
 	public boolean enableAIC() throws InterruptedException {
-		serial.printf("$PMTK286,1*23\r\n");
+		serial.write("$PMTK286,1*23\r\n");
 
 		Thread.sleep(1000);
 		int index = ackResponses.lastIndexOf("$PMTK001,286,3*3C");
@@ -475,7 +493,7 @@ public class GPSModuleInput extends Thread implements ControllerInput,
 	}
 
 	public boolean disableAIC() throws InterruptedException {
-		serial.printf("$PMTK286,0*23\r\n");
+		serial.write("$PMTK286,0*23\r\n");
 
 		Thread.sleep(1000);
 		int index = ackResponses.lastIndexOf("$PMTK001,286,3*3C");
