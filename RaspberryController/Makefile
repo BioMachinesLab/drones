@@ -1,4 +1,4 @@
-PROJECT= /home/pi/scripts/java/RaspberryController
+PROJECT= /home/pi/RaspberryController
 
 CLASSPATH = -cp .:classes:/opt/pi4j/lib/'*':$(PROJECT)/lib/'*'
 JSOURCEPATH = -sourcepath $(PROJECT)/src/
