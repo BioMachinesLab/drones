@@ -2,11 +2,8 @@ package gui;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.KeyEventPostProcessor;
-import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -25,7 +22,7 @@ import network.messages.MotorMessage;
 
 public class Motors_Panel extends JPanel {
 	private static final long serialVersionUID = 7086609300323189722L;
-	private static final int KEY_CONTROL_INCREMENT = 5;
+	// private static final int KEY_CONTROL_INCREMENT = 5;
 	private GUI gui;
 	private boolean locked = false;
 	private JCheckBox chckbxLockControl;
@@ -34,11 +31,13 @@ public class Motors_Panel extends JPanel {
 	private JSlider leftSlider;
 	private JProgressBar leftProgressBar;
 	private JButton btnStopLeft;
+	private int leftMotorPower = 0;
 
 	private JPanel rightPanel;
 	private JSlider rightSlider;
 	private JProgressBar rightProgressBar;
 	private JButton btnStopRight;
+	private int rightMotorPower = 0;
 
 	public Motors_Panel(GUI gui) {
 		this.gui = gui;
@@ -65,78 +64,17 @@ public class Motors_Panel extends JPanel {
 		});
 		add(chckbxLockControl);
 
-		KeyboardFocusManager.getCurrentKeyboardFocusManager()
-				.addKeyEventPostProcessor(new KeyEventPostProcessor() {
-
-					@Override
-					public boolean postProcessKeyEvent(KeyEvent arg0) {
-						if (arg0.getID() == KeyEvent.KEY_PRESSED) {
-							int val;
-							switch (arg0.getKeyChar()) {
-							case 'w':
-								val = leftSlider.getValue()
-										+ KEY_CONTROL_INCREMENT;
-								if (val > leftSlider.getMaximum()) {
-									val = leftSlider.getMaximum();
-								}
-								leftSlider.setValue(val);
-
-								if (locked)
-									rightSlider.setValue(val);
-								break;
-							case 's':
-								val = leftSlider.getValue()
-										- KEY_CONTROL_INCREMENT;
-								if (val < leftSlider.getMinimum()) {
-									val = leftSlider.getMinimum();
-								}
-								leftSlider.setValue(val);
-
-								if (locked)
-									rightSlider.setValue(val);
-								break;
-							case 'o':
-								val = rightSlider.getValue()
-										+ KEY_CONTROL_INCREMENT;
-								if (val > rightSlider.getMaximum()) {
-									val = rightSlider.getMaximum();
-								}
-								rightSlider.setValue(val);
-
-								if (locked)
-									leftSlider.setValue(val);
-								break;
-							case 'k':
-								val = rightSlider.getValue()
-										- KEY_CONTROL_INCREMENT;
-								if (val < rightSlider.getMinimum()) {
-									val = rightSlider.getMinimum();
-								}
-								rightSlider.setValue(val);
-
-								if (locked)
-									leftSlider.setValue(val);
-								break;
-							default:
-								break;
-							}
-							sendPowerMessage();
-							return true;
-						} else {
-							return false;
-						}
-					}
-				});
-
-		// gui.getFrame().addKeyListener(new KeyListener() {
+		// KeyboardFocusManager.getCurrentKeyboardFocusManager()
+		// .addKeyEventPostProcessor(new KeyEventPostProcessor() {
 		//
 		// @Override
-		// public void keyTyped(KeyEvent arg0) {
-		// System.out.println("oioi");
+		// public boolean postProcessKeyEvent(KeyEvent arg0) {
+		// if (arg0.getID() == KeyEvent.KEY_PRESSED) {
 		// int val;
 		// switch (arg0.getKeyChar()) {
 		// case 'w':
-		// val = leftSlider.getValue() + KEY_CONTROL_INCREMENT;
+		// val = leftSlider.getValue()
+		// + KEY_CONTROL_INCREMENT;
 		// if (val > leftSlider.getMaximum()) {
 		// val = leftSlider.getMaximum();
 		// }
@@ -146,7 +84,8 @@ public class Motors_Panel extends JPanel {
 		// rightSlider.setValue(val);
 		// break;
 		// case 's':
-		// val = leftSlider.getValue() - KEY_CONTROL_INCREMENT;
+		// val = leftSlider.getValue()
+		// - KEY_CONTROL_INCREMENT;
 		// if (val < leftSlider.getMinimum()) {
 		// val = leftSlider.getMinimum();
 		// }
@@ -156,7 +95,8 @@ public class Motors_Panel extends JPanel {
 		// rightSlider.setValue(val);
 		// break;
 		// case 'o':
-		// val = rightSlider.getValue() + KEY_CONTROL_INCREMENT;
+		// val = rightSlider.getValue()
+		// + KEY_CONTROL_INCREMENT;
 		// if (val > rightSlider.getMaximum()) {
 		// val = rightSlider.getMaximum();
 		// }
@@ -166,7 +106,8 @@ public class Motors_Panel extends JPanel {
 		// leftSlider.setValue(val);
 		// break;
 		// case 'k':
-		// val = rightSlider.getValue() - KEY_CONTROL_INCREMENT;
+		// val = rightSlider.getValue()
+		// - KEY_CONTROL_INCREMENT;
 		// if (val < rightSlider.getMinimum()) {
 		// val = rightSlider.getMinimum();
 		// }
@@ -178,15 +119,11 @@ public class Motors_Panel extends JPanel {
 		// default:
 		// break;
 		// }
-		// sendPowerMessage();
+		// sendMotorsStateMessage();
+		// return true;
+		// } else {
+		// return false;
 		// }
-		//
-		// @Override
-		// public void keyReleased(KeyEvent arg0) {
-		// }
-		//
-		// @Override
-		// public void keyPressed(KeyEvent arg0) {
 		// }
 		// });
 	}
@@ -213,13 +150,7 @@ public class Motors_Panel extends JPanel {
 
 			@Override
 			public void stateChanged(ChangeEvent arg0) {
-				if (locked) {
-					rightProgressBar.setValue(leftSlider.getValue());
-					rightSlider.setValue(leftSlider.getValue());
-				}
-
-				leftProgressBar.setValue(leftSlider.getValue());
-				sendPowerMessage();
+				setLeftMotorPower(leftSlider.getValue());
 			}
 		});
 		leftPanel.add(leftSlider);
@@ -273,13 +204,7 @@ public class Motors_Panel extends JPanel {
 
 			@Override
 			public void stateChanged(ChangeEvent arg0) {
-				if (locked) {
-					leftProgressBar.setValue(rightSlider.getValue());
-					leftSlider.setValue(rightSlider.getValue());
-				}
-
-				rightProgressBar.setValue(rightSlider.getValue());
-				sendPowerMessage();
+				setRightMotorPower(rightSlider.getValue());
 			}
 		});
 		rightPanel.add(rightSlider);
@@ -311,19 +236,49 @@ public class Motors_Panel extends JPanel {
 		add(rightPanel);
 	}
 
-	public void changeLeftMotorPower(int value) {
-		leftSlider.setValue(value);
-		leftProgressBar.setValue(value);
+	public void setLeftMotorPower(int value) {
+		int val = value;
+		if (val > 100) {
+			val = 100;
+		} else {
+			if (val < 0) {
+				val = 0;
+			}
+		}
+
+		if (locked) {
+			rightProgressBar.setValue(val);
+			rightSlider.setValue(val);
+		}
+
+		leftProgressBar.setValue(val);
+		leftMotorPower = val;
+		sendMotorsStateMessage();
 	}
 
-	public void changeRightMotorPower(int value) {
-		rightSlider.setValue(value);
-		rightProgressBar.setValue(value);
+	public void setRightMotorPower(int value) {
+		int val = value;
+		if (val > 100) {
+			val = 100;
+		} else {
+			if (val < 0) {
+				val = 0;
+			}
+		}
+
+		if (locked) {
+			leftProgressBar.setValue(val);
+			leftSlider.setValue(val);
+		}
+
+		rightProgressBar.setValue(val);
+		rightMotorPower = val;
+		sendMotorsStateMessage();
 	}
 
-	public void sendPowerMessage() {
-		double leftPower = ((double) leftSlider.getValue()) / 100;
-		double rightPower = ((double) rightSlider.getValue()) / 100;
+	public void sendMotorsStateMessage() {
+		double leftPower = ((double) leftMotorPower) / 100;
+		double rightPower = ((double) rightMotorPower) / 100;
 
 		gui.getConnector().sendData(new MotorMessage(leftPower, rightPower));
 	}

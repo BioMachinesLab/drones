@@ -657,6 +657,6 @@ public class SystemInfo_Panel extends JPanel {
 
 	private void requestSysInformationsData() {
 		gui.getConnector()
-				.sendData(new InformationRequest(Message_Type.SYSTEM));
+				.sendData(new InformationRequest(Message_Type.SYSTEM_INFO));
 	}
 }

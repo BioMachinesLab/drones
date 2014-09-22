@@ -12,6 +12,8 @@ import javax.swing.JTextField;
 
 public class IPandPortNumberRequestToUser extends Panel {
 	private static final long serialVersionUID = 1919821842077609484L;
+	private   String DEFAULT_IP = "192.198.1.200";
+	private static final String DEFAULT_PORT = "10101";
 	private InetAddress ip = null;
 	private int portNumber = -1;
 
@@ -19,20 +21,21 @@ public class IPandPortNumberRequestToUser extends Panel {
 		JPanel dialogJPane = new JPanel(new GridLayout(2, 1));
 
 		// JTextFields Construction
+		String[] ipAddrStr = DEFAULT_IP.split("\\.");
 		JTextField address1 = new JTextField(3);
-		address1.setText("10");
+		address1.setText(ipAddrStr[0]);
 
 		JTextField address2 = new JTextField(3);
-		address2.setText("40");
+		address2.setText(ipAddrStr[1]);
 
 		JTextField address3 = new JTextField(3);
-		address3.setText("50");
+		address3.setText(ipAddrStr[2]);
 
 		JTextField address4 = new JTextField(3);
-		address4.setText("242");
+		address4.setText(ipAddrStr[3]);
 
 		JTextField portTextField = new JTextField(5);
-		portTextField.setText("10101");
+		portTextField.setText(DEFAULT_PORT);
 
 		// Panel Construction
 		final JPanel addressPanel = new JPanel();
