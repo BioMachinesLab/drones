@@ -43,7 +43,7 @@ public class Messages_Panel extends JPanel implements Runnable {
 		comboBoxUpdateRate = new JComboBox<String>();
 		comboBoxUpdateRate.setModel(new DefaultComboBoxModel<String>(
 				new String[] { "10 Hz", "5 Hz", "1 Hz", "0.1Hz" }));
-		comboBoxUpdateRate.setSelectedIndex(2);
+		comboBoxUpdateRate.setSelectedIndex(0);
 		comboBoxUpdateRate.setBounds(504, 130, 86, 20);
 		add(comboBoxUpdateRate);
 

@@ -68,7 +68,7 @@ public class GPS_Panel extends JPanel implements Runnable {
 		comboBox = new JComboBox<String>();
 		comboBox.setModel(new DefaultComboBoxModel<String>(new String[] {
 				"10 Hz", "5 Hz", "1 Hz", "0.1Hz" }));
-		comboBox.setSelectedIndex(2);
+		comboBox.setSelectedIndex(0);
 		comboBox.setBounds(95, 317, 86, 20);
 		add(comboBox);
 
@@ -360,7 +360,6 @@ public class GPS_Panel extends JPanel implements Runnable {
 				Thread.sleep(sleepTime);
 			} catch (InterruptedException e) {
 				System.out.println("GPS Panel thread was interrupted....");
-				e.printStackTrace();
 			}
 		}
 	}

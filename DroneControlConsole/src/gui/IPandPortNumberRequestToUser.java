@@ -12,7 +12,7 @@ import javax.swing.JTextField;
 
 public class IPandPortNumberRequestToUser extends Panel {
 	private static final long serialVersionUID = 1919821842077609484L;
-	private   String DEFAULT_IP = "192.198.1.200";
+	private   String DEFAULT_IP = "192.168.1.200";
 	private static final String DEFAULT_PORT = "10101";
 	private InetAddress ip = null;
 	private int portNumber = -1;
