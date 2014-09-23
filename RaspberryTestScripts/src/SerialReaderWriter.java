@@ -25,7 +25,7 @@ public class SerialReaderWriter {
 		Thread.sleep(5000);
 
 		System.out.println("[Writting....]");
-		serial.printf("$PMTK251,57600*2C\r\n");
+		serial.write("$PMTK251,57600*2C\r\n");
 
 		Thread.sleep(5000);
 	}

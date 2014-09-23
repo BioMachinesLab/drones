@@ -4,12 +4,12 @@ import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
 
-public class TPA81Readder {
+public class TPA81Reader {
 	private final static int ADDR = 0x68;
 	private I2CBus i2c_bus_1;
 	private I2CDevice tpa81;
 
-	public TPA81Readder() {
+	public TPA81Reader() {
 		try {
 			System.out.println("Starting sensors reading:");
 
@@ -72,7 +72,7 @@ public class TPA81Readder {
 	}
 
 	public static void main(String[] args) {
-		TPA81Readder tpa81Readder = new TPA81Readder();
+		TPA81Reader tpa81Readder = new TPA81Reader();
 
 		// while (true) {
 		tpa81Readder.readTemperatures();
