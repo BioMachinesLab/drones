@@ -48,70 +48,66 @@ public class ConnectionToDrone extends Thread {
 
 	public void sendData(Object data) {
 		try {
-			if (socket != null) {
+			if (socket != null && !socket.isClosed()) {
 				out.writeObject(data);
 				out.flush();
+				System.out.println("[SEND] Sent Message");
 			}
 		} catch (IOException e) {
-			System.out
+			System.err
 					.println("Unable to send data... there is an open connection?");
+			e.printStackTrace();
 		}
 	}
 
 	@Override
 	public void run() {
-		if (socket != null) {
+		try {
+			socket = new Socket(destHost, port);
+			out = new ObjectOutputStream(socket.getOutputStream());
+			in = new ObjectInputStream(socket.getInputStream());
+
 			try {
-				socket = new Socket(destHost, port);
-				out = new ObjectOutputStream(socket.getOutputStream());
-				in = new ObjectInputStream(socket.getInputStream());
+				out.writeObject(InetAddress.getLocalHost().getHostName());
+				out.flush();
 
-				try {
-					out.writeObject(InetAddress.getLocalHost().getHostName());
-					out.flush();
+				destHostName = (String) in.readObject();
+				System.out.println("Connected to " + destHost.getHostAddress()
+						+ " (" + destHostName + ")");
 
-					destHostName = (String) in.readObject();
-					System.out.println("Connected to "
-							+ destHost.getHostAddress() + " (" + destHostName
-							+ ")");
-
-					while (true) {
-						try {
-							Message message = (Message) in.readObject();
-							gui.processMessage(message);
-						} catch (ClassNotFoundException e) {
-							System.out
-									.println("Received class of unknown type from "
-											+ destHostName
-											+ ", so it was discarded....");
-						}
-					}
-				} catch (IOException e) {
-					System.out
-							.println("Drone Controller closed the connection");
-				} catch (ClassNotFoundException e) {
-					System.out.println("I didn't reveived a correct name from "
-							+ socket.getInetAddress().getHostAddress());
-				} finally {
+				while (true) {
 					try {
-						if (socket != null)
-							socket.close();
-					} catch (IOException e) {
-						System.out
-								.println("Unable to close connection... there is an open connection?");
+						Message message = (Message) in.readObject();
+						System.out.println("[RECEIVED] Received Message");
+						gui.processMessage(message);
+					} catch (ClassNotFoundException e) {
+						System.err
+								.println("Received class of unknown type from "
+										+ destHostName
+										+ ", so it was discarded....");
 					}
 				}
-			} catch (IOException e1) {
-				JOptionPane.showMessageDialog(
-						null,
-						"Unable to open a connection to "
-								+ destHost.getHostAddress(),
-						"Connection Error", JOptionPane.ERROR_MESSAGE);
-				System.exit(0);
+			} catch (IOException e) {
+				System.err.println("Drone Controller closed the connection");
+			} catch (ClassNotFoundException e) {
+				System.err.println("I didn't reveived a correct name from "
+						+ socket.getInetAddress().getHostAddress());
+			} finally {
+				try {
+					if (socket != null)
+						socket.close();
+				} catch (IOException e) {
+					System.err
+							.println("Unable to close connection... there is an open connection?");
+				}
 			}
-		} else {
-			System.out.println("Connection Thread (" + getName()
-					+ ") didn't detected an valid socket");
+		} catch (IOException e1) {
+			JOptionPane.showMessageDialog(
+					null,
+					"Unable to open a connection to "
+							+ destHost.getHostAddress(), "Connection Error",
+					JOptionPane.ERROR_MESSAGE);
+			System.exit(0);
 		}
 	}
 
@@ -127,9 +123,12 @@ public class ConnectionToDrone extends Thread {
 		if (socket != null && !socket.isClosed()) {
 			System.out.println("Closing Connection.... ");
 			try {
+				this.interrupt();
 				socket.close();
+				in.close();
+				out.close();
 			} catch (IOException e) {
-				System.out
+				System.err
 						.println("Unable to close connection... there is an open connection?");
 			}
 		}
