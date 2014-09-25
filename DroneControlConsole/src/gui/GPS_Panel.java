@@ -37,7 +37,7 @@ public class GPS_Panel extends JPanel implements Runnable {
 	private JTextField textFieldGPSSource;
 	private JTextField textFieldTime;
 	private JTextField textFieldDate;
-	private JComboBox<String> comboBox;
+	private JComboBox comboBox;
 
 	private GUI gui;
 	private int debugCounter = 0;
@@ -65,8 +65,8 @@ public class GPS_Panel extends JPanel implements Runnable {
 		});
 		add(btnRefresh);
 
-		comboBox = new JComboBox<String>();
-		comboBox.setModel(new DefaultComboBoxModel<String>(new String[] {
+		comboBox = new JComboBox();
+		comboBox.setModel(new DefaultComboBoxModel(new String[] {
 				"10 Hz", "5 Hz", "1 Hz", "0.1Hz" }));
 		comboBox.setSelectedIndex(0);
 		comboBox.setBounds(95, 317, 86, 20);

@@ -21,7 +21,7 @@ public class Messages_Panel extends JPanel implements Runnable {
 	private GUI gui;
 	private JTextArea messageArea;
 	private JScrollPane scrollPane;
-	private JComboBox<String> comboBoxUpdateRate;
+	private JComboBox comboBoxUpdateRate;
 
 	public Messages_Panel(GUI gui) {
 		this.gui = gui;
@@ -40,8 +40,8 @@ public class Messages_Panel extends JPanel implements Runnable {
 				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		add(scrollPane);
 
-		comboBoxUpdateRate = new JComboBox<String>();
-		comboBoxUpdateRate.setModel(new DefaultComboBoxModel<String>(
+		comboBoxUpdateRate = new JComboBox();
+		comboBoxUpdateRate.setModel(new DefaultComboBoxModel(
 				new String[] { "10 Hz", "5 Hz", "1 Hz", "0.1Hz" }));
 		comboBoxUpdateRate.setSelectedIndex(0);
 		comboBoxUpdateRate.setBounds(654, 130, 86, 20);
