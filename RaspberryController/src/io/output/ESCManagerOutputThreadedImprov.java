@@ -8,7 +8,7 @@ import utils.Math_Utils;
 
 public class ESCManagerOutputThreadedImprov extends Thread implements
 		ControllerOutput {
-	private static final long VELOCITY_UPDATE_DELAY = 0;
+	private static final long VELOCITY_UPDATE_DELAY = 25;
 
 	private final static int LEFT_ESC = 0;
 	private final static int RIGHT_ESC = 1;
@@ -26,6 +26,9 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 
 	private int L_value = STOP_L_VALUE;
 	private int R_value = STOP_R_VALUE;
+
+	private int lastLValue = 0;
+	private int lastRValue = 0;
 
 	public ESCManagerOutputThreadedImprov() throws UnavailableDeviceException {
 		try {
@@ -69,6 +72,7 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 		default:
 			throw new IllegalArgumentException();
 		}
+		System.out.println("[ESCMANAGER] L="+L_value+" R="+R_value);
 	}
 
 	private void writeValueToESC(int index, int value) {
@@ -113,8 +117,13 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 	}
 
 	public void disableMotors() {
-		L_value = DISABLE_VALUE;
-		R_value = DISABLE_VALUE;
+		try {
+			L_value = DISABLE_VALUE;
+			R_value = DISABLE_VALUE;
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -129,8 +138,20 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 		}
 	}
 
-	private synchronized void writeValuesToESC() {
-		writeValueToESC(0, L_value);
-		writeValueToESC(1, R_value);
+	private void writeValuesToESC() {
+		if (L_value != lastLValue) {
+			lastLValue = L_value;
+			writeValueToESC(0, L_value);
+			
+			System.out.println("[MOTOR] Writing new Velocity L=" + L_value);
+		}
+
+		if (R_value != lastRValue) {
+			lastRValue = R_value;
+			writeValueToESC(1, R_value);
+			
+			System.out.println("[MOTOR] Writing new Velocity R="
+					+ R_value);
+		}
 	}
 }
