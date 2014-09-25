@@ -23,10 +23,10 @@ public class ConnectionHandler {
 			serverSocket = new ServerSocket(SOCKET_PORT);
 
 			try {
-				System.out.println("Connection Handler Initialized on "
+				System.out.println("[CONNECTION HANDLER] Connection Handler Initialized on "
 						+ InetAddress.getLocalHost().getHostAddress() + ":"
 						+ SOCKET_PORT);
-				System.out.println("Waiting for connection requests!");
+				System.out.println("[CONNECTION HANDLER] Waiting for connection requests!");
 				while (true) {
 					Socket socket = serverSocket.accept();
 					Connection conn = new Connection(socket, controller, this);
@@ -41,17 +41,17 @@ public class ConnectionHandler {
 					serverSocket.close();
 				} catch (IOException e) {
 					System.out
-							.println("Unable to close server socket.... there was an open socket?");
+							.println("[CONNECTION HANDLER] Unable to close server socket.... there was an open socket?");
 				}
 			}
 		} catch (IOException e) {
-			System.out.println("Unable to init socket!");
+			System.out.println("[CONNECTION HANDLER] Unable to init socket!");
 		}
 	}
 
 	public void closeConnections() {
 		if (!connections.isEmpty()) {
-			System.out.println("Closing Connections!");
+			System.out.println("[CONNECTION HANDLER] Closing Connections!");
 			for (Connection conn : connections) {
 				if (!conn.getSocket().isClosed())
 					conn.closeConnection();
