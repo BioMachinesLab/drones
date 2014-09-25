@@ -49,7 +49,7 @@ public class ConnectionHandler {
 		}
 	}
 
-	public void closeConnections() {
+	public synchronized void closeConnections() {
 		if (!connections.isEmpty()) {
 			System.out.println("[CONNECTION HANDLER] Closing Connections!");
 			for (Connection conn : connections) {

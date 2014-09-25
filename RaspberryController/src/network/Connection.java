@@ -45,16 +45,19 @@ public class Connection extends Thread {
 			System.out.println("[CONNECTION] Client "
 					+ socket.getInetAddress().getHostAddress() + " ("
 					+ clientName + ") connected");
-			
-			controller.sendMessageToOperator("Welcome to drone "+InetAddress.getLocalHost().getHostName()+"! Take good care of me :)");
-			controller.processInformationRequest(new InformationRequest(Message_Type.SYSTEM_STATUS), this);
+
+			controller.sendMessageToOperator("Welcome to drone "
+					+ InetAddress.getLocalHost().getHostName()
+					+ "! Take good care of me :)");
+			controller.processInformationRequest(new InformationRequest(
+					Message_Type.SYSTEM_STATUS), this);
 
 			while (true) {
 				try {
 					Message message = (Message) in.readObject();
 
 					if (message instanceof MotorMessage) {
-						//System.out.println("[CONNECTION] Motor Message");
+						// System.out.println("[CONNECTION] Motor Message");
 						controller.processMotorMessage((MotorMessage) message,
 								this);
 					}
@@ -66,8 +69,9 @@ public class Connection extends Thread {
 								(InformationRequest) message, this);
 					}
 				} catch (ClassNotFoundException e) {
-					System.out.println("[CONNECTION] Received class of unknown type from "
-							+ clientName + ", so it was discarded....");
+					System.out
+							.println("[CONNECTION] Received class of unknown type from "
+									+ clientName + ", so it was discarded....");
 					// e.printStackTrace();
 				} catch (SocketException e) {
 					controller
@@ -96,15 +100,17 @@ public class Connection extends Thread {
 		}
 	}
 
-	public void closeConnection() {
+	public synchronized void closeConnection() {
 		try {
-			socket.close();
-			connectionHandler.removeConnection(this);
-			out.close();
-			in.close();
+			if (socket != null && !socket.isClosed()) {
+				socket.close();
+				connectionHandler.removeConnection(this);
+				out.close();
+				in.close();
+			}
 		} catch (IOException e) {
-			System.out.println("[CONNECTION] Unable to close connection to " + clientName
-					+ "... there is an open connection?");
+			System.out.println("[CONNECTION] Unable to close connection to "
+					+ clientName + "... there is an open connection?");
 		}
 	}
 
