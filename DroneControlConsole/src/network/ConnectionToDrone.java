@@ -22,7 +22,7 @@ public class ConnectionToDrone extends Thread {
 	private String destHostName;
 	private GUI gui;
 
-	public ConnectionToDrone(GUI gui, InetAddress destHost, int port) {
+	public ConnectionToDrone(GUI gui, InetAddress destHost, int port) throws IOException {
 		socket = null;
 		in = null;
 		out = null;
@@ -30,6 +30,9 @@ public class ConnectionToDrone extends Thread {
 		this.destHost = destHost;
 		this.port = port;
 		this.gui = gui;
+		if(!checkIP(destHost)) {
+			throw new UnknownHostException(destHost.getHostAddress()+" unreachable!");
+		}
 	}
 
 	public ConnectionToDrone(GUI gui) {
@@ -41,7 +44,6 @@ public class ConnectionToDrone extends Thread {
 			destHost = InetAddress.getLocalHost();
 			this.gui = gui;
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -58,6 +60,10 @@ public class ConnectionToDrone extends Thread {
 					.println("Unable to send data... there is an open connection?");
 			e.printStackTrace();
 		}
+	}
+	
+	private boolean checkIP(InetAddress destHost) throws IOException {
+		return InetAddress.getByName(destHost.getHostAddress()).isReachable(5*1000);//10 sec timeout
 	}
 
 	@Override
@@ -128,8 +134,7 @@ public class ConnectionToDrone extends Thread {
 				in.close();
 				out.close();
 			} catch (IOException e) {
-				System.err
-						.println("Unable to close connection... there is an open connection?");
+				System.err.println("Unable to close connection... there is an open connection?");
 			}
 		}
 	}

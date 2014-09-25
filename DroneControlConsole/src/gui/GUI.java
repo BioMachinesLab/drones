@@ -2,6 +2,8 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.io.IOException;
+import java.net.UnknownHostException;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -57,27 +59,34 @@ public class GUI {
 					.println("Not able to set LookAndFeel for the current OS");
 			e.printStackTrace();
 		}
+		
+		do {
+			try {
+			IPandPortNumberRequestToUser form = new IPandPortNumberRequestToUser();
+			if (form.getIpAddress() == null || form.getPortNumber() == -1) {
+				continue;
+			} else {
 
-		IPandPortNumberRequestToUser form = new IPandPortNumberRequestToUser();
-		if (form.getIpAddress() == null || form.getPortNumber() == -1) {
-			System.exit(0);
-		} else {
-
-			connector = new ConnectionToDrone(this, form.getIpAddress(),form.getPortNumber());
-			connector.start();
-
-			buildGUI();
-
-			gpsThread = new Thread(gpsPanel);
-			gpsThread.start();
-			messagesThread = new Thread(msgPanel);
-			messagesThread.start();
-
-			display();
-
-			//gamePad = new GamePad(this);
-			//gamePad.start();
-		}
+					connector = new ConnectionToDrone(this, form.getIpAddress(),form.getPortNumber());
+				
+					connector.start();
+		
+					buildGUI();
+		
+					gpsThread = new Thread(gpsPanel);
+					gpsThread.start();
+					messagesThread = new Thread(msgPanel);
+					messagesThread.start();
+		
+					display();
+		
+					//gamePad = new GamePad(this);
+					//gamePad.start();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} while(connector == null);
 	}
 
 	private void buildGUI() {

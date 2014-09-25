@@ -86,12 +86,13 @@ public class IPandPortNumberRequestToUser extends Panel {
 								+ "." + address4.getText());
 						this.portNumber = portNumber;
 					} catch (UnknownHostException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 
 				}
 			}
+		} else {
+			System.exit(0);
 		}
 	}
 
