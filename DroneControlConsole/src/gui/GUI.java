@@ -1,19 +1,25 @@
 package gui;
 
+import gamepad.GamePad;
+
+import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import network.ConnectionToDrone;
 import network.messages.GPSMessage;
 import network.messages.InformationRequest;
+import network.messages.InformationRequest.Message_Type;
 import network.messages.Message;
 import network.messages.MotorMessage;
 import network.messages.SystemInformationsMessage;
-import network.messages.InformationRequest.Message_Type;
+import network.messages.SystemStatusMessage;
 
 public class GUI {
 	// Connections Objects
@@ -21,10 +27,13 @@ public class GUI {
 
 	// GUI Objects
 	private JFrame frame;
-	private Container contentPane;
 	private Motors_Panel motorsPanel;
 	private GPS_Panel gpsPanel;
 	private SystemInfo_Panel sysInfoPanel;
+	private Messages_Panel msgPanel;
+	private GamePad gamePad;
+	private Thread gpsThread;
+	private Thread messagesThread;
 
 	public GUI() {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -33,7 +42,15 @@ public class GUI {
 					if (motorsPanel != null) {
 						connector.sendData(new MotorMessage(0, 0));
 					}
-					connector.closeConnection();
+					if (connector != null) {
+						connector.closeConnection();
+					}
+					if (gpsThread.isAlive()) {
+						gpsThread.interrupt();
+					}
+					if (messagesThread.isAlive()) {
+						messagesThread.interrupt();
+					}
 				}
 			}
 		});
@@ -50,17 +67,23 @@ public class GUI {
 		IPandPortNumberRequestToUser form = new IPandPortNumberRequestToUser();
 		if (form.getIpAddress() == null || form.getPortNumber() == -1) {
 			System.exit(0);
+		} else {
+
+			connector = new ConnectionToDrone(this, form.getIpAddress(),form.getPortNumber());
+			connector.start();
+
+			buildGUI();
+
+			gpsThread = new Thread(gpsPanel);
+			gpsThread.start();
+			messagesThread = new Thread(msgPanel);
+			messagesThread.start();
+
+			display();
+
+			gamePad = new GamePad(this);
+			gamePad.start();
 		}
-
-		connector = new ConnectionToDrone(this, form.getIpAddress(),
-				form.getPortNumber());
-		connector.start();
-
-		buildGUI();
-		display();
-
-		Thread gpsThread = new Thread(gpsPanel);
-		gpsThread.start();
 	}
 
 	private void buildGUI() {
@@ -71,18 +94,23 @@ public class GUI {
 		frame.setResizable(true);
 		frame.setFocusable(true);
 
-		contentPane = frame.getContentPane();
-		contentPane.setLayout(new FlowLayout());
+		frame.setLayout(new BorderLayout());
 
+		JPanel centralPanel = new JPanel(new FlowLayout());
 		motorsPanel = new Motors_Panel(this);
-		contentPane.add(motorsPanel);
+		centralPanel.add(motorsPanel);
 
 		gpsPanel = new GPS_Panel(this);
-		contentPane.add(gpsPanel);
+		centralPanel.add(gpsPanel);
 
-		sysInfoPanel = new SystemInfo_Panel(this);
-		connector.sendData(new InformationRequest(Message_Type.SYSTEM));
-		contentPane.add(sysInfoPanel);
+		// sysInfoPanel = new SystemInfo_Panel(this);
+		// connector.sendData(new InformationRequest(Message_Type.SYSTEM_INFO));
+		// centralPanel.add(sysInfoPanel);
+
+		frame.add(centralPanel, BorderLayout.CENTER);
+
+		msgPanel = new Messages_Panel(this);
+		frame.add(msgPanel, BorderLayout.PAGE_END);
 
 		frame.pack();
 	}
@@ -99,8 +127,12 @@ public class GUI {
 				sysInfoPanel.displayData(((SystemInformationsMessage) message)
 						.getSysInformations());
 			} else {
-				System.out.println("Received Message: "
-						+ message.getClass().toString());
+				if (message instanceof SystemStatusMessage) {
+					msgPanel.addMessage((SystemStatusMessage) message);
+				} else {
+					System.out.println("Received Message: "
+							+ message.getClass().toString());
+				}
 			}
 		}
 	}
@@ -111,5 +143,10 @@ public class GUI {
 
 	public JFrame getFrame() {
 		return frame;
+	}
+
+	public void setMotorsValue(int left, int right) {
+		motorsPanel.setLeftMotorPower(left);
+		motorsPanel.setRightMotorPower(right);
 	}
 }

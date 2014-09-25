@@ -28,13 +28,13 @@ public class Messages_Panel extends JPanel implements Runnable {
 		setBorder(BorderFactory.createTitledBorder("Drone Messages"));
 		setLayout(null);
 		setMinimumSize(new Dimension(300, 300));
-		setPreferredSize(new Dimension(600, 165));
+		setPreferredSize(new Dimension(750, 165));
 
 		messageArea = new JTextArea();
 		messageArea.setEditable(false);
 
 		scrollPane = new JScrollPane(messageArea);
-		scrollPane.setSize(580, 96);
+		scrollPane.setSize(730, 96);
 		scrollPane.setLocation(10, 23);
 		scrollPane
 				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -44,22 +44,24 @@ public class Messages_Panel extends JPanel implements Runnable {
 		comboBoxUpdateRate.setModel(new DefaultComboBoxModel<String>(
 				new String[] { "10 Hz", "5 Hz", "1 Hz", "0.1Hz" }));
 		comboBoxUpdateRate.setSelectedIndex(0);
-		comboBoxUpdateRate.setBounds(504, 130, 86, 20);
+		comboBoxUpdateRate.setBounds(654, 130, 86, 20);
 		add(comboBoxUpdateRate);
 
 		JLabel lblRefreshRate = new JLabel("Refresh Rate");
 		lblRefreshRate.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblRefreshRate.setBounds(414, 133, 80, 14);
+		lblRefreshRate.setBounds(564, 133, 80, 14);
 		add(lblRefreshRate);
 	}
 
 	public void addMessage(SystemStatusMessage message) {
-		String str=message.getMessage();
-		if (!str.endsWith("\n") && !str.endsWith("\r\n"))
-			str += "\n";
-		
-		str=message.getTimestamp()+str;
-		messageArea.append(str);
+		if (message.getMessage() != null) {
+			String str = message.getMessage();
+			if (!str.endsWith("\n") && !str.endsWith("\r\n"))
+				str += "\n";
+
+			str = message.getTimestamp() + " - " + str;
+			messageArea.append(str);
+		}
 	}
 
 	private void requestSystemStatus() {
@@ -75,16 +77,16 @@ public class Messages_Panel extends JPanel implements Runnable {
 			int sleepTime = 0;
 			switch (comboBoxUpdateRate.getSelectedIndex()) {
 			case 0:
-				sleepTime = 100;
+				sleepTime = 10000;
 				break;
 			case 1:
-				sleepTime = 200;
+				sleepTime = 2000;
 				break;
 			case 2:
 				sleepTime = 1000;
 				break;
 			case 3:
-				sleepTime = 10000;
+				sleepTime = 100;
 				break;
 			default:
 				sleepTime = 1000;

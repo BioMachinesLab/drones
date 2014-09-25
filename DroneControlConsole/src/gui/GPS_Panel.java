@@ -341,16 +341,16 @@ public class GPS_Panel extends JPanel implements Runnable {
 			int sleepTime = 0;
 			switch (comboBox.getSelectedIndex()) {
 			case 0:
-				sleepTime = 100;
+				sleepTime = 10000;
 				break;
 			case 1:
-				sleepTime = 200;
+				sleepTime = 2000;
 				break;
 			case 2:
 				sleepTime = 1000;
 				break;
 			case 3:
-				sleepTime = 10000;
+				sleepTime = 100;
 				break;
 			default:
 				sleepTime = 1000;
