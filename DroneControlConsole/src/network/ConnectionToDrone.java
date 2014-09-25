@@ -46,7 +46,7 @@ public class ConnectionToDrone extends Thread {
 		}
 	}
 
-	public void sendData(Object data) {
+	public synchronized void sendData(Object data) {
 		try {
 			if (socket != null && !socket.isClosed()) {
 				out.writeObject(data);
@@ -119,7 +119,7 @@ public class ConnectionToDrone extends Thread {
 		return destHost;
 	}
 
-	public void closeConnection() {
+	public synchronized void closeConnection() {
 		if (socket != null && !socket.isClosed()) {
 			System.out.println("Closing Connection.... ");
 			try {
