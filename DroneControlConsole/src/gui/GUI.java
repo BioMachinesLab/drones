@@ -1,11 +1,7 @@
 package gui;
 
-import gamepad.GamePad;
-
 import java.awt.BorderLayout;
-import java.awt.Container;
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -14,8 +10,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import network.ConnectionToDrone;
 import network.messages.GPSMessage;
-import network.messages.InformationRequest;
-import network.messages.InformationRequest.Message_Type;
 import network.messages.Message;
 import network.messages.MotorMessage;
 import network.messages.SystemInformationsMessage;
@@ -31,7 +25,7 @@ public class GUI {
 	private GPS_Panel gpsPanel;
 	private SystemInfo_Panel sysInfoPanel;
 	private Messages_Panel msgPanel;
-	private GamePad gamePad;
+	//private GamePad gamePad;
 	private Thread gpsThread;
 	private Thread messagesThread;
 
@@ -81,8 +75,8 @@ public class GUI {
 
 			display();
 
-			gamePad = new GamePad(this);
-			gamePad.start();
+			//gamePad = new GamePad(this);
+			//gamePad.start();
 		}
 	}
 
