@@ -41,6 +41,10 @@ public class GPS_Panel extends JPanel implements Runnable {
 
 	private GUI gui;
 	private int debugCounter = 0;
+	
+	private int sleepTime = 1000*10;
+	
+	private Thread threadRef;
 
 	public GPS_Panel(GUI gui) {
 		this.gui = gui;
@@ -54,23 +58,35 @@ public class GPS_Panel extends JPanel implements Runnable {
 		buildGPSFixInformationPanel();
 		buildTimePanel();
 
-		JButton btnRefresh = new JButton("Refresh");
-		btnRefresh.setBounds(246, 316, 89, 23);
-		btnRefresh.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				requestGPSData();
-			}
-		});
-		add(btnRefresh);
-
 		comboBox = new JComboBox();
 		comboBox.setModel(new DefaultComboBoxModel(new String[] {
 				"10 Hz", "5 Hz", "1 Hz", "0.1Hz" }));
-		comboBox.setSelectedIndex(0);
+		comboBox.setSelectedIndex(3);
 		comboBox.setBounds(95, 317, 86, 20);
 		add(comboBox);
+		
+		comboBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				switch (comboBox.getSelectedIndex()) {
+				case 0:
+					sleepTime = 1000/10;
+					break;
+				case 1:
+					sleepTime = 1000/5;
+					break;
+				case 2:
+					sleepTime = 1000;
+					break;
+				case 3:
+					sleepTime = 1000*10;
+					break;
+				default:
+					sleepTime = 1000*10;
+					break;
+				}
+				threadRef.interrupt();
+			}
+		});
 
 		JLabel lblNewLabelRefreshRate = new JLabel("Refresh Rate");
 		lblNewLabelRefreshRate.setBounds(20, 320, 72, 14);
@@ -335,31 +351,15 @@ public class GPS_Panel extends JPanel implements Runnable {
 
 	@Override
 	public void run() {
+		
+		this.threadRef = Thread.currentThread();
+		
 		while (true) {
 			requestGPSData();
-
-			int sleepTime = 0;
-			switch (comboBox.getSelectedIndex()) {
-			case 0:
-				sleepTime = 10000;
-				break;
-			case 1:
-				sleepTime = 2000;
-				break;
-			case 2:
-				sleepTime = 1000;
-				break;
-			case 3:
-				sleepTime = 100;
-				break;
-			default:
-				sleepTime = 1000;
-				break;
-			}
 			try {
 				Thread.sleep(sleepTime);
 			} catch (InterruptedException e) {
-				System.out.println("GPS Panel thread was interrupted....");
+				//we expect interruptions when we change the refresh rate
 			}
 		}
 	}

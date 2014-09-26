@@ -21,6 +21,7 @@ public class ConnectionToDrone extends Thread {
 	private InetAddress destHost;
 	private String destHostName;
 	private GUI gui;
+	private boolean ready = false;
 
 	public ConnectionToDrone(GUI gui, InetAddress destHost, int port) throws IOException {
 		socket = null;
@@ -49,6 +50,10 @@ public class ConnectionToDrone extends Thread {
 	}
 
 	public synchronized void sendData(Object data) {
+		
+		if(!ready)
+			return;
+		
 		try {
 			if (socket != null && !socket.isClosed()) {
 				out.writeObject(data);
@@ -81,6 +86,7 @@ public class ConnectionToDrone extends Thread {
 				System.out.println("Connected to " + destHost.getHostAddress()
 						+ " (" + destHostName + ")");
 
+				ready = true;
 				while (true) {
 					try {
 						Message message = (Message) in.readObject();

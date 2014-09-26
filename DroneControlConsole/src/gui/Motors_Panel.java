@@ -280,8 +280,6 @@ public class Motors_Panel extends JPanel {
 		double leftPower = ((double) leftMotorPower) / 100;
 		double rightPower = ((double) rightMotorPower) / 100;
 
-		gui.getConnector().sendData(new MotorMessage(leftPower, rightPower));
-		
-		System.out.println("[SEND] Sent motor speed: L="+leftMotorPower+" R="+rightMotorPower);
+		gui.getMotorSpeeds().setSpeeds(leftPower, rightPower);
 	}
 }

@@ -2,18 +2,17 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.io.IOException;
-import java.net.UnknownHostException;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import dataObjects.MotorSpeeds;
 import network.ConnectionToDrone;
+import network.MotorMessageSender;
 import network.messages.GPSMessage;
 import network.messages.Message;
-import network.messages.MotorMessage;
 import network.messages.SystemInformationsMessage;
 import network.messages.SystemStatusMessage;
 
@@ -30,13 +29,19 @@ public class GUI {
 	//private GamePad gamePad;
 	private Thread gpsThread;
 	private Thread messagesThread;
+	private MotorSpeeds motorSpeeds;
+	private MotorMessageSender motorMessageSender;
 
 	public GUI() {
+		
+		motorSpeeds = new MotorSpeeds();
+		
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
 				if (connector != null) {
 					if (motorsPanel != null) {
-						connector.sendData(new MotorMessage(0, 0));
+						motorSpeeds.setSpeeds(0,0);
+//						connector.sendData(new MotorMessage(0, 0));
 					}
 					if (connector != null) {
 						connector.closeConnection();
@@ -68,8 +73,10 @@ public class GUI {
 			} else {
 
 					connector = new ConnectionToDrone(this, form.getIpAddress(),form.getPortNumber());
-				
 					connector.start();
+					
+					motorMessageSender = new MotorMessageSender(connector, motorSpeeds);
+					motorMessageSender.start();
 		
 					buildGUI();
 		
@@ -151,5 +158,9 @@ public class GUI {
 	public void setMotorsValue(int left, int right) {
 		motorsPanel.setLeftMotorPower(left);
 		motorsPanel.setRightMotorPower(right);
+	}
+
+	public MotorSpeeds getMotorSpeeds() {
+		return motorSpeeds;
 	}
 }
