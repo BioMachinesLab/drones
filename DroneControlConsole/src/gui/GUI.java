@@ -1,5 +1,7 @@
 package gui;
 
+import gamepad.GamePad;
+
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
@@ -26,22 +28,22 @@ public class GUI {
 	private GPS_Panel gpsPanel;
 	private SystemInfo_Panel sysInfoPanel;
 	private Messages_Panel msgPanel;
-	//private GamePad gamePad;
+	private GamePad gamePad;
 	private Thread gpsThread;
 	private Thread messagesThread;
 	private MotorSpeeds motorSpeeds;
 	private MotorMessageSender motorMessageSender;
 
 	public GUI() {
-		
+
 		motorSpeeds = new MotorSpeeds();
-		
+
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
 				if (connector != null) {
 					if (motorsPanel != null) {
-						motorSpeeds.setSpeeds(0,0);
-//						connector.sendData(new MotorMessage(0, 0));
+						motorSpeeds.setSpeeds(0, 0);
+						// connector.sendData(new MotorMessage(0, 0));
 					}
 					if (connector != null) {
 						connector.closeConnection();
@@ -64,36 +66,38 @@ public class GUI {
 					.println("Not able to set LookAndFeel for the current OS");
 			e.printStackTrace();
 		}
-		
+
 		do {
 			try {
-			IPandPortNumberRequestToUser form = new IPandPortNumberRequestToUser();
-			if (form.getIpAddress() == null || form.getPortNumber() == -1) {
-				continue;
-			} else {
+				IPandPortNumberRequestToUser form = new IPandPortNumberRequestToUser();
+				if (form.getIpAddress() == null || form.getPortNumber() == -1) {
+					continue;
+				} else {
 
-					connector = new ConnectionToDrone(this, form.getIpAddress(),form.getPortNumber());
+					connector = new ConnectionToDrone(this,
+							form.getIpAddress(), form.getPortNumber());
 					connector.start();
-					
-					motorMessageSender = new MotorMessageSender(connector, motorSpeeds);
+
+					motorMessageSender = new MotorMessageSender(connector,
+							motorSpeeds);
 					motorMessageSender.start();
-		
+
 					buildGUI();
-		
+
 					gpsThread = new Thread(gpsPanel);
 					gpsThread.start();
 					messagesThread = new Thread(msgPanel);
 					messagesThread.start();
-		
+
 					display();
-		
-					//gamePad = new GamePad(this);
-					//gamePad.start();
+
+					gamePad = new GamePad(this);
+					gamePad.start();
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		} while(connector == null);
+		} while (connector == null);
 	}
 
 	private void buildGUI() {
@@ -162,5 +166,9 @@ public class GUI {
 
 	public MotorSpeeds getMotorSpeeds() {
 		return motorSpeeds;
+	}
+
+	public GamePad getGamePad() {
+		return gamePad;
 	}
 }

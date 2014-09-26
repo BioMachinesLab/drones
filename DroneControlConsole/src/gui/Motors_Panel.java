@@ -18,8 +18,6 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import network.messages.MotorMessage;
-
 public class Motors_Panel extends JPanel {
 	private static final long serialVersionUID = 7086609300323189722L;
 	// private static final int KEY_CONTROL_INCREMENT = 5;
@@ -38,6 +36,7 @@ public class Motors_Panel extends JPanel {
 	private JProgressBar rightProgressBar;
 	private JButton btnStopRight;
 	private int rightMotorPower = 0;
+	private JCheckBox chckbxEnableGamepad;
 
 	public Motors_Panel(GUI gui) {
 		this.gui = gui;
@@ -50,7 +49,7 @@ public class Motors_Panel extends JPanel {
 		buildRightPanel();
 
 		chckbxLockControl = new JCheckBox("Lock Control");
-		chckbxLockControl.setBounds(107, 270, 97, 23);
+		chckbxLockControl.setBounds(168, 270, 97, 23);
 		chckbxLockControl.addActionListener(new ActionListener() {
 
 			@Override
@@ -64,68 +63,17 @@ public class Motors_Panel extends JPanel {
 		});
 		add(chckbxLockControl);
 
-		// KeyboardFocusManager.getCurrentKeyboardFocusManager()
-		// .addKeyEventPostProcessor(new KeyEventPostProcessor() {
-		//
-		// @Override
-		// public boolean postProcessKeyEvent(KeyEvent arg0) {
-		// if (arg0.getID() == KeyEvent.KEY_PRESSED) {
-		// int val;
-		// switch (arg0.getKeyChar()) {
-		// case 'w':
-		// val = leftSlider.getValue()
-		// + KEY_CONTROL_INCREMENT;
-		// if (val > leftSlider.getMaximum()) {
-		// val = leftSlider.getMaximum();
-		// }
-		// leftSlider.setValue(val);
-		//
-		// if (locked)
-		// rightSlider.setValue(val);
-		// break;
-		// case 's':
-		// val = leftSlider.getValue()
-		// - KEY_CONTROL_INCREMENT;
-		// if (val < leftSlider.getMinimum()) {
-		// val = leftSlider.getMinimum();
-		// }
-		// leftSlider.setValue(val);
-		//
-		// if (locked)
-		// rightSlider.setValue(val);
-		// break;
-		// case 'o':
-		// val = rightSlider.getValue()
-		// + KEY_CONTROL_INCREMENT;
-		// if (val > rightSlider.getMaximum()) {
-		// val = rightSlider.getMaximum();
-		// }
-		// rightSlider.setValue(val);
-		//
-		// if (locked)
-		// leftSlider.setValue(val);
-		// break;
-		// case 'k':
-		// val = rightSlider.getValue()
-		// - KEY_CONTROL_INCREMENT;
-		// if (val < rightSlider.getMinimum()) {
-		// val = rightSlider.getMinimum();
-		// }
-		// rightSlider.setValue(val);
-		//
-		// if (locked)
-		// leftSlider.setValue(val);
-		// break;
-		// default:
-		// break;
-		// }
-		// sendMotorsStateMessage();
-		// return true;
-		// } else {
-		// return false;
-		// }
-		// }
-		// });
+		chckbxEnableGamepad = new JCheckBox("Enable Gamepad");
+		chckbxEnableGamepad.setBounds(20, 270, 122, 23);
+		chckbxEnableGamepad.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				boolean enable = chckbxEnableGamepad.isSelected();
+				setGamePadStatus(enable);
+			}
+		});
+		add(chckbxEnableGamepad);
 	}
 
 	private void buildLeftPanel() {
@@ -281,5 +229,12 @@ public class Motors_Panel extends JPanel {
 		double rightPower = ((double) rightMotorPower) / 100;
 
 		gui.getMotorSpeeds().setSpeeds(leftPower, rightPower);
+	}
+
+	private void setGamePadStatus(boolean status) {
+		if (status)
+			gui.getGamePad().enable();
+		else
+			gui.getGamePad().disable();
 	}
 }
