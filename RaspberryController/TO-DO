@@ -1,0 +1,11 @@
+TO-DO Controller:
+	- Change ESC's - make them more responsive
+	- Improve message system to make like a dashboard of the systems
+
+
+TO-DO GUI:
+	- Refactor gamepads and extract super class
+	- Refactor GUI and remove connection and devices initialization from it
+	- Change layout to make it resizable
+	- Receive notification when connection dies and make connection again
+	-
