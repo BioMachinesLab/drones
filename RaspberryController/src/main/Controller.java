@@ -18,6 +18,7 @@ import network.messages.SystemStatusMessage;
 
 import com.pi4j.io.serial.SerialPortException;
 
+import dataObjects.MotorSpeeds;
 import dataObjects.SystemInformationsData;
 
 public class Controller {
@@ -25,12 +26,16 @@ public class Controller {
 	private ESCManagerOutputThreadedImprov escManagerThreaded;
 	private ConnectionHandler networkConnector;
 	private String messages = "";
+	private MotorSpeeds speeds;
 
 	public static void main(String[] args) throws SerialPortException {
 		new Controller();
 	}
 
 	public Controller() {
+		
+		speeds = new MotorSpeeds();
+		
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
 				System.out.println("# Shutting down... ");
@@ -50,7 +55,7 @@ public class Controller {
 		System.out.println("######################################");
 		System.out.println("Initializing...");
 		try {
-			escManagerThreaded = new ESCManagerOutputThreadedImprov();
+			escManagerThreaded = new ESCManagerOutputThreadedImprov(speeds);
 			escManagerThreaded.start();
 			System.out.println("# ESC modules initialized with success!");
 		} catch (UnavailableDeviceException e) {
@@ -81,9 +86,8 @@ public class Controller {
 		// compassModule = new CompassModuleInput();
 	}
 
-	public void processMotorMessage(MotorMessage message, Connection conn) {
-		escManagerThreaded.setValue(0, message.getLeftMotor());
-		escManagerThreaded.setValue(1, message.getRightMotor());
+	public void processMotorMessage(MotorMessage message) {
+		speeds.setSpeeds(message);
 	}
 
 	public void processInformationRequest(InformationRequest request,

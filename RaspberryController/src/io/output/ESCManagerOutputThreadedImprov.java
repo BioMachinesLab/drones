@@ -4,10 +4,11 @@ import io.UnavailableDeviceException;
 
 import java.io.IOException;
 
+import network.messages.MotorMessage;
 import utils.Math_Utils;
+import dataObjects.MotorSpeeds;
 
-public class ESCManagerOutputThreadedImprov extends Thread implements
-		ControllerOutput {
+public class ESCManagerOutputThreadedImprov extends Thread implements ControllerOutput {
 	private static final long VELOCITY_UPDATE_DELAY = 25;
 
 	private final static int LEFT_ESC = 0;
@@ -27,10 +28,10 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 	private int L_value = STOP_L_VALUE;
 	private int R_value = STOP_R_VALUE;
 
-	private int lastLValue = 0;
-	private int lastRValue = 0;
+	private MotorSpeeds speeds;
 
-	public ESCManagerOutputThreadedImprov() throws UnavailableDeviceException {
+	public ESCManagerOutputThreadedImprov(MotorSpeeds speeds) throws UnavailableDeviceException {
+		this.speeds = speeds;
 		try {
 			writeValueToESC(0, 1);
 			writeValueToESC(1, 1);
@@ -76,6 +77,7 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 	}
 
 	private void writeValueToESC(int index, int value) {
+		long time = System.currentTimeMillis();
 		try {
 			Process p;
 			switch (index) {
@@ -102,8 +104,8 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (InterruptedException e) {
-		}
+		} catch (InterruptedException e) {}
+		System.out.println("Time to update motor "+(System.currentTimeMillis()-time));
 	}
 
 	public void disableMotor(int index) {
@@ -129,29 +131,22 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 	@Override
 	public void run() {
 		while (true) {
-			writeValuesToESC();
-			try {
-				Thread.sleep(VELOCITY_UPDATE_DELAY);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			MotorMessage m = speeds.getSpeeds();
+			writeValuesToESC(m);
 		}
 	}
 
-	private void writeValuesToESC() {
-		if (L_value != lastLValue) {
-			lastLValue = L_value;
-			writeValueToESC(0, L_value);
+	private void writeValuesToESC(MotorMessage m) {
+		
+		setValue(0, m.getLeftMotor());
+		setValue(1, m.getRightMotor());
+		
+		writeValueToESC(0, L_value);
 			
-			System.out.println("[MOTOR] Writing new Velocity L=" + L_value);
-		}
+		System.out.println("[MOTOR] Writing new Velocity L=" + L_value);
 
-		if (R_value != lastRValue) {
-			lastRValue = R_value;
-			writeValueToESC(1, R_value);
+		writeValueToESC(1, R_value);
 			
-			System.out.println("[MOTOR] Writing new Velocity R="
-					+ R_value);
-		}
+		System.out.println("[MOTOR] Writing new Velocity R=" + R_value);
 	}
 }

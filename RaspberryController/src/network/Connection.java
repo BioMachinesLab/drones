@@ -54,12 +54,12 @@ public class Connection extends Thread {
 
 			while (true) {
 				try {
+					System.out.println("###WAITING");
 					Message message = (Message) in.readObject();
 
 					if (message instanceof MotorMessage) {
 						// System.out.println("[CONNECTION] Motor Message");
-						controller.processMotorMessage((MotorMessage) message,
-								this);
+						controller.processMotorMessage((MotorMessage) message);
 					}
 
 					if (message instanceof InformationRequest) {
@@ -75,7 +75,7 @@ public class Connection extends Thread {
 					// e.printStackTrace();
 				} catch (SocketException e) {
 					controller
-							.processMotorMessage(new MotorMessage(0, 0), this);
+							.processMotorMessage(new MotorMessage(0, 0));
 					e.printStackTrace();
 				}
 			}
@@ -84,7 +84,7 @@ public class Connection extends Thread {
 			System.out.println("Client "
 					+ socket.getInetAddress().getHostAddress() + " ("
 					+ clientName + ") disconnected");
-			controller.processMotorMessage(new MotorMessage(0, 0), this);
+			controller.processMotorMessage(new MotorMessage(0, 0));
 		} catch (ClassNotFoundException e) {
 			System.out.println("I didn't reveived a correct name from "
 					+ socket.getInetAddress().getHostAddress());
