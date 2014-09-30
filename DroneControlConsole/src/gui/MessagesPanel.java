@@ -103,7 +103,7 @@ public class MessagesPanel extends JPanel implements Runnable {
 				Thread.sleep(sleepTime);
 			} catch (InterruptedException e) {
 				System.out.println("Messages Panel thread was interrupted....");
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 		}
 	}
