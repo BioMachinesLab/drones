@@ -7,6 +7,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -28,7 +29,7 @@ public class GUI {
 	private Motors_Panel motorsPanel;
 	private GPS_Panel gpsPanel;
 	private SystemInfo_Panel sysInfoPanel;
-	private Messages_Panel msgPanel;
+	private MessagesPanel msgPanel;
 	private GamePad gamePad;
 	private Thread gpsThread;
 	private Thread messagesThread;
@@ -68,6 +69,31 @@ public class GUI {
 			e.printStackTrace();
 		}
 
+		connect();
+	}
+	
+	//Make sure that everything is at the initial state. Useful for reconnections
+	private void init() {
+		if(frame != null)
+			frame.dispose();
+		
+		if(gpsPanel != null)
+			gpsPanel.stopExecuting();
+		
+		if(msgPanel != null)
+			msgPanel.stopExecuting();
+		
+		frame = null;
+		msgPanel = null;
+		gpsPanel = null;
+		sysInfoPanel = null;
+		connector = null;
+	}
+	
+	public void connect() {
+		
+		init();
+		
 		do {
 			try {
 				IPandPortNumberRequestToUser form = new IPandPortNumberRequestToUser();
@@ -97,12 +123,14 @@ public class GUI {
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
+				JOptionPane.showMessageDialog(frame,e.getMessage());
 			}
 		} while (connector == null);
 	}
 
 	private void buildGUI() {
 		frame = new JFrame();
+		frame.setLocationRelativeTo(null);
 		frame.setTitle("HANCAD/ CORATAM Project - Drone Remote Console - "
 				+ connector.getDestInetAddress().getHostAddress());
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -124,7 +152,7 @@ public class GUI {
 
 		frame.add(centralPanel, BorderLayout.CENTER);
 
-		msgPanel = new Messages_Panel(this);
+		msgPanel = new MessagesPanel(this);
 		frame.add(msgPanel, BorderLayout.PAGE_END);
 
 		frame.pack();

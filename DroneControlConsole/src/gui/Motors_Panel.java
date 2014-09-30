@@ -232,9 +232,12 @@ public class Motors_Panel extends JPanel {
 	}
 
 	private void setGamePadStatus(boolean status) {
-		if (status)
-			gui.getGamePad().enable();
-		else
-			gui.getGamePad().disable();
+		
+		if(gui.getGamePad() != null) {
+			if (status)
+				gui.getGamePad().enable();
+			else
+				gui.getGamePad().disable();
+		}
 	}
 }

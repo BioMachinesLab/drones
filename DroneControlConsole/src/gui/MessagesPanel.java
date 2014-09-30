@@ -4,26 +4,27 @@ import java.awt.Dimension;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
 import network.messages.InformationRequest;
-import network.messages.InformationRequest.Message_Type;
+import network.messages.InformationRequest.MessageType;
 import network.messages.SystemStatusMessage;
 
-public class Messages_Panel extends JPanel implements Runnable {
+public class MessagesPanel extends JPanel implements Runnable {
 	private static final long serialVersionUID = 5958293256864880036L;
 	private GUI gui;
 	private JTextArea messageArea;
 	private JScrollPane scrollPane;
-	private JComboBox comboBoxUpdateRate;
+	private JComboBox<String> comboBoxUpdateRate;
+	private boolean keepGoing = true;
 
-	public Messages_Panel(GUI gui) {
+	public MessagesPanel(GUI gui) {
 		this.gui = gui;
 		setBorder(BorderFactory.createTitledBorder("Drone Messages"));
 		setLayout(null);
@@ -40,8 +41,8 @@ public class Messages_Panel extends JPanel implements Runnable {
 				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		add(scrollPane);
 
-		comboBoxUpdateRate = new JComboBox();
-		comboBoxUpdateRate.setModel(new DefaultComboBoxModel(
+		comboBoxUpdateRate = new JComboBox<String>();
+		comboBoxUpdateRate.setModel(new DefaultComboBoxModel<String>(
 				new String[] { "10 Hz", "5 Hz", "1 Hz", "0.1Hz" }));
 		comboBoxUpdateRate.setSelectedIndex(0);
 		comboBoxUpdateRate.setBounds(654, 130, 86, 20);
@@ -66,12 +67,18 @@ public class Messages_Panel extends JPanel implements Runnable {
 
 	private void requestSystemStatus() {
 		gui.getConnector().sendData(
-				new InformationRequest(Message_Type.SYSTEM_STATUS));
+				new InformationRequest(MessageType.SYSTEM_STATUS));
+	}
+	
+	private void requestInitialSystemStatus(){
+		gui.getConnector().sendData(
+				new InformationRequest(MessageType.INITIAL_MESSAGES));
 	}
 
 	@Override
 	public void run() {
-		while (true) {
+		requestInitialSystemStatus();
+		while (keepGoing) {
 			requestSystemStatus();
 
 			int sleepTime = 0;
@@ -99,5 +106,9 @@ public class Messages_Panel extends JPanel implements Runnable {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public void stopExecuting() {
+		keepGoing = false;
 	}
 }

@@ -3,7 +3,6 @@ package gui;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -11,9 +10,8 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-
 import network.messages.InformationRequest;
-import network.messages.InformationRequest.Message_Type;
+import network.messages.InformationRequest.MessageType;
 
 import org.joda.time.LocalDateTime;
 
@@ -37,7 +35,7 @@ public class GPS_Panel extends JPanel implements Runnable {
 	private JTextField textFieldGPSSource;
 	private JTextField textFieldTime;
 	private JTextField textFieldDate;
-	private JComboBox comboBox;
+	private JComboBox<String> comboBox;
 
 	private GUI gui;
 	private int debugCounter = 0;
@@ -45,6 +43,8 @@ public class GPS_Panel extends JPanel implements Runnable {
 	private int sleepTime = 1000*10;
 	
 	private Thread threadRef;
+	
+	private boolean keepGoing = true;
 
 	public GPS_Panel(GUI gui) {
 		this.gui = gui;
@@ -58,8 +58,8 @@ public class GPS_Panel extends JPanel implements Runnable {
 		buildGPSFixInformationPanel();
 		buildTimePanel();
 
-		comboBox = new JComboBox();
-		comboBox.setModel(new DefaultComboBoxModel(new String[] {
+		comboBox = new JComboBox<String>();
+		comboBox.setModel(new DefaultComboBoxModel<String>(new String[] {
 				"10 Hz", "5 Hz", "1 Hz", "0.1Hz" }));
 		comboBox.setSelectedIndex(3);
 		comboBox.setBounds(95, 317, 86, 20);
@@ -346,7 +346,7 @@ public class GPS_Panel extends JPanel implements Runnable {
 	}
 
 	private void requestGPSData() {
-		gui.getConnector().sendData(new InformationRequest(Message_Type.GPS));
+		gui.getConnector().sendData(new InformationRequest(MessageType.GPS));
 	}
 
 	@Override
@@ -354,7 +354,7 @@ public class GPS_Panel extends JPanel implements Runnable {
 		
 		this.threadRef = Thread.currentThread();
 		
-		while (true) {
+		while (keepGoing) {
 			requestGPSData();
 			try {
 				Thread.sleep(sleepTime);
@@ -362,5 +362,9 @@ public class GPS_Panel extends JPanel implements Runnable {
 				//we expect interruptions when we change the refresh rate
 			}
 		}
+	}
+	
+	public void stopExecuting() {
+		keepGoing = false;
 	}
 }

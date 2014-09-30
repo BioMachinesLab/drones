@@ -1,19 +1,20 @@
 package network.messages;
 
 public class InformationRequest extends Message {
-	public static enum Message_Type {
-		GPS, SYSTEM_STATUS, BATTERY, COMPASS,SYSTEM_INFO
+	
+	public static enum MessageType {
+		GPS, SYSTEM_STATUS, BATTERY, COMPASS,SYSTEM_INFO, INITIAL_MESSAGES
 	}
 
 	private static final long serialVersionUID = 7787407138336393178L;
-	private Message_Type type;
+	private MessageType type;
 
-	public InformationRequest(Message_Type type) {
+	public InformationRequest(MessageType type) {
 		super();
 		this.type = type;
 	}
 
-	public Message_Type getMessageTypeQuery() {
+	public MessageType getMessageTypeQuery() {
 		return type;
 	}
 

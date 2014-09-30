@@ -20,29 +20,24 @@ public class GamePad extends Thread {
 	private int lastRightMotorSpeed = 0;
 	private int lastLeftMotorSpeed = 0;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		GamePad gamePad = new GamePad(null, GamePadType.GAMEPAD);
 		gamePad.disable();
 		gamePad.run();
 	}
 
-	public GamePad(GUI gui, GamePadType type) {
-		try {
-			this.gui = gui;
+	public GamePad(GUI gui, GamePadType type) throws IOException {
+		this.gui = gui;
 
-			if (type == GamePadType.LOGITECH) {
-				jinputGamepad = new GamePadJInputLogitech();
-			} else {
-				jinputGamepad = new GamePadJInputGamepad();
-			}
-
-			jinputGamepad.getControllerComponents();
-			jinputGamepad.pollComponentsValues();
-
-			// jinputGamepad.calibrateJoystick();
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (type == GamePadType.LOGITECH) {
+			jinputGamepad = new GamePadJInputLogitech();
+		} else {
+			jinputGamepad = new GamePadJInputGamepad();
 		}
+
+		jinputGamepad.getControllerComponents();
+		jinputGamepad.pollComponentsValues();
+		// jinputGamepad.calibrateJoystick();
 	}
 
 	@Override

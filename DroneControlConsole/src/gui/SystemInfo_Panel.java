@@ -15,7 +15,7 @@ import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 
 import network.messages.InformationRequest;
-import network.messages.InformationRequest.Message_Type;
+import network.messages.InformationRequest.MessageType;
 import dataObjects.SystemInformationsData;
 
 public class SystemInfo_Panel extends JPanel {
@@ -579,7 +579,7 @@ public class SystemInfo_Panel extends JPanel {
 		textFieldCPURevision.setText(data.getCpuRevision());
 		textFieldCPUArchitect.setText(data.getCpuArchitecture());
 		textFieldCPUPartNumb.setText(data.getCpuPart());
-		textFieldCPUTemp.setText(data.getCpuTemperature() + " ºC");
+		textFieldCPUTemp.setText(data.getCpuTemperature() + " ï¿½C");
 		textFieldCPUVoltage.setText(data.getCpuVoltage() + " Volt");
 		textFieldIsHardFloatAbi
 				.setText(Boolean.toString(data.isHardFloatAbi()));
@@ -657,6 +657,6 @@ public class SystemInfo_Panel extends JPanel {
 
 	private void requestSysInformationsData() {
 		gui.getConnector()
-				.sendData(new InformationRequest(Message_Type.SYSTEM_INFO));
+				.sendData(new InformationRequest(MessageType.SYSTEM_INFO));
 	}
 }
