@@ -26,6 +26,7 @@ public class Controller {
 	private ESCManagerOutputThreadedImprov escManagerThreaded;
 	private ConnectionHandler networkConnector;
 	private String messages = "";
+	private String initMessages = "";
 	private MotorSpeeds speeds;
 
 	public static void main(String[] args) throws SerialPortException {
@@ -61,7 +62,7 @@ public class Controller {
 			System.out.println("# ESC modules initialized with success!");
 		} catch (UnavailableDeviceException e) {
 			System.out.println("Unable to start ESC modules!");
-			messages += "Unable to start ESC module!\n";
+			initMessages += "Unable to start ESC module!\n";
 			e.printStackTrace();
 		}
 
@@ -70,7 +71,7 @@ public class Controller {
 			System.out.println("# GPS Module initialized with success!");
 		} catch (UnavailableDeviceException e) {
 			System.out.println("Unable to start GPS module!");
-			messages += "Unable to start GPS module!\n";
+			initMessages += "Unable to start GPS module!\n";
 		}
 
 		try {
@@ -80,7 +81,7 @@ public class Controller {
 					.println("# Network Connection initialized with success!");
 		} catch (IOException e) {
 			System.out.println("Unable to start Netwok Connector!");
-			messages += "Unable to start Network Connector!\n";
+			initMessages += "Unable to start Network Connector!\n";
 		}
 
 		// batteryManager = new BatteryManagerInput();
@@ -91,8 +92,7 @@ public class Controller {
 		speeds.setSpeeds(message);
 	}
 
-	public void processInformationRequest(InformationRequest request,
-			Connection conn) {
+	public void processInformationRequest(InformationRequest request, Connection conn) {
 		Message msg;
 		switch (request.getMessageTypeQuery()) {
 		case BATTERY:
@@ -125,9 +125,15 @@ public class Controller {
 		case SYSTEM_STATUS:
 			if (messages != null) {
 				msg = new SystemStatusMessage(messages);
-				System.out
-						.println("[CONTROLLER)] I sent messages: " + messages);
+				System.out.println("[CONTROLLER] I sent messages: " + messages);
 				messages = null;
+				conn.sendData(msg);
+			}
+			break;
+		case INITIAL_MESSAGES:
+			if (messages != null) {
+				msg = new SystemStatusMessage(initMessages);
+				System.out.println("[CONTROLLER] I sent the initial messages: " + initMessages);
 				conn.sendData(msg);
 			}
 			break;

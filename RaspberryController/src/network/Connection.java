@@ -11,7 +11,7 @@ import main.Controller;
 import network.messages.InformationRequest;
 import network.messages.Message;
 import network.messages.MotorMessage;
-import network.messages.InformationRequest.Message_Type;
+import network.messages.InformationRequest.MessageType;
 
 public class Connection extends Thread {
 	private Socket socket;
@@ -50,11 +50,10 @@ public class Connection extends Thread {
 					+ InetAddress.getLocalHost().getHostName()
 					+ "! Take good care of me :)");
 			controller.processInformationRequest(new InformationRequest(
-					Message_Type.SYSTEM_STATUS), this);
+					MessageType.SYSTEM_STATUS), this);
 
 			while (true) {
 				try {
-					System.out.println("###WAITING");
 					Message message = (Message) in.readObject();
 
 					if (message instanceof MotorMessage) {
