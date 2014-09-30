@@ -1,6 +1,7 @@
 package gui;
 
 import gamepad.GamePad;
+import gamepad.GamePad.GamePadType;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -91,7 +92,7 @@ public class GUI {
 
 					display();
 
-					gamePad = new GamePad(this);
+					gamePad = new GamePad(this, GamePadType.GAMEPAD);
 					gamePad.start();
 				}
 			} catch (Exception e) {

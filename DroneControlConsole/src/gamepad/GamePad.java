@@ -5,8 +5,12 @@ import gui.GUI;
 import java.io.IOException;
 
 public class GamePad extends Thread {
-	private final static int HISTORY_SIZE = 25;
-	private final static int UPDATE_DELAY = 10;
+	public static enum GamePadType {
+		LOGITECH, GAMEPAD
+	}
+
+	private final static int HISTORY_SIZE = 10;
+	private final static int UPDATE_DELAY = 7;
 	private final static int MAXIMUM_SPEED = 25;
 
 	private GUI gui;
@@ -17,16 +21,21 @@ public class GamePad extends Thread {
 	private int lastLeftMotorSpeed = 0;
 
 	public static void main(String[] args) {
-		GamePad gamePad = new GamePad(null);
+		GamePad gamePad = new GamePad(null, GamePadType.GAMEPAD);
 		gamePad.disable();
 		gamePad.run();
 	}
 
-	public GamePad(GUI gui) {
+	public GamePad(GUI gui, GamePadType type) {
 		try {
 			this.gui = gui;
 
-			jinputGamepad = new GamePadJInputLogitech();
+			if (type == GamePadType.LOGITECH) {
+				jinputGamepad = new GamePadJInputLogitech();
+			} else {
+				jinputGamepad = new GamePadJInputGamepad();
+			}
+
 			jinputGamepad.getControllerComponents();
 			jinputGamepad.pollComponentsValues();
 
@@ -98,7 +107,6 @@ public class GamePad extends Thread {
 				System.out.println("Left=" + leftMotorSpeed + " Right="
 						+ rightMotorSpeed);
 
-				enable = false;
 				if (enable
 						&& (leftMotorSpeed != lastLeftMotorSpeed || rightMotorSpeed != lastRightMotorSpeed)) {
 

@@ -1,6 +1,5 @@
 package gamepad;
 
-
 public class GamePadJInputLogitech extends GamePadInput {
 	private static final String GAMEPAD_NAME = "Logitech RumblePad 2 USB";
 
@@ -26,5 +25,25 @@ public class GamePadJInputLogitech extends GamePadInput {
 		middleY = Y_MIDDLE;
 		middleZ = Z_MIDDLE;
 		middleRZ = RZ_MIDDLE;
+	}
+
+	@Override
+	public float getXAxisValue() {
+		return xAxisValue;
+	}
+
+	@Override
+	public float getYAxisValue() {
+		return yAxisValue;
+	}
+
+	@Override
+	public float getZAxisValue() {
+		return zAxisValue;
+	}
+
+	@Override
+	public float getRZAxisValue() {
+		return rzAxisValue;
 	}
 }

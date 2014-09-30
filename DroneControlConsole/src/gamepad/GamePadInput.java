@@ -15,19 +15,19 @@ public abstract class GamePadInput {
 
 	private String xIdentifier = null;
 	private Component xAxis = null;
-	private float xAxisValue = -100;
+	protected float xAxisValue = -100;
 
 	private String yIdentifier = null;
 	private Component yAxis = null;
-	private float yAxisValue = -100;
+	protected float yAxisValue = -100;
 
 	private String zIdentifier = null;
 	private Component zAxis = null;
-	private float zAxisValue = -100;
+	protected float zAxisValue = -100;
 
 	private String rzIdentifier = null;
 	private Component rzAxis = null;
-	private float rzAxisValue = -100;
+	protected float rzAxisValue = -100;
 
 	protected double middleX = 0;
 	protected double middleY = 0;
@@ -67,6 +67,11 @@ public abstract class GamePadInput {
 								}
 							}
 						}
+					}
+
+					if (xAxis != null && yAxis != null && zAxis != null
+							&& rzAxis != null) {
+						break;
 					}
 				}
 
@@ -206,22 +211,6 @@ public abstract class GamePadInput {
 		System.out.println("MiddleRZ= " + middleRZ);
 	}
 
-	public float getXAxisValue() {
-		return xAxisValue;
-	}
-
-	public float getYAxisValue() {
-		return yAxisValue;
-	}
-
-	public float getZAxisValue() {
-		return zAxisValue;
-	}
-
-	public float getRZAxisValue() {
-		return rzAxisValue;
-	}
-
 	public void setXIdentifier(String xIdentifier) {
 		this.xIdentifier = xIdentifier;
 	}
@@ -269,4 +258,12 @@ public abstract class GamePadInput {
 	public void setMiddleRZ(double middleRZ) {
 		this.middleRZ = middleRZ;
 	}
+
+	public abstract float getXAxisValue();
+
+	public abstract float getYAxisValue();
+
+	public abstract float getZAxisValue();
+
+	public abstract float getRZAxisValue();
 }
