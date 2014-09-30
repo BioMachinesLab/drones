@@ -8,7 +8,8 @@ import network.messages.MotorMessage;
 import utils.Math_Utils;
 import dataObjects.MotorSpeeds;
 
-public class ESCManagerOutputThreadedImprov extends Thread implements ControllerOutput {
+public class ESCManagerOutputThreadedImprov extends Thread implements
+		ControllerOutput {
 	private static final long VELOCITY_UPDATE_DELAY = 25;
 
 	private final static int LEFT_ESC = 0;
@@ -30,7 +31,8 @@ public class ESCManagerOutputThreadedImprov extends Thread implements Controller
 
 	private MotorSpeeds speeds;
 
-	public ESCManagerOutputThreadedImprov(MotorSpeeds speeds) throws UnavailableDeviceException {
+	public ESCManagerOutputThreadedImprov(MotorSpeeds speeds)
+			throws UnavailableDeviceException {
 		this.speeds = speeds;
 		try {
 			writeValueToESC(0, 1);
@@ -73,7 +75,7 @@ public class ESCManagerOutputThreadedImprov extends Thread implements Controller
 		default:
 			throw new IllegalArgumentException();
 		}
-		System.out.println("[ESCMANAGER] L="+L_value+" R="+R_value);
+		System.out.println("[ESCMANAGER] L=" + L_value + " R=" + R_value);
 	}
 
 	private void writeValueToESC(int index, int value) {
@@ -104,8 +106,10 @@ public class ESCManagerOutputThreadedImprov extends Thread implements Controller
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (InterruptedException e) {}
-		System.out.println("Time to update motor "+(System.currentTimeMillis()-time));
+		} catch (InterruptedException e) {
+		}
+		System.out.println("Time to update motor "
+				+ (System.currentTimeMillis() - time));
 	}
 
 	public void disableMotor(int index) {
@@ -137,16 +141,21 @@ public class ESCManagerOutputThreadedImprov extends Thread implements Controller
 	}
 
 	private void writeValuesToESC(MotorMessage m) {
-		
-		setValue(0, m.getLeftMotor());
-		setValue(1, m.getRightMotor());
-		
-		writeValueToESC(0, L_value);
-			
-		System.out.println("[MOTOR] Writing new Velocity L=" + L_value);
 
-		writeValueToESC(1, R_value);
-			
-		System.out.println("[MOTOR] Writing new Velocity R=" + R_value);
+		if (m.getLeftMotor() == -1 || m.getRightMotor() == -1) {
+			disableMotors();
+		} else {
+
+			setValue(0, m.getLeftMotor());
+			setValue(1, m.getRightMotor());
+
+			writeValueToESC(0, L_value);
+
+			System.out.println("[MOTOR] Writing new Velocity L=" + L_value);
+
+			writeValueToESC(1, R_value);
+
+			System.out.println("[MOTOR] Writing new Velocity R=" + R_value);
+		}
 	}
 }

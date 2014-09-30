@@ -57,7 +57,7 @@ public class ConnectionHandler {
 		}
 	}
 
-	public void removeConnection(Connection conn) {
+	public synchronized void removeConnection(Connection conn) {
 		connections.remove(conn);
 	}
 }

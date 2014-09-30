@@ -1,11 +1,18 @@
-TO-DO Controller:
+TO-DO Hardware:
 	- Change ESC's - make them more responsive
+	- Make the ESC's rotation reversable
+	- Improve WLAN0 initialization (IP address problem)
+	
+	
+TO-DO Controller:
 	- Improve message system to make like a dashboard of the systems
+	- Solve problem of when you connect to drone controller while it is initializing (when it is initializing, if you connect to it, it blows)
+	- Check connection handler
+	- Deal with Exceptions on the connection loss
 
 
 TO-DO GUI:
-	- Refactor gamepads and extract super class
 	- Refactor GUI and remove connection and devices initialization from it
 	- Change layout to make it resizable
 	- Receive notification when connection dies and make connection again
-	-
+	- Set up the joystick maximum range (maximum speed)

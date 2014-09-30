@@ -43,7 +43,8 @@ public class Controller {
 					networkConnector.closeConnections();
 				}
 				if (escManagerThreaded != null) {
-					escManagerThreaded.disableMotors();
+					//escManagerThreaded.disableMotors();
+					speeds.setSpeeds(new MotorMessage(-1, -1));
 				}
 				if (gpsModule != null) {
 					gpsModule.closeSerial();
