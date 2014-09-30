@@ -7,13 +7,9 @@ public class ESCTester extends Thread {
 	private final static int DISABLE_VALUE = 0;
 	private final static int ARM_VALUE = 80;
 
-	private final static int STOP_L_VALUE = 120;
-	private final static int MIN_L_VALUE = 121;
-	private final static int MAX_L_VALUE = 179;
-
-	private final static int STOP_R_VALUE = 120;
-	private final static int MIN_R_VALUE = 121;
-	private final static int MAX_R_VALUE = 179;
+	private final static int STOP_VALUE = 120;
+	private final static int MIN_VALUE = 121;
+	private final static int MAX_VALUE = 179;
 
 	private final static int DELAY_ACCEL = 10;
 	private final static int DELAY_DESACEL = 10;
@@ -23,15 +19,6 @@ public class ESCTester extends Thread {
 	}
 
 	public ESCTester() {
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			public void run() {
-				System.out.println("# Shutting down... ");
-				writeValueToESC(0, DISABLE_VALUE);
-				writeValueToESC(1, DISABLE_VALUE);
-				System.out.println("now!");
-			}
-		});
-
 		try {
 			writeValueToESC(0, 1);
 			writeValueToESC(1, 1);
@@ -47,9 +34,26 @@ public class ESCTester extends Thread {
 
 	@Override
 	public void run() {
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() {
+				try {
+					System.out.print("# Shutting down... ");
+
+					writeValueToESC(0, DISABLE_VALUE);
+					writeValueToESC(1, DISABLE_VALUE);
+
+					sleep(1000);
+
+					System.out.println("now!");
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+
 		while (true) {
 			System.out.println("Inscreasing speed!");
-			for (int i = STOP_L_VALUE; i <= MAX_L_VALUE; i++) {
+			for (int i = STOP_VALUE; i <= MAX_VALUE; i+=9) {
 				writeValueToESC(0, i);
 				writeValueToESC(1, i);
 
@@ -61,7 +65,7 @@ public class ESCTester extends Thread {
 			}
 
 			System.out.println("Decreasing speed!");
-			for (int i = MAX_L_VALUE; i >= STOP_L_VALUE; i--) {
+			for (int i = MAX_VALUE; i >= STOP_VALUE; i-=9) {
 				writeValueToESC(0, i);
 				writeValueToESC(1, i);
 
@@ -76,8 +80,8 @@ public class ESCTester extends Thread {
 		}
 	}
 
-	private void writeValueToESC(int index, int value) {
-		long time = System.currentTimeMillis();
+	private synchronized void writeValueToESC(int index, int value) {
+		// long time = System.currentTimeMillis();
 		try {
 			Process p;
 			switch (index) {
@@ -105,8 +109,9 @@ public class ESCTester extends Thread {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
-		System.out.println("Time to update motor "
-				+ (System.currentTimeMillis() - time));
+		// System.out.println("Time to update motor "
+		// + (System.currentTimeMillis() - time));
 	}
 }
