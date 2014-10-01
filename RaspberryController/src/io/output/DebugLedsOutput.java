@@ -10,11 +10,10 @@ import com.pi4j.io.gpio.RaspiPin;
 
 public class DebugLedsOutput extends Thread implements ControllerOutput {
 	private static final int NUM_LEDS = 1;
-	private static final Pin[] LED_PINS = { RaspiPin.GPIO_03 };
+	private static final Pin[] LED_PINS = { RaspiPin.GPIO_14 };
 
 	private static final int[] LEDS_TO_BLINK = { 0 };
 	private static final int BLINK_DURATION = 250;
-	private static final int SLEEP_DURATION = 250;
 
 	private GpioController gpio;
 	private GpioPinDigitalOutput[] ledsOutputPins;
@@ -56,6 +55,10 @@ public class DebugLedsOutput extends Thread implements ControllerOutput {
 		ledsOutputPins[index].blink(duration);
 	}
 
+	public void blinkLed(int index) {
+		ledsOutputPins[index].blink(BLINK_DURATION);
+	}
+
 	public void shutdownGpio() {
 		for (int i = 0; i < LED_PINS.length; i++) {
 			ledsOutputPins[i].setShutdownOptions(true, PinState.LOW,
@@ -67,15 +70,18 @@ public class DebugLedsOutput extends Thread implements ControllerOutput {
 
 	@Override
 	public void run() {
-		while (true) {
-			for (int i = 0; i < LEDS_TO_BLINK.length; i++) {
-				blinkLed(LEDS_TO_BLINK[i], BLINK_DURATION);
-			}
+		for (int i = 0; i < LEDS_TO_BLINK.length; i++) {
+			blinkLed(LEDS_TO_BLINK[i], BLINK_DURATION);
+		}
 
-			try {
-				sleep(SLEEP_DURATION);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+		while (true) {
+			synchronized (this) {
+				try {
+					wait();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 	}

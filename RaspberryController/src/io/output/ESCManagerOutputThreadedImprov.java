@@ -34,8 +34,8 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 			throws UnavailableDeviceException {
 		this.speeds = speeds;
 		try {
-			writeValueToESC(0, 1);
-			writeValueToESC(1, 1);
+			writeValueToESC(0, 50);
+			writeValueToESC(1, 50);
 			Thread.sleep(500);
 
 			writeValueToESC(0, ARM_VALUE);
@@ -80,10 +80,9 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 	private void writeValueToESC(int index, int value) {
 		// long time = System.currentTimeMillis();
 		try {
-			Process p;
 			switch (index) {
 			case 0:
-				p = Runtime.getRuntime().exec(
+				Runtime.getRuntime().exec(
 						new String[] {
 								"bash",
 								"-c",
@@ -91,7 +90,7 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 										+ " > /dev/servoblaster" });
 				break;
 			case 1:
-				p = Runtime.getRuntime().exec(
+				Runtime.getRuntime().exec(
 						new String[] {
 								"bash",
 								"-c",
@@ -102,7 +101,7 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 			// Case used on shutdown, to avoid spend processing time (and have
 			// faith that it will run until the end!!!!)
 			case 3:
-				p = Runtime.getRuntime().exec(
+				Runtime.getRuntime().exec(
 						new String[] {
 								"bash",
 								"-c",
@@ -113,7 +112,7 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 				break;
 
 			case 4:
-				p = Runtime.getRuntime().exec(
+				Runtime.getRuntime().exec(
 						new String[] {
 								"bash",
 								"-c",

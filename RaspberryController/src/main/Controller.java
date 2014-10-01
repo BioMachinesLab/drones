@@ -77,6 +77,14 @@ public class Controller {
 		}
 
 		try {
+			debugLeds = new DebugLedsOutput();
+			debugLeds.blinkLed(0);
+		} catch (IllegalArgumentException e) {
+			System.out.println("Unable to start debug leds!");
+			initMessages += "Unable to start debug leds!\n";
+		}
+
+		try {
 			connectionHandler = new ConnectionHandler(this);
 			connectionHandler.initConnector();
 			System.out
@@ -84,15 +92,6 @@ public class Controller {
 		} catch (IOException e) {
 			System.out.println("Unable to start Netwok Connector!");
 			initMessages += "Unable to start Network Connector!\n";
-		}
-
-		try {
-			debugLeds = new DebugLedsOutput();
-			debugLeds.start();
-			System.out.println("# Debug Leds initialized with success!");
-		} catch (IllegalArgumentException e) {
-			System.out.println("Unable to start debug leds!");
-			initMessages += "Unable to start debug leds!\n";
 		}
 
 		// batteryManager = new BatteryManagerInput();
