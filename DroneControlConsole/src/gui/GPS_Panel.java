@@ -3,13 +3,14 @@ package gui;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
 import network.messages.InformationRequest;
 import network.messages.InformationRequest.MessageType;
 
@@ -39,11 +40,11 @@ public class GPS_Panel extends JPanel implements Runnable {
 
 	private GUI gui;
 	private int debugCounter = 0;
-	
-	private int sleepTime = 1000*10;
-	
+
+	private int sleepTime = 1000 * 10;
+
 	private Thread threadRef;
-	
+
 	private boolean keepGoing = true;
 
 	public GPS_Panel(GUI gui) {
@@ -64,24 +65,24 @@ public class GPS_Panel extends JPanel implements Runnable {
 		comboBox.setSelectedIndex(3);
 		comboBox.setBounds(95, 317, 86, 20);
 		add(comboBox);
-		
+
 		comboBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				switch (comboBox.getSelectedIndex()) {
 				case 0:
-					sleepTime = 1000/10;
+					sleepTime = 1000 / 10;
 					break;
 				case 1:
-					sleepTime = 1000/5;
+					sleepTime = 1000 / 5;
 					break;
 				case 2:
 					sleepTime = 1000;
 					break;
 				case 3:
-					sleepTime = 1000*10;
+					sleepTime = 1000 * 10;
 					break;
 				default:
-					sleepTime = 1000*10;
+					sleepTime = 1000 * 10;
 					break;
 				}
 				threadRef.interrupt();
@@ -292,9 +293,9 @@ public class GPS_Panel extends JPanel implements Runnable {
 		textFieldLatitude.setText(data.getLatitude());
 		textFieldLongitude.setText(data.getLongitude());
 
-		textFieldAltitude.setText(Integer.toString(debugCounter));
-		debugCounter++;
-		// textFieldAltitude.setText(Double.toString(data.getAltitude()));
+		// textFieldAltitude.setText(Integer.toString(debugCounter));
+		// debugCounter++;
+		textFieldAltitude.setText(Double.toString(data.getAltitude()));
 
 		textFieldHasFix.setText(Boolean.toString(data.isFix()));
 		textFieldSatelittesView.setText(Integer.toString(data
@@ -351,19 +352,19 @@ public class GPS_Panel extends JPanel implements Runnable {
 
 	@Override
 	public void run() {
-		
+
 		this.threadRef = Thread.currentThread();
-		
+
 		while (keepGoing) {
 			requestGPSData();
 			try {
 				Thread.sleep(sleepTime);
 			} catch (InterruptedException e) {
-				//we expect interruptions when we change the refresh rate
+				// we expect interruptions when we change the refresh rate
 			}
 		}
 	}
-	
+
 	public void stopExecuting() {
 		keepGoing = false;
 	}
