@@ -73,8 +73,7 @@ public class Connection extends Thread {
 									+ clientName + ", so it was discarded....");
 					// e.printStackTrace();
 				} catch (SocketException e) {
-					controller
-							.processMotorMessage(new MotorMessage(0, 0));
+					controller.processMotorMessage(new MotorMessage(0, 0));
 					e.printStackTrace();
 				}
 			}
@@ -83,6 +82,8 @@ public class Connection extends Thread {
 			System.out.println("Client "
 					+ socket.getInetAddress().getHostAddress() + " ("
 					+ clientName + ") disconnected");
+			
+			// Disable motors when client disconnects
 			controller.processMotorMessage(new MotorMessage(0, 0));
 		} catch (ClassNotFoundException e) {
 			System.out.println("I didn't reveived a correct name from "
@@ -104,6 +105,19 @@ public class Connection extends Thread {
 			if (socket != null && !socket.isClosed()) {
 				socket.close();
 				connectionHandler.removeConnection(this);
+				out.close();
+				in.close();
+			}
+		} catch (IOException e) {
+			System.out.println("[CONNECTION] Unable to close connection to "
+					+ clientName + "... there is an open connection?");
+		}
+	}
+
+	public synchronized void closeConnectionWhithoutDiscard() {
+		try {
+			if (socket != null && !socket.isClosed()) {
+				socket.close();
 				out.close();
 				in.close();
 			}

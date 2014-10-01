@@ -17,19 +17,15 @@ public class MotorSpeeds {
 	}
 
 	public synchronized MotorMessage getSpeeds() {
-
 		try {
-
-			while (!changed)
+			while (!changed) {
 				wait();
-
+			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 
 		changed = false;
-
 		return msg;
 	}
-
 }

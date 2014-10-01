@@ -6,9 +6,13 @@ TO-DO Hardware:
 	
 TO-DO Controller:
 	- Improve message system to make like a dashboard of the systems
+	- Dont shutdown motors when there are multiple clients (connection class)
 
 
 TO-DO GUI:
 	- Refactor GUI and remove connection and devices initialization from it
 	- Change layout to make it resizable
 	- Set up the joystick maximum range (maximum speed)
+
+	
+- Compile just our code (without having to compile the entire code)

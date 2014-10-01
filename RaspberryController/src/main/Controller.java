@@ -2,6 +2,7 @@ package main;
 
 import io.UnavailableDeviceException;
 import io.input.GPSModuleInput;
+import io.output.DebugLedsOutput;
 import io.output.ESCManagerOutputThreadedImprov;
 
 import java.io.IOException;
@@ -23,33 +24,34 @@ import dataObjects.SystemInformationsData;
 
 public class Controller {
 	private GPSModuleInput gpsModule;
-	private ESCManagerOutputThreadedImprov escManagerThreaded;
-	private ConnectionHandler networkConnector;
+	private ESCManagerOutputThreadedImprov escManager;
+	private ConnectionHandler connectionHandler;
 	private String messages = "";
 	private String initMessages = "";
 	private MotorSpeeds speeds;
+	private DebugLedsOutput debugLeds;
 
 	public static void main(String[] args) throws SerialPortException {
 		new Controller();
 	}
 
 	public Controller() {
-		
+
 		speeds = new MotorSpeeds();
-		
+
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
-				System.out.println("# Shutting down... ");
-				if (networkConnector != null) {
-					networkConnector.closeConnections();
-				}
-				if (escManagerThreaded != null) {
-					//escManagerThreaded.disableMotors();
+				System.out.print("# Shutting down... ");
+				if (escManager != null) {
 					speeds.setSpeeds(new MotorMessage(-1, -1));
 				}
 				if (gpsModule != null) {
 					gpsModule.closeSerial();
 				}
+				if (debugLeds != null) {
+					debugLeds.shutdownGpio();
+				}
+
 				System.out.println("now!");
 			}
 		});
@@ -57,8 +59,8 @@ public class Controller {
 		System.out.println("######################################");
 		System.out.println("Initializing...");
 		try {
-			escManagerThreaded = new ESCManagerOutputThreadedImprov(speeds);
-			escManagerThreaded.start();
+			escManager = new ESCManagerOutputThreadedImprov(speeds);
+			escManager.start();
 			System.out.println("# ESC modules initialized with success!");
 		} catch (UnavailableDeviceException e) {
 			System.out.println("Unable to start ESC modules!");
@@ -75,13 +77,22 @@ public class Controller {
 		}
 
 		try {
-			networkConnector = new ConnectionHandler(this);
-			networkConnector.initConnector();
+			connectionHandler = new ConnectionHandler(this);
+			connectionHandler.initConnector();
 			System.out
 					.println("# Network Connection initialized with success!");
 		} catch (IOException e) {
 			System.out.println("Unable to start Netwok Connector!");
 			initMessages += "Unable to start Network Connector!\n";
+		}
+
+		try {
+			debugLeds = new DebugLedsOutput();
+			debugLeds.start();
+			System.out.println("# Debug Leds initialized with success!");
+		} catch (IllegalArgumentException e) {
+			System.out.println("Unable to start debug leds!");
+			initMessages += "Unable to start debug leds!\n";
 		}
 
 		// batteryManager = new BatteryManagerInput();
@@ -92,7 +103,8 @@ public class Controller {
 		speeds.setSpeeds(message);
 	}
 
-	public void processInformationRequest(InformationRequest request, Connection conn) {
+	public void processInformationRequest(InformationRequest request,
+			Connection conn) {
 		Message msg;
 		switch (request.getMessageTypeQuery()) {
 		case BATTERY:
@@ -133,7 +145,8 @@ public class Controller {
 		case INITIAL_MESSAGES:
 			if (messages != null) {
 				msg = new SystemStatusMessage(initMessages);
-				System.out.println("[CONTROLLER] I sent the initial messages: " + initMessages);
+				System.out.println("[CONTROLLER] I sent the initial messages: "
+						+ initMessages);
 				conn.sendData(msg);
 			}
 			break;

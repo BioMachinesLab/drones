@@ -10,7 +10,6 @@ import dataObjects.MotorSpeeds;
 
 public class ESCManagerOutputThreadedImprov extends Thread implements
 		ControllerOutput {
-	private static final long VELOCITY_UPDATE_DELAY = 25;
 
 	private final static int LEFT_ESC = 0;
 	private final static int RIGHT_ESC = 1;
@@ -37,11 +36,11 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 		try {
 			writeValueToESC(0, 1);
 			writeValueToESC(1, 1);
-			Thread.sleep(1000);
+			Thread.sleep(500);
 
 			writeValueToESC(0, ARM_VALUE);
 			writeValueToESC(1, ARM_VALUE);
-			Thread.sleep(1000);
+			Thread.sleep(500);
 		} catch (InterruptedException e) {
 			System.err.println(e.getMessage());
 			throw new UnavailableDeviceException();
@@ -79,7 +78,7 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 	}
 
 	private void writeValueToESC(int index, int value) {
-		long time = System.currentTimeMillis();
+		// long time = System.currentTimeMillis();
 		try {
 			Process p;
 			switch (index) {
@@ -90,7 +89,6 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 								"-c",
 								"echo " + LEFT_ESC + "=" + value
 										+ " > /dev/servoblaster" });
-				p.waitFor();
 				break;
 			case 1:
 				p = Runtime.getRuntime().exec(
@@ -99,37 +97,46 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 								"-c",
 								"echo " + RIGHT_ESC + "=" + value
 										+ " > /dev/servoblaster" });
-				p.waitFor();
+				break;
+
+			// Case used on shutdown, to avoid spend processing time (and have
+			// faith that it will run until the end!!!!)
+			case 3:
+				p = Runtime.getRuntime().exec(
+						new String[] {
+								"bash",
+								"-c",
+								"echo " + RIGHT_ESC + "=" + value
+										+ " > /dev/servoblaster; echo "
+										+ LEFT_ESC + "=" + value
+										+ " > /dev/servoblaster" });
+				break;
+
+			case 4:
+				p = Runtime.getRuntime().exec(
+						new String[] {
+								"bash",
+								"-c",
+								"echo " + RIGHT_ESC + "=" + R_value
+										+ " > /dev/servoblaster; echo "
+										+ LEFT_ESC + "=" + L_value
+										+ " > /dev/servoblaster" });
 				break;
 			default:
 				throw new IllegalArgumentException();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (InterruptedException e) {
 		}
-		System.out.println("Time to update motor "
-				+ (System.currentTimeMillis() - time));
-	}
-
-	public void disableMotor(int index) {
-		if (index == 0) {
-			L_value = DISABLE_VALUE;
-		} else {
-			if (index == 1) {
-				R_value = DISABLE_VALUE;
-			}
-		}
+		// System.out.println("Time to update motor "
+		// + (System.currentTimeMillis() - time));
 	}
 
 	public void disableMotors() {
-		try {
-			L_value = DISABLE_VALUE;
-			R_value = DISABLE_VALUE;
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		L_value = DISABLE_VALUE;
+		R_value = DISABLE_VALUE;
+
+		writeValueToESC(4, L_value);
 	}
 
 	@Override
@@ -141,21 +148,16 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 	}
 
 	private void writeValuesToESC(MotorMessage m) {
-
 		if (m.getLeftMotor() == -1 || m.getRightMotor() == -1) {
 			disableMotors();
 		} else {
-
 			setValue(0, m.getLeftMotor());
 			setValue(1, m.getRightMotor());
 
-			writeValueToESC(0, L_value);
-
-			System.out.println("[MOTOR] Writing new Velocity L=" + L_value);
-
-			writeValueToESC(1, R_value);
-
-			System.out.println("[MOTOR] Writing new Velocity R=" + R_value);
+			writeValueToESC(4, 0);
+			// writeValueToESC(0, L_value);
+			// writeValueToESC(1, R_value);
+			// System.out.println("[MOTOR] L=" + L_value + " R=" + R_value);
 		}
 	}
 }

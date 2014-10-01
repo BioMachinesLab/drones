@@ -46,12 +46,12 @@ public class ConnectionHandler {
 		}
 	}
 
-	public synchronized void closeConnections() {
+	public void closeConnections() {
 		if (!connections.isEmpty()) {
 			System.out.println("[CONNECTION HANDLER] Closing Connections!");
 			for (Connection conn : connections) {
 				if (!conn.getSocket().isClosed())
-					conn.closeConnection();
+					conn.closeConnectionWhithoutDiscard();
 			}
 		}
 	}
