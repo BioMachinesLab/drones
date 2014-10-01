@@ -2,9 +2,13 @@ package io.input;
 
 import io.UnavailableDeviceException;
 
+import java.io.FileNotFoundException;
 import java.io.NotActiveException;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
@@ -23,6 +27,10 @@ import dataObjects.GPSData;
 public class GPSModuleInput extends Thread implements ControllerInput,
 		Serializable {
 	private static final long serialVersionUID = -5443358826645386873L;
+
+	private final static String FILE_NAME = "/home/pi/RaspberryController/logs/GPSLog_";
+	private boolean localLog = false;
+	private PrintWriter localLogPrintWriterOut;
 
 	private final static boolean DEBUG_MODE = false;
 
@@ -167,6 +175,10 @@ public class GPSModuleInput extends Thread implements ControllerInput,
 			String[] strs = data.split("\\$");
 
 			for (int i = 0; i < strs.length; i++) {
+				if (localLog) {
+					localLogPrintWriterOut.println(strs[i]);
+				}
+
 				if (strs[i].matches(NMEA_REGEX)) {
 					parseNMEAData("$" + strs[i]);
 				} else {
@@ -503,5 +515,20 @@ public class GPSModuleInput extends Thread implements ControllerInput,
 		}
 
 		return false;
+	}
+
+	public void enableLocalLog() {
+		try {
+			Calendar cal = Calendar.getInstance();
+			cal.getTime();
+			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+
+			localLogPrintWriterOut = new PrintWriter(FILE_NAME
+					+ sdf.format(cal.getTime()));
+			localLog = true;
+		} catch (FileNotFoundException e) {
+			System.err.println("[GPSModuleInput] Unable to start local log");
+			e.printStackTrace();
+		}
 	}
 }

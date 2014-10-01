@@ -82,7 +82,7 @@ public class Connection extends Thread {
 			System.out.println("Client "
 					+ socket.getInetAddress().getHostAddress() + " ("
 					+ clientName + ") disconnected");
-			
+
 			// Disable motors when client disconnects
 			controller.processMotorMessage(new MotorMessage(0, 0));
 		} catch (ClassNotFoundException e) {
@@ -135,7 +135,7 @@ public class Connection extends Thread {
 		} catch (IOException e) {
 			System.out
 					.println("[CONNECTION] Unable to send data... there is an open connection?");
-			e.printStackTrace();
+			// e.printStackTrace();
 		}
 	}
 

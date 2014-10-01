@@ -74,7 +74,7 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 		default:
 			throw new IllegalArgumentException();
 		}
-		System.out.println("[ESCMANAGER] L=" + L_value + " R=" + R_value);
+		// System.out.println("[ESCMANAGER] L=" + L_value + " R=" + R_value);
 	}
 
 	private void writeValueToESC(int index, int value) {

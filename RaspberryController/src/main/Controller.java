@@ -70,6 +70,7 @@ public class Controller {
 
 		try {
 			gpsModule = new GPSModuleInput();
+			gpsModule.enableLocalLog();
 			System.out.println("# GPS Module initialized with success!");
 		} catch (UnavailableDeviceException e) {
 			System.out.println("Unable to start GPS module!");
@@ -79,6 +80,7 @@ public class Controller {
 		try {
 			debugLeds = new DebugLedsOutput();
 			debugLeds.blinkLed(0);
+			System.out.println("# Debug Leds initialized with success!");
 		} catch (IllegalArgumentException e) {
 			System.out.println("Unable to start debug leds!");
 			initMessages += "Unable to start debug leds!\n";
