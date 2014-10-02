@@ -121,6 +121,16 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 										+ LEFT_ESC + "=" + L_value
 										+ " > /dev/servoblaster" });
 				break;
+			case 5:
+				Runtime.getRuntime().exec(
+						new String[] {
+								"bash",
+								"-c",
+								"echo " + LEFT_ESC + "=" + L_value
+										+ " > /dev/servoblaster; echo "
+										+ RIGHT_ESC + "=" + R_value
+										+ " > /dev/servoblaster" });
+				break;
 			default:
 				throw new IllegalArgumentException();
 			}
@@ -153,7 +163,7 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 			setValue(0, m.getLeftMotor());
 			setValue(1, m.getRightMotor());
 
-			writeValueToESC(4, 0);
+			writeValueToESC(5, 0);
 			// writeValueToESC(0, L_value);
 			// writeValueToESC(1, R_value);
 			// System.out.println("[MOTOR] L=" + L_value + " R=" + R_value);
