@@ -67,7 +67,7 @@ public class ConnectionToDrone extends Thread {
 			if (socket != null && !socket.isClosed()) {
 				out.writeObject(data);
 				out.flush();
-				System.out.println("[SEND] Sent Message "+data.getClass().getSimpleName());
+				System.out.println("[SEND] Sent "+data.getClass().getSimpleName());
 			}
 		} catch (IOException e) {
 			System.err
@@ -94,7 +94,7 @@ public class ConnectionToDrone extends Thread {
 			while (true) {
 				try {
 					Message message = (Message) in.readObject();
-					System.out.println("[RECEIVED] Received Message "+message.getClass().getSimpleName());
+					System.out.println("[RECEIVED] Received "+message.getClass().getSimpleName());
 					gui.processMessage(message);
 				} catch (ClassNotFoundException e) {
 					System.err

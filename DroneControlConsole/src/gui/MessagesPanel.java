@@ -70,14 +70,8 @@ public class MessagesPanel extends JPanel implements Runnable {
 				new InformationRequest(MessageType.SYSTEM_STATUS));
 	}
 	
-	private void requestInitialSystemStatus(){
-		gui.getConnector().sendData(
-				new InformationRequest(MessageType.INITIAL_MESSAGES));
-	}
-
 	@Override
 	public void run() {
-		requestInitialSystemStatus();
 		while (keepGoing) {
 			requestSystemStatus();
 
