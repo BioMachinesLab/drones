@@ -5,13 +5,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.SocketException;
-
 import main.Controller;
 import network.messages.InformationRequest;
 import network.messages.Message;
-import network.messages.MotorMessage;
-import network.messages.InformationRequest.MessageType;
 import network.messages.SystemStatusMessage;
 
 public class ConnectionHandler extends Thread {

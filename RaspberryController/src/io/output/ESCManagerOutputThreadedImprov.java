@@ -1,9 +1,6 @@
 package io.output;
 
-import io.UnavailableDeviceException;
-
 import java.io.IOException;
-
 import network.messages.MotorMessage;
 import utils.Math_Utils;
 import dataObjects.MotorSpeeds;

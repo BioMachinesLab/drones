@@ -1,7 +1,5 @@
 package io.input;
 
-import io.UnavailableDeviceException;
-
 import java.io.FileNotFoundException;
 import java.io.NotActiveException;
 import java.io.PrintWriter;
@@ -11,21 +9,16 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
-
 import network.messages.GPSMessage;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import network.messages.SystemStatusMessage;
-
 import org.joda.time.LocalDateTime;
-
 import utils.NMEA_Utils;
-
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialDataEvent;
 import com.pi4j.io.serial.SerialDataListener;
 import com.pi4j.io.serial.SerialFactory;
-import com.pi4j.io.serial.SerialPortException;
 
 import dataObjects.GPSData;
 

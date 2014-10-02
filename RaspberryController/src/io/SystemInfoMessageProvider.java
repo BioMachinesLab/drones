@@ -1,15 +1,11 @@
 package io;
 
-import java.io.IOException;
-import java.text.ParseException;
-
 import network.messages.InformationRequest;
 import network.messages.InformationRequest.MessageType;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import network.messages.SystemInformationsMessage;
 import network.messages.SystemStatusMessage;
-import dataObjects.SystemInformationsData;
 
 public class SystemInfoMessageProvider implements MessageProvider {
 	

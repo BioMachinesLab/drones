@@ -7,15 +7,11 @@ import io.input.GPSModuleInput;
 import io.output.ControllerOutput;
 import io.output.DebugLedsOutput;
 import io.output.ESCManagerOutputThreadedImprov;
-
 import java.io.IOException;
 import java.util.ArrayList;
-
 import network.ConnectionHandler;
 import network.ConnectionListener;
 import network.MotorConnectionListener;
-import network.messages.GPSMessage;
-import network.messages.InformationRequest;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import network.messages.MotorMessage;
