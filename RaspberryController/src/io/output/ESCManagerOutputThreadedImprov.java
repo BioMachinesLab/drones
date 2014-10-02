@@ -29,9 +29,10 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 	private int R_value = STOP_R_VALUE;
 
 	private MotorSpeeds speeds;
+	
+	private boolean available = false;
 
-	public ESCManagerOutputThreadedImprov(MotorSpeeds speeds)
-			throws UnavailableDeviceException {
+	public ESCManagerOutputThreadedImprov(MotorSpeeds speeds) {
 		this.speeds = speeds;
 		try {
 			writeValueToESC(0, 50);
@@ -41,9 +42,9 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 			writeValueToESC(0, ARM_VALUE);
 			writeValueToESC(1, ARM_VALUE);
 			Thread.sleep(500);
+			available = true;
 		} catch (InterruptedException e) {
 			System.err.println(e.getMessage());
-			throw new UnavailableDeviceException();
 		}
 	}
 
@@ -54,6 +55,10 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 
 	@Override
 	public void setValue(int index, double value) {
+		
+		if(!available)
+			return;
+		
 		switch (index) {
 		case 0:
 			if (value == 0) {
@@ -141,7 +146,7 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 		// + (System.currentTimeMillis() - time));
 	}
 
-	public void disableMotors() {
+	private void disableMotors() {
 		L_value = DISABLE_VALUE;
 		R_value = DISABLE_VALUE;
 
@@ -150,6 +155,10 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 
 	@Override
 	public void run() {
+		
+		if(!available)
+			return;
+		
 		while (true) {
 			MotorMessage m = speeds.getSpeeds();
 			writeValuesToESC(m);
@@ -168,5 +177,10 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 			// writeValueToESC(1, R_value);
 			// System.out.println("[MOTOR] L=" + L_value + " R=" + R_value);
 		}
+	}
+	
+	@Override
+	public boolean isAvailable() {
+		return available;
 	}
 }

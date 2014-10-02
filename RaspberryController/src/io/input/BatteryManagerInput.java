@@ -10,6 +10,7 @@ public class BatteryManagerInput implements ControllerInput {
 	private final static int ADDR = 0xD0;
 	private I2CBus bus;
 	private I2CDevice battSensor;
+	private boolean available = false;
 
 	public BatteryManagerInput() {
 		try {
@@ -26,8 +27,9 @@ public class BatteryManagerInput implements ControllerInput {
 			// battSensor.write(0x6B, (byte) 0b00000000);
 			// battSensor.write(0x6C, (byte) 0b00000000);
 			System.out.println("Configuring Device OK!");
+			
+			available = true;
 
-			System.out.println("Configuring sensors OK!");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -38,6 +40,11 @@ public class BatteryManagerInput implements ControllerInput {
 	public Object getReadings() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	@Override
+	public boolean isAvailable() {
+		return available;
 	}
 
 }

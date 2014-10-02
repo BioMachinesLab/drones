@@ -17,18 +17,27 @@ public class DebugLedsOutput extends Thread implements ControllerOutput {
 
 	private GpioController gpio;
 	private GpioPinDigitalOutput[] ledsOutputPins;
+	
+	private boolean available = false;
 
 	public DebugLedsOutput() {
-		if (LED_PINS.length != NUM_LEDS) {
-			throw new IllegalArgumentException(
-					"The number of defined LED's doesn't match with the selected PINS");
-		}
-
-		gpio = GpioFactory.getInstance();
-		ledsOutputPins = new GpioPinDigitalOutput[NUM_LEDS];
-
-		for (int i = 0; i < NUM_LEDS; i++) {
-			ledsOutputPins[i] = gpio.provisionDigitalOutputPin(LED_PINS[i]);
+		
+		try {
+		
+			if (LED_PINS.length == NUM_LEDS) {
+				gpio = GpioFactory.getInstance();
+				ledsOutputPins = new GpioPinDigitalOutput[NUM_LEDS];
+		
+				for (int i = 0; i < NUM_LEDS; i++) {
+					ledsOutputPins[i] = gpio.provisionDigitalOutputPin(LED_PINS[i]);
+				}
+				available = true;
+			}
+			
+			blinkLed(0);
+		
+		} catch(Exception | Error e) {
+			System.err.println("Error initializing DebugLEDs! ("+e.getMessage()+")");
 		}
 	}
 
@@ -84,5 +93,10 @@ public class DebugLedsOutput extends Thread implements ControllerOutput {
 				}
 			}
 		}
+	}
+	
+	@Override
+	public boolean isAvailable() {
+		return available;
 	}
 }

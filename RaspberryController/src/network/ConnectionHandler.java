@@ -1,62 +1,133 @@
 package network;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.net.SocketException;
 
 import main.Controller;
+import network.messages.InformationRequest;
+import network.messages.Message;
+import network.messages.MotorMessage;
+import network.messages.InformationRequest.MessageType;
+import network.messages.SystemStatusMessage;
 
-public class ConnectionHandler {
-	private static final int SOCKET_PORT = 10101;
-	private ArrayList<Connection> connections = new ArrayList<>();
-	private Controller controller;
+public class ConnectionHandler extends Thread {
+	protected Socket socket;
+	protected ObjectOutputStream out;
+	protected ObjectInputStream in;
+	protected Controller controller;
+	protected String clientName = null;
+	protected ConnectionListener connectionListener;
 
-	public ConnectionHandler(Controller controller) {
+	public ConnectionHandler(Socket socket, Controller controller, ConnectionListener connectionListener) {
+		this.socket = socket;
 		this.controller = controller;
+		this.connectionListener = connectionListener;
 	}
 
-	public void initConnector() throws IOException {
-		ServerSocket serverSocket = new ServerSocket(SOCKET_PORT);
-
+	@Override
+	public void run() {
 		try {
-			System.out
-					.println("[CONNECTION HANDLER] Connection Handler Initialized on "
-							+ InetAddress.getLocalHost().getHostAddress()
-							+ ":"
-							+ SOCKET_PORT);
-			System.out
-					.println("[CONNECTION HANDLER] Waiting for connection requests!");
+			
+			initConnection();
+
 			while (true) {
-				Socket socket = serverSocket.accept();
-				Connection conn = new Connection(socket, controller, this);
-				connections.add(conn);
-				conn.start();
+				try {
+					Message message = (Message) in.readObject();
+
+					processMessage(message);
+					
+				} catch (ClassNotFoundException e) {
+					System.out.println("[CONNECTION HANDLER] Received class of unknown type from "
+									+ clientName + ", so it was discarded....");
+				}
 			}
+
 		} catch (IOException e) {
+			System.out.println("Client "
+					+ socket.getInetAddress().getHostAddress() + " ("
+					+ clientName + ") disconnected");
+		} catch (ClassNotFoundException e) {
+			System.out.println("I didn't reveived a correct name from "
+					+ socket.getInetAddress().getHostAddress());
 			e.printStackTrace();
 		} finally {
-			try {
-				serverSocket.close();
-			} catch (IOException e) {
-				System.out
-						.println("[CONNECTION HANDLER] Unable to close server socket.... there was an open socket?");
+			//always shutdown the handler when something goes wrong
+			shutdownHandler();
+		}
+	}
+	
+	protected void shutdownHandler() {
+		closeConnection();
+	}
+	
+	protected void processMessage(Message message) {
+		if (message instanceof InformationRequest) {
+			System.out.println("[CONNECTION HANDLER] Information Request Message ("+message.getClass().getSimpleName()+")");
+			controller.processInformationRequest(message, this);
+		}
+	}
+	
+	protected void initConnection() throws IOException, ClassNotFoundException{
+		out = new ObjectOutputStream(socket.getOutputStream());
+		in = new ObjectInputStream(socket.getInputStream());
+
+		out.reset();
+
+		out.writeObject(InetAddress.getLocalHost().getHostName());
+		out.flush();
+
+		clientName = (String) in.readObject();
+
+		System.out.println("[CONNECTION HANDLER] Client "
+				+ socket.getInetAddress().getHostAddress() + " ("
+				+ clientName + ") connected");
+
+//		controller.processInformationRequest(new InformationRequest(MessageType.SYSTEM_STATUS), this);
+		sendData(new SystemStatusMessage(controller.getInitialMessages()));
+	}
+
+	public synchronized void closeConnection() {
+		try {
+			if (socket != null && !socket.isClosed()) {
+				socket.close();
+				connectionListener.removeConnection(this);
+				out.close();
+				in.close();
 			}
+		} catch (IOException e) {
+			System.out.println("[CONNECTION HANDLER] Unable to close connection to "
+					+ clientName + "... there is an open connection?");
 		}
 	}
 
-	public void closeConnections() {
-		if (!connections.isEmpty()) {
-			System.out.println("[CONNECTION HANDLER] Closing Connections!");
-			for (Connection conn : connections) {
-				if (!conn.getSocket().isClosed())
-					conn.closeConnectionWhithoutDiscard();
+	public synchronized void closeConnectionWhithoutDiscard() {
+		try {
+			if (socket != null && !socket.isClosed()) {
+				socket.close();
+				out.close();
+				in.close();
 			}
+		} catch (IOException e) {
+			System.out.println("[CONNECTION HANDLER] Unable to close connection to "
+					+ clientName + "... there is an open connection?");
 		}
 	}
 
-	public synchronized void removeConnection(Connection conn) {
-		connections.remove(conn);
+	public synchronized void sendData(Object data) {
+		try {
+			out.writeObject(data);
+			out.flush();
+			System.out.println("[CONNECTION HANDLER] Sent Data ("+data.getClass().getSimpleName()+")");
+		} catch (IOException e) {
+			System.out.println("[CONNECTION HANDLER] Unable to send data... there is an open connection?");
+		}
+	}
+
+	public Socket getSocket() {
+		return socket;
 	}
 }
