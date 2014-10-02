@@ -1,11 +1,8 @@
 package network;
 
 import gui.GUI;
-
 import java.io.IOException;
 import java.net.InetAddress;
-
-import network.messages.Message;
 
 public class MotorConnection extends DroneConnection {
 	

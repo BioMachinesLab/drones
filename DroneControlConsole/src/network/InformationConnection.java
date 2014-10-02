@@ -3,10 +3,7 @@ package network;
 import gui.GUI;
 import java.io.IOException;
 import java.net.InetAddress;
-
 import javax.swing.JOptionPane;
-
-import network.messages.Message;
 
 public class InformationConnection extends DroneConnection {
 	

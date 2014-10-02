@@ -1,16 +1,12 @@
 package network;
 
 import gui.GUI;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-
-import javax.swing.JOptionPane;
-
 import network.messages.Message;
 
 public abstract class DroneConnection extends Thread {

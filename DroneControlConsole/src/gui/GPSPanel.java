@@ -39,7 +39,6 @@ public class GPSPanel extends JPanel implements Runnable {
 	private JComboBox<String> comboBox;
 
 	private GUI gui;
-	private int debugCounter = 0;
 
 	private int sleepTime = 1000 * 10;
 
@@ -293,8 +292,6 @@ public class GPSPanel extends JPanel implements Runnable {
 		textFieldLatitude.setText(data.getLatitude());
 		textFieldLongitude.setText(data.getLongitude());
 
-		// textFieldAltitude.setText(Integer.toString(debugCounter));
-		// debugCounter++;
 		textFieldAltitude.setText(Double.toString(data.getAltitude()));
 
 		textFieldHasFix.setText(Boolean.toString(data.isFix()));
