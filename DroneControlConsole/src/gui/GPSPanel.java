@@ -18,7 +18,7 @@ import org.joda.time.LocalDateTime;
 
 import dataObjects.GPSData;
 
-public class GPS_Panel extends JPanel implements Runnable {
+public class GPSPanel extends JPanel implements Runnable {
 	private static final long serialVersionUID = 6535539451990270799L;
 	private JTextField textFieldLatitude;
 	private JTextField textFieldLongitude;
@@ -47,7 +47,7 @@ public class GPS_Panel extends JPanel implements Runnable {
 
 	private boolean keepGoing = true;
 
-	public GPS_Panel(GUI gui) {
+	public GPSPanel(GUI gui) {
 		this.gui = gui;
 		setBorder(BorderFactory.createTitledBorder("GPS Data"));
 		setLayout(null);

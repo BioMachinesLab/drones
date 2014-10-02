@@ -18,7 +18,7 @@ import network.messages.InformationRequest;
 import network.messages.InformationRequest.MessageType;
 import dataObjects.SystemInformationsData;
 
-public class SystemInfo_Panel extends JPanel {
+public class SystemInfoPanel extends JPanel {
 	private static final long serialVersionUID = 8457762280133417243L;
 	private GUI gui;
 
@@ -80,7 +80,7 @@ public class SystemInfo_Panel extends JPanel {
 	private JTextField textFieldHDMIFreq;
 	private JTextField textFieldDPIFreq;
 
-	public SystemInfo_Panel(GUI gui) {
+	public SystemInfoPanel(GUI gui) {
 		this.gui = gui;
 		setBorder(BorderFactory.createTitledBorder("System Informations"));
 		setLayout(null);

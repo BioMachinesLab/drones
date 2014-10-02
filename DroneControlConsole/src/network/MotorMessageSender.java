@@ -5,10 +5,10 @@ import network.messages.MotorMessage;
 
 public class MotorMessageSender extends  Thread {
 	
-	private ConnectionToDrone connection;
+	private MotorConnection connection;
 	private MotorSpeeds speeds;
 	
-	public MotorMessageSender(ConnectionToDrone connection, MotorSpeeds speeds) {
+	public MotorMessageSender(MotorConnection connection, MotorSpeeds speeds) {
 		this.connection = connection;
 		this.speeds = speeds;
 	}

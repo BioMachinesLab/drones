@@ -115,6 +115,24 @@ public class SystemInformationsData implements Serializable {
 		hdmiClockFrequency = SystemInfo.getClockFrequencyHDMI();
 		dpiClockFrequency = SystemInfo.getClockFrequencyDPI();
 	}
+	
+	public void update() {
+		
+		try {
+			// Memory Informations
+			totalMemory = SystemInfo.getMemoryTotal();
+			usedMemory = SystemInfo.getMemoryUsed();
+			freeMemory = SystemInfo.getMemoryFree();
+			sharedMemory = SystemInfo.getMemoryShared();
+			memoryBuffers = SystemInfo.getMemoryBuffers();
+			sdram_c_voltage = SystemInfo.getMemoryVoltageSDRam_C();
+			sdram_i_voltage = SystemInfo.getMemoryVoltageSDRam_I();
+			sdram_p_voltage = SystemInfo.getMemoryVoltageSDRam_P();
+		
+		} catch (Exception e) {
+			System.err.println("Problem updating SystemInformationData");
+		}
+	}
 
 	public String getSerialNumber() {
 		return serialNumber;

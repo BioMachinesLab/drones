@@ -19,6 +19,8 @@ public class GamePad extends Thread {
 
 	private int lastRightMotorSpeed = 0;
 	private int lastLeftMotorSpeed = 0;
+	
+	private boolean available = false;
 
 	public static void main(String[] args) throws IOException {
 		GamePad gamePad = new GamePad(null, GamePadType.GAMEPAD);
@@ -26,18 +28,27 @@ public class GamePad extends Thread {
 		gamePad.run();
 	}
 
-	public GamePad(GUI gui, GamePadType type) throws IOException {
-		this.gui = gui;
-
-		if (type == GamePadType.LOGITECH) {
-			jinputGamepad = new GamePadJInputLogitech();
-		} else {
-			jinputGamepad = new GamePadJInputGamepad();
+	public GamePad(GUI gui, GamePadType type) {
+		
+		try {
+		
+			this.gui = gui;
+	
+			if (type == GamePadType.LOGITECH) {
+				jinputGamepad = new GamePadJInputLogitech();
+			} else {
+				jinputGamepad = new GamePadJInputGamepad();
+			}
+	
+			jinputGamepad.getControllerComponents();
+			jinputGamepad.pollComponentsValues();
+			// jinputGamepad.calibrateJoystick();
+			
+			available = true;
+		
+		} catch(Exception e) {
+			System.err.println("Gamepad not available");
 		}
-
-		jinputGamepad.getControllerComponents();
-		jinputGamepad.pollComponentsValues();
-		// jinputGamepad.calibrateJoystick();
 	}
 
 	@Override
@@ -136,5 +147,9 @@ public class GamePad extends Thread {
 
 	public synchronized void disable() {
 		enable = false;
+	}
+	
+	public boolean isAvailable() {
+		return available;
 	}
 }

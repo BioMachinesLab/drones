@@ -18,7 +18,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-public class Motors_Panel extends JPanel {
+public class MotorsPanel extends JPanel {
 	private static final long serialVersionUID = 7086609300323189722L;
 	// private static final int KEY_CONTROL_INCREMENT = 5;
 	private GUI gui;
@@ -38,7 +38,7 @@ public class Motors_Panel extends JPanel {
 	private int rightMotorPower = 0;
 	private JCheckBox chckbxEnableGamepad;
 
-	public Motors_Panel(GUI gui) {
+	public MotorsPanel(GUI gui) {
 		this.gui = gui;
 		setBorder(BorderFactory.createTitledBorder("Motors Control"));
 		setLayout(null);
@@ -62,18 +62,20 @@ public class Motors_Panel extends JPanel {
 			}
 		});
 		add(chckbxLockControl);
-
-		chckbxEnableGamepad = new JCheckBox("Enable Gamepad");
-		chckbxEnableGamepad.setBounds(20, 270, 122, 23);
-		chckbxEnableGamepad.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				boolean enable = chckbxEnableGamepad.isSelected();
-				setGamePadStatus(enable);
-			}
-		});
-		add(chckbxEnableGamepad);
+		
+		if(gui.getGamePad() != null && gui.getGamePad().isAvailable()) {
+			chckbxEnableGamepad = new JCheckBox("Enable Gamepad");
+			chckbxEnableGamepad.setBounds(20, 270, 122, 23);
+			chckbxEnableGamepad.addActionListener(new ActionListener() {
+	
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					boolean enable = chckbxEnableGamepad.isSelected();
+					setGamePadStatus(enable);
+				}
+			});
+			add(chckbxEnableGamepad);
+		}
 	}
 
 	private void buildLeftPanel() {
