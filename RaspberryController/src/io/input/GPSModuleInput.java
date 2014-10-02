@@ -24,7 +24,7 @@ import com.pi4j.io.serial.SerialPortException;
 
 import dataObjects.GPSData;
 
-public class GPSModuleInput extends Thread implements ControllerInput,
+public class GPSModuleInput implements ControllerInput,
 		Serializable {
 	private static final long serialVersionUID = -5443358826645386873L;
 

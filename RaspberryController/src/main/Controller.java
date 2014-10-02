@@ -48,6 +48,7 @@ public class Controller {
 				if (gpsModule != null) {
 					gpsModule.closeSerial();
 				}
+				
 				if (debugLeds != null) {
 					debugLeds.shutdownGpio();
 				}
@@ -64,7 +65,7 @@ public class Controller {
 			System.out.println("# ESC modules initialized with success!");
 		} catch (UnavailableDeviceException e) {
 			System.out.println("Unable to start ESC modules!");
-			initMessages += "Unable to start ESC module!\n";
+			initMessages += "[INIT] Unable to start ESC module!\n";
 			e.printStackTrace();
 		}
 
@@ -74,7 +75,7 @@ public class Controller {
 			System.out.println("# GPS Module initialized with success!");
 		} catch (UnavailableDeviceException e) {
 			System.out.println("Unable to start GPS module!");
-			initMessages += "Unable to start GPS module!\n";
+			initMessages += "[INIT] Unable to start GPS module!\n";
 		}
 
 		try {
@@ -93,7 +94,7 @@ public class Controller {
 					.println("# Network Connection initialized with success!");
 		} catch (IOException e) {
 			System.out.println("Unable to start Netwok Connector!");
-			initMessages += "Unable to start Network Connector!\n";
+			initMessages += "[INIT] Unable to start Network Connector!\n";
 		}
 
 		// batteryManager = new BatteryManagerInput();
@@ -143,14 +144,6 @@ public class Controller {
 				conn.sendData(msg);
 			}
 			break;
-		case INITIAL_MESSAGES:
-			if (messages != null) {
-				msg = new SystemStatusMessage(initMessages);
-				System.out.println("[CONTROLLER] I sent the initial messages: "
-						+ initMessages);
-				conn.sendData(msg);
-			}
-			break;
 		default:
 			msg = null;
 			break;
@@ -162,5 +155,9 @@ public class Controller {
 			messages = message + "\n";
 		else
 			messages += message + "\n";
+	}
+
+	public String getInitialMessages() {
+		return initMessages;
 	}
 }

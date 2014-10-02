@@ -48,7 +48,7 @@ public class Connection extends Thread {
 
 			controller.sendMessageToOperator("Welcome to drone "
 					+ InetAddress.getLocalHost().getHostName()
-					+ "! Take good care of me :)");
+					+ "! Take good care of me :)\n"+controller.getInitialMessages());
 			controller.processInformationRequest(new InformationRequest(
 					MessageType.SYSTEM_STATUS), this);
 
