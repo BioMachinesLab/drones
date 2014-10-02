@@ -79,7 +79,6 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 		default:
 			throw new IllegalArgumentException();
 		}
-		// System.out.println("[ESCMANAGER] L=" + L_value + " R=" + R_value);
 	}
 
 	private void writeValueToESC(int index, int value) {
@@ -132,13 +131,14 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 								"bash",
 								"-c",
 								"echo " + LEFT_ESC + "=" + L_value
-										+ " > /dev/servoblaster; echo "
+										+ " > /dev/servoblaster& echo "
 										+ RIGHT_ESC + "=" + R_value
-										+ " > /dev/servoblaster" });
+										+ " > /dev/servoblaster&" });
 				break;
 			default:
 				throw new IllegalArgumentException();
 			}
+			System.out.println("[ESCManager] Wrote to motor L: "+L_value+" R:"+R_value);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -150,7 +150,7 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 		L_value = DISABLE_VALUE;
 		R_value = DISABLE_VALUE;
 
-		writeValueToESC(4, L_value);
+		writeValueToESC(5, 0);
 	}
 
 	@Override
@@ -173,9 +173,6 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 			setValue(1, m.getRightMotor());
 
 			writeValueToESC(5, 0);
-			// writeValueToESC(0, L_value);
-			// writeValueToESC(1, R_value);
-			// System.out.println("[MOTOR] L=" + L_value + " R=" + R_value);
 		}
 	}
 	

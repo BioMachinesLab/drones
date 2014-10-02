@@ -21,7 +21,6 @@ public class MotorConnectionHandler extends ConnectionHandler {
 	@Override
 	protected void processMessage(Message message) {
 		if (message instanceof MotorMessage) {
-			System.out.println("[MOTOR CONNECTION HANDLER] Motor Update Message");
 			controller.processMotorMessage(((MotorMessage) message));
 		}
 	}
