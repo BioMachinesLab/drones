@@ -119,9 +119,7 @@ public class GUI {
 					display();
 
 					gamePad = new GamePad(this, GamePadType.GAMEPAD);
-					
-					if(gamePad.isAvailable())
-						gamePad.start();
+					gamePad.start();
 				}
 			} catch (Exception | Error e) {
 				e.printStackTrace();

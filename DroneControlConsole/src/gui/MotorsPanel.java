@@ -63,19 +63,17 @@ public class MotorsPanel extends JPanel {
 		});
 		add(chckbxLockControl);
 		
-		if(gui.getGamePad() != null && gui.getGamePad().isAvailable()) {
-			chckbxEnableGamepad = new JCheckBox("Enable Gamepad");
-			chckbxEnableGamepad.setBounds(20, 270, 122, 23);
-			chckbxEnableGamepad.addActionListener(new ActionListener() {
-	
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					boolean enable = chckbxEnableGamepad.isSelected();
-					setGamePadStatus(enable);
-				}
-			});
-			add(chckbxEnableGamepad);
-		}
+		chckbxEnableGamepad = new JCheckBox("Enable Gamepad");
+		chckbxEnableGamepad.setBounds(20, 270, 122, 23);
+		chckbxEnableGamepad.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				boolean enable = chckbxEnableGamepad.isSelected();
+				setGamePadStatus(enable);
+			}
+		});
+		add(chckbxEnableGamepad);
 	}
 
 	private void buildLeftPanel() {
