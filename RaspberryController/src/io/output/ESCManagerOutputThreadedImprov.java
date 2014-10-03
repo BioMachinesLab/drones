@@ -1,6 +1,7 @@
 package io.output;
 
 import java.io.IOException;
+
 import network.messages.MotorMessage;
 import utils.Math_Utils;
 import dataObjects.MotorSpeeds;
@@ -32,12 +33,11 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 	public ESCManagerOutputThreadedImprov(MotorSpeeds speeds) {
 		this.speeds = speeds;
 		try {
-			writeValueToESC(0, 50);
-			writeValueToESC(1, 50);
+			
+			setRawValues(50,50);
 			Thread.sleep(500);
 
-			writeValueToESC(0, ARM_VALUE);
-			writeValueToESC(1, ARM_VALUE);
+			setRawValues(ARM_VALUE,ARM_VALUE);
 			Thread.sleep(500);
 			available = true;
 		} catch (InterruptedException e) {
@@ -78,62 +78,20 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 		}
 	}
 
-	private void writeValueToESC(int index, int value) {
+	private void writeValueToESC() {
 		// long time = System.currentTimeMillis();
 		try {
-			switch (index) {
-			case 0:
-				Runtime.getRuntime().exec(
-						new String[] {
-								"bash",
-								"-c",
-								"echo " + LEFT_ESC + "=" + value
-										+ " > /dev/servoblaster" });
-				break;
-			case 1:
-				Runtime.getRuntime().exec(
-						new String[] {
-								"bash",
-								"-c",
-								"echo " + RIGHT_ESC + "=" + value
-										+ " > /dev/servoblaster" });
-				break;
-
-			// Case used on shutdown, to avoid spend processing time (and have
-			// faith that it will run until the end!!!!)
-			case 3:
-				Runtime.getRuntime().exec(
-						new String[] {
-								"bash",
-								"-c",
-								"echo " + RIGHT_ESC + "=" + value
-										+ " > /dev/servoblaster; echo "
-										+ LEFT_ESC + "=" + value
-										+ " > /dev/servoblaster" });
-				break;
-
-			case 4:
-				Runtime.getRuntime().exec(
-						new String[] {
-								"bash",
-								"-c",
-								"echo " + RIGHT_ESC + "=" + R_value
-										+ " > /dev/servoblaster; echo "
-										+ LEFT_ESC + "=" + L_value
-										+ " > /dev/servoblaster" });
-				break;
-			case 5:
+			try {
 				Runtime.getRuntime().exec(
 						new String[] {
 								"bash",
 								"-c",
 								"echo " + LEFT_ESC + "=" + L_value
-										+ " > /dev/servoblaster& echo "
+										+ " > /dev/servoblaster; echo "
 										+ RIGHT_ESC + "=" + R_value
-										+ " > /dev/servoblaster&" });
-				break;
-			default:
-				throw new IllegalArgumentException();
+										+ " > /dev/servoblaster;" }).waitFor();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 			System.out.println("[ESCManager] Wrote to motor L: "+L_value+" R:"+R_value);
 		} catch (IOException e) {
@@ -144,10 +102,8 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 	}
 
 	private void disableMotors() {
-		L_value = DISABLE_VALUE;
-		R_value = DISABLE_VALUE;
-
-		writeValueToESC(5, 0);
+		setRawValues(DISABLE_VALUE, DISABLE_VALUE);
+		writeValueToESC();
 	}
 
 	@Override
@@ -168,9 +124,13 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 		} else {
 			setValue(0, m.getLeftMotor());
 			setValue(1, m.getRightMotor());
-
-			writeValueToESC(5, 0);
+			writeValueToESC();
 		}
+	}
+	
+	private void setRawValues(int left, int right) {
+		L_value = left;
+		R_value = right;
 	}
 	
 	@Override
