@@ -11,7 +11,7 @@ public class GamePad extends Thread {
 
 	private final static int HISTORY_SIZE = 10;
 	private final static int UPDATE_DELAY = 7;
-	private final static int MAXIMUM_SPEED = 99; 
+	private final static int MAXIMUM_SPEED = 25; 
 
 	private GUI gui;
 	private GamePadInput jinputGamepad;
