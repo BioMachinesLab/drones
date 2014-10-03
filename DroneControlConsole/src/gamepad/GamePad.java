@@ -40,7 +40,7 @@ public class GamePad extends Thread {
 	
 			jinputGamepad.getControllerComponents();
 			jinputGamepad.pollComponentsValues();
-			// jinputGamepad.calibrateJoystick();
+//			 jinputGamepad.calibrateJoystick();
 			
 		} catch(Exception e) {
 			System.err.println("Gamepad not available");
@@ -92,10 +92,19 @@ public class GamePad extends Thread {
 				// 0.046)+1);
 				// int rightMotorSpeed = (int) (rzValue + Math.exp(xValue *
 				// 0.046)-1);
+				
+				double left = rzValue;
+				double right = rzValue;
+				
+				if(xValue > 0) {
+					left*=Math.abs((100.0-xValue)/100.0);
+				} else if(xValue < 0) {
+					right*=Math.abs((100+xValue)/100.0);
+				}
 
-				int leftMotorSpeed = (int) (rzValue - ((xValue / 100) * rzValue));
-				int rightMotorSpeed = (int) (rzValue + ((xValue / 100) * rzValue));
-
+				int leftMotorSpeed = (int)left;
+				int rightMotorSpeed = (int)right;
+				
 				leftMotorSpeed = (int) map(leftMotorSpeed, -100, 100,
 						-MAXIMUM_SPEED, MAXIMUM_SPEED);
 				if (leftMotorSpeed > MAXIMUM_SPEED) {

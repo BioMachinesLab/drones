@@ -44,7 +44,9 @@ public abstract class GamePadInput {
 				.getDefaultEnvironment().getControllers();
 
 		for (int i = 0; i < controllersList.length; i++) {
-			if (controllersList[i].getName().contains(gamePadName)) {
+			
+			//don't ask
+			if (controllersList[i].getName().contains(gamePadName) || controllersList[i].getName().contains("倀䅌卙䅔䥔乏刨㌩䌠湯牴汯敬齲")) {
 				controller = controllersList[i];
 				Component[] components = controllersList[i].getComponents();
 

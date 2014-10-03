@@ -25,5 +25,12 @@
 	<classpathentry kind="lib" path="/Pi4J_IT_Version/lib/pi4j-service-javadoc.jar"/>
 	<classpathentry kind="lib" path="/Pi4J_IT_Version/lib/pi4j-service-sources.jar"/>
 	<classpathentry kind="lib" path="/Pi4J_IT_Version/lib/pi4j-service.jar"/>
+	<classpathentry kind="lib" path="lib/jinput-platform-2.0.5-natives-osx.jar"/>
+	<classpathentry kind="lib" path="lib"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/inputLib">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="JoystickInputTest/dist"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
