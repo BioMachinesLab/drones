@@ -18,7 +18,8 @@ public class ConnectionHandler extends Thread {
 	protected String clientName = null;
 	protected ConnectionListener connectionListener;
 
-	public ConnectionHandler(Socket socket, Controller controller, ConnectionListener connectionListener) {
+	public ConnectionHandler(Socket socket, Controller controller,
+			ConnectionListener connectionListener) {
 		this.socket = socket;
 		this.controller = controller;
 		this.connectionListener = connectionListener;
@@ -27,7 +28,7 @@ public class ConnectionHandler extends Thread {
 	@Override
 	public void run() {
 		try {
-			
+
 			initConnection();
 
 			while (true) {
@@ -35,9 +36,10 @@ public class ConnectionHandler extends Thread {
 					Message message = (Message) in.readObject();
 
 					processMessage(message);
-					
+
 				} catch (ClassNotFoundException e) {
-					System.out.println("[CONNECTION HANDLER] Received class of unknown type from "
+					System.out
+							.println("[CONNECTION HANDLER] Received class of unknown type from "
 									+ clientName + ", so it was discarded....");
 				}
 			}
@@ -51,23 +53,25 @@ public class ConnectionHandler extends Thread {
 					+ socket.getInetAddress().getHostAddress());
 			e.printStackTrace();
 		} finally {
-			//always shutdown the handler when something goes wrong
+			// always shutdown the handler when something goes wrong
 			shutdownHandler();
 		}
 	}
-	
+
 	protected void shutdownHandler() {
 		closeConnection();
 	}
-	
+
 	protected void processMessage(Message message) {
 		if (message instanceof InformationRequest) {
-			System.out.println("[CONNECTION HANDLER] Information Request Message ("+message.getClass().getSimpleName()+")");
+			System.out
+					.println("[CONNECTION HANDLER] Information Request Message ("
+							+ message.getClass().getSimpleName() + ")");
 			controller.processInformationRequest(message, this);
 		}
 	}
-	
-	protected void initConnection() throws IOException, ClassNotFoundException{
+
+	protected void initConnection() throws IOException, ClassNotFoundException {
 		out = new ObjectOutputStream(socket.getOutputStream());
 		in = new ObjectInputStream(socket.getInputStream());
 
@@ -79,10 +83,11 @@ public class ConnectionHandler extends Thread {
 		clientName = (String) in.readObject();
 
 		System.out.println("[CONNECTION HANDLER] Client "
-				+ socket.getInetAddress().getHostAddress() + " ("
-				+ clientName + ") connected");
+				+ socket.getInetAddress().getHostAddress() + " (" + clientName
+				+ ") connected");
 
-//		controller.processInformationRequest(new InformationRequest(MessageType.SYSTEM_STATUS), this);
+		// controller.processInformationRequest(new
+		// InformationRequest(MessageType.SYSTEM_STATUS), this);
 		sendData(new SystemStatusMessage(controller.getInitialMessages()));
 	}
 
@@ -95,8 +100,9 @@ public class ConnectionHandler extends Thread {
 				in.close();
 			}
 		} catch (IOException e) {
-			System.out.println("[CONNECTION HANDLER] Unable to close connection to "
-					+ clientName + "... there is an open connection?");
+			System.out
+					.println("[CONNECTION HANDLER] Unable to close connection to "
+							+ clientName + "... there is an open connection?");
 		}
 	}
 
@@ -108,8 +114,9 @@ public class ConnectionHandler extends Thread {
 				in.close();
 			}
 		} catch (IOException e) {
-			System.out.println("[CONNECTION HANDLER] Unable to close connection to "
-					+ clientName + "... there is an open connection?");
+			System.out
+					.println("[CONNECTION HANDLER] Unable to close connection to "
+							+ clientName + "... there is an open connection?");
 		}
 	}
 
@@ -117,9 +124,11 @@ public class ConnectionHandler extends Thread {
 		try {
 			out.writeObject(data);
 			out.flush();
-			System.out.println("[CONNECTION HANDLER] Sent Data ("+data.getClass().getSimpleName()+")");
+			System.out.println("[CONNECTION HANDLER] Sent Data ("
+					+ data.getClass().getSimpleName() + ")");
 		} catch (IOException e) {
-			System.out.println("[CONNECTION HANDLER] Unable to send data... there is an open connection?");
+			System.out
+					.println("[CONNECTION HANDLER] Unable to send data... there is an open connection?");
 		}
 	}
 

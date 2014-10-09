@@ -6,13 +6,13 @@ import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
 
-public class BatteryManagerInput implements ControllerInput {
+public class I2CBatteryManagerInput implements ControllerInput {
 	private final static int ADDR = 0xD0;
 	private I2CBus bus;
 	private I2CDevice battSensor;
 	private boolean available = false;
 
-	public BatteryManagerInput() {
+	public I2CBatteryManagerInput() {
 		try {
 			System.out.println("Starting sensors reading:");
 

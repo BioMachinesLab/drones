@@ -22,7 +22,8 @@ import com.pi4j.io.serial.SerialFactory;
 
 import dataObjects.GPSData;
 
-public class GPSModuleInput implements ControllerInput, MessageProvider, Serializable {
+public class GPSModuleInput implements ControllerInput, MessageProvider,
+		Serializable {
 	private static final long serialVersionUID = -5443358826645386873L;
 
 	private final static String FILE_NAME = "/home/pi/RaspberryController/logs/GPSLog_";
@@ -46,40 +47,43 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 	private GPSData gpsData = new GPSData(); // Contains the obtained info
 	private List<String> ackResponses = Collections
 			.synchronizedList(new ArrayList<String>());
-	
+
 	private boolean available = false;
 
 	public GPSModuleInput() {
-		
-		try {
-		
-		serial = SerialFactory.createInstance();
 
-		serial.addListener(new SerialDataListener() {
-			@Override
-			public void dataReceived(SerialDataEvent event) {
-				receivedDataBuffer += event.getData();
-				if (event.getData().endsWith("\r\n")) {
-					String data = receivedDataBuffer;
-					receivedDataBuffer = "";
-					processReceivedData(data);
+		try {
+
+			serial = SerialFactory.createInstance();
+
+			serial.addListener(new SerialDataListener() {
+				@Override
+				public void dataReceived(SerialDataEvent event) {
+					receivedDataBuffer += event.getData();
+					if (event.getData().endsWith("\r\n")) {
+						String data = receivedDataBuffer;
+						receivedDataBuffer = "";
+						processReceivedData(data);
+					}
 				}
-			}
-		});
-		
-		print("Initializing GPS!", false);
-		
-		serial.open(COM_PORT, DEFAULT_BAUD_RATE);
-		
-		setupGPSReceiver();
-		
-		available = true;
-		
-		} catch (NotActiveException | IllegalArgumentException | InterruptedException e) {
-			System.err.println("Error initializing GPSModule! ("+e.getMessage()+")");
+			});
+
+			print("Initializing GPS!", false);
+
+			serial.open(COM_PORT, DEFAULT_BAUD_RATE);
+
+			setupGPSReceiver();
+
+			available = true;
+
+		} catch (NotActiveException | IllegalArgumentException
+				| InterruptedException e) {
+			System.err.println("Error initializing GPSModule! ("
+					+ e.getMessage() + ")");
 			serial.close();
-		} catch(Error | Exception e) {
-			System.err.println("Error initializing GPSModule! ("+e.getMessage()+")");
+		} catch (Error | Exception e) {
+			System.err.println("Error initializing GPSModule! ("
+					+ e.getMessage() + ")");
 		}
 	}
 
@@ -96,7 +100,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 	private void setupGPSReceiver() throws NotActiveException,
 			InterruptedException, IllegalArgumentException {
 		if (UPDATE_DELAY < 100 || UPDATE_DELAY > 10000) {
-			throw new IllegalArgumentException("Frequency must be in [100,10000] interval");
+			throw new IllegalArgumentException(
+					"Frequency must be in [100,10000] interval");
 		}
 
 		// Change Baud Rate
@@ -168,7 +173,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 	 *            : data to be processed
 	 */
 	private void processReceivedData(String data) {
-		
+
 		data = data.replace("\n", "").replace("\r", "");
 		if (data.contains("$GP") || data.contains("$PMTK")) {
 			String[] strs = data.split("\\$");
@@ -205,7 +210,22 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 				System.err.println(str);
 	}
 
-	// GPS Parse Functions
+	public Message getMessage(Message request) {
+		if (!available)
+			return new SystemStatusMessage(
+					"[GPSModule] Unable to send GPS data");
+
+		return new GPSMessage(getReadings());
+	}
+
+	@Override
+	public boolean isAvailable() {
+		return available;
+	}
+
+	/*
+	 * GPS Parse Functions
+	 */
 	/**
 	 * Parses the NMEA messages send by the GPS receiver, containing the
 	 * navigation information
@@ -403,7 +423,9 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 		}
 	}
 
-	// GPS Functions
+	/*
+	 * GPS Functions
+	 */
 	public String getReleaseVersion() throws InterruptedException {
 		serial.write("$PMTK605*31\r\n");
 
@@ -529,18 +551,5 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 			System.err.println("[GPSModuleInput] Unable to start local log");
 			e.printStackTrace();
 		}
-	}
-	
-	public Message getMessage(Message request) {
-		
-		if(!available)
-			return new SystemStatusMessage("Unable to send GPS data");
-		
-		return new GPSMessage(getReadings());
-	}
-	
-	@Override
-	public boolean isAvailable() {
-		return available;
 	}
 }

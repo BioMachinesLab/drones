@@ -1,18 +1,19 @@
 TO-DO Hardware:
-	- Change ESC's - make them more responsive
 	- Make the ESC's rotation reversable
 	- Improve WLAN0 initialization (IP address problem)
+	- Check https://code.google.com/p/i2c-gps-nav/ project. Possible alternative to UART population?
 	
 	
 TO-DO Controller:
-	- Improve message system to make like a dashboard of the systems
 	- Dont shutdown motors when there are multiple clients (connection class)
+	- Create a io manager (remove all the hardware initialization from the controller)
+	- Extract I2C manager to a separate class (already done on the I2CBusController, but not used, yet)
 
 
 TO-DO GUI:
 	- Refactor GUI and remove connection and devices initialization from it
 	- Change layout to make it resizable
-	- Set up the joystick maximum range (maximum speed)
+	- Set up the joystick maximum range (maximum speed) with a slider (or something like that)
 
 	
 - Compile just our code (without having to compile the entire code)
