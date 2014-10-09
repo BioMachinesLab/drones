@@ -8,7 +8,6 @@ public class ESCTester extends Thread {
 	private final static int ARM_VALUE = 80;
 
 	private final static int STOP_VALUE = 120;
-	private final static int MIN_VALUE = 121;
 	private final static int MAX_VALUE = 179;
 
 	private final static int DELAY_ACCEL = 10;
@@ -53,7 +52,7 @@ public class ESCTester extends Thread {
 
 		while (true) {
 			System.out.println("Inscreasing speed!");
-			for (int i = STOP_VALUE; i <= MAX_VALUE; i+=9) {
+			for (int i = STOP_VALUE; i <= MAX_VALUE; i += 9) {
 				writeValueToESC(0, i);
 				writeValueToESC(1, i);
 
@@ -65,7 +64,7 @@ public class ESCTester extends Thread {
 			}
 
 			System.out.println("Decreasing speed!");
-			for (int i = MAX_VALUE; i >= STOP_VALUE; i-=9) {
+			for (int i = MAX_VALUE; i >= STOP_VALUE; i -= 9) {
 				writeValueToESC(0, i);
 				writeValueToESC(1, i);
 
