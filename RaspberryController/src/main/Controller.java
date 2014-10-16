@@ -84,6 +84,16 @@ public class Controller {
 				if (escManager != null) {
 					speeds.setSpeeds(new MotorMessage(-1, -1));
 				}
+
+				if (i2cBus != null) {
+					try {
+						i2cBus.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+
 				if (gpsModule != null) {
 					gpsModule.closeSerial();
 				}

@@ -2,6 +2,7 @@ package io.input;
 
 import java.io.IOException;
 
+import utils.Math_Utils;
 import network.messages.CompassMessage;
 import network.messages.Message;
 import network.messages.MessageProvider;
@@ -36,6 +37,10 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	private int[] axisReadings = new int[3];
 	private boolean deviceActiveMode = true;
 
+	private int[] rangeXAxisValues={1000,5000};
+	private int[] rangeYAxisValues={1000,5000};
+	private int[] rangeZAxisValues={1000,5000};
+	
 	public I2CCompassModuleInput(I2CBus i2cBus) {
 		this.i2cBus = i2cBus;
 
@@ -201,6 +206,35 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	}
 
 	private synchronized void processRawAxisReadings(int[] readings) {
-
+		if(readings[0]<rangeXAxisValues[0]){
+			rangeXAxisValues[0]=readings[0];
+		}
+		
+		if(readings[0]>rangeXAxisValues[1]){
+			rangeXAxisValues[1]=readings[0];
+		}
+		
+		
+		if(readings[1]<rangeYAxisValues[0]){
+			rangeYAxisValues[0]=readings[1];
+		}
+		
+		if(readings[1]>rangeYAxisValues[1]){
+			rangeYAxisValues[1]=readings[1];
+		}
+		
+		
+		if(readings[2]<rangeZAxisValues[0]){
+			rangeZAxisValues[0]=readings[2];
+		}
+		
+		if(readings[2]>rangeZAxisValues[1]){
+			rangeZAxisValues[1]=readings[2];
+		}
+		
+		
+		axisReadings[0]=(int)(Math_Utils.map(readings[0], rangeXAxisValues[0], rangeXAxisValues[1], 0, 359));
+		axisReadings[1]=(int)(Math_Utils.map(readings[1], rangeYAxisValues[0], rangeYAxisValues[1], 0, 359));
+		axisReadings[2]=(int)(Math_Utils.map(readings[2], rangeZAxisValues[0], rangeZAxisValues[1], 0, 359));
 	}
 }
