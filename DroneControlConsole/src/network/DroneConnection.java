@@ -78,7 +78,10 @@ public abstract class DroneConnection extends Thread {
 			System.err.println("Drone Controller closed the connection");
 		} catch (ClassNotFoundException e) {
 			System.err.println("I didn't reveived a correct name from "+ socket.getInetAddress().getHostAddress());
-		} finally {
+		} catch (Exception e ) {
+			e.printStackTrace();
+		}finally {
+		
 			try {
 				if (socket != null)
 					socket.close();

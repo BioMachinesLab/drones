@@ -9,9 +9,9 @@ public class GamePad extends Thread {
 		LOGITECH, GAMEPAD
 	}
 
-	private final static int HISTORY_SIZE = 10;
+	private final static int HISTORY_SIZE = 20;
 	private final static int UPDATE_DELAY = 7;
-	private final static int MAXIMUM_SPEED = 99; 
+	private final static int MAXIMUM_SPEED = 40;
 
 	private GUI gui;
 	private GamePadInput jinputGamepad;
@@ -19,7 +19,7 @@ public class GamePad extends Thread {
 
 	private int lastRightMotorSpeed = 0;
 	private int lastLeftMotorSpeed = 0;
-	
+
 	public static void main(String[] args) throws IOException {
 		GamePad gamePad = new GamePad(null, GamePadType.GAMEPAD);
 		gamePad.disable();
@@ -27,22 +27,22 @@ public class GamePad extends Thread {
 	}
 
 	public GamePad(GUI gui, GamePadType type) {
-		
+
 		try {
-		
+
 			this.gui = gui;
-	
+
 			if (type == GamePadType.LOGITECH) {
 				jinputGamepad = new GamePadJInputLogitech();
 			} else {
 				jinputGamepad = new GamePadJInputGamepad();
 			}
-	
+
 			jinputGamepad.getControllerComponents();
 			jinputGamepad.pollComponentsValues();
-//			 jinputGamepad.calibrateJoystick();
-			
-		} catch(Exception e) {
+			// jinputGamepad.calibrateJoystick();
+
+		} catch (Exception e) {
 			System.err.println("Gamepad not available");
 		}
 	}
@@ -92,19 +92,19 @@ public class GamePad extends Thread {
 				// 0.046)+1);
 				// int rightMotorSpeed = (int) (rzValue + Math.exp(xValue *
 				// 0.046)-1);
-				
+
 				double left = rzValue;
 				double right = rzValue;
-				
-				if(xValue > 0) {
-					left*=Math.abs((100.0-xValue)/100.0);
-				} else if(xValue < 0) {
-					right*=Math.abs((100+xValue)/100.0);
+
+				if (xValue > 0) {
+					left *= Math.abs((100.0 - xValue) / 100.0);
+				} else if (xValue < 0) {
+					right *= Math.abs((100 + xValue) / 100.0);
 				}
 
-				int leftMotorSpeed = (int)left;
-				int rightMotorSpeed = (int)right;
-				
+				int leftMotorSpeed = (int) left;
+				int rightMotorSpeed = (int) right;
+
 				leftMotorSpeed = (int) map(leftMotorSpeed, -100, 100,
 						-MAXIMUM_SPEED, MAXIMUM_SPEED);
 				if (leftMotorSpeed > MAXIMUM_SPEED) {
@@ -122,9 +122,12 @@ public class GamePad extends Thread {
 				// System.out.println("Left=" + leftMotorSpeed + " Right="
 				// + rightMotorSpeed);
 
+
 				if (enable
 						&& (leftMotorSpeed != lastLeftMotorSpeed || rightMotorSpeed != lastRightMotorSpeed)) {
 
+					//leftMotorSpeed*=0.8;
+					
 					gui.setMotorsValue(leftMotorSpeed, rightMotorSpeed);
 
 					lastLeftMotorSpeed = leftMotorSpeed;
