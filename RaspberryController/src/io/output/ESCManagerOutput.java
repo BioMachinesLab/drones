@@ -6,14 +6,14 @@ import network.messages.MotorMessage;
 import utils.Math_Utils;
 import dataObjects.MotorSpeeds;
 
-public class ESCManagerOutputThreadedImprov extends Thread implements
+public class ESCManagerOutput extends Thread implements
 		ControllerOutput {
 
 	private final static int LEFT_ESC = 0;
 	private final static int RIGHT_ESC = 1;
 
 	private final static int DISABLE_VALUE = 0;
-	private final static int ARM_VALUE = 120;
+	private final static int ARM_VALUE = 80;
 
 	private final static int STOP_L_VALUE = 120;
 	private final static int MIN_L_VALUE = 121;
@@ -30,7 +30,7 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 	
 	private boolean available = false;
 
-	public ESCManagerOutputThreadedImprov(MotorSpeeds speeds) {
+	public ESCManagerOutput(MotorSpeeds speeds) {
 		this.speeds = speeds;
 		try {
 			

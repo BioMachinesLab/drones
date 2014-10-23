@@ -7,7 +7,7 @@ import io.input.GPSModuleInput;
 import io.input.I2CCompassModuleInput;
 import io.output.ControllerOutput;
 import io.output.DebugLedsOutput;
-import io.output.ESCManagerOutputThreadedImprov;
+import io.output.ReversableESCManagerOutput;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ import dataObjects.MotorSpeeds;
 
 public class Controller {
 	private GPSModuleInput gpsModule;
-	private ESCManagerOutputThreadedImprov escManager;
+	private ReversableESCManagerOutput escManager;
 	private I2CCompassModuleInput compassModule;
 	private ConnectionListener connectionListener;
 	private MotorConnectionListener motorConnectionListener;
@@ -206,7 +206,7 @@ public class Controller {
 	}
 
 	private void initOutputs() {
-		escManager = new ESCManagerOutputThreadedImprov(speeds);
+		escManager = new ReversableESCManagerOutput(speeds);
 		initMessages += "[INIT] ESCManager: "
 				+ (escManager.isAvailable() ? "ok" : "not ok!") + "\n";
 		if (escManager.isAvailable())
