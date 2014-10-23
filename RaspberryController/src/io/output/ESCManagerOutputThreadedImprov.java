@@ -13,7 +13,7 @@ public class ESCManagerOutputThreadedImprov extends Thread implements
 	private final static int RIGHT_ESC = 1;
 
 	private final static int DISABLE_VALUE = 0;
-	private final static int ARM_VALUE = 80;
+	private final static int ARM_VALUE = 120;
 
 	private final static int STOP_L_VALUE = 120;
 	private final static int MIN_L_VALUE = 121;

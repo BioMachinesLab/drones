@@ -192,7 +192,7 @@ public class Controller {
 
 			// batteryManager = new BatteryManagerInput();
 		} catch (IOException e) {
-			System.out.println("[INIT] Failed to init the I2CBus");
+			initMessages += "\n[INIT] I2CCompassModule: not ok!" + "\n";
 			e.printStackTrace();
 		}
 

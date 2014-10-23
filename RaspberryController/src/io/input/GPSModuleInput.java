@@ -9,12 +9,17 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+
 import network.messages.GPSMessage;
+import network.messages.InformationRequest;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import network.messages.SystemStatusMessage;
+
 import org.joda.time.LocalDateTime;
+
 import utils.NMEA_Utils;
+
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialDataEvent;
 import com.pi4j.io.serial.SerialDataListener;
@@ -211,11 +216,16 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 	}
 
 	public Message getMessage(Message request) {
-		if (!available)
-			return new SystemStatusMessage(
-					"[GPSModule] Unable to send GPS data");
-
-		return new GPSMessage(getReadings());
+		if(request instanceof InformationRequest && ((InformationRequest)request).getMessageTypeQuery().equals(InformationRequest.MessageType.GPS)){
+				
+			if (!available)
+				return new SystemStatusMessage(
+						"[GPSModule] Unable to send GPS data");
+	
+			return new GPSMessage(getReadings());
+		}
+		
+		return null;
 	}
 
 	@Override

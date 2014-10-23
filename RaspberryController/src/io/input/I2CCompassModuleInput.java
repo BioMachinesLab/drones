@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import utils.Math_Utils;
 import network.messages.CompassMessage;
+import network.messages.InformationRequest;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import network.messages.SystemStatusMessage;
@@ -50,7 +51,7 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 
 			// Get device instance
 			mag3110 = i2cBus.getDevice(ADDR);
-			System.out.println("Connection to magnetic sensor established!");
+			//System.out.println("Connection to magnetic sensor established!");
 
 			// Write bits in CTRL_REG2 (set reset and data types)
 			mag3110.write((byte) 0x11, (byte) (CTRL_REG2_AUTO_MRST_EN
@@ -80,12 +81,16 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 
 	@Override
 	public Message getMessage(Message request) {
-		if (!available) {
-			return new SystemStatusMessage(
-					"[CompassModule] Unable to send Compass data");
+		if(request instanceof InformationRequest && ((InformationRequest)request).getMessageTypeQuery().equals(InformationRequest.MessageType.COMPASS)){
+			if (!available) {
+				return new SystemStatusMessage(
+						"[CompassModule] Unable to send Compass data");
+			}
+	
+			return new CompassMessage((int[]) getReadings());
 		}
-
-		return new CompassMessage((int[]) getReadings());
+		
+		return null;
 	}
 
 	@Override
