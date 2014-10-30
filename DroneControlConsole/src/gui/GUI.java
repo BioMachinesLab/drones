@@ -122,29 +122,31 @@ public class GUI {
 					informationConnection = new InformationConnection(this,
 							form.getIpAddress(),
 							form.getInformationPortNumber());
-					informationConnection.start();
 
 					motorConnection = new MotorConnection(this,
 							form.getIpAddress(), form.getMotorPortNumber());
-					motorConnection.start();
+					
 
 					motorMessageSender = new MotorMessageSender(
 							motorConnection, motorSpeeds);
-					motorMessageSender.start();
-
-					buildGUI();
 
 					gpsThread = new Thread(gpsPanel);
-					gpsThread.start();
+					
 					messagesThread = new Thread(msgPanel);
 
-					messagesThread.start();
 					// compassThread = new Thread(compassPanel);
 					// compassThread.start();
-
+					
+					gamePad = new GamePad(this, GamePadType.GAMEPAD);
+					
+					buildGUI();
 					display();
 
-					gamePad = new GamePad(this, GamePadType.GAMEPAD);
+					informationConnection.start();
+					motorConnection.start();
+					motorMessageSender.start();
+					gpsThread.start();
+					messagesThread.start();
 					gamePad.start();
 				}
 			} catch (Exception | Error e) {
@@ -202,6 +204,8 @@ public class GUI {
 						.getSysInformations());
 			} else {
 				if (message instanceof SystemStatusMessage) {
+					if(msgPanel == null)
+						System.out.println("whaaa");
 					msgPanel.addMessage((SystemStatusMessage) message);
 				} else {
 					if (message instanceof CompassMessage) {
