@@ -185,7 +185,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 			for (int i = 0; i < strs.length; i++) {
 				if (localLog) {
-					localLogPrintWriterOut.println(strs[i]);
+					localLogPrintWriterOut.println("$"+strs[i]);
 				}
 
 				if (strs[i].matches(NMEA_REGEX)) {
@@ -548,6 +548,9 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		return false;
 	}
 
+	/*
+	 * Enables a logging of the received NMEA information in the disk (on the selected path)
+	 */
 	public void enableLocalLog() {
 		try {
 			Calendar cal = Calendar.getInstance();
@@ -555,7 +558,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 
 			localLogPrintWriterOut = new PrintWriter(FILE_NAME
-					+ sdf.format(cal.getTime()));
+					+ sdf.format(cal.getTime())+".log");
 			localLog = true;
 		} catch (FileNotFoundException e) {
 			System.err.println("[GPSModuleInput] Unable to start local log");
