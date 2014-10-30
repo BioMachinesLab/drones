@@ -50,6 +50,7 @@ public abstract class DroneConnection extends Thread {
 		
 		try {
 			if (socket != null && !socket.isClosed()) {
+				System.out.println(data);
 				out.writeObject(data);
 				out.flush();
 				System.out.println("[SEND] Sent "+data.getClass().getSimpleName());

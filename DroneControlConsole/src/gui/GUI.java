@@ -34,7 +34,7 @@ public class GUI {
 	private GPSPanel gpsPanel;
 	private SystemInfoPanel sysInfoPanel;
 	private MessagesPanel msgPanel;
-	private CompassPanel compassPanel;
+//	private CompassPanel compassPanel;
 
 	private GamePad gamePad;
 
@@ -95,13 +95,13 @@ public class GUI {
 		if (msgPanel != null)
 			msgPanel.stopExecuting();
 
-		if (compassPanel != null)
-			compassPanel.stopExecuting();
+//		if (compassPanel != null)
+//			compassPanel.stopExecuting();
 
 		frame = null;
 		msgPanel = null;
 		gpsPanel = null;
-		compassPanel = null;
+//		compassPanel = null;
 		sysInfoPanel = null;
 		informationConnection = null;
 		motorConnection = null;

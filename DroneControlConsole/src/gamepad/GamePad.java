@@ -5,6 +5,7 @@ import gui.GUI;
 import java.io.IOException;
 
 public class GamePad extends Thread {
+	
 	public static enum GamePadType {
 		LOGITECH, GAMEPAD
 	}
@@ -19,6 +20,8 @@ public class GamePad extends Thread {
 
 	private int lastRightMotorSpeed = 0;
 	private int lastLeftMotorSpeed = 0;
+	
+	private int offset = 0;
 
 	public static void main(String[] args) throws IOException {
 		GamePad gamePad = new GamePad(null, GamePadType.GAMEPAD);
@@ -155,5 +158,9 @@ public class GamePad extends Thread {
 
 	public synchronized void disable() {
 		enable = false;
+	}
+	
+	public void setOffset(int offset) {
+		this.offset = offset;
 	}
 }
