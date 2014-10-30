@@ -41,6 +41,8 @@ public class Controller {
 	private String initMessages = "";
 	private MotorSpeeds speeds;
 	private DebugLedsOutput debugLeds;
+	
+	private boolean debug = false;
 
 	// TO-DO Refactor this initialization!!!!!
 	private I2CBus i2cBus;
@@ -64,11 +66,12 @@ public class Controller {
 		System.out.println("######################################");
 
 		setStatus("Initializing...");
-
-		initInputs();
-		initOutputs();
-
-		initMessageProviders();
+		
+		if(!debug) {
+			initInputs();
+			initOutputs();
+			initMessageProviders();
+		}
 
 		initConnections();
 
