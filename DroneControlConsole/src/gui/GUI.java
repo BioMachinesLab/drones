@@ -15,6 +15,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import network.InformationConnection;
 import network.MotorConnection;
 import network.MotorMessageSender;
+import network.messages.CompassMessage;
 import network.messages.GPSMessage;
 import network.messages.Message;
 import network.messages.SystemInformationsMessage;
@@ -28,18 +29,23 @@ public class GUI {
 
 	// GUI Objects
 	private JFrame frame;
+
 	private MotorsPanel motorsPanel;
 	private GPSPanel gpsPanel;
 	private SystemInfoPanel sysInfoPanel;
 	private MessagesPanel msgPanel;
+	private CompassPanel compassPanel;
+
 	private GamePad gamePad;
+
 	private Thread gpsThread;
 	private Thread messagesThread;
+	private Thread compassThread;
+
 	private MotorSpeeds motorSpeeds;
 	private MotorMessageSender motorMessageSender;
 
 	public GUI() {
-
 		motorSpeeds = new MotorSpeeds();
 
 		Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -54,8 +60,13 @@ public class GUI {
 					if (gpsThread.isAlive()) {
 						gpsThread.interrupt();
 					}
+
 					if (messagesThread.isAlive()) {
 						messagesThread.interrupt();
+					}
+
+					if (compassThread.isAlive()) {
+						compassThread.interrupt();
 					}
 				}
 			}
@@ -63,50 +74,62 @@ public class GUI {
 
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-			System.err.println("Not able to set LookAndFeel for the current OS");
+		} catch (ClassNotFoundException | InstantiationException
+				| IllegalAccessException | UnsupportedLookAndFeelException e) {
+			System.err
+					.println("Not able to set LookAndFeel for the current OS");
 		}
 
 		connect();
 	}
-	
-	//Make sure that everything is at the initial state. Useful for reconnections
+
+	// Make sure that everything is at the initial state. Useful for
+	// reconnections
 	private void init() {
-		if(frame != null)
+		if (frame != null)
 			frame.dispose();
-		
-		if(gpsPanel != null)
+
+		if (gpsPanel != null)
 			gpsPanel.stopExecuting();
-		
-		if(msgPanel != null)
+
+		if (msgPanel != null)
 			msgPanel.stopExecuting();
-		
+
+		if (compassPanel != null)
+			compassPanel.stopExecuting();
+
 		frame = null;
 		msgPanel = null;
 		gpsPanel = null;
+		compassPanel = null;
 		sysInfoPanel = null;
 		informationConnection = null;
 		motorConnection = null;
 	}
-	
+
 	public void connect() {
-		
 		init();
-		
+
 		do {
 			try {
 				IPandPortNumberRequestToUser form = new IPandPortNumberRequestToUser();
-				if (form.getIpAddress() == null || form.getPortNumber() == -1) {
+				if (form.getIpAddress() == null
+						|| form.getInformationPortNumber() == -1
+						|| form.getMotorPortNumber() == -1) {
 					continue;
 				} else {
 
-					informationConnection = new InformationConnection(this, form.getIpAddress());
+					informationConnection = new InformationConnection(this,
+							form.getIpAddress(),
+							form.getInformationPortNumber());
 					informationConnection.start();
-					
-					motorConnection = new MotorConnection(this, form.getIpAddress());
+
+					motorConnection = new MotorConnection(this,
+							form.getIpAddress(), form.getMotorPortNumber());
 					motorConnection.start();
 
-					motorMessageSender = new MotorMessageSender(motorConnection,motorSpeeds);
+					motorMessageSender = new MotorMessageSender(
+							motorConnection, motorSpeeds);
 					motorMessageSender.start();
 
 					buildGUI();
@@ -114,7 +137,10 @@ public class GUI {
 					gpsThread = new Thread(gpsPanel);
 					gpsThread.start();
 					messagesThread = new Thread(msgPanel);
+
 					messagesThread.start();
+					// compassThread = new Thread(compassPanel);
+					// compassThread.start();
 
 					display();
 
@@ -123,7 +149,7 @@ public class GUI {
 				}
 			} catch (Exception | Error e) {
 				e.printStackTrace();
-				JOptionPane.showMessageDialog(frame,e.getMessage());
+				JOptionPane.showMessageDialog(frame, e.getMessage());
 			}
 		} while (informationConnection == null);
 	}
@@ -139,6 +165,7 @@ public class GUI {
 
 		frame.setLayout(new BorderLayout());
 
+		// Central panel constructor and object addition to the frame
 		JPanel centralPanel = new JPanel(new FlowLayout());
 		motorsPanel = new MotorsPanel(this);
 		centralPanel.add(motorsPanel);
@@ -150,8 +177,12 @@ public class GUI {
 		// connector.sendData(new InformationRequest(Message_Type.SYSTEM_INFO));
 		// centralPanel.add(sysInfoPanel);
 
+		// compassPanel=new CompassPanel(this);
+		// centralPanel.add(compassPanel);
+
 		frame.add(centralPanel, BorderLayout.CENTER);
 
+		// South panel message area addition to the frame
 		msgPanel = new MessagesPanel(this);
 		frame.add(msgPanel, BorderLayout.PAGE_END);
 
@@ -173,8 +204,13 @@ public class GUI {
 				if (message instanceof SystemStatusMessage) {
 					msgPanel.addMessage((SystemStatusMessage) message);
 				} else {
-					System.out.println("Received Message: "
-							+ message.getClass().toString());
+					if (message instanceof CompassMessage) {
+						// compassPanel.displayData((CompassMessage) message);
+					} else {
+						System.out
+								.println("Received non recognise message type: "
+										+ message.getClass().toString());
+					}
 				}
 			}
 		}

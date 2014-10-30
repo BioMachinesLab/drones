@@ -12,14 +12,16 @@ import javax.swing.JTextField;
 
 public class IPandPortNumberRequestToUser extends Panel {
 	private static final long serialVersionUID = 1919821842077609484L;
-	 private String DEFAULT_IP = "192.168.3.1";
-	//private String DEFAULT_IP = "10.40.50.242";
-	private static final String DEFAULT_PORT = "10101";
+	private String DEFAULT_IP = "192.168.3.1";
+	// private String DEFAULT_IP = "10.40.50.242";
+	private static final String DEFAULT_MOTOR_PORT = "10102";
+	private static final String DEFAULT_INFORMATION_PORT = "10101";
 	private InetAddress ip = null;
-	private int portNumber = -1;
+	private int informationPortNumber = -1;
+	private int motorPortNumber = -1;
 
 	public IPandPortNumberRequestToUser() {
-		JPanel dialogJPane = new JPanel(new GridLayout(2, 1));
+		JPanel dialogJPane = new JPanel(new GridLayout(3, 1));
 
 		// JTextFields Construction
 		String[] ipAddrStr = DEFAULT_IP.split("\\.");
@@ -35,11 +37,14 @@ public class IPandPortNumberRequestToUser extends Panel {
 		JTextField address4 = new JTextField(3);
 		address4.setText(ipAddrStr[3]);
 
-		JTextField portTextField = new JTextField(5);
-		portTextField.setText(DEFAULT_PORT);
+		JTextField motorPortTextField = new JTextField(5);
+		motorPortTextField.setText(DEFAULT_MOTOR_PORT);
+
+		JTextField informationPortTextField = new JTextField(5);
+		informationPortTextField.setText(DEFAULT_INFORMATION_PORT);
 
 		// Panel Construction
-		final JPanel addressPanel = new JPanel();
+		JPanel addressPanel = new JPanel();
 		addressPanel.add(new JLabel("IP Address:"));
 		addressPanel.add(address1);
 		addressPanel.add(new JLabel("."));
@@ -50,10 +55,15 @@ public class IPandPortNumberRequestToUser extends Panel {
 		addressPanel.add(address4);
 		dialogJPane.add(addressPanel);
 
-		JPanel portPanel = new JPanel();
-		portPanel.add(new JLabel("Port:"));
-		portPanel.add(portTextField);
-		dialogJPane.add(portPanel);
+		JPanel motorPortPanel = new JPanel();
+		motorPortPanel.add(new JLabel("Motor Port:"));
+		motorPortPanel.add(motorPortTextField);
+		dialogJPane.add(motorPortPanel);
+
+		JPanel informationPortPanel = new JPanel();
+		informationPortPanel.add(new JLabel("Information Port:"));
+		informationPortPanel.add(informationPortTextField);
+		dialogJPane.add(informationPortPanel);
 
 		int result = JOptionPane.showConfirmDialog(null, dialogJPane,
 				"Please Enter Drone's Address and Port",
@@ -71,24 +81,38 @@ public class IPandPortNumberRequestToUser extends Panel {
 						"The given IP address is not valid! Please try again",
 						"IP Address Error", JOptionPane.ERROR_MESSAGE);
 			} else {
-				int portNumber = Integer.parseInt(portTextField.getText());
-				if (portNumber < 1024 || portNumber > 65535) {
+				int motorPortNumber = Integer.parseInt(motorPortTextField
+						.getText());
+				if (motorPortNumber < 1024 || motorPortNumber > 65535) {
 					JOptionPane
 							.showMessageDialog(
 									null,
-									"The given Port number is not valid! Please try again",
+									"The given Motor Port number is not valid! Please try again",
 									"Port Number Error",
 									JOptionPane.ERROR_MESSAGE);
 				} else {
-					try {
-						ip = InetAddress.getByName(address1.getText() + "."
-								+ address2.getText() + "." + address3.getText()
-								+ "." + address4.getText());
-						this.portNumber = portNumber;
-					} catch (UnknownHostException e) {
-						e.printStackTrace();
+					int informationPortNumber = Integer
+							.parseInt(informationPortTextField.getText());
+					if (informationPortNumber < 1024
+							|| informationPortNumber > 65535) {
+						JOptionPane
+								.showMessageDialog(
+										null,
+										"The given Information Port number is not valid! Please try again",
+										"Port Number Error",
+										JOptionPane.ERROR_MESSAGE);
+					} else {
+						try {
+							ip = InetAddress.getByName(address1.getText() + "."
+									+ address2.getText() + "."
+									+ address3.getText() + "."
+									+ address4.getText());
+							this.motorPortNumber = motorPortNumber;
+							this.informationPortNumber = informationPortNumber;
+						} catch (UnknownHostException e) {
+							e.printStackTrace();
+						}
 					}
-
 				}
 			}
 		} else {
@@ -100,7 +124,11 @@ public class IPandPortNumberRequestToUser extends Panel {
 		return ip;
 	}
 
-	public int getPortNumber() {
-		return portNumber;
+	public int getInformationPortNumber() {
+		return informationPortNumber;
+	}
+
+	public int getMotorPortNumber() {
+		return motorPortNumber;
 	}
 }

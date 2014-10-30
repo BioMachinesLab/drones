@@ -36,14 +36,12 @@ public class GPSPanel extends JPanel implements Runnable {
 	private JTextField textFieldGPSSource;
 	private JTextField textFieldTime;
 	private JTextField textFieldDate;
-	private JComboBox<String> comboBox;
+	private JComboBox<String> comboBoxUpdateRate;
 
 	private GUI gui;
 
-	private int sleepTime = 1000 * 10;
-
+	private int sleepTime = 1000;
 	private Thread threadRef;
-
 	private boolean keepGoing = true;
 
 	public GPSPanel(GUI gui) {
@@ -58,30 +56,30 @@ public class GPSPanel extends JPanel implements Runnable {
 		buildGPSFixInformationPanel();
 		buildTimePanel();
 
-		comboBox = new JComboBox<String>();
-		comboBox.setModel(new DefaultComboBoxModel<String>(new String[] {
+		comboBoxUpdateRate = new JComboBox<String>();
+		comboBoxUpdateRate.setModel(new DefaultComboBoxModel<String>(new String[] {
 				"10 Hz", "5 Hz", "1 Hz", "0.1Hz" }));
-		comboBox.setSelectedIndex(3);
-		comboBox.setBounds(95, 317, 86, 20);
-		add(comboBox);
+		comboBoxUpdateRate.setSelectedIndex(2);
+		comboBoxUpdateRate.setBounds(95, 317, 86, 20);
+		add(comboBoxUpdateRate);
 
-		comboBox.addActionListener(new ActionListener() {
+		comboBoxUpdateRate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				switch (comboBox.getSelectedIndex()) {
+				switch (comboBoxUpdateRate.getSelectedIndex()) {
 				case 0:
-					sleepTime = 1000 / 10;
+					sleepTime = 100;
 					break;
 				case 1:
-					sleepTime = 1000 / 5;
+					sleepTime = 200;
 					break;
 				case 2:
 					sleepTime = 1000;
 					break;
 				case 3:
-					sleepTime = 1000 * 10;
+					sleepTime = 10000;
 					break;
 				default:
-					sleepTime = 1000 * 10;
+					sleepTime = 1000;
 					break;
 				}
 				threadRef.interrupt();
@@ -349,7 +347,6 @@ public class GPSPanel extends JPanel implements Runnable {
 
 	@Override
 	public void run() {
-
 		this.threadRef = Thread.currentThread();
 
 		while (keepGoing) {
