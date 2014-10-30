@@ -93,9 +93,6 @@ public abstract class GamePadInput {
 
 	public void pollComponentsValues() {
 		
-		if(controller == null)
-			return;
-		
 		controller.poll();
 
 		if (xAxis.isAnalog()) {
