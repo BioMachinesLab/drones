@@ -1,5 +1,6 @@
 package gui;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -33,25 +34,22 @@ public class MessagesPanel extends JPanel implements Runnable {
 	public MessagesPanel(GUI gui) {
 		this.gui = gui;
 		setBorder(BorderFactory.createTitledBorder("Drone Messages"));
-		setLayout(null);
-		setMinimumSize(new Dimension(300, 300));
-		setPreferredSize(new Dimension(750, 165));
+		setLayout(new BorderLayout());
+		
+//		setPreferredSize(new Dimension(100, 100));
+//		setMinimumSize(new Dimension(100, 100));
 
-		messageArea = new JTextArea();
+		messageArea = new JTextArea(5,40);
 		messageArea.setEditable(false);
 
 		scrollPane = new JScrollPane(messageArea);
-		scrollPane.setSize(730, 96);
-		scrollPane.setLocation(10, 23);
-		scrollPane
-				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		add(scrollPane);
+		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		add(scrollPane, BorderLayout.NORTH);
 
 		comboBoxUpdateRate = new JComboBox<String>();
 		comboBoxUpdateRate.setModel(new DefaultComboBoxModel<String>(
 				new String[] { "10 Hz", "5 Hz", "1 Hz", "0.1Hz" }));
 		comboBoxUpdateRate.setSelectedIndex(2);
-		comboBoxUpdateRate.setBounds(654, 130, 86, 20);
 		comboBoxUpdateRate.addActionListener(new ActionListener() {
 
 			@Override
@@ -76,11 +74,11 @@ public class MessagesPanel extends JPanel implements Runnable {
 				threadRef.interrupt();
 			}
 		});
-		add(comboBoxUpdateRate);
+		
+		add(comboBoxUpdateRate, BorderLayout.EAST);
 
 		JLabel lblRefreshRate = new JLabel("Refresh Rate");
 		lblRefreshRate.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblRefreshRate.setBounds(564, 133, 80, 14);
 		add(lblRefreshRate);
 	}
 

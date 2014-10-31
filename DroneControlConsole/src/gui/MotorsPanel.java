@@ -1,5 +1,6 @@
 package gui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -20,39 +21,37 @@ import javax.swing.event.ChangeListener;
 
 public class MotorsPanel extends JPanel {
 	private static final long serialVersionUID = 7086609300323189722L;
-	// private static final int KEY_CONTROL_INCREMENT = 5;
+
 	private GUI gui;
 	private boolean locked = false;
-	private JCheckBox chckbxLockControl;
 
-	private JPanel leftPanel;
 	private JSlider leftSlider;
 	private JProgressBar leftProgressBar;
-	private JButton btnStopLeft;
 	private int leftMotorPower = 0;
 
-	private JPanel rightPanel;
 	private JSlider rightSlider;
 	private JProgressBar rightProgressBar;
-	private JButton btnStopRight;
 	private int rightMotorPower = 0;
-	private JCheckBox chckbxEnableGamepad;
-
+	
 	public MotorsPanel(GUI gui) {
 		this.gui = gui;
+		
 		setBorder(BorderFactory.createTitledBorder("Motors Control"));
-		setLayout(null);
-		setMinimumSize(new Dimension(300, 300));
-		setPreferredSize(new Dimension(300, 300));
+		setLayout(new BorderLayout());
+		
+		setPreferredSize(new Dimension(300,357));
+		
+		leftSlider = new JSlider();
+		rightSlider = new JSlider();
+		
+		leftProgressBar = new JProgressBar();
+		rightProgressBar = new JProgressBar();
 
-		buildLeftPanel();
-		buildRightPanel();
-
-		chckbxLockControl = new JCheckBox("Lock Control");
-		chckbxLockControl.setBounds(168, 270, 97, 23);
+		add(buildMotorSliderPanel(leftProgressBar, leftSlider, "Left"), BorderLayout.WEST);
+		add(buildMotorSliderPanel(rightProgressBar, rightSlider, "Right"), BorderLayout.EAST);
+		
+		JCheckBox chckbxLockControl = new JCheckBox("Lock Control");
 		chckbxLockControl.addActionListener(new ActionListener() {
-
-			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				locked = chckbxLockControl.isSelected();
 				if (locked) {
@@ -61,167 +60,90 @@ public class MotorsPanel extends JPanel {
 				}
 			}
 		});
-		add(chckbxLockControl);
 		
-		chckbxEnableGamepad = new JCheckBox("Enable Gamepad");
-		chckbxEnableGamepad.setBounds(20, 270, 122, 23);
+		JPanel soutPanel = new JPanel();
+		
+		soutPanel.add(chckbxLockControl);
+		
+		JCheckBox chckbxEnableGamepad = new JCheckBox("Enable Gamepad");
 		chckbxEnableGamepad.addActionListener(new ActionListener() {
-
-			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				boolean enable = chckbxEnableGamepad.isSelected();
 				setGamePadStatus(enable);
 			}
 		});
-		add(chckbxEnableGamepad);
+		soutPanel.add(chckbxEnableGamepad);
+		add(soutPanel, BorderLayout.SOUTH);
 	}
-
-	private void buildLeftPanel() {
-		leftPanel = new JPanel();
-		leftPanel.setBounds(10, 22, 132, 250);
-		leftPanel.setBorder(BorderFactory.createTitledBorder(
-				UIManager.getBorder("TitledBorder.border"), "Left",
+	
+	private JPanel buildMotorSliderPanel(JProgressBar progressBar, JSlider slider, String name) {
+		JPanel panel = new JPanel();
+		panel.setBorder(BorderFactory.createTitledBorder(
+				UIManager.getBorder("TitledBorder.border"), name,
 				TitledBorder.CENTER, TitledBorder.TOP));
-		leftPanel.setLayout(null);
+		panel.setLayout(new BorderLayout());
 
-		leftSlider = new JSlider();
-		leftSlider.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null,
-				null, null));
-		leftSlider.setValue(0);
-		leftSlider.setMinorTickSpacing(5);
-		leftSlider.setPaintLabels(true);
-		leftSlider.setPaintTicks(true);
-		leftSlider.setSnapToTicks(true);
-		leftSlider.setOrientation(SwingConstants.VERTICAL);
-		leftSlider.setBounds(10, 21, 50, 185);
-		leftSlider.addChangeListener(new ChangeListener() {
-
-			@Override
+		slider.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		slider.setValue(0);
+		slider.setMinorTickSpacing(5);
+		slider.setPaintLabels(true);
+		slider.setPaintTicks(true);
+		slider.setSnapToTicks(true);
+		slider.setOrientation(SwingConstants.VERTICAL);
+		slider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
-				setLeftMotorPower(leftSlider.getValue());
-			}
-		});
-		leftPanel.add(leftSlider);
-
-		leftProgressBar = new JProgressBar();
-		leftProgressBar.setForeground(Color.GREEN);
-		leftProgressBar.setStringPainted(true);
-		leftProgressBar.setOrientation(SwingConstants.VERTICAL);
-		leftProgressBar.setBounds(70, 21, 52, 185);
-		leftPanel.add(leftProgressBar);
-
-		btnStopLeft = new JButton("Stop Motor");
-		btnStopLeft.setBounds(20, 217, 89, 23);
-		btnStopLeft.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
 				if (locked) {
-					rightProgressBar.setValue(0);
-					rightSlider.setValue(0);
+					setLeftMotorPower(slider.getValue());
+					setRightMotorPower(slider.getValue());
+				} else {
+					if(name.equals("Left")) {
+						setLeftMotorPower(slider.getValue());
+					} else {
+						setRightMotorPower(slider.getValue());
+					}
 				}
-
-				leftProgressBar.setValue(0);
-				leftSlider.setValue(0);
+				sendMotorsStateMessage();
 			}
 		});
-		leftPanel.add(btnStopLeft);
+		panel.add(slider, BorderLayout.WEST);
 
-		add(leftPanel);
-	}
+		progressBar.setForeground(Color.GREEN);
+		progressBar.setStringPainted(true);
+		progressBar.setOrientation(SwingConstants.VERTICAL);
+		panel.add(progressBar, BorderLayout.CENTER);
 
-	private void buildRightPanel() {
-		rightPanel = new JPanel();
-		rightPanel.setBounds(158, 22, 132, 250);
-		rightPanel.setBorder(BorderFactory.createTitledBorder(
-				UIManager.getBorder("TitledBorder.border"), "Right",
-				TitledBorder.CENTER, TitledBorder.TOP));
-		rightPanel.setLayout(null);
-
-		rightSlider = new JSlider();
-		rightSlider.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null,
-				null, null));
-		rightSlider.setValue(0);
-		rightSlider.setMinorTickSpacing(5);
-		rightSlider.setPaintLabels(true);
-		rightSlider.setPaintTicks(true);
-		rightSlider.setSnapToTicks(true);
-		rightSlider.setOrientation(SwingConstants.VERTICAL);
-		rightSlider.setBounds(10, 21, 50, 185);
-		rightSlider.addChangeListener(new ChangeListener() {
-
-			@Override
-			public void stateChanged(ChangeEvent arg0) {
-				setRightMotorPower(rightSlider.getValue());
-			}
-		});
-		rightPanel.add(rightSlider);
-
-		rightProgressBar = new JProgressBar();
-		rightProgressBar.setForeground(Color.RED);
-		rightProgressBar.setStringPainted(true);
-		rightProgressBar.setOrientation(SwingConstants.VERTICAL);
-		rightProgressBar.setBounds(70, 21, 52, 185);
-		rightPanel.add(rightProgressBar);
-
-		btnStopRight = new JButton("Stop Motor");
-		btnStopRight.setBounds(20, 216, 89, 23);
-		btnStopRight.addActionListener(new ActionListener() {
-
-			@Override
+		JButton btnStop = new JButton("Stop Motor");
+		btnStop.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if (locked) {
-					leftProgressBar.setValue(0);
 					leftSlider.setValue(0);
+					rightSlider.setValue(0);
+				} else {
+					slider.setValue(0);
 				}
-
-				rightProgressBar.setValue(0);
-				rightSlider.setValue(0);
 			}
 		});
-		rightPanel.add(btnStopRight);
+		panel.add(btnStop, BorderLayout.SOUTH);
 
-		add(rightPanel);
+		return panel;
+	}
+	
+	private int boundValue(int val) {
+		
+		val = Math.max(val, 0);
+		val = Math.min(val, 100);
+		
+		return val;
 	}
 
-	public void setLeftMotorPower(int value) {
-		int val = value;
-		if (val > 100) {
-			val = 100;
-		} else {
-			if (val < 0) {
-				val = 0;
-			}
-		}
-
-		if (locked) {
-			rightProgressBar.setValue(val);
-			rightSlider.setValue(val);
-		}
-
-		leftProgressBar.setValue(val);
-		leftMotorPower = val;
-		sendMotorsStateMessage();
+	public void setLeftMotorPower(int val) {
+		leftMotorPower = boundValue(val);
+		leftProgressBar.setValue(leftMotorPower);
 	}
 
-	public void setRightMotorPower(int value) {
-		int val = value;
-		if (val > 100) {
-			val = 100;
-		} else {
-			if (val < 0) {
-				val = 0;
-			}
-		}
-
-		if (locked) {
-			leftProgressBar.setValue(val);
-			leftSlider.setValue(val);
-		}
-
-		rightProgressBar.setValue(val);
-		rightMotorPower = val;
-		sendMotorsStateMessage();
+	public void setRightMotorPower(int val) {
+		rightMotorPower = boundValue(val);
+		rightProgressBar.setValue(rightMotorPower);
 	}
 
 	public void sendMotorsStateMessage() {

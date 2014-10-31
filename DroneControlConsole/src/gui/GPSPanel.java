@@ -1,6 +1,8 @@
 package gui;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -20,6 +22,9 @@ import dataObjects.GPSData;
 
 public class GPSPanel extends JPanel implements Runnable {
 	private static final long serialVersionUID = 6535539451990270799L;
+	
+	private static int TEXTFIELD_SIZE = 7;
+	
 	private JTextField textFieldLatitude;
 	private JTextField textFieldLongitude;
 	private JTextField textFieldAltitude;
@@ -47,22 +52,29 @@ public class GPSPanel extends JPanel implements Runnable {
 	public GPSPanel(GUI gui) {
 		this.gui = gui;
 		setBorder(BorderFactory.createTitledBorder("GPS Data"));
-		setLayout(null);
-		setMinimumSize(new Dimension(390, 350));
-		setPreferredSize(new Dimension(390, 350));
+		setLayout(new BorderLayout());
 
-		buildCoordinatesPanel();
-		buildNavitationInformationsPanel();
-		buildGPSFixInformationPanel();
-		buildTimePanel();
+		JPanel left = new JPanel();
+		left.setLayout(new BorderLayout());
+		left.add(buildCoordinatesPanel(),BorderLayout.NORTH);
+		left.add(buildNavitationInformationsPanel(),BorderLayout.CENTER);
+		left.add(buildTimePanel(), BorderLayout.SOUTH);
+		add(left,BorderLayout.WEST);
+		
+		add(buildGPSFixInformationPanel(), BorderLayout.EAST);
+		add(buildRefreshPanel(), BorderLayout.SOUTH);
+	}
+	
+	private JPanel buildRefreshPanel() {
+		JPanel refresh = new JPanel();
+		refresh.add(new JLabel("Refresh Rate"));
 
 		comboBoxUpdateRate = new JComboBox<String>();
 		comboBoxUpdateRate.setModel(new DefaultComboBoxModel<String>(new String[] {
 				"10 Hz", "5 Hz", "1 Hz", "0.1Hz" }));
 		comboBoxUpdateRate.setSelectedIndex(2);
-		comboBoxUpdateRate.setBounds(95, 317, 86, 20);
-		add(comboBoxUpdateRate);
-
+		add(comboBoxUpdateRate, BorderLayout.SOUTH);
+		
 		comboBoxUpdateRate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				switch (comboBoxUpdateRate.getSelectedIndex()) {
@@ -86,204 +98,134 @@ public class GPSPanel extends JPanel implements Runnable {
 			}
 		});
 
-		JLabel lblNewLabelRefreshRate = new JLabel("Refresh Rate");
-		lblNewLabelRefreshRate.setBounds(20, 320, 72, 14);
-		add(lblNewLabelRefreshRate);
+		refresh.add(comboBoxUpdateRate);
+		return refresh;
 	}
 
-	private void buildCoordinatesPanel() {
+	private JPanel buildCoordinatesPanel() {
 		JPanel coordinatesPanel = new JPanel();
-		coordinatesPanel.setBounds(10, 16, 181, 104);
-		coordinatesPanel.setBorder(BorderFactory
-				.createTitledBorder("Coordinates"));
-		coordinatesPanel.setLayout(null);
-		add(coordinatesPanel);
+		coordinatesPanel.setBorder(BorderFactory.createTitledBorder("Coordinates"));
+		coordinatesPanel.setLayout(new GridLayout(3,2));
 
-		JLabel lblLatitude = new JLabel("Latitude");
-		lblLatitude.setBounds(10, 25, 65, 14);
-		coordinatesPanel.add(lblLatitude);
-
-		JLabel lblLongitude = new JLabel("Longitude");
-		lblLongitude.setBounds(10, 50, 65, 14);
-		coordinatesPanel.add(lblLongitude);
-
-		JLabel lblAltitude = new JLabel("Altitude");
-		lblAltitude.setBounds(10, 75, 65, 14);
-		coordinatesPanel.add(lblAltitude);
-
-		textFieldLatitude = new JTextField();
+		coordinatesPanel.add(new JLabel("Latitude"));
+		textFieldLatitude = new JTextField(TEXTFIELD_SIZE);
 		textFieldLatitude.setEditable(false);
-		textFieldLatitude.setBounds(85, 22, 86, 20);
-		textFieldLatitude.setColumns(10);
 		coordinatesPanel.add(textFieldLatitude);
-
-		textFieldLongitude = new JTextField();
+		
+		coordinatesPanel.add(new JLabel("Longitude"));
+		textFieldLongitude = new JTextField(TEXTFIELD_SIZE);
 		textFieldLongitude.setEditable(false);
-		textFieldLongitude.setBounds(85, 47, 86, 20);
-		textFieldLongitude.setColumns(10);
 		coordinatesPanel.add(textFieldLongitude);
 
-		textFieldAltitude = new JTextField();
+		coordinatesPanel.add(new JLabel("Altitude"));
+		textFieldAltitude = new JTextField(TEXTFIELD_SIZE);
 		textFieldAltitude.setEditable(false);
-		textFieldAltitude.setBounds(85, 72, 86, 20);
-		textFieldAltitude.setColumns(10);
 		coordinatesPanel.add(textFieldAltitude);
+		
+		return coordinatesPanel;
 	}
 
-	private void buildNavitationInformationsPanel() {
+	private JPanel buildNavitationInformationsPanel() {
 		JPanel navigationPanel = new JPanel();
-		navigationPanel.setBounds(10, 142, 181, 104);
-		add(navigationPanel);
-		navigationPanel.setBorder(BorderFactory
-				.createTitledBorder("Navigation"));
-		navigationPanel.setLayout(null);
+		navigationPanel.setBorder(BorderFactory.createTitledBorder("Navigation"));
+		navigationPanel.setLayout(new GridLayout(3,2));
 
 		JLabel lblVelkmh = new JLabel("Vel. (Km/h)");
-		lblVelkmh.setBounds(10, 25, 65, 14);
 		navigationPanel.add(lblVelkmh);
+		textFieldVelKmh = new JTextField(TEXTFIELD_SIZE);
+		textFieldVelKmh.setEditable(false);
+		navigationPanel.add(textFieldVelKmh);
 
 		JLabel lblVelknots = new JLabel("Vel. (Knots)");
-		lblVelknots.setBounds(10, 50, 65, 14);
 		navigationPanel.add(lblVelknots);
+		textFieldVelKnots = new JTextField(TEXTFIELD_SIZE);
+		textFieldVelKnots.setEditable(false);
+		navigationPanel.add(textFieldVelKnots);
 
 		JLabel lblOrientation = new JLabel("Orientation");
-		lblOrientation.setBounds(10, 75, 65, 14);
 		navigationPanel.add(lblOrientation);
-
-		textFieldVelKmh = new JTextField();
-		textFieldVelKmh.setEditable(false);
-		textFieldVelKmh.setBounds(85, 22, 86, 20);
-		navigationPanel.add(textFieldVelKmh);
-		textFieldVelKmh.setColumns(10);
-
-		textFieldVelKnots = new JTextField();
-		textFieldVelKnots.setEditable(false);
-		textFieldVelKnots.setBounds(85, 47, 86, 20);
-		navigationPanel.add(textFieldVelKnots);
-		textFieldVelKnots.setColumns(10);
-
-		textFieldOrientation = new JTextField();
+		textFieldOrientation = new JTextField(TEXTFIELD_SIZE);
 		textFieldOrientation.setEditable(false);
-		textFieldOrientation.setBounds(85, 72, 86, 20);
 		navigationPanel.add(textFieldOrientation);
-		textFieldOrientation.setColumns(10);
+		
+		return navigationPanel;
 	}
 
-	private void buildGPSFixInformationPanel() {
+	private JPanel buildGPSFixInformationPanel() {
 		JPanel fixInformationsPanel = new JPanel();
-		fixInformationsPanel.setBounds(201, 16, 181, 230);
 		fixInformationsPanel.setBorder(BorderFactory
 				.createTitledBorder("Fix Informations"));
-		fixInformationsPanel.setLayout(null);
-		add(fixInformationsPanel);
+		fixInformationsPanel.setLayout(new GridLayout(8,2));
 
 		JLabel lblHasFix = new JLabel("Has Fix");
-		lblHasFix.setBounds(10, 25, 46, 14);
 		fixInformationsPanel.add(lblHasFix);
-
-		JLabel lblFixType = new JLabel("Fix Type");
-		lblFixType.setBounds(10, 50, 46, 14);
-		fixInformationsPanel.add(lblFixType);
-
-		JLabel lblNSatellites = new JLabel("Sat. View");
-		lblNSatellites.setBounds(10, 75, 65, 14);
-		fixInformationsPanel.add(lblNSatellites);
-
-		JLabel lblSatUsed = new JLabel("Sat. Used");
-		lblSatUsed.setBounds(10, 100, 65, 14);
-		fixInformationsPanel.add(lblSatUsed);
-
-		JLabel lblHdop = new JLabel("HDOP");
-		lblHdop.setBounds(10, 125, 46, 14);
-		fixInformationsPanel.add(lblHdop);
-
-		JLabel lblPdop = new JLabel("PDOP");
-		lblPdop.setBounds(10, 150, 46, 14);
-		fixInformationsPanel.add(lblPdop);
-
-		JLabel lblVdop = new JLabel("VDOP");
-		lblVdop.setBounds(10, 175, 46, 14);
-		fixInformationsPanel.add(lblVdop);
-
-		JLabel lblGpsSource = new JLabel("GPS Source");
-		lblGpsSource.setBounds(10, 200, 65, 14);
-		fixInformationsPanel.add(lblGpsSource);
-
-		textFieldHasFix = new JTextField();
+		textFieldHasFix = new JTextField(TEXTFIELD_SIZE);
 		textFieldHasFix.setEditable(false);
-		textFieldHasFix.setBounds(85, 22, 86, 20);
-		textFieldHasFix.setColumns(10);
 		fixInformationsPanel.add(textFieldHasFix);
 
-		textFieldFixType = new JTextField();
+		JLabel lblFixType = new JLabel("Fix Type");
+		fixInformationsPanel.add(lblFixType);
+		textFieldFixType = new JTextField(TEXTFIELD_SIZE);
 		textFieldFixType.setEditable(false);
-		textFieldFixType.setBounds(85, 47, 86, 20);
-		textFieldFixType.setColumns(10);
 		fixInformationsPanel.add(textFieldFixType);
 
-		textFieldSatelittesView = new JTextField();
+		JLabel lblNSatellites = new JLabel("Sat. View");
+		fixInformationsPanel.add(lblNSatellites);
+		textFieldSatelittesView = new JTextField(TEXTFIELD_SIZE);
 		textFieldSatelittesView.setEditable(false);
-		textFieldSatelittesView.setBounds(85, 72, 86, 20);
-		textFieldSatelittesView.setColumns(10);
 		fixInformationsPanel.add(textFieldSatelittesView);
 
-		textFieldSatelittesUsed = new JTextField();
+		JLabel lblSatUsed = new JLabel("Sat. Used");
+		fixInformationsPanel.add(lblSatUsed);
+		textFieldSatelittesUsed = new JTextField(TEXTFIELD_SIZE);
 		textFieldSatelittesUsed.setEditable(false);
-		textFieldSatelittesUsed.setBounds(85, 97, 86, 20);
-		textFieldSatelittesUsed.setColumns(10);
 		fixInformationsPanel.add(textFieldSatelittesUsed);
 
-		textFieldHDOP = new JTextField();
+		JLabel lblHdop = new JLabel("HDOP");
+		fixInformationsPanel.add(lblHdop);
+		textFieldHDOP = new JTextField(TEXTFIELD_SIZE);
 		textFieldHDOP.setEditable(false);
-		textFieldHDOP.setBounds(85, 122, 86, 20);
 		fixInformationsPanel.add(textFieldHDOP);
-		textFieldHDOP.setColumns(10);
 
-		textFieldPDOP = new JTextField();
+		JLabel lblPdop = new JLabel("PDOP");
+		fixInformationsPanel.add(lblPdop);
+		textFieldPDOP = new JTextField(TEXTFIELD_SIZE);
 		textFieldPDOP.setEditable(false);
-		textFieldPDOP.setBounds(85, 147, 86, 20);
 		fixInformationsPanel.add(textFieldPDOP);
-		textFieldPDOP.setColumns(10);
 
-		textFieldVDOP = new JTextField();
+		JLabel lblVdop = new JLabel("VDOP");
+		fixInformationsPanel.add(lblVdop);
+		textFieldVDOP = new JTextField(TEXTFIELD_SIZE);
 		textFieldVDOP.setEditable(false);
-		textFieldVDOP.setBounds(85, 172, 86, 20);
 		fixInformationsPanel.add(textFieldVDOP);
-		textFieldVDOP.setColumns(10);
 
-		textFieldGPSSource = new JTextField();
+		JLabel lblGpsSource = new JLabel("GPS Source");
+		fixInformationsPanel.add(lblGpsSource);
+		textFieldGPSSource = new JTextField(TEXTFIELD_SIZE);
 		textFieldGPSSource.setEditable(false);
-		textFieldGPSSource.setBounds(85, 197, 86, 20);
 		fixInformationsPanel.add(textFieldGPSSource);
-		textFieldGPSSource.setColumns(10);
+		
+		return fixInformationsPanel;
 	}
 
-	private void buildTimePanel() {
+	private JPanel buildTimePanel() {
 		JPanel timePanel = new JPanel();
-		timePanel.setBounds(10, 257, 372, 57);
 		timePanel.setBorder(BorderFactory.createTitledBorder("Time & Date"));
-		timePanel.setLayout(null);
-		add(timePanel);
+		timePanel.setLayout(new GridLayout(2,2));
 
 		JLabel lblTime = new JLabel("Time");
-		lblTime.setBounds(10, 25, 46, 14);
 		timePanel.add(lblTime);
-
-		JLabel lblDate = new JLabel("Date");
-		lblDate.setBounds(200, 25, 46, 14);
-		timePanel.add(lblDate);
-
 		textFieldTime = new JTextField();
 		textFieldTime.setEditable(false);
-		textFieldTime.setBounds(85, 22, 86, 20);
 		timePanel.add(textFieldTime);
-		textFieldTime.setColumns(10);
 
+		JLabel lblDate = new JLabel("Date");
+		timePanel.add(lblDate);
 		textFieldDate = new JTextField();
 		textFieldDate.setEditable(false);
-		textFieldDate.setBounds(276, 22, 86, 20);
 		timePanel.add(textFieldDate);
-		textFieldDate.setColumns(10);
+		
+		return timePanel;
 	}
 
 	public void displayData(GPSData data) {

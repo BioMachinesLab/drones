@@ -158,7 +158,6 @@ public class GUI {
 
 	private void buildGUI() {
 		frame = new JFrame();
-		frame.setLocationRelativeTo(null);
 		frame.setTitle("HANCAD/ CORATAM Project - Drone Remote Console - "
 				+ informationConnection.getDestInetAddress().getHostAddress());
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -189,6 +188,7 @@ public class GUI {
 		frame.add(msgPanel, BorderLayout.PAGE_END);
 
 		frame.pack();
+		frame.setLocationRelativeTo(null);
 	}
 
 	public void display() {
