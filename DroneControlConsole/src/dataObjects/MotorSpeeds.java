@@ -9,12 +9,12 @@ public class MotorSpeeds {
 	private boolean changed = true;
 	
 	public synchronized void setSpeeds(double left, double right) {
-		if(Math.abs(left-speedLeft) >= 0.05 || Math.abs(right-speedRight) >= 0.05 || (left == 0 && right == 0)){
+//		if(Math.abs(left-speedLeft) >= 0.05 || Math.abs(right-speedRight) >= 0.05 || (left == 0 && right == 0)){
 			speedLeft = left;
 			speedRight = right;
 			changed = true;
 			notifyAll();
-		}
+//		}
 	}
 	
 	public synchronized MotorMessage getSpeeds() {

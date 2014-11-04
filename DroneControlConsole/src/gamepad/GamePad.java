@@ -12,7 +12,7 @@ public class GamePad extends Thread {
 
 	private final static int HISTORY_SIZE = 20;
 	private final static int UPDATE_DELAY = 7;
-	private final static int MAXIMUM_SPEED = 40;
+	private final static int MAXIMUM_SPEED = 100;
 
 	private GUI gui;
 	private GamePadInput jinputGamepad;
@@ -104,22 +104,23 @@ public class GamePad extends Thread {
 				} else if (xValue < 0) {
 					right *= Math.abs((100 + xValue) / 100.0);
 				}
+				
 
 				int leftMotorSpeed = (int) left;
 				int rightMotorSpeed = (int) right;
 
-				leftMotorSpeed = (int) map(leftMotorSpeed, -100, 100,
-						-MAXIMUM_SPEED, MAXIMUM_SPEED);
+//				leftMotorSpeed = (int) map(leftMotorSpeed, -100, 100,
+//						-MAXIMUM_SPEED, MAXIMUM_SPEED);
 				if (leftMotorSpeed > MAXIMUM_SPEED) {
 					leftMotorSpeed = MAXIMUM_SPEED;
-					rightMotorSpeed = 1;
+					//rightMotorSpeed = 1;
 				}
 
-				rightMotorSpeed = (int) map(rightMotorSpeed, -100, 100,
-						-MAXIMUM_SPEED, MAXIMUM_SPEED);
+//				rightMotorSpeed = (int) map(rightMotorSpeed, -100, 100,
+//						-MAXIMUM_SPEED, MAXIMUM_SPEED);
 				if (rightMotorSpeed > MAXIMUM_SPEED) {
 					rightMotorSpeed = MAXIMUM_SPEED;
-					leftMotorSpeed = 1;
+					//leftMotorSpeed = 1;
 				}
 
 				// System.out.println("Left=" + leftMotorSpeed + " Right="
