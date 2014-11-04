@@ -1,7 +1,6 @@
 package gui;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,14 +12,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import network.messages.InformationRequest;
-import network.messages.InformationRequest.MessageType;
-
 import org.joda.time.LocalDateTime;
 
+import threads.UpdateThread;
 import dataObjects.GPSData;
 
-public class GPSPanel extends JPanel implements Runnable {
+public class GPSPanel extends JPanel implements UpdatePanel {
 	private static final long serialVersionUID = 6535539451990270799L;
 	
 	private static int TEXTFIELD_SIZE = 7;
@@ -43,14 +40,11 @@ public class GPSPanel extends JPanel implements Runnable {
 	private JTextField textFieldDate;
 	private JComboBox<String> comboBoxUpdateRate;
 
-	private GUI gui;
-
+	private UpdateThread thread;
+	
 	private int sleepTime = 1000;
-	private Thread threadRef;
-	private boolean keepGoing = true;
 
-	public GPSPanel(GUI gui) {
-		this.gui = gui;
+	public GPSPanel() {
 		setBorder(BorderFactory.createTitledBorder("GPS Data"));
 		setLayout(new BorderLayout());
 
@@ -94,7 +88,8 @@ public class GPSPanel extends JPanel implements Runnable {
 					sleepTime = 1000;
 					break;
 				}
-				threadRef.interrupt();
+				if(thread != null)
+					thread.interrupt();
 			}
 		});
 
@@ -282,26 +277,13 @@ public class GPSPanel extends JPanel implements Runnable {
 
 		repaint();
 	}
-
-	private void requestGPSData() {
-		gui.getConnector().sendData(new InformationRequest(MessageType.GPS));
+	
+	public void registerThread(UpdateThread t) {
+		this.thread = t;
+	}
+	
+	public int getSleepTime() {
+		return sleepTime;
 	}
 
-	@Override
-	public void run() {
-		this.threadRef = Thread.currentThread();
-
-		while (keepGoing) {
-			requestGPSData();
-			try {
-				Thread.sleep(sleepTime);
-			} catch (InterruptedException e) {
-				// we expect interruptions when we change the refresh rate
-			}
-		}
-	}
-
-	public void stopExecuting() {
-		keepGoing = false;
-	}
 }

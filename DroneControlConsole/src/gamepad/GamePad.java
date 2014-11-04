@@ -1,8 +1,7 @@
 package gamepad;
 
-import gui.GUI;
-
 import java.io.IOException;
+import main.DroneControlConsole;
 
 public class GamePad extends Thread {
 	
@@ -14,26 +13,24 @@ public class GamePad extends Thread {
 	private final static int UPDATE_DELAY = 7;
 	private final static int MAXIMUM_SPEED = 100;
 
-	private GUI gui;
+	private DroneControlConsole console;
 	private GamePadInput jinputGamepad;
 	private boolean enable = true;
 
 	private int lastRightMotorSpeed = 0;
 	private int lastLeftMotorSpeed = 0;
 	
-	private int offset = 0;
-
 	public static void main(String[] args) throws IOException {
 		GamePad gamePad = new GamePad(null, GamePadType.GAMEPAD);
 		gamePad.disable();
 		gamePad.run();
 	}
 
-	public GamePad(GUI gui, GamePadType type) {
+	public GamePad(DroneControlConsole console, GamePadType type) {
 
 		try {
 
-			this.gui = gui;
+			this.console = console;
 
 			if (type == GamePadType.LOGITECH) {
 				jinputGamepad = new GamePadJInputLogitech();
@@ -132,7 +129,7 @@ public class GamePad extends Thread {
 
 					//leftMotorSpeed*=0.8;
 					
-					gui.setMotorsValue(leftMotorSpeed, rightMotorSpeed);
+					console.getMotorSpeeds().setSpeeds(leftMotorSpeed, rightMotorSpeed);
 
 					lastLeftMotorSpeed = leftMotorSpeed;
 					lastRightMotorSpeed = rightMotorSpeed;
@@ -161,7 +158,4 @@ public class GamePad extends Thread {
 		enable = false;
 	}
 	
-	public void setOffset(int offset) {
-		this.offset = offset;
-	}
 }

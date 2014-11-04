@@ -1,7 +1,7 @@
 package gui;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -13,38 +13,39 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingConstants;
 
-import network.messages.InformationRequest;
-import network.messages.InformationRequest.MessageType;
 import network.messages.SystemStatusMessage;
+import threads.UpdateThread;
 
-public class MessagesPanel extends JPanel implements Runnable {
+public class MessagesPanel extends JPanel implements UpdatePanel {
 	private static final long serialVersionUID = 5958293256864880036L;
-	private GUI gui;
 
 	private JTextArea messageArea;
 	private JScrollPane scrollPane;
 	private JComboBox<String> comboBoxUpdateRate;
 
-	private boolean keepGoing = true;
-	private Thread threadRef;
 	private int sleepTime = 1000;
+	
+	private UpdateThread thread;
 
-	public MessagesPanel(GUI gui) {
-		this.gui = gui;
+	public MessagesPanel() {
 		setBorder(BorderFactory.createTitledBorder("Drone Messages"));
 		setLayout(new BorderLayout());
 		
 //		setPreferredSize(new Dimension(100, 100));
 //		setMinimumSize(new Dimension(100, 100));
 
-		messageArea = new JTextArea(5,40);
+		messageArea = new JTextArea(10,20);
 		messageArea.setEditable(false);
 
 		scrollPane = new JScrollPane(messageArea);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		add(scrollPane, BorderLayout.NORTH);
+		add(scrollPane, BorderLayout.CENTER);
+		
+		JPanel refresh = new JPanel();
+		
+		JLabel lblRefreshRate = new JLabel("Refresh Rate");
+		refresh.add(lblRefreshRate);
 
 		comboBoxUpdateRate = new JComboBox<String>();
 		comboBoxUpdateRate.setModel(new DefaultComboBoxModel<String>(
@@ -71,15 +72,15 @@ public class MessagesPanel extends JPanel implements Runnable {
 					sleepTime = 1000;
 					break;
 				}
-				threadRef.interrupt();
+				if(thread != null)
+					thread.interrupt();
 			}
 		});
 		
-		add(comboBoxUpdateRate, BorderLayout.EAST);
+		refresh.add(comboBoxUpdateRate);
 
-		JLabel lblRefreshRate = new JLabel("Refresh Rate");
-		lblRefreshRate.setHorizontalAlignment(SwingConstants.RIGHT);
-		add(lblRefreshRate);
+		
+		add(refresh, BorderLayout.SOUTH);
 	}
 
 	public void addMessage(SystemStatusMessage message) {
@@ -90,29 +91,15 @@ public class MessagesPanel extends JPanel implements Runnable {
 
 			str = message.getTimestamp() + " - " + str;
 			messageArea.append(str);
+			messageArea.setCaretPosition(messageArea.getDocument().getLength());
 		}
 	}
-
-	private void requestSystemStatus() {
-		gui.getConnector().sendData(
-				new InformationRequest(MessageType.SYSTEM_STATUS));
+	
+	public int getSleepTime() {
+		return sleepTime;
 	}
 
-	@Override
-	public void run() {
-		this.threadRef = Thread.currentThread();
-
-		while (keepGoing) {
-			requestSystemStatus();
-			try {
-				Thread.sleep(sleepTime);
-			} catch (InterruptedException e) {
-				// we expect interruptions when we change the refresh rate
-			}
-		}
-	}
-
-	public void stopExecuting() {
-		keepGoing = false;
+	public void registerThread(UpdateThread t) {
+		this.thread = t;
 	}
 }

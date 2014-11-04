@@ -1,12 +1,15 @@
 package network;
 
 import gui.GUI;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+
+import main.DroneControlConsole;
 import network.messages.Message;
 
 public abstract class DroneConnection extends Thread {
@@ -17,18 +20,18 @@ public abstract class DroneConnection extends Thread {
 	protected ObjectOutputStream out;
 	protected InetAddress destHost;
 	protected String destHostName;
-	protected GUI gui;
+	protected DroneControlConsole console;
 	
 	protected boolean ready = false;
 	
-	public DroneConnection(GUI gui, InetAddress destHost, int port) throws IOException {
+	public DroneConnection(DroneControlConsole console, InetAddress destHost, int port) throws IOException {
 		this.socket = null;
 		this.in = null;
 		this.out = null;
 		this.destHostName = null;
 		this.destHost = destHost;
 		this.port = port;
-		this.gui = gui;
+		this.console = console;
 		
 		if(!checkIP(destHost)) {
 			throw new UnknownHostException(destHost.getHostAddress()+" unreachable!");
@@ -113,7 +116,7 @@ public abstract class DroneConnection extends Thread {
 		try {
 			Message message = (Message) in.readObject();
 			System.out.println("[RECEIVED] Received "+message.getClass().getSimpleName());
-			gui.processMessage(message);
+			console.processMessage(message);
 		} catch (ClassNotFoundException e) {
 			System.err.println("Received class of unknown type from "
 							+ destHostName

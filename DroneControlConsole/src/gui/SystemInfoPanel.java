@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -13,12 +12,10 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
-
-import network.messages.InformationRequest;
-import network.messages.InformationRequest.MessageType;
+import threads.UpdateThread;
 import dataObjects.SystemInformationsData;
 
-public class SystemInfoPanel extends JPanel {
+public class SystemInfoPanel extends JPanel implements UpdatePanel {
 	private static final long serialVersionUID = 8457762280133417243L;
 	private GUI gui;
 
@@ -79,6 +76,8 @@ public class SystemInfoPanel extends JPanel {
 	private JTextField textFieldEMMCFreq;
 	private JTextField textFieldHDMIFreq;
 	private JTextField textFieldDPIFreq;
+	
+	private UpdateThread thread;
 
 	public SystemInfoPanel(GUI gui) {
 		this.gui = gui;
@@ -100,7 +99,8 @@ public class SystemInfoPanel extends JPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				requestSysInformationsData();
+				if(thread != null)
+					thread.interrupt();
 			}
 		});
 		add(btnRefresh);
@@ -655,8 +655,13 @@ public class SystemInfoPanel extends JPanel {
 		repaint();
 	}
 
-	private void requestSysInformationsData() {
-		gui.getConnector()
-				.sendData(new InformationRequest(MessageType.SYSTEM_INFO));
+	@Override
+	public void registerThread(UpdateThread t) {
+		this.thread = t;
+	}
+
+	@Override
+	public int getSleepTime() {
+		return Integer.MAX_VALUE;
 	}
 }

@@ -1,32 +1,32 @@
 package network;
 
-import gui.GUI;
 import java.io.IOException;
 import java.net.InetAddress;
 import javax.swing.JOptionPane;
+import main.DroneControlConsole;
 
 public class InformationConnection extends DroneConnection {
 
 	private static int INFORMATION_PORT = 10101;
 
-	public InformationConnection(GUI gui, InetAddress destHost)
+	public InformationConnection(DroneControlConsole console, InetAddress destHost)
 			throws IOException {
-		super(gui, destHost, INFORMATION_PORT);
+		super(console, destHost, INFORMATION_PORT);
 	}
 
-	public InformationConnection(GUI gui, InetAddress destHost, int destPort)
+	public InformationConnection(DroneControlConsole console, InetAddress destHost, int destPort)
 			throws IOException {
-		super(gui, destHost, destPort);
+		super(console, destHost, destPort);
 	}
 
 	@Override
 	protected void shutdownConnection() {
-		JOptionPane.showMessageDialog(gui.getFrame(),
+		JOptionPane.showMessageDialog(console.getGUI(),
 				"Connection to drone was lost!");
 		System.exit(0);
 		// TODO fix this! when this happens, the old threads are still in the
 		// background sending stuff
-		gui.connect();
+		console.connect();
 	}
 
 }

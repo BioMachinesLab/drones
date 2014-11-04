@@ -1,20 +1,20 @@
 package network;
 
-import gui.GUI;
 import java.io.IOException;
 import java.net.InetAddress;
+import main.DroneControlConsole;
 
 public class MotorConnection extends DroneConnection {
 
 	private static int MOTOR_PORT = 10102;
 
-	public MotorConnection(GUI gui, InetAddress destHost) throws IOException {
-		super(gui, destHost, MOTOR_PORT);
+	public MotorConnection(DroneControlConsole console, InetAddress destHost) throws IOException {
+		super(console, destHost, MOTOR_PORT);
 	}
 
-	public MotorConnection(GUI gui, InetAddress destHost, int destPort)
+	public MotorConnection(DroneControlConsole console, InetAddress destHost, int destPort)
 			throws IOException {
-		super(gui, destHost, destPort);
+		super(console, destHost, destPort);
 	}
 
 }
