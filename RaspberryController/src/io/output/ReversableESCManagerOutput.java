@@ -30,12 +30,9 @@ public class ReversableESCManagerOutput extends Thread implements
 	public ReversableESCManagerOutput(MotorSpeeds speeds) {
 		this.speeds = speeds;
 		try {
-
-			setRawValues(50, 50);
-			Thread.sleep(500);
-
 			setRawValues(CENTRAL_L_VALUE, CENTRAL_R_VALUE);
-			Thread.sleep(500);
+			Thread.sleep(1000);
+			
 			available = true;
 		} catch (InterruptedException e) {
 			System.err.println(e.getMessage());
