@@ -1,6 +1,7 @@
 package gamepad;
 
 import java.io.IOException;
+
 import main.DroneControlConsole;
 
 public class GamePad extends Thread {
@@ -10,19 +11,16 @@ public class GamePad extends Thread {
 	}
 
 	private final static int HISTORY_SIZE = 20;
-	private final static int UPDATE_DELAY = 7;
 	private final static int MAXIMUM_SPEED = 100;
 
 	private DroneControlConsole console;
 	private GamePadInput jinputGamepad;
-	private boolean enable = true;
 
 	private int lastRightMotorSpeed = 0;
 	private int lastLeftMotorSpeed = 0;
 	
 	public static void main(String[] args) throws IOException {
 		GamePad gamePad = new GamePad(null, GamePadType.GAMEPAD);
-		gamePad.disable();
 		gamePad.run();
 	}
 
@@ -57,6 +55,8 @@ public class GamePad extends Thread {
 			double middleX = jinputGamepad.getMiddleX();
 			double middleRZ = jinputGamepad.getMiddleRZ();
 			
+			boolean osX = isPlatformOsx();
+			
 			try {
 
 				while (true) {
@@ -65,7 +65,7 @@ public class GamePad extends Thread {
 						index = 0;
 	
 					readingsXHistory[index] = jinputGamepad.getXAxisValue();
-					readingsRZHistory[index] = jinputGamepad.getRZAxisValue();
+					readingsRZHistory[index] = osX ? jinputGamepad.getZAxisValue() : jinputGamepad.getRZAxisValue();
 	
 					double xValue = 0;
 					double rzValue = 0;
@@ -74,7 +74,6 @@ public class GamePad extends Thread {
 						xValue += readingsXHistory[i];
 						rzValue += readingsRZHistory[i];
 					}
-	
 					xValue /= HISTORY_SIZE;
 					xValue = Math.round(xValue * 1E10) / 1E10;
 					rzValue /= HISTORY_SIZE;
@@ -84,16 +83,6 @@ public class GamePad extends Thread {
 					rzValue = (int) map(rzValue, middleRZ, 0.02, 0, 2.01);
 	
 					index++;
-	
-					// System.out.println("X=" + xValue + " RZ=" + rzValue);
-					// Linear Transformation
-					// int leftMotorSpeed = (int) (rzValue - xValue);
-					// int rightMotorSpeed = (int) (rzValue + xValue);
-	
-					// int leftMotorSpeed = (int) (rzValue - Math.exp(xValue *
-					// 0.046)+1);
-					// int rightMotorSpeed = (int) (rzValue + Math.exp(xValue *
-					// 0.046)-1);
 	
 					double left = rzValue;
 					double right = rzValue;
@@ -108,57 +97,52 @@ public class GamePad extends Thread {
 					int leftMotorSpeed = (int) left;
 					int rightMotorSpeed = (int) right;
 	
-	//				leftMotorSpeed = (int) map(leftMotorSpeed, -100, 100,
-	//						-MAXIMUM_SPEED, MAXIMUM_SPEED);
 					if (leftMotorSpeed > MAXIMUM_SPEED) {
 						leftMotorSpeed = MAXIMUM_SPEED;
-						//rightMotorSpeed = 1;
 					}
 	
-	//				rightMotorSpeed = (int) map(rightMotorSpeed, -100, 100,
-	//						-MAXIMUM_SPEED, MAXIMUM_SPEED);
 					if (rightMotorSpeed > MAXIMUM_SPEED) {
 						rightMotorSpeed = MAXIMUM_SPEED;
-						//leftMotorSpeed = 1;
 					}
-	
-					// System.out.println("Left=" + leftMotorSpeed + " Right="
-					// + rightMotorSpeed);
-	
-	
-					if (enable
-							&& (leftMotorSpeed != lastLeftMotorSpeed || rightMotorSpeed != lastRightMotorSpeed)) {
-	
-						//leftMotorSpeed*=0.8;
+					
+					if(Math.abs(leftMotorSpeed) < 5)
+						leftMotorSpeed = 0;
+					
+					if(Math.abs(rightMotorSpeed) < 5)
+						rightMotorSpeed = 0;
+					
+					if(Math.abs(leftMotorSpeed-lastLeftMotorSpeed) <= 2 && Math.abs(rightMotorSpeed-lastRightMotorSpeed) <= 2)
+						continue;
 						
-						console.getMotorSpeeds().setSpeeds(leftMotorSpeed, rightMotorSpeed);
-	
-						lastLeftMotorSpeed = leftMotorSpeed;
-						lastRightMotorSpeed = rightMotorSpeed;
+					if(console != null) {
+						console.getGUI().getMotorsPanel().setSliderValues(leftMotorSpeed,rightMotorSpeed);
+//							console.getMotorSpeeds().setSpeeds(leftMotorSpeed, rightMotorSpeed);
 					}
-	
-					try {
-						Thread.sleep(UPDATE_DELAY);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			} catch(Exception e) {}
-		}
 
+					lastLeftMotorSpeed = leftMotorSpeed;
+					lastRightMotorSpeed = rightMotorSpeed;
+						
+				}
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public int getLeftMotorSpeed() {
+		return lastLeftMotorSpeed;
+	}
+	
+	public int getRightMotorSpeed() {
+		return lastRightMotorSpeed;
 	}
 
-	private double map(double x, double in_min, double in_max, double out_min,
-			double out_max) {
+	private double map(double x, double in_min, double in_max, double out_min, double out_max) {
 		return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 	}
-
-	public synchronized void enable() {
-		enable = true;
-	}
-
-	public synchronized void disable() {
-		enable = false;
-	}
 	
+	public static boolean isPlatformOsx() {
+        String os = System.getProperty("os.name");
+        return os != null && os.toLowerCase().startsWith("mac os x");
+    }
 }

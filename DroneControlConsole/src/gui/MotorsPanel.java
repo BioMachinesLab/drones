@@ -51,6 +51,8 @@ public class MotorsPanel extends JPanel implements UpdatePanel {
 	private int motorOffset = 0;
 	private int motorLimit = 100;
 	
+	private boolean interrupt = true;
+	
 	public MotorsPanel() {
 		
 		setBorder(BorderFactory.createTitledBorder("Motors Control"));
@@ -192,7 +194,7 @@ public class MotorsPanel extends JPanel implements UpdatePanel {
 						setRightMotorPower(slider.getValue());
 					}
 				}
-				if(thread != null) {
+				if(interrupt && thread != null) {
 					thread.interrupt();
 				}
 			}
@@ -228,6 +230,20 @@ public class MotorsPanel extends JPanel implements UpdatePanel {
 		val = Math.min(val, 100);
 		
 		return val;
+	}
+	
+	public void setSliderValues(int left, int right) {
+		interrupt = false;
+		
+		this.leftSlider.setValue(left);
+		this.rightSlider.setValue(right);
+		
+		interrupt = true;
+		
+		if(thread != null) {
+			thread.interrupt();
+		}
+		
 	}
 
 	public void setLeftMotorPower(int val) {

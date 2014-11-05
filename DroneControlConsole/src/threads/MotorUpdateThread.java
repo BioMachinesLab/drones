@@ -1,5 +1,6 @@
 package threads;
 
+import gamepad.GamePad;
 import gui.MotorsPanel;
 import gui.UpdatePanel;
 import main.DroneControlConsole;
@@ -11,6 +12,7 @@ public class MotorUpdateThread extends UpdateThread {
 	public MotorUpdateThread(DroneControlConsole console, UpdatePanel panel) {
 		super(console, panel, null);
 		this.motorPanel = (MotorsPanel)panel;
+		motorPanel.registerThread(this);
 	}
 	
 	@Override
