@@ -11,8 +11,6 @@ TO-DO Controller:
 
 
 TO-DO GUI:
-	- Refactor GUI and remove connection and devices initialization from it
-	- Change layout to make it resizable
 	- Set up the joystick maximum range (maximum speed) with a slider (or something like that)
 
 	

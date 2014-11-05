@@ -122,6 +122,7 @@ public class ConnectionHandler extends Thread {
 
 	public synchronized void sendData(Object data) {
 		try {
+			out.reset();//clear the cache so that we don't send old data
 			out.writeObject(data);
 			out.flush();
 			System.out.println("[CONNECTION HANDLER] Sent Data ("

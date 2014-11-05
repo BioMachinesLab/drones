@@ -4,6 +4,8 @@ import java.io.FileNotFoundException;
 import java.io.NotActiveException;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -185,7 +187,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 			for (int i = 0; i < strs.length; i++) {
 				if (localLog) {
-					localLogPrintWriterOut.println("$"+strs[i]);
+					localLogPrintWriterOut.println("$" + strs[i]);
 				}
 
 				if (strs[i].matches(NMEA_REGEX)) {
@@ -216,15 +218,17 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 	}
 
 	public Message getMessage(Message request) {
-		if(request instanceof InformationRequest && ((InformationRequest)request).getMessageTypeQuery().equals(InformationRequest.MessageType.GPS)){
-				
+		if (request instanceof InformationRequest
+				&& ((InformationRequest) request).getMessageTypeQuery().equals(
+						InformationRequest.MessageType.GPS)) {
+
 			if (!available)
 				return new SystemStatusMessage(
 						"[GPSModule] Unable to send GPS data");
-	
+
 			return new GPSMessage(getReadings());
 		}
-		
+
 		return null;
 	}
 
@@ -304,8 +308,15 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		if (params.length == 15) {
 			print("[Parsing GPGGA]", false);
 			if (params[2].length() != 0) {
-				gpsData.setLatitude(params[2] + params[3]);
-				gpsData.setLongitude(params[4] + params[5]);
+				
+				double lat = Double.parseDouble(params[2]);
+				char latPos = params[3].charAt(0);
+				
+				double lon = Double.parseDouble(params[4]);
+				char lonPos = params[5].charAt(0);
+				
+				gpsData.setLatitude(""+Nmea0183ToDecimalConverter.convertLatitudeToDecimal(lat, latPos));
+				gpsData.setLongitude(""+Nmea0183ToDecimalConverter.convertLongitudeToDecimal(lon, lonPos));
 				gpsData.setGPSSourceType(Integer.parseInt(params[6]));
 				gpsData.setNumberOfSatellitesInUse(Integer.parseInt(params[7]));
 				gpsData.setHDOP(Double.parseDouble(params[8]));
@@ -402,8 +413,16 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			}
 
 			if (params[3].length() != 0 && params[5].length() != 0) {
-				gpsData.setLatitude(params[3] + params[4]);
-				gpsData.setLongitude(params[5] + params[6]);
+				
+				double lat = Double.parseDouble(params[3]);
+				char latPos = params[4].charAt(0);
+				
+				double lon = Double.parseDouble(params[5]);
+				char lonPos = params[6].charAt(0);
+				
+				gpsData.setLatitude(""+Nmea0183ToDecimalConverter.convertLatitudeToDecimal(lat, latPos));
+				gpsData.setLongitude(""+Nmea0183ToDecimalConverter.convertLongitudeToDecimal(lon, lonPos));
+				
 			}
 
 			gpsData.setGroundSpeedKnts(Double.parseDouble(params[7]));
@@ -549,7 +568,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 	}
 
 	/*
-	 * Enables a logging of the received NMEA information in the disk (on the selected path)
+	 * Enables a logging of the received NMEA information in the disk (on the
+	 * selected path)
 	 */
 	public void enableLocalLog() {
 		try {
@@ -558,7 +578,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 
 			localLogPrintWriterOut = new PrintWriter(FILE_NAME
-					+ sdf.format(cal.getTime())+".log");
+					+ sdf.format(cal.getTime()) + ".log");
 			localLog = true;
 		} catch (FileNotFoundException e) {
 			System.err.println("[GPSModuleInput] Unable to start local log");

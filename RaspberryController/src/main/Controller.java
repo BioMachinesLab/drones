@@ -183,7 +183,7 @@ public class Controller {
 	 * Hardware initialization routines
 	 */
 	private void initInputs() {
-		try {
+		/*try {
 			// Get I2C instance
 			i2cBus = I2CFactory.getInstance(I2CBus.BUS_1);
 
@@ -197,7 +197,7 @@ public class Controller {
 		} catch (IOException e) {
 			initMessages += "\n[INIT] I2CCompassModule: not ok!" + "\n";
 			e.printStackTrace();
-		}
+		}*/
 
 		gpsModule = new GPSModuleInput();
 		initMessages += "\n[INIT] GPSModule: "
