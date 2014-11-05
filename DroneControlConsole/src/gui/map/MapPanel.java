@@ -53,7 +53,7 @@ public class MapPanel extends JPanel {
     private JLabel mperpLabelName=null;
     private JLabel mperpLabelValue = null;
     
-    private static int POSITION_HISTORY = 15;
+    private static int POSITION_HISTORY = 100;
     
     private int robotMarkerIndex = 0;
     
@@ -219,16 +219,16 @@ public class MapPanel extends JPanel {
         // map.setDisplayPosition(new Coordinate(49.807, 8.6), 11);
 //        map.setTileGridVisible(true);
         
+        //Lisbon
         map().setDisplayPosition(new Coordinate(38.7166700,-9.1333300), 11);
 
         map().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    map().getAttribution().handleAttribution(e.getPoint(), true);
-                } else if(e.getButton() == MouseEvent.BUTTON3) {
-//                	addMarker(map().getPosition(),"waypoints");
-                	updateRobotPosition("drone",map().getPosition());
+            	
+               if(e.getButton() == MouseEvent.BUTTON3) {
+//            	   addMarker(map().getPosition(e.getPoint()),"waypoints");
+            	   updateRobotPosition("drone", map().getPosition(e.getPoint()));
                 }
             }
         });
@@ -291,7 +291,7 @@ public class MapPanel extends JPanel {
     	
     	if(!robotPositions.isEmpty()) {
     	
-	    	Style styleOld = new Style(Color.black, Color.green, new BasicStroke(1), new Font("Dialog", Font.PLAIN, 0));
+	    	Style styleOld = new Style(Color.black, Color.LIGHT_GRAY, new BasicStroke(1), new Font("Dialog", Font.PLAIN, 0));
 	    	
 	    	//remove last value from previous iteration
 	    	MapMarker last = robotPositions.pollLast();
@@ -307,7 +307,7 @@ public class MapPanel extends JPanel {
     	}
     	
     	//add the new one with the new style
-    	Style styleNew = new Style(Color.RED, Color.BLUE, new BasicStroke(1), new Font("Dialog", Font.PLAIN, 12));
+    	Style styleNew = new Style(Color.RED, Color.green, new BasicStroke(1), new Font("Dialog", Font.PLAIN, 12));
     	MapMarker m = new MapMarkerDot(l, "drone" , c, styleNew);
     	l.add(m);
     	map().addMapMarker(m);

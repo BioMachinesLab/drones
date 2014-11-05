@@ -38,7 +38,7 @@ public class GamePad extends Thread {
 
 			jinputGamepad.getControllerComponents();
 			jinputGamepad.pollComponentsValues();
-			// jinputGamepad.calibrateJoystick();
+//			jinputGamepad.calibrateJoystick();
 
 		} catch (Exception e) {
 			System.err.println("Gamepad not available");

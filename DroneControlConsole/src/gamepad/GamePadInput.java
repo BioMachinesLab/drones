@@ -142,11 +142,10 @@ public abstract class GamePadInput {
 
 		System.out.println("Calibrating Gamepad!");
 		System.out.println("Press enter to calibrate Left Joystick!");
-
-		System.out
-				.println("Reading values, so move the joystick in circles. When finished, press enter!");
 		scanner.nextLine();
 		System.out.println("Calibrating.....");
+
+		System.out.println("Reading values, so move the joystick in circles. When finished, press enter!");
 
 		int readedLeftSamples = 0;
 		while (!finished) {
@@ -169,11 +168,13 @@ public abstract class GamePadInput {
 				}
 			}
 		}
+		
+		
 
 		System.out.println("Press enter to calibrate Right Joystick!");
-		System.out
-				.println("Reading values, so move the joystick in circles. When finished, press enter!");
 		scanner.nextLine();
+		System.out.println("Reading values, so move the joystick in circles. When finished, press enter!");
+		
 		System.out.println("Calibrating.....");
 
 		finished = false;
@@ -208,10 +209,10 @@ public abstract class GamePadInput {
 		middleRZ /= readedRightSamples;
 
 		System.out.println("Results: ");
-		System.out.println("MiddleX= " + middleX);
-		System.out.println("MiddleY= " + middleY);
-		System.out.println("MiddleZ= " + middleZ);
-		System.out.println("MiddleRZ= " + middleRZ);
+		System.out.println("protected double middleX= " + middleX+";");
+		System.out.println("protected double middleY= " + middleY+";");
+		System.out.println("protected double middleZ= " + middleZ+";");
+		System.out.println("protected double middleRZ= " + middleRZ+";");
 	}
 
 	public void setXIdentifier(String xIdentifier) {
