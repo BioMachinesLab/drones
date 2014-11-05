@@ -6,20 +6,23 @@ public class MotorSpeeds {
 	
 	private double speedLeft = 0;
 	private double speedRight = 0;
+	
 	private double limit = 0;
 	private double offset = 0;
 	private boolean changed = true;
 	
 	public synchronized void setSpeeds(double left, double right) {
+		
 		left = limit(left);
 		right = limit(right);
+		
+		left = offsetLeft(left);
+		right = offsetRight(right);
 
 		if(Math.abs(left-speedLeft) >= 0.05 || Math.abs(right-speedRight) >= 0.05){
 			
 			this.speedLeft = left;
 			this.speedRight = right;
-			
-			offset();
 			
 			changed = true;
 			notifyAll();
@@ -30,16 +33,23 @@ public class MotorSpeeds {
 		return val > limit ? limit : val;
 	}
 	
-	private void offset() {
-		
+	private double offsetLeft(double leftVal) {
 		if(offset > 0) {
 			//right should have more power
-			speedLeft*= (1-offset);
-		} else if (offset < 0) {
+			leftVal*= (1-offset);
+		}
+		
+		return leftVal;
+		
+	}
+	
+	private double offsetRight(double rightVal) {
+		if (offset < 0) {
 			//left should have more power
 			offset = -offset;
-			speedRight*= (1-offset);
+			rightVal*= (1-offset);
 		}
+		return rightVal;
 		
 	}
 	

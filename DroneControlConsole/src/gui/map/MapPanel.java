@@ -1,7 +1,10 @@
-package gui;
+package gui.map;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Font;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,6 +15,8 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -21,11 +26,12 @@ import javax.swing.JPanel;
 
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
-import org.openstreetmap.gui.jmapviewer.JMapViewerTree;
 import org.openstreetmap.gui.jmapviewer.Layer;
-import org.openstreetmap.gui.jmapviewer.MapMarkerCircle;
+import org.openstreetmap.gui.jmapviewer.MapMarkerDot;
 import org.openstreetmap.gui.jmapviewer.OsmFileCacheTileLoader;
 import org.openstreetmap.gui.jmapviewer.OsmTileLoader;
+import org.openstreetmap.gui.jmapviewer.Style;
+import org.openstreetmap.gui.jmapviewer.interfaces.MapMarker;
 import org.openstreetmap.gui.jmapviewer.interfaces.TileLoader;
 import org.openstreetmap.gui.jmapviewer.interfaces.TileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.BingAerialTileSource;
@@ -33,17 +39,25 @@ import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOpenAerialTileSource
 import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOsmTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.OsmTileSource;
 
+import dataObjects.GPSData;
+
 public class MapPanel extends JPanel {
 	
 	private static final long serialVersionUID = 1L;
 
-    private JMapViewerTree treeMap = null;
+    private JMapViewerTreeDrone treeMap = null;
 
     private JLabel zoomLabel=null;
     private JLabel zoomValue=null;
 
     private JLabel mperpLabelName=null;
     private JLabel mperpLabelValue = null;
+    
+    private static int POSITION_HISTORY = 15;
+    
+    private int robotMarkerIndex = 0;
+    
+    private LinkedList<MapMarker> robotPositions = new LinkedList<MapMarker>();
 
     /**
      * Constructs the {@code Demo}.
@@ -51,8 +65,8 @@ public class MapPanel extends JPanel {
      */
     public MapPanel() {
 
-        treeMap = new JMapViewerTree("Zones");
-
+        treeMap = new JMapViewerTreeDrone("Zones");
+        
         // final JMapViewer map = new JMapViewer(new MemoryTileCache(),4);
         // map.setTileLoader(new OsmFileCacheTileLoader(map));
         // new DefaultMapController(map);
@@ -112,6 +126,15 @@ public class MapPanel extends JPanel {
         } catch(MalformedURLException e) {
         	e.printStackTrace();
         }
+        
+        final JCheckBox showTreeLayers = new JCheckBox("Tree Layers visible");
+        showTreeLayers.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                treeMap.setTreeVisible(showTreeLayers.isSelected());
+            }
+        });
+        panelBottom.add(showTreeLayers);
+        
         final JCheckBox showMapMarker = new JCheckBox("Map markers visible");
         showMapMarker.setSelected(map().getMapMarkersVisible());
         showMapMarker.addActionListener(new ActionListener() {
@@ -192,20 +215,20 @@ public class MapPanel extends JPanel {
 
         Layer wales = treeMap.addLayer("UK");
         map().addMapRectangle(new MapRectangleImpl(wales, "Wales", c(53.35,-4.57), c(51.64,-2.63)));
-
+         */
         // map.setDisplayPosition(new Coordinate(49.807, 8.6), 11);
-        */
-        // map.setTileGridVisible(true);
+//        map.setTileGridVisible(true);
         
         map().setDisplayPosition(new Coordinate(38.7166700,-9.1333300), 11);
 
         map().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-            	System.out.println(map().getPosition());
-            	addMarker(map().getPosition(),"hey");
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     map().getAttribution().handleAttribution(e.getPoint(), true);
+                } else if(e.getButton() == MouseEvent.BUTTON3) {
+//                	addMarker(map().getPosition(),"waypoints");
+                	updateRobotPosition("drone",map().getPosition());
                 }
             }
         });
@@ -233,17 +256,90 @@ public class MapPanel extends JPanel {
         return new Coordinate(lat, lon);
     }
 
-    private void updateZoomParameters() {
+    public void addMarker(Coordinate c, String name) {
+    	Layer l = null;
     	
-        if (mperpLabelValue!=null)
-            mperpLabelValue.setText(String.format("%s",map().getMeterPerPixel()));
-        if (zoomValue!=null)
-            zoomValue.setText(String.format("%s", map().getZoom()));
+    	for(Layer layer : treeMap.getLayers())
+    		if(layer.getName().equals(name))
+    			l = layer;
+
+    	if(l == null)
+    		l = treeMap.addLayer("waypoints");
+    	
+    	MapMarker m = new MapMarkerDot(l, ""+Math.random()*100 , c);
+    	l.add(m);
+    	map().addMapMarker(m);
     }
     
-    public void addMarker(Coordinate c, String name) {
-    	Layer layer = treeMap.addLayer(name);
-    	map().addMapMarker(new MapMarkerCircle(layer, name , c, .002));
+    public void updateRobotPosition(String name, Coordinate c) {
+    	
+    	Layer l = null;
+    	
+    	Iterator<MapMarker> i = map().getMapMarkerList().iterator();
+    	
+    	while(i.hasNext()) {
+    		MapMarker m = i.next();
+    		if(m.getLayer().getName().equals(name)) {
+    			l = m.getLayer();
+    			break;
+    		}
+    	}
+
+    	if(l == null) {
+    		l = treeMap.addLayer(name);
+    	}
+    	
+    	if(!robotPositions.isEmpty()) {
+    	
+	    	Style styleOld = new Style(Color.black, Color.green, new BasicStroke(1), new Font("Dialog", Font.PLAIN, 0));
+	    	
+	    	//remove last value from previous iteration
+	    	MapMarker last = robotPositions.pollLast();
+	    	treeMap.removeFromLayer(last);
+	    	map().removeMapMarker(last);
+	    	
+	    	//add that same one with a different style
+	    	MapMarker old = new MapMarkerDot(l,""+robotMarkerIndex++,last.getCoordinate(), styleOld);
+	    	robotPositions.add(old);
+	    	l.add(old);
+	    	map().addMapMarker(old);
+	    	
+    	}
+    	
+    	//add the new one with the new style
+    	Style styleNew = new Style(Color.RED, Color.BLUE, new BasicStroke(1), new Font("Dialog", Font.PLAIN, 12));
+    	MapMarker m = new MapMarkerDot(l, "drone" , c, styleNew);
+    	l.add(m);
+    	map().addMapMarker(m);
+    	robotPositions.add(m);
+    	
+    	while(robotPositions.size() > POSITION_HISTORY) {
+    		MapMarker old = robotPositions.pollFirst();
+    		treeMap.removeFromLayer(old);
+        	map().removeMapMarker(old);
+    	}
+    	
     }
+
+	public void displayData(GPSData gpsData) {
+		if(usefulRobotCoordinate(gpsData)) {
+			updateRobotPosition("drone", c(Double.parseDouble(gpsData.getLatitude()),Double.parseDouble(gpsData.getLongitude())));
+		}
+	}
+	
+	private boolean usefulRobotCoordinate(GPSData gpsData) {
+		if(gpsData.getLatitude() == null || gpsData.getLongitude() == null)
+			return false;
+		if(gpsData.getLatitude().isEmpty() || gpsData.getLongitude().isEmpty())
+			return false;
+		
+		Coordinate c = robotPositions.peekLast().getCoordinate();
+		Coordinate n = c(Double.parseDouble(gpsData.getLatitude()), Double.parseDouble(gpsData.getLongitude()));
+		
+		if(c.getLat() == n.getLat() && c.getLon() == n.getLon())
+			return false;
+		
+		return true;
+	}
 
 }

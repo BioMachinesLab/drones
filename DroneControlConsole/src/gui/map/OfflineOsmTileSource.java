@@ -1,4 +1,4 @@
-package gui;
+package gui.map;
 
 import org.openstreetmap.gui.jmapviewer.tilesources.AbstractOsmTileSource;
 

@@ -1,8 +1,10 @@
 package gui;
 
+import gui.map.MapPanel;
+
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
+import java.awt.Window;
+import java.lang.reflect.Method;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -28,12 +30,10 @@ public class GUI extends JFrame{
 			System.err
 					.println("Not able to set LookAndFeel for the current OS");
 		}
-
+		
+		enableOSXFullscreen(this);
 		buildGUI();
 	}
-
-	// Make sure that everything is at the initial state. Useful for
-	// reconnections
 
 	private void buildGUI() {
 		setTitle("HANCAD/ CORATAM Project - Drone Remote Console");
@@ -96,5 +96,20 @@ public class GUI extends JFrame{
 	
 	public MotorsPanel getMotorsPanel() {
 		return motorsPanel;
+	}
+	
+	public MapPanel getMapPanel() {
+		return mapPanel;
+	}
+	
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	public static void enableOSXFullscreen(Window window) {
+	    try {
+	        Class util = Class.forName("com.apple.eawt.FullScreenUtilities");
+	        Class params[] = new Class[]{Window.class, Boolean.TYPE};
+	        Method method = util.getMethod("setWindowCanFullScreen", params);
+	        method.invoke(util, window, true);
+	    } catch (ClassNotFoundException e1) {
+	    } catch (Exception e) {}
 	}
 }

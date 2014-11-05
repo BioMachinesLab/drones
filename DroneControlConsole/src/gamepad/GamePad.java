@@ -56,91 +56,94 @@ public class GamePad extends Thread {
 			double[] readingsRZHistory = new double[HISTORY_SIZE];
 			double middleX = jinputGamepad.getMiddleX();
 			double middleRZ = jinputGamepad.getMiddleRZ();
+			
+			try {
 
-			while (true) {
-				jinputGamepad.pollComponentsValues();
-				if (index == HISTORY_SIZE)
-					index = 0;
-
-				readingsXHistory[index] = jinputGamepad.getXAxisValue();
-				readingsRZHistory[index] = jinputGamepad.getRZAxisValue();
-
-				double xValue = 0;
-				double rzValue = 0;
-
-				for (int i = 0; i < HISTORY_SIZE; i++) {
-					xValue += readingsXHistory[i];
-					rzValue += readingsRZHistory[i];
-				}
-
-				xValue /= HISTORY_SIZE;
-				xValue = Math.round(xValue * 1E10) / 1E10;
-				rzValue /= HISTORY_SIZE;
-				rzValue = Math.round(rzValue * 1E10) / 1E10;
-
-				xValue = (int) map(xValue, middleX, 0.02, 0, 2.02);
-				rzValue = (int) map(rzValue, middleRZ, 0.02, 0, 2.01);
-
-				index++;
-
-				// System.out.println("X=" + xValue + " RZ=" + rzValue);
-				// Linear Transformation
-				// int leftMotorSpeed = (int) (rzValue - xValue);
-				// int rightMotorSpeed = (int) (rzValue + xValue);
-
-				// int leftMotorSpeed = (int) (rzValue - Math.exp(xValue *
-				// 0.046)+1);
-				// int rightMotorSpeed = (int) (rzValue + Math.exp(xValue *
-				// 0.046)-1);
-
-				double left = rzValue;
-				double right = rzValue;
-
-				if (xValue > 0) {
-					left *= Math.abs((100.0 - xValue) / 100.0);
-				} else if (xValue < 0) {
-					right *= Math.abs((100 + xValue) / 100.0);
-				}
-				
-
-				int leftMotorSpeed = (int) left;
-				int rightMotorSpeed = (int) right;
-
-//				leftMotorSpeed = (int) map(leftMotorSpeed, -100, 100,
-//						-MAXIMUM_SPEED, MAXIMUM_SPEED);
-				if (leftMotorSpeed > MAXIMUM_SPEED) {
-					leftMotorSpeed = MAXIMUM_SPEED;
-					//rightMotorSpeed = 1;
-				}
-
-//				rightMotorSpeed = (int) map(rightMotorSpeed, -100, 100,
-//						-MAXIMUM_SPEED, MAXIMUM_SPEED);
-				if (rightMotorSpeed > MAXIMUM_SPEED) {
-					rightMotorSpeed = MAXIMUM_SPEED;
-					//leftMotorSpeed = 1;
-				}
-
-				// System.out.println("Left=" + leftMotorSpeed + " Right="
-				// + rightMotorSpeed);
-
-
-				if (enable
-						&& (leftMotorSpeed != lastLeftMotorSpeed || rightMotorSpeed != lastRightMotorSpeed)) {
-
-					//leftMotorSpeed*=0.8;
+				while (true) {
+					jinputGamepad.pollComponentsValues();
+					if (index == HISTORY_SIZE)
+						index = 0;
+	
+					readingsXHistory[index] = jinputGamepad.getXAxisValue();
+					readingsRZHistory[index] = jinputGamepad.getRZAxisValue();
+	
+					double xValue = 0;
+					double rzValue = 0;
+	
+					for (int i = 0; i < HISTORY_SIZE; i++) {
+						xValue += readingsXHistory[i];
+						rzValue += readingsRZHistory[i];
+					}
+	
+					xValue /= HISTORY_SIZE;
+					xValue = Math.round(xValue * 1E10) / 1E10;
+					rzValue /= HISTORY_SIZE;
+					rzValue = Math.round(rzValue * 1E10) / 1E10;
+	
+					xValue = (int) map(xValue, middleX, 0.02, 0, 2.02);
+					rzValue = (int) map(rzValue, middleRZ, 0.02, 0, 2.01);
+	
+					index++;
+	
+					// System.out.println("X=" + xValue + " RZ=" + rzValue);
+					// Linear Transformation
+					// int leftMotorSpeed = (int) (rzValue - xValue);
+					// int rightMotorSpeed = (int) (rzValue + xValue);
+	
+					// int leftMotorSpeed = (int) (rzValue - Math.exp(xValue *
+					// 0.046)+1);
+					// int rightMotorSpeed = (int) (rzValue + Math.exp(xValue *
+					// 0.046)-1);
+	
+					double left = rzValue;
+					double right = rzValue;
+	
+					if (xValue > 0) {
+						left *= Math.abs((100.0 - xValue) / 100.0);
+					} else if (xValue < 0) {
+						right *= Math.abs((100 + xValue) / 100.0);
+					}
 					
-					console.getMotorSpeeds().setSpeeds(leftMotorSpeed, rightMotorSpeed);
-
-					lastLeftMotorSpeed = leftMotorSpeed;
-					lastRightMotorSpeed = rightMotorSpeed;
+	
+					int leftMotorSpeed = (int) left;
+					int rightMotorSpeed = (int) right;
+	
+	//				leftMotorSpeed = (int) map(leftMotorSpeed, -100, 100,
+	//						-MAXIMUM_SPEED, MAXIMUM_SPEED);
+					if (leftMotorSpeed > MAXIMUM_SPEED) {
+						leftMotorSpeed = MAXIMUM_SPEED;
+						//rightMotorSpeed = 1;
+					}
+	
+	//				rightMotorSpeed = (int) map(rightMotorSpeed, -100, 100,
+	//						-MAXIMUM_SPEED, MAXIMUM_SPEED);
+					if (rightMotorSpeed > MAXIMUM_SPEED) {
+						rightMotorSpeed = MAXIMUM_SPEED;
+						//leftMotorSpeed = 1;
+					}
+	
+					// System.out.println("Left=" + leftMotorSpeed + " Right="
+					// + rightMotorSpeed);
+	
+	
+					if (enable
+							&& (leftMotorSpeed != lastLeftMotorSpeed || rightMotorSpeed != lastRightMotorSpeed)) {
+	
+						//leftMotorSpeed*=0.8;
+						
+						console.getMotorSpeeds().setSpeeds(leftMotorSpeed, rightMotorSpeed);
+	
+						lastLeftMotorSpeed = leftMotorSpeed;
+						lastRightMotorSpeed = rightMotorSpeed;
+					}
+	
+					try {
+						Thread.sleep(UPDATE_DELAY);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
-
-				try {
-					Thread.sleep(UPDATE_DELAY);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
+			} catch(Exception e) {}
 		}
 
 	}

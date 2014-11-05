@@ -63,12 +63,13 @@ public class DroneControlConsole extends Thread {
 	@Override
 	public void run() {
 		
+		motorSpeeds = new MotorSpeeds();
+		
 //		connect();
 
 		setupGUI();
 		
-		gamePad = new GamePad(this, GamePadType.GAMEPAD);
-		gamePad.start();
+		setupGamepad();
 		
 		if(informationConnection != null && motorConnection != null) {
 			informationConnection.start();
@@ -78,6 +79,15 @@ public class DroneControlConsole extends Thread {
 		
 		gui.setVisible(true);
 		
+	}
+	
+	private void setupGamepad() {
+		try {
+			gamePad = new GamePad(this, GamePadType.GAMEPAD);
+			gamePad.start();
+		} catch(UnsatisfiedLinkError e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private void setupGUI() {
@@ -118,8 +128,6 @@ public class DroneControlConsole extends Thread {
 							form.getIpAddress(), form.getMotorPortNumber());
 					
 
-					motorSpeeds = new MotorSpeeds();
-					
 					motorMessageSender = new MotorMessageSender(
 							motorConnection, motorSpeeds);
 
@@ -135,6 +143,7 @@ public class DroneControlConsole extends Thread {
 
 		if (message instanceof GPSMessage) {
 			gui.getGPSPanel().displayData(((GPSMessage) message).getGPSData());
+			gui.getMapPanel().displayData(((GPSMessage) message).getGPSData());
 		} else if (message instanceof SystemInformationsMessage) {
 			gui.getSysInfoPanel().displayData(((SystemInformationsMessage) message).getSysInformations());
 		} else if (message instanceof SystemStatusMessage) {

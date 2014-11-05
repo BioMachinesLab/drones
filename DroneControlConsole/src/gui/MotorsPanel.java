@@ -249,7 +249,7 @@ public class MotorsPanel extends JPanel implements UpdatePanel {
 	}
 	
 	public double getMotorOffset() {
-		return motorOffset;
+		return motorOffset/100.0;
 	}
 	
 	public double getMotorLimit() {
