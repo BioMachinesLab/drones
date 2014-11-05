@@ -7,12 +7,9 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Hashtable;
-
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -27,7 +24,6 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.plaf.basic.BasicGraphicsUtils;
 import javax.swing.plaf.basic.BasicProgressBarUI;
 
 import sun.swing.SwingUtilities2;
@@ -200,15 +196,17 @@ public class MotorsPanel extends JPanel implements UpdatePanel {
 			}
 		});
 		panel.add(slider, BorderLayout.WEST);
-
+		progressBar.setPreferredSize(new Dimension(50,10));
 		progressBar.setValue(0);
 		progressBar.setForeground(Color.GREEN);
 		progressBar.setUI(new MyProgressUI());
 		progressBar.setStringPainted(true);
 		progressBar.setOrientation(SwingConstants.VERTICAL);
 		panel.add(progressBar, BorderLayout.CENTER);
+		
+//		panel.setPreferredSize(new Dimension(10,10));
 
-		JButton btnStop = new JButton("Stop Motor");
+		JButton btnStop = new JButton("Stop");
 		btnStop.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if (locked) {

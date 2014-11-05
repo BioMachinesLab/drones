@@ -35,7 +35,7 @@ public class MessagesPanel extends JPanel implements UpdatePanel {
 //		setPreferredSize(new Dimension(100, 100));
 //		setMinimumSize(new Dimension(100, 100));
 
-		messageArea = new JTextArea(10,20);
+		messageArea = new JTextArea(10,1);
 		messageArea.setEditable(false);
 
 		scrollPane = new JScrollPane(messageArea);

@@ -1,6 +1,8 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,6 +13,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.border.LineBorder;
 
 import org.joda.time.LocalDateTime;
 
@@ -20,24 +23,21 @@ import dataObjects.GPSData;
 public class GPSPanel extends JPanel implements UpdatePanel {
 	private static final long serialVersionUID = 6535539451990270799L;
 	
-	private static int TEXTFIELD_SIZE = 7;
+	private static int TEXTFIELD_SIZE = 90;
 	
 	private JTextField textFieldLatitude;
 	private JTextField textFieldLongitude;
-	private JTextField textFieldAltitude;
-	private JTextField textFieldHasFix;
-	private JTextField textFieldFixType;
 	private JTextField textFieldSatelittesView;
 	private JTextField textFieldSatelittesUsed;
 	private JTextField textFieldVelKmh;
-	private JTextField textFieldVelKnots;
 	private JTextField textFieldOrientation;
 	private JTextField textFieldHDOP;
 	private JTextField textFieldPDOP;
 	private JTextField textFieldVDOP;
-	private JTextField textFieldGPSSource;
 	private JTextField textFieldTime;
-	private JTextField textFieldDate;
+	
+	private JLabel labelHasFix;
+	
 	private JComboBox<String> comboBoxUpdateRate;
 
 	private UpdateThread thread;
@@ -51,8 +51,6 @@ public class GPSPanel extends JPanel implements UpdatePanel {
 		JPanel left = new JPanel();
 		left.setLayout(new BorderLayout());
 		left.add(buildCoordinatesPanel(),BorderLayout.NORTH);
-		left.add(buildNavitationInformationsPanel(),BorderLayout.CENTER);
-		left.add(buildTimePanel(), BorderLayout.SOUTH);
 		add(left,BorderLayout.WEST);
 		
 		add(buildGPSFixInformationPanel(), BorderLayout.EAST);
@@ -99,137 +97,91 @@ public class GPSPanel extends JPanel implements UpdatePanel {
 
 	private JPanel buildCoordinatesPanel() {
 		JPanel coordinatesPanel = new JPanel();
-		coordinatesPanel.setBorder(BorderFactory.createTitledBorder("Coordinates"));
-		coordinatesPanel.setLayout(new GridLayout(3,2));
+		coordinatesPanel.setBorder(BorderFactory.createTitledBorder(""));
+		coordinatesPanel.setLayout(new GridLayout(5,2));
+		
+		coordinatesPanel.add(new JLabel("Has Fix"));
+		labelHasFix = new JLabel();
+		labelHasFix.setBackground(Color.RED);
+		labelHasFix.setBorder(new LineBorder(new Color(238,238,238), 4));
+		labelHasFix.setOpaque(true);
+		coordinatesPanel.add(labelHasFix);
 
 		coordinatesPanel.add(new JLabel("Latitude"));
-		textFieldLatitude = new JTextField(TEXTFIELD_SIZE);
+		textFieldLatitude = new JTextField();
+		textFieldLatitude.setPreferredSize(new Dimension(TEXTFIELD_SIZE,1));
+		
 		textFieldLatitude.setEditable(false);
 		coordinatesPanel.add(textFieldLatitude);
 		
 		coordinatesPanel.add(new JLabel("Longitude"));
-		textFieldLongitude = new JTextField(TEXTFIELD_SIZE);
+		textFieldLongitude = new JTextField();
+		textFieldLatitude.setPreferredSize(new Dimension(TEXTFIELD_SIZE,1));
 		textFieldLongitude.setEditable(false);
 		coordinatesPanel.add(textFieldLongitude);
 
-		coordinatesPanel.add(new JLabel("Altitude"));
-		textFieldAltitude = new JTextField(TEXTFIELD_SIZE);
-		textFieldAltitude.setEditable(false);
-		coordinatesPanel.add(textFieldAltitude);
+		coordinatesPanel.add(new JLabel("Vel. (Km/h)"));
+		textFieldVelKmh = new JTextField();
+		textFieldVelKmh.setPreferredSize(new Dimension(TEXTFIELD_SIZE,1));
+		textFieldVelKmh.setEditable(false);
+		coordinatesPanel.add(textFieldVelKmh);
+		
+		coordinatesPanel.add(new JLabel("Time"));
+		textFieldTime = new JTextField();
+		textFieldTime.setPreferredSize(new Dimension(TEXTFIELD_SIZE,1));
+		textFieldTime.setEditable(false);
+		coordinatesPanel.add(textFieldTime);
 		
 		return coordinatesPanel;
 	}
 
-	private JPanel buildNavitationInformationsPanel() {
-		JPanel navigationPanel = new JPanel();
-		navigationPanel.setBorder(BorderFactory.createTitledBorder("Navigation"));
-		navigationPanel.setLayout(new GridLayout(3,2));
-
-		JLabel lblVelkmh = new JLabel("Vel. (Km/h)");
-		navigationPanel.add(lblVelkmh);
-		textFieldVelKmh = new JTextField(TEXTFIELD_SIZE);
-		textFieldVelKmh.setEditable(false);
-		navigationPanel.add(textFieldVelKmh);
-
-		JLabel lblVelknots = new JLabel("Vel. (Knots)");
-		navigationPanel.add(lblVelknots);
-		textFieldVelKnots = new JTextField(TEXTFIELD_SIZE);
-		textFieldVelKnots.setEditable(false);
-		navigationPanel.add(textFieldVelKnots);
-
-		JLabel lblOrientation = new JLabel("Orientation");
-		navigationPanel.add(lblOrientation);
-		textFieldOrientation = new JTextField(TEXTFIELD_SIZE);
-		textFieldOrientation.setEditable(false);
-		navigationPanel.add(textFieldOrientation);
-		
-		return navigationPanel;
-	}
-
 	private JPanel buildGPSFixInformationPanel() {
 		JPanel fixInformationsPanel = new JPanel();
-		fixInformationsPanel.setBorder(BorderFactory
-				.createTitledBorder("Fix Informations"));
-		fixInformationsPanel.setLayout(new GridLayout(8,2));
-
-		JLabel lblHasFix = new JLabel("Has Fix");
-		fixInformationsPanel.add(lblHasFix);
-		textFieldHasFix = new JTextField(TEXTFIELD_SIZE);
-		textFieldHasFix.setEditable(false);
-		fixInformationsPanel.add(textFieldHasFix);
-
-		JLabel lblFixType = new JLabel("Fix Type");
-		fixInformationsPanel.add(lblFixType);
-		textFieldFixType = new JTextField(TEXTFIELD_SIZE);
-		textFieldFixType.setEditable(false);
-		fixInformationsPanel.add(textFieldFixType);
+		fixInformationsPanel.setBorder(BorderFactory.createTitledBorder(""));
+		fixInformationsPanel.setLayout(new GridLayout(5,2));
 
 		JLabel lblNSatellites = new JLabel("Sat. View");
 		fixInformationsPanel.add(lblNSatellites);
-		textFieldSatelittesView = new JTextField(TEXTFIELD_SIZE);
+		textFieldSatelittesView = new JTextField();
+		textFieldSatelittesView.setPreferredSize(new Dimension(TEXTFIELD_SIZE,1));
 		textFieldSatelittesView.setEditable(false);
 		fixInformationsPanel.add(textFieldSatelittesView);
 
 		JLabel lblSatUsed = new JLabel("Sat. Used");
 		fixInformationsPanel.add(lblSatUsed);
-		textFieldSatelittesUsed = new JTextField(TEXTFIELD_SIZE);
+		textFieldSatelittesUsed = new JTextField();
+		textFieldSatelittesUsed.setPreferredSize(new Dimension(TEXTFIELD_SIZE,1));
 		textFieldSatelittesUsed.setEditable(false);
 		fixInformationsPanel.add(textFieldSatelittesUsed);
 
 		JLabel lblHdop = new JLabel("HDOP");
 		fixInformationsPanel.add(lblHdop);
-		textFieldHDOP = new JTextField(TEXTFIELD_SIZE);
+		textFieldHDOP = new JTextField();
+		textFieldHDOP.setPreferredSize(new Dimension(TEXTFIELD_SIZE,1));
 		textFieldHDOP.setEditable(false);
 		fixInformationsPanel.add(textFieldHDOP);
 
 		JLabel lblPdop = new JLabel("PDOP");
 		fixInformationsPanel.add(lblPdop);
-		textFieldPDOP = new JTextField(TEXTFIELD_SIZE);
+		textFieldPDOP = new JTextField();
+		textFieldPDOP.setPreferredSize(new Dimension(TEXTFIELD_SIZE,1));
 		textFieldPDOP.setEditable(false);
 		fixInformationsPanel.add(textFieldPDOP);
 
 		JLabel lblVdop = new JLabel("VDOP");
 		fixInformationsPanel.add(lblVdop);
-		textFieldVDOP = new JTextField(TEXTFIELD_SIZE);
+		textFieldVDOP = new JTextField();
+		textFieldVDOP.setPreferredSize(new Dimension(TEXTFIELD_SIZE,1));
 		textFieldVDOP.setEditable(false);
 		fixInformationsPanel.add(textFieldVDOP);
 
-		JLabel lblGpsSource = new JLabel("GPS Source");
-		fixInformationsPanel.add(lblGpsSource);
-		textFieldGPSSource = new JTextField(TEXTFIELD_SIZE);
-		textFieldGPSSource.setEditable(false);
-		fixInformationsPanel.add(textFieldGPSSource);
-		
 		return fixInformationsPanel;
-	}
-
-	private JPanel buildTimePanel() {
-		JPanel timePanel = new JPanel();
-		timePanel.setBorder(BorderFactory.createTitledBorder("Time & Date"));
-		timePanel.setLayout(new GridLayout(2,2));
-
-		JLabel lblTime = new JLabel("Time");
-		timePanel.add(lblTime);
-		textFieldTime = new JTextField();
-		textFieldTime.setEditable(false);
-		timePanel.add(textFieldTime);
-
-		JLabel lblDate = new JLabel("Date");
-		timePanel.add(lblDate);
-		textFieldDate = new JTextField();
-		textFieldDate.setEditable(false);
-		timePanel.add(textFieldDate);
-		
-		return timePanel;
 	}
 
 	public void displayData(GPSData data) {
 		textFieldLatitude.setText(data.getLatitude());
 		textFieldLongitude.setText(data.getLongitude());
 
-		textFieldAltitude.setText(Double.toString(data.getAltitude()));
-
-		textFieldHasFix.setText(Boolean.toString(data.isFix()));
 		textFieldSatelittesView.setText(Integer.toString(data
 				.getNumberOfSatellitesInView()));
 		textFieldSatelittesUsed.setText(Integer.toString(data
@@ -237,43 +189,23 @@ public class GPSPanel extends JPanel implements UpdatePanel {
 		textFieldHDOP.setText(Double.toString(data.getHDOP()));
 		textFieldPDOP.setText(Double.toString(data.getPDOP()));
 		textFieldVDOP.setText(Double.toString(data.getVDOP()));
-		switch (data.getFixType()) {
-		case 0:
-			textFieldFixType.setText("Not Available");
-			break;
-		case 1:
-			textFieldFixType.setText("2D");
-			break;
-		case 2:
-			textFieldFixType.setText("3D");
-			break;
-		}
 
 		switch (data.getGPSSourceType()) {
 		case 0:
-			textFieldGPSSource.setText("No fix");
+			labelHasFix.setBackground(Color.RED);
 			break;
-		case 1:
-			textFieldGPSSource.setText("GPS");
-			break;
-		case 2:
-			textFieldGPSSource.setText("Diff. GPS");
-			break;
-		case 3:
-			textFieldGPSSource.setText("Code " + data.getGPSSourceType() + "?");
+		default:
+			labelHasFix.setBackground(Color.GREEN);
 			break;
 		}
 
 		textFieldVelKmh.setText(Double.toString(data.getGroundSpeedKmh()));
-		textFieldVelKnots.setText(Double.toString(data.getGroundSpeedKnts()));
 		textFieldOrientation.setText(Double.toString(data.getOrientation()));
 
 		LocalDateTime date = data.getDate();
 		textFieldTime.setText(date.getHourOfDay() + ":"
 				+ date.getMinuteOfHour() + ":" + date.getSecondOfMinute() + ","
 				+ date.getMillisOfSecond());
-		textFieldDate.setText(date.getDayOfMonth() + "/"
-				+ date.getMonthOfYear() + "/" + date.getYear());
 
 		repaint();
 	}
@@ -285,5 +217,4 @@ public class GPSPanel extends JPanel implements UpdatePanel {
 	public int getSleepTime() {
 		return sleepTime;
 	}
-
 }

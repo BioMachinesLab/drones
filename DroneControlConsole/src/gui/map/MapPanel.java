@@ -74,7 +74,6 @@ public class MapPanel extends JPanel {
         setLayout(new BorderLayout());
         JPanel panel = new JPanel();
         JPanel panelTop = new JPanel();
-        JPanel panelBottom = new JPanel();
         JPanel helpPanel = new JPanel();
 
         mperpLabelName=new JLabel("Meters/Pixels: ");
@@ -87,10 +86,9 @@ public class MapPanel extends JPanel {
         add(helpPanel, BorderLayout.SOUTH);
         panel.setLayout(new BorderLayout());
         panel.add(panelTop, BorderLayout.NORTH);
-        panel.add(panelBottom, BorderLayout.SOUTH);
-        JLabel helpLabel = new JLabel("Use right mouse button to move,\n " + "left double click or mouse wheel to zoom.");
+        JLabel helpLabel = new JLabel("Left mouse: move // Double left click or mouse wheel: zoom // Right click: add markers");
         helpPanel.add(helpLabel);
-        JButton button = new JButton("setDisplayToFitMapMarkers");
+        JButton button = new JButton("Fit Markers");
         button.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
@@ -108,79 +106,45 @@ public class MapPanel extends JPanel {
 	                map().setTileSource((TileSource) e.getItem());
 	            }
 	        });
-	        JComboBox<TileLoader> tileLoaderSelector;
-	        try {
-	            tileLoaderSelector = new JComboBox<>(new TileLoader[] { new OsmFileCacheTileLoader(map()), new OsmTileLoader(map()) });
-	        } catch (IOException e) {
-	            tileLoaderSelector = new JComboBox<>(new TileLoader[] { new OsmTileLoader(map()) });
-	        }
-	        tileLoaderSelector.addItemListener(new ItemListener() {
-	            public void itemStateChanged(ItemEvent e) {
-	                map().setTileLoader((TileLoader) e.getItem());
-	            }
-	        });
-	        map().setTileLoader((TileLoader) tileLoaderSelector.getSelectedItem());
+	        
 	        panelTop.add(tileSourceSelector);
-	        panelTop.add(tileLoaderSelector);
+	        
+	        try {
+	        	map().setTileLoader(new OsmFileCacheTileLoader(map()));
+	        } catch (IOException e) {
+	        	map().setTileLoader(new OsmTileLoader(map()));
+	        }
         
         } catch(MalformedURLException e) {
         	e.printStackTrace();
         }
         
-        final JCheckBox showTreeLayers = new JCheckBox("Tree Layers visible");
+        final JCheckBox showTreeLayers = new JCheckBox("Tree Layers");
         showTreeLayers.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 treeMap.setTreeVisible(showTreeLayers.isSelected());
             }
         });
-        panelBottom.add(showTreeLayers);
+        panelTop.add(showTreeLayers);
         
-        final JCheckBox showMapMarker = new JCheckBox("Map markers visible");
+        final JCheckBox showMapMarker = new JCheckBox("Markers");
         showMapMarker.setSelected(map().getMapMarkersVisible());
         showMapMarker.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 map().setMapMarkerVisible(showMapMarker.isSelected());
             }
         });
-        panelBottom.add(showMapMarker);
+        panelTop.add(showMapMarker);
         ///
-        final JCheckBox showToolTip = new JCheckBox("ToolTip visible");
-        showToolTip.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                map().setToolTipText(null);
-            }
-        });
-        panelBottom.add(showToolTip);
-        ///
-        final JCheckBox showTileGrid = new JCheckBox("Tile grid visible");
-        showTileGrid.setSelected(map().isTileGridVisible());
-        showTileGrid.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                map().setTileGridVisible(showTileGrid.isSelected());
-            }
-        });
-        panelBottom.add(showTileGrid);
-        final JCheckBox showZoomControls = new JCheckBox("Show zoom controls");
+        final JCheckBox showZoomControls = new JCheckBox("Zoom Controls");
         showZoomControls.setSelected(map().getZoomContolsVisible());
         showZoomControls.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 map().setZoomContolsVisible(showZoomControls.isSelected());
             }
         });
-        panelBottom.add(showZoomControls);
-        final JCheckBox scrollWrapEnabled = new JCheckBox("Scrollwrap enabled");
-        scrollWrapEnabled.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                map().setScrollWrapEnabled(scrollWrapEnabled.isSelected());
-            }
-        });
-        panelBottom.add(scrollWrapEnabled);
-        panelBottom.add(button);
-
-        panelTop.add(zoomLabel);
-        panelTop.add(zoomValue);
-        panelTop.add(mperpLabelName);
-        panelTop.add(mperpLabelValue);
+        panelTop.add(showZoomControls);
+        panelTop.add(button);
 
         add(treeMap, BorderLayout.CENTER);
 
@@ -243,7 +207,6 @@ public class MapPanel extends JPanel {
                 } else {
                     map().setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                 }
-                if(showToolTip.isSelected()) map().setToolTipText(map().getPosition(p).toString());
             }
         });
     }
