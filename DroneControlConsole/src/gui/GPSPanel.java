@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
@@ -14,9 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
-
 import org.joda.time.LocalDateTime;
-
 import threads.UpdateThread;
 import dataObjects.GPSData;
 
@@ -30,7 +27,6 @@ public class GPSPanel extends JPanel implements UpdatePanel {
 	private JTextField textFieldSatelittesView;
 	private JTextField textFieldSatelittesUsed;
 	private JTextField textFieldVelKmh;
-	private JTextField textFieldOrientation;
 	private JTextField textFieldHDOP;
 	private JTextField textFieldPDOP;
 	private JTextField textFieldVDOP;
@@ -189,8 +185,11 @@ public class GPSPanel extends JPanel implements UpdatePanel {
 		textFieldHDOP.setText(Double.toString(data.getHDOP()));
 		textFieldPDOP.setText(Double.toString(data.getPDOP()));
 		textFieldVDOP.setText(Double.toString(data.getVDOP()));
+		
+		System.out.println(data.getGPSSourceType());
 
 		switch (data.getGPSSourceType()) {
+		case -1:
 		case 0:
 			labelHasFix.setBackground(Color.RED);
 			break;
@@ -200,7 +199,6 @@ public class GPSPanel extends JPanel implements UpdatePanel {
 		}
 
 		textFieldVelKmh.setText(Double.toString(data.getGroundSpeedKmh()));
-		textFieldOrientation.setText(Double.toString(data.getOrientation()));
 
 		LocalDateTime date = data.getDate();
 		textFieldTime.setText(date.getHourOfDay() + ":"

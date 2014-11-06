@@ -13,13 +13,16 @@ public class MotorSpeeds {
 	
 	public synchronized void setSpeeds(double left, double right) {
 		
+		left= left/2.0 + 0.5;
+		right= right/2.0 + 0.5;
+		
 		left = limit(left);
 		right = limit(right);
 		
 		left = offsetLeft(left);
 		right = offsetRight(right);
 
-		if(Math.abs(left-speedLeft) >= 0.05 || Math.abs(right-speedRight) >= 0.05){
+		if(Math.abs(left-speedLeft) >= 0.01 || Math.abs(right-speedRight) >= 0.01){
 			
 			this.speedLeft = left;
 			this.speedRight = right;
