@@ -24,7 +24,7 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	private final static int CTRL_REG1 = (CTRL_REG1_DR | CTRL_REG1_OS);
 
 	private final static int CTRL_REG2_AUTO_MRST_EN = 0x80;
-	private final static int CTRL_REG2_RAW = 0x00;
+	private final static int CTRL_REG2_RAW = 0x00;//0x20;
 	private final static int CTRL_REG2_MAG_RST = 0x00;
 
 	/*
@@ -60,7 +60,7 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 			Thread.sleep(15);
 
 			// Write bits in CTRL_REG1 (set output rate and over sample ratio)
-			mag3110.write((byte) 0x10, (byte) (0x01 | CTRL_REG1));
+			mag3110.write((byte) 0x10, (byte) (0x01 /*| CTRL_REG1*/));
 
 			available = true;
 		} catch (IOException e) {
@@ -102,26 +102,37 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	/*
 	 * Device readers and modifiers
 	 */
-	private int readX() throws IOException, InterruptedException {
+	private short readX() throws IOException, InterruptedException {
 		if (deviceActiveMode) {
 			int xl, xh; // define the MSB and LSB
 
 			xh = mag3110.read((byte) 0x01); // x MSB reg
 			Thread.sleep(2); // needs at least 1.3us free time between start &
-								// stop
-
+			
 			xl = mag3110.read((byte) 0x02); // x LSB reg
 			Thread.sleep(2); // needs at least 1.3us free time between start &
-								// stop
-
-			int xout = (xl | (xh << 8)); // concatenate the MSB and LSB
+			
+			short h = (short)((xh & 0xFF) << 8);
+			short l = (short)(xl & 0xFF);
+			
+			short b = (short)((h | l) & 0xFFFF);
+			
+			System.out.println(b);
+			
+//			byte h = (byte)xh;
+//			byte l = (byte)xl;
+//			
+//			int r = ((h & 0x7F) <<8) | l;
+//			boolean negative = 0x7
+			
+			short xout = (short)((xl | (xh << 8)) & 0xFFFF) ; // concatenate the MSB and LSB
 			return xout;
 		} else {
 			return -1;
 		}
 	}
 
-	private int readY() throws IOException, InterruptedException {
+	private short readY() throws IOException, InterruptedException {
 		if (deviceActiveMode) {
 			int yl, yh; // define the MSB and LSB
 
@@ -134,13 +145,13 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 								// stop
 
 			int yout = (yl | (yh << 8)); // concatenate the MSB and LSB
-			return yout;
+			return (short)(yout & 0xFFFF);
 		} else {
 			return -1;
 		}
 	}
 
-	private int readZ() throws IOException, InterruptedException {
+	private short readZ() throws IOException, InterruptedException {
 		if (deviceActiveMode) {
 			int zl, zh; // define the MSB and LSB
 
@@ -153,7 +164,7 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 								// stop
 
 			int zout = (zl | (zh << 8)); // concatenate the MSB and LSB
-			return zout;
+			return (short)(zout & 0xFFFF);
 		} else {
 			return -1;
 		}
@@ -166,7 +177,6 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				Thread.sleep(2); // 1.3us free time between start & stop
 				deviceActiveMode = false;
 			} catch (IOException | InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -179,7 +189,6 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				Thread.sleep(2); // 1.3us free time between start & stop
 				deviceActiveMode = true;
 			} catch (IOException | InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -189,57 +198,72 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	public void run() {
 		while (true) {
 			try {
-				int[] rawAxisReadings = new int[3];
+				short[] rawAxisReadings = new short[3];
 
 				rawAxisReadings[0] = readX();
 				rawAxisReadings[1] = readY();
 				rawAxisReadings[2] = readZ();
+				
+//				processRawAxisReadings(rawAxisReadings);
+				
+				double heading = Math.atan2(-rawAxisReadings[1], rawAxisReadings[0]);
+				
+				//Value for Lisbon is -2º (0.034906585 rad). Find more here: http://www.magnetic-declination.com
+				double declinationAngle = 0.034906585;
+				heading += declinationAngle;
 
-				processRawAxisReadings(rawAxisReadings);
+				heading%= 2*Math.PI;
+
+				  // Convert radians to degrees for readability.
+				double headingDegrees = heading * 180/Math.PI;
+				
+//				System.out.println(rawAxisReadings[0]+" "+rawAxisReadings[1]+" "+rawAxisReadings[2]);
+//				System.out.println(heading);
+//				System.out.println(headingDegrees);
+//				System.out.println("#");
+				
 			} catch (IOException | InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
 			try {
 				Thread.sleep(I2C_DEVICE_UPDATE_DELAY);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 	}
-
+	
 	private synchronized void processRawAxisReadings(int[] readings) {
-		if(readings[0]<rangeXAxisValues[0]){
-			rangeXAxisValues[0]=readings[0];
-		}
+//		if(readings[0]<rangeXAxisValues[0]){
+//			rangeXAxisValues[0]=readings[0];
+//		}
+//		
+//		if(readings[0]>rangeXAxisValues[1]){
+//			rangeXAxisValues[1]=readings[0];
+//		}
+//		
+//		
+//		if(readings[1]<rangeYAxisValues[0]){
+//			rangeYAxisValues[0]=readings[1];
+//		}
+//		
+//		if(readings[1]>rangeYAxisValues[1]){
+//			rangeYAxisValues[1]=readings[1];
+//		}
+//		
+//		
+//		if(readings[2]<rangeZAxisValues[0]){
+//			rangeZAxisValues[0]=readings[2];
+//		}
+//		
+//		if(readings[2]>rangeZAxisValues[1]){
+//			rangeZAxisValues[1]=readings[2];
+//		}
 		
-		if(readings[0]>rangeXAxisValues[1]){
-			rangeXAxisValues[1]=readings[0];
-		}
 		
-		
-		if(readings[1]<rangeYAxisValues[0]){
-			rangeYAxisValues[0]=readings[1];
-		}
-		
-		if(readings[1]>rangeYAxisValues[1]){
-			rangeYAxisValues[1]=readings[1];
-		}
-		
-		
-		if(readings[2]<rangeZAxisValues[0]){
-			rangeZAxisValues[0]=readings[2];
-		}
-		
-		if(readings[2]>rangeZAxisValues[1]){
-			rangeZAxisValues[1]=readings[2];
-		}
-		
-		
-		axisReadings[0]=(int)(Math_Utils.map(readings[0], rangeXAxisValues[0], rangeXAxisValues[1], 0, 359));
-		axisReadings[1]=(int)(Math_Utils.map(readings[1], rangeYAxisValues[0], rangeYAxisValues[1], 0, 359));
-		axisReadings[2]=(int)(Math_Utils.map(readings[2], rangeZAxisValues[0], rangeZAxisValues[1], 0, 359));
+//		axisReadings[0]=(int)(Math_Utils.map(readings[0], rangeXAxisValues[0], rangeXAxisValues[1], 0, 359));
+//		axisReadings[1]=(int)(Math_Utils.map(readings[1], rangeYAxisValues[0], rangeYAxisValues[1], 0, 359));
+//		axisReadings[2]=(int)(Math_Utils.map(readings[2], rangeZAxisValues[0], rangeZAxisValues[1], 0, 359));
 	}
 }

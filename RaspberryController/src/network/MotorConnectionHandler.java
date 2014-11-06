@@ -20,7 +20,7 @@ public class MotorConnectionHandler extends ConnectionHandler {
 	
 	@Override
 	protected void shutdownHandler() {
-		controller.processMotorMessage(new MotorMessage(0, 0));
+		controller.processMotorMessage(new MotorMessage(-1, -1));
 		closeConnection();
 	}
 	

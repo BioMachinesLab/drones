@@ -12,16 +12,15 @@ public class ReversableESCManagerOutput extends Thread implements
 	private final static int LEFT_ESC = 0;
 	private final static int RIGHT_ESC = 1;
 
-	private final static int CENTRAL_L_VALUE = 150;
-	private final static int MIN_L_VALUE = 60;
-	private final static int MAX_L_VALUE = 240;
+	private final static int CENTRAL_VALUE = 150;
+	private final static int MIN_VALUE = 60;
+	private final static int MAX_VALUE = 240;
+	
+	private final static int MIN_FW_VALUE = 165;
+	private final static int MIN_BW_VALUE = 135;
 
-	private final static int CENTRAL_R_VALUE = 150;
-	private final static int MIN_R_VALUE = 60;
-	private final static int MAX_R_VALUE = 240;
-
-	private int L_value = CENTRAL_L_VALUE;
-	private int R_value = CENTRAL_R_VALUE;
+	private int lValue = CENTRAL_VALUE;
+	private int rValue = CENTRAL_VALUE;
 
 	private MotorSpeeds speeds;
 
@@ -30,7 +29,7 @@ public class ReversableESCManagerOutput extends Thread implements
 	public ReversableESCManagerOutput(MotorSpeeds speeds) {
 		this.speeds = speeds;
 		try {
-			setRawValues(CENTRAL_L_VALUE, CENTRAL_R_VALUE);
+			setRawValues(CENTRAL_VALUE, CENTRAL_VALUE);
 			Thread.sleep(1000);
 			
 			available = true;
@@ -52,19 +51,25 @@ public class ReversableESCManagerOutput extends Thread implements
 
 		switch (index) {
 		case 0:
-			if (value == 0) {
-				L_value = CENTRAL_L_VALUE;
+			if (value == 0.5 || value == -1) {
+				lValue = CENTRAL_VALUE;
 			} else {
-				L_value = (int) Math_Utils.map(value, 0, 1, MIN_L_VALUE,
-						MAX_L_VALUE);
+				if(value > 0.5) {
+					lValue = (int)(Math_Utils.map(value, 0.5, 1, MIN_FW_VALUE, MAX_VALUE));
+				} else if(value < 0.5) {
+					lValue = (int)(Math_Utils.map(value, 0, 0.5, MIN_VALUE, MIN_BW_VALUE));
+				}
 			}
 			break;
 		case 1:
-			if (value == 0) {
-				R_value = CENTRAL_R_VALUE;
+			if (value == 0.5 || value == -1) {
+				rValue = CENTRAL_VALUE;
 			} else {
-				R_value = (int) Math_Utils.map(value, 0, 1, MIN_R_VALUE,
-						MAX_R_VALUE);
+				if(value > 0.5) {
+					rValue = (int)(Math_Utils.map(value, 0.5, 1, MIN_FW_VALUE, MAX_VALUE));
+				} else if(value < 0.5) {
+					rValue = (int)(Math_Utils.map(value, 0, 0.5, MIN_VALUE, MIN_BW_VALUE));
+				}
 			}
 			break;
 		default:
@@ -80,15 +85,15 @@ public class ReversableESCManagerOutput extends Thread implements
 						.exec(new String[] {
 								"bash",
 								"-c",
-								"echo " + LEFT_ESC + "=" + L_value
+								"echo " + LEFT_ESC + "=" + lValue
 										+ " > /dev/servoblaster; echo "
-										+ RIGHT_ESC + "=" + R_value
+										+ RIGHT_ESC + "=" + rValue
 										+ " > /dev/servoblaster;" }).waitFor();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			System.out.println("[ESCManager] Wrote to motor L: " + L_value
-					+ " R:" + R_value);
+			System.out.println("[ESCManager] Wrote to motor L: " + lValue
+					+ " R:" + rValue);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -97,7 +102,7 @@ public class ReversableESCManagerOutput extends Thread implements
 	}
 
 	private void disableMotors() {
-		setRawValues(CENTRAL_L_VALUE, CENTRAL_R_VALUE);
+		setRawValues(CENTRAL_VALUE, CENTRAL_VALUE);
 		writeValueToESC();
 	}
 
@@ -123,8 +128,8 @@ public class ReversableESCManagerOutput extends Thread implements
 	}
 
 	private void setRawValues(int left, int right) {
-		L_value = left;
-		R_value = right;
+		lValue = left;
+		rValue = right;
 	}
 
 	@Override
