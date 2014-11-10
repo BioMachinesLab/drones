@@ -87,16 +87,19 @@ public class Controller {
 				if (escManager != null) {
 					speeds.setSpeeds(new MotorMessage(-1, -1));
 				}
+				
+				if(compassModule != null) {
+					compassModule.interrupt();
+				}
 
 				if (i2cBus != null) {
 					try {
 						i2cBus.close();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
-
+				
 				if (gpsModule != null) {
 					gpsModule.closeSerial();
 				}
@@ -183,7 +186,7 @@ public class Controller {
 	 * Hardware initialization routines
 	 */
 	private void initInputs() {
-		/*try {
+		try {
 			// Get I2C instance
 			i2cBus = I2CFactory.getInstance(I2CBus.BUS_1);
 
@@ -191,14 +194,15 @@ public class Controller {
 			initMessages += "\n[INIT] I2CCompassModule: "
 					+ (compassModule.isAvailable() ? "ok" : "not ok!") + "\n";
 			inputs.add(compassModule);
+			compassModule.start();
 			System.out.print(".");
 
 			// batteryManager = new BatteryManagerInput();
 		} catch (IOException e) {
 			initMessages += "\n[INIT] I2CCompassModule: not ok!" + "\n";
 			e.printStackTrace();
-		}*/
-
+		}
+/*
 		gpsModule = new GPSModuleInput();
 		initMessages += "\n[INIT] GPSModule: "
 				+ (gpsModule.isAvailable() ? "ok" : "not ok!") + "\n";
@@ -206,26 +210,31 @@ public class Controller {
 		System.out.print(".");
 
 		inputs.add(gpsModule);
+		*/
 	}
 
 	private void initOutputs() {
+		/*
 		escManager = new ReversableESCManagerOutput(speeds);
 		initMessages += "[INIT] ESCManager: "
 				+ (escManager.isAvailable() ? "ok" : "not ok!") + "\n";
 		if (escManager.isAvailable())
 			escManager.start();
+		
+		outputs.add(escManager);
 		System.out.print(".");
-
+		 */
 		debugLeds = new DebugLedsOutput();
 		initMessages += "[INIT] DebugLEDs: "
 				+ (debugLeds.isAvailable() ? "ok" : "not ok!") + "\n";
 		System.out.print(".");
 
-		outputs.add(escManager);
+		
 		outputs.add(debugLeds);
 	}
 
 	private void initConnections() {
+		/*
 		try {
 			connectionListener = new ConnectionListener(this);
 			connectionListener.start();
@@ -243,5 +252,6 @@ public class Controller {
 			e.printStackTrace();
 			initMessages += "[INIT] Unable to start Network Connection Listeners!\n";
 		}
+		*/
 	}
 }

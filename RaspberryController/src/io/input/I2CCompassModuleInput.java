@@ -35,12 +35,14 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	private I2CBus i2cBus;
 	private I2CDevice mag3110;
 	private boolean available = false;
-	private int[] axisReadings = new int[3];
 	private boolean deviceActiveMode = true;
+	private int heading = 0;
+	
+	private long startTime = System.currentTimeMillis();
 
-	private int[] rangeXAxisValues={1000,5000};
-	private int[] rangeYAxisValues={1000,5000};
-	private int[] rangeZAxisValues={1000,5000};
+	private short[] min = {Short.MAX_VALUE, Short.MAX_VALUE, Short.MAX_VALUE};
+	private short[] max = {-Short.MAX_VALUE, -Short.MAX_VALUE, -Short.MAX_VALUE};
+	
 	
 	public I2CCompassModuleInput(I2CBus i2cBus) {
 		this.i2cBus = i2cBus;
@@ -105,6 +107,16 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	private short readX() throws IOException, InterruptedException {
 		if (deviceActiveMode) {
 			int xl, xh; // define the MSB and LSB
+			
+			//sometimes when an exception happens at PI4J the next value comes out as shit
+			mag3110.read((byte) 0x01);
+			Thread.sleep(2);
+			mag3110.read((byte) 0x02);
+			Thread.sleep(2);
+			mag3110.read((byte) 0x01);
+			Thread.sleep(2);
+			mag3110.read((byte) 0x02);
+			Thread.sleep(2);
 
 			xh = mag3110.read((byte) 0x01); // x MSB reg
 			Thread.sleep(2); // needs at least 1.3us free time between start &
@@ -112,20 +124,17 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 			xl = mag3110.read((byte) 0x02); // x LSB reg
 			Thread.sleep(2); // needs at least 1.3us free time between start &
 			
-			short h = (short)((xh & 0xFF) << 8);
-			short l = (short)(xl & 0xFF);
-			
-			short b = (short)((h | l) & 0xFFFF);
-			
-			System.out.println(b);
-			
-//			byte h = (byte)xh;
-//			byte l = (byte)xl;
-//			
-//			int r = ((h & 0x7F) <<8) | l;
-//			boolean negative = 0x7
-			
 			short xout = (short)((xl | (xh << 8)) & 0xFFFF) ; // concatenate the MSB and LSB
+			
+			if(System.currentTimeMillis() - startTime < 10*1000) {
+				if(xout > max[0])
+					max[0] = xout;
+				if(xout < min[0])
+					min[0] = xout;
+				
+				System.out.print("callibrating...");
+			}
+			
 			return xout;
 		} else {
 			return -1;
@@ -135,6 +144,16 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	private short readY() throws IOException, InterruptedException {
 		if (deviceActiveMode) {
 			int yl, yh; // define the MSB and LSB
+			
+			//sometimes when an exception happens at PI4J the next value comes out as shit
+			mag3110.read((byte) 0x03);
+			Thread.sleep(2);
+			mag3110.read((byte) 0x04);
+			Thread.sleep(2);
+			mag3110.read((byte) 0x03);
+			Thread.sleep(2);
+			mag3110.read((byte) 0x04);
+			Thread.sleep(2);
 
 			yh = mag3110.read((byte) 0x03); // y MSB reg
 			Thread.sleep(2); // needs at least 1.3us free time between start &
@@ -144,8 +163,16 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 			Thread.sleep(2); // needs at least 1.3us free time between start &
 								// stop
 
-			int yout = (yl | (yh << 8)); // concatenate the MSB and LSB
-			return (short)(yout & 0xFFFF);
+			short yout = (short)((yl | (yh << 8)) & 0xFFFF); // concatenate the MSB and LSB
+			
+			if(System.currentTimeMillis() - startTime < 10*1000) {
+				if(yout > max[1])
+					max[1] = yout;
+				if(yout < min[1])
+					min[1] = yout;
+			}
+			
+			return yout;
 		} else {
 			return -1;
 		}
@@ -154,6 +181,16 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	private short readZ() throws IOException, InterruptedException {
 		if (deviceActiveMode) {
 			int zl, zh; // define the MSB and LSB
+			
+			//sometimes when an exception happens at PI4J the next value comes out as shit
+			mag3110.read((byte) 0x05);
+			Thread.sleep(2);
+			mag3110.read((byte) 0x06);
+			Thread.sleep(2);
+			mag3110.read((byte) 0x05);
+			Thread.sleep(2);
+			mag3110.read((byte) 0x06);
+			Thread.sleep(2);
 
 			zh = mag3110.read((byte) 0x05); // z MSB reg
 			Thread.sleep(2); // needs at least 1.3us free time between start &
@@ -163,8 +200,16 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 			Thread.sleep(2); // needs at least 1.3us free time between start &
 								// stop
 
-			int zout = (zl | (zh << 8)); // concatenate the MSB and LSB
-			return (short)(zout & 0xFFFF);
+			short zout = (short)((zl | (zh << 8)) & 0xFFFF); // concatenate the MSB and LSB
+			
+			if(System.currentTimeMillis() - startTime < 10*1000) {
+				if(zout > max[2])
+					max[2] = zout;
+				if(zout < min[2])
+					min[2] = zout;
+			}
+			
+			return zout;
 		} else {
 			return -1;
 		}
@@ -206,21 +251,24 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				
 //				processRawAxisReadings(rawAxisReadings);
 				
-				double heading = Math.atan2(-rawAxisReadings[1], rawAxisReadings[0]);
+				short middleX = (short)((max[0] + min[0])/2);
+				short middleY = (short)((max[1] + min[1])/2);
+				
+				double scaleX = 1.0/(max[0]-min[0]);
+				double scaleY = 1.0/(max[1]-min[1]);
+				
+				double heading = Math.atan2(-(rawAxisReadings[1] - middleY)*scaleY, (rawAxisReadings[0] - middleX)*scaleX);
 				
 				//Value for Lisbon is -2º (0.034906585 rad). Find more here: http://www.magnetic-declination.com
 				double declinationAngle = 0.034906585;
 				heading += declinationAngle;
 
-				heading%= 2*Math.PI;
-
-				  // Convert radians to degrees for readability.
-				double headingDegrees = heading * 180/Math.PI;
+				if(heading < 0) {
+					heading += 2*Math.PI;  // correct for when the heading is negative
+				}
 				
-//				System.out.println(rawAxisReadings[0]+" "+rawAxisReadings[1]+" "+rawAxisReadings[2]);
-//				System.out.println(heading);
-//				System.out.println(headingDegrees);
-//				System.out.println("#");
+				  // Convert radians to degrees for readability.
+				this.heading = (int)(heading * 180/Math.PI);
 				
 			} catch (IOException | InterruptedException e) {
 				e.printStackTrace();
@@ -232,38 +280,5 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				e.printStackTrace();
 			}
 		}
-	}
-	
-	private synchronized void processRawAxisReadings(int[] readings) {
-//		if(readings[0]<rangeXAxisValues[0]){
-//			rangeXAxisValues[0]=readings[0];
-//		}
-//		
-//		if(readings[0]>rangeXAxisValues[1]){
-//			rangeXAxisValues[1]=readings[0];
-//		}
-//		
-//		
-//		if(readings[1]<rangeYAxisValues[0]){
-//			rangeYAxisValues[0]=readings[1];
-//		}
-//		
-//		if(readings[1]>rangeYAxisValues[1]){
-//			rangeYAxisValues[1]=readings[1];
-//		}
-//		
-//		
-//		if(readings[2]<rangeZAxisValues[0]){
-//			rangeZAxisValues[0]=readings[2];
-//		}
-//		
-//		if(readings[2]>rangeZAxisValues[1]){
-//			rangeZAxisValues[1]=readings[2];
-//		}
-		
-		
-//		axisReadings[0]=(int)(Math_Utils.map(readings[0], rangeXAxisValues[0], rangeXAxisValues[1], 0, 359));
-//		axisReadings[1]=(int)(Math_Utils.map(readings[1], rangeYAxisValues[0], rangeYAxisValues[1], 0, 359));
-//		axisReadings[2]=(int)(Math_Utils.map(readings[2], rangeZAxisValues[0], rangeZAxisValues[1], 0, 359));
 	}
 }
