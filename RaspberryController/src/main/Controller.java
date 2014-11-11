@@ -202,7 +202,7 @@ public class Controller {
 			initMessages += "\n[INIT] I2CCompassModule: not ok!" + "\n";
 			e.printStackTrace();
 		}
-/*
+
 		gpsModule = new GPSModuleInput();
 		initMessages += "\n[INIT] GPSModule: "
 				+ (gpsModule.isAvailable() ? "ok" : "not ok!") + "\n";
@@ -210,11 +210,11 @@ public class Controller {
 		System.out.print(".");
 
 		inputs.add(gpsModule);
-		*/
+		
 	}
 
 	private void initOutputs() {
-		/*
+		
 		escManager = new ReversableESCManagerOutput(speeds);
 		initMessages += "[INIT] ESCManager: "
 				+ (escManager.isAvailable() ? "ok" : "not ok!") + "\n";
@@ -223,7 +223,7 @@ public class Controller {
 		
 		outputs.add(escManager);
 		System.out.print(".");
-		 */
+		 
 		debugLeds = new DebugLedsOutput();
 		initMessages += "[INIT] DebugLEDs: "
 				+ (debugLeds.isAvailable() ? "ok" : "not ok!") + "\n";
@@ -234,7 +234,7 @@ public class Controller {
 	}
 
 	private void initConnections() {
-		/*
+		
 		try {
 			connectionListener = new ConnectionListener(this);
 			connectionListener.start();
@@ -252,6 +252,6 @@ public class Controller {
 			e.printStackTrace();
 			initMessages += "[INIT] Unable to start Network Connection Listeners!\n";
 		}
-		*/
+		
 	}
 }

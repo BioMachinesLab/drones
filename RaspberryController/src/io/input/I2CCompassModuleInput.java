@@ -30,9 +30,9 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	/*
 	 * Other variables
 	 */
+	private final static int CALIBRATION_TIME = 20*1000;
 	private final static int I2C_DEVICE_UPDATE_DELAY = 15;
 
-	private I2CBus i2cBus;
 	private I2CDevice mag3110;
 	private boolean available = false;
 	private boolean deviceActiveMode = true;
@@ -45,7 +45,6 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	
 	
 	public I2CCompassModuleInput(I2CBus i2cBus) {
-		this.i2cBus = i2cBus;
 
 		try {
 			// Get device instance
@@ -85,20 +84,16 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	public Message getMessage(Message request) {
 		if(request instanceof InformationRequest && ((InformationRequest)request).getMessageTypeQuery().equals(InformationRequest.MessageType.COMPASS)){
 			if (!available) {
-				return new SystemStatusMessage(
-						"[CompassModule] Unable to send Compass data");
+				return new SystemStatusMessage("[CompassModule] Unable to send Compass data");
 			}
-	
-			return new CompassMessage((int[]) getReadings());
+			return new CompassMessage(getHeading());
 		}
-		
 		return null;
 	}
 
 	@Override
 	public Object getReadings() {
-		// int[] readings=new
-		return null;
+		return heading;
 	}
 
 	/*
@@ -108,31 +103,21 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 		if (deviceActiveMode) {
 			int xl, xh; // define the MSB and LSB
 			
-			//sometimes when an exception happens at PI4J the next value comes out as shit
-			mag3110.read((byte) 0x01);
-			Thread.sleep(2);
-			mag3110.read((byte) 0x02);
-			Thread.sleep(2);
-			mag3110.read((byte) 0x01);
-			Thread.sleep(2);
-			mag3110.read((byte) 0x02);
-			Thread.sleep(2);
-
-			xh = mag3110.read((byte) 0x01); // x MSB reg
+			xh = getByte((byte) 0x01); // x MSB reg
 			Thread.sleep(2); // needs at least 1.3us free time between start &
 			
-			xl = mag3110.read((byte) 0x02); // x LSB reg
+			xl = getByte((byte) 0x02); // x LSB reg
 			Thread.sleep(2); // needs at least 1.3us free time between start &
 			
 			short xout = (short)((xl | (xh << 8)) & 0xFFFF) ; // concatenate the MSB and LSB
 			
-			if(System.currentTimeMillis() - startTime < 10*1000) {
+			if(System.currentTimeMillis() - startTime < CALIBRATION_TIME) {
 				if(xout > max[0])
 					max[0] = xout;
 				if(xout < min[0])
 					min[0] = xout;
 				
-				System.out.print("callibrating...");
+				System.out.println("Callibrating Compass ["+(int)(((System.currentTimeMillis() - (double)startTime)/CALIBRATION_TIME)*100)+"%]");
 			}
 			
 			return xout;
@@ -144,28 +129,18 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	private short readY() throws IOException, InterruptedException {
 		if (deviceActiveMode) {
 			int yl, yh; // define the MSB and LSB
-			
-			//sometimes when an exception happens at PI4J the next value comes out as shit
-			mag3110.read((byte) 0x03);
-			Thread.sleep(2);
-			mag3110.read((byte) 0x04);
-			Thread.sleep(2);
-			mag3110.read((byte) 0x03);
-			Thread.sleep(2);
-			mag3110.read((byte) 0x04);
-			Thread.sleep(2);
 
-			yh = mag3110.read((byte) 0x03); // y MSB reg
+			yh = getByte((byte) 0x03); // y MSB reg
 			Thread.sleep(2); // needs at least 1.3us free time between start &
 								// stop
 
-			yl = mag3110.read((byte) 0x04); // y LSB reg
+			yl = getByte((byte) 0x04); // y LSB reg
 			Thread.sleep(2); // needs at least 1.3us free time between start &
 								// stop
 
 			short yout = (short)((yl | (yh << 8)) & 0xFFFF); // concatenate the MSB and LSB
 			
-			if(System.currentTimeMillis() - startTime < 10*1000) {
+			if(System.currentTimeMillis() - startTime < CALIBRATION_TIME) {
 				if(yout > max[1])
 					max[1] = yout;
 				if(yout < min[1])
@@ -177,32 +152,26 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 			return -1;
 		}
 	}
+	
+	private int getByte(byte address) throws IOException {
+		return mag3110.read(address);
+	}
 
 	private short readZ() throws IOException, InterruptedException {
 		if (deviceActiveMode) {
 			int zl, zh; // define the MSB and LSB
-			
-			//sometimes when an exception happens at PI4J the next value comes out as shit
-			mag3110.read((byte) 0x05);
-			Thread.sleep(2);
-			mag3110.read((byte) 0x06);
-			Thread.sleep(2);
-			mag3110.read((byte) 0x05);
-			Thread.sleep(2);
-			mag3110.read((byte) 0x06);
-			Thread.sleep(2);
 
-			zh = mag3110.read((byte) 0x05); // z MSB reg
+			zh = getByte((byte) 0x05); // z MSB reg
 			Thread.sleep(2); // needs at least 1.3us free time between start &
 								// stop
 
-			zl = mag3110.read((byte) 0x06); // z LSB reg
+			zl = getByte((byte) 0x06); // z LSB reg
 			Thread.sleep(2); // needs at least 1.3us free time between start &
 								// stop
 
 			short zout = (short)((zl | (zh << 8)) & 0xFFFF); // concatenate the MSB and LSB
 			
-			if(System.currentTimeMillis() - startTime < 10*1000) {
+			if(System.currentTimeMillis() - startTime < CALIBRATION_TIME) {
 				if(zout > max[2])
 					max[2] = zout;
 				if(zout < min[2])
@@ -249,8 +218,6 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				rawAxisReadings[1] = readY();
 				rawAxisReadings[2] = readZ();
 				
-//				processRawAxisReadings(rawAxisReadings);
-				
 				short middleX = (short)((max[0] + min[0])/2);
 				short middleY = (short)((max[1] + min[1])/2);
 				
@@ -262,15 +229,34 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				//Value for Lisbon is -2º (0.034906585 rad). Find more here: http://www.magnetic-declination.com
 				double declinationAngle = 0.034906585;
 				heading += declinationAngle;
+				
+				heading = 2*Math.PI-heading;
+				
+				heading+=Math.PI/2;
 
 				if(heading < 0) {
-					heading += 2*Math.PI;  // correct for when the heading is negative
+					heading += 2*Math.PI;
+				}
+				
+				if(heading > 2*Math.PI) {
+					heading -= 2*Math.PI;
 				}
 				
 				  // Convert radians to degrees for readability.
 				this.heading = (int)(heading * 180/Math.PI);
 				
 			} catch (IOException | InterruptedException e) {
+				try {
+					//after a PI4J exception, the next reading is usually crap. Get rid of it right away
+					getByte((byte)0x01);Thread.sleep(2);
+					getByte((byte)0x02);Thread.sleep(2);
+					getByte((byte)0x03);Thread.sleep(2);
+					getByte((byte)0x04);Thread.sleep(2);
+					getByte((byte)0x05);Thread.sleep(2);
+					getByte((byte)0x06);Thread.sleep(2);
+				}catch(Exception ex){
+					e.printStackTrace();
+				}
 				e.printStackTrace();
 			}
 
@@ -280,5 +266,9 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public int getHeading() {
+		return heading;
 	}
 }
