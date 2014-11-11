@@ -65,7 +65,7 @@ public class DroneControlConsole extends Thread {
 		
 		motorSpeeds = new MotorSpeeds();
 		
-		connect();
+//		connect();
 
 		setupGUI();
 		
@@ -96,14 +96,14 @@ public class DroneControlConsole extends Thread {
 		UpdateThread gpsThread = new UpdateThread(this, gui.getGPSPanel(), MessageType.GPS);
 		UpdateThread messagesThread = new UpdateThread(this, gui.getMessagesPanel(), MessageType.SYSTEM_STATUS);
 		UpdateThread motorsThread = new MotorUpdateThread(this, gui.getMotorsPanel());
-//		UpdateThread compassThread = new UpdateThread(this, gui.getCompassPanel(), MessageType.COMPASS);
+		UpdateThread compassThread = new UpdateThread(this, gui.getCompassPanel(), MessageType.COMPASS);
 //		UpdateThread infoThread = new UpdateThread(this, gui.getSysInfoPanel(), MessageType.SYSTEM_INFO);
 		
 		
 		gpsThread.start();
 		messagesThread.start();
 		motorsThread.start();
-//		compassThread.start();
+		compassThread.start();
 //		infoThread.run();
 		
 	}
@@ -147,9 +147,10 @@ public class DroneControlConsole extends Thread {
 		} else if (message instanceof SystemInformationsMessage) {
 			gui.getSysInfoPanel().displayData(((SystemInformationsMessage) message).getSysInformations());
 		} else if (message instanceof SystemStatusMessage) {
-			gui.getMessagesPanel().addMessage((SystemStatusMessage) message);
+			gui.getMessagesPanel().displayData((SystemStatusMessage) message);
 		} else if (message instanceof CompassMessage) {
-			// compassPanel.displayData((CompassMessage) message);
+			gui.getCompassPanel().displayData((CompassMessage) message);
+			gui.getMapPanel().displayData(((CompassMessage) message));
 		} else {
 			System.out.println("Received non recognise message type: " + message.getClass().toString());
 		}

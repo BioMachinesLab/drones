@@ -29,7 +29,7 @@ public class UpdateThread extends Thread {
 			try {
 				Thread.sleep(sleepTime);
 			} catch (InterruptedException e) {
-				// we expect interruptions when the GPSPanel changes the refresh rate
+				// we expect interruptions when the panel changes the refresh rate
 			}
 		}
 	}

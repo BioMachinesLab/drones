@@ -1,6 +1,5 @@
 package gui;
 
-import gamepad.CompassPanel;
 import gui.map.MapPanel;
 
 import java.awt.BorderLayout;
