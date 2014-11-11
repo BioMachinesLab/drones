@@ -24,6 +24,8 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import network.messages.CompassMessage;
+
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 import org.openstreetmap.gui.jmapviewer.Layer;
@@ -100,7 +102,7 @@ public class MapPanel extends JPanel {
         
 	        JComboBox<TileSource> tileSourceSelector = new JComboBox<>(new TileSource[] { new OsmTileSource.Mapnik(),
 	                new OsmTileSource.CycleMap(), new BingAerialTileSource(), new MapQuestOsmTileSource(), new MapQuestOpenAerialTileSource(),
-	                new OfflineOsmTileSource((new File("tiles").toURI().toURL()).toString(),1,14) });
+	                new OfflineOsmTileSource((new File("tiles").toURI().toURL()).toString(),1,20) });
 	        tileSourceSelector.addItemListener(new ItemListener() {
 	            public void itemStateChanged(ItemEvent e) {
 	                map().setTileSource((TileSource) e.getItem());
@@ -288,6 +290,10 @@ public class MapPanel extends JPanel {
 		if(usefulRobotCoordinate(gpsData)) {
 			updateRobotPosition("drone", c(Double.parseDouble(gpsData.getLatitude()),Double.parseDouble(gpsData.getLongitude())));
 		}
+	}
+	
+	public void displayData(CompassMessage compassMessage) {
+		//TODO
 	}
 	
 	private boolean usefulRobotCoordinate(GPSData gpsData) {

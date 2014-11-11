@@ -34,8 +34,6 @@ public class GPSPanel extends JPanel implements UpdatePanel {
 	
 	private JLabel labelHasFix;
 	
-	private JComboBox<String> comboBoxUpdateRate;
-
 	private UpdateThread thread;
 	
 	private int sleepTime = 1000;
@@ -57,7 +55,7 @@ public class GPSPanel extends JPanel implements UpdatePanel {
 		JPanel refresh = new JPanel();
 		refresh.add(new JLabel("Refresh Rate"));
 
-		comboBoxUpdateRate = new JComboBox<String>();
+		JComboBox<String> comboBoxUpdateRate = new JComboBox<String>();
 		comboBoxUpdateRate.setModel(new DefaultComboBoxModel<String>(new String[] {
 				"10 Hz", "5 Hz", "1 Hz", "0.1Hz" }));
 		comboBoxUpdateRate.setSelectedIndex(2);
@@ -186,8 +184,6 @@ public class GPSPanel extends JPanel implements UpdatePanel {
 		textFieldPDOP.setText(Double.toString(data.getPDOP()));
 		textFieldVDOP.setText(Double.toString(data.getVDOP()));
 		
-		System.out.println(data.getGPSSourceType());
-
 		switch (data.getGPSSourceType()) {
 		case -1:
 		case 0:

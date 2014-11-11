@@ -83,7 +83,7 @@ public class MessagesPanel extends JPanel implements UpdatePanel {
 		add(refresh, BorderLayout.SOUTH);
 	}
 
-	public void addMessage(SystemStatusMessage message) {
+	public void displayData(SystemStatusMessage message) {
 		if (message.getMessage() != null) {
 			String str = message.getMessage();
 			if (!str.endsWith("\n") && !str.endsWith("\r\n"))

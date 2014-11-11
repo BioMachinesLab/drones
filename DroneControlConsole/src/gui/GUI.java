@@ -1,5 +1,6 @@
 package gui;
 
+import gamepad.CompassPanel;
 import gui.map.MapPanel;
 
 import java.awt.BorderLayout;
@@ -18,7 +19,7 @@ public class GUI extends JFrame{
 	private GPSPanel gpsPanel;
 	private SystemInfoPanel sysInfoPanel;
 	private MessagesPanel msgPanel;
-//	private CompassPanel compassPanel;
+	private CompassPanel compassPanel;
 	private MapPanel mapPanel;
 
 	public GUI() {
@@ -27,8 +28,7 @@ public class GUI extends JFrame{
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException | InstantiationException
 				| IllegalAccessException | UnsupportedLookAndFeelException e) {
-			System.err
-					.println("Not able to set LookAndFeel for the current OS");
+			System.err.println("Not able to set LookAndFeel for the current OS");
 		}
 		
 		enableOSXFullscreen(this);
@@ -67,6 +67,10 @@ public class GUI extends JFrame{
 		//GPS
 		gpsPanel = new GPSPanel();
 		motorsGPSPanel.add(gpsPanel, BorderLayout.CENTER);
+		
+		//Compass
+		compassPanel = new CompassPanel();
+		motorsGPSPanel.add(compassPanel, BorderLayout.SOUTH);
 
 		infoPanel.add(motorsGPSPanel, BorderLayout.NORTH);
 
@@ -84,6 +88,10 @@ public class GUI extends JFrame{
 	
 	public GPSPanel getGPSPanel() {
 		return gpsPanel;
+	}
+	
+	public CompassPanel getCompassPanel() {
+		return compassPanel;
 	}
 	
 	public MessagesPanel getMessagesPanel() {
