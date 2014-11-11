@@ -65,7 +65,7 @@ public class DroneControlConsole extends Thread {
 		
 		motorSpeeds = new MotorSpeeds();
 		
-//		connect();
+		connect();
 
 		setupGUI();
 		

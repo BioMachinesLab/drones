@@ -34,14 +34,15 @@ public class CompassPanel extends JPanel implements UpdatePanel {
 		setLayout(new BorderLayout());
 		setBorder(BorderFactory.createTitledBorder("Compass Data"));
 		
-//		add(new JLabel("Heading"));
-//		
-//		heading = new JTextField(6);
-//		heading.setEditable(false);
-//		add(heading);
+		JPanel valuePanel = new JPanel(new BorderLayout());
 		
-		JPanel refreshPanel = new JPanel();
-//		
+		valuePanel.add(new JLabel("Heading"), BorderLayout.WEST);
+		
+		heading = new JTextField(6);
+		heading.setEditable(false);
+		valuePanel.add(heading, BorderLayout.EAST);
+		
+		JPanel refreshPanel = new JPanel(new BorderLayout());
 		refreshPanel.add(new JLabel("Refresh Rate"), BorderLayout.WEST);
 		
 		JComboBox<String> comboBoxUpdateRate = new JComboBox<String>();
@@ -50,7 +51,12 @@ public class CompassPanel extends JPanel implements UpdatePanel {
 		comboBoxUpdateRate.setSelectedIndex(2);
 		refreshPanel.add(comboBoxUpdateRate, BorderLayout.EAST);
 		
-		add(refreshPanel, BorderLayout.EAST);
+		JPanel right = new JPanel(new BorderLayout());
+		
+		right.add(valuePanel, BorderLayout.NORTH);
+		right.add(refreshPanel, BorderLayout.SOUTH);
+		
+		add(right, BorderLayout.EAST);
 		add(new CompassDrawingPanel(), BorderLayout.WEST);
 		
 		comboBoxUpdateRate.addActionListener(new ActionListener() {
