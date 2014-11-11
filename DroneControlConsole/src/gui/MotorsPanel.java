@@ -42,6 +42,8 @@ public class MotorsPanel extends JPanel implements UpdatePanel {
 	private JProgressBar rightProgressBar;
 	private int rightMotorPower = 0;
 	
+	private JSlider offsetSlider;
+	
 	private UpdateThread thread;
 	
 	private int motorOffset = 0;
@@ -54,7 +56,7 @@ public class MotorsPanel extends JPanel implements UpdatePanel {
 		setBorder(BorderFactory.createTitledBorder("Motors Control"));
 		setLayout(new BorderLayout());
 		
-		setPreferredSize(new Dimension(300,357));
+		setPreferredSize(new Dimension(300,270));
 		
 		leftSlider = new JSlider(-100,100);
 		rightSlider = new JSlider(-100,100);
@@ -82,9 +84,18 @@ public class MotorsPanel extends JPanel implements UpdatePanel {
 			}
 		});
 		
+		JButton resetOffset = new JButton("Reset Offset");
+		
+		resetOffset.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				offsetSlider.setValue(0);
+			}
+		});
+		
 		JPanel soutPanel = new JPanel();
 		
 		soutPanel.add(chckbxLockControl);
+		soutPanel.add(resetOffset);
 		
 		add(soutPanel, BorderLayout.SOUTH);
 	}
@@ -99,7 +110,7 @@ public class MotorsPanel extends JPanel implements UpdatePanel {
 		limitSlider.setPaintTicks(true);
 		limitSlider.setSnapToTicks(true);
 		limitSlider.setOrientation(SwingConstants.VERTICAL);
-		limitSlider.setPreferredSize(new Dimension(150, 180));
+		limitSlider.setPreferredSize(new Dimension(150, 110));
 		
 		Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
 		labelTable.put(new Integer(0), new JLabel("0") );
@@ -126,13 +137,13 @@ public class MotorsPanel extends JPanel implements UpdatePanel {
 		
 		topSliderPanel.add(limitSlider, BorderLayout.NORTH);
 		
-		JSlider offsetSlider = new JSlider(-100,100);
+		offsetSlider = new JSlider(-100,100);
 		offsetSlider.setMinorTickSpacing(20);
 		offsetSlider.setPaintLabels(true);
 		offsetSlider.setPaintTicks(true);
 		offsetSlider.setSnapToTicks(false);
 		offsetSlider.setOrientation(SwingConstants.HORIZONTAL);
-		offsetSlider.setPreferredSize(new Dimension(150, 70));
+		offsetSlider.setPreferredSize(new Dimension(150, 50));
 		
 		offsetSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {

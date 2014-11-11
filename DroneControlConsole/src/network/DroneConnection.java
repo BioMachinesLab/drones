@@ -14,6 +14,7 @@ import network.messages.Message;
 
 public abstract class DroneConnection extends Thread {
 	
+	private final static boolean DEBUG = false;
 	protected int port;
 	protected Socket socket;
 	protected ObjectInputStream in;
@@ -53,10 +54,10 @@ public abstract class DroneConnection extends Thread {
 		
 		try {
 			if (socket != null && !socket.isClosed()) {
-				System.out.println(data);
 				out.writeObject(data);
 				out.flush();
-				System.out.println("[SEND] Sent "+data.getClass().getSimpleName());
+				if(DEBUG)
+					System.out.println("[SEND] Sent "+data.getClass().getSimpleName());
 			}
 		} catch (IOException e) {
 			System.err.println("Unable to send data... there is an open connection?");
@@ -115,7 +116,8 @@ public abstract class DroneConnection extends Thread {
 	protected void update() throws IOException {
 		try {
 			Message message = (Message) in.readObject();
-			System.out.println("[RECEIVED] Received "+message.getClass().getSimpleName());
+			if(DEBUG)
+				System.out.println("[RECEIVED] Received "+message.getClass().getSimpleName());
 			console.processMessage(message);
 		} catch (ClassNotFoundException e) {
 			System.err.println("Received class of unknown type from "

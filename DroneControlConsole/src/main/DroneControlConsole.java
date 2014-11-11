@@ -114,18 +114,15 @@ public class DroneControlConsole extends Thread {
 		do {
 			try {
 				IPandPortNumberRequestToUser form = new IPandPortNumberRequestToUser();
-				if (form.getIpAddress() == null
-						|| form.getInformationPortNumber() == -1
-						|| form.getMotorPortNumber() == -1) {
+				if (form.getIpAddress() == null) {
 					continue;
 				} else {
 
 					informationConnection = new InformationConnection(this,
-							form.getIpAddress(),
-							form.getInformationPortNumber());
+							form.getIpAddress());
 
 					motorConnection = new MotorConnection(this,
-							form.getIpAddress(), form.getMotorPortNumber());
+							form.getIpAddress());
 					
 
 					motorMessageSender = new MotorMessageSender(

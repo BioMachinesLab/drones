@@ -19,9 +19,9 @@ public class MotorSpeeds {
 		left = limit(left);
 		right = limit(right);
 		
-		left = offsetLeft(left);
-		right = offsetRight(right);
-
+		left = offset(left, offset);
+		right = offset(right, -offset);
+		
 		if(Math.abs(left-speedLeft) >= 0.01 || Math.abs(right-speedRight) >= 0.01){
 			
 			this.speedLeft = left;
@@ -33,27 +33,33 @@ public class MotorSpeeds {
 }
 	
 	private double limit(double val) {
-		return val > limit ? limit : val;
+		
+		val = (val - 0.5)*2;
+		
+		if(Math.abs(val) > limit) {
+			val*=limit;
+		}
+		
+		val/=2;
+		val+=0.5;
+		
+		return val;
+		
 	}
 	
-	private double offsetLeft(double leftVal) {
+	private double offset(double val, double offset) {
+		
+		val = (val - 0.5)*2;
+		
 		if(offset > 0) {
 			//right should have more power
-			leftVal*= (1-offset);
+			val*= (1-Math.abs(offset));
 		}
 		
-		return leftVal;
+		val/=2;
+		val+=0.5;
 		
-	}
-	
-	private double offsetRight(double rightVal) {
-		if (offset < 0) {
-			//left should have more power
-			offset = -offset;
-			rightVal*= (1-offset);
-		}
-		return rightVal;
-		
+		return val;
 	}
 	
 	public synchronized MotorMessage getSpeeds() {
