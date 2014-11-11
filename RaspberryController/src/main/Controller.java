@@ -38,7 +38,7 @@ public class Controller {
 	private ArrayList<ControllerInput> inputs = new ArrayList<ControllerInput>();
 
 	private String status = "";
-	private String initMessages = "";
+	private String initMessages = "\n";
 	private MotorSpeeds speeds;
 	private DebugLedsOutput debugLeds;
 	
@@ -191,20 +191,20 @@ public class Controller {
 			i2cBus = I2CFactory.getInstance(I2CBus.BUS_1);
 
 			compassModule = new I2CCompassModuleInput(i2cBus);
-			initMessages += "\n[INIT] I2CCompassModule: "
-					+ (compassModule.isAvailable() ? "ok" : "not ok!") + "\n";
+			initMessages += "[INIT] I2CCompassModule: "
+					+ (compassModule.isAvailable() ? "ok" : "not ok!") + "\n" ;
 			inputs.add(compassModule);
 			compassModule.start();
 			System.out.print(".");
 
 			// batteryManager = new BatteryManagerInput();
 		} catch (IOException e) {
-			initMessages += "\n[INIT] I2CCompassModule: not ok!" + "\n";
+			initMessages += "\n[INIT] I2CCompassModule: not ok!\n";
 			e.printStackTrace();
 		}
 
 		gpsModule = new GPSModuleInput();
-		initMessages += "\n[INIT] GPSModule: "
+		initMessages += "[INIT] GPSModule: "
 				+ (gpsModule.isAvailable() ? "ok" : "not ok!") + "\n";
 		gpsModule.enableLocalLog();
 		System.out.print(".");

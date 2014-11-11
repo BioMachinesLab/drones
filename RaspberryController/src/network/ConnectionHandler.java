@@ -11,6 +11,9 @@ import network.messages.Message;
 import network.messages.SystemStatusMessage;
 
 public class ConnectionHandler extends Thread {
+	
+	private final static boolean DEBUG = false;
+	
 	protected Socket socket;
 	protected ObjectOutputStream out;
 	protected ObjectInputStream in;
@@ -64,8 +67,8 @@ public class ConnectionHandler extends Thread {
 
 	protected void processMessage(Message message) {
 		if (message instanceof InformationRequest) {
-			System.out
-					.println("[CONNECTION HANDLER] Information Request Message ("
+			if(DEBUG)
+				System.out.println("[CONNECTION HANDLER] Information Request Message ("
 							+ message.getClass().getSimpleName() + ")");
 			controller.processInformationRequest(message, this);
 		}
@@ -125,7 +128,8 @@ public class ConnectionHandler extends Thread {
 			out.reset();//clear the cache so that we don't send old data
 			out.writeObject(data);
 			out.flush();
-			System.out.println("[CONNECTION HANDLER] Sent Data ("
+			if(DEBUG)
+				System.out.println("[CONNECTION HANDLER] Sent Data ("
 					+ data.getClass().getSimpleName() + ")");
 		} catch (IOException e) {
 			System.out

@@ -117,7 +117,7 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				if(xout < min[0])
 					min[0] = xout;
 				
-				System.out.println("Callibrating Compass ["+(int)(((System.currentTimeMillis() - (double)startTime)/CALIBRATION_TIME)*100)+"%]");
+//				System.out.println("Callibrating Compass ["+(int)(((System.currentTimeMillis() - (double)startTime)/CALIBRATION_TIME)*100)+"%]");
 			}
 			
 			return xout;
