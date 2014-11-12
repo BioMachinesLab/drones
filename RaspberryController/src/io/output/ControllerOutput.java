@@ -6,4 +6,6 @@ public interface ControllerOutput {
 	public int getNumberOfOutputValues();
 
 	public boolean isAvailable();
+	
+	public double getValue(int index);
 }

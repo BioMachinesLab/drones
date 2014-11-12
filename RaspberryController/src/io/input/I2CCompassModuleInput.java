@@ -1,14 +1,11 @@
 package io.input;
 
 import java.io.IOException;
-
-import utils.Math_Utils;
 import network.messages.CompassMessage;
 import network.messages.InformationRequest;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import network.messages.SystemStatusMessage;
-
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 
@@ -42,6 +39,8 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 
 	private short[] min = {Short.MAX_VALUE, Short.MAX_VALUE, Short.MAX_VALUE};
 	private short[] max = {-Short.MAX_VALUE, -Short.MAX_VALUE, -Short.MAX_VALUE};
+	
+	private boolean calibrationStatus = false;
 	
 	
 	public I2CCompassModuleInput(I2CBus i2cBus) {
@@ -112,12 +111,24 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 			short xout = (short)((xl | (xh << 8)) & 0xFFFF) ; // concatenate the MSB and LSB
 			
 			if(System.currentTimeMillis() - startTime < CALIBRATION_TIME) {
+				
+				if(!calibrationStatus) {
+					System.out.println("Calibration started!");
+					calibrationStatus = true;
+				}
+					
+				
 				if(xout > max[0])
 					max[0] = xout;
 				if(xout < min[0])
 					min[0] = xout;
 				
 //				System.out.println("Callibrating Compass ["+(int)(((System.currentTimeMillis() - (double)startTime)/CALIBRATION_TIME)*100)+"%]");
+			} else {
+				if(calibrationStatus) {
+					System.out.println("Calibration ended!");
+					calibrationStatus = false;
+				}
 			}
 			
 			return xout;

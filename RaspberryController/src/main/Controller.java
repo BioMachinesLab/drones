@@ -19,6 +19,7 @@ import network.messages.Message;
 import network.messages.MessageProvider;
 import network.messages.MotorMessage;
 import network.messages.SystemStatusMessage;
+import utils.Logger;
 
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CFactory;
@@ -41,6 +42,8 @@ public class Controller {
 	private String initMessages = "\n";
 	private MotorSpeeds speeds;
 	private DebugLedsOutput debugLeds;
+	
+	private Logger logThread;
 	
 	private boolean debug = false;
 
@@ -74,6 +77,9 @@ public class Controller {
 		}
 
 		initConnections();
+		
+		logThread = new Logger(this);
+		logThread.start();
 
 		setStatus("Running");
 
@@ -86,6 +92,10 @@ public class Controller {
 				System.out.print("# Shutting down... ");
 				if (escManager != null) {
 					speeds.setSpeeds(new MotorMessage(-1, -1));
+				}
+				
+				if(logThread != null) {
+					logThread.interrupt();
 				}
 				
 				if(compassModule != null) {
@@ -253,5 +263,13 @@ public class Controller {
 			initMessages += "[INIT] Unable to start Network Connection Listeners!\n";
 		}
 		
+	}
+	
+	public ArrayList<ControllerInput> getInputs() {
+		return inputs;
+	}
+	
+	public ArrayList<ControllerOutput> getOutputs() {
+		return outputs;
 	}
 }

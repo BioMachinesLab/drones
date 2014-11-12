@@ -137,4 +137,12 @@ public class ESCManagerOutput extends Thread implements
 	public boolean isAvailable() {
 		return available;
 	}
+	
+	@Override
+	public double getValue(int index) {
+		if(index == 0) {
+			return L_value;
+		}
+		return R_value;
+	}
 }

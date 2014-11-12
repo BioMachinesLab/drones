@@ -21,7 +21,7 @@ public class ReversableESCManagerOutput extends Thread implements
 
 	private int lValue = CENTRAL_VALUE;
 	private int rValue = CENTRAL_VALUE;
-
+	
 	private MotorSpeeds speeds;
 
 	private boolean available = false;
@@ -135,5 +135,13 @@ public class ReversableESCManagerOutput extends Thread implements
 	@Override
 	public boolean isAvailable() {
 		return available;
+	}
+	
+	@Override
+	public double getValue(int index) {
+		if(index == 0) {
+			return lValue;
+		}
+		return rValue;
 	}
 }

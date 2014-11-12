@@ -88,7 +88,6 @@ public class DebugLedsOutput extends Thread implements ControllerOutput {
 				try {
 					wait();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -98,5 +97,10 @@ public class DebugLedsOutput extends Thread implements ControllerOutput {
 	@Override
 	public boolean isAvailable() {
 		return available;
+	}
+	
+	@Override
+	public double getValue(int index) {
+		return ledsOutputPins[index].getState().getValue();
 	}
 }

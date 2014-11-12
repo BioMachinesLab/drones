@@ -575,7 +575,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		try {
 			Calendar cal = Calendar.getInstance();
 			cal.getTime();
-			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+			SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy_HH-mm-ss");
 
 			localLogPrintWriterOut = new PrintWriter(FILE_NAME
 					+ sdf.format(cal.getTime()) + ".log");
