@@ -41,6 +41,7 @@ import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOpenAerialTileSource
 import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOsmTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.OsmTileSource;
 
+import utils.Nmea0183ToDecimalConverter;
 import dataObjects.GPSData;
 
 public class MapPanel extends JPanel {
@@ -287,8 +288,27 @@ public class MapPanel extends JPanel {
     }
 
 	public void displayData(GPSData gpsData) {
-		if(usefulRobotCoordinate(gpsData)) {
-			updateRobotPosition("drone", c(Double.parseDouble(gpsData.getLatitude()),Double.parseDouble(gpsData.getLongitude())));
+		
+		if(gpsData.getLatitude() == null || gpsData.getLongitude() == null)
+			return;
+		if(gpsData.getLatitude().isEmpty() || gpsData.getLongitude().isEmpty())
+			return;
+		
+		//NMEA format: 3844.9474N 00909.2214W
+		String latitude = gpsData.getLatitude();
+		String longitude = gpsData.getLongitude();
+		
+		double lat = Double.parseDouble(latitude.substring(0,latitude.length()-1));
+		char latPos = latitude.charAt(latitude.length()-1);
+		
+		double lon = Double.parseDouble(longitude.substring(0,longitude.length()-1));
+		char lonPos = longitude.charAt(longitude.length()-1);
+		
+		lat = Nmea0183ToDecimalConverter.convertLatitudeToDecimal(lat, latPos);
+		lon = Nmea0183ToDecimalConverter.convertLongitudeToDecimal(lon, lonPos);
+		
+		if(usefulRobotCoordinate(c(lat,lon))) {
+			updateRobotPosition("drone", c(lat,lon));
 		}
 	}
 	
@@ -296,19 +316,16 @@ public class MapPanel extends JPanel {
 		//TODO
 	}
 	
-	private boolean usefulRobotCoordinate(GPSData gpsData) {
-		if(gpsData.getLatitude() == null || gpsData.getLongitude() == null)
-			return false;
-		if(gpsData.getLatitude().isEmpty() || gpsData.getLongitude().isEmpty())
-			return false;
+	private boolean usefulRobotCoordinate(Coordinate n) {
+		
+		if(robotPositions.isEmpty())
+			return true;
 		
 		Coordinate c = robotPositions.peekLast().getCoordinate();
-		Coordinate n = c(Double.parseDouble(gpsData.getLatitude()), Double.parseDouble(gpsData.getLongitude()));
 		
 		if(c.getLat() == n.getLat() && c.getLon() == n.getLon())
 			return false;
 		
 		return true;
 	}
-
 }

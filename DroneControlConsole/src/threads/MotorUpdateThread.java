@@ -1,6 +1,5 @@
 package threads;
 
-import gamepad.GamePad;
 import gui.MotorsPanel;
 import gui.UpdatePanel;
 import main.DroneControlConsole;

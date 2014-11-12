@@ -184,16 +184,12 @@ public class GPSPanel extends JPanel implements UpdatePanel {
 		textFieldPDOP.setText(Double.toString(data.getPDOP()));
 		textFieldVDOP.setText(Double.toString(data.getVDOP()));
 		
-		switch (data.getGPSSourceType()) {
-		case -1:
-		case 0:
-			labelHasFix.setBackground(Color.RED);
-			break;
-		default:
+		if(data.isFix()) {
 			labelHasFix.setBackground(Color.GREEN);
-			break;
+		} else {
+			labelHasFix.setBackground(Color.RED);
 		}
-
+		
 		textFieldVelKmh.setText(Double.toString(data.getGroundSpeedKmh()));
 
 		LocalDateTime date = data.getDate();
