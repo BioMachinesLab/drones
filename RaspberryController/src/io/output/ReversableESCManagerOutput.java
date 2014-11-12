@@ -8,6 +8,8 @@ import dataObjects.MotorSpeeds;
 
 public class ReversableESCManagerOutput extends Thread implements
 		ControllerOutput {
+	
+	private final static boolean DEBUG = false;
 
 	private final static int LEFT_ESC = 0;
 	private final static int RIGHT_ESC = 1;
@@ -92,8 +94,8 @@ public class ReversableESCManagerOutput extends Thread implements
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			System.out.println("[ESCManager] Wrote to motor L: " + lValue
-					+ " R:" + rValue);
+			if(DEBUG)
+				System.out.println("[ESCManager] Wrote to motor L: " + lValue+ " R:" + rValue);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

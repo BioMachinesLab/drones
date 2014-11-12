@@ -196,6 +196,7 @@ public class Controller {
 	 * Hardware initialization routines
 	 */
 	private void initInputs() {
+/*
 		try {
 			// Get I2C instance
 			i2cBus = I2CFactory.getInstance(I2CBus.BUS_1);
@@ -212,7 +213,7 @@ public class Controller {
 			initMessages += "\n[INIT] I2CCompassModule: not ok!\n";
 			e.printStackTrace();
 		}
-
+*/
 		gpsModule = new GPSModuleInput();
 		initMessages += "[INIT] GPSModule: "
 				+ (gpsModule.isAvailable() ? "ok" : "not ok!") + "\n";
@@ -224,7 +225,7 @@ public class Controller {
 	}
 
 	private void initOutputs() {
-		
+		/*
 		escManager = new ReversableESCManagerOutput(speeds);
 		initMessages += "[INIT] ESCManager: "
 				+ (escManager.isAvailable() ? "ok" : "not ok!") + "\n";
@@ -241,6 +242,7 @@ public class Controller {
 
 		
 		outputs.add(debugLeds);
+		*/
 	}
 
 	private void initConnections() {
