@@ -604,8 +604,6 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				gpsData.setOrientation(Double.parseDouble(params[8]));
 
 				// Missing magnetic declination (value and orientation)
-			} else {
-				System.out.println("GPRMC not good "+params.length);
 			}
 		}
 
