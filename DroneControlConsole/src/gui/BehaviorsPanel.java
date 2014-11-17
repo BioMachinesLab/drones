@@ -88,12 +88,12 @@ public class BehaviorsPanel extends UpdatePanel{
 		add(argumentButton);
 	}
 	
-	private void statusMessage(Class<Behavior> className, boolean status) {
+	private synchronized void statusMessage(Class<Behavior> className, boolean status) {
 		currentMessage = new BehaviorMessage(className, status);
 		notifyAll();
 	}
 	
-	private void argumentMessage(Class<Behavior> className, int index, double value) {
+	private synchronized void argumentMessage(Class<Behavior> className, int index, double value) {
 		currentMessage = new BehaviorMessage(className, index, value);
 		notifyAll();
 	}
@@ -123,7 +123,7 @@ public class BehaviorsPanel extends UpdatePanel{
 	}
 
 	@Override
-	public void threadSleep() {
+	public synchronized void threadSleep() {
 		try {
 			wait();
 			Thread.sleep(sleepTime);

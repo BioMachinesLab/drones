@@ -12,6 +12,7 @@ import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
+
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
@@ -77,10 +78,14 @@ public class CompassPanel extends UpdatePanel {
 					sleepTime = 1000;
 					break;
 				}
-				if(thread != null)
-					thread.interrupt();
+				wakeUpThread();
 			}
 		});
+	}
+	
+	private synchronized void wakeUpThread() {
+		notifyAll();
+		thread.interrupt();
 	}
 
 	@Override
@@ -91,12 +96,14 @@ public class CompassPanel extends UpdatePanel {
 	@Override
 	public void threadSleep() {
 		try {
-			wait();
+			synchronized(this){
+				wait();
+			}
 			Thread.sleep(sleepTime);
 		}catch(Exception e) {}
 	}
 
-	public void displayData(CompassMessage message) {
+	public synchronized void displayData(CompassMessage message) {
 		this.headingValue = message.getHeading();
 		heading.setText(""+headingValue);
 		notifyAll();

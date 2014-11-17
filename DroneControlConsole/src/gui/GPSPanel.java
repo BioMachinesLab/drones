@@ -174,7 +174,7 @@ public class GPSPanel extends UpdatePanel {
 		return fixInformationsPanel;
 	}
 
-	public void displayData(GPSData data) {
+	public synchronized void displayData(GPSData data) {
 		textFieldLatitude.setText(data.getLatitude());
 		textFieldLongitude.setText(data.getLongitude());
 
@@ -210,7 +210,9 @@ public class GPSPanel extends UpdatePanel {
 	@Override
 	public void threadSleep() {
 		try {
-			wait();
+			synchronized(this){
+				wait();
+			}
 			Thread.sleep(sleepTime);
 		}catch(Exception e) {}
 	}

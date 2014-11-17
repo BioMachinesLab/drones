@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -12,6 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
+
 import threads.UpdateThread;
 import dataObjects.SystemInformationsData;
 
@@ -663,8 +665,10 @@ public class SystemInfoPanel extends UpdatePanel {
 	@Override
 	public void threadSleep() {
 		try {
-			wait();
-			Thread.sleep(Integer.MAX_VALUE);
+			synchronized(this){
+				wait();
+			}
+			Thread.sleep(10000);
 		}catch(Exception e) {}
 	}
 }

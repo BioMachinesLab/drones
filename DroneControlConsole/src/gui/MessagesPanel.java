@@ -24,7 +24,7 @@ public class MessagesPanel extends UpdatePanel {
 	private JScrollPane scrollPane;
 	private JComboBox<String> comboBoxUpdateRate;
 
-	private int sleepTime = 1000;
+	private int sleepTime = 10000;
 	
 	private UpdateThread thread;
 
@@ -72,7 +72,7 @@ public class MessagesPanel extends UpdatePanel {
 					sleepTime = 1000;
 					break;
 				}
-				notifyAll();
+				wakeUpThread();
 			}
 		});
 		
@@ -81,8 +81,13 @@ public class MessagesPanel extends UpdatePanel {
 		
 		add(refresh, BorderLayout.SOUTH);
 	}
+	
+	private synchronized void wakeUpThread() {
+		notifyAll();
+		thread.interrupt();
+	}
 
-	public void displayData(SystemStatusMessage message) {
+	public synchronized void displayData(SystemStatusMessage message) {
 		if (message.getMessage() != null) {
 			String str = message.getMessage();
 			if (!str.endsWith("\n") && !str.endsWith("\r\n"))
@@ -99,7 +104,9 @@ public class MessagesPanel extends UpdatePanel {
 	@Override
 	public void threadSleep() {
 		try {
-			wait();
+			synchronized(this){
+				wait();
+			}
 			Thread.sleep(sleepTime);
 		}catch(Exception e) {}
 	}
