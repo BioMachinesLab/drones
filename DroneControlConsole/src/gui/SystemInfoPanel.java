@@ -15,7 +15,7 @@ import javax.swing.border.TitledBorder;
 import threads.UpdateThread;
 import dataObjects.SystemInformationsData;
 
-public class SystemInfoPanel extends JPanel implements UpdatePanel {
+public class SystemInfoPanel extends UpdatePanel {
 	private static final long serialVersionUID = 8457762280133417243L;
 	private GUI gui;
 
@@ -659,9 +659,12 @@ public class SystemInfoPanel extends JPanel implements UpdatePanel {
 	public void registerThread(UpdateThread t) {
 		this.thread = t;
 	}
-
+	
 	@Override
-	public int getSleepTime() {
-		return Integer.MAX_VALUE;
+	public void threadSleep() {
+		try {
+			wait();
+			Thread.sleep(Integer.MAX_VALUE);
+		}catch(Exception e) {}
 	}
 }

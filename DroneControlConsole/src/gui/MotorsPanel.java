@@ -29,7 +29,7 @@ import javax.swing.plaf.basic.BasicProgressBarUI;
 import sun.swing.SwingUtilities2;
 import threads.UpdateThread;
 
-public class MotorsPanel extends JPanel implements UpdatePanel {
+public class MotorsPanel extends UpdatePanel {
 	private static final long serialVersionUID = 7086609300323189722L;
 
 	private boolean locked = false;
@@ -286,11 +286,6 @@ public class MotorsPanel extends JPanel implements UpdatePanel {
 		this.thread = t;
 	}
 
-	@Override
-	public int getSleepTime() {
-		return 10;
-	}
-	
 	private class MyProgressUI extends BasicProgressBarUI {
 
         @Override
@@ -349,4 +344,7 @@ public class MotorsPanel extends JPanel implements UpdatePanel {
             
         }
     }
+	
+	@Override
+	public void threadSleep() {}
 }

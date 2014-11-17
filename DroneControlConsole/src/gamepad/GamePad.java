@@ -123,9 +123,7 @@ public class GamePad extends Thread {
 					lastRightMotorSpeed = rightMotorSpeed;
 						
 				}
-			} catch(Exception e) {
-				e.printStackTrace();
-			}
+			} catch(Exception e) {}
 		}
 	}
 	

@@ -33,5 +33,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/JMapViewer.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/RaspberryController"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

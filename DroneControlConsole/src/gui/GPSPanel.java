@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
@@ -13,11 +14,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
+
 import org.joda.time.LocalDateTime;
+
 import threads.UpdateThread;
 import dataObjects.GPSData;
 
-public class GPSPanel extends JPanel implements UpdatePanel {
+public class GPSPanel extends UpdatePanel {
 	private static final long serialVersionUID = 6535539451990270799L;
 	
 	private static int TEXTFIELD_SIZE = 90;
@@ -80,8 +83,7 @@ public class GPSPanel extends JPanel implements UpdatePanel {
 					sleepTime = 1000;
 					break;
 				}
-				if(thread != null)
-					thread.interrupt();
+				notifyAll();
 			}
 		});
 
@@ -198,13 +200,18 @@ public class GPSPanel extends JPanel implements UpdatePanel {
 				+ date.getMillisOfSecond());
 
 		repaint();
+		notifyAll();
 	}
 	
 	public void registerThread(UpdateThread t) {
 		this.thread = t;
 	}
 	
-	public int getSleepTime() {
-		return sleepTime;
+	@Override
+	public void threadSleep() {
+		try {
+			wait();
+			Thread.sleep(sleepTime);
+		}catch(Exception e) {}
 	}
 }

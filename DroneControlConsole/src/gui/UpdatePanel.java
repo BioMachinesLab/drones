@@ -1,10 +1,11 @@
 package gui;
 
+import javax.swing.JPanel;
 import threads.UpdateThread;
 
-public interface UpdatePanel {
+public abstract class UpdatePanel extends JPanel{
 	
-	public void registerThread(UpdateThread t);
-	public int getSleepTime();
+	public abstract void registerThread(UpdateThread t);
+	public abstract void threadSleep();
 
 }

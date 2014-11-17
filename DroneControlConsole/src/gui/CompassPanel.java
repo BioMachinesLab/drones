@@ -12,7 +12,6 @@ import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
-
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
@@ -23,7 +22,7 @@ import javax.swing.JTextField;
 import network.messages.CompassMessage;
 import threads.UpdateThread;
 
-public class CompassPanel extends JPanel implements UpdatePanel {
+public class CompassPanel extends UpdatePanel {
 	
 	private UpdateThread thread;
 	private JTextField heading;
@@ -90,13 +89,17 @@ public class CompassPanel extends JPanel implements UpdatePanel {
 	}
 
 	@Override
-	public int getSleepTime() {
-		return sleepTime;
+	public void threadSleep() {
+		try {
+			wait();
+			Thread.sleep(sleepTime);
+		}catch(Exception e) {}
 	}
 
 	public void displayData(CompassMessage message) {
 		this.headingValue = message.getHeading();
 		heading.setText(""+headingValue);
+		notifyAll();
 	}
 	
 	public class CompassDrawingPanel extends JPanel {
@@ -116,7 +119,7 @@ public class CompassPanel extends JPanel implements UpdatePanel {
             			while(true) {
 	            			panel.repaint();
 	            			try {
-	            				Thread.sleep(100);
+	            				Thread.sleep(50);
 	            			} catch (InterruptedException e) {
 	            				e.printStackTrace();
 	            			}
@@ -173,7 +176,7 @@ public class CompassPanel extends JPanel implements UpdatePanel {
             int rotationY = circleX + (circleRadius / 2);
 
             g2d.setColor(Color.green);
-            g2d.fillOval(rotationX, rotationY, 5, 5);
+            g2d.fillOval((int)(circleX + (circleRadius / 2) + Math.cos(Math.toRadians(headingValue-90))*55), (int)(circleX + (circleRadius / 2) + Math.sin(Math.toRadians(headingValue-90))*55), 5, 5);
             
             AffineTransform a = g2d.getTransform().getRotateInstance(Math.toRadians(headingValue), rotationX, rotationY);
             g2d.setTransform(a);

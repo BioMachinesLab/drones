@@ -20,6 +20,7 @@ public class GUI extends JFrame{
 	private MessagesPanel msgPanel;
 	private CompassPanel compassPanel;
 	private MapPanel mapPanel;
+	private BehaviorsPanel behaviorsPanel;
 
 	public GUI() {
 
@@ -56,7 +57,7 @@ public class GUI extends JFrame{
 	}
 
 	private void createInfoPanel() {
-		JPanel infoPanel = new JPanel(new BorderLayout());
+		JPanel rightPanel = new JPanel(new BorderLayout());
 
 		//Motors
 		JPanel motorsGPSPanel = new JPanel(new BorderLayout());
@@ -71,13 +72,23 @@ public class GUI extends JFrame{
 		compassPanel = new CompassPanel();
 		motorsGPSPanel.add(compassPanel, BorderLayout.SOUTH);
 
-		infoPanel.add(motorsGPSPanel, BorderLayout.NORTH);
+		rightPanel.add(motorsGPSPanel, BorderLayout.NORTH);
+		
+		add(rightPanel, BorderLayout.EAST);
+		
+		JPanel leftPanel = new JPanel(new BorderLayout());
 
 		//Messages
 		msgPanel = new MessagesPanel();
-		infoPanel.add(msgPanel, BorderLayout.CENTER);
+		leftPanel.add(msgPanel, BorderLayout.CENTER);
 		
-		add(infoPanel, BorderLayout.EAST);
+		
+		//Behaviors
+		behaviorsPanel = new BehaviorsPanel();
+		leftPanel.add(behaviorsPanel, BorderLayout.NORTH);
+		
+		add(leftPanel, BorderLayout.WEST);
+		
 	}
 	
 	private void createSysInfoPanel() {
@@ -108,6 +119,11 @@ public class GUI extends JFrame{
 	public MapPanel getMapPanel() {
 		return mapPanel;
 	}
+	
+	public BehaviorsPanel getBehaviorsPanel() {
+		return behaviorsPanel;
+	}
+	
 	
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static void enableOSXFullscreen(Window window) {

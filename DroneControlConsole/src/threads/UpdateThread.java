@@ -10,7 +10,6 @@ public class UpdateThread extends Thread {
 	protected UpdatePanel panel;
 	protected DroneControlConsole console;
 	protected boolean keepGoing = true;
-	protected int sleepTime = 0;
 	protected MessageType type;
 	
 	public UpdateThread(DroneControlConsole console, UpdatePanel panel, MessageType type) {
@@ -24,13 +23,8 @@ public class UpdateThread extends Thread {
 	public void run() {
 
 		while (keepGoing) {
-			sleepTime = panel.getSleepTime();
 			console.sendData(new InformationRequest(type));
-			try {
-				Thread.sleep(sleepTime);
-			} catch (InterruptedException e) {
-				// we expect interruptions when the panel changes the refresh rate
-			}
+			panel.threadSleep();
 		}
 	}
 	

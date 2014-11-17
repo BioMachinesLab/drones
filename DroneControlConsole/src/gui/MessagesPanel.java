@@ -17,7 +17,7 @@ import javax.swing.ScrollPaneConstants;
 import network.messages.SystemStatusMessage;
 import threads.UpdateThread;
 
-public class MessagesPanel extends JPanel implements UpdatePanel {
+public class MessagesPanel extends UpdatePanel {
 	private static final long serialVersionUID = 5958293256864880036L;
 
 	private JTextArea messageArea;
@@ -50,7 +50,7 @@ public class MessagesPanel extends JPanel implements UpdatePanel {
 		comboBoxUpdateRate = new JComboBox<String>();
 		comboBoxUpdateRate.setModel(new DefaultComboBoxModel<String>(
 				new String[] { "10 Hz", "5 Hz", "1 Hz", "0.1Hz" }));
-		comboBoxUpdateRate.setSelectedIndex(2);
+		comboBoxUpdateRate.setSelectedIndex(3);
 		comboBoxUpdateRate.addActionListener(new ActionListener() {
 
 			@Override
@@ -72,8 +72,7 @@ public class MessagesPanel extends JPanel implements UpdatePanel {
 					sleepTime = 1000;
 					break;
 				}
-				if(thread != null)
-					thread.interrupt();
+				notifyAll();
 			}
 		});
 		
@@ -92,11 +91,17 @@ public class MessagesPanel extends JPanel implements UpdatePanel {
 			str = message.getTimestamp() + " - " + str;
 			messageArea.append(str);
 			messageArea.setCaretPosition(messageArea.getDocument().getLength());
+			
+			notifyAll();
 		}
 	}
 	
-	public int getSleepTime() {
-		return sleepTime;
+	@Override
+	public void threadSleep() {
+		try {
+			wait();
+			Thread.sleep(sleepTime);
+		}catch(Exception e) {}
 	}
 
 	public void registerThread(UpdateThread t) {

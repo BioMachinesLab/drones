@@ -18,14 +18,14 @@ public class MotorUpdateThread extends UpdateThread {
 	public void run() {
 
 		while (keepGoing) {
-			sleepTime = panel.getSleepTime();
+			panel.threadSleep();
 			
 			console.getMotorSpeeds().setLimit(motorPanel.getMotorLimit());
 			console.getMotorSpeeds().setOffset(motorPanel.getMotorOffset());
 			console.getMotorSpeeds().setSpeeds(motorPanel.getLeftMotorPower(), motorPanel.getRightMotorPower());
 			
 			try {
-				Thread.sleep(sleepTime);
+				Thread.sleep(10);
 			} catch (InterruptedException e) {
 				// we expect interruptions when the GPSPanel changes the refresh rate
 			}

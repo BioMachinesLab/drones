@@ -65,7 +65,7 @@ public class DroneControlConsole extends Thread {
 		
 		motorSpeeds = new MotorSpeeds();
 		
-		connect();
+//		connect();
 
 		setupGUI();
 		
@@ -161,7 +161,7 @@ public class DroneControlConsole extends Thread {
 		return gamePad;
 	}
 	
-	public void sendData(InformationRequest message) {
+	public void sendData(Message message) {
 		if(informationConnection != null)
 			informationConnection.sendData(message);
 	}
