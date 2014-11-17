@@ -46,7 +46,7 @@ public class ESCManagerOutput extends Thread implements
 	}
 
 	@Override
-	public int getNumberOfOutputValues() {
+	public int getNumberOfOutputs() {
 		return 2;
 	}
 

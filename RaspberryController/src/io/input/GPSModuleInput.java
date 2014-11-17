@@ -395,7 +395,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 					String name = keys[index];
 					String val = currentValues.get(name);
 					
-					if(!val.isEmpty()) {
+					if(val!=null && !val.isEmpty()) {
 						
 						//check if it has been changed in the meanwhile.
 						//if not, set it as empty because it has already been processed

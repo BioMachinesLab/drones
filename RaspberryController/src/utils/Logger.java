@@ -74,7 +74,7 @@ public class Logger extends Thread {
 		}
 		
 		for(ControllerOutput o : outputs) {
-			for(int i = 0 ; i < o.getNumberOfOutputValues() ; i++)
+			for(int i = 0 ; i < o.getNumberOfOutputs() ; i++)
 				result+=o.getValue(i)+"\t";
 		}
 		return result+"\n";

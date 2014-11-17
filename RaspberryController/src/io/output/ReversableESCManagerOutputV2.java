@@ -4,36 +4,52 @@ import java.io.IOException;
 
 import network.messages.MotorMessage;
 import utils.Math_Utils;
+
+import com.pi4j.io.gpio.GpioController;
+import com.pi4j.io.gpio.GpioPinDigitalOutput;
+import com.pi4j.io.gpio.Pin;
+import com.pi4j.io.gpio.PinState;
+import com.pi4j.io.gpio.RaspiPin;
+
 import dataObjects.MotorSpeeds;
 
-public class ReversableESCManagerOutput extends Thread implements
+public class ReversableESCManagerOutputV2 extends Thread implements
 		ControllerOutput {
-	
+
 	private final static boolean DEBUG = false;
 
+	private final static Pin SWITCH_PIN = RaspiPin.GPIO_13;
 	private final static int LEFT_ESC = 0;
 	private final static int RIGHT_ESC = 1;
 
 	private final static int CENTRAL_VALUE = 150;
 	private final static int MIN_VALUE = 60;
 	private final static int MAX_VALUE = 240;
-	
+
 	private final static int MIN_FW_VALUE = 165;
 	private final static int MIN_BW_VALUE = 135;
 
 	private int lValue = CENTRAL_VALUE;
 	private int rValue = CENTRAL_VALUE;
-	
+
 	private MotorSpeeds speeds;
+	private GpioPinDigitalOutput escSwitch;
 
 	private boolean available = false;
 
-	public ReversableESCManagerOutput(MotorSpeeds speeds) {
+	public ReversableESCManagerOutputV2(MotorSpeeds speeds,
+			GpioController gpioController) {
 		this.speeds = speeds;
+
+		escSwitch = gpioController.provisionDigitalOutputPin(SWITCH_PIN,
+				PinState.LOW);
+
 		try {
 			setRawValues(CENTRAL_VALUE, CENTRAL_VALUE);
 			Thread.sleep(1000);
-			
+			escSwitch.high();
+			Thread.sleep(10);
+
 			available = true;
 		} catch (InterruptedException e) {
 			System.err.println(e.getMessage());
@@ -56,10 +72,12 @@ public class ReversableESCManagerOutput extends Thread implements
 			if (value == 0.5 || value == -1) {
 				lValue = CENTRAL_VALUE;
 			} else {
-				if(value > 0.5) {
-					lValue = (int)(Math_Utils.map(value, 0.5, 1, MIN_FW_VALUE, MAX_VALUE));
-				} else if(value < 0.5) {
-					lValue = (int)(Math_Utils.map(value, 0, 0.5, MIN_VALUE, MIN_BW_VALUE));
+				if (value > 0.5) {
+					lValue = (int) (Math_Utils.map(value, 0.5, 1, MIN_FW_VALUE,
+							MAX_VALUE));
+				} else if (value < 0.5) {
+					lValue = (int) (Math_Utils.map(value, 0, 0.5, MIN_VALUE,
+							MIN_BW_VALUE));
 				}
 			}
 			break;
@@ -67,10 +85,12 @@ public class ReversableESCManagerOutput extends Thread implements
 			if (value == 0.5 || value == -1) {
 				rValue = CENTRAL_VALUE;
 			} else {
-				if(value > 0.5) {
-					rValue = (int)(Math_Utils.map(value, 0.5, 1, MIN_FW_VALUE, MAX_VALUE));
-				} else if(value < 0.5) {
-					rValue = (int)(Math_Utils.map(value, 0, 0.5, MIN_VALUE, MIN_BW_VALUE));
+				if (value > 0.5) {
+					rValue = (int) (Math_Utils.map(value, 0.5, 1, MIN_FW_VALUE,
+							MAX_VALUE));
+				} else if (value < 0.5) {
+					rValue = (int) (Math_Utils.map(value, 0, 0.5, MIN_VALUE,
+							MIN_BW_VALUE));
 				}
 			}
 			break;
@@ -94,8 +114,9 @@ public class ReversableESCManagerOutput extends Thread implements
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			if(DEBUG)
-				System.out.println("[ESCManager] Wrote to motor L: " + lValue+ " R:" + rValue);
+			if (DEBUG)
+				System.out.println("[ESCManager] Wrote to motor L: " + lValue
+						+ " R:" + rValue);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -104,8 +125,17 @@ public class ReversableESCManagerOutput extends Thread implements
 	}
 
 	private void disableMotors() {
+		escSwitch.low();
 		setRawValues(CENTRAL_VALUE, CENTRAL_VALUE);
 		writeValueToESC();
+		available=false;
+	}
+	
+	private void enableMotors(){
+		setRawValues(CENTRAL_VALUE, CENTRAL_VALUE);
+		writeValueToESC();
+		escSwitch.high();
+		available=true;
 	}
 
 	@Override
@@ -123,6 +153,10 @@ public class ReversableESCManagerOutput extends Thread implements
 		if (m.getLeftMotor() == -1 || m.getRightMotor() == -1) {
 			disableMotors();
 		} else {
+			if (!available){
+				enableMotors();
+			}
+			
 			setValue(0, m.getLeftMotor());
 			setValue(1, m.getRightMotor());
 			writeValueToESC();
@@ -138,10 +172,10 @@ public class ReversableESCManagerOutput extends Thread implements
 	public boolean isAvailable() {
 		return available;
 	}
-	
+
 	@Override
 	public double getValue(int index) {
-		if(index == 0) {
+		if (index == 0) {
 			return lValue;
 		}
 		return rValue;

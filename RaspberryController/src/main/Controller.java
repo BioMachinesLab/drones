@@ -4,10 +4,11 @@ import io.SystemInfoMessageProvider;
 import io.SystemStatusMessageProvider;
 import io.input.ControllerInput;
 import io.input.GPSModuleInput;
+import io.input.I2CBatteryManagerInput;
 import io.input.I2CCompassModuleInput;
 import io.output.ControllerOutput;
 import io.output.DebugLedsOutput;
-import io.output.ReversableESCManagerOutput;
+import io.output.ReversableESCManagerOutputV2;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,41 +20,48 @@ import network.MotorConnectionListener;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import network.messages.MotorMessage;
-import network.messages.SystemStatusMessage;
 import utils.Logger;
 import behaviors.Behavior;
 import behaviors.TurnToOrientation;
 
+import com.pi4j.io.gpio.GpioController;
+import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.i2c.I2CBus;
-import com.pi4j.io.i2c.I2CFactory;
 import com.pi4j.io.serial.SerialPortException;
 
 import dataObjects.MotorSpeeds;
 
 public class Controller {
+	private boolean debug = false;
+
+	// Modules
 	private GPSModuleInput gpsModule;
-	private ReversableESCManagerOutput escManager;
+	private ReversableESCManagerOutputV2 escManager;
 	private I2CCompassModuleInput compassModule;
 	private ConnectionListener connectionListener;
 	private MotorConnectionListener motorConnectionListener;
+	private I2CBatteryManagerInput batteryManager;
 
+	// Messages and IO's
 	private ArrayList<MessageProvider> messageProviders = new ArrayList<MessageProvider>();
 	private ArrayList<ControllerOutput> outputs = new ArrayList<ControllerOutput>();
 	private ArrayList<ControllerInput> inputs = new ArrayList<ControllerInput>();
 	private ArrayList<Behavior> behaviors = new ArrayList<Behavior>();
 
+	// Hardware Instances
+	private GpioController gpioController;
+	/* TO-DO Refactor I2C initialization!!!!! */
+	private I2CBus i2cBus;
+
+	// Other Stuff
 	private String status = "";
 	private String initMessages = "\n";
 	private MotorSpeeds speeds;
 	private DebugLedsOutput debugLeds;
-	
-	private Logger logThread;
-	private MessageHandler messageHandler;
-	
-	private boolean debug = false;
 
-	// TO-DO Refactor this initialization!!!!!
-	private I2CBus i2cBus;
+	private Logger logThread;
+
+	private MessageHandler messageHandler;
 
 	public static void main(String[] args) throws SerialPortException {
 		new Controller();
@@ -73,23 +81,24 @@ public class Controller {
 	private void initModules() {
 		System.out.println("######################################");
 
-		setStatus("Initializing...");
-		
-		if(!debug) {
+		setStatus("Initializing...\n");
+
+		if (!debug) {
+			initHardwareCommunicatonProtocols();
 			initInputs();
 			initOutputs();
 			initMessageProviders();
 		}
 
-		initConnections();
-		
+		// initConnections();
+
 		logThread = new Logger(this);
 		logThread.start();
-		
+
 		messageHandler = new MessageHandler(this);
 		messageHandler.start();
 
-		setStatus("Running");
+		setStatus("Running!\n");
 
 		System.out.println(initMessages);
 	}
@@ -101,12 +110,12 @@ public class Controller {
 				if (escManager != null) {
 					speeds.setSpeeds(new MotorMessage(-1, -1));
 				}
-				
-				if(logThread != null) {
+
+				if (logThread != null) {
 					logThread.interrupt();
 				}
-				
-				if(compassModule != null) {
+
+				if (compassModule != null) {
 					compassModule.interrupt();
 				}
 
@@ -117,14 +126,19 @@ public class Controller {
 						e.printStackTrace();
 					}
 				}
-				
+
 				if (gpsModule != null) {
 					gpsModule.closeSerial();
 				}
 
 				if (debugLeds != null) {
-					debugLeds.shutdownGpio();
+					debugLeds.shutdownLeds();
 				}
+
+				if (gpioController != null) {
+					gpioController.shutdown();
+				}
+
 				System.out.println("# Finished cleanup!");
 			}
 		});
@@ -149,7 +163,8 @@ public class Controller {
 	 * @param The
 	 *            connection handler for the information requester
 	 */
-	public void processInformationRequest(Message request, ConnectionHandler conn) {
+	public void processInformationRequest(Message request,
+			ConnectionHandler conn) {
 		messageHandler.addMessage(request, conn);
 	}
 
@@ -182,72 +197,104 @@ public class Controller {
 
 	public void setStatus(String status) {
 		this.status = status;
-		System.out.println(status);
+		System.out.print(status);
 	}
-	
+
 	private void initBehaviors() {
-		
+
 		Behavior turnBehavior = new TurnToOrientation(this);
 		turnBehavior.start();
 		behaviors.add(turnBehavior);
-		
+
+	}
+
+	/**
+	 * Initialize the Hardware protocols shared and used on input and output
+	 * devices ("physical layer"), like I2C and GPIO management instances
+	 */
+	private void initHardwareCommunicatonProtocols() {
+		// try {
+		// // Get I2C instance
+		// i2cBus = I2CFactory.getInstance(I2CBus.BUS_1);
+		// } catch (IOException e) {
+		// initMessages += "\n[INIT] I2C Interface: not ok!\n";
+		// e.printStackTrace();
+		// }
+
+		try {
+			gpioController = GpioFactory.getInstance();
+		} catch (Exception | Error e) {
+			initMessages += ("\n[INIT] GPIO Controller: not ok! ("
+					+ e.getMessage() + ")\n");
+		}
 	}
 
 	/*
 	 * Hardware initialization routines
 	 */
 	private void initInputs() {
+		// Compass Module Init
+		// compassModule = new I2CCompassModuleInput(i2cBus);
+		// initMessages += "[INIT] I2CCompassModule: "
+		// + (compassModule.isAvailable() ? "ok" : "not ok!") + "\n";
+		//
+		// if (compassModule.isAvailable()) {
+		// compassModule.start();
+		// inputs.add(compassModule);
+		// System.out.print(".");
+		// }
 
-		try {
-			// Get I2C instance
-			i2cBus = I2CFactory.getInstance(I2CBus.BUS_1);
+		// Battery Module Init
+		// batteryManager = new I2CBatteryManagerInput();
+		// initMessages += "[INIT] BatteryManager: "
+		// + (batteryManager.isAvailable() ? "ok" : "not ok!") + "\n";
+		// if (batteryManager.isAvailable()) {
+		// batteryManager.start();
+		// inputs.add(batteryManager);
+		// System.out.print(".");
+		// }
 
-			compassModule = new I2CCompassModuleInput(i2cBus);
-			initMessages += "[INIT] I2CCompassModule: "
-					+ (compassModule.isAvailable() ? "ok" : "not ok!") + "\n" ;
-			inputs.add(compassModule);
-			compassModule.start();
-			System.out.print(".");
-
-			// batteryManager = new BatteryManagerInput();
-		} catch (IOException e) {
-			initMessages += "\n[INIT] I2CCompassModule: not ok!\n";
-			e.printStackTrace();
-		}
-
+		// GPS Module Init
 		gpsModule = new GPSModuleInput();
 		initMessages += "[INIT] GPSModule: "
 				+ (gpsModule.isAvailable() ? "ok" : "not ok!") + "\n";
-		gpsModule.enableLocalLog();
-		System.out.print(".");
 
-		inputs.add(gpsModule);
-		
+		if (gpsModule.isAvailable()) {
+			gpsModule.enableLocalLog();
+			inputs.add(gpsModule);
+			System.out.print(".");
+		}
 	}
 
 	private void initOutputs() {
-		
-		escManager = new ReversableESCManagerOutput(speeds);
+
+		// ESC Output Init
+		escManager = new ReversableESCManagerOutputV2(speeds, gpioController);
+
 		initMessages += "[INIT] ESCManager: "
 				+ (escManager.isAvailable() ? "ok" : "not ok!") + "\n";
-		if (escManager.isAvailable())
+
+		if (escManager.isAvailable()) {
 			escManager.start();
-		
-		outputs.add(escManager);
-		System.out.print(".");
-		 
-		debugLeds = new DebugLedsOutput();
+			outputs.add(escManager);
+			System.out.print(".");
+		}
+
+		// Debug Leds Init
+		debugLeds = new DebugLedsOutput(gpioController);
 		initMessages += "[INIT] DebugLEDs: "
 				+ (debugLeds.isAvailable() ? "ok" : "not ok!") + "\n";
-		System.out.print(".");
+		if (debugLeds.isAvailable()) {
+			debugLeds.start();
+			outputs.add(debugLeds);
 
-		
-		outputs.add(debugLeds);
-		
+			debugLeds.addBlinkLed(0);
+
+			System.out.print(".");
+		}
 	}
 
 	private void initConnections() {
-		
 		try {
 			connectionListener = new ConnectionListener(this);
 			connectionListener.start();
@@ -265,13 +312,13 @@ public class Controller {
 			e.printStackTrace();
 			initMessages += "[INIT] Unable to start Network Connection Listeners!\n";
 		}
-		
+
 	}
-	
+
 	public ArrayList<ControllerInput> getInputs() {
 		return inputs;
 	}
-	
+
 	public ArrayList<ControllerOutput> getOutputs() {
 		return outputs;
 	}
@@ -279,7 +326,7 @@ public class Controller {
 	public ArrayList<MessageProvider> getMessageProviders() {
 		return messageProviders;
 	}
-	
+
 	public ArrayList<Behavior> getBehaviors() {
 		return behaviors;
 	}
