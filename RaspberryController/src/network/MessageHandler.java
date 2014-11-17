@@ -2,6 +2,7 @@ package network;
 
 import main.Controller;
 import network.messages.BehaviorMessage;
+import network.messages.InformationRequest;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import network.messages.SystemStatusMessage;
@@ -26,39 +27,45 @@ public class MessageHandler extends Thread {
 	@Override
 	public void run() {
 		
-		while(pendingIndex == currentIndex) {
-			try {
-				wait();
-			} catch(Exception e){}
-		}
+		try {
 		
-		Message request = pendingMessages[currentIndex];
-		Message response = null;
-		
-		if(request instanceof BehaviorMessage) {
+			while(true) {
 			
-			processBehaviorMessage(request);
+				while(pendingIndex == currentIndex) {
+					try {
+						wait();
+					} catch(Exception e){}
+				}
+				
+				Message request = pendingMessages[currentIndex];
+				Message response = null;
+				
+				if(request instanceof BehaviorMessage) {
+					processBehaviorMessage(request);
+				} else {
+					for (MessageProvider p : controller.getMessageProviders()) {
+						response = p.getMessage(request);
+						if (response != null)
+							break;
+					}
 			
-		} else {
-			for (MessageProvider p : controller.getMessageProviders()) {
-				response = p.getMessage(request);
-				if (response != null)
-					break;
+					if (response == null)
+						response = new SystemStatusMessage(
+								"No message provider for the current request ("
+										+ request.getClass().getSimpleName() + ")");
+			
+					pendingConnections[currentIndex].sendData(response);
+				}
+				
+				pendingMessages[currentIndex] = null;
+				pendingConnections[currentIndex] = null;
+				
+				currentIndex++;
+				currentIndex%=BUFFER_SIZE;
 			}
-	
-			if (response == null)
-				response = new SystemStatusMessage(
-						"No message provider for the current request ("
-								+ request.getClass().getSimpleName() + ")");
-	
-			pendingConnections[currentIndex].sendData(response);
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
-		
-		pendingMessages[currentIndex] = null;
-		pendingConnections[currentIndex] = null;
-		
-		currentIndex++;
-		currentIndex%=BUFFER_SIZE;
 	}
 	
 	private void processBehaviorMessage(Message request) {
@@ -88,12 +95,11 @@ public class MessageHandler extends Thread {
 	}
 	
 	public synchronized void addMessage(Message m, ConnectionHandler c) {
-		pendingMessages[currentIndex] = m;
-		pendingConnections[currentIndex] = c;
+		pendingMessages[pendingIndex] = m;
+		pendingConnections[pendingIndex] = c;
 		pendingIndex++;
 		pendingIndex%=BUFFER_SIZE;
 		notifyAll();
-		System.out.println("[MessageHandler] Queue:"+Math.abs(pendingIndex-currentIndex));
 	}
 
 }

@@ -90,7 +90,7 @@ public class Controller {
 			initMessageProviders();
 		}
 
-		// initConnections();
+		initConnections();
 
 		logThread = new Logger(this);
 		logThread.start();

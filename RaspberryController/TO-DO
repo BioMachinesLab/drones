@@ -1,6 +1,4 @@
 TO-DO Hardware:
-	- Make the ESC's rotation reversable
-	- Improve WLAN0 initialization (IP address problem)
 	- Check https://code.google.com/p/i2c-gps-nav/ project. Possible alternative to UART population?
 	
 	
@@ -11,7 +9,5 @@ TO-DO Controller:
 
 
 TO-DO GUI:
-	- Set up the joystick maximum range (maximum speed) with a slider (or something like that)
-
 	
 - Compile just our code (without having to compile the entire code)
