@@ -24,17 +24,20 @@ import com.pi4j.io.serial.SerialFactory;
 
 import dataObjects.GPSData;
 
-public class GPSModuleInput implements ControllerInput, MessageProvider, Serializable {
+public class GPSModuleInput implements ControllerInput, MessageProvider,
+		Serializable {
 	private static final long serialVersionUID = -5443358826645386873L;
 
 	private final static String FILE_NAME = "/home/pi/RaspberryController/logs/GPSLog_";
 	private boolean localLog = false;
 	private PrintWriter localLogPrintWriterOut;
 
-	private final static boolean DEBUG_MODE = false;
+	private final static boolean DEBUG_MODE = true;
 
-//	private final static String NMEA_REGEX = "GP[A-Z]{3},[a-zA-Z0-9,._]*[*][0-9a-fA-F]{2}?";
-//	private final static String PMTK_REGEX = "PMTK[a-zA-Z0-9,._]*[*][0-9a-fA-F]{2}?";
+	// private final static String NMEA_REGEX =
+	// "GP[A-Z]{3},[a-zA-Z0-9,._]*[*][0-9a-fA-F]{2}?";
+	// private final static String PMTK_REGEX =
+	// "PMTK[a-zA-Z0-9,._]*[*][0-9a-fA-F]{2}?";
 	private final static int DEFAULT_BAUD_RATE = 9600;
 	private final static int TARGET_BAUD_RATE = 57600; // Possible:
 														// 4800,9600,14400,19200,38400,57600,115200
@@ -50,61 +53,64 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 			.synchronizedList(new ArrayList<String>());
 
 	private boolean available = false;
-	
+
 	private MessageParser messageParser;
 
 	public GPSModuleInput() {
 
 		try {
-			
+
 			print("Initializing GPS!", false);
-			
+
 			setupGPSReceiver();
-			
+
 			messageParser = new MessageParser();
 			messageParser.start();
-			
+
 			available = true;
 
 		} catch (NotActiveException | IllegalArgumentException
 				| InterruptedException e) {
-			System.err.println("Error initializing GPSModule! ("
+			System.err.println("[GPS Module] Error initializing GPSModule! ("
 					+ e.getMessage() + ")");
 			serial.close();
 		} catch (Error | Exception e) {
-			System.err.println("Error initializing GPSModule! ("
+			System.err.println("[GPS Module] Error initializing GPSModule! ("
 					+ e.getMessage() + ")");
 		}
 	}
-	
+
 	private void createSerial(int baudrate) {
-		
+
 		serial = SerialFactory.createInstance();
 
 		serial.addListener(new SerialDataListener() {
 			@Override
 			public void dataReceived(SerialDataEvent event) {
-				
-				//TODO check that we are not losing data
-				
+
+				// TODO check that we are not losing data
+
 				String received = event.getData();
-				
-				while(received.contains("\r\n")) {
-					
+
+				while (received.contains("\r\n")) {
+
 					int indexNewline = received.indexOf("\r\n");
-					
-					String sub = received.substring(0,indexNewline);
+
+					String sub = received.substring(0, indexNewline);
 					sub = (receivedDataBuffer + sub).trim();
-					
-					if(messageParser != null && sub.startsWith("$"))
+
+					if (messageParser != null && sub.startsWith("$"))
 						messageParser.processReceivedData(sub);
-					
+
 					receivedDataBuffer = "";
-					received = received.substring(indexNewline+1);//+1 to skip the previous \r\n
+					received = received.substring(indexNewline + 1);// +1 to
+																	// skip the
+																	// previous
+																	// \r\n
 				}
-				
-				receivedDataBuffer+=received;
-				
+
+				receivedDataBuffer += received;
+
 			}
 		});
 
@@ -125,9 +131,9 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 			InterruptedException, IllegalArgumentException {
 		if (UPDATE_DELAY < 100 || UPDATE_DELAY > 10000) {
 			throw new IllegalArgumentException(
-					"Frequency must be in [100,10000] interval");
+					"[GPS Module] Frequency must be in [100,10000] interval");
 		}
-		
+
 		createSerial(DEFAULT_BAUD_RATE);
 
 		// Change Baud Rate
@@ -143,9 +149,9 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 		receivedDataBuffer = "";
 		ackResponses.clear();
 		Thread.sleep(1000);
-		
+
 		createSerial(TARGET_BAUD_RATE);
-		
+
 		print("Started new baud rate!", false);
 		Thread.sleep(1000);
 
@@ -159,8 +165,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 		Thread.sleep(1000);
 		int index = ackResponses.lastIndexOf("$PMTK001,220,3*30");
 		if (index == -1) {
-			/*throw new NotActiveException*/System.out.println(
-					"The update frequency was not succefully changed");
+			/* throw new NotActiveException */System.out
+					.println("[GPS Module] The update frequency was not succefully changed");
 		} else {
 			ackResponses.remove(index);
 		}
@@ -173,8 +179,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 		Thread.sleep(1000);
 		index = ackResponses.lastIndexOf("$PMTK001,397,3*3D");
 		if (index == -1) {
-			/*throw new NotActiveException*/System.out.println(
-					"The navigation speed threshold was not succefully changed");
+			/* throw new NotActiveException */System.out
+					.println("[GPS Module] The navigation speed threshold was not succefully changed");
 		} else {
 			ackResponses.remove(index);
 		}
@@ -198,15 +204,17 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 	}
 
 	public Message getMessage(Message request) {
-		if(request instanceof InformationRequest && ((InformationRequest)request).getMessageTypeQuery().equals(InformationRequest.MessageType.GPS)){
-				
+		if (request instanceof InformationRequest
+				&& ((InformationRequest) request).getMessageTypeQuery().equals(
+						InformationRequest.MessageType.GPS)) {
+
 			if (!available)
 				return new SystemStatusMessage(
 						"[GPSModule] Unable to send GPS data");
-	
+
 			return new GPSMessage(getReadings());
 		}
-		
+
 		return null;
 	}
 
@@ -331,7 +339,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 	}
 
 	/*
-	 * Enables a logging of the received NMEA information in the disk (on the selected path)
+	 * Enables a logging of the received NMEA information in the disk (on the
+	 * selected path)
 	 */
 	public void enableLocalLog() {
 		try {
@@ -340,19 +349,19 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 
 			localLogPrintWriterOut = new PrintWriter(FILE_NAME
-					+ sdf.format(cal.getTime())+".log");
+					+ sdf.format(cal.getTime()) + ".log");
 			localLog = true;
 		} catch (FileNotFoundException e) {
 			System.err.println("[GPSModuleInput] Unable to start local log");
 			e.printStackTrace();
 		}
 	}
-	
+
 	class MessageParser extends Thread {
-		
-		private HashMap<String,String> currentValues = new HashMap<String,String>();
-		private HashMap<String,String> oldValues = new HashMap<String,String>();
-		
+
+		private HashMap<String, String> currentValues = new HashMap<String, String>();
+		private HashMap<String, String> oldValues = new HashMap<String, String>();
+
 		/**
 		 * Processes the received data and splits it by commands and messages
 		 * sentences and send them to the correct parser
@@ -362,66 +371,69 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 		 */
 		private void processReceivedData(String data) {
 			int indexComma = data.indexOf(',');
-			if(indexComma >= 0) {
-//				System.out.println(data);
-				String name = data.substring(0,indexComma);
-				currentValues.put(name,data.substring(indexComma+1));
+			if (indexComma >= 0) {
+				// System.out.println(data);
+				String name = data.substring(0, indexComma);
+				currentValues.put(name, data.substring(indexComma + 1));
 			}
 		}
-		
-		
+
 		@Override
 		public void run() {
-			
+
 			int index = 0;
 			int size = 0;
 			String[] keys = {};
-			
-			while(true) {
-				
-				if(currentValues.size() != size) {
+
+			while (true) {
+
+				if (currentValues.size() != size) {
 					size = currentValues.size();
 					keys = new String[size];
 					int i = 0;
-					for(String s : currentValues.keySet()) {
+					for (String s : currentValues.keySet()) {
 						keys[i++] = s;
 					}
 				}
-				
-				if(size > 0) {
-				
-					index%=size;
-					
+
+				if (size > 0) {
+
+					index %= size;
+
 					String name = keys[index];
 					String val = currentValues.get(name);
-					
-					if(val!=null && !val.isEmpty()) {
-						
-						//check if it has been changed in the meanwhile.
-						//if not, set it as empty because it has already been processed
+
+					if (val != null && !val.isEmpty()) {
+
+						// check if it has been changed in the meanwhile.
+						// if not, set it as empty because it has already been
+						// processed
 						String oldVal = oldValues.get(name);
-						if(oldVal == null || !oldVal.equals(val)) {
-						
-							if (name.startsWith("$GP") || name.startsWith("$PMTK")) {
-								
+						if (oldVal == null || !oldVal.equals(val)) {
+
+							if (name.startsWith("$GP")
+									|| name.startsWith("$PMTK")) {
+
 								if (localLog) {
-									localLogPrintWriterOut.println(name+","+val);
+									localLogPrintWriterOut.println(name + ","
+											+ val);
 								}
-								
-								if(name.startsWith("$GP")) {
+
+								if (name.startsWith("$GP")) {
 									parseNMEAData(name, val);
-								} else if (name.startsWith("$PMTK")) {
-									parsePMTKData(name, val);
+								} else {
+									if (name.startsWith("$PMTK")) {
+										parsePMTKData(name, val);
+									}
 								}
 							}
-							oldValues.put(name,val);
+							oldValues.put(name, val);
 						}
 					}
 				}
 				index++;
 			}
 		}
-		
 
 		/*
 		 * GPS Parse Functions
@@ -434,9 +446,9 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 		 *            : NMEA sentence to be processed
 		 */
 		private void parseNMEAData(String name, String data) {
-			
-			String fullString = name+","+data;
-			
+
+			String fullString = name + "," + data;
+
 			String[] split = fullString.split(",");
 
 			if (nmeaUtils.checkNMEAChecksum(fullString)) {
@@ -476,9 +488,9 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 		 *            : PMTK sentence to be processed
 		 */
 		private void parsePMTKData(String name, String data) {
-			
-			String fullString = name+","+data;
-			
+
+			String fullString = name + "," + data;
+
 			if (nmeaUtils.checkNMEAChecksum(fullString)) {
 				print("[Parsing PMTK]", false);
 				ackResponses.add(fullString);
@@ -500,7 +512,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 					gpsData.setLatitude(params[2] + params[3]);
 					gpsData.setLongitude(params[4] + params[5]);
 					gpsData.setGPSSourceType(Integer.parseInt(params[6]));
-					gpsData.setNumberOfSatellitesInUse(Integer.parseInt(params[7]));
+					gpsData.setNumberOfSatellitesInUse(Integer
+							.parseInt(params[7]));
 					gpsData.setHDOP(Double.parseDouble(params[8]));
 
 					if (params[9].length() != 0)
@@ -525,7 +538,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 				print("[Parsing GPGSA]", false);
 				int fixType = Integer.parseInt(params[2]);
 				gpsData.setFixType(fixType);
-				
+
 				if (fixType == 1)
 					gpsData.setFix(false);
 				else
@@ -537,11 +550,12 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 					gpsData.setHDOP(Double.parseDouble(params[16]));
 
 					if (params[17].length() > 3)
-						gpsData.setVDOP(Double.parseDouble(params[17].substring(0,
-								params[17].length() - 3)));
+						gpsData.setVDOP(Double.parseDouble(params[17]
+								.substring(0, params[17].length() - 3)));
 				}
 
-				// Missing list of satellites in view, used to fix (not parsed in
+				// Missing list of satellites in view, used to fix (not parsed
+				// in
 				// this case)
 			}
 		}
@@ -560,7 +574,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 			} else {
 				if (params.length > 4) {
 					print("[Parsing GPGSV]", false);
-					gpsData.setNumberOfSatellitesInView(Integer.parseInt(params[3]));
+					gpsData.setNumberOfSatellitesInView(Integer
+							.parseInt(params[3]));
 				}
 			}
 		}
@@ -607,8 +622,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider, Seriali
 		}
 
 		/**
-		 * Track Made Good and Ground Speed Data (http://aprs.gids.nl/nmea/#vtg and
-		 * http://www.hemispheregps.com/gpsreference/GPVTG.htm)
+		 * Track Made Good and Ground Speed Data (http://aprs.gids.nl/nmea/#vtg
+		 * and http://www.hemispheregps.com/gpsreference/GPVTG.htm)
 		 * 
 		 * @param params
 		 *            : Parameters extracted from GPVTG sentence
