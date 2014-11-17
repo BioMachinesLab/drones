@@ -24,8 +24,7 @@ import com.pi4j.io.serial.SerialFactory;
 
 import dataObjects.GPSData;
 
-public class GPSModuleInput implements ControllerInput, MessageProvider,
-		Serializable {
+public class GPSModuleInput implements ControllerInput, MessageProvider, Serializable {
 	private static final long serialVersionUID = -5443358826645386873L;
 
 	private final static String FILE_NAME = "/home/pi/RaspberryController/logs/GPSLog_";
