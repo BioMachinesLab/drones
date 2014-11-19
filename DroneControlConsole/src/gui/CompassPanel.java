@@ -27,8 +27,10 @@ public class CompassPanel extends UpdatePanel {
 	
 	private UpdateThread thread;
 	private JTextField heading;
-	private int sleepTime = 1000;
+	private long sleepTime = 1000;
 	private int headingValue = 0;
+	private CompassDrawingPanel compassDrawing;
+	private RefreshThread refreshThread;
 	
 	public CompassPanel() {
 		setLayout(new BorderLayout());
@@ -57,7 +59,11 @@ public class CompassPanel extends UpdatePanel {
 		right.add(refreshPanel, BorderLayout.SOUTH);
 		
 		add(right, BorderLayout.EAST);
-		add(new CompassDrawingPanel(), BorderLayout.WEST);
+		compassDrawing = new CompassDrawingPanel();
+		add(compassDrawing, BorderLayout.WEST);
+		
+		refreshThread = new RefreshThread();
+		refreshThread.start();
 		
 		comboBoxUpdateRate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -94,13 +100,17 @@ public class CompassPanel extends UpdatePanel {
 	}
 
 	@Override
-	public void threadSleep() {
+	public void threadWait() {
 		try {
 			synchronized(this){
 				wait();
 			}
-			Thread.sleep(sleepTime);
 		}catch(Exception e) {}
+	}
+	
+	@Override
+	public long getSleepTime() {
+		return sleepTime;
 	}
 
 	public synchronized void displayData(CompassMessage message) {
@@ -118,29 +128,12 @@ public class CompassPanel extends UpdatePanel {
         public CompassDrawingPanel() {
             setVisible(true);
             setPreferredSize(new Dimension(150,150));
-            JPanel panel = this;
-            
-            new Thread(
-            	new Runnable(){
-            		public void run() {
-            			while(true) {
-	            			panel.repaint();
-	            			try {
-	            				Thread.sleep(50);
-	            			} catch (InterruptedException e) {
-	            				e.printStackTrace();
-	            			}
-	            		}
-            		}
-            	}
-            ).start();
-            
         }
-
+        
         @Override
-        public void paint(Graphics g) {
-            super.paint(g);
+        public void paintComponent(Graphics g) {
             Graphics2D g2d = (Graphics2D) g;
+            
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             circleRadius = (int) (getWidth() * 0.7);
             circleX = 25;
@@ -185,12 +178,13 @@ public class CompassPanel extends UpdatePanel {
             g2d.setColor(Color.green);
             g2d.fillOval((int)(circleX + (circleRadius / 2) + Math.cos(Math.toRadians(headingValue-90))*55), (int)(circleX + (circleRadius / 2) + Math.sin(Math.toRadians(headingValue-90))*55), 5, 5);
             
-            AffineTransform a = g2d.getTransform().getRotateInstance(Math.toRadians(headingValue), rotationX, rotationY);
-            g2d.setTransform(a);
+            AffineTransform at = g2d.getTransform().getRotateInstance(Math.toRadians(headingValue), rotationX, rotationY);
+            
+            g2d.setTransform(at);
 
             g2d.setColor(Color.RED);
             g2d.fillPolygon(fillPoly);
-
+            
             g2d.setColor(Color.black);
             g2d.draw(outerPoly);
         }
@@ -212,6 +206,14 @@ public class CompassPanel extends UpdatePanel {
             paint(bufG);
             g.drawImage(bufImage, 0, 0, this);
         }
-
     }
+	
+	class RefreshThread extends Thread{
+		public void run() {
+			while(true) {
+				compassDrawing.repaint();
+    			threadWait();
+    		}
+		}
+	}
 }

@@ -19,13 +19,12 @@ public class BehaviorMessageThread extends UpdateThread {
 	public void run() {
 
 		while (keepGoing) {
-			panel.threadSleep();
+			panel.threadWait();
 			
 			BehaviorMessage msg = behaviorsPanel.getCurrentMessage();
 			
 			if(msg != null)
-				console.sendData(msg);		
+				console.sendData(msg);
 		}
 	}
-
 }

@@ -51,6 +51,8 @@ public class MotorsPanel extends UpdatePanel {
 	
 	private boolean interrupt = true;
 	
+	private long sleepTime = 10;
+	
 	public MotorsPanel() {
 		
 		setBorder(BorderFactory.createTitledBorder("Motors Control"));
@@ -346,5 +348,10 @@ public class MotorsPanel extends UpdatePanel {
     }
 	
 	@Override
-	public void threadSleep() {}
+	public void threadWait() {}
+	
+	@Override
+	public long getSleepTime() {
+		return sleepTime;
+	}
 }

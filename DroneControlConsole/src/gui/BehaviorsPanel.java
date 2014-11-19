@@ -1,5 +1,6 @@
 package gui;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -11,6 +12,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import network.messages.BehaviorMessage;
@@ -21,22 +23,25 @@ import behaviors.Behavior;
 public class BehaviorsPanel extends UpdatePanel{
 	
 	private UpdateThread thread;
-	private int sleepTime = 10;
 	private JLabel statusMessage;
 	private BehaviorMessage currentMessage;
 	
 	public BehaviorsPanel() {
 		
-		setLayout(new GridLayout(5,2));
-		
 		setBorder(BorderFactory.createTitledBorder("Behaviors"));
+		
+		setLayout(new BorderLayout());
+		
+		JPanel topPanel = new JPanel();
+		
+		topPanel.setLayout(new GridLayout(5,2));
 		
 		JComboBox<Class<Behavior>> behaviors = new JComboBox<>();
 		behaviors.setPreferredSize(new Dimension(20,20));
 		
 		populateBehaviors(behaviors);
 		
-		add(behaviors);
+		topPanel.add(behaviors);
 		
 		JButton start = new JButton("Start");
 		JButton stop = new JButton("Stop");
@@ -47,15 +52,15 @@ public class BehaviorsPanel extends UpdatePanel{
 			}
 		});
 		
-		start.addActionListener(new ActionListener() {
+		stop.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				statusMessage((Class<Behavior>)behaviors.getSelectedItem(), false);
 			}
 		});
 		
-		add(start);
-		add(new JLabel(""));
-		add(stop);
+		topPanel.add(start);
+		topPanel.add(new JLabel(""));
+		topPanel.add(stop);
 		
 		JTextField argIndex = new JTextField(5);
 		JTextField argValue = new JTextField(5);
@@ -71,29 +76,35 @@ public class BehaviorsPanel extends UpdatePanel{
 					argumentMessage((Class<Behavior>)behaviors.getSelectedItem(), index, value);
 				
 				} catch(Exception ex){
-					JOptionPane.showMessageDialog(null, "Arguments not well formatted!");
+					statusMessage.setText("Arguments not well formatted!");
 				}
 			}
 		});
 		
-		add(new JLabel("Index"));
-		add(argIndex);
+		topPanel.add(new JLabel("Index"));
+		topPanel.add(argIndex);
 		
-		add(new JLabel("Value"));
-		add(argValue);
+		topPanel.add(new JLabel("Value"));
+		topPanel.add(argValue);
 		
-		statusMessage = new JLabel();
+		statusMessage = new JLabel("");
+		statusMessage.setPreferredSize(new Dimension(10,20));
 		
-		add(statusMessage);
-		add(argumentButton);
+		topPanel.add(new JLabel());
+		topPanel.add(argumentButton);
+		
+		add(topPanel, BorderLayout.NORTH);
+		add(statusMessage, BorderLayout.SOUTH);
 	}
 	
 	private synchronized void statusMessage(Class<Behavior> className, boolean status) {
+		statusMessage.setText("");
 		currentMessage = new BehaviorMessage(className, status);
 		notifyAll();
 	}
 	
 	private synchronized void argumentMessage(Class<Behavior> className, int index, double value) {
+		statusMessage.setText("");
 		currentMessage = new BehaviorMessage(className, index, value);
 		notifyAll();
 	}
@@ -106,16 +117,10 @@ public class BehaviorsPanel extends UpdatePanel{
 	}
 	
 	public BehaviorMessage getCurrentMessage() {
-		
-		while(currentMessage == null) {
-			try {
-				wait();
-			} catch(Exception e){}
-		}
-		
-		return currentMessage;
+		BehaviorMessage result = currentMessage;
+		currentMessage = null;
+		return result;
 	}
-	
 
 	@Override
 	public void registerThread(UpdateThread t) {
@@ -123,10 +128,25 @@ public class BehaviorsPanel extends UpdatePanel{
 	}
 
 	@Override
-	public synchronized void threadSleep() {
-		try {
-			wait();
-			Thread.sleep(sleepTime);
-		}catch(Exception e) {}
+	public synchronized void threadWait() {
+		while(currentMessage == null) {
+			try {
+				wait();
+			} catch(Exception e){}
+		}
+	}
+	
+	@Override
+	public long getSleepTime() {
+		return 0;
+	}
+
+	public void displayData(BehaviorMessage message) {
+		String result = message.getSelectedBehavior().getSimpleName()+": ";
+		result+=message.changeStatusOrder() ?
+				(message.getSelectedStatus() ? "start" : "stop") :
+					message.getArgumentIndex()+"="+message.getArgumentValue();
+		
+		statusMessage.setText(result);
 	}
 }

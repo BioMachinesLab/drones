@@ -1,14 +1,11 @@
 package network;
 
-import gui.GUI;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-
 import main.DroneControlConsole;
 import network.messages.Message;
 
@@ -86,20 +83,8 @@ public abstract class DroneConnection extends Thread {
 		} catch (Exception e ) {
 			e.printStackTrace();
 		}finally {
-		
-			try {
-				if (socket != null)
-					socket.close();
-			} catch (IOException e) {
-				System.err.println("Unable to close connection... is there an open connection?");
-			}
+			closeConnection();
 		}
-		
-		shutdownConnection();
-	}
-	
-	protected void shutdownConnection() {
-		//No shutdown procedure in the default class
 	}
 	
 	protected void initialization() throws IOException, ClassNotFoundException{
@@ -107,8 +92,8 @@ public abstract class DroneConnection extends Thread {
 		out.flush();
 
 		destHostName = (String) in.readObject();
-		System.out.println("Connected to " + destHost.getHostAddress()
-				+ " (" + destHostName + ")");
+		System.out.println("Connected to " + destHostName
+				+ " (" + destHost.getHostAddress()+":"+port + ")");
 
 		ready = true;
 	}
@@ -146,5 +131,9 @@ public abstract class DroneConnection extends Thread {
 				System.err.println("Unable to close connection... is there an open connection?");
 			}
 		}
+	}
+	
+	public boolean connectionOK() {
+		return socket != null && !socket.isClosed();
 	}
 }

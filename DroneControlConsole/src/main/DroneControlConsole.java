@@ -5,18 +5,17 @@ import gamepad.GamePad.GamePadType;
 import gui.GUI;
 import gui.IPandPortNumberRequestToUser;
 
+import java.util.ArrayList;
+
 import javax.swing.JOptionPane;
 
+import network.ConsoleMessageHandler;
 import network.InformationConnection;
 import network.MotorConnection;
 import network.MotorMessageSender;
-import network.messages.CompassMessage;
-import network.messages.GPSMessage;
-import network.messages.InformationRequest;
 import network.messages.InformationRequest.MessageType;
 import network.messages.Message;
-import network.messages.SystemInformationsMessage;
-import network.messages.SystemStatusMessage;
+import threads.BehaviorMessageThread;
 import threads.MotorUpdateThread;
 import threads.UpdateThread;
 import dataObjects.MotorSpeeds;
@@ -25,7 +24,6 @@ public class DroneControlConsole extends Thread {
 	
 	private GUI gui;
 	
-	// Connections Objects
 	private InformationConnection informationConnection;
 	private MotorConnection motorConnection;
 	
@@ -34,51 +32,37 @@ public class DroneControlConsole extends Thread {
 	private MotorSpeeds motorSpeeds;
 	private MotorMessageSender motorMessageSender;
 	
-	public DroneControlConsole() {
-		/*Runtime.getRuntime().addShutdownHook(new Thread() {
-			public void run() {
-				if (informationConnection != null) {
-					if (motorsPanel != null) {
-						motorSpeeds.setSpeeds(0, 0);
-					}
-					if (informationConnection != null) {
-						informationConnection.closeConnection();
-					}
-					if (gpsThread.isAlive()) {
-						gpsThread.interrupt();
-					}
-
-					if (messagesThread.isAlive()) {
-						messagesThread.interrupt();
-					}
-
-					if (compassThread.isAlive()) {
-						compassThread.interrupt();
-					}
-				}
-			}
-		});*/
-	}
+	private ConsoleMessageHandler messageHandler;
+	
+	private ArrayList<UpdateThread> updateThreads = new ArrayList<UpdateThread>();
 	
 	@Override
 	public void run() {
+		try {
+			while(true) {
+			
+				motorSpeeds = new MotorSpeeds();
+				
+				connect();
+				setupGUI();
+				setupGamepad();
+				
+				if(informationConnection != null && motorConnection != null) {
+					informationConnection.start();
+					motorConnection.start();
+					motorMessageSender.start();
+				}
+				gui.setVisible(true);
+				
+				while(informationConnection.connectionOK() && motorConnection.connectionOK()) {
+					Thread.sleep(500);
+				}
+				reset("Lost connection to the drone!");
+			}
 		
-		motorSpeeds = new MotorSpeeds();
-		
-		connect();
-
-		setupGUI();
-		
-		setupGamepad();
-		
-		if(informationConnection != null && motorConnection != null) {
-			informationConnection.start();
-			motorConnection.start();
-			motorMessageSender.start();
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
-		
-		gui.setVisible(true);
-		
 	}
 	
 	private void setupGamepad() {
@@ -93,41 +77,59 @@ public class DroneControlConsole extends Thread {
 	private void setupGUI() {
 		gui = new GUI();
 		
-		UpdateThread gpsThread = new UpdateThread(this, gui.getGPSPanel(), MessageType.GPS);
-		UpdateThread messagesThread = new UpdateThread(this, gui.getMessagesPanel(), MessageType.SYSTEM_STATUS);
-		UpdateThread motorsThread = new MotorUpdateThread(this, gui.getMotorsPanel());
-		UpdateThread compassThread = new UpdateThread(this, gui.getCompassPanel(), MessageType.COMPASS);
-//		UpdateThread infoThread = new UpdateThread(this, gui.getSysInfoPanel(), MessageType.SYSTEM_INFO);
+		updateThreads.add(new UpdateThread(this, gui.getGPSPanel(), MessageType.GPS));
+		updateThreads.add(new UpdateThread(this, gui.getMessagesPanel(), MessageType.SYSTEM_STATUS));
+		updateThreads.add(new MotorUpdateThread(this, gui.getMotorsPanel()));
+		updateThreads.add(new UpdateThread(this, gui.getCompassPanel(), MessageType.COMPASS));
+		updateThreads.add(new BehaviorMessageThread(this, gui.getBehaviorsPanel()));
+//		updateThreads.add(new UpdateThread(this, gui.getSysInfoPanel(), MessageType.SYSTEM_INFO));
 		
-		
-		gpsThread.start();
-		messagesThread.start();
-		motorsThread.start();
-		compassThread.start();
-//		infoThread.run();
-		
+		for(UpdateThread ut : updateThreads)
+			ut.start();
 	}
 	
+	private void reset(String reason) {
+		for(UpdateThread ut : updateThreads)
+			ut.stopExecuting();
+		
+		updateThreads.clear();
+		
+		gamePad.stopExecuting();
+		gamePad = null;
+		
+		informationConnection.closeConnection();
+		informationConnection = null;
+		
+		motorConnection.closeConnection();
+		motorConnection = null;
+		
+		messageHandler.stopExecuting();
+		messageHandler = null;
+		
+		motorMessageSender.stopExecuting();
+		motorMessageSender = null;
+		
+		JOptionPane.showMessageDialog(gui, reason);
+		
+		gui.dispose();
+		gui = null;
+	}
 	
 	public void connect() {
-
 		do {
 			try {
 				IPandPortNumberRequestToUser form = new IPandPortNumberRequestToUser();
 				if (form.getIpAddress() == null) {
 					continue;
 				} else {
-
-					informationConnection = new InformationConnection(this,
-							form.getIpAddress());
-
-					motorConnection = new MotorConnection(this,
-							form.getIpAddress());
 					
+					messageHandler = new ConsoleMessageHandler(this);
 
-					motorMessageSender = new MotorMessageSender(
-							motorConnection, motorSpeeds);
-
+					informationConnection = new InformationConnection(this, form.getIpAddress());
+					motorConnection = new MotorConnection(this, form.getIpAddress());
+					motorMessageSender = new MotorMessageSender(motorConnection, motorSpeeds);
+					
+					messageHandler.start();
 				}
 			} catch (Exception | Error e) {
 				e.printStackTrace();
@@ -137,20 +139,7 @@ public class DroneControlConsole extends Thread {
 	}
 	
 	public void processMessage(Message message) {
-
-		if (message instanceof GPSMessage) {
-			gui.getGPSPanel().displayData(((GPSMessage) message).getGPSData());
-			gui.getMapPanel().displayData(((GPSMessage) message).getGPSData());
-		} else if (message instanceof SystemInformationsMessage) {
-			gui.getSysInfoPanel().displayData(((SystemInformationsMessage) message).getSysInformations());
-		} else if (message instanceof SystemStatusMessage) {
-			gui.getMessagesPanel().displayData((SystemStatusMessage) message);
-		} else if (message instanceof CompassMessage) {
-			gui.getCompassPanel().displayData((CompassMessage) message);
-			gui.getMapPanel().displayData(((CompassMessage) message));
-		} else {
-			System.out.println("Received non recognise message type: " + message.getClass().toString());
-		}
+		messageHandler.addMessage(message,null);
 	}
 	
 	public MotorSpeeds getMotorSpeeds() {

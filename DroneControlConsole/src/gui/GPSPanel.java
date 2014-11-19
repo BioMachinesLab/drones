@@ -39,7 +39,7 @@ public class GPSPanel extends UpdatePanel {
 	
 	private UpdateThread thread;
 	
-	private int sleepTime = 1000;
+	private long sleepTime = 1000;
 
 	public GPSPanel() {
 		setBorder(BorderFactory.createTitledBorder("GPS Data"));
@@ -83,12 +83,17 @@ public class GPSPanel extends UpdatePanel {
 					sleepTime = 1000;
 					break;
 				}
-				notifyAll();
+				wakeUpThread();
 			}
 		});
 
 		refresh.add(comboBoxUpdateRate);
 		return refresh;
+	}
+	
+	private synchronized void wakeUpThread() {
+		notifyAll();
+		thread.interrupt();
 	}
 
 	private JPanel buildCoordinatesPanel() {
@@ -200,7 +205,6 @@ public class GPSPanel extends UpdatePanel {
 				+ date.getMillisOfSecond());
 
 		repaint();
-		notifyAll();
 	}
 	
 	public void registerThread(UpdateThread t) {
@@ -208,12 +212,15 @@ public class GPSPanel extends UpdatePanel {
 	}
 	
 	@Override
-	public void threadSleep() {
+	public void threadWait() {
 		try {
 			synchronized(this){
 				wait();
 			}
-			Thread.sleep(sleepTime);
 		}catch(Exception e) {}
+	}
+	
+	public long getSleepTime() {
+		return sleepTime;
 	}
 }

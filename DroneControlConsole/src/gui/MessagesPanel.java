@@ -24,7 +24,7 @@ public class MessagesPanel extends UpdatePanel {
 	private JScrollPane scrollPane;
 	private JComboBox<String> comboBoxUpdateRate;
 
-	private int sleepTime = 10000;
+	private long sleepTime = 10000;
 	
 	private UpdateThread thread;
 
@@ -102,13 +102,17 @@ public class MessagesPanel extends UpdatePanel {
 	}
 	
 	@Override
-	public void threadSleep() {
+	public void threadWait() {
 		try {
 			synchronized(this){
 				wait();
 			}
-			Thread.sleep(sleepTime);
 		}catch(Exception e) {}
+	}
+	
+	@Override
+	public long getSleepTime() {
+		return sleepTime;
 	}
 
 	public void registerThread(UpdateThread t) {

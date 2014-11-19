@@ -16,5 +16,4 @@ public class MotorConnection extends DroneConnection {
 			throws IOException {
 		super(console, destHost, destPort);
 	}
-
 }

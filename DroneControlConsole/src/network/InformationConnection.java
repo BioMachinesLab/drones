@@ -19,14 +19,4 @@ public class InformationConnection extends DroneConnection {
 		super(console, destHost, destPort);
 	}
 
-	@Override
-	protected void shutdownConnection() {
-		JOptionPane.showMessageDialog(console.getGUI(),
-				"Connection to drone was lost!");
-		System.exit(0);
-		// TODO fix this! when this happens, the old threads are still in the
-		// background sending stuff
-		console.connect();
-	}
-
 }

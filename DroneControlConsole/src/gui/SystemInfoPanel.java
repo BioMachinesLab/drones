@@ -80,6 +80,8 @@ public class SystemInfoPanel extends UpdatePanel {
 	private JTextField textFieldDPIFreq;
 	
 	private UpdateThread thread;
+	
+	private long sleepTime = 10000;
 
 	public SystemInfoPanel(GUI gui) {
 		this.gui = gui;
@@ -663,12 +665,16 @@ public class SystemInfoPanel extends UpdatePanel {
 	}
 	
 	@Override
-	public void threadSleep() {
+	public void threadWait() {
 		try {
 			synchronized(this){
 				wait();
 			}
-			Thread.sleep(10000);
 		}catch(Exception e) {}
+	}
+	
+	@Override
+	public long getSleepTime() {
+		return sleepTime;
 	}
 }

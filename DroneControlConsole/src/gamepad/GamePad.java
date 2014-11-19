@@ -1,7 +1,6 @@
 package gamepad;
 
 import java.io.IOException;
-
 import main.DroneControlConsole;
 
 public class GamePad extends Thread {
@@ -18,6 +17,8 @@ public class GamePad extends Thread {
 
 	private int lastRightMotorSpeed = 0;
 	private int lastLeftMotorSpeed = 0;
+	
+	private boolean keepExecuting = true;
 	
 	public static void main(String[] args) throws IOException {
 		GamePad gamePad = new GamePad(null, GamePadType.GAMEPAD);
@@ -59,7 +60,7 @@ public class GamePad extends Thread {
 			
 			try {
 
-				while (true) {
+				while (keepExecuting) {
 					jinputGamepad.pollComponentsValues();
 					if (index == HISTORY_SIZE)
 						index = 0;
@@ -114,10 +115,8 @@ public class GamePad extends Thread {
 					if(Math.abs(leftMotorSpeed-lastLeftMotorSpeed) <= 2 && Math.abs(rightMotorSpeed-lastRightMotorSpeed) <= 2)
 						continue;
 						
-					if(console != null) {
+					if(console != null)
 						console.getGUI().getMotorsPanel().setSliderValues(leftMotorSpeed,rightMotorSpeed);
-//							console.getMotorSpeeds().setSpeeds(leftMotorSpeed, rightMotorSpeed);
-					}
 
 					lastLeftMotorSpeed = leftMotorSpeed;
 					lastRightMotorSpeed = rightMotorSpeed;
@@ -143,4 +142,8 @@ public class GamePad extends Thread {
         String os = System.getProperty("os.name");
         return os != null && os.toLowerCase().startsWith("mac os x");
     }
+	
+	public void stopExecuting() {
+		keepExecuting = false;
+	}
 }
