@@ -1,7 +1,6 @@
 package gui;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -13,6 +12,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
+
+import org.joda.time.Chronology;
+import org.joda.time.DateTimeField;
+import org.joda.time.DateTimeFieldType;
+import org.joda.time.DurationFieldType;
+import org.joda.time.LocalDateTime;
 
 import network.messages.SystemStatusMessage;
 import threads.UpdateThread;
@@ -92,8 +97,10 @@ public class MessagesPanel extends UpdatePanel {
 			String str = message.getMessage();
 			if (!str.endsWith("\n") && !str.endsWith("\r\n"))
 				str += "\n";
+			
+			LocalDateTime time = message.getTimestamp();
 
-			str = message.getTimestamp() + " - " + str;
+			str = time.toString("HH:MM:SS.ss") + " - " + str;
 			messageArea.append(str);
 			messageArea.setCaretPosition(messageArea.getDocument().getLength());
 			
