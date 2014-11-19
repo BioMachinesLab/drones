@@ -6,7 +6,7 @@ import io.output.ControllerOutput;
 import io.output.ReversableESCManagerOutput;
 import main.Controller;
 
-public class TurnToOrientation extends Behavior{
+public class TurnToOrientation extends Behavior {
 	
 	private I2CCompassModuleInput compass;
 	private ReversableESCManagerOutput motors;

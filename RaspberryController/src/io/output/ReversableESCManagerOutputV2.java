@@ -41,8 +41,7 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 			GpioController gpioController) {
 		this.speeds = speeds;
 
-		escSwitch = gpioController.provisionDigitalOutputPin(SWITCH_PIN,
-				PinState.LOW);
+		escSwitch = gpioController.provisionDigitalOutputPin(SWITCH_PIN, PinState.LOW);
 
 		try {
 			setRawValues(CENTRAL_VALUE, CENTRAL_VALUE);

@@ -3,9 +3,7 @@ package network.messages;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetAddress;
-
 import org.joda.time.LocalDateTime;
-
 import com.pi4j.system.NetworkInfo;
 
 public abstract class Message implements Serializable {

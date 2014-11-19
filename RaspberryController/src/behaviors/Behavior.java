@@ -1,8 +1,9 @@
 package behaviors;
 
 import main.Controller;
+import network.messages.*;
 
-public abstract class Behavior extends Thread {
+public abstract class Behavior extends Thread implements MessageProvider{
 	
 	protected Controller c;
 	protected long sleepTime = 100;
@@ -38,7 +39,7 @@ public abstract class Behavior extends Thread {
 		this.sleepTime = sleepTime;
 	}
 	
-	public void startBehavior() {
+	public synchronized void startBehavior() {
 		this.execute = true;
 		notifyAll();
 	}
@@ -50,4 +51,32 @@ public abstract class Behavior extends Thread {
 	public abstract void setArgument(int index, double value);
 	
 	protected abstract void update();
+	
+	@Override
+	public Message getMessage(Message request) {
+		
+		Message response = null;
+		
+		if(request instanceof BehaviorMessage) {
+			
+			BehaviorMessage bm = (BehaviorMessage)request;
+			
+			Class<Behavior> chosenClass = bm.getSelectedBehavior();
+			
+			if(chosenClass.isInstance(this)) {
+				//send the same message back as an acknowledgement
+				response = request;
+				if(bm.changeStatusOrder()) {
+					if(bm.getSelectedStatus()) {
+						startBehavior();
+					} else {
+						stopBehavior();
+					}
+				} else if(bm.changeArgumentOrder()) {
+					setArgument(bm.getArgumentIndex(), bm.getArgumentValue());
+				}	
+			}
+		}
+		return response;
+	}
 }

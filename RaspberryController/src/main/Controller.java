@@ -1,29 +1,14 @@
 package main;
 
-import io.SystemInfoMessageProvider;
-import io.SystemStatusMessageProvider;
-import io.input.ControllerInput;
-import io.input.GPSModuleInput;
-import io.input.I2CBatteryManagerInput;
-import io.input.I2CCompassModuleInput;
-import io.output.ControllerOutput;
-import io.output.DebugLedsOutput;
-import io.output.ReversableESCManagerOutputV2;
-
+import io.*;
+import io.input.*;
+import io.output.*;
+import network.*;
+import network.messages.*;
 import java.io.IOException;
 import java.util.ArrayList;
-
-import network.ConnectionHandler;
-import network.ConnectionListener;
-import network.MessageHandler;
-import network.MotorConnectionListener;
-import network.messages.Message;
-import network.messages.MessageProvider;
-import network.messages.MotorMessage;
 import utils.Logger;
-import behaviors.Behavior;
-import behaviors.TurnToOrientation;
-
+import behaviors.*;
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.i2c.I2CBus;
@@ -32,7 +17,6 @@ import com.pi4j.io.serial.SerialPortException;
 import dataObjects.MotorSpeeds;
 
 public class Controller {
-	private boolean debug = false;
 
 	// Modules
 	private GPSModuleInput gpsModule;
@@ -67,14 +51,9 @@ public class Controller {
 		new Controller();
 	}
 
-	/*
-	 * Constructor and main initialization routine
-	 */
 	public Controller() {
 		speeds = new MotorSpeeds();
-
 		addShutdownHooks();
-
 		initModules();
 	}
 
@@ -83,19 +62,18 @@ public class Controller {
 
 		setStatus("Initializing...\n");
 
-		if (!debug) {
-			initHardwareCommunicatonProtocols();
-			initInputs();
-			initOutputs();
-			initMessageProviders();
-		}
+		initHardwareCommunicatonProtocols();
+		initInputs();
+		initOutputs();
+		initBehaviors();
+		initMessageProviders();
 
 		initConnections();
 
 		logThread = new Logger(this);
 		logThread.start();
 
-		messageHandler = new MessageHandler(this);
+		messageHandler = new ControllerMessageHandler(this);
 		messageHandler.start();
 
 		setStatus("Running!\n");
@@ -107,17 +85,14 @@ public class Controller {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
 				System.out.print("# Shutting down... ");
-				if (escManager != null) {
+				if (escManager != null)
 					speeds.setSpeeds(new MotorMessage(-1, -1));
-				}
-
-				if (logThread != null) {
+				
+				if (logThread != null)
 					logThread.interrupt();
-				}
 
-				if (compassModule != null) {
+				if (compassModule != null)
 					compassModule.interrupt();
-				}
 
 				if (i2cBus != null) {
 					try {
@@ -127,18 +102,15 @@ public class Controller {
 					}
 				}
 
-				if (gpsModule != null) {
+				if (gpsModule != null)
 					gpsModule.closeSerial();
-				}
 
-				if (debugLeds != null) {
+				if (debugLeds != null)
 					debugLeds.shutdownLeds();
-				}
 
-				if (gpioController != null) {
+				if (gpioController != null)
 					gpioController.shutdown();
-				}
-
+				
 				System.out.println("# Finished cleanup!");
 			}
 		});
@@ -188,6 +160,11 @@ public class Controller {
 		for (ControllerOutput o : outputs) {
 			if (o instanceof MessageProvider)
 				messageProviders.add((MessageProvider) o);
+		}
+		
+		for (Behavior b : behaviors) {
+			if (b instanceof MessageProvider)
+				messageProviders.add((MessageProvider) b);
 		}
 	}
 
@@ -253,44 +230,60 @@ public class Controller {
 		// inputs.add(batteryManager);
 		// System.out.print(".");
 		// }
-
-		// GPS Module Init
-		gpsModule = new GPSModuleInput();
-		initMessages += "[INIT] GPSModule: "
-				+ (gpsModule.isAvailable() ? "ok" : "not ok!") + "\n";
-
-		if (gpsModule.isAvailable()) {
-			gpsModule.enableLocalLog();
-			inputs.add(gpsModule);
-			System.out.print(".");
+		
+		try {
+			// GPS Module Init
+			gpsModule = new GPSModuleInput();
+			initMessages += "[INIT] GPSModule: "
+					+ (gpsModule.isAvailable() ? "ok" : "not ok!") + "\n";
+	
+			if (gpsModule.isAvailable()) {
+				gpsModule.enableLocalLog();
+				inputs.add(gpsModule);
+				System.out.print(".");
+			}
+		} catch(Exception e) {
+			initMessages += "[INIT] GPSModule: not ok! ("
+					+ e.getMessage() + ")\n";
 		}
 	}
 
 	private void initOutputs() {
+		
+		try {
+			// ESC Output Init
+			escManager = new ReversableESCManagerOutputV2(speeds, gpioController);
 
-		// ESC Output Init
-		escManager = new ReversableESCManagerOutputV2(speeds, gpioController);
-
-		initMessages += "[INIT] ESCManager: "
-				+ (escManager.isAvailable() ? "ok" : "not ok!") + "\n";
-
-		if (escManager.isAvailable()) {
-			escManager.start();
-			outputs.add(escManager);
-			System.out.print(".");
+			initMessages += "[INIT] ESCManager: "
+					+ (escManager.isAvailable() ? "ok" : "not ok!") + "\n";
+	
+			if (escManager.isAvailable()) {
+				escManager.start();
+				outputs.add(escManager);
+				System.out.print(".");
+			}
+		
+		} catch(Exception e) {
+			initMessages += "[INIT] ESCManager: not ok! ("
+					+ e.getMessage() + ")\n";
 		}
-
-		// Debug Leds Init
-		debugLeds = new DebugLedsOutput(gpioController);
-		initMessages += "[INIT] DebugLEDs: "
-				+ (debugLeds.isAvailable() ? "ok" : "not ok!") + "\n";
-		if (debugLeds.isAvailable()) {
-			debugLeds.start();
-			outputs.add(debugLeds);
-
-			debugLeds.addBlinkLed(0);
-
-			System.out.print(".");
+		
+		try {
+			// Debug Leds Init
+			debugLeds = new DebugLedsOutput(gpioController);
+			initMessages += "[INIT] DebugLEDs: "
+					+ (debugLeds.isAvailable() ? "ok" : "not ok!") + "\n";
+			if (debugLeds.isAvailable()) {
+				debugLeds.start();
+				outputs.add(debugLeds);
+	
+				debugLeds.addBlinkLed(0);
+	
+				System.out.print(".");
+			}
+		} catch(Exception e) {
+			initMessages += "[INIT] DebugLEDs: not ok! ("
+					+ e.getMessage() + ")\n";
 		}
 	}
 
@@ -309,10 +302,9 @@ public class Controller {
 			initMessages += "[INIT] MotorConnectionListener: ok\n";
 
 		} catch (IOException e) {
-			e.printStackTrace();
-			initMessages += "[INIT] Unable to start Network Connection Listeners!\n";
+			initMessages += "[INIT] Unable to start Network Connection Listeners! ("
+					+ e.getMessage() + ")\n";
 		}
-
 	}
 
 	public ArrayList<ControllerInput> getInputs() {

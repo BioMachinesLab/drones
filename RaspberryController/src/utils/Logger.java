@@ -34,7 +34,7 @@ public class Logger extends Thread {
 		
 		try {
 		
-			FileWriter fw = new FileWriter(new File("/home/pi/RaspberryController/logs/values_"+fileName+".log"));
+			FileWriter fw = new FileWriter(new File("logs/values_"+fileName+".log"));
 			bw = new BufferedWriter(fw);
 			
 			while(true) {

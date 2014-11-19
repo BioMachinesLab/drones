@@ -37,13 +37,16 @@ public class ConnectionHandler extends Thread {
 			while (true) {
 				try {
 					Message message = (Message) in.readObject();
-
 					processMessage(message);
 
 				} catch (ClassNotFoundException e) {
 					System.out
 							.println("[CONNECTION HANDLER] Received class of unknown type from "
 									+ clientName + ", so it was discarded....");
+				} catch (ClassCastException e) {
+					System.out
+					.println("[CONNECTION HANDLER] Received class of different type (other than Message) from "
+							+ clientName + ", so it was discarded....");
 				}
 			}
 
@@ -66,12 +69,10 @@ public class ConnectionHandler extends Thread {
 	}
 
 	protected void processMessage(Message message) {
-		if (message instanceof InformationRequest) {
-			if(DEBUG)
-				System.out.println("[CONNECTION HANDLER] Information Request Message ("
-							+ message.getClass().getSimpleName() + ")");
-			controller.processInformationRequest(message, this);
-		}
+		if(DEBUG)
+			System.out.println("[CONNECTION HANDLER] Information Request Message ("
+						+ message.getClass().getSimpleName() + ")");
+		controller.processInformationRequest(message, this);
 	}
 
 	protected void initConnection() throws IOException, ClassNotFoundException {

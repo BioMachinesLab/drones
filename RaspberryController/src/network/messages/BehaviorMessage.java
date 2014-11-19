@@ -21,6 +21,7 @@ public class BehaviorMessage extends Message{
 	}
 	
 	public BehaviorMessage(Class<Behavior> selectedBehavior, boolean selectedStatus) {
+		this.selectedBehavior = selectedBehavior;
 		this.changeStatus = true;
 		this.selectedStatus = selectedStatus;
 	}
