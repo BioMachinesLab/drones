@@ -10,13 +10,17 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+
 import network.messages.GPSMessage;
 import network.messages.InformationRequest;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import network.messages.SystemStatusMessage;
+
 import org.joda.time.LocalDateTime;
+
 import utils.NMEA_Utils;
+
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialDataEvent;
 import com.pi4j.io.serial.SerialDataListener;
@@ -34,27 +38,30 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 	private final static boolean DEBUG_MODE = true;
 
-	// private final static String NMEA_REGEX =
-	// "GP[A-Z]{3},[a-zA-Z0-9,._]*[*][0-9a-fA-F]{2}?";
-	// private final static String PMTK_REGEX =
-	// "PMTK[a-zA-Z0-9,._]*[*][0-9a-fA-F]{2}?";
+	/*
+	 * GPS Configurations
+	 */
 	private final static int DEFAULT_BAUD_RATE = 9600;
-	private final static int TARGET_BAUD_RATE = 57600; // Possible:
-														// 4800,9600,14400,19200,38400,57600,115200
-	private final static int UPDATE_DELAY = 100; // In miliseconds on
-													// [100,10000] interval
-	private final static String COM_PORT = Serial.DEFAULT_COM_PORT;
 
+	/* Possible: // 4800,9600,14400,19200,38400,57600,115200 */
+	private final static int TARGET_BAUD_RATE = 57600;
+
+	/* In milliseconds on [100,10000] interval */
+	private final static int UPDATE_DELAY = 200;
+
+	/* Can only be enabled when update rate is less or equal than 5Hz (200ms) */
+	private final static boolean ENABLE_SBAS = true;
+
+	private final static String COM_PORT = Serial.DEFAULT_COM_PORT;
 	private NMEA_Utils nmeaUtils = new NMEA_Utils();
 	private Serial serial; // Serial connection
 	private String receivedDataBuffer = "";
 	private GPSData gpsData = new GPSData(); // Contains the obtained info
 	private List<String> ackResponses = Collections
 			.synchronizedList(new ArrayList<String>());
+	private MessageParser messageParser;
 
 	private boolean available = false;
-
-	private MessageParser messageParser;
 
 	public GPSModuleInput() {
 
@@ -131,23 +138,27 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			InterruptedException, IllegalArgumentException {
 		if (UPDATE_DELAY < 100 || UPDATE_DELAY > 10000) {
 			throw new IllegalArgumentException(
-					"[GPS Module] Frequency must be in [100,10000] interval");
+					"[GPS Module] Frequency must be in [100,10000] interval!");
 		}
 
 		createSerial(DEFAULT_BAUD_RATE);
 
-		// Change Baud Rate
+		/*
+		 * Change Baud Rate
+		 */
 		String command = "$PMTK251," + TARGET_BAUD_RATE + "*";
 		int checkSum = nmeaUtils.calculateNMEAChecksum(command);
 		command += Integer.toHexString(checkSum).toUpperCase() + "\r\n";
 		serial.write(command);
 		print("[COMMAND] " + command, false);
 
-		// Closing old velocity serial
+		/*
+		 * Closing old velocity serial
+		 */
 		serial.close();
 		serial.flush();
 		receivedDataBuffer = "";
-		ackResponses.clear();
+		// ackResponses.clear();
 		Thread.sleep(1000);
 
 		createSerial(TARGET_BAUD_RATE);
@@ -155,7 +166,9 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		print("Started new baud rate!", false);
 		Thread.sleep(1000);
 
-		// Change Update Frequency
+		/*
+		 * Change Update Frequency
+		 */
 		command = "$PMTK220," + UPDATE_DELAY + "*";
 		checkSum = nmeaUtils.calculateNMEAChecksum(command);
 		command += Integer.toHexString(checkSum).toUpperCase() + "\r\n";
@@ -163,28 +176,57 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		print("[COMMAND] " + command, false);
 
 		Thread.sleep(1000);
-		int index = ackResponses.lastIndexOf("$PMTK001,220,3*30");
-		if (index == -1) {
-			/* throw new NotActiveException */System.out
-					.println("[GPS Module] The update frequency was not succefully changed");
-		} else {
-			ackResponses.remove(index);
-		}
-		ackResponses.clear();
 
-		// Set navigation speed threshold to 0
+		// Check if the command was successfully executed
+		String ack1 = getStringStartWithFromList("$PMTK001,220,3*30");
+		if (ack1 == null) {
+			/* throw new NotActiveException */System.out
+					.println("[GPS Module] The update frequency was not succefully changed!");
+		} else {
+			String[] str = ack1.split(",");
+			ackResponses.remove(Integer.parseInt(str[1]));
+		}
+
+		// ackResponses.clear();
+
+		/*
+		 * Set navigation speed threshold to 0
+		 */
 		command = "$PMTK397,0*23\r\n";
 		serial.write(command);
 
 		Thread.sleep(1000);
-		index = ackResponses.lastIndexOf("$PMTK001,397,3*3D");
-		if (index == -1) {
+
+		// Check if the command was successfully executed
+		String ack2 = getStringStartWithFromList("$PMTK001,397,3*3D");
+		if (ack2 == null) {
 			/* throw new NotActiveException */System.out
-					.println("[GPS Module] The navigation speed threshold was not succefully changed");
+					.println("[GPS Module] The navigation speed threshold was not succefully changed!");
 		} else {
-			ackResponses.remove(index);
+			String[] str = ack2.split(",");
+			ackResponses.remove(Integer.parseInt(str[1]));
 		}
-		ackResponses.clear();
+
+		// ackResponses.clear();
+
+		if (ENABLE_SBAS) {
+			try {
+				enableSBAS();
+			} catch (InterruptedException e) {
+				/* throw new NotActiveException */System.out
+						.println("[GPS Module] The SBAS was not succefully enabled!");
+			}
+		}
+	}
+
+	private String getStringStartWithFromList(String str) {
+		for (String string : ackResponses) {
+			if (string.startsWith(str)) {
+				return string;
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -223,6 +265,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		return available;
 	}
 
+	
 	/*
 	 * GPS Functions
 	 */
@@ -333,6 +376,39 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		if (index != -1) {
 			ackResponses.remove(index);
 			return true;
+		}
+
+		return false;
+	}
+
+	public boolean enableSBAS() throws InterruptedException {
+		serial.write("$PMTK313,1*2E\r\n");
+		// serial.write("$PMTK513,1*28\r\n"); // DT Command. Which is the
+		// difference??
+
+		Thread.sleep(1000);
+
+		// Check if the command was successfully executed
+		String ack = getStringStartWithFromList("$PMTK001,313,3*31");
+		if (ack != null) {
+			String[] str = ack.split(",");
+			ackResponses.remove(Integer.parseInt(str[1]));
+		}
+
+		return false;
+	}
+
+	public boolean disableSBAS() throws InterruptedException {
+		serial.write("$PMTK313,0*2F\r\n");
+		// serial.write("$PMTK513,0*29\r\n"); // DT Command. Which is the
+
+		Thread.sleep(1000);
+
+		// Check if the command was successfully executed
+		String ack = getStringStartWithFromList("$PMTK001,313,3*31");
+		if (ack != null) {
+			String[] str = ack.split(",");
+			ackResponses.remove(Integer.parseInt(str[1]));
 		}
 
 		return false;

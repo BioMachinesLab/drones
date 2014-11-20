@@ -6,10 +6,9 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
+import main.Controller;
 import network.messages.Message;
 import network.messages.MotorMessage;
-import network.messages.SystemStatusMessage;
-import main.Controller;
 
 public class MotorConnectionHandler extends ConnectionHandler {
 
@@ -17,20 +16,23 @@ public class MotorConnectionHandler extends ConnectionHandler {
 			ConnectionListener connectionListener) {
 		super(socket, controller, connectionListener);
 	}
-	
+
 	@Override
 	protected void shutdownHandler() {
-		controller.processMotorMessage(new MotorMessage(-1, -1));
+		if (connectionListener.getConnections() == null) {
+			controller.processMotorMessage(new MotorMessage(-1, -1));
+		}
 		closeConnection();
 	}
-	
+
 	@Override
 	protected void processMessage(Message message) {
 		if (message instanceof MotorMessage) {
 			controller.processMotorMessage(((MotorMessage) message));
 		}
 	}
-	
+
+	@Override
 	protected void initConnection() throws IOException, ClassNotFoundException {
 		out = new ObjectOutputStream(socket.getOutputStream());
 		in = new ObjectInputStream(socket.getInputStream());
@@ -48,6 +50,6 @@ public class MotorConnectionHandler extends ConnectionHandler {
 
 		// controller.processInformationRequest(new
 		// InformationRequest(MessageType.SYSTEM_STATUS), this);
-		/*sendData(new SystemStatusMessage(controller.getInitialMessages()));*/
+		/* sendData(new SystemStatusMessage(controller.getInitialMessages())); */
 	}
 }

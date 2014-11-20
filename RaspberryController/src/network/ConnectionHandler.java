@@ -110,7 +110,7 @@ public class ConnectionHandler extends Thread {
 		}
 	}
 
-	public synchronized void closeConnectionWhithoutDiscard() {
+	public synchronized void closeConnectionWthoutDiscardConnListener() {
 		try {
 			if (socket != null && !socket.isClosed()) {
 				socket.close();

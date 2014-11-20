@@ -3,9 +3,20 @@ TO-DO Hardware:
 	
 	
 TO-DO Controller:
-	- Dont shutdown motors when there are multiple clients (connection class)
-	- Create a io manager (remove all the hardware initialization from the controller)
+	// - Don't shutdown motors when there are multiple clients (connection class)
+	- Create a IO manager (remove all the hardware initialization from the controller)
 	- Extract I2C manager to a separate class (already done on the I2CBusController, but not used, yet)
+	- Function "downloadLog", on GPSModuleInput (download the log from the GPS Receiver itself, into the raspberry)
+	- GPSModuleInput-> correct function
+		- getReleaseVersion
+		- startLog
+		- stopLog
+		- eraseLog
+		- enableAlwaysLocateStandby
+		- disableAlwaysLocateStandby
+		- enableAIC
+		- disableAIC
+		to support the new use of Hash Map (similar to what was done on the setup function).
 
 
 TO-DO GUI:

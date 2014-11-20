@@ -9,21 +9,22 @@ import java.util.ArrayList;
 import main.Controller;
 
 public class ConnectionListener extends Thread {
-	
+
 	private static final int DEFAULT_PORT = 10101;
 	protected ArrayList<ConnectionHandler> connections = new ArrayList<>();
 	protected Controller controller;
 	protected int port;
 	protected ServerSocket serverSocket = null;
 
-	public ConnectionListener(Controller controller) throws IOException{
+	public ConnectionListener(Controller controller) throws IOException {
 		this(controller, DEFAULT_PORT);
 	}
-	
-	public ConnectionListener(Controller controller, int port) throws IOException{
+
+	public ConnectionListener(Controller controller, int port)
+			throws IOException {
 		this.controller = controller;
 		this.port = port;
-		
+
 		serverSocket = new ServerSocket(port);
 	}
 
@@ -48,15 +49,16 @@ public class ConnectionListener extends Thread {
 			try {
 				serverSocket.close();
 			} catch (IOException e) {
-				System.out.println("[CONNECTION HANDLER] Unable to close server socket.... there was an open socket?");
+				System.out
+						.println("[CONNECTION HANDLER] Unable to close server socket.... there was an open socket?");
 			}
 		}
 	}
-	
+
 	protected void addConnection(ConnectionHandler conn) {
 		connections.add(conn);
 	}
-	
+
 	protected void createHandler(Socket s) {
 		ConnectionHandler conn = new ConnectionHandler(s, controller, this);
 		addConnection(conn);
@@ -68,12 +70,16 @@ public class ConnectionListener extends Thread {
 			System.out.println("[CONNECTION HANDLER] Closing Connections!");
 			for (ConnectionHandler conn : connections) {
 				if (!conn.getSocket().isClosed())
-					conn.closeConnectionWhithoutDiscard();
+					conn.closeConnectionWthoutDiscardConnListener();
 			}
 		}
 	}
 
 	public synchronized void removeConnection(ConnectionHandler conn) {
 		connections.remove(conn);
+	}
+
+	public ArrayList<ConnectionHandler> getConnections() {
+		return connections;
 	}
 }
