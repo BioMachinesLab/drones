@@ -204,7 +204,7 @@ public class GPSPanel extends UpdatePanel {
 				+ date.getMinuteOfHour() + ":" + date.getSecondOfMinute() + ","
 				+ date.getMillisOfSecond());
 
-		repaint();
+		notifyAll();
 	}
 	
 	public void registerThread(UpdateThread t) {

@@ -100,7 +100,7 @@ public class MessagesPanel extends UpdatePanel {
 			
 			LocalDateTime time = message.getTimestamp();
 
-			str = time.toString("HH:MM:SS.ss") + " - " + str;
+			str = time.toString("HH:MM:ss.SS") + " - " + str;
 			messageArea.append(str);
 			messageArea.setCaretPosition(messageArea.getDocument().getLength());
 			

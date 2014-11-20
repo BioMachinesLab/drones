@@ -4,12 +4,12 @@ import network.messages.MotorMessage;
 
 public class MotorSpeeds {
 	
-	private double speedLeft = 0;
-	private double speedRight = 0;
+	private double speedLeft = 0.5;
+	private double speedRight = 0.5;
 	
 	private double limit = 0;
 	private double offset = 0;
-	private boolean changed = true;
+	private boolean changed = false;
 	
 	public synchronized void setSpeeds(double left, double right) {
 		

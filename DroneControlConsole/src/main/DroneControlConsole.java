@@ -51,7 +51,11 @@ public class DroneControlConsole extends Thread {
 					informationConnection.start();
 					motorConnection.start();
 					motorMessageSender.start();
+					
+					for(UpdateThread ut : updateThreads)
+						ut.start();
 				}
+				
 				gui.setVisible(true);
 				
 				while(informationConnection.connectionOK() && motorConnection.connectionOK()) {
@@ -83,9 +87,6 @@ public class DroneControlConsole extends Thread {
 		updateThreads.add(new UpdateThread(this, gui.getCompassPanel(), MessageType.COMPASS));
 		updateThreads.add(new BehaviorMessageThread(this, gui.getBehaviorsPanel()));
 //		updateThreads.add(new UpdateThread(this, gui.getSysInfoPanel(), MessageType.SYSTEM_INFO));
-		
-		for(UpdateThread ut : updateThreads)
-			ut.start();
 	}
 	
 	private void reset(String reason) {

@@ -12,14 +12,12 @@ import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
-
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-
 import network.messages.CompassMessage;
 import threads.UpdateThread;
 
@@ -183,9 +181,9 @@ public class CompassPanel extends UpdatePanel {
 
             int rotationX = circleX + (circleRadius / 2);
             int rotationY = circleX + (circleRadius / 2);
-            headingValue++;
             g2d.setColor(Color.green);
-            g2d.fillOval((int)(circleX + (circleRadius / 2) + Math.cos(Math.toRadians(headingValue-90))*55), (int)(circleX + (circleRadius / 2) + Math.sin(Math.toRadians(headingValue-90))*55), 5, 5);
+            int ovalRadius = 2;
+            g2d.fillOval((int)(circleX + (circleRadius / 2) + Math.cos(Math.toRadians(headingValue-90))*55) - ovalRadius, (int)(circleX + (circleRadius / 2) + Math.sin(Math.toRadians(headingValue-90))*55) - ovalRadius, ovalRadius*2, ovalRadius*2);
             
             AffineTransform old = g2d.getTransform();
             
