@@ -5,7 +5,7 @@ import network.messages.MotorMessage;
 
 public class MotorMessageSender extends  Thread {
 	
-	private final static boolean DEBUG = true;
+	private final static boolean DEBUG = false;
 	private MotorConnection connection;
 	private MotorSpeeds speeds;
 	private boolean keepExecuting = true;
