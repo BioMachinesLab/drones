@@ -20,30 +20,41 @@ public class GamePad extends Thread {
 	
 	private boolean keepExecuting = true;
 	
+	private GamePadType type;
+	
 	public static void main(String[] args) throws IOException {
-		GamePad gamePad = new GamePad(null, GamePadType.GAMEPAD);
+		GamePad gamePad = new GamePad(null);
 		gamePad.run();
 	}
 
-	public GamePad(DroneControlConsole console, GamePadType type) {
+	public GamePad(DroneControlConsole console) {
+		
+		for(GamePadType t : GamePadType.values()) {
+			
+			try {
+				
+				this.console = console;
 
-		try {
+				if (t == GamePadType.LOGITECH) {
+					jinputGamepad = new GamePadJInputLogitech();
+				} else {
+					jinputGamepad = new GamePadJInputGamepad();
+				}
 
-			this.console = console;
-
-			if (type == GamePadType.LOGITECH) {
-				jinputGamepad = new GamePadJInputLogitech();
-			} else {
-				jinputGamepad = new GamePadJInputGamepad();
-			}
-
-			jinputGamepad.getControllerComponents();
-			jinputGamepad.pollComponentsValues();
-//			jinputGamepad.calibrateJoystick();
-
-		} catch (Exception e) {
-			System.err.println("Gamepad not available");
+				jinputGamepad.getControllerComponents();
+				jinputGamepad.pollComponentsValues();
+//				jinputGamepad.calibrateJoystick();
+				
+				//If we got up to here, it means that there was no problem
+				type = t;
+				break;
+				
+			} catch(Exception e ){}
+			
 		}
+		
+		if(type == null)
+			System.err.println("Gamepad not available");
 	}
 
 	@Override
@@ -66,7 +77,9 @@ public class GamePad extends Thread {
 						index = 0;
 	
 					readingsXHistory[index] = jinputGamepad.getXAxisValue();
-					readingsRZHistory[index] = osX ? jinputGamepad.getZAxisValue() : jinputGamepad.getRZAxisValue();
+					readingsRZHistory[index] = osX && type == GamePadType.GAMEPAD ?
+								jinputGamepad.getZAxisValue() :
+								jinputGamepad.getRZAxisValue();
 	
 					double xValue = 0;
 					double rzValue = 0;

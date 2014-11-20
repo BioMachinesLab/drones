@@ -71,7 +71,7 @@ public class DroneControlConsole extends Thread {
 	
 	private void setupGamepad() {
 		try {
-			gamePad = new GamePad(this, GamePadType.GAMEPAD);
+			gamePad = new GamePad(this);
 			gamePad.start();
 		} catch(UnsatisfiedLinkError e) {
 			e.printStackTrace();
