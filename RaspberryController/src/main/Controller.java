@@ -195,7 +195,7 @@ public class Controller {
 	private void addShutdownHooks() {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
-				System.out.print("# Shutting down Controller...");
+				System.out.println("# Shutting down Controller...");
 				
 				if (logThread != null)
 					logThread.interrupt();

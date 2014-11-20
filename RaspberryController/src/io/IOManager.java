@@ -150,7 +150,7 @@ public class IOManager {
 	private void addShutdownHooks() {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
-				System.out.print("# Shutting down IO...");
+				System.out.println("# Shutting down IO...");
 				if (escManager != null)
 					controller.getMotorSpeeds().setSpeeds(new MotorMessage(-1, -1));
 				
