@@ -22,12 +22,18 @@ public class TurnToOrientation extends Behavior {
 			}
 		}
 		
+		if(compass == null)
+			throw new RuntimeException("TurnToOrientation -- Compass not available!");
+		
 		for(ControllerOutput o : c.getOutputs()) {
 			if(o instanceof ReversableESCManagerOutput) {
 				motors = (ReversableESCManagerOutput)o;
 				break;
 			}
 		}
+		
+		if(motors == null)
+			throw new RuntimeException("TurnToOrientation -- Motors not available!");
 	}
 
 	@Override

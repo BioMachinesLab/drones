@@ -36,7 +36,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 	private boolean localLog = false;
 	private PrintWriter localLogPrintWriterOut;
 
-	private final static boolean DEBUG_MODE = true;
+	private final static boolean DEBUG_MODE = false;
 
 	/*
 	 * GPS Configurations
@@ -247,8 +247,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 	public Message getMessage(Message request) {
 		if (request instanceof InformationRequest
-				&& ((InformationRequest) request).getMessageTypeQuery().equals(
-						InformationRequest.MessageType.GPS)) {
+				&& ((InformationRequest) request).getMessageTypeQuery() == InformationRequest.MessageType.GPS) {
 
 			if (!available)
 				return new SystemStatusMessage(
@@ -450,7 +449,9 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			if (indexComma >= 0) {
 				// System.out.println(data);
 				String name = data.substring(0, indexComma);
-				currentValues.put(name, data.substring(indexComma + 1));
+				synchronized(currentValues) {
+					currentValues.put(name, data.substring(indexComma + 1));
+				}
 			}
 		}
 
@@ -467,8 +468,10 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 					size = currentValues.size();
 					keys = new String[size];
 					int i = 0;
-					for (String s : currentValues.keySet()) {
-						keys[i++] = s;
+					synchronized(currentValues) {
+						for (String s : currentValues.keySet()) {
+							keys[i++] = s;
+						}
 					}
 				}
 
@@ -522,38 +525,42 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		 *            : NMEA sentence to be processed
 		 */
 		private void parseNMEAData(String name, String data) {
-
-			String fullString = name + "," + data;
-
-			String[] split = fullString.split(",");
-
-			if (nmeaUtils.checkNMEAChecksum(fullString)) {
-
-				switch (name) {
-				case "$GPGGA":
-					parseGPGGASentence(split);
-					break;
-
-				case "$GPGSA":
-					parseGPGSASentence(split);
-					break;
-
-				case "$GPGSV":
-					parseGPGSVSentence(split);
-					break;
-
-				case "$GPRMC":
-					parseGPRMCSentence(split);
-					break;
-
-				case "$GPVTG":
-					parseGPVTGSentence(split);
-					break;
-
-				default:
-					print("No parser for " + name + " sentence", false);
-					break;
+			
+			try {
+				String fullString = name + "," + data;
+	
+				String[] split = fullString.split(",");
+	
+				if (nmeaUtils.checkNMEAChecksum(fullString)) {
+	
+					switch (name) {
+					case "$GPGGA":
+						parseGPGGASentence(split);
+						break;
+	
+					case "$GPGSA":
+						parseGPGSASentence(split);
+						break;
+	
+					case "$GPGSV":
+						parseGPGSVSentence(split);
+						break;
+	
+					case "$GPRMC":
+						parseGPRMCSentence(split);
+						break;
+	
+					case "$GPVTG":
+						parseGPVTGSentence(split);
+						break;
+	
+					default:
+						print("No parser for " + name + " sentence", false);
+						break;
+					}
 				}
+			} catch(Exception e) {
+				System.out.println("[GPS] Error parsing "+name+"!");
 			}
 		}
 
@@ -670,12 +677,22 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 				params[1] = params[1].replace(".", "");
 				String[] t = params[1].split("(?<=\\G.{2})");
+				
+				int miliseconds = Integer.parseInt(t[3] + t[4]);
+				
+				//LocalDateTime doesn't like miliseconds with
+				//a value higher than 999, but NMEA does.
+				while(miliseconds > 999)
+					miliseconds/=10;
 
 				LocalDateTime date = new LocalDateTime(
-						Integer.parseInt(d[2]) + 100, Integer.parseInt(d[1]),
-						Integer.parseInt(d[0]), Integer.parseInt(t[0]),
-						Integer.parseInt(t[1]), Integer.parseInt(t[2]),
-						Integer.parseInt(t[3] + t[4]));
+						Integer.parseInt(d[2]) + 100,
+						Integer.parseInt(d[1]),
+						Integer.parseInt(d[0]),
+						Integer.parseInt(t[0]),
+						Integer.parseInt(t[1]),
+						Integer.parseInt(t[2]),
+						miliseconds);
 				gpsData.setDate(date);
 
 				if (params[2].equals("V")) {

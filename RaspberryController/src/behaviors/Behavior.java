@@ -23,8 +23,11 @@ public abstract class Behavior extends Thread implements MessageProvider{
 		while(true) {
 			
 			try {
-				while(!execute)
-					wait();
+				while(!execute) {
+					synchronized(this) {
+						wait();
+					}
+				}
 			} catch(InterruptedException e) {}
 			
 			update();

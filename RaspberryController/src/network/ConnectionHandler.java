@@ -6,7 +6,6 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import main.Controller;
-import network.messages.InformationRequest;
 import network.messages.Message;
 import network.messages.SystemStatusMessage;
 

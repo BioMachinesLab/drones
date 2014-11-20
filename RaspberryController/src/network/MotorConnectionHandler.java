@@ -12,14 +12,13 @@ import network.messages.MotorMessage;
 
 public class MotorConnectionHandler extends ConnectionHandler {
 
-	public MotorConnectionHandler(Socket socket, Controller controller,
-			ConnectionListener connectionListener) {
+	public MotorConnectionHandler(Socket socket, Controller controller, ConnectionListener connectionListener) {
 		super(socket, controller, connectionListener);
 	}
 
 	@Override
 	protected void shutdownHandler() {
-		if (connectionListener.getConnections() == null) {
+		if (connectionListener.getConnections().isEmpty()) {
 			controller.processMotorMessage(new MotorMessage(-1, -1));
 		}
 		closeConnection();
