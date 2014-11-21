@@ -23,7 +23,7 @@ import dataObjects.MotorSpeeds;
 public interface Controller {
 	
 	public String getStatus();
-	public void setStatus(String status);
+	public void   setStatus(String status);
 	public String getInitMessages();
 	
 	public void processInformationRequest(Message request, ConnectionHandler conn);

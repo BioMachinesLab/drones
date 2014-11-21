@@ -36,7 +36,7 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	private I2CDevice mag3110;
 	private boolean available = false;
 	private boolean deviceActiveMode = true;
-	private int heading = 0;
+	private int headingInDegrees = 0;
 	
 	private long startTime = System.currentTimeMillis();
 
@@ -99,7 +99,7 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 
 	@Override
 	public Object getReadings() {
-		return heading;
+		return headingInDegrees;
 	}
 
 	/*
@@ -298,7 +298,7 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				}
 				
 				  // Convert radians to degrees for readability.
-				this.heading = (int)(heading * 180/Math.PI);
+				this.headingInDegrees = (int)(heading * 180/Math.PI);
 				
 				/*
 				short middleX = (short)((max[0] + min[0])/2);
@@ -309,7 +309,7 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				
 				double heading = Math.atan2(-(rawAxisReadings[1] - middleY)*scaleY, (rawAxisReadings[0] - middleX)*scaleX);
 				
-				//Value for Lisbon is -2º (0.034906585 rad). Find more here: http://www.magnetic-declination.com
+				//Value for Lisbon is -2�� (0.034906585 rad). Find more here: http://www.magnetic-declination.com
 				double declinationAngle = 0.034906585;
 				heading += declinationAngle;
 				
@@ -326,7 +326,7 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				}
 				
 				  // Convert radians to degrees for readability.
-				this.heading = (int)(heading * 180/Math.PI);
+				this.headingInDegrees = (int)(heading * 180/Math.PI);
 				*/
 				
 			} catch (IOException | InterruptedException e) {
@@ -353,6 +353,6 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	}
 	
 	public int getHeading() {
-		return heading;
+		return headingInDegrees;
 	}
 }

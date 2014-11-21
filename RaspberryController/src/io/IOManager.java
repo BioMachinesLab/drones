@@ -54,6 +54,14 @@ public class IOManager {
 		
 	}
 	
+	public GPSModuleInput getGpsModule() {
+		return gpsModule;
+	}
+
+	public I2CCompassModuleInput getCompassModule() {
+		return compassModule;
+	}
+
 	/**
 	 * Initialize the Hardware protocols shared and used on input and output
 	 * devices ("physical layer"), like I2C and GPIO management instances
