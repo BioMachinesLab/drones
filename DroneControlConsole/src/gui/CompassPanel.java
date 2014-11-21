@@ -111,6 +111,7 @@ public class CompassPanel extends UpdatePanel {
 		this.headingValue = message.getHeading();
 		heading.setText(""+headingValue);
 		notifyAll();
+		compassDrawing.repaint();
 	}
 	
 	public class CompassDrawingPanel extends JPanel {
@@ -184,7 +185,6 @@ public class CompassPanel extends UpdatePanel {
             g2d.setColor(Color.green);
             int ovalRadius = 2;
             g2d.fillOval((int)(circleX + (circleRadius / 2) + Math.cos(Math.toRadians(headingValue-90))*55) - ovalRadius, (int)(circleX + (circleRadius / 2) + Math.sin(Math.toRadians(headingValue-90))*55) - ovalRadius, ovalRadius*2, ovalRadius*2);
-            
             AffineTransform old = g2d.getTransform();
             
             AffineTransform at = g2d.getTransform().getRotateInstance(Math.toRadians(headingValue), rotationX, rotationY);
