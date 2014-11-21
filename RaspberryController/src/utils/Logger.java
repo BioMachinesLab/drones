@@ -4,6 +4,7 @@ import io.input.ControllerInput;
 import io.input.GPSModuleInput;
 import io.input.I2CCompassModuleInput;
 import io.output.ControllerOutput;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -11,6 +12,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
 import main.Controller;
 import dataObjects.GPSData;
 
@@ -57,8 +60,8 @@ public class Logger extends Thread {
 	}
 	
 	private String getLogString() {
-		ArrayList<ControllerInput> inputs = controller.getInputs();
-		ArrayList<ControllerOutput> outputs = controller.getOutputs();
+		List<ControllerInput> inputs = controller.getIOManager().getInputs();
+		List<ControllerOutput> outputs = controller.getIOManager().getOutputs();
 		
 		DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 		

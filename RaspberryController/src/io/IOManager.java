@@ -18,6 +18,8 @@ import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.i2c.I2CBus;
 
+import dataObjects.MotorSpeeds;
+
 public class IOManager {
 	
 	private ArrayList<ControllerOutput> outputs = new ArrayList<ControllerOutput>();
@@ -39,13 +41,16 @@ public class IOManager {
 	
 	private String initMessages = "\n";
 	private Controller controller;
-	
+	private MotorSpeeds motorSpeeds;
+		
 	public IOManager(Controller controller) {
-		this.controller = controller;
+		this.controller  = controller;
+		motorSpeeds = new MotorSpeeds();
 		initHardwareCommunicatonProtocols();
 		initInputs();
 		initOutputs();
 		addShutdownHooks();
+		
 	}
 	
 	/**
@@ -112,7 +117,7 @@ public class IOManager {
 		
 		try {
 			// ESC Output Init
-			escManager = new ReversableESCManagerOutputV2(controller.getMotorSpeeds(), gpioController);
+			escManager = new ReversableESCManagerOutputV2(motorSpeeds, gpioController);
 
 			initMessages += "[INIT] ESCManager: "
 					+ (escManager.isAvailable() ? "ok" : "not ok!") + "\n";
@@ -152,7 +157,7 @@ public class IOManager {
 			public void run() {
 				System.out.println("# Shutting down IO...");
 				if (escManager != null)
-					controller.getMotorSpeeds().setSpeeds(new MotorMessage(-1, -1));
+					setMotorSpeeds(-1, -1);
 				
 				if (compassModule != null)
 					compassModule.interrupt();
@@ -189,5 +194,9 @@ public class IOManager {
 	
 	public ArrayList<ControllerOutput> getOutputs() {
 		return outputs;
+	}
+	
+	public void setMotorSpeeds(double left, double right) {
+		motorSpeeds.setSpeeds(new MotorMessage(left, right));
 	}
 }

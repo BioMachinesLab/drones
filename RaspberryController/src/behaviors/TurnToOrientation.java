@@ -15,7 +15,7 @@ public class TurnToOrientation extends Behavior {
 	public TurnToOrientation(Controller c) {
 		super(c);
 		
-		for(ControllerInput i : c.getInputs()) {
+		for(ControllerInput i : c.getIOManager().getInputs()) {
 			if(i instanceof I2CCompassModuleInput) {
 				compass = (I2CCompassModuleInput)i;
 				break;
@@ -25,7 +25,7 @@ public class TurnToOrientation extends Behavior {
 		if(compass == null)
 			throw new RuntimeException("TurnToOrientation -- Compass not available!");
 		
-		for(ControllerOutput o : c.getOutputs()) {
+		for(ControllerOutput o : c.getIOManager().getOutputs()) {
 			if(o instanceof ReversableESCManagerOutput) {
 				motors = (ReversableESCManagerOutput)o;
 				break;

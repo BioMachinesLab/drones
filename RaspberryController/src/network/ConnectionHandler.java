@@ -91,7 +91,7 @@ public class ConnectionHandler extends Thread {
 
 		// controller.processInformationRequest(new
 		// InformationRequest(MessageType.SYSTEM_STATUS), this);
-		sendData(new SystemStatusMessage(controller.getInitialMessages()));
+		sendData(new SystemStatusMessage(controller.getInitMessages()));
 	}
 
 	public synchronized void closeConnection() {

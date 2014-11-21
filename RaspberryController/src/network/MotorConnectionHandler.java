@@ -6,12 +6,13 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
+import dataObjects.MotorSpeeds;
 import main.Controller;
 import network.messages.Message;
 import network.messages.MotorMessage;
 
 public class MotorConnectionHandler extends ConnectionHandler {
-
+	
 	public MotorConnectionHandler(Socket socket, Controller controller, ConnectionListener connectionListener) {
 		super(socket, controller, connectionListener);
 	}
@@ -19,7 +20,7 @@ public class MotorConnectionHandler extends ConnectionHandler {
 	@Override
 	protected void shutdownHandler() {
 		if (connectionListener.getConnections().isEmpty()) {
-			controller.processMotorMessage(new MotorMessage(-1, -1));
+			controller.getIOManager().setMotorSpeeds(-1, -1);
 		}
 		closeConnection();
 	}
@@ -27,7 +28,8 @@ public class MotorConnectionHandler extends ConnectionHandler {
 	@Override
 	protected void processMessage(Message message) {
 		if (message instanceof MotorMessage) {
-			controller.processMotorMessage(((MotorMessage) message));
+			MotorMessage motorMessage = (MotorMessage) message;
+			controller.getIOManager().setMotorSpeeds(motorMessage.getLeftMotor(), motorMessage.getRightMotor());
 		}
 	}
 
