@@ -17,6 +17,7 @@ import main.Controller;
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.i2c.I2CBus;
+import com.pi4j.io.i2c.I2CFactory;
 
 import dataObjects.MotorSpeeds;
 
@@ -58,13 +59,13 @@ public class IOManager {
 	 * devices ("physical layer"), like I2C and GPIO management instances
 	 */
 	private void initHardwareCommunicatonProtocols() {
-		// try {
-		// // Get I2C instance
-		// i2cBus = I2CFactory.getInstance(I2CBus.BUS_1);
-		// } catch (IOException e) {
-		// initMessages += "\n[INIT] I2C Interface: not ok!\n";
-		// e.printStackTrace();
-		// }
+		 try {
+		 // Get I2C instance
+			 i2cBus = I2CFactory.getInstance(I2CBus.BUS_1);
+		 } catch (IOException e) {
+			 initMessages += "\n[INIT] I2C Interface: not ok!\n";
+			 e.printStackTrace();
+		 }
 
 		try {
 			gpioController = GpioFactory.getInstance();
@@ -76,15 +77,15 @@ public class IOManager {
 	
 	private void initInputs() {
 		// Compass Module Init
-		// compassModule = new I2CCompassModuleInput(i2cBus);
-		// initMessages += "[INIT] I2CCompassModule: "
-		// + (compassModule.isAvailable() ? "ok" : "not ok!") + "\n";
-		//
-		// if (compassModule.isAvailable()) {
-		// compassModule.start();
-		// inputs.add(compassModule);
-		// System.out.print(".");
-		// }
+		 compassModule = new I2CCompassModuleInput(i2cBus);
+		 initMessages += "[INIT] I2CCompassModule: "
+		 + (compassModule.isAvailable() ? "ok" : "not ok!") + "\n";
+		
+		 if (compassModule.isAvailable()) {
+			 compassModule.start();
+			 inputs.add(compassModule);
+		 	System.out.print(".");
+		 }
 
 		// Battery Module Init
 		// batteryManager = new I2CBatteryManagerInput();

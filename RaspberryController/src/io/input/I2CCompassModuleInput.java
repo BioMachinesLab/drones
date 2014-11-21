@@ -1,11 +1,14 @@
 package io.input;
 
 import java.io.IOException;
+import java.util.ArrayList;
+
 import network.messages.CompassMessage;
 import network.messages.InformationRequest;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import network.messages.SystemStatusMessage;
+
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 
@@ -37,11 +40,15 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	
 	private long startTime = System.currentTimeMillis();
 
-	private short[] min = {Short.MAX_VALUE, Short.MAX_VALUE, Short.MAX_VALUE};
-	private short[] max = {-Short.MAX_VALUE, -Short.MAX_VALUE, -Short.MAX_VALUE};
+	private ArrayList<int[]> calibrationValues = new ArrayList<int[]>(); 
 	
 	private boolean calibrationStatus = false;
 	
+	private int yCenter = 0;
+	private int xCenter = 0;
+	private double theta = 0;
+	private double scaleX = 0;
+	private double scaleY = 0;
 	
 	public I2CCompassModuleInput(I2CBus i2cBus) {
 
@@ -110,27 +117,6 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 			
 			short xout = (short)((xl | (xh << 8)) & 0xFFFF) ; // concatenate the MSB and LSB
 			
-			if(System.currentTimeMillis() - startTime < CALIBRATION_TIME) {
-				
-				if(!calibrationStatus) {
-					System.out.println("Calibration started!");
-					calibrationStatus = true;
-				}
-					
-				
-				if(xout > max[0])
-					max[0] = xout;
-				if(xout < min[0])
-					min[0] = xout;
-				
-//				System.out.println("Callibrating Compass ["+(int)(((System.currentTimeMillis() - (double)startTime)/CALIBRATION_TIME)*100)+"%]");
-			} else {
-				if(calibrationStatus) {
-					System.out.println("Calibration ended!");
-					calibrationStatus = false;
-				}
-			}
-			
 			return xout;
 		} else {
 			return -1;
@@ -150,13 +136,6 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 								// stop
 
 			short yout = (short)((yl | (yh << 8)) & 0xFFFF); // concatenate the MSB and LSB
-			
-			if(System.currentTimeMillis() - startTime < CALIBRATION_TIME) {
-				if(yout > max[1])
-					max[1] = yout;
-				if(yout < min[1])
-					min[1] = yout;
-			}
 			
 			return yout;
 		} else {
@@ -181,13 +160,6 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 								// stop
 
 			short zout = (short)((zl | (zh << 8)) & 0xFFFF); // concatenate the MSB and LSB
-			
-			if(System.currentTimeMillis() - startTime < CALIBRATION_TIME) {
-				if(zout > max[2])
-					max[2] = zout;
-				if(zout < min[2])
-					min[2] = zout;
-			}
 			
 			return zout;
 		} else {
@@ -229,6 +201,106 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				rawAxisReadings[1] = readY();
 				rawAxisReadings[2] = readZ();
 				
+				if(System.currentTimeMillis() - startTime < CALIBRATION_TIME) {
+					
+					if(!calibrationStatus) {
+						System.out.println("Calibration started!");
+						calibrationStatus = true;
+					}
+						
+					
+					int[] vals = new int[3];
+					vals[0] = rawAxisReadings[0];
+					vals[1] = rawAxisReadings[1];
+					vals[2] = rawAxisReadings[2];
+					
+					System.out.println(vals[0]+" "+vals[1]+" "+vals[2]);
+					
+					calibrationValues.add(vals);
+					
+				} else {
+					if(calibrationStatus) {
+						System.out.println("Calibration ended!");
+						calibrationStatus = false;
+						
+						//Translation
+						int xMin = Integer.MAX_VALUE;
+						int xMax = -Integer.MAX_VALUE;
+						int yMin = Integer.MAX_VALUE;
+						int yMax = -Integer.MAX_VALUE;
+						
+						for(int[] data : calibrationValues) {
+							xMin = Math.min(data[0],xMin);
+							xMax = Math.max(data[0],xMax);
+							yMin = Math.min(data[1],yMin);
+							yMax = Math.max(data[1],yMax);
+						}
+						
+						xCenter = (xMax + xMin)/2;
+						yCenter = (yMax + yMin)/2;
+						
+						System.out.println("xCenter "+xCenter+" yCenter "+yCenter);
+						
+						//Rotation
+						int maxVector = -Integer.MAX_VALUE;
+						int maxVectorX = -Integer.MAX_VALUE;
+						int maxVectorY = -Integer.MAX_VALUE;
+						
+						for(int[] data : calibrationValues) {
+							int vector = (int)(Math.pow(data[0]-xCenter, 2) + Math.pow(data[1]-yCenter, 2));
+							if(vector > maxVector) {
+								maxVector = vector;
+								maxVectorX = data[0];
+								maxVectorY = data[1];
+							}
+						}
+						
+						theta = Math.atan2(-maxVectorY, maxVectorX);
+						
+						System.out.println("maxVectorX "+maxVectorX+" maxVectorY "+maxVectorY);
+						System.out.println("theta "+theta);
+						
+						int xMaxRotatedTranslated = -Integer.MAX_VALUE;
+						int yMaxRotatedTranslated = -Integer.MAX_VALUE;
+						
+						for(int[] data : calibrationValues) {
+							int x = (int)((data[0]-xCenter) * Math.cos(theta) - (data[1]-yCenter) * Math.sin(theta));
+							int y = (int)((data[0]-xCenter) * Math.sin(theta) + (data[1]-yCenter) * Math.cos(theta));
+							xMaxRotatedTranslated = Math.max(x,xMaxRotatedTranslated);
+							yMaxRotatedTranslated = Math.max(y,yMaxRotatedTranslated);
+						}
+						
+						System.out.println("xMaxRotatedTranslated "+xMaxRotatedTranslated+" yMaxRotatedTranslated "+yMaxRotatedTranslated);
+						
+						scaleX = 1.0/xMaxRotatedTranslated;
+						scaleY = 1.0/yMaxRotatedTranslated;
+						
+						System.out.println("scaleX "+scaleX+" scaleY "+scaleY);
+					}
+				}
+				
+				double heading = Math.atan2(-(rawAxisReadings[1] - yCenter)*scaleY, (rawAxisReadings[0] - xCenter)*scaleX);
+				
+				//Value for Lisbon is -2º (0.034906585 rad). Find more here: http://www.magnetic-declination.com
+				double declinationAngle = 0.034906585;
+				heading += declinationAngle;
+				
+				heading = 2*Math.PI-heading;
+				
+				heading+=Math.PI/2;
+
+				if(heading < 0) {
+					heading += 2*Math.PI;
+				}
+				
+				if(heading > 2*Math.PI) {
+					heading -= 2*Math.PI;
+				}
+				
+				  // Convert radians to degrees for readability.
+				this.heading = (int)(heading * 180/Math.PI);
+				
+				/*
 				short middleX = (short)((max[0] + min[0])/2);
 				short middleY = (short)((max[1] + min[1])/2);
 				
@@ -255,6 +327,7 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				
 				  // Convert radians to degrees for readability.
 				this.heading = (int)(heading * 180/Math.PI);
+				*/
 				
 			} catch (IOException | InterruptedException e) {
 				try {
