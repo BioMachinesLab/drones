@@ -1,10 +1,10 @@
 package commoninterface;
 
-public interface Drone {
+public interface DroneCI {
 	public void    start();
 	public void    shutdown();
-	public void    setSpeed(double leftMotor, double rightMotor);
-	public double  getOrientaiton();
+	public void    setMotorSpeeds(double leftMotor, double rightMotor);
+	public double  getCompassOrientaiton();
 	public double  getGPSLatitude();
 	public double  getGPSLongitude();
 	public double  getTimeSinceStart();
