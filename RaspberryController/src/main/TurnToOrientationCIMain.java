@@ -10,6 +10,7 @@ public class TurnToOrientationCIMain {
 		RealAquaticDroneCI drone  = new RealAquaticDroneCI();
 		CIStdOutLogger     logger = new CIStdOutLogger(drone);
 		TurnToOrientationCIBehavior behavior = new TurnToOrientationCIBehavior(args, drone, logger);
+		behavior.start();
 		
 		long millisBetweenControlCycles = (long) (1000.0 * behavior.getControlStepPeriod());
 		long before = System.currentTimeMillis();
