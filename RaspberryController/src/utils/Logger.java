@@ -70,7 +70,7 @@ public class Logger extends Thread {
 		for(ControllerInput i : inputs) {
 			if(i instanceof I2CCompassModuleInput) {
 				I2CCompassModuleInput ic = (I2CCompassModuleInput)i;
-				result+=ic.getHeading()+"\t";
+				result+=ic.getHeadingInDegrees()+"\t";
 			} else if(i instanceof GPSModuleInput) {
 				GPSModuleInput ig = (GPSModuleInput)i;
 				GPSData data = ig.getReadings();

@@ -21,5 +21,6 @@
 	<classpathentry kind="lib" path="/Pi4J_IT_Version/lib/pi4j-service-sources.jar"/>
 	<classpathentry kind="lib" path="/Pi4J_IT_Version/lib/pi4j-service.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/CommonInterface"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Behaviors"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

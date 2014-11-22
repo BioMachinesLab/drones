@@ -45,7 +45,7 @@ public class TurnToOrientation extends Behavior {
 		while(targetOrientation > 360)
 			targetOrientation-=360;
 		
-		int diff = Math.abs(targetOrientation - compass.getHeading());
+		int diff = Math.abs(targetOrientation - compass.getHeadingInDegrees());
 		
 		if(diff < 20) {//this is good enough
 			motors.setValue(0, 0.5);

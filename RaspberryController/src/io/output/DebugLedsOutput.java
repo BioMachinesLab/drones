@@ -30,6 +30,10 @@ public class DebugLedsOutput extends Thread implements ControllerOutput {
 		}
 	}
 
+	public int getNumberOfLeds() {
+		return NUM_LEDS;
+	}
+	
 	@Override
 	// if value==0 the led will be off, and on if value!=0
 	public void setValue(int index, double value) {

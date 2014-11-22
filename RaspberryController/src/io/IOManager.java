@@ -208,4 +208,8 @@ public class IOManager {
 	public void setMotorSpeeds(double left, double right) {
 		motorSpeeds.setSpeeds(new MotorMessage(left, right));
 	}
+	
+	public DebugLedsOutput getDebugLeds() {
+		return debugLeds;
+	}
 }

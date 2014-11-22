@@ -92,7 +92,7 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 			if (!available) {
 				return new SystemStatusMessage("[CompassModule] Unable to send Compass data");
 			}
-			return new CompassMessage(getHeading());
+			return new CompassMessage(getHeadingInDegrees());
 		}
 		return null;
 	}
@@ -352,7 +352,7 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 		}
 	}
 	
-	public int getHeading() {
+	public int getHeadingInDegrees() {
 		return headingInDegrees;
 	}
 }

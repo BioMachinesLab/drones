@@ -18,10 +18,11 @@ import network.messages.Message;
 import network.messages.MessageProvider;
 import utils.Logger;
 import utils.Nmea0183ToDecimalConverter;
-import commoninterface.DroneCI;
+import commoninterface.AquaticDroneCI;
+import commoninterface.CILogger;
 import dataObjects.GPSData;
 
-public class RealDroneCI implements DroneCI, Controller {
+public class RealAquaticDroneCI implements AquaticDroneCI, Controller {
 
 	private String status = "";
 	private String initMessages = "\n";
@@ -31,10 +32,17 @@ public class RealDroneCI implements DroneCI, Controller {
 	private ConnectionListener connectionListener;
 	private MotorConnectionListener motorConnectionListener;
 	private List<MessageProvider> messageProviders = new ArrayList<MessageProvider>();
-
+	private String[] args;
+	private CILogger logger;
+	private long     startTimeInMillis;
+	
 	
 	@Override
-	public void start() {		
+	public void start(String[] args, CILogger logger) {		
+		this.startTimeInMillis = System.currentTimeMillis();
+		this.args   = args;
+		this.logger = logger; 
+		
 		initIO();
 		initMessageProviders();
 		initConnections();
@@ -57,12 +65,13 @@ public class RealDroneCI implements DroneCI, Controller {
 
 	@Override
 	public void setMotorSpeeds(double left, double right) {
-		ioManager.setMotorSpeeds(left, right);
+		ioManager.setMotorSpeeds(left * 2.0 - 1.0, right * 2.0 - 1.0);
 	}
 
 	@Override
-	public double getCompassOrientaiton() {
-		return ioManager.getCompassModule().getHeading();
+	public double getCompassOrientationInDegrees() {
+		double orientation = ioManager.getCompassModule().getHeadingInDegrees();
+		return (orientation % 360.0);
 	}
 
 	@Override
@@ -94,8 +103,9 @@ public class RealDroneCI implements DroneCI, Controller {
 
 	@Override
 	public double getTimeSinceStart() {
-		// TODO Auto-generated method stub
-		return 0;
+		long elapsedMillis =  System.currentTimeMillis() - this.startTimeInMillis;
+		
+		return ((double) elapsedMillis) / 1000.0;
 	}
 	
 	@Override
@@ -121,23 +131,15 @@ public class RealDroneCI implements DroneCI, Controller {
 
 	@Override
 	public List<MessageProvider> getMessageProviders() {
-		// TODO Auto-generated method stub
-		return null;
+		return messageProviders;
 	}
 
 
 	@Override
 	public IOManager getIOManager() {
-		// TODO Auto-generated method stub
-		return null;
+		return ioManager;
 	}
-	
-	private void initModules() {
-		System.out.println("######################################");
-
-
-	}	
-	
+		
 	private void initIO() {
 		ioManager = new IOManager(this);
 		initMessages += ioManager.getInitMessages();
@@ -180,6 +182,27 @@ public class RealDroneCI implements DroneCI, Controller {
 		for (ControllerOutput o : ioManager.getOutputs()) {
 			if (o instanceof MessageProvider)
 				messageProviders.add((MessageProvider) o);
+		}
+	}
+
+	@Override
+	public void setLed(int index, AquaticDroneCI.LedState state) {
+		if (index >= 0 && index < ioManager.getDebugLeds().getNumberOfLeds()) {
+			switch (state) {
+			case ON:
+				ioManager.getDebugLeds().removeBlinkLed(index);
+				ioManager.getDebugLeds().setValue(index, 1);
+				break;
+			case OFF:
+				ioManager.getDebugLeds().removeBlinkLed(index);
+				ioManager.getDebugLeds().setValue(index, 0);
+				break;
+			case BLINKING:
+				ioManager.getDebugLeds().addBlinkLed(index);
+				break;
+			} 
+		} else {
+			logger.logError("Invalid led index: " + index + ", must be >= 0 and < " + ioManager.getDebugLeds().getNumberOfLeds());
 		}
 	}
 	
