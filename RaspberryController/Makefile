@@ -1,6 +1,6 @@
 PROJECT= $(shell pwd)
 
-CLASSPATH = -cp .:classes:/opt/pi4j/lib/'*':$(PROJECT)/lib/'*':$(PROJECT)/bin
+CLASSPATH = -cp .:classes:/opt/pi4j/lib/'*':$(PROJECT)/lib/'*':$(PROJECT)/bin:$CLASSPATH
 JSOURCEPATH = -sourcepath $(PROJECT)/src/
 ROOT_FILE = $(PROJECT)/src/main/Controller.java
 
