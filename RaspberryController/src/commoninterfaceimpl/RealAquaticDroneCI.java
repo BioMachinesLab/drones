@@ -65,7 +65,7 @@ public class RealAquaticDroneCI implements AquaticDroneCI, Controller {
 
 	@Override
 	public void setMotorSpeeds(double left, double right) {
-		ioManager.setMotorSpeeds(left * 2.0 - 1.0, right * 2.0 - 1.0);
+		ioManager.setMotorSpeeds(left / 2.0 + 0.5, right / 2.0 + 0.5);
 	}
 
 	@Override

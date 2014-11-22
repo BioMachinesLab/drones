@@ -47,7 +47,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 	private final static int TARGET_BAUD_RATE = 57600;
 
 	/* In milliseconds on [100,10000] interval */
-	private final static int UPDATE_DELAY = 200;
+	private final static int UPDATE_DELAY = 100;
 
 	/* Can only be enabled when update rate is less or equal than 5Hz (200ms) */
 	private final static boolean ENABLE_SBAS = true;
@@ -98,6 +98,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				// TODO check that we are not losing data
 
 				String received = event.getData();
+//				System.out.println(received);
 
 				while (received.contains("\r\n")) {
 
@@ -445,10 +446,15 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		 *            : data to be processed
 		 */
 		private void processReceivedData(String data) {
+			
+			if(!nmeaUtils.checkNMEAChecksum(data))
+				return;
+			
 			int indexComma = data.indexOf(',');
 			if (indexComma >= 0) {
 				// System.out.println(data);
 				String name = data.substring(0, indexComma);
+				
 				synchronized(currentValues) {
 					currentValues.put(name, data.substring(indexComma + 1));
 				}
@@ -461,7 +467,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			int index = 0;
 			int size = 0;
 			String[] keys = {};
-
+			
 			while (true) {
 
 				if (currentValues.size() != size) {
@@ -511,6 +517,11 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 					}
 				}
 				index++;
+				try {
+					Thread.sleep(UPDATE_DELAY/4);
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 

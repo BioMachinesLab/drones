@@ -16,7 +16,7 @@ import dataObjects.MotorSpeeds;
 public class ReversableESCManagerOutputV2 extends Thread implements
 		ControllerOutput {
 
-	private final static boolean DEBUG = false;
+	private final static boolean DEBUG = true;
 
 	private final static Pin SWITCH_PIN = RaspiPin.GPIO_13;
 	private final static int LEFT_ESC = 0;
@@ -62,7 +62,7 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 
 	@Override
 	public void setValue(int index, double value) {
-
+		
 		if (!available)
 			return;
 

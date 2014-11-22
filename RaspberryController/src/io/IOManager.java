@@ -70,7 +70,7 @@ public class IOManager {
 		 try {
 		 // Get I2C instance
 			 i2cBus = I2CFactory.getInstance(I2CBus.BUS_1);
-		 } catch (IOException e) {
+		 } catch (Exception e) {
 			 initMessages += "\n[INIT] I2C Interface: not ok!\n";
 			 e.printStackTrace();
 		 }
