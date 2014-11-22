@@ -1,0 +1,21 @@
+package commoninterface;
+
+public class CIStdOutLogger implements CILogger 
+{	
+	private AquaticDroneCI droneCI;
+	
+	public CIStdOutLogger(AquaticDroneCI droneCI) {
+		this.droneCI = droneCI;
+	}
+	
+	@Override
+	public void logMessage(String message) {
+		System.out.printf("%6.2s: %s\n", droneCI.getTimeSinceStart(), message);
+	}
+
+	@Override
+	public void logError(String error) {
+		System.err.printf("%6.2s: %s\n", droneCI.getTimeSinceStart(), error);
+	}
+	
+}
