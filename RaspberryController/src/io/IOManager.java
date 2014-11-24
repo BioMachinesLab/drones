@@ -112,7 +112,7 @@ public class IOManager {
 					+ (gpsModule.isAvailable() ? "ok" : "not ok!") + "\n";
 	
 			if (gpsModule.isAvailable()) {
-				gpsModule.enableLocalLog();
+//				gpsModule.enableLocalLog();
 				inputs.add(gpsModule);
 				System.out.print(".");
 			}

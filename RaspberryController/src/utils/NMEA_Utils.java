@@ -83,11 +83,12 @@ public class NMEA_Utils {
 	 *         if not)
 	 */
 	public boolean checkNMEAChecksum(String sentence) {
-		int checksum = calculateNMEAChecksum(sentence);
 		
 		if(sentence.length() < 4)
 			return false;
-
+		
+		int checksum = calculateNMEAChecksum(sentence);
+		
 		if (sentence.charAt(sentence.length() - 3) == '*') {
 			String ck = sentence.substring(sentence.length() - 2,
 					sentence.length());

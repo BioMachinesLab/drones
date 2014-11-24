@@ -35,6 +35,7 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	private final static int I2C_DEVICE_UPDATE_DELAY = 15;
 
 	private I2CDevice mag3110;
+	private I2CBus i2cBus;
 	private boolean available = false;
 	private boolean deviceActiveMode = true;
 	private int headingInDegrees = 0;
@@ -45,39 +46,23 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	
 	private boolean calibrationStatus = false;
 	
-	private double yCenter = 0;
-	private double xCenter = 0;
-	private double zCenter = 0;
+	private double xCenter, yCenter, zCenter;
 	
-	private double alpha = 0;
-	private double beta = 0;
-	private double theta = 0;
+	private double alpha, beta, theta;
 	
-	private double scaleX = 0;
-	private double scaleY = 0;
-	private double scaleZ = 0;
+	private double scaleX, scaleY, scaleZ;
 	
-	private double gps = 0;
-	
-	double ct;
-	double st;
-	
-	double cb;
-	double sb;
-	
-	double ca;
-	double sa;
-
-	double sx;
-	double sy;
-	double sz;
-	
-	double sgps;
-	double cgps;
-
+	private double ct, st;
+	private double cb, sb;
+	private double ca, sa;
+	private double gps, sgps, cgps;
 	
 	public I2CCompassModuleInput(I2CBus i2cBus) {
-
+		this.i2cBus = i2cBus;
+		configureCompass();
+	}
+	
+	public void configureCompass() {
 		try {
 
 			// Get device instance
@@ -172,6 +157,8 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	}
 
 	private short readZ() throws IOException, InterruptedException {
+		
+//		return 0;
 		if (deviceActiveMode) {
 			int zl, zh; // define the MSB and LSB
 
@@ -225,38 +212,15 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				rawAxisReadings[1] = readY();
 				rawAxisReadings[2] = readZ();
 				
-				if(System.currentTimeMillis() - startTime < CALIBRATION_TIME) {
-					
-					if(!calibrationStatus) {
-						System.out.println("Calibration started!");
-						calibrationStatus = true;
-					}
-						
-					
-					double[] vals = new double[3];
-					vals[0] = rawAxisReadings[0];
-					vals[1] = rawAxisReadings[1];
-					vals[2] = rawAxisReadings[2];
-					
-//					System.out.println(vals[0]+" "+vals[1]+" "+vals[2]);
-					
-					calibrationValues.add(vals);
-					
-				} else {
-					if(calibrationStatus) {
-						System.out.println("Calibration ended!");
-						calibrationStatus = false;
-						calibrate();
-					}
-				}
+				handleCalibration(rawAxisReadings[0], rawAxisReadings[1], rawAxisReadings[2]);
 				
 				double[] converted = convert(rawAxisReadings[0],rawAxisReadings[1],rawAxisReadings[2]);
 				
 				double heading = Math.atan2(converted[1],converted[0]);
 				
 				//Value for Lisbon is -2º (0.034906585 rad). Find more here: http://www.magnetic-declination.com
-				double declinationAngle = 0.034906585;
-				heading += declinationAngle;
+//				double declinationAngle = 0.034906585;
+//				heading += declinationAngle;
 				
 //				heading = 2*Math.PI-heading;
 				
@@ -271,21 +235,17 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				  // Convert radians to degrees for readability.
 				this.headingInDegrees = (int)(heading * 180/Math.PI);
 				
-//				if(!calibrationStatus) {
+				if(!calibrationStatus) {
 //					System.out.println("RAW "+rawAxisReadings[0]+" "+rawAxisReadings[1]+" "+rawAxisReadings[2]);
 //					System.out.println("CORRECTED "+converted[0]+" "+converted[1]+" "+converted[2]);
 //					System.out.println("heading "+headingInDegrees);
-//				}
+				}
 				
 			} catch (IOException | InterruptedException e) {
 				try {
 					//after a PI4J exception, the next reading is usually crap. Get rid of it right away
-					getByte((byte)0x01);Thread.sleep(2);
-					getByte((byte)0x02);Thread.sleep(2);
-					getByte((byte)0x03);Thread.sleep(2);
-					getByte((byte)0x04);Thread.sleep(2);
-					getByte((byte)0x05);Thread.sleep(2);
-					getByte((byte)0x06);Thread.sleep(2);
+					System.out.println("Compass went haywire! Reconnecting...");
+					configureCompass();
 				}catch(Exception ex){
 					e.printStackTrace();
 				}
@@ -296,6 +256,32 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				Thread.sleep(I2C_DEVICE_UPDATE_DELAY);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+			}
+		}
+	}
+	
+	private void handleCalibration(short x, short y, short z) {
+		if(System.currentTimeMillis() - startTime < CALIBRATION_TIME) {
+			
+			if(!calibrationStatus) {
+				System.out.println("Calibration started!");
+				calibrationStatus = true;
+			}
+			
+			double[] vals = new double[3];
+			vals[0] = x;
+			vals[1] = y;
+			vals[2] = z;
+			
+//			System.out.println(vals[0]+" "+vals[1]+" "+vals[2]);
+			
+			calibrationValues.add(vals);
+			
+		} else {
+			if(calibrationStatus) {
+				System.out.println("Calibration ended!");
+				calibrationStatus = false;
+				calibrate();
 			}
 		}
 	}
@@ -362,20 +348,20 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				alpha+=Math.PI;
 			}
 			
-			double cosa = Math.cos(alpha);
-			double sina = Math.sin(alpha);
+			ca = Math.cos(alpha);
+			sa = Math.sin(alpha);
 		
-			double xRotated = cosa*maxVectorX+ sina*maxVectorZ;
+			double xRotated = ca*maxVectorX+ sa*maxVectorZ;
 			double yRotated = maxVectorY;
-			double zRotated = -sina*maxVectorX + cosa*maxVectorZ;
+			double zRotated = -sa*maxVectorX + ca*maxVectorZ;
 //			System.out.println();
 //			System.out.println("###FIRST ROTATION");
 //			System.out.println("Vector size rotated "+(Math.pow(xRotated, 2) + Math.pow(yRotated, 2) + Math.pow(zRotated, 2)));
 //			System.out.println("maxVectorXR "+xRotated+" maxVectorYR "+yRotated+" maxVectorZR "+zRotated);
 
 			beta = Math.atan2(yRotated, xRotated);
-			double cosb = Math.cos(-beta);
-			double sinb = Math.sin(-beta);
+			cb = Math.cos(-beta);
+			sb = Math.sin(-beta);
 			
 			if(xRotated < 0) {
 				beta+=Math.PI;
@@ -383,9 +369,9 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 
 //			System.out.println("alpha "+Math.toDegrees(alpha)+" beta "+Math.toDegrees(beta));
 			
-			double xRotated2 = cosb*xRotated - sinb*yRotated ;
-			double yRotated2 = sinb*xRotated + cosb*yRotated ;
-			double zRotated2 = zRotated ;
+//			double xRotated2 = cosb*xRotated - sinb*yRotated ;
+//			double yRotated2 = sinb*xRotated + cosb*yRotated ;
+//			double zRotated2 = zRotated ;
 
 //			System.out.println("maxVectorXR "+xRotated2+" maxVectorYR "+yRotated2+" maxVectorZR "+zRotated2);
 //			System.out.println();
@@ -396,9 +382,9 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				double y = data[1];
 				double z = data[2];
 				
-				xRotated = cosb*cosa*x - sinb*y + cosb*sina*z;
-				yRotated = cosa*sinb*x + cosb*y + sina*sinb*z;
-				zRotated = -sina*x + cosa*z;
+				xRotated = cb*ca*x - sb*y + cb*sa*z;
+				yRotated = ca*sb*x + cb*y + sa*sb*z;
+				zRotated = -sa*x + ca*z;
 				
 				data[0] = xRotated;
 				data[1] = yRotated;
@@ -428,8 +414,8 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				theta+=Math.PI;
 			}
 			
-			double cost = Math.cos(-theta);
-			double sint = Math.sin(-theta);
+			ct = Math.cos(-theta);
+			st = Math.sin(-theta);
 			
 //			System.out.println("theta "+Math.toDegrees(theta));
 			
@@ -437,8 +423,8 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				double y = data[1];
 				double z = data[2];
 				
-				yRotated = cost*y - sint*z;
-				zRotated = sint*y + cost*z;
+				yRotated = ct*y - st*z;
+				zRotated = st*y + ct*z;
 				
 				data[1] = yRotated;
 				data[2] = zRotated;
@@ -474,12 +460,15 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				if(north[0] < 0)
 					gps+=Math.PI;
 				
+				sgps = Math.sin(-gps);
+				cgps = Math.cos(-gps);
+				
 				double[] res = convert(x,y,z);
 				
 //				System.out.println("north transf "+north[0]+" "+north[1] +" "+north[2]);
 //				System.out.println("gps angle "+gps);
 //				System.out.println("RESULT "+res[0]+" "+res[1] +" "+res[2]);
-				
+//				
 //				s.next();
 				
 			} catch(Exception e) {
@@ -492,35 +481,19 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 		
 		double[] res = new double[3];
 		
-		double ct = Math.cos(-theta);
-		double st = Math.sin(-theta);
-		
-		double cb = Math.cos(-beta);
-		double sb = Math.sin(-beta);
-		
-		double ca = Math.cos(alpha);
-		double sa = Math.sin(alpha);
-
-		double sx = scaleX;
-		double sy = scaleY;
-		double sz = scaleZ;
-		
-		double sgps = Math.sin(-gps);
-		double cgps = Math.cos(-gps);
-		
-		res[0] = (-ct*sb*sgps*sy + cb*(ca*cgps*sx - sa*sgps*st*sy))*(x - 
-			      xCenter) + (-cb*ct*sgps*sy - sb*(ca*cgps*sx - sa*sgps*st*sy))*(y -
-					       yCenter) + (cgps*sa*sx + ca*sgps*st*sy)*(z - 
+		res[0] = (-ct*sb*sgps*scaleY + cb*(ca*cgps*scaleX - sa*sgps*st*scaleY))*(x - 
+			      xCenter) + (-cb*ct*sgps*scaleY - sb*(ca*cgps*scaleX - sa*sgps*st*scaleY))*(y -
+					       yCenter) + (cgps*sa*scaleX + ca*sgps*st*scaleY)*(z - 
 					      zCenter);
 		
-		res[1] = (cgps*ct*sb*sy + cb*(ca*sgps*sx + cgps*sa*st*sy))*(x -
-			       xCenter) + (cb*cgps*ct*sy - sb*(ca*sgps*sx + cgps*sa*st*sy))*(y -
-			       yCenter) + (sa*sgps*sx - ca*cgps*st*sy)*(z - 
+		res[1] = (cgps*ct*sb*scaleY + cb*(ca*sgps*scaleX + cgps*sa*st*scaleY))*(x -
+			       xCenter) + (cb*cgps*ct*scaleY - sb*(ca*sgps*scaleX + cgps*sa*st*scaleY))*(y -
+			       yCenter) + (sa*sgps*scaleX - ca*cgps*st*scaleY)*(z - 
 			      zCenter);
 		
 		
-		res[2] = (-cb*ct*sa*sz + sb*st*sz)*(x - xCenter) + (ct*sa*sb*sz +
-			       cb*st*sz)*(y - yCenter) + ca*ct*sz*(z - zCenter);
+		res[2] = (-cb*ct*sa*scaleZ + sb*st*scaleZ)*(x - xCenter) + (ct*sa*sb*scaleZ +
+			       cb*st*scaleZ)*(y - yCenter) + ca*ct*scaleZ*(z - zCenter);
 		
 		return res;
 	}
@@ -528,16 +501,6 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	private double[] transformReading(double x, double y, double z) {
 		
 		double[] res = new double[3];
-		
-		double ct = Math.cos(-theta);
-		double st = Math.sin(-theta);
-		
-		double cb = Math.cos(-beta);
-		double sb = Math.sin(-beta);
-		
-		double ca = Math.cos(alpha);
-		double sa = Math.sin(alpha);
-		
 		
 		res[0] = ca*cb*scaleX*(x - xCenter) - ca*sb*scaleX*(y - yCenter) + sa*scaleX*(z - zCenter);
 			   

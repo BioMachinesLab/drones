@@ -1,24 +1,12 @@
 package main;
 
 import io.*;
-import io.input.*;
-import io.output.*;
 import network.*;
 import network.messages.*;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-import utils.Logger;
-import behaviors.*;
-
-import com.pi4j.io.gpio.GpioController;
-import com.pi4j.io.gpio.GpioFactory;
-import com.pi4j.io.i2c.I2CBus;
-import com.pi4j.io.serial.SerialPortException;
-
-import dataObjects.MotorSpeeds;
+import commoninterface.CIBehavior;
 
 public interface Controller {
 	
@@ -30,4 +18,7 @@ public interface Controller {
 	
 	public List<MessageProvider> getMessageProviders();
 	public IOManager getIOManager();
+	public List<CIBehavior> getBehaviors();
+	
+	public void executeBehavior(CIBehavior b, boolean c);
 }

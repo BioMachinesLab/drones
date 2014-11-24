@@ -1,10 +1,10 @@
 package network.messages;
 
-import behaviors.Behavior;
+import commoninterface.CIBehavior;
 
 public class BehaviorMessage extends Message{
 	
-	protected Class<Behavior> selectedBehavior;
+	protected Class<CIBehavior> selectedBehavior;
 	
 	protected boolean changeStatus = false;
 	protected boolean selectedStatus = false;
@@ -13,14 +13,14 @@ public class BehaviorMessage extends Message{
 	protected int argumentIndex = 0;
 	protected double argumentValue = 0;
 	
-	public BehaviorMessage(Class<Behavior> selectedBehavior, int argumentIndex, double argumentValue) {
+	public BehaviorMessage(Class<CIBehavior> selectedBehavior, int argumentIndex, double argumentValue) {
 		this.selectedBehavior = selectedBehavior;
 		this.setArgument = true;
 		this.argumentIndex = argumentIndex;
 		this.argumentValue = argumentValue;
 	}
 	
-	public BehaviorMessage(Class<Behavior> selectedBehavior, boolean selectedStatus) {
+	public BehaviorMessage(Class<CIBehavior> selectedBehavior, boolean selectedStatus) {
 		this.selectedBehavior = selectedBehavior;
 		this.changeStatus = true;
 		this.selectedStatus = selectedStatus;
@@ -46,7 +46,7 @@ public class BehaviorMessage extends Message{
 		return argumentValue;
 	}
 	
-	public Class<Behavior> getSelectedBehavior() {
+	public Class<CIBehavior> getSelectedBehavior() {
 		return selectedBehavior;
 	}
 }

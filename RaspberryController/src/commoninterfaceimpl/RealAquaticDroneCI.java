@@ -1,14 +1,17 @@
 package commoninterfaceimpl;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import io.IOManager;
 import io.SystemInfoMessageProvider;
 import io.SystemStatusMessageProvider;
 import io.input.ControllerInput;
 import io.output.ControllerOutput;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
 import main.Controller;
 import network.ConnectionHandler;
 import network.ConnectionListener;
@@ -16,51 +19,80 @@ import network.ControllerMessageHandler;
 import network.MotorConnectionListener;
 import network.messages.Message;
 import network.messages.MessageProvider;
-import utils.Logger;
+import simpletestbehaviors.TurnToOrientationCIBehavior;
 import utils.Nmea0183ToDecimalConverter;
+
 import commoninterface.AquaticDroneCI;
+import commoninterface.CIBehavior;
 import commoninterface.CILogger;
+
 import dataObjects.GPSData;
 
-public class RealAquaticDroneCI implements AquaticDroneCI, Controller {
+public class RealAquaticDroneCI extends Thread implements AquaticDroneCI, Controller {
 
 	private String status = "";
 	private String initMessages = "\n";
-	private Logger logThread;
 	private IOManager ioManager;
 	private ControllerMessageHandler messageHandler;
+	
 	private ConnectionListener connectionListener;
 	private MotorConnectionListener motorConnectionListener;
+	
 	private List<MessageProvider> messageProviders = new ArrayList<MessageProvider>();
+	private List<CIBehavior> behaviors = new ArrayList<CIBehavior>();
+	
 	private String[] args;
 	private CILogger logger;
 	private long     startTimeInMillis;
 	
+	private LinkedList<CIBehavior> activeBehaviors;
 	
 	@Override
-	public void start(String[] args, CILogger logger) {		
+	public void begin(String[] args, CILogger logger) {		
 		this.startTimeInMillis = System.currentTimeMillis();
 		this.args   = args;
 		this.logger = logger; 
 		
+		addShutdownHooks();
+		
 		initIO();
+		initBehaviors();
 		initMessageProviders();
 		initConnections();
-
-		logThread = new Logger(this);
-		logThread.start();
 
 		messageHandler = new ControllerMessageHandler(this);
 		messageHandler.start();
 
 		setStatus("Running!\n");
 
-		System.out.println(initMessages);
+		logger.logMessage(initMessages);
+	}
+	
+	@Override
+	public void start() {
+		while(true) {
+			
+			Iterator<CIBehavior> i = activeBehaviors.iterator();
+			
+			while(i.hasNext()) {
+				CIBehavior b = i.next();
+				b.step();
+			}
+			
+			try {
+				Thread.sleep((long) (1000*behaviors.get(0).getControlStepPeriod()));
+			} catch (InterruptedException e) {}
+		}
 	}
 
 	@Override
 	public void shutdown() {
+		logger.logMessage("# Shutting down Controller...");
 		
+		if (logger != null)
+			logger.stopLogging();
+
+		System.out.println("# Finished Controller cleanup!");
 	}
 
 	@Override
@@ -84,20 +116,23 @@ public class RealAquaticDroneCI implements AquaticDroneCI, Controller {
 		double lat = Double.parseDouble(latitude.substring(0,latitude.length()-1));
 		char latPos = latitude.charAt(latitude.length()-1);
 
-
 		lat = Nmea0183ToDecimalConverter.convertLatitudeToDecimal(lat, latPos);
-		// TODO Auto-generated method stub
-		return 0;
+		
+		return lat;
 	}
 
 	@Override
 	public double getGPSLongitude() {
 		GPSData gpsData = ioManager.getGpsModule().getReadings();
 
+		//NMEA format: e.g. 3844.9474N 00909.2214W
 		String longitude = gpsData.getLongitude();
+		
 		double lon = Double.parseDouble(longitude.substring(0,longitude.length()-1));
 		char lonPos = longitude.charAt(longitude.length()-1);
+		
 		lon = Nmea0183ToDecimalConverter.convertLongitudeToDecimal(lon, lonPos);
+		
 		return lon;
 	}
 
@@ -119,8 +154,7 @@ public class RealAquaticDroneCI implements AquaticDroneCI, Controller {
 	}
 
 	@Override
-	public void processInformationRequest(Message request,
-			ConnectionHandler conn) {
+	public void processInformationRequest(Message request, ConnectionHandler conn) {
 		messageHandler.addMessage(request, conn);
 	}
 
@@ -150,18 +184,30 @@ public class RealAquaticDroneCI implements AquaticDroneCI, Controller {
 			connectionListener = new ConnectionListener(this);
 			connectionListener.start();
 
-			System.out.print(".");
+			logger.logMessage(".");
 			initMessages += "[INIT] ConnectionListener: ok\n";
 
 			motorConnectionListener = new MotorConnectionListener(this);
 			motorConnectionListener.start();
 
-			System.out.print(".");
+			logger.logMessage(".");
 			initMessages += "[INIT] MotorConnectionListener: ok\n";
 
 		} catch (IOException e) {
 			initMessages += "[INIT] Unable to start Network Connection Listeners! ("
 					+ e.getMessage() + ")\n";
+		}
+	}
+	
+	private void initBehaviors() {
+
+		activeBehaviors = new LinkedList<CIBehavior>();
+		
+		try{
+			CIBehavior turnBehavior = new TurnToOrientationCIBehavior(new String[]{}, this, logger);
+			behaviors.add(turnBehavior);
+		} catch(Exception e) {
+			initMessages += "[INIT] Behavior "+e.getMessage()+"\n";
 		}
 	}
 
@@ -206,4 +252,27 @@ public class RealAquaticDroneCI implements AquaticDroneCI, Controller {
 		}
 	}
 	
+	@Override
+	public List<CIBehavior> getBehaviors() {
+		return behaviors;
+	}
+	
+	private void addShutdownHooks() {
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() {
+				shutdown();
+			}
+		});
+	}
+	
+	@Override
+	public void executeBehavior(CIBehavior behavior, boolean active) {
+		
+		if(!active) {
+			activeBehaviors.remove(behavior);
+			behavior.cleanUp();
+		} else {
+			activeBehaviors.add(behavior);
+		}
+	}
 }

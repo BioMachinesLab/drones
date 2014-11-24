@@ -1,5 +1,8 @@
 package network;
 
+import commoninterface.CIBehavior;
+
+import network.messages.BehaviorMessage;
 import network.messages.InformationRequest;
 import network.messages.Message;
 import network.messages.MessageProvider;
@@ -24,7 +27,27 @@ public class ControllerMessageHandler extends MessageHandler {
 			if (response != null)
 				break;
 		}
-
+		
+		if(response == null && m instanceof BehaviorMessage) {
+			BehaviorMessage bm = (BehaviorMessage)m;
+			
+			for(CIBehavior b : controller.getBehaviors()) {
+				if(bm.getSelectedBehavior().equals(b.getClass())) {
+                    //send the same message back as an acknowledgement
+                    response = request;
+                    if(bm.changeStatusOrder()) {
+                        if(bm.getSelectedStatus()) {
+                        	controller.executeBehavior(b,true);
+                        } else {
+                        	controller.executeBehavior(b,false);
+                        }
+                    } else if(bm.changeArgumentOrder()) {
+//                    	b.setArgument(bm.getArgumentIndex(), bm.getArgumentValue());
+                    }       
+				}
+			}
+		}
+		
 		if (response == null) {
 			
 			String sResponse = "No message provider for the current request (";

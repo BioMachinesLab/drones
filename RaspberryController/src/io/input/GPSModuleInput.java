@@ -57,8 +57,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 	private Serial serial; // Serial connection
 	private String receivedDataBuffer = "";
 	private GPSData gpsData = new GPSData(); // Contains the obtained info
-	private List<String> ackResponses = Collections
-			.synchronizedList(new ArrayList<String>());
+	private List<String> ackResponses = Collections.synchronizedList(new ArrayList<String>());
 	private MessageParser messageParser;
 
 	private boolean available = false;
@@ -107,7 +106,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 					String sub = received.substring(0, indexNewline);
 					sub = (receivedDataBuffer + sub).trim();
 
-					if (messageParser != null && sub.startsWith("$"))
+					if (messageParser != null && !sub.isEmpty() && sub.charAt(0) == '$')
 						messageParser.processReceivedData(sub);
 
 					receivedDataBuffer = "";
@@ -251,8 +250,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				&& ((InformationRequest) request).getMessageTypeQuery() == InformationRequest.MessageType.GPS) {
 
 			if (!available)
-				return new SystemStatusMessage(
-						"[GPSModule] Unable to send GPS data");
+				return new SystemStatusMessage("[GPSModule] Unable to send GPS data");
 
 			return new GPSMessage(getReadings());
 		}
@@ -265,7 +263,6 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		return available;
 	}
 
-	
 	/*
 	 * GPS Functions
 	 */
@@ -437,6 +434,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 		private HashMap<String, String> currentValues = new HashMap<String, String>();
 		private HashMap<String, String> oldValues = new HashMap<String, String>();
+		private boolean pending = false;
 
 		/**
 		 * Processes the received data and splits it by commands and messages
@@ -452,11 +450,16 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			
 			int indexComma = data.indexOf(',');
 			if (indexComma >= 0) {
-				// System.out.println(data);
 				String name = data.substring(0, indexComma);
 				
 				synchronized(currentValues) {
+					if(currentValues.get("name") == null) {
+						pending = true;
+					}
 					currentValues.put(name, data.substring(indexComma + 1));
+				}
+				synchronized(this) {
+					notifyAll();
 				}
 			}
 		}
@@ -464,11 +467,19 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		@Override
 		public void run() {
 
-			int index = 0;
 			int size = 0;
 			String[] keys = {};
 			
 			while (true) {
+
+				synchronized(this) {
+					try {
+						while(!pending)
+							wait();
+					} catch(Exception e) {
+						e.printStackTrace();
+					}
+				}
 
 				if (currentValues.size() != size) {
 					size = currentValues.size();
@@ -482,52 +493,43 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				}
 
 				if (size > 0) {
+					
+					for(int index = 0 ; index < size ; index++) {
 
-					index %= size;
-
-					String name = keys[index];
-					String val = currentValues.get(name);
-
-					if (val != null && !val.isEmpty()) {
-
-						// check if it has been changed in the meanwhile.
-						// if not, set it as empty because it has already been
-						// processed
-						String oldVal = oldValues.get(name);
-						if (oldVal == null || !oldVal.equals(val)) {
-
-							if (name.startsWith("$GP")
-									|| name.startsWith("$PMTK")) {
-
-								if (localLog) {
-									localLogPrintWriterOut.println(name + ","
-											+ val);
-								}
-
-								if (name.startsWith("$GP")) {
-									parseNMEAData(name, val);
-								} else {
-									if (name.startsWith("$PMTK")) {
+						String name = keys[index];
+						String val;
+						
+						synchronized(currentValues) {
+							val = currentValues.get(name);
+							currentValues.put(name, null);
+						}
+	
+						if (val != null && !val.isEmpty()) {
+							
+							// check if it has changed in the meanwhile
+							String oldVal = oldValues.get(name);
+							
+							if (oldVal == null || !oldVal.equals(val)) {
+	
+								if (name.startsWith("$GP") || name.startsWith("$PMTK")) {
+	
+									if (localLog)
+										localLogPrintWriterOut.println(name + "," + val);
+	
+									if (name.startsWith("$GP"))
+										parseNMEAData(name, val);
+									else if (name.startsWith("$PMTK"))
 										parsePMTKData(name, val);
-									}
 								}
+								oldValues.put(name, val);
 							}
-							oldValues.put(name, val);
 						}
 					}
-				}
-				index++;
-				try {
-					Thread.sleep(UPDATE_DELAY/4);
-				} catch(Exception e) {
-					e.printStackTrace();
+					pending = false;
 				}
 			}
 		}
 
-		/*
-		 * GPS Parse Functions
-		 */
 		/**
 		 * Parses the NMEA messages send by the GPS receiver, containing the
 		 * navigation information
@@ -542,33 +544,30 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 	
 				String[] split = fullString.split(",");
 	
-				if (nmeaUtils.checkNMEAChecksum(fullString)) {
-	
-					switch (name) {
-					case "$GPGGA":
-						parseGPGGASentence(split);
-						break;
-	
-					case "$GPGSA":
-						parseGPGSASentence(split);
-						break;
-	
-					case "$GPGSV":
-						parseGPGSVSentence(split);
-						break;
-	
-					case "$GPRMC":
-						parseGPRMCSentence(split);
-						break;
-	
-					case "$GPVTG":
-						parseGPVTGSentence(split);
-						break;
-	
-					default:
-						print("No parser for " + name + " sentence", false);
-						break;
-					}
+				switch (name) {
+				case "$GPGGA":
+					parseGPGGASentence(split);
+					break;
+
+				case "$GPGSA":
+					parseGPGSASentence(split);
+					break;
+
+				case "$GPGSV":
+					parseGPGSVSentence(split);
+					break;
+
+				case "$GPRMC":
+					parseGPRMCSentence(split);
+					break;
+
+				case "$GPVTG":
+					parseGPVTGSentence(split);
+					break;
+
+				default:
+					print("No parser for " + name + " sentence", false);
+					break;
 				}
 			} catch(Exception e) {
 				System.out.println("[GPS] Error parsing "+name+"!");
@@ -585,11 +584,9 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 			String fullString = name + "," + data;
 
-			if (nmeaUtils.checkNMEAChecksum(fullString)) {
-				print("[Parsing PMTK]", false);
-				ackResponses.add(fullString);
-				print("[ACK] " + data, false);
-			}
+			print("[Parsing PMTK]", false);
+			ackResponses.add(fullString);
+			print("[ACK] " + data, false);
 		}
 
 		/**
@@ -602,7 +599,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		private void parseGPGGASentence(String[] params) {
 			if (params.length == 15) {
 				print("[Parsing GPGGA]", false);
-				if (params[2].length() != 0) {
+				if (!params[2].isEmpty()) {
 					gpsData.setLatitude(params[2] + params[3]);
 					gpsData.setLongitude(params[4] + params[5]);
 					gpsData.setGPSSourceType(Integer.parseInt(params[6]));
@@ -610,7 +607,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 							.parseInt(params[7]));
 					gpsData.setHDOP(Double.parseDouble(params[8]));
 
-					if (params[9].length() != 0)
+					if (!params[9].isEmpty())
 						gpsData.setAltitude(Double.parseDouble(params[9]));
 
 					// Missing the geoidal separation (not parsed in this case)
@@ -638,8 +635,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				else
 					gpsData.setFix(true);
 
-				if (params[15].length() != 0 && params[16].length() != 0
-						&& params[17].length() != 0) {
+				if (!params[15].isEmpty() && !params[16].isEmpty()
+						&& !params[17].isEmpty()) {
 					gpsData.setPDOP(Double.parseDouble(params[15]));
 					gpsData.setHDOP(Double.parseDouble(params[16]));
 
@@ -684,6 +681,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		private void parseGPRMCSentence(String[] params) {
 			if (params.length == 13) {
 				print("[Parsing GPRMC]", false);
+				//TODO splits and replaces are slow
 				String[] d = params[9].split("(?<=\\G.{2})");
 
 				params[1] = params[1].replace(".", "");
@@ -695,7 +693,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				//a value higher than 999, but NMEA does.
 				while(miliseconds > 999)
 					miliseconds/=10;
-
+				
 				LocalDateTime date = new LocalDateTime(
 						Integer.parseInt(d[2]) + 100,
 						Integer.parseInt(d[1]),
@@ -708,12 +706,11 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 				if (params[2].equals("V")) {
 					gpsData.setFix(false);
-				} else {
-					if (params[2].equals("A"))
+				} else if (params[2].equals("A")) {
 						gpsData.setFix(true);
 				}
 
-				if (params[3].length() != 0 && params[5].length() != 0) {
+				if (!params[3].isEmpty() && !params[5].isEmpty()) {
 					gpsData.setLatitude(params[3] + params[4]);
 					gpsData.setLongitude(params[5] + params[6]);
 				}
@@ -734,13 +731,13 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		 */
 		private void parseGPVTGSentence(String[] params) {
 			if (params.length == 10) {
-				if (params[1].length() != 0)
+				if (!params[1].isEmpty())
 					gpsData.setOrientation(Double.parseDouble(params[1]));
 
-				if (params[5].length() != 0)
+				if (!params[5].isEmpty())
 					gpsData.setGroundSpeedKnts(Double.parseDouble(params[5]));
 
-				if (params[7].length() != 0)
+				if (!params[7].isEmpty())
 					gpsData.setGroundSpeedKmh(Double.parseDouble(params[7]));
 			}
 		}
