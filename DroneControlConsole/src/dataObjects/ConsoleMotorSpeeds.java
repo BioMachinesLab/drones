@@ -2,7 +2,7 @@ package dataObjects;
 
 import network.messages.MotorMessage;
 
-public class MotorSpeeds {
+public class ConsoleMotorSpeeds {
 	
 	private double speedLeft = 0.5;
 	private double speedRight = 0.5;
@@ -62,7 +62,7 @@ public class MotorSpeeds {
 		return val;
 	}
 	
-	public synchronized MotorMessage getSpeeds() {
+	public synchronized MotorMessage getMotorMessage() {
 		
 		try {
 			while(!changed)

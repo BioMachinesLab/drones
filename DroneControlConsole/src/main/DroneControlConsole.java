@@ -3,11 +3,8 @@ package main;
 import gamepad.GamePad;
 import gui.GUI;
 import gui.IPandPortNumberRequestToUser;
-
 import java.util.ArrayList;
-
 import javax.swing.JOptionPane;
-
 import network.ConsoleMessageHandler;
 import network.InformationConnection;
 import network.MotorConnection;
@@ -18,7 +15,7 @@ import threads.BehaviorMessageThread;
 import threads.MapThread;
 import threads.MotorUpdateThread;
 import threads.UpdateThread;
-import dataObjects.MotorSpeeds;
+import dataObjects.ConsoleMotorSpeeds;
 
 public class DroneControlConsole extends Thread {
 	
@@ -29,7 +26,7 @@ public class DroneControlConsole extends Thread {
 	
 	private GamePad gamePad;
 
-	private MotorSpeeds motorSpeeds;
+	private ConsoleMotorSpeeds motorSpeeds;
 	private MotorMessageSender motorMessageSender;
 	
 	private ConsoleMessageHandler messageHandler;
@@ -41,7 +38,7 @@ public class DroneControlConsole extends Thread {
 		try {
 			while(true) {
 			
-				motorSpeeds = new MotorSpeeds();
+				motorSpeeds = new ConsoleMotorSpeeds();
 				
 				connect();
 				setupGUI();
@@ -144,7 +141,7 @@ public class DroneControlConsole extends Thread {
 		messageHandler.addMessage(message,null);
 	}
 	
-	public MotorSpeeds getMotorSpeeds() {
+	public ConsoleMotorSpeeds getMotorSpeeds() {
 		return motorSpeeds;
 	}
 	

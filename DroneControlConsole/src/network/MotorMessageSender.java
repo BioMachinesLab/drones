@@ -1,16 +1,16 @@
 package network;
 
 import network.messages.MotorMessage;
-import dataObjects.MotorSpeeds;
+import dataObjects.ConsoleMotorSpeeds;
 
 public class MotorMessageSender extends  Thread {
 	
 	private final static boolean DEBUG = false;
 	private MotorConnection connection;
-	private MotorSpeeds speeds;
+	private ConsoleMotorSpeeds speeds;
 	private boolean keepExecuting = true;
 	
-	public MotorMessageSender(MotorConnection connection, MotorSpeeds speeds) {
+	public MotorMessageSender(MotorConnection connection, ConsoleMotorSpeeds speeds) {
 		this.connection = connection;
 		this.speeds = speeds;
 	}
@@ -18,7 +18,7 @@ public class MotorMessageSender extends  Thread {
 	@Override
 	public void run() {
 		while(keepExecuting) {
-			MotorMessage m = speeds.getSpeeds();
+			MotorMessage m = speeds.getMotorMessage();
 			connection.sendData(m);
 			if(DEBUG)
 				System.out.println("[SEND] Sent motor speed: L="+m.getLeftMotor()+" R="+m.getRightMotor());
