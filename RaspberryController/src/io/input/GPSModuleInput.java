@@ -57,7 +57,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 	private Serial serial; // Serial connection
 	private String receivedDataBuffer = "";
 	private GPSData gpsData = new GPSData(); // Contains the obtained info
-	private List<String> ackResponses = Collections.synchronizedList(new ArrayList<String>());
+	private List<String> ackResponses = Collections
+			.synchronizedList(new ArrayList<String>());
 	private MessageParser messageParser;
 
 	private boolean available = false;
@@ -97,7 +98,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				// TODO check that we are not losing data
 
 				String received = event.getData();
-//				System.out.println(received);
+				// System.out.println(received);
 
 				while (received.contains("\r\n")) {
 
@@ -106,7 +107,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 					String sub = received.substring(0, indexNewline);
 					sub = (receivedDataBuffer + sub).trim();
 
-					if (messageParser != null && !sub.isEmpty() && sub.charAt(0) == '$')
+					if (messageParser != null && !sub.isEmpty()
+							&& sub.charAt(0) == '$')
 						messageParser.processReceivedData(sub);
 
 					receivedDataBuffer = "";
@@ -250,7 +252,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				&& ((InformationRequest) request).getMessageTypeQuery() == InformationRequest.MessageType.GPS) {
 
 			if (!available)
-				return new SystemStatusMessage("[GPSModule] Unable to send GPS data");
+				return new SystemStatusMessage(
+						"[GPSModule] Unable to send GPS data");
 
 			return new GPSMessage(getReadings());
 		}
@@ -444,21 +447,21 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		 *            : data to be processed
 		 */
 		private void processReceivedData(String data) {
-			
-			if(!nmeaUtils.checkNMEAChecksum(data))
+
+			if (!nmeaUtils.checkNMEAChecksum(data))
 				return;
-			
+
 			int indexComma = data.indexOf(',');
 			if (indexComma >= 0) {
 				String name = data.substring(0, indexComma);
-				
-				synchronized(currentValues) {
-					if(currentValues.get("name") == null) {
+
+				synchronized (currentValues) {
+					if (currentValues.get(name) == null) {
 						pending = true;
 					}
 					currentValues.put(name, data.substring(indexComma + 1));
 				}
-				synchronized(this) {
+				synchronized (this) {
 					notifyAll();
 				}
 			}
@@ -469,14 +472,14 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 			int size = 0;
 			String[] keys = {};
-			
+
 			while (true) {
 
-				synchronized(this) {
+				synchronized (this) {
 					try {
-						while(!pending)
+						while (!pending)
 							wait();
-					} catch(Exception e) {
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
@@ -485,7 +488,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 					size = currentValues.size();
 					keys = new String[size];
 					int i = 0;
-					synchronized(currentValues) {
+					synchronized (currentValues) {
 						for (String s : currentValues.keySet()) {
 							keys[i++] = s;
 						}
@@ -493,33 +496,38 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				}
 
 				if (size > 0) {
-					
-					for(int index = 0 ; index < size ; index++) {
+
+					for (int index = 0; index < size; index++) {
 
 						String name = keys[index];
 						String val;
-						
-						synchronized(currentValues) {
+
+						synchronized (currentValues) {
 							val = currentValues.get(name);
 							currentValues.put(name, null);
 						}
-	
-						if (val != null && !val.isEmpty()) {
-							
+
+						if (val != null) {
+
 							// check if it has changed in the meanwhile
 							String oldVal = oldValues.get(name);
-							
+
 							if (oldVal == null || !oldVal.equals(val)) {
-	
-								if (name.startsWith("$GP") || name.startsWith("$PMTK")) {
-	
+
+								if (name.charAt(1) == 'G') {
+
 									if (localLog)
-										localLogPrintWriterOut.println(name + "," + val);
-	
-									if (name.startsWith("$GP"))
-										parseNMEAData(name, val);
-									else if (name.startsWith("$PMTK"))
-										parsePMTKData(name, val);
+										localLogPrintWriterOut.println(name
+												+ "," + val);
+
+									parseNMEAData(name, val);
+								}
+								if (name.charAt(1) == 'P') {
+									if (localLog)
+										localLogPrintWriterOut.println(name
+												+ "," + val);
+
+									parsePMTKData(name, val);
 								}
 								oldValues.put(name, val);
 							}
@@ -538,12 +546,12 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		 *            : NMEA sentence to be processed
 		 */
 		private void parseNMEAData(String name, String data) {
-			
+
 			try {
 				String fullString = name + "," + data;
-	
+
 				String[] split = fullString.split(",");
-	
+
 				switch (name) {
 				case "$GPGGA":
 					parseGPGGASentence(split);
@@ -569,8 +577,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 					print("No parser for " + name + " sentence", false);
 					break;
 				}
-			} catch(Exception e) {
-				System.out.println("[GPS] Error parsing "+name+"!");
+			} catch (Exception e) {
+				System.out.println("[GPS] Error parsing " + name + "!");
 			}
 		}
 
@@ -681,33 +689,30 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		private void parseGPRMCSentence(String[] params) {
 			if (params.length == 13) {
 				print("[Parsing GPRMC]", false);
-				//TODO splits and replaces are slow
+				// TODO splits and replaces are slow
 				String[] d = params[9].split("(?<=\\G.{2})");
 
 				params[1] = params[1].replace(".", "");
 				String[] t = params[1].split("(?<=\\G.{2})");
-				
+
 				int miliseconds = Integer.parseInt(t[3] + t[4]);
-				
-				//LocalDateTime doesn't like miliseconds with
-				//a value higher than 999, but NMEA does.
-				while(miliseconds > 999)
-					miliseconds/=10;
-				
+
+				// LocalDateTime doesn't like miliseconds with
+				// a value higher than 999, but NMEA does.
+				while (miliseconds > 999)
+					miliseconds /= 10;
+
 				LocalDateTime date = new LocalDateTime(
-						Integer.parseInt(d[2]) + 100,
-						Integer.parseInt(d[1]),
-						Integer.parseInt(d[0]),
-						Integer.parseInt(t[0]),
-						Integer.parseInt(t[1]),
-						Integer.parseInt(t[2]),
+						Integer.parseInt(d[2]) + 100, Integer.parseInt(d[1]),
+						Integer.parseInt(d[0]), Integer.parseInt(t[0]),
+						Integer.parseInt(t[1]), Integer.parseInt(t[2]),
 						miliseconds);
 				gpsData.setDate(date);
 
 				if (params[2].equals("V")) {
 					gpsData.setFix(false);
 				} else if (params[2].equals("A")) {
-						gpsData.setFix(true);
+					gpsData.setFix(true);
 				}
 
 				if (!params[3].isEmpty() && !params[5].isEmpty()) {
