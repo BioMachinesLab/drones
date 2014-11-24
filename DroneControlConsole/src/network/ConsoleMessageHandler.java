@@ -7,6 +7,7 @@ import network.messages.GPSMessage;
 import network.messages.Message;
 import network.messages.SystemInformationsMessage;
 import network.messages.SystemStatusMessage;
+import network.messages.WaypointMessage;
 
 public class ConsoleMessageHandler extends MessageHandler {
 	
@@ -30,7 +31,9 @@ public class ConsoleMessageHandler extends MessageHandler {
 			console.getGUI().getMapPanel().displayData(((CompassMessage) message));
 		} else if (message instanceof BehaviorMessage) {
 			console.getGUI().getBehaviorsPanel().displayData((BehaviorMessage) message);
-		} else {
+		} else if (message instanceof WaypointMessage) {
+			console.getGUI().getMapPanel().displayData((WaypointMessage) message);
+		}else {
 			System.out.println("Received non recognise message type: " + message.getClass().toString());
 		}
 	}

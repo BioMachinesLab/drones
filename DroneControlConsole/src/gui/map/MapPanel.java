@@ -1,5 +1,7 @@
 package gui.map;
 
+import gui.UpdatePanel;
+
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -25,6 +27,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import network.messages.CompassMessage;
+import network.messages.WaypointMessage;
+import objects.Waypoint;
 
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
@@ -40,10 +44,10 @@ import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOpenAerialTileSource
 import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOsmTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.OsmTileSource;
 
-import utils.Nmea0183ToDecimalConverter;
+import threads.UpdateThread;
 import dataObjects.GPSData;
 
-public class MapPanel extends JPanel {
+public class MapPanel extends UpdatePanel {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -60,6 +64,10 @@ public class MapPanel extends JPanel {
     private int robotMarkerIndex = 0;
     
     private LinkedList<MapMarker> robotPositions = new LinkedList<MapMarker>();
+    private LinkedList<MapMarker> waypoints = new LinkedList<MapMarker>();
+    
+    private Waypoint droneWaypoint = null;
+    private UpdateThread thread = null;
 
     /**
      * Constructs the {@code Demo}.
@@ -193,8 +201,8 @@ public class MapPanel extends JPanel {
             public void mouseClicked(MouseEvent e) {
             	
                if(e.getButton() == MouseEvent.BUTTON3) {
-//            	   addMarker(map().getPosition(e.getPoint()),"waypoints");
-            	   updateRobotPosition("drone", map().getPosition(e.getPoint()));
+            	   addMarker(map().getPosition(e.getPoint()),"waypoint");
+//            	   updateRobotPosition("drone", map().getPosition(e.getPoint()));
                 }
             }
         });
@@ -228,12 +236,26 @@ public class MapPanel extends JPanel {
     		if(layer.getName().equals(name))
     			l = layer;
 
-    	if(l == null)
-    		l = treeMap.addLayer("waypoints");
+    	if(l == null) {
+    		l = treeMap.addLayer(name);
+    	} else {
+    		MapMarker old = waypoints.peekFirst();
+    		treeMap.removeFromLayer(old);
+    		map().removeMapMarker(old);
+    	}
     	
-    	MapMarker m = new MapMarkerDot(l, ""+Math.random()*100 , c);
+    	waypoints.clear();
+    	
+    	MapMarker m = new MapMarkerDot(l, name , c);
     	l.add(m);
+    	waypoints.add(m);
+    	
     	map().addMapMarker(m);
+    	
+    	synchronized(this) {
+    		droneWaypoint = new Waypoint(c.getLat(),c.getLon());
+    		notifyAll();
+    	}
     }
     
     public void updateRobotPosition(String name, Coordinate c) {
@@ -293,18 +315,8 @@ public class MapPanel extends JPanel {
 		if(gpsData.getLatitude().isEmpty() || gpsData.getLongitude().isEmpty())
 			return;
 		
-		//NMEA format: 3844.9474N 00909.2214W
-		String latitude = gpsData.getLatitude();
-		String longitude = gpsData.getLongitude();
-		
-		double lat = Double.parseDouble(latitude.substring(0,latitude.length()-1));
-		char latPos = latitude.charAt(latitude.length()-1);
-		
-		double lon = Double.parseDouble(longitude.substring(0,longitude.length()-1));
-		char lonPos = longitude.charAt(longitude.length()-1);
-		
-		lat = Nmea0183ToDecimalConverter.convertLatitudeToDecimal(lat, latPos);
-		lon = Nmea0183ToDecimalConverter.convertLongitudeToDecimal(lon, lonPos);
+		double lat = gpsData.getLatitudeDecimal();
+		double lon = gpsData.getLongitudeDecimal();
 		
 		if(usefulRobotCoordinate(c(lat,lon))) {
 			updateRobotPosition("drone", c(lat,lon));
@@ -327,4 +339,34 @@ public class MapPanel extends JPanel {
 		
 		return true;
 	}
+	
+	public synchronized WaypointMessage getCurrentMessage() {
+		WaypointMessage m = new WaypointMessage(droneWaypoint);
+		droneWaypoint = null;
+		return m;
+	}
+	
+	@Override
+	public long getSleepTime() {
+		return 10;
+	}
+	
+	@Override
+	public void registerThread(UpdateThread t) {
+		this.thread = t;		
+	}
+	
+	@Override
+	public synchronized void threadWait() {
+		while(droneWaypoint == null) {
+			try {
+				wait();
+			} catch(Exception e){}
+		}
+	}
+
+	public void displayData(WaypointMessage message) {
+		System.out.println("TODO MapPanel");
+	}
+	
 }

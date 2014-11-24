@@ -180,8 +180,8 @@ public class GPSPanel extends UpdatePanel {
 	}
 
 	public synchronized void displayData(GPSData data) {
-		textFieldLatitude.setText(data.getLatitude());
-		textFieldLongitude.setText(data.getLongitude());
+		textFieldLatitude.setText(""+data.getLatitudeDecimal());
+		textFieldLongitude.setText(""+data.getLongitudeDecimal());
 
 		textFieldSatelittesView.setText(Integer.toString(data
 				.getNumberOfSatellitesInView()));

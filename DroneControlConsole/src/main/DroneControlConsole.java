@@ -15,6 +15,7 @@ import network.MotorMessageSender;
 import network.messages.InformationRequest.MessageType;
 import network.messages.Message;
 import threads.BehaviorMessageThread;
+import threads.MapThread;
 import threads.MotorUpdateThread;
 import threads.UpdateThread;
 import dataObjects.MotorSpeeds;
@@ -85,6 +86,7 @@ public class DroneControlConsole extends Thread {
 		updateThreads.add(new MotorUpdateThread(this, gui.getMotorsPanel()));
 		updateThreads.add(new UpdateThread(this, gui.getCompassPanel(), MessageType.COMPASS));
 		updateThreads.add(new BehaviorMessageThread(this, gui.getBehaviorsPanel()));
+		updateThreads.add(new MapThread(this, gui.getMapPanel()));
 //		updateThreads.add(new UpdateThread(this, gui.getSysInfoPanel(), MessageType.SYSTEM_INFO));
 	}
 	

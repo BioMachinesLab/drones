@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 
 import main.DroneControlConsole;
 import network.messages.Message;
+import network.messages.WaypointMessage;
 
 public abstract class DroneConnection extends Thread {
 	
