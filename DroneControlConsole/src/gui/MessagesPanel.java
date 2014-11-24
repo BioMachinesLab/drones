@@ -13,13 +13,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 
-import org.joda.time.Chronology;
-import org.joda.time.DateTimeField;
-import org.joda.time.DateTimeFieldType;
-import org.joda.time.DurationFieldType;
+import network.messages.SystemStatusMessage;
+
 import org.joda.time.LocalDateTime;
 
-import network.messages.SystemStatusMessage;
 import threads.UpdateThread;
 
 public class MessagesPanel extends UpdatePanel {

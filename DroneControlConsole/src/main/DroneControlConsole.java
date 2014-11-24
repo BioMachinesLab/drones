@@ -1,7 +1,6 @@
 package main;
 
 import gamepad.GamePad;
-import gamepad.GamePad.GamePadType;
 import gui.GUI;
 import gui.IPandPortNumberRequestToUser;
 

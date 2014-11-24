@@ -1,6 +1,7 @@
 package gui;
 
 import javax.swing.JPanel;
+
 import threads.UpdateThread;
 
 public abstract class UpdatePanel extends JPanel{

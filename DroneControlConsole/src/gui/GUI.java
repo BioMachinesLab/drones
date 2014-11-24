@@ -1,9 +1,11 @@
 package gui;
 
 import gui.map.MapPanel;
+
 import java.awt.BorderLayout;
 import java.awt.Window;
 import java.lang.reflect.Method;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;

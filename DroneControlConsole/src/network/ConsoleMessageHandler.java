@@ -1,7 +1,12 @@
 package network;
 
 import main.DroneControlConsole;
-import network.messages.*;
+import network.messages.BehaviorMessage;
+import network.messages.CompassMessage;
+import network.messages.GPSMessage;
+import network.messages.Message;
+import network.messages.SystemInformationsMessage;
+import network.messages.SystemStatusMessage;
 
 public class ConsoleMessageHandler extends MessageHandler {
 	

@@ -1,7 +1,7 @@
 package network;
 
-import dataObjects.MotorSpeeds;
 import network.messages.MotorMessage;
+import dataObjects.MotorSpeeds;
 
 public class MotorMessageSender extends  Thread {
 	

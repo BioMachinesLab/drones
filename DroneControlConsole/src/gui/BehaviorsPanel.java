@@ -11,14 +11,14 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import commoninterface.CIBehavior;
 
 import network.messages.BehaviorMessage;
 import threads.UpdateThread;
 import utils.ClassLoadHelper;
-import behaviors.Behavior;
 
 public class BehaviorsPanel extends UpdatePanel{
 	
@@ -36,7 +36,7 @@ public class BehaviorsPanel extends UpdatePanel{
 		
 		topPanel.setLayout(new GridLayout(5,2));
 		
-		JComboBox<Class<Behavior>> behaviors = new JComboBox<>();
+		JComboBox<Class<CIBehavior>> behaviors = new JComboBox<>();
 		behaviors.setPreferredSize(new Dimension(20,20));
 		
 		populateBehaviors(behaviors);
@@ -48,13 +48,13 @@ public class BehaviorsPanel extends UpdatePanel{
 		
 		start.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				statusMessage((Class<Behavior>)behaviors.getSelectedItem(), true);
+				statusMessage((Class<CIBehavior>)behaviors.getSelectedItem(), true);
 			}
 		});
 		
 		stop.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				statusMessage((Class<Behavior>)behaviors.getSelectedItem(), false);
+				statusMessage((Class<CIBehavior>)behaviors.getSelectedItem(), false);
 			}
 		});
 		
@@ -73,7 +73,7 @@ public class BehaviorsPanel extends UpdatePanel{
 					int index = Integer.parseInt(argIndex.getText());
 					double value = Double.parseDouble(argValue.getText());
 					
-					argumentMessage((Class<Behavior>)behaviors.getSelectedItem(), index, value);
+					argumentMessage((Class<CIBehavior>)behaviors.getSelectedItem(), index, value);
 				
 				} catch(Exception ex){
 					statusMessage.setText("Arguments not well formatted!");
@@ -97,22 +97,22 @@ public class BehaviorsPanel extends UpdatePanel{
 		add(statusMessage, BorderLayout.SOUTH);
 	}
 	
-	private synchronized void statusMessage(Class<Behavior> className, boolean status) {
+	private synchronized void statusMessage(Class<CIBehavior> className, boolean status) {
 		statusMessage.setText("");
 		currentMessage = new BehaviorMessage(className, status);
 		notifyAll();
 	}
 	
-	private synchronized void argumentMessage(Class<Behavior> className, int index, double value) {
+	private synchronized void argumentMessage(Class<CIBehavior> className, int index, double value) {
 		statusMessage.setText("");
 		currentMessage = new BehaviorMessage(className, index, value);
 		notifyAll();
 	}
 	
-	private void populateBehaviors(JComboBox<Class<Behavior>> list) {
-		ArrayList<Class<?>> classes = ClassLoadHelper.findRelatedClasses(Behavior.class);
+	private void populateBehaviors(JComboBox<Class<CIBehavior>> list) {
+		ArrayList<Class<?>> classes = ClassLoadHelper.findRelatedClasses(CIBehavior.class);
 		for(Class<?> c : classes) {
-			list.addItem((Class<Behavior>)c);
+			list.addItem((Class<CIBehavior>)c);
 		}
 	}
 	

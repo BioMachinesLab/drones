@@ -1,6 +1,7 @@
 package gamepad;
 
 import java.io.IOException;
+
 import main.DroneControlConsole;
 
 public class GamePad extends Thread {
