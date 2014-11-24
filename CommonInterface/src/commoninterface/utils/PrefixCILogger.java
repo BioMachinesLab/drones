@@ -29,5 +29,10 @@ public class PrefixCILogger implements CILogger {
 	public void logError(String error) {
 		originalLogger.logMessage(prefix + ": " + error);		
 	}
+	
+	@Override
+	public void stopLogging() {
+		originalLogger.stopLogging();
+	}
 
 }

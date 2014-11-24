@@ -26,7 +26,7 @@ public abstract class CIBehavior {
 	}
 
 	public void start() {		
-		drone.start(args, logger);
+		drone.begin(args, logger);
 	}
 	
 	/**

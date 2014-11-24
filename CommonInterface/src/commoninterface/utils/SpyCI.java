@@ -25,9 +25,9 @@ public class SpyCI implements AquaticDroneCI {
 	}
 	
 	@Override
-	public void start(String[] args, CILogger logger) {
+	public void begin(String[] args, CILogger logger) {
 		spyLogger.logMessage("start(" + Arrays.toString(args) + ", " + logger + ")");
-		original.start(args, logger);
+		original.begin(args, logger);
 	}
 
 	@Override

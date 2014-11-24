@@ -18,4 +18,9 @@ public class CIStdOutLogger implements CILogger
 		System.err.printf("%6.2s: %s\n", droneCI.getTimeSinceStart(), error);
 	}
 	
+	@Override
+	public void stopLogging() {
+		System.out.println("Logger stopping");
+	}
+	
 }

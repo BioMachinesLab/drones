@@ -18,7 +18,7 @@ public interface AquaticDroneCI {
 	/**
 	 * Start the drone hardware
 	 */
-	public void    start(String[] args, CILogger logger);
+	public void    begin(String[] args, CILogger logger);
 	
 	/**
 	 * Stop the drone hardware
