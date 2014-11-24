@@ -12,23 +12,22 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import main.Controller;
 import network.ConnectionHandler;
 import network.ConnectionListener;
 import network.ControllerMessageHandler;
 import network.MotorConnectionListener;
 import network.messages.Message;
 import network.messages.MessageProvider;
+import objects.Waypoint;
+import simpletestbehaviors.GoToWaypointCIBehavior;
 import simpletestbehaviors.TurnToOrientationCIBehavior;
 import utils.Nmea0183ToDecimalConverter;
-
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
-
 import dataObjects.GPSData;
 
-public class RealAquaticDroneCI extends Thread implements AquaticDroneCI, Controller {
+public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	private String status = "";
 	private String initMessages = "\n";
@@ -45,7 +44,8 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI, Contro
 	private CILogger logger;
 	private long     startTimeInMillis;
 	
-	private LinkedList<CIBehavior> activeBehaviors;
+	private LinkedList<CIBehavior> activeBehaviors = new LinkedList<CIBehavior>();
+	private LinkedList<Waypoint> waypoints = new LinkedList<Waypoint>();
 	
 	@Override
 	public void begin(String[] args, CILogger logger) {		
@@ -97,6 +97,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI, Contro
 
 	@Override
 	public void setMotorSpeeds(double left, double right) {
+		System.out.println("Left: "+(left / 2.0 + 0.5)+" Right: "+ (right/ 2.0 + 0.5));
 		ioManager.setMotorSpeeds(left / 2.0 + 0.5, right / 2.0 + 0.5);
 	}
 
@@ -143,33 +144,27 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI, Contro
 		return ((double) elapsedMillis) / 1000.0;
 	}
 	
-	@Override
 	public String getStatus() {
 		return status;
 	}
 
-	@Override
 	public void setStatus(String status) {
 		this.status = status;
 	}
 
-	@Override
 	public void processInformationRequest(Message request, ConnectionHandler conn) {
 		messageHandler.addMessage(request, conn);
 	}
 
-	@Override
 	public String getInitMessages() {
 		return initMessages;
 	}
 
-	@Override
 	public List<MessageProvider> getMessageProviders() {
 		return messageProviders;
 	}
 
 
-	@Override
 	public IOManager getIOManager() {
 		return ioManager;
 	}
@@ -201,11 +196,11 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI, Contro
 	
 	private void initBehaviors() {
 
-		activeBehaviors = new LinkedList<CIBehavior>();
-		
 		try{
 			CIBehavior turnBehavior = new TurnToOrientationCIBehavior(new String[]{}, this, logger);
+			CIBehavior go = new GoToWaypointCIBehavior(new String[]{}, this, logger);
 			behaviors.add(turnBehavior);
+			behaviors.add(go);
 		} catch(Exception e) {
 			initMessages += "[INIT] Behavior "+e.getMessage()+"\n";
 		}
@@ -252,7 +247,6 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI, Contro
 		}
 	}
 	
-	@Override
 	public List<CIBehavior> getBehaviors() {
 		return behaviors;
 	}
@@ -265,7 +259,6 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI, Contro
 		});
 	}
 	
-	@Override
 	public void executeBehavior(CIBehavior behavior, boolean active) {
 		
 		if(!active) {
@@ -274,5 +267,10 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI, Contro
 		} else {
 			activeBehaviors.add(behavior);
 		}
+	}
+	
+	@Override
+	public LinkedList<Waypoint> getWaypoints() {
+		return waypoints;
 	}
 }

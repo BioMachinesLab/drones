@@ -5,22 +5,21 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-
+import commoninterfaceimpl.RealAquaticDroneCI;
 import dataObjects.MotorSpeeds;
-import main.Controller;
 import network.messages.Message;
 import network.messages.MotorMessage;
 
 public class MotorConnectionHandler extends ConnectionHandler {
 	
-	public MotorConnectionHandler(Socket socket, Controller controller, ConnectionListener connectionListener) {
-		super(socket, controller, connectionListener);
+	public MotorConnectionHandler(Socket socket, RealAquaticDroneCI drone, ConnectionListener connectionListener) {
+		super(socket, drone, connectionListener);
 	}
 
 	@Override
 	protected void shutdownHandler() {
 		if (connectionListener.getConnections().isEmpty()) {
-			controller.getIOManager().setMotorSpeeds(-1, -1);
+			drone.getIOManager().setMotorSpeeds(-1, -1);
 		}
 		closeConnection();
 	}
@@ -29,7 +28,7 @@ public class MotorConnectionHandler extends ConnectionHandler {
 	protected void processMessage(Message message) {
 		if (message instanceof MotorMessage) {
 			MotorMessage motorMessage = (MotorMessage) message;
-			controller.getIOManager().setMotorSpeeds(motorMessage.getLeftMotor(), motorMessage.getRightMotor());
+			drone.getIOManager().setMotorSpeeds(motorMessage.getLeftMotor(), motorMessage.getRightMotor());
 		}
 	}
 

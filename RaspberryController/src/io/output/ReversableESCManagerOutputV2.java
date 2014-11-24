@@ -65,7 +65,7 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 		
 		if (!available)
 			return;
-
+		
 		switch (index) {
 		case 0:
 			if (value == 0.5 || value == -1) {

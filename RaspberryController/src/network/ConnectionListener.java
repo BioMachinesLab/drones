@@ -5,24 +5,23 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-
-import main.Controller;
+import commoninterfaceimpl.RealAquaticDroneCI;
 
 public class ConnectionListener extends Thread {
 
 	private static final int DEFAULT_PORT = 10101;
 	protected ArrayList<ConnectionHandler> connections = new ArrayList<>();
-	protected Controller controller;
+	protected RealAquaticDroneCI drone;
 	protected int port;
 	protected ServerSocket serverSocket = null;
 
-	public ConnectionListener(Controller controller) throws IOException {
+	public ConnectionListener(RealAquaticDroneCI controller) throws IOException {
 		this(controller, DEFAULT_PORT);
 	}
 
-	public ConnectionListener(Controller controller, int port)
+	public ConnectionListener(RealAquaticDroneCI drone, int port)
 			throws IOException {
-		this.controller = controller;
+		this.drone = drone;
 		this.port = port;
 
 		serverSocket = new ServerSocket(port);
@@ -60,7 +59,7 @@ public class ConnectionListener extends Thread {
 	}
 
 	protected void createHandler(Socket s) {
-		ConnectionHandler conn = new ConnectionHandler(s, controller, this);
+		ConnectionHandler conn = new ConnectionHandler(s, drone, this);
 		addConnection(conn);
 		conn.start();
 	}

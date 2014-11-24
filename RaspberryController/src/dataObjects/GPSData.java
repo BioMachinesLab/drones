@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import org.joda.time.LocalDateTime;
 
+import utils.Nmea0183ToDecimalConverter;
+
 /**
  * Check http://aprs.gids.nl/nmea/ for more informations about the fields
  * 
@@ -16,6 +18,8 @@ public class GPSData implements Serializable {
 	private long PRINT_NUMBER = 0;
 
 	// Coordinates
+	private double latitudeDecimal;
+	private double longitudeDecimal;
 	private String latitude;
 	private String longitude;
 	private double altitude;
@@ -70,7 +74,14 @@ public class GPSData implements Serializable {
 	}
 
 	public void setLatitude(String latitude) {
+		
 		this.latitude = latitude;
+		
+		double lat = Double.parseDouble(latitude.substring(0,latitude.length()-1));
+		char latPos = latitude.charAt(latitude.length()-1);
+		lat = Nmea0183ToDecimalConverter.convertLatitudeToDecimal(lat, latPos);
+		
+		this.latitudeDecimal = lat;
 	}
 
 	public String getLongitude() {
@@ -78,9 +89,25 @@ public class GPSData implements Serializable {
 	}
 
 	public void setLongitude(String longitude) {
+		
 		this.longitude = longitude;
+		
+		double lon = Double.parseDouble(longitude.substring(0,longitude.length()-1));
+		char lonPos = longitude.charAt(longitude.length()-1);
+		
+		lon = Nmea0183ToDecimalConverter.convertLongitudeToDecimal(lon, lonPos);		
+		
+		this.longitudeDecimal = lon;
 	}
-
+	
+	public void setLatitudeDecimal(double lat) {
+		this.latitudeDecimal = lat;
+	}
+	
+	public void setLongitudeDecimal(double lon) {
+		this.longitudeDecimal = lon;
+	}
+	
 	public double getAltitude() {
 		return altitude;
 	}
@@ -183,6 +210,14 @@ public class GPSData implements Serializable {
 
 	public void setDate(LocalDateTime date) {
 		this.date = date;
+	}
+	
+	public double getLatitudeDecimal() {
+		return latitudeDecimal;
+	}
+	
+	public double getLongitudeDecimal() {
+		return longitudeDecimal;
 	}
 
 	@Override

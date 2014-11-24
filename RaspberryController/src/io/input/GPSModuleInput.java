@@ -501,37 +501,43 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 						String name = keys[index];
 						String val;
+						
+						try {
 
-						synchronized (currentValues) {
-							val = currentValues.get(name);
-							currentValues.put(name, null);
-						}
-
-						if (val != null) {
-
-							// check if it has changed in the meanwhile
-							String oldVal = oldValues.get(name);
-
-							if (oldVal == null || !oldVal.equals(val)) {
-
-								if (name.charAt(1) == 'G') {
-
-									if (localLog)
-										localLogPrintWriterOut.println(name
-												+ "," + val);
-
-									parseNMEAData(name, val);
-								}
-								if (name.charAt(1) == 'P') {
-									if (localLog)
-										localLogPrintWriterOut.println(name
-												+ "," + val);
-
-									parsePMTKData(name, val);
-								}
-								oldValues.put(name, val);
+							synchronized (currentValues) {
+								val = currentValues.get(name);
+								currentValues.put(name, null);
 							}
+							
+							if (val != null) {
+	
+								// check if it has changed in the meanwhile
+								String oldVal = oldValues.get(name);
+	
+								if (oldVal == null || !oldVal.equals(val)) {
+	
+									if (name.charAt(1) == 'G') {
+	
+										if (localLog)
+											localLogPrintWriterOut.println(name
+													+ "," + val);
+	
+										parseNMEAData(name, val);
+									}
+									if (name.charAt(1) == 'P') {
+										if (localLog)
+											localLogPrintWriterOut.println(name
+													+ "," + val);
+	
+										parsePMTKData(name, val);
+									}
+									oldValues.put(name, val);
+								}
+							}
+						} catch(Exception e) {
+							System.out.println("error reading "+name);
 						}
+						
 					}
 					pending = false;
 				}

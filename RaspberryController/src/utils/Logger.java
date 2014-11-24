@@ -4,17 +4,14 @@ import io.input.ControllerInput;
 import io.input.GPSModuleInput;
 import io.input.I2CCompassModuleInput;
 import io.output.ControllerOutput;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import main.Controller;
+import commoninterfaceimpl.RealAquaticDroneCI;
 import dataObjects.GPSData;
 
 public class Logger extends Thread {
@@ -22,10 +19,10 @@ public class Logger extends Thread {
 	private final static long SLEEP_TIME = 100;
 	
 	private String fileName = "";
-	private Controller controller;
+	private RealAquaticDroneCI drone;
 	
-	public Logger(Controller controller) {
-		this.controller = controller;
+	public Logger(RealAquaticDroneCI drone) {
+		this.drone = drone;
 		DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy_HH-mm-ss");
 		fileName = dateFormat.format(new Date());
 	}
@@ -60,8 +57,8 @@ public class Logger extends Thread {
 	}
 	
 	private String getLogString() {
-		List<ControllerInput> inputs = controller.getIOManager().getInputs();
-		List<ControllerOutput> outputs = controller.getIOManager().getOutputs();
+		List<ControllerInput> inputs = drone.getIOManager().getInputs();
+		List<ControllerOutput> outputs = drone.getIOManager().getOutputs();
 		
 		DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 		

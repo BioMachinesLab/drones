@@ -1,6 +1,6 @@
 package io;
 
-import main.Controller;
+import commoninterfaceimpl.RealAquaticDroneCI;
 import network.messages.InformationRequest;
 import network.messages.InformationRequest.MessageType;
 import network.messages.Message;
@@ -9,10 +9,10 @@ import network.messages.SystemStatusMessage;
 
 public class SystemStatusMessageProvider implements MessageProvider {
 	
-	private Controller controller;
+	private RealAquaticDroneCI drone;
 	
-	public SystemStatusMessageProvider(Controller controller) {
-		this.controller = controller;
+	public SystemStatusMessageProvider(RealAquaticDroneCI drone) {
+		this.drone = drone;
 	}
 	
 	@Override
@@ -21,7 +21,7 @@ public class SystemStatusMessageProvider implements MessageProvider {
 		if(request instanceof InformationRequest) {
 			InformationRequest infoRequest = (InformationRequest)request;
 			if(infoRequest.getMessageTypeQuery() == MessageType.SYSTEM_STATUS)
-				return new SystemStatusMessage(controller.getStatus());
+				return new SystemStatusMessage(drone.getStatus());
 		}
 		
 		return null;

@@ -1,20 +1,23 @@
 package network;
 
-import commoninterface.CIBehavior;
-
 import network.messages.BehaviorMessage;
+import network.messages.GPSMessage;
 import network.messages.InformationRequest;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import network.messages.SystemStatusMessage;
-import main.Controller;
+import network.messages.WaypointMessage;
+import objects.Waypoint;
+
+import commoninterface.CIBehavior;
+import commoninterfaceimpl.RealAquaticDroneCI;
 
 public class ControllerMessageHandler extends MessageHandler {
 	
-	private Controller controller;
+	private RealAquaticDroneCI drone;
 	
-	public ControllerMessageHandler(Controller c) {
-		this.controller = c;
+	public ControllerMessageHandler(RealAquaticDroneCI c) {
+		this.drone = c;
 	}
 	
 	@Override
@@ -22,24 +25,33 @@ public class ControllerMessageHandler extends MessageHandler {
 		Message request = pendingMessages[currentIndex];
 		Message response = null;
 		
-		for (MessageProvider p : controller.getMessageProviders()) {
+		for (MessageProvider p : drone.getMessageProviders()) {
 			response = p.getMessage(request);
 			if (response != null)
 				break;
 		}
 		
+		if(response == null && m instanceof WaypointMessage) {
+			WaypointMessage wm = (WaypointMessage)m;
+			Waypoint p = wm.getWaypoint();
+			drone.getWaypoints().clear();
+			drone.getWaypoints().add(p);
+			response = m;
+			System.out.println("Waypoint added!");
+		}
+		
 		if(response == null && m instanceof BehaviorMessage) {
 			BehaviorMessage bm = (BehaviorMessage)m;
 			
-			for(CIBehavior b : controller.getBehaviors()) {
+			for(CIBehavior b : drone.getBehaviors()) {
 				if(bm.getSelectedBehavior().equals(b.getClass())) {
                     //send the same message back as an acknowledgement
                     response = request;
                     if(bm.changeStatusOrder()) {
                         if(bm.getSelectedStatus()) {
-                        	controller.executeBehavior(b,true);
+                        	drone.executeBehavior(b,true);
                         } else {
-                        	controller.executeBehavior(b,false);
+                        	drone.executeBehavior(b,false);
                         }
                     } else if(bm.changeArgumentOrder()) {
 //                    	b.setArgument(bm.getArgumentIndex(), bm.getArgumentValue());

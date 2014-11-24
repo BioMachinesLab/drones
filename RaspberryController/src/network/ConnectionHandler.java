@@ -5,9 +5,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-import main.Controller;
+
 import network.messages.Message;
 import network.messages.SystemStatusMessage;
+
+import commoninterfaceimpl.RealAquaticDroneCI;
 
 public class ConnectionHandler extends Thread {
 	
@@ -16,14 +18,14 @@ public class ConnectionHandler extends Thread {
 	protected Socket socket;
 	protected ObjectOutputStream out;
 	protected ObjectInputStream in;
-	protected Controller controller;
+	protected RealAquaticDroneCI drone;
 	protected String clientName = null;
 	protected ConnectionListener connectionListener;
 
-	public ConnectionHandler(Socket socket, Controller controller,
+	public ConnectionHandler(Socket socket, RealAquaticDroneCI drone,
 			ConnectionListener connectionListener) {
 		this.socket = socket;
-		this.controller = controller;
+		this.drone = drone;
 		this.connectionListener = connectionListener;
 	}
 
@@ -71,7 +73,7 @@ public class ConnectionHandler extends Thread {
 		if(DEBUG)
 			System.out.println("[CONNECTION HANDLER] Information Request Message ("
 						+ message.getClass().getSimpleName() + ")");
-		controller.processInformationRequest(message, this);
+		drone.processInformationRequest(message, this);
 	}
 
 	protected void initConnection() throws IOException, ClassNotFoundException {
@@ -91,7 +93,7 @@ public class ConnectionHandler extends Thread {
 
 		// controller.processInformationRequest(new
 		// InformationRequest(MessageType.SYSTEM_STATUS), this);
-		sendData(new SystemStatusMessage(controller.getInitMessages()));
+		sendData(new SystemStatusMessage(drone.getInitMessages()));
 	}
 
 	public synchronized void closeConnection() {

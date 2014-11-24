@@ -7,18 +7,14 @@ import io.input.I2CCompassModuleInput;
 import io.output.ControllerOutput;
 import io.output.DebugLedsOutput;
 import io.output.ReversableESCManagerOutputV2;
-
 import java.io.IOException;
 import java.util.ArrayList;
-
 import network.messages.MotorMessage;
-import main.Controller;
-
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CFactory;
-
+import commoninterfaceimpl.RealAquaticDroneCI;
 import dataObjects.MotorSpeeds;
 
 public class IOManager {
@@ -41,11 +37,11 @@ public class IOManager {
 	private I2CBus i2cBus;
 	
 	private String initMessages = "\n";
-	private Controller controller;
+	private RealAquaticDroneCI drone;
 	private MotorSpeeds motorSpeeds;
 		
-	public IOManager(Controller controller) {
-		this.controller  = controller;
+	public IOManager(RealAquaticDroneCI drone) {
+		this.drone  = drone;
 		motorSpeeds = new MotorSpeeds();
 		initHardwareCommunicatonProtocols();
 		initInputs();
@@ -112,7 +108,7 @@ public class IOManager {
 					+ (gpsModule.isAvailable() ? "ok" : "not ok!") + "\n";
 	
 			if (gpsModule.isAvailable()) {
-//				gpsModule.enableLocalLog();
+				gpsModule.enableLocalLog();
 				inputs.add(gpsModule);
 				System.out.print(".");
 			}
