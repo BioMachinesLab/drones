@@ -1,5 +1,9 @@
 package commoninterface;
 
+import java.util.LinkedList;
+
+import objects.Waypoint;
+
 /**
  * Aquatic Drone Common Interface: an interface that allow for controllers built 
  * on top of it to be run in simulation, on real aquatic drones, and in mixed 
@@ -73,6 +77,7 @@ public interface AquaticDroneCI {
 	 * @param state the state of the led
 	 */
 	public void setLed (int index, LedState state);
+	public LinkedList<Waypoint> getWaypoints();
 	
 	//TODO: Methods for communication and for getting nearby robots and messages from those are still missing
 }

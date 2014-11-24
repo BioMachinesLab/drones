@@ -1,6 +1,9 @@
 package commoninterface.utils;
 
 import java.util.Arrays;
+import java.util.LinkedList;
+
+import objects.Waypoint;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.CILogger;
@@ -76,4 +79,11 @@ public class SpyCI implements AquaticDroneCI {
 		spyLogger.logMessage("setLed(" + index + "," + state + ")");
 		original.setLed(index, state);
 	}
+	
+	@Override
+	public LinkedList<Waypoint> getWaypoints() {
+		spyLogger.logMessage("getWaypoints()");
+		return original.getWaypoints();
+	}
+	
 }
