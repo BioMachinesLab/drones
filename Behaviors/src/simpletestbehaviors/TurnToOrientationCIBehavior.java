@@ -29,9 +29,7 @@ public class TurnToOrientationCIBehavior extends CIBehavior {
 	@Override
 	public void step() {
 		double currentOrientation = drone.getCompassOrientationInDegrees();		
-//		getLogger().logMessage("Current orientation: " + currentOrientation);
 		double difference = currentOrientation - targetOrientation;
-//		getLogger().logMessage("Current difference: " + difference);
 		
 		difference%=360;
 		
@@ -42,15 +40,12 @@ public class TurnToOrientationCIBehavior extends CIBehavior {
 		if (Math.abs(difference) <= tolerance) {
 			drone.setLed(0, LedState.ON);
 			drone.setMotorSpeeds(0, 0);
-//			getLogger().logMessage("Within tolerance, stopping");
 		}
 		else {
 			drone.setLed(0, LedState.BLINKING);
 			if (difference > 0) {
-//				getLogger().logMessage("Turning left");				
 				drone.setMotorSpeeds(-0.1, 0.1);
 			} else {
-//				getLogger().logMessage("Turning right");
 				drone.setMotorSpeeds(0.1, -0.1);
 			}
 		}
