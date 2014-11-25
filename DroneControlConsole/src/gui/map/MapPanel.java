@@ -293,8 +293,6 @@ public class MapPanel extends UpdatePanel {
 	    	l.add(old);
 	    	map().addMapMarker(old);
 	    	
-    	} else {
-    		fitMarkersButton.doClick();
     	}
     	
     	//add the new one with the new style
@@ -308,6 +306,10 @@ public class MapPanel extends UpdatePanel {
     		MapMarker old = robotPositions.pollFirst();
     		treeMap.removeFromLayer(old);
         	map().removeMapMarker(old);
+    	}
+    	
+    	if(robotPositions.size() == 1) {
+    		fitMarkersButton.doClick();
     	}
     	
     }
