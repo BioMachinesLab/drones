@@ -19,12 +19,13 @@ import network.MotorConnectionListener;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import objects.Waypoint;
-import simpletestbehaviors.GoToWaypointCIBehavior;
 import simpletestbehaviors.TurnToOrientationCIBehavior;
 import utils.Nmea0183ToDecimalConverter;
+
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
+
 import dataObjects.GPSData;
 
 public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
@@ -228,7 +229,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	@Override
 	public void setLed(int index, AquaticDroneCI.LedState state) {
-		if (index >= 0 && index < ioManager.getDebugLeds().getNumberOfLeds()) {
+		if (index >= 0 && index < ioManager.getDebugLeds().getNumberOfOutputs()) {
 			switch (state) {
 			case ON:
 				ioManager.getDebugLeds().removeBlinkLed(index);
@@ -243,7 +244,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 				break;
 			} 
 		} else {
-			logger.logError("Invalid led index: " + index + ", must be >= 0 and < " + ioManager.getDebugLeds().getNumberOfLeds());
+			logger.logError("Invalid led index: " + index + ", must be >= 0 and < " + ioManager.getDebugLeds().getNumberOfOutputs());
 		}
 	}
 	

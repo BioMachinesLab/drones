@@ -8,7 +8,6 @@ import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
 
 public class DebugLedsOutput extends Thread implements ControllerOutput {
-	private static final int NUM_LEDS = 2;
 	private static final Pin[] LED_PINS = { RaspiPin.GPIO_05, RaspiPin.GPIO_06 };
 
 	private static final int BLINK_DURATION = 250;
@@ -18,22 +17,16 @@ public class DebugLedsOutput extends Thread implements ControllerOutput {
 	private boolean available = false;
 
 	public DebugLedsOutput(GpioController gpioController) {
-		if (LED_PINS.length == NUM_LEDS) {
-			ledsOutputPins = new GpioPinDigitalOutput[NUM_LEDS];
+		ledsOutputPins = new GpioPinDigitalOutput[LED_PINS.length];
 
-			for (int i = 0; i < NUM_LEDS; i++) {
-				ledsOutputPins[i] = gpioController.provisionDigitalOutputPin(
-						LED_PINS[i], PinState.LOW);
-			}
-
-			available = true;
+		for (int i = 0; i < LED_PINS.length; i++) {
+			ledsOutputPins[i] = gpioController.provisionDigitalOutputPin(
+					LED_PINS[i], PinState.LOW);
 		}
+
+		available = true;
 	}
 
-	public int getNumberOfLeds() {
-		return NUM_LEDS;
-	}
-	
 	@Override
 	// if value==0 the led will be off, and on if value!=0
 	public void setValue(int index, double value) {
@@ -46,7 +39,7 @@ public class DebugLedsOutput extends Thread implements ControllerOutput {
 
 	@Override
 	public int getNumberOfOutputs() {
-		return NUM_LEDS;
+		return LED_PINS.length;
 	}
 
 	public void addBlinkLed(int index) {
