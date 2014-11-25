@@ -211,7 +211,7 @@ public class IOManager {
 			public void run() {
 				System.out.println("# Shutting down IO...");
 				if (escManager != null)
-					setMotorSpeeds(-1, -1);
+					escManager.disableMotors();
 				
 				if (compassModule != null)
 					compassModule.interrupt();

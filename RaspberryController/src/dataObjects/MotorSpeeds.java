@@ -15,7 +15,7 @@ public class MotorSpeeds {
 			notifyAll();
 		}
 	}
-
+	
 	public synchronized MotorMessage getSpeeds() {
 		try {
 			while (!changed) {

@@ -66,36 +66,24 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 		if (!available)
 			return;
 		
-		switch (index) {
-		case 0:
-			if (value == 0.5 || value == -1) {
-				lValue = CENTRAL_VALUE;
-			} else {
-				if (value > 0.5) {
-					lValue = (int) (Math_Utils.map(value, 0.5, 1, MIN_FW_VALUE,
-							MAX_VALUE));
-				} else if (value < 0.5) {
-					lValue = (int) (Math_Utils.map(value, 0, 0.5, MIN_VALUE,
-							MIN_BW_VALUE));
-				}
+		int finalVal = CENTRAL_VALUE;
+		
+		if (value == 0) {
+			finalVal = CENTRAL_VALUE;
+		} else {
+			if (value > 0) {
+				finalVal = (int) (Math_Utils.map(value, 0, 1, MIN_FW_VALUE,
+						MAX_VALUE));
+			} else if (value < 0) {
+				finalVal = (int) (Math_Utils.map(value, -1, 0, MIN_VALUE,
+						MIN_BW_VALUE));
 			}
-			break;
-		case 1:
-			if (value == 0.5 || value == -1) {
-				rValue = CENTRAL_VALUE;
-			} else {
-				if (value > 0.5) {
-					rValue = (int) (Math_Utils.map(value, 0.5, 1, MIN_FW_VALUE,
-							MAX_VALUE));
-				} else if (value < 0.5) {
-					rValue = (int) (Math_Utils.map(value, 0, 0.5, MIN_VALUE,
-							MIN_BW_VALUE));
-				}
-			}
-			break;
-		default:
-			throw new IllegalArgumentException();
 		}
+		
+		if(index == 0)
+			lValue = finalVal;
+		else
+			rValue = finalVal;
 	}
 
 	private void writeValueToESC() {
@@ -123,7 +111,7 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 		// + (System.currentTimeMillis() - time));
 	}
 
-	private void disableMotors() {
+	public void disableMotors() {
 		escSwitch.low();
 		setRawValues(CENTRAL_VALUE, CENTRAL_VALUE);
 		writeValueToESC();
@@ -149,17 +137,13 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 	}
 
 	private void writeValuesToESC(MotorMessage m) {
-		if (m.getLeftMotor() == -1 || m.getRightMotor() == -1) {
-			disableMotors();
-		} else {
-			if (!available){
-				enableMotors();
-			}
-			
-			setValue(0, m.getLeftMotor());
-			setValue(1, m.getRightMotor());
-			writeValueToESC();
+		if (!available){
+			enableMotors();
 		}
+		
+		setValue(0, m.getLeftMotor());
+		setValue(1, m.getRightMotor());
+		writeValueToESC();
 	}
 
 	private void setRawValues(int left, int right) {
