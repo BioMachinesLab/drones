@@ -6,13 +6,12 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import commoninterfaceimpl.RealAquaticDroneCI;
-import dataObjects.MotorSpeeds;
 import network.messages.Message;
 import network.messages.MotorMessage;
 
 public class MotorConnectionHandler extends ConnectionHandler {
 	
-	private final static boolean DEBUG = true;
+	private final static boolean DEBUG = false;
 	
 	public MotorConnectionHandler(Socket socket, RealAquaticDroneCI drone, ConnectionListener connectionListener) {
 		super(socket, drone, connectionListener);
@@ -52,8 +51,5 @@ public class MotorConnectionHandler extends ConnectionHandler {
 				+ socket.getInetAddress().getHostAddress() + " (" + clientName
 				+ ") connected");
 
-		// controller.processInformationRequest(new
-		// InformationRequest(MessageType.SYSTEM_STATUS), this);
-		/* sendData(new SystemStatusMessage(controller.getInitialMessages())); */
 	}
 }

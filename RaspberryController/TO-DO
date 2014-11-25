@@ -1,7 +1,6 @@
 TO-DO Hardware:
 	- Check https://code.google.com/p/i2c-gps-nav/ project. Possible alternative to UART population?
 	
-	
 TO-DO Controller:
 	- Compass calibration
 	- Extract I2C manager to a separate class (already done on the I2CBusController, but not used, yet)
