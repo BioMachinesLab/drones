@@ -13,7 +13,7 @@ import commoninterfaceimpl.RealAquaticDroneCI;
 
 public class ConnectionHandler extends Thread {
 	
-	private final static boolean DEBUG = false;
+	private final static boolean DEBUG = true;
 	
 	protected Socket socket;
 	protected ObjectOutputStream out;

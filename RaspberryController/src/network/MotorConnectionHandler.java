@@ -12,6 +12,8 @@ import network.messages.MotorMessage;
 
 public class MotorConnectionHandler extends ConnectionHandler {
 	
+	private final static boolean DEBUG = true;
+	
 	public MotorConnectionHandler(Socket socket, RealAquaticDroneCI drone, ConnectionListener connectionListener) {
 		super(socket, drone, connectionListener);
 	}
@@ -28,7 +30,9 @@ public class MotorConnectionHandler extends ConnectionHandler {
 	protected void processMessage(Message message) {
 		if (message instanceof MotorMessage) {
 			MotorMessage motorMessage = (MotorMessage) message;
-			drone.getIOManager().setMotorSpeeds(motorMessage.getLeftMotor(), motorMessage.getRightMotor());
+			if(DEBUG)
+				System.out.println("[MotorConnectionHandler] Got new speeds "+motorMessage.getLeftMotor()+" "+motorMessage.getRightMotor());
+			drone.getIOManager().setMotorSpeeds(motorMessage);
 		}
 	}
 

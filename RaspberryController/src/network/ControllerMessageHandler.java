@@ -1,7 +1,6 @@
 package network;
 
 import network.messages.BehaviorMessage;
-import network.messages.GPSMessage;
 import network.messages.InformationRequest;
 import network.messages.Message;
 import network.messages.MessageProvider;
@@ -37,7 +36,6 @@ public class ControllerMessageHandler extends MessageHandler {
 			drone.getWaypoints().clear();
 			drone.getWaypoints().add(p);
 			response = m;
-			System.out.println("Waypoint added!");
 		}
 		
 		if(response == null && m instanceof BehaviorMessage) {

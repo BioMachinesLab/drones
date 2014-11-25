@@ -344,9 +344,9 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 			
 			alpha = Math.atan2(maxVectorZ, maxVectorX);
 			
-			if(maxVectorX < 0) {
-				alpha+=Math.PI;
-			}
+//			if(maxVectorX < 0) {
+//				alpha+=Math.PI;
+//			}
 			
 			ca = Math.cos(alpha);
 			sa = Math.sin(alpha);
@@ -363,9 +363,9 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 			cb = Math.cos(-beta);
 			sb = Math.sin(-beta);
 			
-			if(xRotated < 0) {
-				beta+=Math.PI;
-			}
+//			if(xRotated < 0) {
+//				beta+=Math.PI;
+//			}
 
 //			System.out.println("alpha "+Math.toDegrees(alpha)+" beta "+Math.toDegrees(beta));
 			
@@ -410,9 +410,9 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 			
 			theta = Math.atan2(maxVectorZ,maxVectorY);
 			
-			if(maxVectorY < 0) {
-				theta+=Math.PI;
-			}
+//			if(maxVectorY < 0) {
+//				theta+=Math.PI;
+//			}
 			
 			ct = Math.cos(-theta);
 			st = Math.sin(-theta);
@@ -457,19 +457,19 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				
 				gps = Math.atan2(north[1],north[0]);
 				
-				if(north[0] < 0)
-					gps+=Math.PI;
+//				if(north[0] < 0)
+//					gps+=Math.PI;
 				
 				sgps = Math.sin(-gps);
 				cgps = Math.cos(-gps);
 				
 				double[] res = convert(x,y,z);
 				
-//				System.out.println("north transf "+north[0]+" "+north[1] +" "+north[2]);
-//				System.out.println("gps angle "+gps);
-//				System.out.println("RESULT "+res[0]+" "+res[1] +" "+res[2]);
-//				
-//				s.next();
+				System.out.println("north transf "+north[0]+" "+north[1] +" "+north[2]);
+				System.out.println("gps angle "+gps);
+				System.out.println("RESULT "+res[0]+" "+res[1] +" "+res[2]);
+				
+				s.next();
 				
 			} catch(Exception e) {
 				e.printStackTrace();
