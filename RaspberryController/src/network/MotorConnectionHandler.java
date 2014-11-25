@@ -19,9 +19,6 @@ public class MotorConnectionHandler extends ConnectionHandler {
 
 	@Override
 	protected void shutdownHandler() {
-		if (connectionListener.getConnections().isEmpty()) {
-			drone.getIOManager().setMotorSpeeds(-1, -1);
-		}
 		closeConnection();
 	}
 

@@ -45,6 +45,7 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 
 		try {
 			setRawValues(CENTRAL_VALUE, CENTRAL_VALUE);
+			writeValueToESC();
 			Thread.sleep(1000);
 			escSwitch.high();
 			Thread.sleep(10);

@@ -61,8 +61,6 @@ public class IOManager {
 		initHardwareCommunicatonProtocols();
 		initInputs();
 		initOutputs();
-		addShutdownHooks();
-		
 	}
 	
 	private void loadConfigurations() {
@@ -206,36 +204,32 @@ public class IOManager {
 		}
 	}
 	
-	private void addShutdownHooks() {
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			public void run() {
-				System.out.println("# Shutting down IO...");
-				if (escManager != null)
-					escManager.disableMotors();
-				
-				if (compassModule != null)
-					compassModule.interrupt();
+	public void shutdown() {
+		System.out.println("# Shutting down IO...");
+		if (escManager != null)
+			shutdownMotors();
+		
+		if (compassModule != null)
+			compassModule.interrupt();
 
-				if (i2cBus != null) {
-					try {
-						i2cBus.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-
-				if (gpsModule != null)
-					gpsModule.closeSerial();
-
-				if (debugLeds != null)
-					debugLeds.shutdownLeds();
-
-				if (gpioController != null)
-					gpioController.shutdown();
-				
-				System.out.println("# Finished IO cleanup!");
+		if (i2cBus != null) {
+			try {
+				i2cBus.close();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-		});
+		}
+
+		if (gpsModule != null)
+			gpsModule.closeSerial();
+
+		if (debugLeds != null)
+			debugLeds.shutdownLeds();
+
+		if (gpioController != null)
+			gpioController.shutdown();
+		
+		System.out.println("# Finished IO cleanup!");
 	}
 	
 	public String getInitMessages() {
@@ -248,6 +242,10 @@ public class IOManager {
 	
 	public ArrayList<ControllerOutput> getOutputs() {
 		return outputs;
+	}
+	
+	public void shutdownMotors() {
+		escManager.disableMotors();
 	}
 	
 	public void setMotorSpeeds(double left, double right) {

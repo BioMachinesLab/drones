@@ -22,12 +22,10 @@ import objects.Waypoint;
 import simpletestbehaviors.GoToWaypointCIBehavior;
 import simpletestbehaviors.TurnToOrientationCIBehavior;
 import utils.Nmea0183ToDecimalConverter;
-
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
 import commoninterface.LedState;
-
 import dataObjects.GPSData;
 
 public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
@@ -76,15 +74,17 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		while(true) {
 			
 			Iterator<CIBehavior> i = activeBehaviors.iterator();
-			
+				
 			while(i.hasNext()) {
 				CIBehavior b = i.next();
 				b.step();
 			}
-			
+				
 			try {
+				//TODO allow different behaviors to have different sleep times
 				Thread.sleep((long) (1000*behaviors.get(0).getControlStepPeriod()));
 			} catch (InterruptedException e) {}
+			
 		}
 	}
 
@@ -94,6 +94,8 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		
 		if (logger != null)
 			logger.stopLogging();
+		
+		ioManager.shutdown();
 
 		System.out.println("# Finished Controller cleanup!");
 	}
@@ -253,18 +255,14 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		return behaviors;
 	}
 	
-	private void addShutdownHooks() {
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			public void run() {
-				shutdown();
-			}
-		});
-	}
-	
 	public void executeBehavior(CIBehavior behavior, boolean active) {
 		
 		if(!active) {
 			activeBehaviors.remove(behavior);
+			try {
+				//make sure that the current step is processed
+				Thread.sleep(100);
+			} catch (InterruptedException e) {}
 			behavior.cleanUp();
 		} else {
 			activeBehaviors.add(behavior);
@@ -274,5 +272,26 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	@Override
 	public LinkedList<Waypoint> getWaypoints() {
 		return waypoints;
+	}
+
+	private void addShutdownHooks() {
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() {
+				shutdown();
+			}
+		});
+	}
+
+	public void reset() {
+		ioManager.shutdownMotors();
+		
+		activeBehaviors.clear();
+		try {
+			//make sure that the current control step is processed
+			Thread.sleep(100);
+		} catch (InterruptedException e) {}
+		
+		for(CIBehavior b : behaviors)
+			b.cleanUp();
 	}
 }
