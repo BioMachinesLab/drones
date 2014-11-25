@@ -7,7 +7,7 @@ import main.DroneControlConsole;
 public class GamePad extends Thread {
 	
 	public static enum GamePadType {
-		LOGITECH, GAMEPAD
+		GAMEPAD, LOGITECH
 	}
 
 	private final static int HISTORY_SIZE = 20;
@@ -76,8 +76,10 @@ public class GamePad extends Thread {
 					jinputGamepad.pollComponentsValues();
 					if (index == HISTORY_SIZE)
 						index = 0;
-	
-					readingsXHistory[index] = jinputGamepad.getXAxisValue();
+					
+					readingsXHistory[index] = osX && type == GamePadType.LOGITECH ?
+								-jinputGamepad.getXAxisValue():
+								jinputGamepad.getXAxisValue();
 					readingsRZHistory[index] = osX && type == GamePadType.GAMEPAD ?
 								jinputGamepad.getZAxisValue() :
 								jinputGamepad.getRZAxisValue();
@@ -131,7 +133,6 @@ public class GamePad extends Thread {
 						
 					if(console != null)
 						console.getGUI().getMotorsPanel().setSliderValues(leftMotorSpeed,rightMotorSpeed);
-
 					lastLeftMotorSpeed = leftMotorSpeed;
 					lastRightMotorSpeed = rightMotorSpeed;
 						

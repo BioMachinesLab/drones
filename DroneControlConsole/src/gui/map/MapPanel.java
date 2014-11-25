@@ -59,6 +59,8 @@ public class MapPanel extends UpdatePanel {
     private JLabel mperpLabelName=null;
     private JLabel mperpLabelValue = null;
     
+    private JButton fitMarkersButton;
+    
     private static int POSITION_HISTORY = 100;
     
     private int robotMarkerIndex = 0;
@@ -98,8 +100,8 @@ public class MapPanel extends UpdatePanel {
         panel.add(panelTop, BorderLayout.NORTH);
         JLabel helpLabel = new JLabel("Left mouse: move // Double left click or mouse wheel: zoom // Right click: add markers");
         helpPanel.add(helpLabel);
-        JButton button = new JButton("Fit Markers");
-        button.addActionListener(new ActionListener() {
+        fitMarkersButton = new JButton("Fit Markers");
+        fitMarkersButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
                 map().setDisplayToFitMapMarkers();
@@ -154,7 +156,7 @@ public class MapPanel extends UpdatePanel {
             }
         });
         panelTop.add(showZoomControls);
-        panelTop.add(button);
+        panelTop.add(fitMarkersButton);
 
         add(treeMap, BorderLayout.CENTER);
 
@@ -291,6 +293,8 @@ public class MapPanel extends UpdatePanel {
 	    	l.add(old);
 	    	map().addMapMarker(old);
 	    	
+    	} else {
+    		fitMarkersButton.doClick();
     	}
     	
     	//add the new one with the new style
