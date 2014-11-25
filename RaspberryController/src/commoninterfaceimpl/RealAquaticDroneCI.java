@@ -100,8 +100,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	@Override
 	public void setMotorSpeeds(double left, double right) {
-		System.out.println("Left: "+(left / 2.0 + 0.5)+" Right: "+ (right/ 2.0 + 0.5));
-		ioManager.setMotorSpeeds(left / 2.0 + 0.5, right / 2.0 + 0.5);
+		ioManager.setMotorSpeeds(left,right);
 	}
 
 	@Override
