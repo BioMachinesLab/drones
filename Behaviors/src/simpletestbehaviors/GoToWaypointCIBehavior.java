@@ -1,9 +1,11 @@
 package simpletestbehaviors;
 
 import objects.Waypoint;
+
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
+import commoninterface.LedState;
 
 public class GoToWaypointCIBehavior extends CIBehavior {
 
@@ -37,11 +39,11 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 	
 		if(currentDistance > distanceTolerance) {
 			if (Math.abs(difference) <= angleTolerance) {
-				drone.setLed(0, AquaticDroneCI.LedState.ON);
+				drone.setLed(0, LedState.ON);
 				drone.setMotorSpeeds(0.1, 0.1);
 //				getLogger().logMessage("Straight ahead, skipper!");
 			} else {
-				drone.setLed(0, AquaticDroneCI.LedState.BLINKING);
+				drone.setLed(0, LedState.BLINKING);
 				if (difference < 180) {
 //					getLogger().logMessage("Turning left "+difference);				
 					drone.setMotorSpeeds(-0.1, 0.1);
@@ -52,7 +54,7 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 			}
 		} else {
 			getLogger().logMessage("Reached waypoint");				
-			drone.setLed(0, AquaticDroneCI.LedState.OFF);
+			drone.setLed(0, LedState.OFF);
 			drone.setMotorSpeeds(0, 0);
 		}
 	}
@@ -112,7 +114,7 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 	
 	@Override
 	public void cleanUp() {
-		drone.setLed(0, AquaticDroneCI.LedState.OFF);
+		drone.setLed(0, LedState.OFF);
 		drone.setMotorSpeeds(0, 0);
 	}
 }
