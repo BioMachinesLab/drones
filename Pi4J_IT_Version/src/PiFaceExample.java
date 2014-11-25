@@ -11,7 +11,7 @@
  * this project can be found here:  http://www.pi4j.com/
  * **********************************************************************
  * %%
- * Copyright (C) 2014 Pi4J
+ * Copyright (C) 2012 - 2014 Pi4J
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@
  */
 
 
-import java.io.IOException;
 import com.pi4j.component.switches.SwitchListener;
 import com.pi4j.component.switches.SwitchState;
 import com.pi4j.component.switches.SwitchStateChangeEvent;
@@ -38,6 +37,8 @@ import com.pi4j.device.piface.PiFaceRelay;
 import com.pi4j.device.piface.PiFaceSwitch;
 import com.pi4j.device.piface.impl.PiFaceDevice;
 import com.pi4j.wiringpi.Spi;
+
+import java.io.IOException;
 
 /**
  * <p>
@@ -132,7 +133,7 @@ public class PiFaceExample {
                 }
             }
         });
-        
+
         // run continuously until user aborts with CTRL-C
         while(true) {
                         
@@ -146,9 +147,9 @@ public class PiFaceExample {
             for(int index = PiFaceLed.LED7.getIndex(); index >= PiFaceLed.LED3.getIndex(); index--) {
                 piface.getLed(index).pulse(cylonSpeed);
                 Thread.sleep(cylonSpeed);
-            }            
+            }
         }
-        
+
         // stop all GPIO activity/threads by shutting down the GPIO controller
         // (this method will forcefully shutdown all GPIO monitoring threads and scheduled tasks)
         //gpio.shutdown();  // <-- uncomment if your program terminates

@@ -1,10 +1,9 @@
-
 /*
  * #%L
  * **********************************************************************
  * ORGANIZATION  :  Pi4J
  * PROJECT       :  Pi4J :: Java Examples
- * FILENAME      :  WiringPiSerialExample.java  
+ * FILENAME      :  RPIServoBlasterExample.java  
  * 
  * This file is part of the Pi4J project. More information about 
  * this project can be found here:  http://www.pi4j.com/
@@ -25,37 +24,35 @@
  * limitations under the License.
  * #L%
  */
-import com.pi4j.wiringpi.Serial;
+import com.pi4j.component.servo.ServoDriver;
+import com.pi4j.component.servo.ServoProvider;
+import com.pi4j.component.servo.impl.RPIServoBlasterProvider;
 
-public class WiringPiSerialExample {
-    
-    public static void main(String args[]) throws InterruptedException {
+
+public class RPIServoBlasterExample {
+
+    public static void main(String[] args) throws Exception {
+        ServoProvider servoProvider = new RPIServoBlasterProvider();
         
-        System.out.println("<--Pi4J--> SERIAL test program");
-
-        // open serial port for communication
-        int fd = Serial.serialOpen(Serial.DEFAULT_COM_PORT, 38400);
-        if (fd == -1) {
-            System.out.println(" ==>> SERIAL SETUP FAILED");
-            return;
-        }
-
-        // infinite loop
-        while(true) {
+        ServoDriver servo7 = servoProvider.getServoDriver(servoProvider.getDefinedServoPins().get(7));
+        
+        long start = System.currentTimeMillis();
+        
+        while (System.currentTimeMillis() - start < 120000) { // 2 minutes
             
-            // send test ASCII message
-            Serial.serialPuts(fd, "TEST\r\n");
-
-            // display data received to console
-            int dataavail = Serial.serialDataAvail(fd);            
-            while(dataavail > 0) {
-                int data = Serial.serialGetchar(fd);
-                System.out.print((char)data);                
-                dataavail = Serial.serialDataAvail(fd);
+            for (int i = 50; i < 150; i++) {
+                servo7.setServoPulseWidth(i); // Set raw value for this servo driver - 50 to 195
+                Thread.sleep(10);
             }
             
-            // wash, rinse, repeat
-            Thread.sleep(1000);
+            for (int i = 150; i > 50; i--) {
+                servo7.setServoPulseWidth(i); // Set raw value for this servo driver - 50 to 195
+                Thread.sleep(10);
+            }
+            
         }
+        
     }
+    
 }
+
