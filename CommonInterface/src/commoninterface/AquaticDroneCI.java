@@ -1,7 +1,6 @@
 package commoninterface;
 
 import java.util.LinkedList;
-
 import objects.Waypoint;
 
 /**
@@ -13,11 +12,6 @@ import objects.Waypoint;
  *
  */
 public interface AquaticDroneCI {
-	public enum LedState {
-		OFF,
-		ON,
-		BLINKING
-	}
 	
 	/**
 	 * Start the drone hardware
