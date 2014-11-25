@@ -34,8 +34,10 @@ public class TurnToOrientationCIBehavior extends CIBehavior {
 		
 		difference%=360;
 		
-		System.out.println("[diff] "+difference);
-		
+		if(difference > 180){
+			difference = -((180 -difference) + 180);
+		}
+			
 		if (Math.abs(difference) <= tolerance) {
 			drone.setLed(0, AquaticDroneCI.LedState.ON);
 			drone.setMotorSpeeds(0, 0);
