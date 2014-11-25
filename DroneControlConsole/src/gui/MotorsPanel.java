@@ -51,8 +51,9 @@ public class MotorsPanel extends UpdatePanel {
 	private int motorLimit = 100;
 	
 	private boolean interrupt = true;
+	private boolean newValues = false;
 	
-	private long sleepTime = 10;
+	private long sleepTime = 30;
 	
 	public MotorsPanel() {
 		
@@ -205,7 +206,7 @@ public class MotorsPanel extends UpdatePanel {
 					}
 				}
 				if(interrupt && thread != null) {
-					thread.interrupt();
+					wakeUpThread();
 				}
 			}
 		});
@@ -253,7 +254,7 @@ public class MotorsPanel extends UpdatePanel {
 		interrupt = true;
 		
 		if(thread != null) {
-			thread.interrupt();
+			wakeUpThread();
 		}
 		
 	}
@@ -348,8 +349,21 @@ public class MotorsPanel extends UpdatePanel {
         }
     }
 	
+	private synchronized void wakeUpThread() {
+		newValues = true;
+		notifyAll();
+	}
+	
 	@Override
-	public void threadWait() {}
+	public void threadWait() {
+		try {
+			synchronized(this){
+				while(!newValues)
+					wait();
+				newValues = false;
+			}
+		}catch(Exception e) {}
+	}
 	
 	@Override
 	public long getSleepTime() {

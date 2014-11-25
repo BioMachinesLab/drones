@@ -5,7 +5,7 @@ import dataObjects.ConsoleMotorSpeeds;
 
 public class MotorMessageSender extends  Thread {
 	
-	private final static boolean DEBUG = false;
+	private final static boolean DEBUG = true;
 	private MotorConnection connection;
 	private ConsoleMotorSpeeds speeds;
 	private boolean keepExecuting = true;

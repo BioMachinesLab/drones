@@ -56,7 +56,7 @@ public class DroneControlConsole extends Thread {
 				gui.setVisible(true);
 				
 				while(informationConnection.connectionOK() && motorConnection.connectionOK()) {
-					Thread.sleep(500);
+					Thread.sleep(1000);
 				}
 				reset("Lost connection to the drone!");
 			}
