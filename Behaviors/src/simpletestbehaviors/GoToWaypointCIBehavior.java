@@ -15,11 +15,6 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 	public GoToWaypointCIBehavior(String[] args, AquaticDroneCI drone, CILogger logger) {
 		super(args, drone, logger);
 		
-		//fixed waypoint at 10,10! Change this
-		double[] latLon = CoordinateUtilities.cartesianToGPS(10, 10);
-		
-		drone.getWaypoints().add(new Waypoint(latLon[0], latLon[1]));
-		
 		//TODO: Find a more elegant way to parse arguments
 		for (String arg : args) {
 			if (arg.startsWith("distancetolerance=")) {
@@ -45,33 +40,30 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 				drone.getWaypoints().get(0).getLatitude(),
 				drone.getWaypoints().get(0).getLongitude());
 		
-		double difference = coordinatesAngle - currentOrientation;
-		
 		double currentDistance = CoordinateUtilities.distanceInMeters(
 				drone.getGPSLatitude(), drone.getGPSLongitude(),
 				drone.getWaypoints().get(0).getLatitude(),
 				drone.getWaypoints().get(0).getLongitude());
-	
-		if(currentDistance > distanceTolerance) {
+
+		double difference = currentOrientation - coordinatesAngle;
+		
+		if(Math.abs(currentDistance) < distanceTolerance){
+			drone.setLed(0, LedState.OFF);
+			drone.setMotorSpeeds(0, 0);
+		}else{
 			if (Math.abs(difference) <= angleTolerance) {
 				drone.setLed(0, LedState.ON);
 				drone.setMotorSpeeds(0.1, 0.1);
-//				getLogger().logMessage("Straight ahead, skipper!");
-			} else {
+			}else {
 				drone.setLed(0, LedState.BLINKING);
-				if (difference < 180) {
-//					getLogger().logMessage("Turning left "+difference);				
+				if (difference > 0) {
 					drone.setMotorSpeeds(-0.1, 0.1);
 				} else {
-//					getLogger().logMessage("Turning right "+difference);
 					drone.setMotorSpeeds(0.1, -0.1);
 				}
 			}
-		} else {
-			getLogger().logMessage("Reached waypoint");				
-			drone.setLed(0, LedState.OFF);
-			drone.setMotorSpeeds(0, 0);
 		}
+		
 	}
 	
 	@Override
