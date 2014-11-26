@@ -20,8 +20,8 @@ public class CoordinateUtilities {
 		
 		LatLng coordinate = new LatLng(lat,lon);
 		UTMRef utmCoordinate = coordinate.toUTMRef();
-		result[0] = REFERENCE_UTM.getEasting() - utmCoordinate.getEasting();
-		result[1] = REFERENCE_UTM.getNorthing() - utmCoordinate.getNorthing();
+		result[0] = utmCoordinate.getEasting() - REFERENCE_UTM.getEasting();
+		result[1] = utmCoordinate.getNorthing() - REFERENCE_UTM.getNorthing();
 		
 		return result;
 	}
@@ -74,7 +74,6 @@ public class CoordinateUtilities {
 	public static double distanceInMeters(double lat1, double lon1, double lat2, double lon2) {
 		LatLng coord1 = new LatLng(lat1, lon1);
 		LatLng coord2 = new LatLng(lat2, lon2);
-		
 		return coord1.distance(coord2)*1000;
 	}
 	
