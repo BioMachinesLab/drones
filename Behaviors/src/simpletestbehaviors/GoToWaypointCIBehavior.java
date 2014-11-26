@@ -1,6 +1,5 @@
 package simpletestbehaviors;
 
-import objects.Waypoint;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
@@ -47,19 +46,29 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 
 		double difference = currentOrientation - coordinatesAngle;
 		
+		difference%=360;
+		
+		if(difference > 180){
+			difference = -((180 -difference) + 180);
+		}
+		
 		if(Math.abs(currentDistance) < distanceTolerance){
+			System.out.println("stop");
 			drone.setLed(0, LedState.OFF);
 			drone.setMotorSpeeds(0, 0);
 		}else{
 			if (Math.abs(difference) <= angleTolerance) {
+				System.out.println("front");
 				drone.setLed(0, LedState.ON);
 				drone.setMotorSpeeds(0.1, 0.1);
 			}else {
 				drone.setLed(0, LedState.BLINKING);
 				if (difference > 0) {
-					drone.setMotorSpeeds(-0.1, 0.1);
+					System.out.println("left");
+					drone.setMotorSpeeds(0, 0.1);
 				} else {
-					drone.setMotorSpeeds(0.1, -0.1);
+					System.out.println("right");
+					drone.setMotorSpeeds(0.1, 0);
 				}
 			}
 		}
