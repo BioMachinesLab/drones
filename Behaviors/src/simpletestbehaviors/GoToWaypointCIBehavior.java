@@ -10,11 +10,12 @@ import commoninterface.utils.CoordinateUtilities;
 public class GoToWaypointCIBehavior extends CIBehavior {
 
 	private double distanceTolerance = 3;
-	private double angleTolerance = 20;
+	private double angleTolerance = 10;
 	
 	public GoToWaypointCIBehavior(String[] args, AquaticDroneCI drone, CILogger logger) {
 		super(args, drone, logger);
 		
+		//fixed waypoint at 10,10! Change this
 		double[] latLon = CoordinateUtilities.cartesianToGPS(10, 10);
 		
 		drone.getWaypoints().add(new Waypoint(latLon[0], latLon[1]));
