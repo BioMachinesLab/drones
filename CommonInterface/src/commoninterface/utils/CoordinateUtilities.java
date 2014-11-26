@@ -62,7 +62,12 @@ public class CoordinateUtilities {
 		angle = Math.atan2(dy, dx);
 	
 		//0 is to the right. By subtracting 90, we are making 0 toward north
-		return -(Math.toDegrees(angle) - 90);
+		angle = -(Math.toDegrees(angle) - 90);
+		
+		if(angle < 0)
+			angle += 360;
+		
+		return angle;
 			
 	}
 	
