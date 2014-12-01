@@ -21,11 +21,15 @@ import network.messages.MessageProvider;
 import objects.Waypoint;
 import simpletestbehaviors.GoToWaypointCIBehavior;
 import simpletestbehaviors.TurnToOrientationCIBehavior;
+import utils.Logger;
 import utils.Nmea0183ToDecimalConverter;
+import behaviors.CalibrationCIBehavior;
+
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
 import commoninterface.LedState;
+
 import dataObjects.GPSData;
 
 public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
@@ -56,8 +60,9 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		
 		addShutdownHooks();
 		
-		initIO();
 		initBehaviors();
+		
+		initIO();
 		initMessageProviders();
 		initConnections();
 
@@ -78,6 +83,8 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			while(i.hasNext()) {
 				CIBehavior b = i.next();
 				b.step();
+				if(b.getTerminateBehavior())
+					executeBehavior(b, false);
 			}
 				
 			try {
@@ -96,7 +103,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			logger.stopLogging();
 		
 		ioManager.shutdown();
-
+		
 		System.out.println("# Finished Controller cleanup!");
 	}
 
@@ -117,6 +124,9 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		
 		//NMEA format: e.g. 3844.9474N 00909.2214W
 		String latitude = gpsData.getLatitude();
+		
+		if(latitude == null)
+			return -1;
 
 		double lat = Double.parseDouble(latitude.substring(0,latitude.length()-1));
 		char latPos = latitude.charAt(latitude.length()-1);
@@ -132,6 +142,9 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 		//NMEA format: e.g. 3844.9474N 00909.2214W
 		String longitude = gpsData.getLongitude();
+		
+		if(longitude == null)
+			return -1;
 		
 		double lon = Double.parseDouble(longitude.substring(0,longitude.length()-1));
 		char lonPos = longitude.charAt(longitude.length()-1);
@@ -201,10 +214,9 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	private void initBehaviors() {
 
 		try{
-			CIBehavior turnBehavior = new TurnToOrientationCIBehavior(new String[]{}, this, logger);
-			CIBehavior go = new GoToWaypointCIBehavior(new String[]{}, this, logger);
-			behaviors.add(turnBehavior);
-			behaviors.add(go);
+			behaviors.add(new TurnToOrientationCIBehavior(new String[]{}, this, logger));
+			behaviors.add(new GoToWaypointCIBehavior(new String[]{}, this, logger));
+			behaviors.add(new CalibrationCIBehavior(new String[]{}, this, logger));
 		} catch(Exception e) {
 			initMessages += "[INIT] Behavior "+e.getMessage()+"\n";
 		}

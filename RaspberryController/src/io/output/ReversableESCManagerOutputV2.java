@@ -26,11 +26,14 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 	private final static int MIN_VALUE = 60;
 	private final static int MAX_VALUE = 240;
 
-	private final static int MIN_FW_VALUE = 165;
-	private final static int MIN_BW_VALUE = 135;
+	private final static int MIN_FW_VALUE = 169;
+	private final static int MIN_BW_VALUE = 117;
 
 	private int lValue = CENTRAL_VALUE;
 	private int rValue = CENTRAL_VALUE;
+	
+	private double lReceivedValue = 0;
+	private double rReceivedValue = 0;
 
 	private MotorSpeeds speeds;
 	private GpioPinDigitalOutput escSwitch;
@@ -81,10 +84,13 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 			}
 		}
 		
-		if(index == 0)
+		if(index == 0) {
 			lValue = finalVal;
-		else
+			lReceivedValue = value;
+		} else {
 			rValue = finalVal;
+			rReceivedValue = value;
+		}
 	}
 
 	private void writeValueToESC() {
@@ -160,8 +166,8 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 	@Override
 	public double getValue(int index) {
 		if (index == 0) {
-			return lValue;
+			return lReceivedValue;
 		}
-		return rValue;
+		return rReceivedValue;
 	}
 }

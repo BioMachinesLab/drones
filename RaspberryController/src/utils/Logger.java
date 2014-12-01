@@ -64,14 +64,15 @@ public class Logger extends Thread {
 		
 		String result = dateFormat.format(new Date())+"\t";
 		
+		result+=drone.getGPSLatitude()+"\t"+drone.getGPSLongitude()+"\t"+drone.getCompassOrientationInDegrees();
+		
 		for(ControllerInput i : inputs) {
-			if(i instanceof I2CCompassModuleInput) {
-				I2CCompassModuleInput ic = (I2CCompassModuleInput)i;
-				result+=ic.getHeadingInDegrees()+"\t";
-			} else if(i instanceof GPSModuleInput) {
+			if(i instanceof GPSModuleInput) {
 				GPSModuleInput ig = (GPSModuleInput)i;
 				GPSData data = ig.getReadings();
-				result+=data.getLatitude()+"\t"+data.getLongitude()+"\t"+data.getOrientation()+"\t"+data.getGroundSpeedKmh()+"\t";
+				
+				result+="\t"+data.getGroundSpeedKmh()+"\t";
+				break;
 			}
 		}
 		

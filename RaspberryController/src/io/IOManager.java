@@ -15,14 +15,17 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Scanner;
 
+import utils.Logger;
 import network.messages.MotorMessage;
+import behaviors.CalibrationCIBehavior;
 
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CFactory;
-import commoninterfaceimpl.RealAquaticDroneCI;
 
+import commoninterface.CIBehavior;
+import commoninterfaceimpl.RealAquaticDroneCI;
 import dataObjects.MotorSpeeds;
 
 public class IOManager {
@@ -51,6 +54,8 @@ public class IOManager {
 	private MotorSpeeds motorSpeeds;
 	
 	private LinkedList<String> enabledIO = new LinkedList<String>();
+	
+	private Logger fileLogger;
 		
 	public IOManager(RealAquaticDroneCI drone) {
 		this.drone  = drone;
@@ -59,8 +64,14 @@ public class IOManager {
 		loadConfigurations();		
 		
 		initHardwareCommunicatonProtocols();
-		initInputs();
 		initOutputs();
+		initInputs();
+		
+		if(enabledIO.contains("filelogger")) {
+			fileLogger = new Logger(drone);
+			fileLogger.start();
+		}
+		
 	}
 	
 	private void loadConfigurations() {
@@ -128,6 +139,14 @@ public class IOManager {
 				 inputs.add(compassModule);
 			 	System.out.print(".");
 			 }
+			 
+			 if(enabledIO.contains("autocompasscalibration")) {
+				 for(CIBehavior b : drone.getBehaviors()) {
+					 if(b instanceof CalibrationCIBehavior)
+						 drone.executeBehavior(b, true);
+				 }
+			 }
+			 
 		}
 
 		if(enabledIO.contains("battery")) {
@@ -208,6 +227,9 @@ public class IOManager {
 		System.out.println("# Shutting down IO...");
 		if (escManager != null)
 			shutdownMotors();
+		
+		if(fileLogger != null)
+			fileLogger.interrupt();
 		
 		if (compassModule != null)
 			compassModule.interrupt();

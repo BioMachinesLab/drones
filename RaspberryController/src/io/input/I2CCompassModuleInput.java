@@ -212,7 +212,8 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				rawAxisReadings[1] = readY();
 				rawAxisReadings[2] = readZ();
 				
-				handleCalibration(rawAxisReadings[0], rawAxisReadings[1], rawAxisReadings[2]);
+				if(calibrationStatus)
+					handleCalibration(rawAxisReadings[0], rawAxisReadings[1], rawAxisReadings[2]);
 				
 				double[] converted = convert(rawAxisReadings[0],rawAxisReadings[1],rawAxisReadings[2]);
 				
@@ -263,11 +264,6 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	private void handleCalibration(short x, short y, short z) {
 		if(System.currentTimeMillis() - startTime < CALIBRATION_TIME) {
 			
-			if(!calibrationStatus) {
-				System.out.println("Calibration started!");
-				calibrationStatus = true;
-			}
-			
 			double[] vals = new double[3];
 			vals[0] = x;
 			vals[1] = y;
@@ -279,11 +275,26 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 			
 		} else {
 			if(calibrationStatus) {
-				System.out.println("Calibration ended!");
-				calibrationStatus = false;
-				calibrate();
+				endCalibration();
 			}
 		}
+	}
+	
+	public boolean getCalibrationStatus() {
+		return calibrationStatus;
+	}
+	
+	public void startCalibration() {
+		System.out.println("Calibration started!");
+		startTime = System.currentTimeMillis();
+		calibrationValues.clear();
+		calibrationStatus = true;
+	}
+	
+	public void endCalibration() {
+		System.out.println("Calibration ended!");
+		calibrationStatus = false;
+		calibrate();
 	}
 	
 	public int getHeadingInDegrees() {

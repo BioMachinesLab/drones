@@ -67,7 +67,6 @@ public class ConnectionHandler extends Thread {
 
 	protected void shutdownHandler() {
 		closeConnection();
-		System.out.println(connectionListener.getConnections().size());
 		if (connectionListener.getConnections().isEmpty()) {
 			drone.reset();
 		}
