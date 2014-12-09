@@ -55,16 +55,24 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 	private final static String COM_PORT = Serial.DEFAULT_COM_PORT;
 	private NMEA_Utils nmeaUtils = new NMEA_Utils();
 	private Serial serial; // Serial connection
-	private String receivedDataBuffer = "";
-	private GPSData gpsData = new GPSData(); // Contains the obtained info
+	protected StringBuilder receivedDataBuffer = new StringBuilder();
+	protected GPSData gpsData = new GPSData(); // Contains the obtained info
 	private List<String> ackResponses = Collections
 			.synchronizedList(new ArrayList<String>());
-	private MessageParser messageParser;
+	protected MessageParser messageParser;
 
-	private boolean available = false;
+	protected boolean available = false;
+	
+	public GPSModuleInput(boolean fake) {
+		if(!fake)
+			init();
+	}
 
 	public GPSModuleInput() {
-
+		init();
+	}
+	
+	public void init() {
 		try {
 
 			print("Initializing GPS!", false);
@@ -87,7 +95,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		}
 	}
 
-	private void createSerial(int baudrate) {
+	protected void createSerial(int baudrate) {
 
 		serial = SerialFactory.createInstance();
 
@@ -95,31 +103,31 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			@Override
 			public void dataReceived(SerialDataEvent event) {
 
-				// TODO check that we are not losing data
+				receivedDataBuffer.append(event.getData());
+				
+				boolean keepGoing = true;
 
-				String received = event.getData();
-				// System.out.println(received);
-
-				while (received.contains("\r\n")) {
-
-					int indexNewline = received.indexOf("\r\n");
-
-					String sub = received.substring(0, indexNewline);
-					sub = (receivedDataBuffer + sub).trim();
-
-					if (messageParser != null && !sub.isEmpty()
-							&& sub.charAt(0) == '$')
-						messageParser.processReceivedData(sub);
-
-					receivedDataBuffer = "";
-					received = received.substring(indexNewline + 1);// +1 to
-																	// skip the
-																	// previous
-																	// \r\n
+				while (keepGoing) {
+					keepGoing = false;
+					int indexFirstDollar = receivedDataBuffer.indexOf("$");
+					
+					if(indexFirstDollar >= 0) {
+						
+						int indexSecondDollar = receivedDataBuffer.indexOf("$",indexFirstDollar+1);
+						
+						if(indexSecondDollar > 0) {
+						
+							String sub = receivedDataBuffer.substring(indexFirstDollar,indexSecondDollar).trim();
+			
+							if (messageParser != null && !sub.isEmpty() && sub.charAt(0) == '$') {
+								messageParser.processReceivedData(sub);
+								
+								receivedDataBuffer.delete(0,indexSecondDollar);
+								keepGoing = true;
+							}
+						}
+					}
 				}
-
-				receivedDataBuffer += received;
-
 			}
 		});
 
@@ -149,8 +157,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		 * Change Baud Rate
 		 */
 		String command = "$PMTK251," + TARGET_BAUD_RATE + "*";
-		int checkSum = nmeaUtils.calculateNMEAChecksum(command);
-		command += Integer.toHexString(checkSum).toUpperCase() + "\r\n";
+		String checksum = nmeaUtils.calculateNMEAChecksum(command);
+		command += checksum + "\r\n";
 		serial.write(command);
 		print("[COMMAND] " + command, false);
 
@@ -159,7 +167,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		 */
 		serial.close();
 		serial.flush();
-		receivedDataBuffer = "";
+		receivedDataBuffer = new StringBuilder();
 		// ackResponses.clear();
 		Thread.sleep(1000);
 
@@ -172,8 +180,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		 * Change Update Frequency
 		 */
 		command = "$PMTK220," + UPDATE_DELAY + "*";
-		checkSum = nmeaUtils.calculateNMEAChecksum(command);
-		command += Integer.toHexString(checkSum).toUpperCase() + "\r\n";
+		checksum = nmeaUtils.calculateNMEAChecksum(command);
+		command += checksum + "\r\n";
 		serial.write(command);
 		print("[COMMAND] " + command, false);
 
@@ -422,7 +430,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		try {
 			Calendar cal = Calendar.getInstance();
 			cal.getTime();
-			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+			SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy_HH-mm-ss");
 
 			localLogPrintWriterOut = new PrintWriter(FILE_NAME
 					+ sdf.format(cal.getTime()) + ".log");
@@ -446,19 +454,21 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		 * @param data
 		 *            : data to be processed
 		 */
-		private void processReceivedData(String data) {
+		protected void processReceivedData(String data) {
 
-			if (!nmeaUtils.checkNMEAChecksum(data))
+			if (!nmeaUtils.checkNMEAChecksum(data)) {
+				System.out.println("[GPS] Checksum failed for "+data);
 				return;
+			}
 
 			int indexComma = data.indexOf(',');
 			if (indexComma >= 0) {
 				String name = data.substring(0, indexComma);
 
 				synchronized (currentValues) {
-					if (currentValues.get(name) == null) {
+//					if (currentValues.get(name) == null) {
 						pending = true;
-					}
+//					}
 					currentValues.put(name, data.substring(indexComma + 1));
 				}
 				synchronized (this) {
@@ -483,7 +493,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 						e.printStackTrace();
 					}
 				}
-
+				
 				if (currentValues.size() != size) {
 					size = currentValues.size();
 					keys = new String[size];
@@ -519,15 +529,13 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 									if (name.charAt(1) == 'G') {
 	
 										if (localLog)
-											localLogPrintWriterOut.println(name
-													+ "," + val);
+											localLogPrintWriterOut.println(name+ "," + val);
 	
 										parseNMEAData(name, val);
 									}
 									if (name.charAt(1) == 'P') {
 										if (localLog)
-											localLogPrintWriterOut.println(name
-													+ "," + val);
+											localLogPrintWriterOut.println(name+ "," + val);
 	
 										parsePMTKData(name, val);
 									}
@@ -585,6 +593,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				}
 			} catch (Exception e) {
 				System.out.println("[GPS] Error parsing " + name + "!");
+				System.out.println(name+","+data);
+				e.printStackTrace();
 			}
 		}
 
@@ -629,7 +639,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				} else {
 					gpsData.setFix(false);
 				}
-			}
+			} else
+				throw new RuntimeException();
 		}
 
 		/**
@@ -662,7 +673,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				// Missing list of satellites in view, used to fix (not parsed
 				// in
 				// this case)
-			}
+			} else
+				throw new RuntimeException();
 		}
 
 		/**
@@ -676,13 +688,12 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				print("[Parsing GPGSV]", false);
 				gpsData.setNumberOfSatellitesInView(Integer.parseInt(params[3]
 						.substring(0, params[3].length() - 3)));
-			} else {
-				if (params.length > 4) {
-					print("[Parsing GPGSV]", false);
-					gpsData.setNumberOfSatellitesInView(Integer
+			} else if (params.length > 4) {
+				print("[Parsing GPGSV]", false);
+				gpsData.setNumberOfSatellitesInView(Integer
 							.parseInt(params[3]));
-				}
-			}
+			} else
+				throw new RuntimeException();
 		}
 
 		/**
@@ -693,27 +704,32 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		 *            : Parameters extracted from GPRMC sentence
 		 */
 		private void parseGPRMCSentence(String[] params) {
-			if (params.length == 13) {
+			if (params.length == 13 || params.length == 10) {
 				print("[Parsing GPRMC]", false);
 				// TODO splits and replaces are slow
+				
 				String[] d = params[9].split("(?<=\\G.{2})");
 
 				params[1] = params[1].replace(".", "");
 				String[] t = params[1].split("(?<=\\G.{2})");
 
-				int miliseconds = Integer.parseInt(t[3] + t[4]);
+				try {
+					int miliseconds = Integer.parseInt(t[3] + t[4]);
 
-				// LocalDateTime doesn't like miliseconds with
-				// a value higher than 999, but NMEA does.
-				while (miliseconds > 999)
-					miliseconds /= 10;
-
-				LocalDateTime date = new LocalDateTime(
-						Integer.parseInt(d[2]) + 100, Integer.parseInt(d[1]),
-						Integer.parseInt(d[0]), Integer.parseInt(t[0]),
-						Integer.parseInt(t[1]), Integer.parseInt(t[2]),
-						miliseconds);
-				gpsData.setDate(date);
+					// LocalDateTime doesn't like miliseconds with
+					// a value higher than 999, but NMEA does.
+					while (miliseconds > 999)
+						miliseconds /= 10;
+					
+					LocalDateTime date = new LocalDateTime(
+							Integer.parseInt(d[2]) + 100, Integer.parseInt(d[1]),
+							Integer.parseInt(d[0]), Integer.parseInt(t[0]),
+							Integer.parseInt(t[1]), Integer.parseInt(t[2]),
+							miliseconds);
+					gpsData.setDate(date);
+				} catch(Exception e) {
+					//this part is optional!
+				}
 
 				if (params[2].equals("V")) {
 					gpsData.setFix(false);
@@ -730,7 +746,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				gpsData.setOrientation(Double.parseDouble(params[8]));
 
 				// Missing magnetic declination (value and orientation)
-			}
+			} else
+				throw new RuntimeException();
 		}
 
 		/**
@@ -750,7 +767,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 				if (!params[7].isEmpty())
 					gpsData.setGroundSpeedKmh(Double.parseDouble(params[7]));
-			}
+			} else
+				throw new RuntimeException();
 		}
 	}
 }

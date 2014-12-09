@@ -38,7 +38,11 @@ public class Logger extends Thread {
 			bw = new BufferedWriter(fw);
 			
 			while(true) {
-				bw.write(getLogString());
+				try {
+					bw.write(getLogString());
+				} catch(Exception e) {
+					//ignore :)
+				}
 				Thread.sleep(SLEEP_TIME);
 			}
 			
@@ -64,7 +68,7 @@ public class Logger extends Thread {
 		
 		String result = dateFormat.format(new Date())+"\t";
 		
-		result+=drone.getGPSLatitude()+"\t"+drone.getGPSLongitude()+"\t"+drone.getCompassOrientationInDegrees();
+		result+=drone.getGPSLatitude()+"\t"+drone.getGPSLongitude()+"\t"+drone.getGPSOrientationInDegrees()+"\t"+drone.getCompassOrientationInDegrees();
 		
 		for(ControllerInput i : inputs) {
 			if(i instanceof GPSModuleInput) {

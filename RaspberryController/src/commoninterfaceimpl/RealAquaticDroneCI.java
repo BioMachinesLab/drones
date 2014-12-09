@@ -21,7 +21,6 @@ import network.messages.MessageProvider;
 import objects.Waypoint;
 import simpletestbehaviors.GoToWaypointCIBehavior;
 import simpletestbehaviors.TurnToOrientationCIBehavior;
-import utils.Logger;
 import utils.Nmea0183ToDecimalConverter;
 import behaviors.CalibrationCIBehavior;
 
@@ -152,6 +151,12 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		lon = Nmea0183ToDecimalConverter.convertLongitudeToDecimal(lon, lonPos);
 		
 		return lon;
+	}
+	
+	@Override
+	public double getGPSOrientationInDegrees() {
+		GPSData gpsData = ioManager.getGpsModule().getReadings();
+		return gpsData.getOrientation();
 	}
 
 	@Override

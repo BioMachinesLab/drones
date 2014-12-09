@@ -25,14 +25,14 @@ public class NMEA_Utils {
 	 */
 	public void calculateNMEAChecksum() {
 		Scanner in = new Scanner(System.in);
-
-		System.out.println("Entrer NMEA sentence to calculate checksum: ");
-		int checksum = calculateNMEAChecksum(in.nextLine());
-		in.close();
-
-		// System.out.println("Checksum (DEC): " + checksum);
-		System.out.println("Chechsum (HEX): "
-				+ Integer.toHexString(checksum).toUpperCase());
+		
+		while(true) {
+			System.out.println("Entrer NMEA sentence to calculate checksum: ");
+			String checksum = calculateNMEAChecksum(in.nextLine());
+			// System.out.println("Checksum (DEC): " + checksum);
+			System.out.println("Chechsum (HEX): "
+					+ checksum);
+		}
 	}
 
 	/**
@@ -43,7 +43,7 @@ public class NMEA_Utils {
 	 *            to calculate checksum
 	 * @return the checksum
 	 */
-	public int calculateNMEAChecksum(String sentence) {
+	public String calculateNMEAChecksum(String sentence) {
 		int checksum = 0;
 
 		for (int i = 0; i < sentence.length(); i++) {
@@ -54,8 +54,12 @@ public class NMEA_Utils {
 					checksum ^= (byte) sentence.charAt(i);
 			}
 		}
+		
+		String stringChecksum = Integer.toHexString(checksum).toUpperCase();
+		if(stringChecksum.length() == 1)
+			stringChecksum = "0"+stringChecksum;
 
-		return checksum;
+		return stringChecksum;
 	}
 
 	/**
@@ -64,14 +68,15 @@ public class NMEA_Utils {
 	 */
 	public void checkNMEAChecksum() {
 		Scanner in = new Scanner(System.in);
-
-		System.out.println("Entrer NMEA sentence to check checksum: ");
-		String sentence = in.nextLine();
-		boolean check = checkNMEAChecksum(sentence);
-		in.close();
-
-		System.out.println("The checksum is "
-				+ (check ? "correct" : "incorrect"));
+		
+		while(true) {
+			System.out.println("Entrer NMEA sentence to check checksum: ");
+			String sentence = in.nextLine();
+			boolean check = checkNMEAChecksum(sentence);
+	
+			System.out.println("The checksum is "
+					+ (check ? "correct" : "incorrect"));
+		}
 	}
 
 	/**
@@ -87,16 +92,14 @@ public class NMEA_Utils {
 		if(sentence.length() < 4)
 			return false;
 		
-		int checksum = calculateNMEAChecksum(sentence);
-		
 		if (sentence.charAt(sentence.length() - 3) == '*') {
-			String ck = sentence.substring(sentence.length() - 2,
-					sentence.length());
-			if (ck.equals(Integer.toHexString(checksum).toUpperCase()))
-				return true;
-			else
-				return false;
+			
+			String ck = sentence.substring(sentence.length() - 2,sentence.length());
+			String calculatedChecksum = calculateNMEAChecksum(sentence);
+			
+			return ck.equals(calculatedChecksum);
 		}
+		
 		return false;
 	}
 }

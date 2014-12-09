@@ -1,6 +1,7 @@
 package io;
 
 import io.input.ControllerInput;
+import io.input.FakeGPSModuleInput;
 import io.input.GPSModuleInput;
 import io.input.I2CBatteryManagerInput;
 import io.input.I2CCompassModuleInput;
@@ -170,6 +171,23 @@ public class IOManager {
 		
 				if (gpsModule.isAvailable()) {
 					gpsModule.enableLocalLog();
+					inputs.add(gpsModule);
+					System.out.print(".");
+				}
+			} catch(Exception e) {
+				initMessages += "[INIT] GPSModule: not ok! ("
+						+ e.getMessage() + ")\n";
+			}
+		}
+		
+		if(enabledIO.contains("fakegps")) {
+			try {
+				// GPS Module Init
+				gpsModule = new FakeGPSModuleInput();
+				initMessages += "[INIT] GPSModule: "
+						+ (gpsModule.isAvailable() ? "ok" : "not ok!") + "\n";
+		
+				if (gpsModule.isAvailable()) {
 					inputs.add(gpsModule);
 					System.out.print(".");
 				}

@@ -2,6 +2,7 @@ package io.input;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import network.messages.CompassMessage;
@@ -31,7 +32,6 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	/*
 	 * Other variables
 	 */
-	private final static int CALIBRATION_TIME = 20*1000;
 	private final static int I2C_DEVICE_UPDATE_DELAY = 15;
 
 	private I2CDevice mag3110;
@@ -40,8 +40,6 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	private boolean deviceActiveMode = true;
 	private int headingInDegrees = 0;
 	
-	private long startTime = System.currentTimeMillis();
-
 	private ArrayList<double[]> calibrationValues = new ArrayList<double[]>(); 
 	
 	private boolean calibrationStatus = false;
@@ -56,6 +54,8 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	private double cb, sb;
 	private double ca, sa;
 	private double gps, sgps, cgps;
+	
+	private double[] north = {0,0,0};
 	
 	public I2CCompassModuleInput(I2CBus i2cBus) {
 		this.i2cBus = i2cBus;
@@ -204,54 +204,41 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 
 	@Override
 	public void run() {
+		
+		
 		while (true) {
-			try {
-				short[] rawAxisReadings = new short[3];
+			double[] rawAxisReadings = readXYZ();
 
-				rawAxisReadings[0] = readX();
-				rawAxisReadings[1] = readY();
-				rawAxisReadings[2] = readZ();
-				
-				if(calibrationStatus)
-					handleCalibration(rawAxisReadings[0], rawAxisReadings[1], rawAxisReadings[2]);
-				
-				double[] converted = convert(rawAxisReadings[0],rawAxisReadings[1],rawAxisReadings[2]);
-				
-				double heading = Math.atan2(converted[1],converted[0]);
-				
-				//Value for Lisbon is -2º (0.034906585 rad). Find more here: http://www.magnetic-declination.com
+			if(calibrationStatus)
+				handleCalibration(rawAxisReadings[0], rawAxisReadings[1], rawAxisReadings[2]);
+			
+			double[] converted = convert(rawAxisReadings[0],rawAxisReadings[1],rawAxisReadings[2]);
+			
+			double heading = Math.atan2(converted[1],converted[0]);
+			
+			//Value for Lisbon is -2º (0.034906585 rad). Find more here: http://www.magnetic-declination.com
 //				double declinationAngle = 0.034906585;
 //				heading += declinationAngle;
-				
+			
 //				heading = 2*Math.PI-heading;
-				
-				if(heading < 0) {
-					heading += 2*Math.PI;
-				}
-				
-				if(heading > 2*Math.PI) {
-					heading -= 2*Math.PI;
-				}
-				
-				  // Convert radians to degrees for readability.
-				this.headingInDegrees = (int)(heading * 180/Math.PI);
-				
-				if(!calibrationStatus) {
-//					System.out.println("RAW "+rawAxisReadings[0]+" "+rawAxisReadings[1]+" "+rawAxisReadings[2]);
-//					System.out.println("CORRECTED "+converted[0]+" "+converted[1]+" "+converted[2]);
-//					System.out.println("heading "+headingInDegrees);
-				}
-				
-			} catch (IOException | InterruptedException e) {
-				try {
-					//after a PI4J exception, the next reading is usually crap. Get rid of it right away
-					System.out.println("Compass went haywire! Reconnecting...");
-					configureCompass();
-				}catch(Exception ex){
-					e.printStackTrace();
-				}
-				e.printStackTrace();
+			
+			if(heading < 0) {
+				heading += 2*Math.PI;
 			}
+			
+			if(heading > 2*Math.PI) {
+				heading -= 2*Math.PI;
+			}
+			
+			  // Convert radians to degrees for readability.
+			this.headingInDegrees = (int)(heading * 180/Math.PI);
+			
+			if(!calibrationStatus) {
+//				System.out.println("RAW "+rawAxisReadings[0]+" "+rawAxisReadings[1]+" "+rawAxisReadings[2]);
+//				System.out.println("CORRECTED "+converted[0]+" "+converted[1]+" "+converted[2]);
+//				System.out.println("heading "+headingInDegrees);
+			}
+				
 
 			try {
 				Thread.sleep(I2C_DEVICE_UPDATE_DELAY);
@@ -261,23 +248,15 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 		}
 	}
 	
-	private void handleCalibration(short x, short y, short z) {
-		if(System.currentTimeMillis() - startTime < CALIBRATION_TIME) {
-			
-			double[] vals = new double[3];
-			vals[0] = x;
-			vals[1] = y;
-			vals[2] = z;
-			
-//			System.out.println(vals[0]+" "+vals[1]+" "+vals[2]);
-			
-			calibrationValues.add(vals);
-			
-		} else {
-			if(calibrationStatus) {
-				endCalibration();
-			}
-		}
+	private void handleCalibration(double x, double y, double z) {
+		double[] vals = new double[3];
+		vals[0] = x;
+		vals[1] = y;
+		vals[2] = z;
+		
+		//System.out.println(vals[0]+" "+vals[1]+" "+vals[2]);
+		
+		calibrationValues.add(vals);
 	}
 	
 	public boolean getCalibrationStatus() {
@@ -285,8 +264,31 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	}
 	
 	public void startCalibration() {
-		System.out.println("Calibration started!");
-		startTime = System.currentTimeMillis();
+		System.out.println("Calibration started! Point north and press a key");
+		
+		try {
+		
+			Scanner s = new Scanner(System.in);
+			s.nextLine();
+			
+			double[] readings = readXYZ();
+			
+			north[0]  = readings[0];
+			north[1]  = readings[1];
+			north[2]  = readings[2];
+			
+			System.out.println("North acquired! Place the drone in water and press a key");
+			s.nextLine();
+			s.close();
+		
+		} catch(NoSuchElementException e) {
+			//this occurs when we remotely trigger the calibration behavior
+			double[] readings = readXYZ();
+			north[0]  = readings[0];
+			north[1]  = readings[1];
+			north[2]  = readings[2];
+		}
+		
 		calibrationValues.clear();
 		calibrationStatus = true;
 	}
@@ -299,6 +301,31 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	
 	public int getHeadingInDegrees() {
 		return headingInDegrees;
+	}
+	
+	private double[] readXYZ() {
+		
+		double[] readings = new double[3];
+		
+		boolean successful = false;
+		while(!successful) {
+			try {
+				readings[0] = readX();
+				readings[1] = readY();
+				readings[2] = readZ();
+				successful = true;
+			} catch (IOException | InterruptedException e) {
+				try {
+					//after a PI4J exception, the next reading is usually crap. Get rid of it right away
+					System.out.println("Compass went haywire! Reconnecting...");
+					configureCompass();
+				}catch(Exception ex){
+					e.printStackTrace();
+				}
+				e.printStackTrace();
+			}
+		}
+		return readings;
 	}
 	
 	private void calibrate() {
@@ -456,34 +483,21 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 			scaleY = 1.0/maxY;
 			scaleZ = 1.0/maxZ;
 			
-			Scanner s = new Scanner(System.in);
-			System.out.println("Point north bastard!");
-			s.next();
-			try{
-				short x  = readX();
-				short y  = readY();
-				short z  = readZ();
-				
-				double[] north = transformReading(x,y,z);
-				
-				gps = Math.atan2(north[1],north[0]);
-				
+			double[] northTransformed = transformReading(north[0],north[1],north[2]);
+			
+			gps = Math.atan2(northTransformed[1],northTransformed[0]);
+			
 //				if(north[0] < 0)
 //					gps+=Math.PI;
-				
-				sgps = Math.sin(-gps);
-				cgps = Math.cos(-gps);
-				
-				double[] res = convert(x,y,z);
-				
-				System.out.println("north transf "+north[0]+" "+north[1] +" "+north[2]);
-				System.out.println("gps angle "+gps);
-				System.out.println("RESULT "+res[0]+" "+res[1] +" "+res[2]);
-				
-			} catch(Exception e) {
-				e.printStackTrace();
-			}
 			
+			sgps = Math.sin(-gps);
+			cgps = Math.cos(-gps);
+			
+			double[] res = convert(north[0],north[1],north[2]);
+			
+			System.out.println("north transf "+northTransformed[0]+" "+northTransformed[1] +" "+northTransformed[2]);
+			System.out.println("gps angle "+gps);
+			System.out.println("RESULT "+res[0]+" "+res[1] +" "+res[2]);
 	}
 	
 	private double[] convert(double x, double y, double z) {

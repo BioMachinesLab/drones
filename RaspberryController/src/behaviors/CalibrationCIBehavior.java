@@ -11,7 +11,7 @@ public class CalibrationCIBehavior extends CIBehavior {
 	private boolean executed = false;
 	private long startTime = 0;
 	private RealAquaticDroneCI drone;
-	private int timeIncrement = 5;
+	private int timeIncrement = 10;
 	
 	public CalibrationCIBehavior(String[] args, AquaticDroneCI drone, CILogger logger) {
 		super(args,drone,logger);
@@ -22,8 +22,8 @@ public class CalibrationCIBehavior extends CIBehavior {
 	public void step() {
 		
 		if(!executing && !executed) {
-			startTime = System.currentTimeMillis();
 			drone.getIOManager().getCompassModule().startCalibration();
+			startTime = System.currentTimeMillis();
 			executing = true;
 		}
 		
