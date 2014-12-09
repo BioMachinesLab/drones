@@ -7,7 +7,7 @@ import java.util.Scanner;
 public class FakeGPSModuleInput extends GPSModuleInput {
 	
 	private static final long INITIAL_SLEEP = 10*1000;
-	private static final long CYCLE_SLEEP = 0;//25
+	private static final long CYCLE_SLEEP = 25;//25
 	private static final String FILENAME = "logs/fakegps.log";
 	private Scanner s = null;
 	

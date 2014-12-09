@@ -469,7 +469,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 //					if (currentValues.get(name) == null) {
 						pending = true;
 //					}
-					currentValues.put(name, data.substring(indexComma + 1));
+					currentValues.put(name, data);
 				}
 				synchronized (this) {
 					notifyAll();
@@ -529,13 +529,13 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 									if (name.charAt(1) == 'G') {
 	
 										if (localLog)
-											localLogPrintWriterOut.println(name+ "," + val);
+											localLogPrintWriterOut.println(val);
 	
 										parseNMEAData(name, val);
 									}
 									if (name.charAt(1) == 'P') {
 										if (localLog)
-											localLogPrintWriterOut.println(name+ "," + val);
+											localLogPrintWriterOut.println(val);
 	
 										parsePMTKData(name, val);
 									}
@@ -559,11 +559,9 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		 * @param data
 		 *            : NMEA sentence to be processed
 		 */
-		private void parseNMEAData(String name, String data) {
+		private void parseNMEAData(String name, String fullString) {
 
 			try {
-				String fullString = name + "," + data;
-
 				String[] split = fullString.split(",");
 
 				switch (name) {
@@ -593,7 +591,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				}
 			} catch (Exception e) {
 				System.out.println("[GPS] Error parsing " + name + "!");
-				System.out.println(name+","+data);
+				System.out.println(fullString);
 				e.printStackTrace();
 			}
 		}
@@ -604,13 +602,12 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		 * @param data
 		 *            : PMTK sentence to be processed
 		 */
-		private void parsePMTKData(String name, String data) {
+		private void parsePMTKData(String name, String fullString) {
 
-			String fullString = name + "," + data;
 
 			print("[Parsing PMTK]", false);
 			ackResponses.add(fullString);
-			print("[ACK] " + data, false);
+			print("[ACK] " + fullString, false);
 		}
 
 		/**
