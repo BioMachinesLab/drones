@@ -73,9 +73,11 @@ public class NMEA_Utils {
 			System.out.println("Entrer NMEA sentence to check checksum: ");
 			String sentence = in.nextLine();
 			boolean check = checkNMEAChecksum(sentence);
+			String ck = calculateNMEAChecksum(sentence);
 	
 			System.out.println("The checksum is "
 					+ (check ? "correct" : "incorrect"));
+			System.out.println("Expected="+ck);
 		}
 	}
 
@@ -96,7 +98,6 @@ public class NMEA_Utils {
 			
 			String ck = sentence.substring(sentence.length() - 2,sentence.length());
 			String calculatedChecksum = calculateNMEAChecksum(sentence);
-			
 			return ck.equals(calculatedChecksum);
 		}
 		

@@ -55,7 +55,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 	private final static String COM_PORT = Serial.DEFAULT_COM_PORT;
 	private NMEA_Utils nmeaUtils = new NMEA_Utils();
 	private Serial serial; // Serial connection
-	protected StringBuilder receivedDataBuffer = new StringBuilder();
+	protected StringBuffer receivedDataBuffer = new StringBuffer();
 	protected GPSData gpsData = new GPSData(); // Contains the obtained info
 	private List<String> ackResponses = Collections
 			.synchronizedList(new ArrayList<String>());
@@ -102,31 +102,41 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		serial.addListener(new SerialDataListener() {
 			@Override
 			public void dataReceived(SerialDataEvent event) {
-
-				receivedDataBuffer.append(event.getData());
 				
-				boolean keepGoing = true;
+				int indexSecondDollar = 0;
+				int indexFirstDollar = 0;
+				
+				try {
 
-				while (keepGoing) {
-					keepGoing = false;
-					int indexFirstDollar = receivedDataBuffer.indexOf("$");
+					receivedDataBuffer.append(event.getData());
 					
-					if(indexFirstDollar >= 0) {
+					boolean keepGoing = true;
+
+					while (keepGoing) {
+						keepGoing = false;
+						indexFirstDollar = receivedDataBuffer.indexOf("$");
 						
-						int indexSecondDollar = receivedDataBuffer.indexOf("$",indexFirstDollar+1);
-						
-						if(indexSecondDollar > 0) {
-						
-							String sub = receivedDataBuffer.substring(indexFirstDollar,indexSecondDollar).trim();
-			
-							if (messageParser != null && !sub.isEmpty() && sub.charAt(0) == '$') {
-								messageParser.processReceivedData(sub);
-								
+						if(indexFirstDollar >= 0) {
+							
+							indexSecondDollar = receivedDataBuffer.indexOf("$",indexFirstDollar+1);
+							
+							if(indexSecondDollar >= 0 && indexSecondDollar < receivedDataBuffer.length()) {
+							
+								String sub = receivedDataBuffer.substring(indexFirstDollar,indexSecondDollar).trim();
+				
+								if (messageParser != null && !sub.isEmpty() && sub.charAt(0) == '$') {
+									messageParser.processReceivedData(sub);
+									keepGoing = true;
+								}
 								receivedDataBuffer.delete(0,indexSecondDollar);
-								keepGoing = true;
 							}
 						}
 					}
+				} catch(Exception e) {
+					e.printStackTrace();
+					System.out.println(indexFirstDollar+" -> "+indexSecondDollar);
+					System.out.println(receivedDataBuffer);
+					receivedDataBuffer.setLength(0);
 				}
 			}
 		});
@@ -167,7 +177,6 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		 */
 		serial.close();
 		serial.flush();
-		receivedDataBuffer = new StringBuilder();
 		// ackResponses.clear();
 		Thread.sleep(1000);
 
@@ -457,7 +466,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		protected void processReceivedData(String data) {
 
 			if (!nmeaUtils.checkNMEAChecksum(data)) {
-				System.out.println("[GPS] Checksum failed for "+data);
+//				System.out.println("[GPS] Checksum failed for "+data);
 				return;
 			}
 
@@ -565,9 +574,9 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				String[] split = fullString.split(",");
 
 				switch (name) {
-				case "$GPGGA":
-					parseGPGGASentence(split);
-					break;
+//				case "$GPGGA":
+//					parseGPGGASentence(split);
+//					break;
 
 				case "$GPGSA":
 					parseGPGSASentence(split);
@@ -581,9 +590,9 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 					parseGPRMCSentence(split);
 					break;
 
-				case "$GPVTG":
-					parseGPVTGSentence(split);
-					break;
+//				case "$GPVTG":
+//					parseGPVTGSentence(split);
+//					break;
 
 				default:
 					print("No parser for " + name + " sentence", false);
@@ -740,6 +749,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				}
 
 				gpsData.setGroundSpeedKnts(Double.parseDouble(params[7]));
+				gpsData.setGroundSpeedKmh(Double.parseDouble(params[7])*1.85200);
 				gpsData.setOrientation(Double.parseDouble(params[8]));
 
 				// Missing magnetic declination (value and orientation)
