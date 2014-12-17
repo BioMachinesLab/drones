@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.joda.time.LocalDateTime;
 
+import utils.NetworkUtils;
 import utils.Nmea0183ToDecimalConverter;
 
 /**
@@ -16,6 +17,8 @@ public class GPSData implements Serializable {
 	private static final long serialVersionUID = -2077018378793167250L;
 	private final static int NUMBER_OF_PARAMETERS = 15;
 	private long PRINT_NUMBER = 0;
+	
+	private String droneAddress;
 
 	// Coordinates
 	private double latitudeDecimal;
@@ -44,6 +47,7 @@ public class GPSData implements Serializable {
 
 	// General Methods
 	public GPSData() {
+		droneAddress = NetworkUtils.getAddress();
 		latitude = null;
 		longitude = null;
 		altitude = 0;
@@ -71,6 +75,14 @@ public class GPSData implements Serializable {
 	// Getters And Setters
 	public String getLatitude() {
 		return latitude;
+	}
+	
+	public void setDroneAddress(String droneAddress) {
+		this.droneAddress = droneAddress;
+	}
+	
+	public String getDroneAddress() {
+		return droneAddress;
 	}
 
 	public void setLatitude(String latitude) {

@@ -16,6 +16,7 @@ import network.ConnectionHandler;
 import network.ConnectionListener;
 import network.ControllerMessageHandler;
 import network.MotorConnectionListener;
+import network.broadcast.BroadcastHandler;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import objects.Waypoint;
@@ -23,12 +24,10 @@ import simpletestbehaviors.GoToWaypointCIBehavior;
 import simpletestbehaviors.TurnToOrientationCIBehavior;
 import utils.Nmea0183ToDecimalConverter;
 import behaviors.CalibrationCIBehavior;
-
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
 import commoninterface.LedState;
-
 import dataObjects.GPSData;
 
 public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
@@ -40,6 +39,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	
 	private ConnectionListener connectionListener;
 	private MotorConnectionListener motorConnectionListener;
+	private BroadcastHandler broadcastHandler;
 	
 	private List<MessageProvider> messageProviders = new ArrayList<MessageProvider>();
 	private List<CIBehavior> behaviors = new ArrayList<CIBehavior>();
@@ -113,50 +113,66 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	@Override
 	public double getCompassOrientationInDegrees() {
-		double orientation = ioManager.getCompassModule().getHeadingInDegrees();
-		return (orientation % 360.0);
+		try {
+			double orientation = ioManager.getCompassModule().getHeadingInDegrees();
+			return (orientation % 360.0);
+		} catch(Exception e){}
+		
+		return -1;
 	}
 
 	@Override
 	public double getGPSLatitude() {
-		GPSData gpsData = ioManager.getGpsModule().getReadings();
+		try {
+			GPSData gpsData = ioManager.getGpsModule().getReadings();
+			
+			//NMEA format: e.g. 3844.9474N 00909.2214W
+			String latitude = gpsData.getLatitude();
+			
+			if(latitude == null)
+				return -1;
+	
+			double lat = Double.parseDouble(latitude.substring(0,latitude.length()-1));
+			char latPos = latitude.charAt(latitude.length()-1);
+	
+			lat = Nmea0183ToDecimalConverter.convertLatitudeToDecimal(lat, latPos);
+			
+			return lat;
+		} catch(Exception e){}
 		
-		//NMEA format: e.g. 3844.9474N 00909.2214W
-		String latitude = gpsData.getLatitude();
-		
-		if(latitude == null)
-			return -1;
-
-		double lat = Double.parseDouble(latitude.substring(0,latitude.length()-1));
-		char latPos = latitude.charAt(latitude.length()-1);
-
-		lat = Nmea0183ToDecimalConverter.convertLatitudeToDecimal(lat, latPos);
-		
-		return lat;
+		return -1;
 	}
 
 	@Override
 	public double getGPSLongitude() {
-		GPSData gpsData = ioManager.getGpsModule().getReadings();
-
-		//NMEA format: e.g. 3844.9474N 00909.2214W
-		String longitude = gpsData.getLongitude();
+		try {
+			GPSData gpsData = ioManager.getGpsModule().getReadings();
+	
+			//NMEA format: e.g. 3844.9474N 00909.2214W
+			String longitude = gpsData.getLongitude();
+			
+			if(longitude == null)
+				return -1;
+			
+			double lon = Double.parseDouble(longitude.substring(0,longitude.length()-1));
+			char lonPos = longitude.charAt(longitude.length()-1);
+			
+			lon = Nmea0183ToDecimalConverter.convertLongitudeToDecimal(lon, lonPos);
+			
+			return lon;
+		} catch(Exception e){}
 		
-		if(longitude == null)
-			return -1;
-		
-		double lon = Double.parseDouble(longitude.substring(0,longitude.length()-1));
-		char lonPos = longitude.charAt(longitude.length()-1);
-		
-		lon = Nmea0183ToDecimalConverter.convertLongitudeToDecimal(lon, lonPos);
-		
-		return lon;
+		return -1;
 	}
 	
 	@Override
 	public double getGPSOrientationInDegrees() {
-		GPSData gpsData = ioManager.getGpsModule().getReadings();
-		return gpsData.getOrientation();
+		try {
+			GPSData gpsData = ioManager.getGpsModule().getReadings();
+			return gpsData.getOrientation();
+		} catch(Exception e){}
+		
+		return -1;
 	}
 
 	@Override
@@ -198,6 +214,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	private void initConnections() {
 		try {
+			
 			connectionListener = new ConnectionListener(this);
 			connectionListener.start();
 
@@ -206,6 +223,8 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 			motorConnectionListener = new MotorConnectionListener(this);
 			motorConnectionListener.start();
+			
+			broadcastHandler = new BroadcastHandler(this);
 
 			logger.logMessage(".");
 			initMessages += "[INIT] MotorConnectionListener: ok\n";
@@ -226,7 +245,6 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			initMessages += "[INIT] Behavior "+e.getMessage()+"\n";
 		}
 	}
-
 
 	/**
 	 * Create a message provider for all the possible message provider classes

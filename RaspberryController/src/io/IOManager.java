@@ -285,15 +285,18 @@ public class IOManager {
 	}
 	
 	public void shutdownMotors() {
-		escManager.disableMotors();
+		if(escManager != null)
+			escManager.disableMotors();
 	}
 	
 	public void setMotorSpeeds(double left, double right) {
-		motorSpeeds.setSpeeds(new MotorMessage(left, right));
+		if(motorSpeeds != null)
+			motorSpeeds.setSpeeds(new MotorMessage(left, right));
 	}
 	
 	public void setMotorSpeeds(MotorMessage message) {
-		motorSpeeds.setSpeeds(message);
+		if(motorSpeeds != null)
+			motorSpeeds.setSpeeds(message);
 	}
 	
 	public DebugLedsOutput getDebugLeds() {
