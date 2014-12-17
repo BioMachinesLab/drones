@@ -6,10 +6,13 @@ import java.awt.BorderLayout;
 import java.awt.Window;
 import java.lang.reflect.Method;
 
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+
+import main.DroneControlConsole;
 
 public class GUI extends JFrame{
 	
@@ -21,8 +24,13 @@ public class GUI extends JFrame{
 	private CompassPanel compassPanel;
 	private MapPanel mapPanel;
 	private BehaviorsPanel behaviorsPanel;
+	private ConnectionPanel connectionPanel;
+	
+	private DroneControlConsole console;
 
-	public GUI() {
+	public GUI(DroneControlConsole console) {
+		
+		this.console = console;
 
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -78,17 +86,24 @@ public class GUI extends JFrame{
 		
 		JPanel leftPanel = new JPanel(new BorderLayout());
 
+		JPanel leftTopPanel = new JPanel();
+		leftTopPanel.setLayout(new BoxLayout(leftTopPanel, BoxLayout.Y_AXIS));
+		leftTopPanel.setAlignmentY(JPanel.CENTER_ALIGNMENT);
+		
+		//Connection
+		connectionPanel = new ConnectionPanel(console);
+		leftTopPanel.add(connectionPanel);
+		
+		//Behaviors
+		behaviorsPanel = new BehaviorsPanel();
+		leftTopPanel.add(behaviorsPanel);
+		leftPanel.add(leftTopPanel, BorderLayout.NORTH);
+		
 		//Messages
 		msgPanel = new MessagesPanel();
 		leftPanel.add(msgPanel, BorderLayout.CENTER);
 		
-		
-		//Behaviors
-		behaviorsPanel = new BehaviorsPanel();
-		leftPanel.add(behaviorsPanel, BorderLayout.NORTH);
-		
 		add(leftPanel, BorderLayout.WEST);
-		
 	}
 	
 	private void createSysInfoPanel() {
@@ -124,6 +139,9 @@ public class GUI extends JFrame{
 		return behaviorsPanel;
 	}
 	
+	public ConnectionPanel getConnectionPanel() {
+		return connectionPanel;
+	}
 	
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static void enableOSXFullscreen(Window window) {

@@ -53,12 +53,6 @@ public class MapPanel extends UpdatePanel {
 
     private JMapViewerTreeDrone treeMap = null;
 
-    private JLabel zoomLabel=null;
-    private JLabel zoomValue=null;
-
-    private JLabel mperpLabelName=null;
-    private JLabel mperpLabelValue = null;
-    
     private JButton fitMarkersButton;
     
     private static int POSITION_HISTORY = 100;
@@ -87,12 +81,6 @@ public class MapPanel extends UpdatePanel {
         JPanel panel = new JPanel();
         JPanel panelTop = new JPanel();
         JPanel helpPanel = new JPanel();
-
-        mperpLabelName=new JLabel("Meters/Pixels: ");
-        mperpLabelValue=new JLabel(String.format("%s",map().getMeterPerPixel()));
-
-        zoomLabel=new JLabel("Zoom: ");
-        zoomValue=new JLabel(String.format("%s", map().getZoom()));
 
         add(panel, BorderLayout.NORTH);
         add(helpPanel, BorderLayout.SOUTH);
@@ -260,7 +248,7 @@ public class MapPanel extends UpdatePanel {
     	}
     }
     
-    public void updateRobotPosition(String name, Coordinate c) {
+    public void updateRobotPosition(String name, Coordinate c, double orientation) {
     	
     	Layer l = null;
     	
@@ -297,7 +285,7 @@ public class MapPanel extends UpdatePanel {
     	
     	//add the new one with the new style
     	Style styleNew = new Style(Color.RED, Color.green, new BasicStroke(1), new Font("Dialog", Font.PLAIN, 12));
-    	MapMarker m = new MapMarkerDot(l, "drone" , c, styleNew);
+    	MapMarker m = new MapMarkerDrone(l, name , c, styleNew, orientation);
     	l.add(m);
     	map().addMapMarker(m);
     	robotPositions.add(m);
@@ -311,21 +299,22 @@ public class MapPanel extends UpdatePanel {
     	if(robotPositions.size() == 1) {
     		fitMarkersButton.doClick();
     	}
-    	
     }
 
 	public void displayData(GPSData gpsData) {
 		
-		if(gpsData.getLatitude() == null || gpsData.getLongitude() == null)
-			return;
-		if(gpsData.getLatitude().isEmpty() || gpsData.getLongitude().isEmpty())
+		if(gpsData.getLatitudeDecimal() == 0 && gpsData.getLongitudeDecimal() == 0)
 			return;
 		
 		double lat = gpsData.getLatitudeDecimal();
 		double lon = gpsData.getLongitudeDecimal();
 		
+		double orientation = gpsData.getOrientation();
+		
+		String droneName = gpsData.getDroneAddress().isEmpty() ? "drone" : gpsData.getDroneAddress();
+		
 		if(usefulRobotCoordinate(c(lat,lon))) {
-			updateRobotPosition("drone", c(lat,lon));
+			updateRobotPosition(droneName, c(lat,lon), orientation);
 		}
 	}
 	
@@ -334,6 +323,9 @@ public class MapPanel extends UpdatePanel {
 	}
 	
 	private boolean usefulRobotCoordinate(Coordinate n) {
+		
+		if(n.getLat() == -1 && n.getLon() == -1)
+			return false;
 		
 		if(robotPositions.isEmpty())
 			return true;

@@ -12,6 +12,8 @@ public class UpdateThread extends Thread {
 	protected boolean keepGoing = true;
 	protected MessageType type;
 	
+	protected final static long INITIAL_SLEEP = 2000;
+	
 	/**
 	 * The UpdateThread is responsible for sending data requests, such as GPS, Compass or
 	 * status messages, to the drone. It then waits for a response from the drone before another
@@ -27,6 +29,11 @@ public class UpdateThread extends Thread {
 	
 	@Override
 	public void run() {
+		
+		try {
+			//Wait until the interface is ready before starting
+			Thread.sleep(INITIAL_SLEEP);
+		} catch (InterruptedException e) {}
 
 		while (keepGoing) {
 			console.sendData(new InformationRequest(type));

@@ -34,9 +34,6 @@ public class MessagesPanel extends UpdatePanel {
 		setBorder(BorderFactory.createTitledBorder("Drone Messages"));
 		setLayout(new BorderLayout());
 		
-//		setPreferredSize(new Dimension(100, 100));
-//		setMinimumSize(new Dimension(100, 100));
-
 		messageArea = new JTextArea(10,1);
 		messageArea.setEditable(false);
 
@@ -82,6 +79,10 @@ public class MessagesPanel extends UpdatePanel {
 
 		
 		add(refresh, BorderLayout.SOUTH);
+	}
+	
+	public void clear() {
+		messageArea.setText("");
 	}
 	
 	private synchronized void wakeUpThread() {
