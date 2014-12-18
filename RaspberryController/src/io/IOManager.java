@@ -5,6 +5,8 @@ import io.input.FakeGPSModuleInput;
 import io.input.GPSModuleInput;
 import io.input.I2CBatteryManagerInput;
 import io.input.I2CCompassModuleInput;
+import io.output.BuzzerOutput;
+import io.output.BuzzerOutput.BuzzerMode;
 import io.output.ControllerOutput;
 import io.output.DebugLedsOutput;
 import io.output.ReversableESCManagerOutputV2;
@@ -30,69 +32,76 @@ import commoninterfaceimpl.RealAquaticDroneCI;
 import dataObjects.MotorSpeeds;
 
 public class IOManager {
-	
+
 	private final static String CONFIG_FILE = "io_config.conf";
-	
+
 	private ArrayList<ControllerOutput> outputs = new ArrayList<ControllerOutput>();
 	private ArrayList<ControllerInput> inputs = new ArrayList<ControllerInput>();
 
-	//Inputs
+	// Inputs
 	private GPSModuleInput gpsModule;
 	private I2CCompassModuleInput compassModule;
 	private I2CBatteryManagerInput batteryManager;
-	
-	//Outputs
+
+	// Outputs
 	private ReversableESCManagerOutputV2 escManager;
 	private DebugLedsOutput debugLeds;
-	
+	private BuzzerOutput buzzer;
+
 	// Hardware Instances
 	private GpioController gpioController;
-	//TODO Refactor I2C initialization!
+	// TODO Refactor I2C initialization!
 	private I2CBus i2cBus;
-	
+
 	private String initMessages = "\n";
 	private RealAquaticDroneCI drone;
 	private MotorSpeeds motorSpeeds;
-	
+
 	private LinkedList<String> enabledIO = new LinkedList<String>();
-	
+
 	private Logger fileLogger;
-		
+
 	public IOManager(RealAquaticDroneCI drone) {
-		this.drone  = drone;
+		this.drone = drone;
 		motorSpeeds = new MotorSpeeds();
-		
-		loadConfigurations();		
-		
+
+		loadConfigurations();
+
 		initHardwareCommunicatonProtocols();
 		initOutputs();
 		initInputs();
-		
-		if(enabledIO.contains("filelogger")) {
+
+		if (enabledIO.contains("filelogger")) {
 			fileLogger = new Logger(drone);
 			fileLogger.start();
 		}
-		
+
 	}
-	
+
 	private void loadConfigurations() {
-		
+
 		try {
 			Scanner s = new Scanner(new File(CONFIG_FILE));
-			while(s.hasNextLine()) {
+			while (s.hasNextLine()) {
 				String line = s.nextLine();
+
+				// So we can put comments on the io_config.conf
+				if (line.startsWith("#") || line.length() < 2) {
+					continue;
+				}
+
 				String[] split = line.split(" ");
-				if(split[1].equals("1"))
+				if (split[1].equals("1"))
 					enabledIO.add(split[0]);
 			}
 			s.close();
-			
+
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 	public GPSModuleInput getGpsModule() {
 		return gpsModule;
 	}
@@ -106,8 +115,8 @@ public class IOManager {
 	 * devices ("physical layer"), like I2C and GPIO management instances
 	 */
 	private void initHardwareCommunicatonProtocols() {
-		
-		if(enabledIO.contains("i2c")) {
+
+		if (enabledIO.contains("i2c")) {
 			try {
 				// Get I2C instance
 				i2cBus = I2CFactory.getInstance(I2CBus.BUS_1);
@@ -117,7 +126,7 @@ public class IOManager {
 			}
 		}
 
-		if(enabledIO.contains("gpio")) {
+		if (enabledIO.contains("gpio")) {
 			try {
 				gpioController = GpioFactory.getInstance();
 			} catch (Exception | Error e) {
@@ -126,101 +135,101 @@ public class IOManager {
 			}
 		}
 	}
-	
+
 	private void initInputs() {
-		
-		if(enabledIO.contains("compass")) {
+
+		if (enabledIO.contains("compass") && enabledIO.contains("i2c")) {
 			// Compass Module Init
-			 compassModule = new I2CCompassModuleInput(i2cBus);
-			 initMessages += "[INIT] I2CCompassModule: "
-			 + (compassModule.isAvailable() ? "ok" : "not ok!") + "\n";
-			
-			 if (compassModule.isAvailable()) {
-				 compassModule.start();
-				 inputs.add(compassModule);
-			 	System.out.print(".");
-			 }
-			 
-			 if(enabledIO.contains("autocompasscalibration")) {
-				 for(CIBehavior b : drone.getBehaviors()) {
-					 if(b instanceof CalibrationCIBehavior)
-						 drone.executeBehavior(b, true);
-				 }
-			 }
-			 
+			compassModule = new I2CCompassModuleInput(i2cBus);
+			initMessages += "[INIT] I2CCompassModule: "
+					+ (compassModule.isAvailable() ? "ok" : "not ok!") + "\n";
+
+			if (compassModule.isAvailable()) {
+				compassModule.start();
+				inputs.add(compassModule);
+				System.out.print(".");
+			}
+
+			if (enabledIO.contains("autocompasscalibration")) {
+				for (CIBehavior b : drone.getBehaviors()) {
+					if (b instanceof CalibrationCIBehavior)
+						drone.executeBehavior(b, true);
+				}
+			}
+
 		}
 
-		if(enabledIO.contains("battery")) {
-	//		 Battery Module Init
-//			 batteryManager = new I2CBatteryManagerInput();
-//			 initMessages += "[INIT] BatteryManager: "
-//			 + (batteryManager.isAvailable() ? "ok" : "not ok!") + "\n";
-//			 if (batteryManager.isAvailable()) {
-//				 batteryManager.start();
-//				 inputs.add(batteryManager);
-//				 System.out.print(".");
-//			 }
+		if (enabledIO.contains("battery") && enabledIO.contains("i2c")) {
+			// Battery Module Init
+			// batteryManager = new I2CBatteryManagerInput();
+			// initMessages += "[INIT] BatteryManager: "
+			// + (batteryManager.isAvailable() ? "ok" : "not ok!") + "\n";
+			// if (batteryManager.isAvailable()) {
+			// batteryManager.start();
+			// inputs.add(batteryManager);
+			// System.out.print(".");
+			// }
 		}
-		
-		if(enabledIO.contains("gps")) {
+
+		if (enabledIO.contains("gps")) {
 			try {
 				// GPS Module Init
 				gpsModule = new GPSModuleInput();
 				initMessages += "[INIT] GPSModule: "
 						+ (gpsModule.isAvailable() ? "ok" : "not ok!") + "\n";
-		
+
 				if (gpsModule.isAvailable()) {
 					gpsModule.enableLocalLog();
 					inputs.add(gpsModule);
 					System.out.print(".");
 				}
-			} catch(Exception e) {
-				initMessages += "[INIT] GPSModule: not ok! ("
-						+ e.getMessage() + ")\n";
+			} catch (Exception e) {
+				initMessages += "[INIT] GPSModule: not ok! (" + e.getMessage()
+						+ ")\n";
 			}
 		}
-		
-		if(enabledIO.contains("fakegps")) {
+
+		if (enabledIO.contains("fakegps")) {
 			try {
 				// GPS Module Init
 				gpsModule = new FakeGPSModuleInput();
 				initMessages += "[INIT] GPSModule: "
 						+ (gpsModule.isAvailable() ? "ok" : "not ok!") + "\n";
-		
+
 				if (gpsModule.isAvailable()) {
 					inputs.add(gpsModule);
 					System.out.print(".");
 				}
-			} catch(Exception e) {
-				initMessages += "[INIT] GPSModule: not ok! ("
-						+ e.getMessage() + ")\n";
+			} catch (Exception e) {
+				initMessages += "[INIT] GPSModule: not ok! (" + e.getMessage()
+						+ ")\n";
 			}
 		}
 	}
 
 	private void initOutputs() {
-		
-		if(enabledIO.contains("esc")) {
+		if (enabledIO.contains("esc") && enabledIO.contains("i2c")) {
 			try {
 				// ESC Output Init
-				escManager = new ReversableESCManagerOutputV2(motorSpeeds, gpioController);
-	
+				escManager = new ReversableESCManagerOutputV2(motorSpeeds,
+						gpioController);
+
 				initMessages += "[INIT] ESCManager: "
 						+ (escManager.isAvailable() ? "ok" : "not ok!") + "\n";
-		
+
 				if (escManager.isAvailable()) {
 					escManager.start();
 					outputs.add(escManager);
 					System.out.print(".");
 				}
-			
-			} catch(Exception e) {
-				initMessages += "[INIT] ESCManager: not ok! ("
-						+ e.getMessage() + ")\n";
+
+			} catch (Exception e) {
+				initMessages += "[INIT] ESCManager: not ok! (" + e.getMessage()
+						+ ")\n";
 			}
 		}
-		
-		if(enabledIO.contains("leds")) {
+
+		if (enabledIO.contains("leds") && enabledIO.contains("i2c")) {
 			try {
 				// Debug Leds Init
 				debugLeds = new DebugLedsOutput(gpioController);
@@ -229,26 +238,46 @@ public class IOManager {
 				if (debugLeds.isAvailable()) {
 					debugLeds.start();
 					outputs.add(debugLeds);
-		
+
 					debugLeds.addBlinkLed(0);
-		
+
 					System.out.print(".");
 				}
-			} catch(Exception e) {
-				initMessages += "[INIT] DebugLEDs: not ok! ("
-						+ e.getMessage() + ")\n";
+			} catch (Exception e) {
+				initMessages += "[INIT] DebugLEDs: not ok! (" + e.getMessage()
+						+ ")\n";
+			}
+		}
+
+		if (enabledIO.contains("buzzer")) {
+			try {
+				// Buzzer Init
+				buzzer = new BuzzerOutput();
+				initMessages += "[INIT] Buzzer: "
+						+ (buzzer.isAvailable() ? "ok" : "not ok!") + "\n";
+				if (buzzer.isAvailable()) {
+					buzzer.start();
+					outputs.add(buzzer);
+
+					buzzer.setValue(BuzzerMode.DOUBLE_BEEP);
+
+					System.out.print(".");
+				}
+			} catch (Exception e) {
+				initMessages += "[INIT] Buzzer: not ok! (" + e.getMessage()
+						+ ")\n";
 			}
 		}
 	}
-	
+
 	public void shutdown() {
 		System.out.println("# Shutting down IO...");
 		if (escManager != null)
 			shutdownMotors();
-		
-		if(fileLogger != null)
+
+		if (fileLogger != null)
 			fileLogger.interrupt();
-		
+
 		if (compassModule != null)
 			compassModule.interrupt();
 
@@ -268,38 +297,42 @@ public class IOManager {
 
 		if (gpioController != null)
 			gpioController.shutdown();
-		
+
 		System.out.println("# Finished IO cleanup!");
 	}
-	
+
 	public String getInitMessages() {
 		return initMessages;
 	}
-	
+
 	public ArrayList<ControllerInput> getInputs() {
 		return inputs;
 	}
-	
+
 	public ArrayList<ControllerOutput> getOutputs() {
 		return outputs;
 	}
-	
+
 	public void shutdownMotors() {
-		if(escManager != null)
+		if (escManager != null)
 			escManager.disableMotors();
 	}
-	
+
 	public void setMotorSpeeds(double left, double right) {
-		if(motorSpeeds != null)
+		if (motorSpeeds != null)
 			motorSpeeds.setSpeeds(new MotorMessage(left, right));
 	}
-	
+
 	public void setMotorSpeeds(MotorMessage message) {
-		if(motorSpeeds != null)
+		if (motorSpeeds != null)
 			motorSpeeds.setSpeeds(message);
 	}
-	
+
 	public DebugLedsOutput getDebugLeds() {
 		return debugLeds;
+	}
+
+	public BuzzerOutput getBuzzer() {
+		return buzzer;
 	}
 }
