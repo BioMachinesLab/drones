@@ -2,9 +2,11 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/joda-time-2.4-javadoc.jar"/>
-	<classpathentry kind="lib" path="lib/joda-time-2.4-sources.jar"/>
-	<classpathentry kind="lib" path="lib/joda-time-2.4.jar"/>
+	<classpathentry kind="lib" path="lib/joda-time-2.4.jar" sourcepath="lib/joda-time-2.4-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/RaspberryController/lib/joda-time-2.4-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/Behaviors"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/CommonInterface"/>
 	<classpathentry kind="lib" path="/Pi4J_IT_Version/lib/pi4j-core.jar" sourcepath="/Pi4J_IT_Version/lib/pi4j-core-sources.jar">
