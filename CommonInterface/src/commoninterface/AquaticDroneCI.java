@@ -1,6 +1,7 @@
 package commoninterface;
 
 import java.util.LinkedList;
+
 import objects.Waypoint;
 
 /**
@@ -56,6 +57,13 @@ public interface AquaticDroneCI {
 	 * @return longitude read from the GPS in decimal.
 	 */
 	public double  getGPSLongitude();
+	
+	/**
+	 * Get the orientation (in degrees) from the GPS.
+	 * 
+	 * @return orientation read from the GPS in degrees
+	 */
+	public double getGPSOrientationInDegrees();
 
 	/**
 	 * Get time elapsed since the controller was started (in seconds).
