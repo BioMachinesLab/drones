@@ -5,11 +5,12 @@ import io.input.FakeGPSModuleInput;
 import io.input.GPSModuleInput;
 import io.input.I2CBatteryManagerInput;
 import io.input.I2CCompassModuleInput;
-import io.output.BuzzerOutput;
-import io.output.BuzzerOutput.BuzzerMode;
+//import io.output.BuzzerOutput;
+//import io.output.BuzzerOutput.BuzzerMode;
 import io.output.ControllerOutput;
 import io.output.DebugLedsOutput;
 import io.output.ReversableESCManagerOutputV2;
+import io.output.ServoOutput;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -46,7 +47,7 @@ public class IOManager {
 	// Outputs
 	private ReversableESCManagerOutputV2 escManager;
 	private DebugLedsOutput debugLeds;
-	private BuzzerOutput buzzer;
+//	private BuzzerOutput buzzer;
 
 	// Hardware Instances
 	private GpioController gpioController;
@@ -213,7 +214,7 @@ public class IOManager {
 				// ESC Output Init
 				escManager = new ReversableESCManagerOutputV2(motorSpeeds,
 						gpioController);
-
+				
 				initMessages += "[INIT] ESCManager: "
 						+ (escManager.isAvailable() ? "ok" : "not ok!") + "\n";
 
@@ -225,6 +226,27 @@ public class IOManager {
 
 			} catch (Exception e) {
 				initMessages += "[INIT] ESCManager: not ok! (" + e.getMessage()
+						+ ")\n";
+			}
+		}
+		
+		if (enabledIO.contains("servos") && enabledIO.contains("i2c")) {
+			try {
+				// ESC Output Init
+				escManager = new ServoOutput(motorSpeeds,
+						gpioController);
+				
+				initMessages += "[INIT] ServoManager: "
+						+ (escManager.isAvailable() ? "ok" : "not ok!") + "\n";
+
+				if (escManager.isAvailable()) {
+					escManager.start();
+					outputs.add(escManager);
+					System.out.print(".");
+				}
+
+			} catch (Exception e) {
+				initMessages += "[INIT] ServoManager: not ok! (" + e.getMessage()
 						+ ")\n";
 			}
 		}
@@ -249,25 +271,25 @@ public class IOManager {
 			}
 		}
 
-		if (enabledIO.contains("buzzer")) {
-			try {
-				// Buzzer Init
-				buzzer = new BuzzerOutput();
-				initMessages += "[INIT] Buzzer: "
-						+ (buzzer.isAvailable() ? "ok" : "not ok!") + "\n";
-				if (buzzer.isAvailable()) {
-					buzzer.start();
-					outputs.add(buzzer);
-
-					buzzer.setValue(BuzzerMode.DOUBLE_BEEP);
-
-					System.out.print(".");
-				}
-			} catch (Exception e) {
-				initMessages += "[INIT] Buzzer: not ok! (" + e.getMessage()
-						+ ")\n";
-			}
-		}
+//		if (enabledIO.contains("buzzer")) {
+//			try {
+//				// Buzzer Init
+//				buzzer = new BuzzerOutput();
+//				initMessages += "[INIT] Buzzer: "
+//						+ (buzzer.isAvailable() ? "ok" : "not ok!") + "\n";
+//				if (buzzer.isAvailable()) {
+//					buzzer.start();
+//					outputs.add(buzzer);
+//
+//					buzzer.setValue(BuzzerMode.DOUBLE_BEEP);
+//
+//					System.out.print(".");
+//				}
+//			} catch (Exception e) {
+//				initMessages += "[INIT] Buzzer: not ok! (" + e.getMessage()
+//						+ ")\n";
+//			}
+//		}
 	}
 
 	public void shutdown() {
@@ -332,7 +354,7 @@ public class IOManager {
 		return debugLeds;
 	}
 
-	public BuzzerOutput getBuzzer() {
-		return buzzer;
-	}
+//	public BuzzerOutput getBuzzer() {
+//		return buzzer;
+//	}
 }
