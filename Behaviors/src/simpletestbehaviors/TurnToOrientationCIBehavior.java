@@ -8,7 +8,7 @@ import commoninterface.LedState;
 public class TurnToOrientationCIBehavior extends CIBehavior {
 
 	private double targetOrientation = 0;
-	private double tolerance         = 40;
+	private double tolerance         = 10;
 	
 	public TurnToOrientationCIBehavior(String[] args, AquaticDroneCI drone, CILogger logger) {
 		super(args, drone, logger);
