@@ -55,20 +55,15 @@ public class CoordinateUtilities {
 	}
 	
 	public static double angleInDegrees(double lat1, double lon1, double lat2, double lon2) {
-		double angle = 0;
 		
-		double dy = lat2 - lat1;
-		double dx = Math.cos(Math.PI/180*lat1)*(lon2 - lon1);
-		angle = Math.atan2(dy, dx);
+		lat1 = Math.toRadians(lat1);
+		lat2 = Math.toRadians(lat2);
+		lon1 = Math.toRadians(lon1);
+		lon2 = Math.toRadians(lon2);
+		
+		double result = Math.atan2(Math.sin(lon2-lon1)*Math.cos(lat2), Math.cos(lat1)*Math.sin(lat2)-Math.sin(lat1)*Math.cos(lat2)*Math.cos(lon2-lon1));
 	
-		//0 is to the right. By subtracting 90, we are making 0 toward north
-		angle = -(Math.toDegrees(angle) - 90);
-		
-		if(angle < 0)
-			angle += 360;
-		
-		return angle;
-			
+		return Math.toDegrees(result);
 	}
 	
 	public static double distanceInMeters(double lat1, double lon1, double lat2, double lon2) {
@@ -77,8 +72,4 @@ public class CoordinateUtilities {
 		return coord1.distance(coord2)*1000;
 	}
 	
-	public static void main(String[] args) {
-		double[] bottomRight = cartesianToGPS(10.0, -10.0);
-		double[] topRight = cartesianToGPS(10.0, 10.0);
-	}
 }
