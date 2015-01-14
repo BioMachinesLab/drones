@@ -5,6 +5,8 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+
+import utils.NetworkUtils;
 import commoninterfaceimpl.RealAquaticDroneCI;
 
 public class ConnectionListener extends Thread {
@@ -33,7 +35,7 @@ public class ConnectionListener extends Thread {
 		try {
 			System.out
 					.println("[CONNECTION HANDLER] Connection Handler Initialized on "
-							+ InetAddress.getLocalHost().getHostAddress()
+							+ NetworkUtils.getAddress("wlan0")
 							+ ":"
 							+ port);
 			System.out
