@@ -49,7 +49,7 @@ public class BroadcastHandler {
 		//TODO possibly retransmit. We also have to react to certain messages,
 		//such as starting behaviors, for instance.
 		
-		//System.out.println("Received "+message+" from "+address);
+		System.out.println("Received "+message+" from "+address);
 	}
 	
 	public void sendMessage(String message) {
@@ -66,10 +66,11 @@ public class BroadcastHandler {
 		
 		public BroadcastSender() {
 			try {
-				InetAddress ownInetAddress = InetAddress.getByName(NetworkUtils.getAddress());
+				InetAddress ownInetAddress = InetAddress.getByName(NetworkUtils.getAddress("wlan0"));
 				ownAddress = ownInetAddress.getHostAddress();
 				socket = new DatagramSocket(PORT+1, ownInetAddress);
 				socket.setBroadcast(true);
+				System.out.println("IP: "+ownAddress);
 			} catch(Exception e) {
 				e.printStackTrace();
 			}
