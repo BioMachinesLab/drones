@@ -5,9 +5,9 @@ import network.messages.InformationRequest;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import network.messages.SystemStatusMessage;
-import network.messages.WaypointMessage;
+import network.messages.EntityMessage;
+import objects.Entity;
 import objects.Waypoint;
-
 import commoninterface.CIBehavior;
 import commoninterfaceimpl.RealAquaticDroneCI;
 
@@ -30,11 +30,15 @@ public class ControllerMessageHandler extends MessageHandler {
 				break;
 		}
 		
-		if(response == null && m instanceof WaypointMessage) {
-			WaypointMessage wm = (WaypointMessage)m;
-			Waypoint p = wm.getWaypoint();
-			drone.getWaypoints().clear();
-			drone.getWaypoints().add(p);
+		if(response == null && m instanceof EntityMessage) {
+			EntityMessage wm = (EntityMessage)m;
+			Entity e = wm.getEntity();
+			
+			if(drone.getEntities().contains(e)) {
+				drone.getEntities().remove(e);
+			}
+			
+			drone.getEntities().add(e);
 			response = m;
 		}
 		

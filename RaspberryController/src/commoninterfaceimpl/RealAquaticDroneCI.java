@@ -5,13 +5,11 @@ import io.SystemInfoMessageProvider;
 import io.SystemStatusMessageProvider;
 import io.input.ControllerInput;
 import io.output.ControllerOutput;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
 import network.ConnectionHandler;
 import network.ConnectionListener;
 import network.ControllerMessageHandler;
@@ -19,7 +17,7 @@ import network.MotorConnectionListener;
 import network.broadcast.BroadcastHandler;
 import network.messages.Message;
 import network.messages.MessageProvider;
-import objects.Waypoint;
+import objects.Entity;
 import simpletestbehaviors.GoToWaypointCIBehavior;
 import simpletestbehaviors.TurnToOrientationCIBehavior;
 import utils.Nmea0183ToDecimalConverter;
@@ -27,6 +25,7 @@ import behaviors.CalibrationCIBehavior;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
+import commoninterface.CISensor;
 import commoninterface.LedState;
 import dataObjects.GPSData;
 
@@ -43,13 +42,14 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	
 	private List<MessageProvider> messageProviders = new ArrayList<MessageProvider>();
 	private List<CIBehavior> behaviors = new ArrayList<CIBehavior>();
+	private ArrayList<CISensor> cisensors = new ArrayList<CISensor>();
 	
 	private String[] args;
 	private CILogger logger;
 	private long     startTimeInMillis;
 	
 	private LinkedList<CIBehavior> activeBehaviors = new LinkedList<CIBehavior>();
-	private LinkedList<Waypoint> waypoints = new LinkedList<Waypoint>();
+	private ArrayList<Entity> entities = new ArrayList<Entity>();
 	
 	@Override
 	public void begin(String[] args, CILogger logger) {		
@@ -305,8 +305,8 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	}
 	
 	@Override
-	public LinkedList<Waypoint> getWaypoints() {
-		return waypoints;
+	public ArrayList<Entity> getEntities() {
+		return entities;
 	}
 
 	private void addShutdownHooks() {
@@ -315,6 +315,11 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 				shutdown();
 			}
 		});
+	}
+	
+	@Override
+	public ArrayList<CISensor> getCISensors() {
+		return cisensors;
 	}
 
 	public void reset() {

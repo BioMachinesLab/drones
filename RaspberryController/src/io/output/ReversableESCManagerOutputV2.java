@@ -22,15 +22,16 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 	private final static int LEFT_ESC = 0;
 	private final static int RIGHT_ESC = 1;
 
-	private final static int CENTRAL_VALUE = 150;
+	private final static int CENTRAL_VALUE_LEFT = 150;
+	private final static int CENTRAL_VALUE_RIGHT = 150;
 	private final static int MIN_VALUE = 60;
 	private final static int MAX_VALUE = 240;
 
 	private final static int MIN_FW_VALUE = 169;
 	private final static int MIN_BW_VALUE = 117;
 
-	private int lValue = CENTRAL_VALUE;
-	private int rValue = CENTRAL_VALUE;
+	private int lValue = CENTRAL_VALUE_LEFT;
+	private int rValue = CENTRAL_VALUE_RIGHT;
 	
 	private double lReceivedValue = 0;
 	private double rReceivedValue = 0;
@@ -40,14 +41,13 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 
 	private boolean available = false;
 
-	public ReversableESCManagerOutputV2(MotorSpeeds speeds,
-			GpioController gpioController) {
+	public ReversableESCManagerOutputV2(MotorSpeeds speeds, GpioController gpioController) {
 		this.speeds = speeds;
 
 		escSwitch = gpioController.provisionDigitalOutputPin(SWITCH_PIN, PinState.LOW);
 
 		try {
-			setRawValues(CENTRAL_VALUE, CENTRAL_VALUE);
+			setRawValues(CENTRAL_VALUE_LEFT, CENTRAL_VALUE_RIGHT);
 			writeValueToESC();
 			Thread.sleep(1000);
 			escSwitch.high();
@@ -58,7 +58,7 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 			System.err.println(e.getMessage());
 		}
 	}
-
+	
 	@Override
 	public int getNumberOfOutputs() {
 		return 2;
@@ -70,11 +70,9 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 		if (!available)
 			return;
 		
-		int finalVal = CENTRAL_VALUE;
+		int finalVal = index == 0 ? CENTRAL_VALUE_LEFT : CENTRAL_VALUE_RIGHT;
 		
-		if (value == 0) {
-			finalVal = CENTRAL_VALUE;
-		} else {
+		if (value != 0) {
 			if (value > 0) {
 				finalVal = (int) (Math_Utils.map(value, 0, 1, MIN_FW_VALUE,
 						MAX_VALUE));
@@ -120,13 +118,13 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 
 	public void disableMotors() {
 		escSwitch.low();
-		setRawValues(CENTRAL_VALUE, CENTRAL_VALUE);
+		setRawValues(CENTRAL_VALUE_LEFT, CENTRAL_VALUE_RIGHT);
 		writeValueToESC();
 		available=false;
 	}
 	
 	private void enableMotors(){
-		setRawValues(CENTRAL_VALUE, CENTRAL_VALUE);
+		setRawValues(CENTRAL_VALUE_LEFT, CENTRAL_VALUE_RIGHT);
 		writeValueToESC();
 		escSwitch.high();
 		available=true;
