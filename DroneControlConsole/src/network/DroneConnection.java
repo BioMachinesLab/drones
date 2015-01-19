@@ -9,7 +9,7 @@ import java.net.UnknownHostException;
 
 import main.DroneControlConsole;
 import network.messages.Message;
-import network.messages.WaypointMessage;
+import network.messages.EntityMessage;
 
 public abstract class DroneConnection extends Thread {
 	
@@ -129,6 +129,7 @@ public abstract class DroneConnection extends Thread {
 				socket.close();
 				in.close();
 				out.close();
+				console.disconnect();
 			} catch (IOException e) {
 				System.err.println("Unable to close connection... is there an open connection?");
 			}

@@ -27,7 +27,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import network.messages.CompassMessage;
-import network.messages.WaypointMessage;
+import network.messages.EntityMessage;
 import objects.Waypoint;
 
 import org.openstreetmap.gui.jmapviewer.Coordinate;
@@ -243,7 +243,7 @@ public class MapPanel extends UpdatePanel {
     	map().addMapMarker(m);
     	
     	synchronized(this) {
-    		droneWaypoint = new Waypoint(c.getLat(),c.getLon());
+    		droneWaypoint = new Waypoint(c.getLat(),c.getLon(),"waypoint");
     		notifyAll();
     	}
     }
@@ -338,8 +338,8 @@ public class MapPanel extends UpdatePanel {
 		return true;
 	}
 	
-	public synchronized WaypointMessage getCurrentMessage() {
-		WaypointMessage m = new WaypointMessage(droneWaypoint);
+	public synchronized EntityMessage getCurrentMessage() {
+		EntityMessage m = new EntityMessage(droneWaypoint);
 		droneWaypoint = null;
 		return m;
 	}
@@ -363,7 +363,7 @@ public class MapPanel extends UpdatePanel {
 		}
 	}
 
-	public void displayData(WaypointMessage message) {
+	public void displayData(EntityMessage message) {
 		System.out.println("TODO MapPanel");
 	}
 	

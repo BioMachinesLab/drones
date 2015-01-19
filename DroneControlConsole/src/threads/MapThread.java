@@ -3,7 +3,7 @@ package threads;
 import gui.UpdatePanel;
 import gui.map.MapPanel;
 import main.DroneControlConsole;
-import network.messages.WaypointMessage;
+import network.messages.EntityMessage;
 
 public class MapThread extends UpdateThread {
 	
@@ -21,7 +21,7 @@ public class MapThread extends UpdateThread {
 		while (keepGoing) {
 			panel.threadWait();
 			
-			WaypointMessage msg = mapPanel.getCurrentMessage();
+			EntityMessage msg = mapPanel.getCurrentMessage();
 			
 			if(msg != null)
 				console.sendData(msg);
