@@ -1,9 +1,14 @@
 package simpletestbehaviors;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+
+import objects.Waypoint;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
 import commoninterface.LedState;
+import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CoordinateUtilities;
 
 public class GoToWaypointCIBehavior extends CIBehavior {
@@ -27,23 +32,23 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 		}
 		
 	}
-
+	
 	@Override
 	public void step() {
 		
-		if(drone.getWaypoints().size() == 0)
+		ArrayList<Waypoint> waypoints = Waypoint.getWaypoints(drone);
+		
+		if(waypoints.size() == 0)
 			return;
 		
 		double currentOrientation = drone.getCompassOrientationInDegrees();
 		double coordinatesAngle = CoordinateUtilities.angleInDegrees(
-				drone.getGPSLatitude(), drone.getGPSLongitude(),
-				drone.getWaypoints().get(0).getLatitude(),
-				drone.getWaypoints().get(0).getLongitude());
+				new Vector2d(drone.getGPSLatitude(), drone.getGPSLongitude()),
+				new Vector2d(waypoints.get(0).getLatitude(),waypoints.get(0).getLongitude()));
 		
 		double currentDistance = CoordinateUtilities.distanceInMeters(
-				drone.getGPSLatitude(), drone.getGPSLongitude(),
-				drone.getWaypoints().get(0).getLatitude(),
-				drone.getWaypoints().get(0).getLongitude());
+				new Vector2d(drone.getGPSLatitude(), drone.getGPSLongitude()),
+				new Vector2d(waypoints.get(0).getLatitude(),waypoints.get(0).getLongitude()));
 
 		double difference = currentOrientation - coordinatesAngle;
 		
