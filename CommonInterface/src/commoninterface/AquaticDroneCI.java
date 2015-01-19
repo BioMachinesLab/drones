@@ -1,7 +1,10 @@
 package commoninterface;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
+import objects.Entity;
 import objects.Waypoint;
 
 /**
@@ -79,7 +82,20 @@ public interface AquaticDroneCI {
 	 * @param state the state of the led
 	 */
 	public void setLed (int index, LedState state);
-	public LinkedList<Waypoint> getWaypoints();
+	
+	/**
+	 * Get the list of entities that have been detected/received by the drone (waypoints, other drones' locations, etc).
+	 * 
+	 * @return the list with all the current entities.
+	 */
+	public ArrayList<Entity> getEntities();
+	
+	/**
+	 * Get the list of registered sensors.
+	 * 
+	 * @return the list with all the current sensors.
+	 */
+	public ArrayList<CISensor> getCISensors();
 	
 	//TODO: Methods for communication and for getting nearby robots and messages from those are still missing
 }

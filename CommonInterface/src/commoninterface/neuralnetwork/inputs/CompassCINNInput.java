@@ -1,13 +1,13 @@
 package commoninterface.neuralnetwork.inputs;
 
 import commoninterface.AquaticDroneCI;
+import commoninterface.CISensor;
+import commoninterface.sensors.CompassCISensor;
 
 public class CompassCINNInput extends CINNInput {
 
-	private AquaticDroneCI drone;
-
-	public CompassCINNInput(AquaticDroneCI drone) {
-		this.drone = drone;
+	public CompassCINNInput(CISensor sensor) {
+		super(sensor);
 	}
 	
 	@Override
@@ -17,7 +17,7 @@ public class CompassCINNInput extends CINNInput {
 
 	@Override
 	public double getValue(int index) {
-		return drone.getCompassOrientationInDegrees();
+		return ((CompassCISensor)cisensor).getSensorReading(index);
 	}
 
 }

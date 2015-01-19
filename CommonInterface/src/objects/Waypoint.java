@@ -1,42 +1,26 @@
 package objects;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
-public class Waypoint implements Serializable{
-	
-	private double latitude;
-	private double longitude;
-	private double orientation;
-	private String name = "";
-	
-	public Waypoint(double lat, double lon) {
-		this.latitude = lat;
-		this.longitude = lon;
-	}
-	
-	public Waypoint(double lat, double lon, double orientation) {
-		this(lat,lon);
-		this.orientation = orientation;
-	}
-	
-	public Waypoint(double lat, double lon, double orientation, String name) {
-		this(lat, lon, orientation);
-		this.name = name;
-	}
-	
-	public double getLatitude(){
-		return latitude;
-	}
+import commoninterface.AquaticDroneCI;
 
-	public double getLongitude() {
-		return longitude;
+public class Waypoint extends Entity implements Serializable{
+	
+	public Waypoint(double lat, double lon, String name) {
+		super(lat, lon, name);
 	}
 	
-	public double getOrientation() {
-		return orientation;
+	public static ArrayList<Waypoint> getWaypoints(AquaticDroneCI drone) {
+		ArrayList<Waypoint> waypoints = new ArrayList<Waypoint>();
+		
+		for(Entity e : drone.getEntities()) {
+			if(e instanceof Waypoint)
+				waypoints.add((Waypoint)e);
+		}
+		
+		return waypoints;
 	}
 	
-	public String getName() {
-		return name;
-	}
 }

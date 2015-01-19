@@ -1,6 +1,5 @@
 package commoninterface.neuralnetwork;
 
-import java.awt.Robot;
 import java.io.Serializable;
 import java.util.Random;
 import java.util.Vector;
@@ -29,7 +28,7 @@ public abstract class CINeuralNetwork implements Serializable{
 	protected int genomeLength = -1;
 	
 	public boolean printValues = false;
-
+	
 	public void create(Vector<CINNInput> inputs, Vector<CINNOutput> outputs) {
 		this.inputs = inputs;
 		this.outputs = outputs;

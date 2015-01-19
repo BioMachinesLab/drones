@@ -5,12 +5,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Vector;
-
 import commoninterface.neuralnetwork.inputs.CINNInput;
 import commoninterface.neuralnetwork.outputs.CINNOutput;
 import commoninterface.utils.CIArguments;
 
-public class AquaticDroneNeuralNetwork extends CINeuralNetwork {
+public class CICTRNN extends CINeuralNetwork {
 	protected double    timeStep = 0.2;
     protected double    tau      = 2.5;
     
@@ -24,7 +23,7 @@ public class AquaticDroneNeuralNetwork extends CINeuralNetwork {
 	protected double[]  hiddenToOutputWeights;
 	protected double[]  outputBiases;
 
-	public AquaticDroneNeuralNetwork(Vector<CINNInput> inputs, Vector<CINNOutput> outputs, CIArguments arguments) {
+	public CICTRNN(Vector<CINNInput> inputs, Vector<CINNOutput> outputs, CIArguments arguments) {
 		numberOfHiddenNodes = arguments.getArgumentAsIntOrSetDefault("hiddennodes",5);
 		create(inputs, outputs, numberOfHiddenNodes);
 	}

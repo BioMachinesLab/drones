@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -66,6 +67,15 @@ public class CIArguments implements Serializable {
 	 * @throws ClassNotFoundException
 	 */
 	public CIArguments(String unparsedArgumentString) {
+		parseString(unparsedArgumentString);
+		removeRepeated();
+	}
+	
+	public CIArguments(String unparsedArgumentString, boolean translateClasses) {
+		if(translateClasses) {
+			unparsedArgumentString = translateClasses(unparsedArgumentString);
+//			System.out.println(unparsedArgumentString);
+		}
 		parseString(unparsedArgumentString);
 		removeRepeated();
 	}
@@ -654,6 +664,53 @@ public class CIArguments implements Serializable {
 			arguments.remove(index);
 			values.remove(index);
 		}
+	}
+	
+	private String translateClasses(String arg) {
+		Pattern p = Pattern.compile("classname=\\w*(\\.\\w*)*");
+	 	Matcher m = p.matcher(arg);
+	 	
+	 	LinkedList<String> strings = new LinkedList<String>();
+		while(m.find()) {
+			String found = m.group();
+			String[] split = found.split("=");
+			strings.add(split[1]);
+			arg = m.replaceFirst("__PLACEHOLDER__");
+			m = p.matcher(arg);
+	 	}
+		
+		for(int i = 0 ; i < strings.size() ; i++) {
+			List<String> names = ClassSearchUtils.searchFullNameInPath(strings.get(i));
+			if (names.size() == 0) {
+				String[] split = strings.get(i).split("\\.");
+				names = ClassSearchUtils.searchFullNameInPath(split[split.length-1]);
+				
+				if (names.size() == 0) {
+					
+					//We're really sorry for this crappy code, but we needed this for legacy support :( authors: Miguel and Tiago
+					if(strings.get(i).endsWith("NNInput")) {
+						List<String> sensorinputnames = ClassSearchUtils.searchFullNameInPath("SensorNNInput");
+						strings.set(i, sensorinputnames.get(0));
+						continue;
+					} if(strings.get(i).contains("Simple") && strings.get(i).contains("Sensor")) {
+						String currentString = strings.get(i);
+						currentString = currentString.replace("Simple", "");
+						List<String> sensorinputnames = ClassSearchUtils.searchFullNameInPath(currentString);
+						strings.set(i, sensorinputnames.get(0));
+						continue;
+					} else {
+						throw new RuntimeException("Class not found "+ strings.get(i));
+					}
+				}
+			} else if (names.size() > 1) {
+				throw new RuntimeException("Multiple implementations of class: "+ strings.get(i) + " - " + names);
+			}
+			strings.set(i, names.get(0));
+		}
+		
+		for(String s : strings)
+			arg = arg.replaceFirst("__PLACEHOLDER__", CLASS_NAME_TAG+"="+s);
+		return arg;
 	}
 	
 }

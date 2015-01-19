@@ -6,10 +6,9 @@ public class TwoWheelCINNOutput extends CINNOutput {
 
 	private double leftSpeed;
 	private double rightSpeed;
-	private AquaticDroneCI drone;
 	
 	public TwoWheelCINNOutput(AquaticDroneCI drone) {
-		this.drone = drone;
+		super(drone);
 	}
 	
 	@Override
