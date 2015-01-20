@@ -2,6 +2,7 @@ package commoninterface.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -10,7 +11,7 @@ import java.util.StringTokenizer;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-public class ClassSearchUtils {
+public class ClassSearchUtils implements Serializable {
 
 
 	public static String getClassFullName(String className){

@@ -1,11 +1,7 @@
 package commoninterface;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-
 import objects.Entity;
-import objects.Waypoint;
 
 /**
  * Aquatic Drone Common Interface: an interface that allow for controllers built 

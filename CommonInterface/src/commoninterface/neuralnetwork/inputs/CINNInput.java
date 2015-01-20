@@ -1,5 +1,6 @@
 package commoninterface.neuralnetwork.inputs;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Vector;
 
@@ -8,7 +9,7 @@ import commoninterface.CIFactory;
 import commoninterface.CISensor;
 import commoninterface.utils.CIArguments;
 
-public abstract class CINNInput {
+public abstract class CINNInput implements Serializable {
 	
 	protected CISensor cisensor;
 	

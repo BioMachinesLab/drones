@@ -6,7 +6,7 @@ import java.util.LinkedHashSet;
 
 import commoninterface.AquaticDroneCI;
 
-public class Waypoint extends Entity implements Serializable{
+public class Waypoint extends Entity {
 	
 	public Waypoint(double lat, double lon, String name) {
 		super(lat, lon, name);

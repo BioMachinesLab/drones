@@ -1,8 +1,10 @@
 package objects;
 
+import java.io.Serializable;
+
 import commoninterface.mathutils.Vector2d;
 
-public abstract class Entity {
+public abstract class Entity implements Serializable{
 	
 	protected double latitude;
 	protected double longitude;

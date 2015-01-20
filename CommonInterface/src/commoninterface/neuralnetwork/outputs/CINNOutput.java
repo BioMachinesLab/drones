@@ -1,15 +1,13 @@
 package commoninterface.neuralnetwork.outputs;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.Vector;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIFactory;
-import commoninterface.CISensor;
-import commoninterface.neuralnetwork.inputs.CINNInput;
 import commoninterface.utils.CIArguments;
 
-public abstract class CINNOutput {
+public abstract class CINNOutput implements Serializable {
 	
 	protected AquaticDroneCI drone;
 	

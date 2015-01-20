@@ -1,11 +1,11 @@
 package commoninterface.utils;
 
+import java.io.Serializable;
+
 import commoninterface.mathutils.Vector2d;
+import commoninterface.utils.jcoord.*;
 
-import uk.me.jstott.jcoord.LatLng;
-import uk.me.jstott.jcoord.UTMRef;
-
-public class CoordinateUtilities {
+public class CoordinateUtilities implements Serializable {
 
 	/**
 	 * The reference coordinate is located in Lisbon, Portugal. I'm not sure what's 

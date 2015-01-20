@@ -1,10 +1,13 @@
 package commoninterface;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+
 import objects.Entity;
+
 import commoninterface.utils.CIArguments;
 
-public abstract class CISensor {
+public abstract class CISensor implements Serializable{
 	
 	protected int id = 0;
 	protected AquaticDroneCI drone;
