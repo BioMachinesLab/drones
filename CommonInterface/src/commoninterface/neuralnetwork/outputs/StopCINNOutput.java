@@ -26,7 +26,7 @@ public class StopCINNOutput extends CINNOutput {
 	@Override
 	public void apply() {
 		if(stop)
-			drone.setMotorSpeeds(0, 0);
+			drone.setMotorSpeeds(0.5, 0.5);
 	}
 
 }
