@@ -5,21 +5,24 @@ import io.SystemInfoMessageProvider;
 import io.SystemStatusMessageProvider;
 import io.input.ControllerInput;
 import io.output.ControllerOutput;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
 import network.ConnectionHandler;
 import network.ConnectionListener;
 import network.ControllerMessageHandler;
 import network.MotorConnectionListener;
-import network.broadcast.BroadcastHandler;
+import network.broadcast.RealBroadcastHandler;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import objects.Entity;
 import simpletestbehaviors.GoToWaypointCIBehavior;
 import simpletestbehaviors.TurnToOrientationCIBehavior;
+import utils.NetworkUtils;
 import utils.Nmea0183ToDecimalConverter;
 import behaviors.CalibrationCIBehavior;
 import commoninterface.AquaticDroneCI;
@@ -27,6 +30,7 @@ import commoninterface.CIBehavior;
 import commoninterface.CILogger;
 import commoninterface.CISensor;
 import commoninterface.LedState;
+import commoninterface.network.broadcast.BroadcastHandler;
 import dataObjects.GPSData;
 
 public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
@@ -224,7 +228,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			motorConnectionListener = new MotorConnectionListener(this);
 			motorConnectionListener.start();
 			
-			broadcastHandler = new BroadcastHandler(this);
+			broadcastHandler = new RealBroadcastHandler(this);
 
 			logger.logMessage(".");
 			initMessages += "[INIT] MotorConnectionListener: ok\n";
@@ -333,5 +337,15 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		
 		for(CIBehavior b : behaviors)
 			b.cleanUp();
+	}
+	
+	@Override
+	public String getNetworkAddress() {
+		return NetworkUtils.getAddress();
+	}
+	
+	@Override
+	public BroadcastHandler getBroadcastHandler() {
+		return broadcastHandler;
 	}
 }

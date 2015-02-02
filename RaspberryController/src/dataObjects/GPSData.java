@@ -2,6 +2,8 @@ package dataObjects;
 
 import java.io.Serializable;
 
+import objects.DroneLocation;
+
 import org.joda.time.LocalDateTime;
 
 import utils.NetworkUtils;
@@ -18,8 +20,8 @@ public class GPSData implements Serializable {
 	private final static int NUMBER_OF_PARAMETERS = 15;
 	private long PRINT_NUMBER = 0;
 	
-	private String droneAddress;
-
+	private String address;
+	
 	// Coordinates
 	private double latitudeDecimal;
 	private double longitudeDecimal;
@@ -47,7 +49,7 @@ public class GPSData implements Serializable {
 
 	// General Methods
 	public GPSData() {
-		droneAddress = NetworkUtils.getAddress();
+		address = NetworkUtils.getAddress();
 		latitude = null;
 		longitude = null;
 		altitude = 0;
@@ -77,14 +79,6 @@ public class GPSData implements Serializable {
 		return latitude;
 	}
 	
-	public void setDroneAddress(String droneAddress) {
-		this.droneAddress = droneAddress;
-	}
-	
-	public String getDroneAddress() {
-		return droneAddress;
-	}
-
 	public void setLatitude(String latitude) {
 		
 		this.latitude = latitude;
@@ -258,5 +252,13 @@ public class GPSData implements Serializable {
 
 		PRINT_NUMBER++;
 		return str;
+	}
+
+	public DroneLocation toDroneLocation() {
+		return new DroneLocation(latitudeDecimal, longitudeDecimal, orientation, address);
+	}
+
+	public String getDroneAddress() {
+		return address;
 	}
 }
