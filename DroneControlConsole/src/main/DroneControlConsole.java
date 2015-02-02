@@ -5,14 +5,15 @@ import gui.GUI;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
+import objects.DroneLocation;
+import commoninterface.network.broadcast.BroadcastMessage;
+import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
+import commoninterface.network.broadcast.PositionBroadcastMessage;
 import network.ConsoleMessageHandler;
 import network.InformationConnection;
 import network.MotorConnection;
 import network.MotorMessageSender;
-import network.broadcast.BroadcastStatusThread;
 import network.broadcast.ConsoleBroadcastHandler;
-import network.broadcast.HeartbeatStatusThread;
-import network.broadcast.PositionStatusThread;
 import network.messages.InformationRequest.MessageType;
 import network.messages.Message;
 import threads.BehaviorMessageThread;
@@ -21,7 +22,6 @@ import threads.MapThread;
 import threads.MotorUpdateThread;
 import threads.UpdateThread;
 import dataObjects.ConsoleMotorSpeeds;
-import dataObjects.GPSData;
 
 public class DroneControlConsole {
 	
@@ -159,17 +159,17 @@ public class DroneControlConsole {
 	
 	public void newBroadcastMessage(String address, String message) {
 		
-		String[] split = message.split(BroadcastStatusThread.MESSAGE_SEPARATOR);
+		String[] split = message.split(BroadcastMessage.MESSAGE_SEPARATOR);
 		
 		switch(split[0]) {
 			case "HEARTBEAT":
-				long timeElapsed = HeartbeatStatusThread.decode(message);
+				long timeElapsed = HeartbeatBroadcastMessage.decode(message);
 				gui.getConnectionPanel().newAddress(address);
 				break;
 			case "GPS":
-				GPSData gpsData = PositionStatusThread.decode(address, message);
-				if(gpsData != null)
-					gui.getMapPanel().displayData(gpsData);
+				DroneLocation di = PositionBroadcastMessage.decode(address, message);
+				if(di != null)
+					gui.getMapPanel().displayData(di);
 				break;
 			default:
 				System.out.println("Uncategorized message >"+message+" from "+address);

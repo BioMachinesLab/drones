@@ -21,7 +21,7 @@ public class ConsoleMessageHandler extends MessageHandler {
 	protected void processMessage(Message message, ConnectionHandler c) {
 		if (message instanceof GPSMessage) {
 			console.getGUI().getGPSPanel().displayData(((GPSMessage) message).getGPSData());
-			console.getGUI().getMapPanel().displayData(((GPSMessage) message).getGPSData());
+			console.getGUI().getMapPanel().displayData(((GPSMessage) message).getGPSData().toDroneLocation());
 		} else if (message instanceof SystemInformationsMessage) {
 			console.getGUI().getSysInfoPanel().displayData(((SystemInformationsMessage) message).getSysInformations());
 		} else if (message instanceof SystemStatusMessage) {

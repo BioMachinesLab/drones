@@ -1,7 +1,6 @@
 package gui.map;
 
 import gui.UpdatePanel;
-
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -19,17 +18,15 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Iterator;
 import java.util.LinkedList;
-
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-
 import network.messages.CompassMessage;
 import network.messages.EntityMessage;
+import objects.DroneLocation;
 import objects.Waypoint;
-
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 import org.openstreetmap.gui.jmapviewer.Layer;
@@ -43,7 +40,6 @@ import org.openstreetmap.gui.jmapviewer.tilesources.BingAerialTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOpenAerialTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOsmTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.OsmTileSource;
-
 import threads.UpdateThread;
 import dataObjects.GPSData;
 
@@ -300,18 +296,18 @@ public class MapPanel extends UpdatePanel {
     		fitMarkersButton.doClick();
     	}
     }
-
-	public void displayData(GPSData gpsData) {
+    
+    public void displayData(DroneLocation di) {
 		
-		if(gpsData.getLatitudeDecimal() == 0 && gpsData.getLongitudeDecimal() == 0)
+		double lat = di.getLatitude();
+		double lon = di.getLongitude();
+		
+		if(lat == 0 && lon == 0)
 			return;
 		
-		double lat = gpsData.getLatitudeDecimal();
-		double lon = gpsData.getLongitudeDecimal();
+		double orientation = di.getOrientation();
 		
-		double orientation = gpsData.getOrientation();
-		
-		String droneName = gpsData.getDroneAddress().isEmpty() ? "drone" : gpsData.getDroneAddress();
+		String droneName = di.getName().isEmpty() ? "drone" : di.getName();
 		
 		if(usefulRobotCoordinate(c(lat,lon))) {
 			updateRobotPosition(droneName, c(lat,lon), orientation);
