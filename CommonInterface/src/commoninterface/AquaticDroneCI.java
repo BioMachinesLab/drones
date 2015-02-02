@@ -1,6 +1,9 @@
 package commoninterface;
 
 import java.util.ArrayList;
+
+import commoninterface.network.broadcast.BroadcastHandler;
+
 import objects.Entity;
 
 /**
@@ -93,5 +96,19 @@ public interface AquaticDroneCI {
 	 */
 	public ArrayList<CISensor> getCISensors();
 	
-	//TODO: Methods for communication and for getting nearby robots and messages from those are still missing
+	/**
+	 * The network address is the identifier of each drone.
+	 * 
+	 * @return IP address of the drone
+	 */
+	public String getNetworkAddress();
+	
+	/**
+	 * The BroadcastHandler takes care of communication with nearby drone.
+	 * It is possible to send and receive messages.
+	 * 
+	 * @return the BroadcastHandler
+	 */
+	public BroadcastHandler getBroadcastHandler();
+	
 }
