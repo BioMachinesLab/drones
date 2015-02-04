@@ -61,4 +61,9 @@ public class WaypointCISensor extends CISensor{
 	public double getRange() {
 		return range;
 	}
+
+	@Override
+	public int getNumberOfSensors() {
+		return readings.length;
+	}
 }

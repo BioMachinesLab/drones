@@ -18,6 +18,8 @@ public abstract class CISensor implements Serializable{
 		this.drone = drone;
 	}
 	
+	public abstract int getNumberOfSensors();
+	
 	public abstract double getSensorReading(int sensorNumber);
 	
 	public abstract void update(double time, ArrayList<Entity> entities);

@@ -21,7 +21,13 @@ public abstract class BroadcastHandler {
 	public abstract void sendMessage(String message);
 	
 	public void messageReceived(String address, String message) {
-		switch(message) {
+
+		if(address.equals(drone.getNetworkAddress()))
+			return;
+		
+		String identifier = message.split(BroadcastMessage.MESSAGE_SEPARATOR)[0];
+		
+		switch(identifier) {
 			case HeartbeatBroadcastMessage.IDENTIFIER:
 				//do nothing :D
 				break;
@@ -36,5 +42,4 @@ public abstract class BroadcastHandler {
 	public AquaticDroneCI getDrone() {
 		return drone;
 	}
-
 }
