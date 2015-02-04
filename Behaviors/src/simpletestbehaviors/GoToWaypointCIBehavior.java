@@ -1,15 +1,16 @@
 package simpletestbehaviors;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 
 import objects.Waypoint;
+
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
 import commoninterface.LedState;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CoordinateUtilities;
+import commoninterface.utils.jcoord.LatLon;
 
 public class GoToWaypointCIBehavior extends CIBehavior {
 
@@ -42,13 +43,11 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 			return;
 		
 		double currentOrientation = drone.getCompassOrientationInDegrees();
-		double coordinatesAngle = CoordinateUtilities.angleInDegrees(
-				new Vector2d(drone.getGPSLatitude(), drone.getGPSLongitude()),
-				new Vector2d(waypoints.get(0).getLatitude(),waypoints.get(0).getLongitude()));
+		double coordinatesAngle = CoordinateUtilities.angleInDegrees(drone.getGPSLatLon(),
+				new LatLon(waypoints.get(0).getLatitude(),waypoints.get(0).getLongitude()));
 		
-		double currentDistance = CoordinateUtilities.distanceInMeters(
-				new Vector2d(drone.getGPSLatitude(), drone.getGPSLongitude()),
-				new Vector2d(waypoints.get(0).getLatitude(),waypoints.get(0).getLongitude()));
+		double currentDistance = CoordinateUtilities.distanceInMeters(drone.getGPSLatLon(),
+				new LatLon(waypoints.get(0).getLatitude(),waypoints.get(0).getLongitude()));
 
 		double difference = currentOrientation - coordinatesAngle;
 		
