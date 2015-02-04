@@ -63,7 +63,7 @@ public class UTMRef implements Serializable {
    * @return the converted latitude and longitude
    * @since 1.0
    */
-  public LatLng toLatLng() {
+  public LatLon toLatLng() {
     double UTM_F0 = 0.9996;
     double a = RefEll.WGS84.getMaj();
     double eSquared = RefEll.WGS84.getEcc();
@@ -125,7 +125,7 @@ public class UTMRef implements Serializable {
                 * Math.pow(d, 5.0) / 120.0) / Math.cos(phi1Rad))
             * (180.0 / Math.PI);
 
-    return new LatLng(latitude, longitude);
+    return new LatLon(latitude, longitude);
   }
 
 

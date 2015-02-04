@@ -153,7 +153,7 @@ public class OSRef implements Serializable {
    *         OSGB36 datum
    * @since 1.0
    */
-  public LatLng toLatLng() {
+  public LatLon toLatLng() {
     double OSGB_F0 = 0.9996012717;
     double N0 = -100000.0;
     double E0 = 400000.0;
@@ -220,7 +220,7 @@ public class OSRef implements Serializable {
         lambda0 + (X * (E - E0)) - (XI * Math.pow(E - E0, 3.0))
             + (XII * Math.pow(E - E0, 5.0)) - (XIIA * Math.pow(E - E0, 7.0));
 
-    return new LatLng(Math.toDegrees(phi), Math.toDegrees(lambda));
+    return new LatLon(Math.toDegrees(phi), Math.toDegrees(lambda));
   }
 
 

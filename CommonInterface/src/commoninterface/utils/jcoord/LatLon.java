@@ -13,7 +13,7 @@ import java.io.Serializable;
  * @version 1.0
  * @since 1.0
  */
-public class LatLng implements Serializable {
+public class LatLon implements Serializable {
 
   /**
    * Latitude in degrees.
@@ -35,7 +35,7 @@ public class LatLng implements Serializable {
    *          the longitude in degrees
    * @since 1.0
    */
-  public LatLng(double lat, double lng) {
+  public LatLon(double lat, double lng) {
     this.lat = lat;
     this.lng = lng;
   }
@@ -70,7 +70,7 @@ public class LatLng implements Serializable {
     double b = airy1830.getMin();
     double eSquared = airy1830.getEcc();
     double phi = Math.toRadians(getLat());
-    double lambda = Math.toRadians(getLng());
+    double lambda = Math.toRadians(getLon());
     double E = 0.0;
     double N = 0.0;
     double n = (a - b) / (a + b);
@@ -316,13 +316,13 @@ public class LatLng implements Serializable {
    * @return the surface distance in km
    * @since 1.0
    */
-  public double distance(LatLng ll) {
+  public double distance(LatLon ll) {
     double er = 6366.707;
 
     double latFrom = Math.toRadians(getLat());
     double latTo = Math.toRadians(ll.getLat());
-    double lngFrom = Math.toRadians(getLng());
-    double lngTo = Math.toRadians(ll.getLng());
+    double lngFrom = Math.toRadians(getLon());
+    double lngTo = Math.toRadians(ll.getLon());
 
     double d =
         Math.acos(Math.sin(latFrom) * Math.sin(latTo) + Math.cos(latFrom)
@@ -350,7 +350,7 @@ public class LatLng implements Serializable {
    * @return the longitude in degrees
    * @since 1.0
    */
-  public double getLng() {
+  public double getLon() {
     return lng;
   }
 }

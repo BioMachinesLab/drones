@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Random;
 
 import objects.Entity;
+
 import commoninterface.AquaticDroneCI;
 import commoninterface.CISensor;
 import commoninterface.mathutils.GeometricCalculator;
@@ -12,6 +13,7 @@ import commoninterface.mathutils.GeometricInfo;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
+import commoninterface.utils.jcoord.LatLon;
 
 public abstract class CIConeTypeSensor extends CISensor {
 
@@ -75,7 +77,7 @@ public abstract class CIConeTypeSensor extends CISensor {
 	
 	public void update(double time, ArrayList<Entity> entities) {
 		
-		robotPos = CoordinateUtilities.GPSToCartesian(drone.getGPSLatitude(), drone.getGPSLongitude());
+		robotPos = CoordinateUtilities.GPSToCartesian(drone.getGPSLatLon());
 		
 		try { 
 			for(int j = 0; j < readings.length; j++){

@@ -1,7 +1,9 @@
 package commoninterface.sensors;
 
 import java.util.ArrayList;
+
 import objects.Entity;
+
 import commoninterface.AquaticDroneCI;
 import commoninterface.CISensor;
 import commoninterface.mathutils.GeometricCalculator;
@@ -9,6 +11,7 @@ import commoninterface.mathutils.GeometricInfo;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
+import commoninterface.utils.jcoord.LatLon;
 
 public abstract class ConeTypeCISensor extends CISensor {
 
@@ -39,10 +42,9 @@ public abstract class ConeTypeCISensor extends CISensor {
 
 	@Override
 	public void update(double time, ArrayList<Entity> entities) {
-		long t = System.currentTimeMillis();
 		
-		Vector2d robotPos = new Vector2d(drone.getGPSLatitude(), drone.getGPSLongitude());
-		robotCartesian = CoordinateUtilities.GPSToCartesian(robotPos.getX(), robotPos.getY());
+		LatLon robotLatLon = drone.getGPSLatLon();
+		robotCartesian = CoordinateUtilities.GPSToCartesian(robotLatLon);
 		
 		for(int j = 0; j < readings.length; j++){
 			readings[j] = 0.0;
@@ -50,8 +52,7 @@ public abstract class ConeTypeCISensor extends CISensor {
 		
 		for (Entity e : entities) {
 			if (validEntity(e)) {
-				Vector2d entityPos = new Vector2d(e.getLatitude(),e.getLongitude());
-				Vector2d entityCartesian = CoordinateUtilities.GPSToCartesian(entityPos.getX(), entityPos.getY());
+				Vector2d entityCartesian = CoordinateUtilities.GPSToCartesian(new LatLon(e.getLatitude(),e.getLongitude()));
 				for(int j=0; j<numberSensors; j++) {			
 					readings[j] = Math.max(calculateContributionToSensor(j, entityCartesian), readings[j]);
 				}

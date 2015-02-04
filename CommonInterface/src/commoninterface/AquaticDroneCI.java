@@ -3,7 +3,7 @@ package commoninterface;
 import java.util.ArrayList;
 
 import commoninterface.network.broadcast.BroadcastHandler;
-
+import commoninterface.utils.jcoord.LatLon;
 import objects.Entity;
 
 /**
@@ -47,18 +47,11 @@ public interface AquaticDroneCI {
 	public double  getCompassOrientationInDegrees();
 
 	/**
-	 * Get the latitude (in decimal) from the GPS.
+	 * Get the latitude and longitude (in decimal) from the GPS.
 	 * 
-	 * @return latitude read from the GPS in decimal.
+	 * @return LatLon read from the GPS in decimal.
 	 */
-	public double  getGPSLatitude();
-	
-	/**
-	 * Get the longitude (in decimal) from the GPS.
-	 * 
-	 * @return longitude read from the GPS in decimal.
-	 */
-	public double  getGPSLongitude();
+	public LatLon  getGPSLatLon();
 	
 	/**
 	 * Get the orientation (in degrees) from the GPS.

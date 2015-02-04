@@ -1,7 +1,9 @@
 package commoninterface.network.broadcast;
 
 import objects.DroneLocation;
+
 import commoninterface.AquaticDroneCI;
+import commoninterface.utils.jcoord.LatLon;
 
 public class PositionBroadcastMessage extends BroadcastMessage {
 
@@ -15,11 +17,10 @@ public class PositionBroadcastMessage extends BroadcastMessage {
 	@Override
 	public String getMessage() {
 		
-		double latitude = drone.getGPSLatitude();
-		double longitude = drone.getGPSLongitude();
+		LatLon latLon = drone.getGPSLatLon();
 		double orientation = drone.getCompassOrientationInDegrees();
 		
-		return latitude+MESSAGE_SEPARATOR+longitude+MESSAGE_SEPARATOR+orientation;
+		return latLon.getLat()+MESSAGE_SEPARATOR+latLon.getLon()+MESSAGE_SEPARATOR+orientation;
 	}
 	
 	public static DroneLocation decode(String address, String message) {

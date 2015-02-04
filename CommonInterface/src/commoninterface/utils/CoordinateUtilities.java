@@ -13,13 +13,12 @@ public class CoordinateUtilities implements Serializable {
 	 * 
 	 * @miguelduarte42
 	 */
-	private final static UTMRef REFERENCE_UTM = new LatLng(38.765078, -9.093461).toUTMRef();
+	private final static UTMRef REFERENCE_UTM = new LatLon(38.765078, -9.093461).toUTMRef();
 	
-	public static Vector2d GPSToCartesian(double lat, double lon) {
+	public static Vector2d GPSToCartesian(LatLon coordinate) {
 		
 		Vector2d result = new Vector2d();
 		
-		LatLng coordinate = new LatLng(lat,lon);
 		UTMRef utmCoordinate = coordinate.toUTMRef();
 		result.setX(utmCoordinate.getEasting() - REFERENCE_UTM.getEasting());
 		result.setY(utmCoordinate.getNorthing() - REFERENCE_UTM.getNorthing());
@@ -35,45 +34,54 @@ public class CoordinateUtilities implements Serializable {
 	 * If the reference coordinate and the new coordinate are in different
 	 * UTM zones, for instance, it might be a problem.
 	 * 
-	 * @return a Vector2d with Lat in X and Lon in Y (this might be
-	 * counter-intuitive)
+	 * @return a Vector2d with Lat in Y and Lon in X
 	 * 
 	 * @author miguelduarte42
 	 */
-	public static Vector2d cartesianToGPS(double x, double y) {
-		
-		Vector2d result = new Vector2d();
+	public static LatLon cartesianToGPS(Vector2d cartesian) {
 		
 		UTMRef resultUTM = new UTMRef(
-				REFERENCE_UTM.getEasting()+x,
-				REFERENCE_UTM.getNorthing()+y,
+				REFERENCE_UTM.getEasting()+cartesian.getX(),
+				REFERENCE_UTM.getNorthing()+cartesian.getY(),
 				REFERENCE_UTM.getLatZone(),
 				REFERENCE_UTM.getLngZone());
 		
-		LatLng resultGPS = resultUTM.toLatLng();
-		
-		result.setX(resultGPS.getLat());
-		result.setY(resultGPS.getLng());
-		
-		return result;
+		return resultUTM.toLatLng();
 	}
 	
-	public static double angleInDegrees(Vector2d latLon1, Vector2d latLon2) {
+	public static LatLon cartesianToGPS(double x, double y) {
+		return cartesianToGPS(new Vector2d(x,y));
+	}
+	
+	public static double angleInDegrees(LatLon latLon1, LatLon latLon2) {
 		
-		double lat1 = Math.toRadians(latLon1.getX());
-		double lat2 = Math.toRadians(latLon2.getX());
-		double lon1 = Math.toRadians(latLon1.getY());
-		double lon2 = Math.toRadians(latLon2.getY());
+		double lat1 = latLon1.getLat();
+		double lat2 = latLon2.getLat();
+		double lon1 = latLon1.getLon();
+		double lon2 = latLon2.getLon();
 		
 		double result = Math.atan2(Math.sin(lon2-lon1)*Math.cos(lat2), Math.cos(lat1)*Math.sin(lat2)-Math.sin(lat1)*Math.cos(lat2)*Math.cos(lon2-lon1));
 	
 		return Math.toDegrees(result);
 	}
 	
-	public static double distanceInMeters(Vector2d latLon1, Vector2d latLon2) {
-		LatLng coord1 = new LatLng(latLon1.getX(), latLon1.getY());
-		LatLng coord2 = new LatLng(latLon2.getX(), latLon2.getY());
+	public static double distanceInMeters(LatLon coord1, LatLon coord2) {
 		return coord1.distance(coord2)*1000;
+	}
+	
+	public static void main(String[] args) {
+		LatLon o = new LatLon(38.765078, -9.093461);
+		Vector2d oCart = GPSToCartesian(o);
+		System.out.println(oCart.getX()+" "+oCart.getY());
+		
+		Vector2d tr = new Vector2d(10,10);
+		Vector2d tl = new Vector2d(-10,10);
+		Vector2d b = new Vector2d(0,-10);
+		
+		System.out.println(GPSToCartesian(cartesianToGPS(tl)));
+		System.out.println(GPSToCartesian(cartesianToGPS(tr)));
+		System.out.println(GPSToCartesian(cartesianToGPS(b)));
+		
 	}
 	
 }
