@@ -55,12 +55,15 @@ public class CoordinateUtilities implements Serializable {
 	
 	public static double angleInDegrees(LatLon latLon1, LatLon latLon2) {
 		
-		double lat1 = latLon1.getLat();
-		double lat2 = latLon2.getLat();
-		double lon1 = latLon1.getLon();
-		double lon2 = latLon2.getLon();
+		double lat1 = Math.toRadians(latLon1.getLat());
+		double lat2 = Math.toRadians(latLon2.getLat());
+		double lon1 = Math.toRadians(latLon1.getLon());
+		double lon2 = Math.toRadians(latLon2.getLon());
 		
-		double result = Math.atan2(Math.sin(lon2-lon1)*Math.cos(lat2), Math.cos(lat1)*Math.sin(lat2)-Math.sin(lat1)*Math.cos(lat2)*Math.cos(lon2-lon1));
+		double result = Math.atan2(
+				Math.sin(lon2-lon1)*Math.cos(lat2),
+				Math.cos(lat1)*Math.sin(lat2)-Math.sin(lat1)*Math.cos(lat2)*Math.cos(lon2-lon1)
+			);
 	
 		return Math.toDegrees(result);
 	}
@@ -70,6 +73,7 @@ public class CoordinateUtilities implements Serializable {
 	}
 	
 	public static void main(String[] args) {
+		//Test cases
 		LatLon o = new LatLon(38.765078, -9.093461);
 		Vector2d oCart = GPSToCartesian(o);
 		System.out.println(oCart.getX()+" "+oCart.getY());
@@ -77,10 +81,27 @@ public class CoordinateUtilities implements Serializable {
 		Vector2d tr = new Vector2d(10,10);
 		Vector2d tl = new Vector2d(-10,10);
 		Vector2d b = new Vector2d(0,-10);
+		Vector2d r = new Vector2d(10,0);
+		Vector2d l = new Vector2d(-10,0);
 		
+		System.out.println();
+		System.out.println((cartesianToGPS(tl)));
+		System.out.println((cartesianToGPS(tr)));
+		System.out.println((cartesianToGPS(b)));
+		System.out.println((cartesianToGPS(r)));
+		System.out.println((cartesianToGPS(l)));
+		System.out.println();
 		System.out.println(GPSToCartesian(cartesianToGPS(tl)));
 		System.out.println(GPSToCartesian(cartesianToGPS(tr)));
 		System.out.println(GPSToCartesian(cartesianToGPS(b)));
+		System.out.println(GPSToCartesian(cartesianToGPS(r)));
+		System.out.println(GPSToCartesian(cartesianToGPS(l)));
+		System.out.println();
+		System.out.println(angleInDegrees(o, cartesianToGPS(tl)));
+		System.out.println(angleInDegrees(o, cartesianToGPS(tr)));
+		System.out.println(angleInDegrees(o, cartesianToGPS(b)));
+		System.out.println(angleInDegrees(o, cartesianToGPS(r)));
+		System.out.println(angleInDegrees(o, cartesianToGPS(l)));
 		
 	}
 	

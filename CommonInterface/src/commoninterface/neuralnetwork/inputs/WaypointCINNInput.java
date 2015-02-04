@@ -22,12 +22,12 @@ public class WaypointCINNInput extends CINNInput {
 		
 		if(index == 0) { //angle
 			
-			return cisensor.getSensorReading(index)/360.0+0.5;
+			return sensor.getSensorReading(index)/360.0+0.5;
 			
 		} else {//range
 			
-			double range = ((WaypointCISensor)cisensor).getRange();
-			double distance = cisensor.getSensorReading(index); 
+			double range = ((WaypointCISensor)sensor).getRange();
+			double distance = sensor.getSensorReading(index); 
 			if(distance > range) {
 				return 0;
 			} else {

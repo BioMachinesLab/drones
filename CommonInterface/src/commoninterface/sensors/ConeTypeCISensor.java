@@ -22,7 +22,6 @@ public abstract class ConeTypeCISensor extends CISensor {
 	protected double openingAngle = Math.toRadians(90);
 	protected GeometricCalculator geoCalc = new GeometricCalculator();
 	private Vector2d sensorPosition = new Vector2d();
-	private Vector2d robotCartesian;
 
 	public ConeTypeCISensor(int id, AquaticDroneCI drone, CIArguments args) {
 		super(id, drone, args);
@@ -43,46 +42,45 @@ public abstract class ConeTypeCISensor extends CISensor {
 	@Override
 	public void update(double time, ArrayList<Entity> entities) {
 		
-		LatLon robotLatLon = drone.getGPSLatLon();
-		robotCartesian = CoordinateUtilities.GPSToCartesian(robotLatLon);
-		
 		for(int j = 0; j < readings.length; j++){
 			readings[j] = 0.0;
 		}
 		
 		for (Entity e : entities) {
 			if (validEntity(e)) {
-				Vector2d entityCartesian = CoordinateUtilities.GPSToCartesian(new LatLon(e.getLatitude(),e.getLongitude()));
 				for(int j=0; j<numberSensors; j++) {			
-					readings[j] = Math.max(calculateContributionToSensor(j, entityCartesian), readings[j]);
+					readings[j] = Math.max(calculateContributionToSensor(j, new LatLon(e.getLatitude(),e.getLongitude())), readings[j]);
 				}
 			}
 		}
 	}
 	
-	protected double calculateContributionToSensor(int sensorNumber, Vector2d e) {
+	protected double calculateContributionToSensor(int sensorNumber, LatLon e) {
 		
-		GeometricInfo sensorInfo = getSensorGeometricInfo(sensorNumber, e);
+		LatLon droneLatLon = drone.getGPSLatLon();
 		
-		if((sensorInfo.getAngle() < (openingAngle / 2.0)) && 
-				   (sensorInfo.getAngle() > (-openingAngle / 2.0))) {
+		double distance = CoordinateUtilities.distanceInMeters(droneLatLon, e);
+		
+		if(distance < getRange()) { 
 
-			return (getRange() - sensorInfo.getDistance()) / getRange();
+			double absoluteAngle = Math.toRadians(CoordinateUtilities.angleInDegrees(drone.getGPSLatLon(), e) ); 
+			double sensorAngle = angles[sensorNumber] + Math.toRadians(drone.getCompassOrientationInDegrees());
+			
+			double relativeAngle = sensorAngle - absoluteAngle;
+			
+			while(relativeAngle > Math.PI)
+				relativeAngle-=2*Math.PI;
+			while(relativeAngle < -Math.PI)
+				relativeAngle+=2*Math.PI;
+			
+			if((relativeAngle < (openingAngle / 2.0)) && (relativeAngle > (-openingAngle / 2.0))) {
+				return (getRange() - distance) / getRange();
+			}
 		}
 		
 		return 0;
 	}
 	
-	protected GeometricInfo getSensorGeometricInfo(int sensorNumber, Vector2d e){
-		
-		double orientation= angles[sensorNumber] + Math.toRadians(drone.getCompassOrientationInDegrees()-90);
-		
-		sensorPosition.set(robotCartesian.getX(), robotCartesian.getY());
-		GeometricInfo sensorInfo = geoCalc.getGeometricInfoBetweenPoints(
-				sensorPosition, orientation, e);
-		return sensorInfo;
-	}
-
 	public void setupPositions(int numberSensors) {
 		double delta = 2 * Math.PI / numberSensors;
 		double angle = 0;

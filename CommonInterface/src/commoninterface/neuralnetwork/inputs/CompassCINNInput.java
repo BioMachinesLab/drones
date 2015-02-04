@@ -17,7 +17,7 @@ public class CompassCINNInput extends CINNInput {
 
 	@Override
 	public double getValue(int index) {
-		return ((CompassCISensor)cisensor).getSensorReading(index);
+		return ((CompassCISensor)sensor).getSensorReading(index);
 	}
 
 }

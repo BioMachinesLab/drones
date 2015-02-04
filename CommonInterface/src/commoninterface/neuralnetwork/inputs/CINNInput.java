@@ -11,10 +11,10 @@ import commoninterface.utils.CIArguments;
 
 public abstract class CINNInput implements Serializable {
 	
-	protected CISensor cisensor;
+	protected CISensor sensor;
 	
 	public CINNInput(CISensor s) {
-		this.cisensor = s;
+		this.sensor = s;
 	}
 	
 	public abstract int getNumberOfInputValues();

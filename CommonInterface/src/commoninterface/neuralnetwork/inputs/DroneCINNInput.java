@@ -1,7 +1,6 @@
 package commoninterface.neuralnetwork.inputs;
 
 import commoninterface.CISensor;
-import commoninterface.sensors.WaypointCISensor;
 
 public class DroneCINNInput extends CINNInput {
 
@@ -11,7 +10,7 @@ public class DroneCINNInput extends CINNInput {
 	
 	@Override
 	public int getNumberOfInputValues() {
-		return cisensor.getNumberOfSensors();
+		return sensor.getNumberOfSensors();
 	}
 
 	@Override
@@ -20,7 +19,7 @@ public class DroneCINNInput extends CINNInput {
 		if(index >= getNumberOfInputValues())
 			throw new RuntimeException("[DroneCINNInput] Invalid number of input index!");
 		
-		return cisensor.getSensorReading(index);
+		return sensor.getSensorReading(index);
 		
 	}
 
