@@ -42,5 +42,4 @@ public class BroadcastMessageThread extends Thread{
 			e.printStackTrace();
 		}
 	}
-
 }
