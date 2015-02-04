@@ -68,7 +68,7 @@ public class Logger extends Thread {
 		
 		String result = dateFormat.format(new Date())+"\t";
 		
-		result+=drone.getGPSLatitude()+"\t"+drone.getGPSLongitude()+"\t"+drone.getGPSOrientationInDegrees()+"\t"+drone.getCompassOrientationInDegrees();
+		result+=drone.getGPSLatLon().getLat()+"\t"+drone.getGPSLatLon().getLon()+"\t"+drone.getGPSOrientationInDegrees()+"\t"+drone.getCompassOrientationInDegrees();
 		
 		for(ControllerInput i : inputs) {
 			if(i instanceof GPSModuleInput) {

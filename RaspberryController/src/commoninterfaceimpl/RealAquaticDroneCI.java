@@ -25,12 +25,15 @@ import simpletestbehaviors.TurnToOrientationCIBehavior;
 import utils.NetworkUtils;
 import utils.Nmea0183ToDecimalConverter;
 import behaviors.CalibrationCIBehavior;
+
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
 import commoninterface.CISensor;
 import commoninterface.LedState;
 import commoninterface.network.broadcast.BroadcastHandler;
+import commoninterface.utils.jcoord.LatLon;
+
 import dataObjects.GPSData;
 
 public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
@@ -126,49 +129,32 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	}
 
 	@Override
-	public double getGPSLatitude() {
+	public LatLon getGPSLatLon() {
 		try {
 			GPSData gpsData = ioManager.getGpsModule().getReadings();
 			
 			//NMEA format: e.g. 3844.9474N 00909.2214W
 			String latitude = gpsData.getLatitude();
+			String longitude = gpsData.getLongitude();
 			
-			if(latitude == null)
-				return -1;
+			if(latitude == null || longitude == null)
+				return null;
 	
 			double lat = Double.parseDouble(latitude.substring(0,latitude.length()-1));
 			char latPos = latitude.charAt(latitude.length()-1);
-	
-			lat = Nmea0183ToDecimalConverter.convertLatitudeToDecimal(lat, latPos);
-			
-			return lat;
-		} catch(Exception e){}
-		
-		return -1;
-	}
-
-	@Override
-	public double getGPSLongitude() {
-		try {
-			GPSData gpsData = ioManager.getGpsModule().getReadings();
-	
-			//NMEA format: e.g. 3844.9474N 00909.2214W
-			String longitude = gpsData.getLongitude();
-			
-			if(longitude == null)
-				return -1;
 			
 			double lon = Double.parseDouble(longitude.substring(0,longitude.length()-1));
 			char lonPos = longitude.charAt(longitude.length()-1);
-			
+	
+			lat = Nmea0183ToDecimalConverter.convertLatitudeToDecimal(lat, latPos);
 			lon = Nmea0183ToDecimalConverter.convertLongitudeToDecimal(lon, lonPos);
 			
-			return lon;
+			return new LatLon(lat,lon);
 		} catch(Exception e){}
 		
-		return -1;
+		return null;
 	}
-	
+
 	@Override
 	public double getGPSOrientationInDegrees() {
 		try {
