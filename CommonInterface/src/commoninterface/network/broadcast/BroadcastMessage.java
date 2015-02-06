@@ -18,7 +18,11 @@ public abstract class BroadcastMessage {
 	protected abstract String getMessage();
 		
 	public String encode() {
-		return identifier+MESSAGE_SEPARATOR+getMessage();
+		String msg = getMessage();
+		if(msg != null) {
+			return identifier+MESSAGE_SEPARATOR+msg;
+		}
+		return null;
 	}
 	
 	public long getUpdateTimeInMiliseconds() {

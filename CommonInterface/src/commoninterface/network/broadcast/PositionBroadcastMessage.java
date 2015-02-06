@@ -18,9 +18,12 @@ public class PositionBroadcastMessage extends BroadcastMessage {
 	public String getMessage() {
 		
 		LatLon latLon = drone.getGPSLatLon();
-		double orientation = drone.getCompassOrientationInDegrees();
 		
-		return latLon.getLat()+MESSAGE_SEPARATOR+latLon.getLon()+MESSAGE_SEPARATOR+orientation;
+		if(latLon != null) {
+			double orientation = drone.getCompassOrientationInDegrees();
+			return latLon.getLat()+MESSAGE_SEPARATOR+latLon.getLon()+MESSAGE_SEPARATOR+orientation;
+		}
+		return null;
 	}
 	
 	public static DroneLocation decode(String address, String message) {
