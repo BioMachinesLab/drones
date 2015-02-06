@@ -13,7 +13,8 @@ public class BroadcastSender {
 	public BroadcastSender(String ownAddress, int port) {
 		this.port = port;
 		try {
-			socket = new DatagramSocket(port, InetAddress.getByName(ownAddress));
+			System.out.println("BroadcastSender own address is "+ownAddress);
+			socket = new DatagramSocket(port+1, InetAddress.getByName(ownAddress));
 			socket.setBroadcast(true);
 		} catch (Exception e) {
 			e.printStackTrace();

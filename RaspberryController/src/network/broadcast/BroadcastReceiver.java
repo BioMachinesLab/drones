@@ -3,13 +3,13 @@ package network.broadcast;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+
 import commoninterface.network.broadcast.BroadcastHandler;
 
 public class BroadcastReceiver extends Thread{
 	
 	private static int BUFFER_LENGTH = 15000;
 	private DatagramSocket socket;
-	private Thread receiver;
 	private String ownAddress;
 	private BroadcastHandler bh;
 
@@ -22,7 +22,6 @@ public class BroadcastReceiver extends Thread{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		receiver.start();
 	}
 
 	@Override
@@ -35,9 +34,9 @@ public class BroadcastReceiver extends Thread{
 				socket.receive(packet);
 
 				String message = new String(packet.getData()).trim();
-				
-				if(!packet.getAddress().getHostAddress().equals(ownAddress))
+				if(!packet.getAddress().getHostAddress().equals(ownAddress)) {
 					bh.messageReceived(packet.getAddress().getHostAddress(), message);
+				}
 			}
 
 		} catch (Exception e) {

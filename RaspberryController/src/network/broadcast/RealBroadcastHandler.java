@@ -11,6 +11,7 @@ import commoninterface.network.broadcast.BroadcastHandler;
  */
 public class RealBroadcastHandler extends BroadcastHandler {
 	
+	private static boolean DEBUG = false;
 	private BroadcastMessageThread broadcastStatusThread = null;
 	
 	private BroadcastReceiver receiver;
@@ -19,14 +20,13 @@ public class RealBroadcastHandler extends BroadcastHandler {
 	public RealBroadcastHandler(AquaticDroneCI drone) {
 		super(drone);
 		receiver = new BroadcastReceiver(this, drone.getNetworkAddress(), PORT);
-		sender = new BroadcastSender(drone.getNetworkAddress(), PORT+1);
+		sender = new BroadcastSender(drone.getNetworkAddress(), PORT);
 		receiver.start();
 		
 		initBroadcastThread();
 	}
 	
 	private void initBroadcastThread() {
-		
 		broadcastStatusThread = new BroadcastMessageThread(this, broadcastMessages);
 		broadcastStatusThread.start();
 	}
@@ -34,6 +34,15 @@ public class RealBroadcastHandler extends BroadcastHandler {
 	@Override
 	public void sendMessage(String message) {
 		sender.sendMessage(message);
+		if(DEBUG)
+			System.out.println("RealBroadcastHandler sent ["+message+"]");
+	}
+	
+	@Override
+	public void messageReceived(String address, String message) {
+		super.messageReceived(address, message);
+		if(DEBUG)
+			System.out.println("RealBroadcastHandler received ["+message+"]");
 	}
 	
 	public AquaticDroneCI getDrone() {
