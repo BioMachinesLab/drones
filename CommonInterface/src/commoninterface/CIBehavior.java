@@ -1,16 +1,13 @@
 package commoninterface;
 
+import commoninterface.utils.CIArguments;
+
 /**
- * 
  * @author alc
  */
-
-
 public abstract class CIBehavior {
-	private CILogger logger;
-	private String[] args;
+	private CIArguments args;
 	protected AquaticDroneCI drone; 
-	
 	
 	/**
 	 * Initialize the controller
@@ -19,20 +16,22 @@ public abstract class CIBehavior {
 	 * @param drone   Common drone hardware interface. 
 	 * @param logger  Instance of the CI logger to use.
 	 */
-	public CIBehavior(String[] args, AquaticDroneCI drone, CILogger logger) {
+	public CIBehavior(CIArguments args, AquaticDroneCI drone) {
 		this.drone  = drone;
-		this.logger = logger;
 		this.args   = args;
 	}
 
+	/**
+	 * Make any initial configurations.
+	 */
 	public void start() {		
-		drone.begin(args, logger);
+		
 	}
 	
 	/**
 	 * Take one control step.
 	 */
-	public abstract void step();
+	public abstract void step(double timestep);
 	
 	/**
 	 * Return the control step period: the time between sense-think-act loops.
@@ -40,15 +39,6 @@ public abstract class CIBehavior {
 	 */
 	public double getControlStepPeriod() {
 		return 0.1;
-	}
-	
-	/**
-	 * Get the logger.
-	 * 
-	 * @return the logger assigned to this behavior.
-	 */
-	public CILogger getLogger() {
-		return logger;
 	}
 
 	/**

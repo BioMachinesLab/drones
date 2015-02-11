@@ -19,9 +19,9 @@ public class TwoWheelCINNOutput extends CINNOutput {
 	@Override
 	public void setValue(int output, double value) {
 		if (output == 0)
-			leftSpeed = value;
+			leftSpeed = value*2 - 1;
 		else
-			rightSpeed = value;
+			rightSpeed = value*2 - 1;
 	}
 
 	@Override

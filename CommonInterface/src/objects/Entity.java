@@ -11,6 +11,7 @@ public abstract class Entity implements Serializable{
 	protected double orientation;
 	protected String name = "";
 	protected Vector2d latLon;
+	protected long timestepReceived = 0;
 	
 	public Entity(double lat, double lon) {
 		this.latitude = lat;
@@ -60,6 +61,14 @@ public abstract class Entity implements Serializable{
 		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		return result;
+	}
+	
+	public void setTimestepReceived(long timestep) {
+		this.timestepReceived = timestep;
+	}
+	
+	public long getTimestepReceived() {
+		return timestepReceived;
 	}
 
 	@Override

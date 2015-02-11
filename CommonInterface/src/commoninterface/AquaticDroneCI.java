@@ -3,6 +3,7 @@ package commoninterface;
 import java.util.ArrayList;
 
 import commoninterface.network.broadcast.BroadcastHandler;
+import commoninterface.utils.CIArguments;
 import commoninterface.utils.jcoord.LatLon;
 import objects.Entity;
 
@@ -19,7 +20,7 @@ public interface AquaticDroneCI {
 	/**
 	 * Start the drone hardware
 	 */
-	public void    begin(String[] args, CILogger logger);
+	public void    begin(CIArguments args, CILogger logger);
 	
 	/**
 	 * Stop the drone hardware

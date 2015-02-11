@@ -31,6 +31,8 @@ public class WaypointCISensor extends CISensor{
 		
 		LatLon robotLatLon = drone.getGPSLatLon();
 		
+		boolean found = false;
+		
 		for(Entity e : entities) {
 			if(e instanceof Waypoint) {
 				LatLon latLon = new LatLon(e.getLatitude(),e.getLongitude());
@@ -52,9 +54,17 @@ public class WaypointCISensor extends CISensor{
 					
 					readings[0] = difference;
 					readings[1] = currentDistance;
+					found = true;
 					closestDistance = currentDistance;
 				}
 			}
+		}
+		
+		if(!found) {
+			//If there is no waypoint, the sensor
+			//should act as if the robot arrived at a waypoint
+			readings[0] = 0.5;
+			readings[1] = 1;
 		}
 	}
 	

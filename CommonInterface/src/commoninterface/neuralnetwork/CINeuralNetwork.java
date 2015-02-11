@@ -142,6 +142,16 @@ public abstract class CINeuralNetwork implements Serializable{
 		if (!arguments.getArgumentIsDefined("classname"))
 			throw new RuntimeException("Neural Network 'classname' not defined: "+ arguments.toString());
 		
-		return (CINeuralNetwork)CIFactory.getInstance(arguments.getArgumentAsString("classname"),inputs,outputs,arguments);
+		CINeuralNetwork network = (CINeuralNetwork)CIFactory.getInstance(arguments.getArgumentAsString("classname"),inputs,outputs,arguments); 
+
+		if(arguments.getArgumentIsDefined("weights")) {
+			String[] rawArray = arguments.getArgumentAsString("weights").split(",");
+			double[] weights = new double[rawArray.length];
+			for(int i = 0 ; i < weights.length ; i++)
+				weights[i] = Double.parseDouble(rawArray[i]);
+			network.setWeights(weights);
+		}
+		
+		return network;
 	}
 }
