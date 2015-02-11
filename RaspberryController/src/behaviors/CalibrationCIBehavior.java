@@ -3,6 +3,7 @@ package behaviors;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
+import commoninterface.utils.CIArguments;
 import commoninterfaceimpl.RealAquaticDroneCI;
 
 public class CalibrationCIBehavior extends CIBehavior {
@@ -15,13 +16,13 @@ public class CalibrationCIBehavior extends CIBehavior {
 	
 	private double speed = 0.2;
 	
-	public CalibrationCIBehavior(String[] args, AquaticDroneCI drone, CILogger logger) {
-		super(args,drone,logger);
+	public CalibrationCIBehavior(CIArguments args, AquaticDroneCI drone) {
+		super(args,drone);
 		this.drone = (RealAquaticDroneCI)drone;
 	}
 
 	@Override
-	public void step() {
+	public void step(double time) {
 		
 		if(!executing && !executed) {
 			drone.getIOManager().getCompassModule().startCalibration();
@@ -31,11 +32,11 @@ public class CalibrationCIBehavior extends CIBehavior {
 		
 		if(executing) {
 			if(System.currentTimeMillis() - startTime < timeIncrement*1000) {
-				drone.setMotorSpeeds(speed, -speed);
+//				drone.setMotorSpeeds(speed, -speed);
 			} else if(System.currentTimeMillis() - startTime < timeIncrement*2*1000) {
-				drone.setMotorSpeeds(-speed, speed);
+//				drone.setMotorSpeeds(-speed, speed);
 			} else if(System.currentTimeMillis() - startTime >= timeIncrement*2*1000) {
-				drone.setMotorSpeeds(0, 0);
+//				drone.setMotorSpeeds(0, 0);
 				drone.getIOManager().getCompassModule().endCalibration();
 				executed = true;
 				executing = false;
@@ -52,6 +53,7 @@ public class CalibrationCIBehavior extends CIBehavior {
 	public void cleanUp() {
 		executed = false;
 		executing = false;
+		drone.setMotorSpeeds(0, 0);
 	}
 	
 	

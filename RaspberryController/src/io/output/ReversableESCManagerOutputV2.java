@@ -27,8 +27,8 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 	private final static int MIN_VALUE = 60;
 	private final static int MAX_VALUE = 240;
 
-	private final static int MIN_FW_VALUE = 169;
-	private final static int MIN_BW_VALUE = 117;
+	private final static int MIN_FW_VALUE = 156;
+	private final static int MIN_BW_VALUE = 145;
 
 	private int lValue = CENTRAL_VALUE_LEFT;
 	private int rValue = CENTRAL_VALUE_RIGHT;

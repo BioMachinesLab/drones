@@ -1,14 +1,19 @@
 package network;
 
+import java.lang.reflect.Constructor;
+import java.util.Iterator;
+
 import network.messages.BehaviorMessage;
+import network.messages.EntityMessage;
 import network.messages.InformationRequest;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import network.messages.SystemStatusMessage;
-import network.messages.EntityMessage;
 import objects.Entity;
-import objects.Waypoint;
+import utils.Logger;
+import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
+import commoninterface.utils.CIArguments;
 import commoninterfaceimpl.RealAquaticDroneCI;
 
 public class ControllerMessageHandler extends MessageHandler {
@@ -44,22 +49,23 @@ public class ControllerMessageHandler extends MessageHandler {
 		
 		if(response == null && m instanceof BehaviorMessage) {
 			BehaviorMessage bm = (BehaviorMessage)m;
+			System.out.println("Got it");
+			long t = System.currentTimeMillis();
 			
-			for(CIBehavior b : drone.getBehaviors()) {
-				if(bm.getSelectedBehavior().equals(b.getClass())) {
-                    //send the same message back as an acknowledgement
-                    response = request;
-                    if(bm.changeStatusOrder()) {
-                        if(bm.getSelectedStatus()) {
-                        	drone.executeBehavior(b,true);
-                        } else {
-                        	drone.executeBehavior(b,false);
-                        }
-                    } else if(bm.changeArgumentOrder()) {
-//                    	b.setArgument(bm.getArgumentIndex(), bm.getArgumentValue());
-                    }       
-				}
-			}
+          	 if(bm.getSelectedStatus()) {
+          		try {
+              		Constructor<CIBehavior> constructor = bm.getSelectedBehavior().getConstructor(new Class[] { CIArguments.class, AquaticDroneCI.class});
+    				CIBehavior ctArgs = constructor.newInstance(new Object[] { new CIArguments(bm.getArguments(),true), drone });
+    				System.out.println(System.currentTimeMillis()-t);
+    				drone.startBehavior(ctArgs);
+          		} catch(ReflectiveOperationException e) {
+          			e.printStackTrace();
+          		}
+          	 } else {
+          		 drone.stopActiveBehavior();
+          	 }
+          	 bm.setArguments("");
+          	 response = bm;
 		}
 		
 		if (response == null) {

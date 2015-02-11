@@ -14,7 +14,7 @@ public class ServoOutput extends ReversableESCManagerOutputV2 {
 	private final static int LEFT_ESC = 0;
 	private final static int RIGHT_ESC = 1;
 
-	private final static int CENTRAL_LEFT = 1525;
+	private final static int CENTRAL_LEFT = 1519;
 	private final static int CENTRAL_RIGHT = 1519;
 	
 	private final static int MAX = 200;

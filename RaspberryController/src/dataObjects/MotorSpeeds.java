@@ -28,4 +28,8 @@ public class MotorSpeeds {
 		changed = false;
 		return msg;
 	}
+	
+	public MotorMessage getNonBlockingSpeeds() {
+		return msg;
+	}
 }

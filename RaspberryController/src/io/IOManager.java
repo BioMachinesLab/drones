@@ -2,6 +2,7 @@ package io;
 
 import io.input.ControllerInput;
 import io.input.FakeGPSModuleInput;
+import io.input.FileGPSModuleInput;
 import io.input.GPSModuleInput;
 import io.input.I2CBatteryManagerInput;
 import io.input.I2CCompassModuleInput;
@@ -29,6 +30,7 @@ import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CFactory;
 
 import commoninterface.CIBehavior;
+import commoninterface.utils.CIArguments;
 import commoninterfaceimpl.RealAquaticDroneCI;
 import dataObjects.MotorSpeeds;
 
@@ -152,10 +154,7 @@ public class IOManager {
 			}
 
 			if (enabledIO.contains("autocompasscalibration")) {
-				for (CIBehavior b : drone.getBehaviors()) {
-					if (b instanceof CalibrationCIBehavior)
-						drone.executeBehavior(b, true);
-				}
+				drone.startBehavior(new CalibrationCIBehavior(new CIArguments(""), drone));
 			}
 
 		}
@@ -188,13 +187,11 @@ public class IOManager {
 				initMessages += "[INIT] GPSModule: not ok! (" + e.getMessage()
 						+ ")\n";
 			}
-		}
-
-		if (enabledIO.contains("fakegps")) {
+		} else if (enabledIO.contains("filegps")) {
 			try {
 				// GPS Module Init
-				gpsModule = new FakeGPSModuleInput();
-				initMessages += "[INIT] GPSModule: "
+				gpsModule = new FileGPSModuleInput();
+				initMessages += "[INIT] FileGPSModule: "
 						+ (gpsModule.isAvailable() ? "ok" : "not ok!") + "\n";
 
 				if (gpsModule.isAvailable()) {
@@ -202,7 +199,22 @@ public class IOManager {
 					System.out.print(".");
 				}
 			} catch (Exception e) {
-				initMessages += "[INIT] GPSModule: not ok! (" + e.getMessage()
+				initMessages += "[INIT] FileGPSModule: not ok! (" + e.getMessage()
+						+ ")\n";
+			}
+		} else if (enabledIO.contains("fakegps")) {
+			try {
+				// GPS Module Init
+				gpsModule = new FakeGPSModuleInput(drone);
+				initMessages += "[INIT] FakeGPSModule: "
+						+ (gpsModule.isAvailable() ? "ok" : "not ok!") + "\n";
+
+				if (gpsModule.isAvailable()) {
+					inputs.add(gpsModule);
+					System.out.print(".");
+				}
+			} catch (Exception e) {
+				initMessages += "[INIT] FakeGPSModule: not ok! (" + e.getMessage()
 						+ ")\n";
 			}
 		}
@@ -348,6 +360,10 @@ public class IOManager {
 	public void setMotorSpeeds(MotorMessage message) {
 		if (motorSpeeds != null)
 			motorSpeeds.setSpeeds(message);
+	}
+	
+	public MotorSpeeds getMotorSpeeds() {
+		return motorSpeeds;
 	}
 
 	public DebugLedsOutput getDebugLeds() {

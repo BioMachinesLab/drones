@@ -20,23 +20,26 @@ import network.broadcast.RealBroadcastHandler;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import objects.Entity;
+import simpletestbehaviors.ControllerCIBehavior;
 import simpletestbehaviors.GoToWaypointCIBehavior;
 import simpletestbehaviors.TurnToOrientationCIBehavior;
 import utils.NetworkUtils;
 import utils.Nmea0183ToDecimalConverter;
 import behaviors.CalibrationCIBehavior;
-
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
 import commoninterface.CISensor;
 import commoninterface.LedState;
 import commoninterface.network.broadcast.BroadcastHandler;
+import commoninterface.sensors.WaypointCISensor;
+import commoninterface.utils.CIArguments;
 import commoninterface.utils.jcoord.LatLon;
-
 import dataObjects.GPSData;
 
 public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
+	
+	private static long CYCLE_TIME = 100;//in miliseconds
 
 	private String status = "";
 	private String initMessages = "\n";
@@ -48,25 +51,25 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	private BroadcastHandler broadcastHandler;
 	
 	private List<MessageProvider> messageProviders = new ArrayList<MessageProvider>();
-	private List<CIBehavior> behaviors = new ArrayList<CIBehavior>();
 	private ArrayList<CISensor> cisensors = new ArrayList<CISensor>();
 	
-	private String[] args;
+	private CIArguments args;
 	private CILogger logger;
-	private long     startTimeInMillis;
+	private long startTimeInMillis;
+	private double timestep = 0;
+	private double leftSpeed = 0;
+	private double rightSpeed = 0;
 	
-	private LinkedList<CIBehavior> activeBehaviors = new LinkedList<CIBehavior>();
+	private CIBehavior activeBehavior = null;
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
 	
 	@Override
-	public void begin(String[] args, CILogger logger) {		
+	public void begin(CIArguments args, CILogger logger) {		
 		this.startTimeInMillis = System.currentTimeMillis();
 		this.args   = args;
 		this.logger = logger; 
 		
 		addShutdownHooks();
-		
-		initBehaviors();
 		
 		initIO();
 		initMessageProviders();
@@ -81,23 +84,31 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	}
 	
 	@Override
-	public void start() {
+	public void run() {
 		while(true) {
 			
-			Iterator<CIBehavior> i = activeBehaviors.iterator();
-				
-			while(i.hasNext()) {
-				CIBehavior b = i.next();
-				b.step();
-				if(b.getTerminateBehavior())
-					executeBehavior(b, false);
+			long lastCycleTime = System.currentTimeMillis();
+			CIBehavior current = activeBehavior;
+			if(current != null) {
+				current.step(timestep);
+				if(current.getTerminateBehavior()) {
+					stopActiveBehavior();
+				}
+				ioManager.setMotorSpeeds(leftSpeed, rightSpeed);
 			}
-				
-			try {
-				//TODO allow different behaviors to have different sleep times
-				Thread.sleep((long) (1000*behaviors.get(0).getControlStepPeriod()));
-			} catch (InterruptedException e) {}
 			
+			if(broadcastHandler != null)
+				broadcastHandler.update(timestep);
+			
+			long timeToSleep = CYCLE_TIME - (System.currentTimeMillis() - lastCycleTime);
+			
+			if(timeToSleep > 0) {
+				try {
+					Thread.sleep(timeToSleep);
+				} catch (InterruptedException e) {}
+			}
+			
+			timestep++;
 		}
 	}
 
@@ -115,7 +126,8 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	@Override
 	public void setMotorSpeeds(double left, double right) {
-		ioManager.setMotorSpeeds(left,right);
+		leftSpeed = left;
+		rightSpeed = right;
 	}
 
 	@Override
@@ -133,23 +145,10 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		try {
 			GPSData gpsData = ioManager.getGpsModule().getReadings();
 			
-			//NMEA format: e.g. 3844.9474N 00909.2214W
-			String latitude = gpsData.getLatitude();
-			String longitude = gpsData.getLongitude();
-			
-			if(latitude == null || longitude == null)
+			if(gpsData.getLatitudeDecimal() == 0 || gpsData.getLongitudeDecimal() == 0)
 				return null;
 	
-			double lat = Double.parseDouble(latitude.substring(0,latitude.length()-1));
-			char latPos = latitude.charAt(latitude.length()-1);
-			
-			double lon = Double.parseDouble(longitude.substring(0,longitude.length()-1));
-			char lonPos = longitude.charAt(longitude.length()-1);
-	
-			lat = Nmea0183ToDecimalConverter.convertLatitudeToDecimal(lat, latPos);
-			lon = Nmea0183ToDecimalConverter.convertLongitudeToDecimal(lon, lonPos);
-			
-			return new LatLon(lat,lon);
+			return new LatLon(gpsData.getLatitudeDecimal(),gpsData.getLongitudeDecimal());
 		} catch(Exception e){}
 		
 		return null;
@@ -225,17 +224,6 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		}
 	}
 	
-	private void initBehaviors() {
-
-		try{
-			behaviors.add(new TurnToOrientationCIBehavior(new String[]{}, this, logger));
-			behaviors.add(new GoToWaypointCIBehavior(new String[]{}, this, logger));
-			behaviors.add(new CalibrationCIBehavior(new String[]{}, this, logger));
-		} catch(Exception e) {
-			initMessages += "[INIT] Behavior "+e.getMessage()+"\n";
-		}
-	}
-
 	/**
 	 * Create a message provider for all the possible message provider classes
 	 * like the inputs, outputs, system information queries
@@ -257,40 +245,24 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	@Override
 	public void setLed(int index, LedState state) {
-		if (index >= 0 && index < ioManager.getDebugLeds().getNumberOfOutputs()) {
-			switch (state) {
-			case ON:
-				ioManager.getDebugLeds().removeBlinkLed(index);
-				ioManager.getDebugLeds().setValue(index, 1);
-				break;
-			case OFF:
-				ioManager.getDebugLeds().removeBlinkLed(index);
-				ioManager.getDebugLeds().setValue(index, 0);
-				break;
-			case BLINKING:
-				ioManager.getDebugLeds().addBlinkLed(index);
-				break;
-			} 
-		} else {
-			logger.logError("Invalid led index: " + index + ", must be >= 0 and < " + ioManager.getDebugLeds().getNumberOfOutputs());
-		}
-	}
-	
-	public List<CIBehavior> getBehaviors() {
-		return behaviors;
-	}
-	
-	public void executeBehavior(CIBehavior behavior, boolean active) {
-		
-		if(!active) {
-			activeBehaviors.remove(behavior);
-			try {
-				//make sure that the current step is processed
-				Thread.sleep(100);
-			} catch (InterruptedException e) {}
-			behavior.cleanUp();
-		} else {
-			activeBehaviors.add(behavior);
+		if(ioManager.getDebugLeds() != null) {
+			if (index >= 0 && index < ioManager.getDebugLeds().getNumberOfOutputs()) {
+				switch (state) {
+				case ON:
+					ioManager.getDebugLeds().removeBlinkLed(index);
+					ioManager.getDebugLeds().setValue(index, 1);
+					break;
+				case OFF:
+					ioManager.getDebugLeds().removeBlinkLed(index);
+					ioManager.getDebugLeds().setValue(index, 0);
+					break;
+				case BLINKING:
+					ioManager.getDebugLeds().addBlinkLed(index);
+					break;
+				} 
+			} else {
+				logger.logError("Invalid led index: " + index + ", must be >= 0 and < " + ioManager.getDebugLeds().getNumberOfOutputs());
+			}
 		}
 	}
 	
@@ -315,14 +287,16 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	public void reset() {
 		ioManager.shutdownMotors();
 		
-		activeBehaviors.clear();
+		if(activeBehavior != null) {
+			activeBehavior.cleanUp();
+			activeBehavior = null;
+			ioManager.setMotorSpeeds(leftSpeed, rightSpeed);
+		}
 		try {
 			//make sure that the current control step is processed
 			Thread.sleep(100);
 		} catch (InterruptedException e) {}
 		
-		for(CIBehavior b : behaviors)
-			b.cleanUp();
 	}
 	
 	@Override
@@ -333,5 +307,22 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	@Override
 	public BroadcastHandler getBroadcastHandler() {
 		return broadcastHandler;
+	}
+
+	public CIBehavior getActiveBehavior() {
+		return activeBehavior;
+	}
+	
+	public void startBehavior(CIBehavior b) {
+		stopActiveBehavior();
+		activeBehavior = b;
+	}
+	
+	public void stopActiveBehavior() {
+		if(activeBehavior != null) {
+			activeBehavior.cleanUp();
+			activeBehavior = null;
+			ioManager.setMotorSpeeds(leftSpeed, rightSpeed);
+		}
 	}
 }

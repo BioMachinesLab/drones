@@ -11,7 +11,6 @@ import commoninterface.network.broadcast.BroadcastHandler;
  */
 public class RealBroadcastHandler extends BroadcastHandler {
 	
-	private static boolean DEBUG = false;
 	private BroadcastMessageThread broadcastStatusThread = null;
 	
 	private BroadcastReceiver receiver;
@@ -33,9 +32,10 @@ public class RealBroadcastHandler extends BroadcastHandler {
 	
 	@Override
 	public void sendMessage(String message) {
-		sender.sendMessage(message);
-		if(DEBUG)
+		if(DEBUG) {
 			System.out.println("RealBroadcastHandler sent ["+message+"]");
+		}
+		sender.sendMessage(message);
 	}
 	
 	@Override

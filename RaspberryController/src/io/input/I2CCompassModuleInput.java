@@ -1,5 +1,8 @@
 package io.input;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
@@ -19,6 +22,7 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	/*
 	 * I2C Device variables and settings
 	 */
+	private final static String CALIBRATION_FILE = "calibration.txt";
 	private final static int ADDR = 0x0E; // 7-bit address for the MAG3110
 
 	private final static int CTRL_REG1_DR = 0x00;
@@ -60,6 +64,36 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	public I2CCompassModuleInput(I2CBus i2cBus) {
 		this.i2cBus = i2cBus;
 		configureCompass();
+		readPreviousCalibration();
+	}
+	
+	private void readPreviousCalibration() {
+		try {
+			Scanner s = new Scanner(new File(CALIBRATION_FILE));
+			xCenter = s.nextDouble();
+			yCenter = s.nextDouble();
+			zCenter = s.nextDouble();
+			alpha = s.nextDouble();
+			ca = s.nextDouble();
+			sa = s.nextDouble();
+			beta = s.nextDouble();
+			cb = s.nextDouble();
+			sb = s.nextDouble();
+			theta = s.nextDouble();
+			ct = s.nextDouble();
+			st = s.nextDouble();
+			scaleX = s.nextDouble();
+			scaleY = s.nextDouble();
+			scaleZ = s.nextDouble();
+			gps = s.nextDouble();
+			sgps = s.nextDouble();
+			cgps = s.nextDouble();
+			north[0] = s.nextDouble();
+			north[1] = s.nextDouble();
+			north[2] = s.nextDouble();
+			s.close();
+			System.out.println("Compass calibration loaded from the file!");
+		} catch (IOException e) {}
 	}
 	
 	public void configureCompass() {
@@ -207,31 +241,34 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 		
 		
 		while (true) {
+			
 			double[] rawAxisReadings = readXYZ();
 
-			if(calibrationStatus)
+			if(calibrationStatus) {
 				handleCalibration(rawAxisReadings[0], rawAxisReadings[1], rawAxisReadings[2]);
+			} else {
 			
-			double[] converted = convert(rawAxisReadings[0],rawAxisReadings[1],rawAxisReadings[2]);
-			
-			double heading = Math.atan2(converted[1],converted[0]);
-			
-			//Value for Lisbon is -2º (0.034906585 rad). Find more here: http://www.magnetic-declination.com
-//				double declinationAngle = 0.034906585;
-//				heading += declinationAngle;
-			
-//				heading = 2*Math.PI-heading;
-			
-			if(heading < 0) {
-				heading += 2*Math.PI;
+				double[] converted = convert(rawAxisReadings[0],rawAxisReadings[1],rawAxisReadings[2]);
+				
+				double heading = Math.atan2(converted[1],converted[0]);
+				
+				//Value for Lisbon is -2º (0.034906585 rad). Find more here: http://www.magnetic-declination.com
+	//				double declinationAngle = 0.034906585;
+	//				heading += declinationAngle;
+				
+	//				heading = 2*Math.PI-heading;
+				
+				if(heading < 0) {
+					heading += 2*Math.PI;
+				}
+				
+				if(heading > 2*Math.PI) {
+					heading -= 2*Math.PI;
+				}
+				
+				  // Convert radians to degrees for readability.
+				this.headingInDegrees = (int)(heading * 180/Math.PI);
 			}
-			
-			if(heading > 2*Math.PI) {
-				heading -= 2*Math.PI;
-			}
-			
-			  // Convert radians to degrees for readability.
-			this.headingInDegrees = (int)(heading * 180/Math.PI);
 			
 			if(!calibrationStatus) {
 //				System.out.println("RAW "+rawAxisReadings[0]+" "+rawAxisReadings[1]+" "+rawAxisReadings[2]);
@@ -266,9 +303,11 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	public void startCalibration() {
 		System.out.println("Calibration started! Point north and press a key");
 		
+		Scanner s = null;
+		
 		try {
 		
-			Scanner s = new Scanner(System.in);
+			s = new Scanner(System.in);
 			s.nextLine();
 			
 			double[] readings = readXYZ();
@@ -287,6 +326,9 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 			north[0]  = readings[0];
 			north[1]  = readings[1];
 			north[2]  = readings[2];
+		} finally {
+			if(s != null)
+				s.close();
 		}
 		
 		calibrationValues.clear();
@@ -296,7 +338,7 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	public void endCalibration() {
 		System.out.println("Calibration ended!");
 		calibrationStatus = false;
-		calibrate();
+		finalizeCalibration();
 	}
 	
 	public int getHeadingInDegrees() {
@@ -328,85 +370,87 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 		return readings;
 	}
 	
-	private void calibrate() {
+	private void finalizeCalibration() {
+		
+		String toSave = "";
 			
-			//Translation
-			double xMin = Double.MAX_VALUE;
-			double xMax = -Double.MAX_VALUE;
-			double yMin = Double.MAX_VALUE;
-			double yMax = -Double.MAX_VALUE;
-			double zMin = Double.MAX_VALUE;
-			double zMax = -Double.MAX_VALUE;
-			
-			for(double[] data : calibrationValues) {
-				xMin = Math.min(data[0],xMin);
-				xMax = Math.max(data[0],xMax);
-				yMin = Math.min(data[1],yMin);
-				yMax = Math.max(data[1],yMax);
-				zMin = Math.min(data[2],zMin);
-				zMax = Math.max(data[2],zMax);
+		//Translation
+		double xMin = Double.MAX_VALUE;
+		double xMax = -Double.MAX_VALUE;
+		double yMin = Double.MAX_VALUE;
+		double yMax = -Double.MAX_VALUE;
+		double zMin = Double.MAX_VALUE;
+		double zMax = -Double.MAX_VALUE;
+		
+		for(double[] data : calibrationValues) {
+			xMin = Math.min(data[0],xMin);
+			xMax = Math.max(data[0],xMax);
+			yMin = Math.min(data[1],yMin);
+			yMax = Math.max(data[1],yMax);
+			zMin = Math.min(data[2],zMin);
+			zMax = Math.max(data[2],zMax);
+		}
+		
+		xCenter = (xMax + xMin)/2;
+		yCenter = (yMax + yMin)/2;
+		zCenter = (zMax + zMin)/2;
+		
+		//center all coordinates
+		for(double[] data : calibrationValues) {
+			data[0] = data[0]-xCenter;
+			data[1] = data[1]-yCenter;
+			data[2] = data[2]-zCenter;
+		}
+		
+		System.out.println("xCenter "+xCenter+" yCenter "+yCenter+" zCenter "+zCenter);
+		
+		//Rotation
+		double maxVector = -Double.MAX_VALUE;
+		double maxVectorX = -Double.MAX_VALUE;
+		double maxVectorY = -Double.MAX_VALUE;
+		double maxVectorZ = -Double.MAX_VALUE;
+		
+		for(double[] data : calibrationValues) {
+			double vector = Math.pow(data[0], 2) + Math.pow(data[1], 2) + Math.pow(data[2], 2);
+			if(vector > maxVector) {
+				maxVector = vector;
+				maxVectorX = data[0];
+				maxVectorY = data[1];
+				maxVectorZ = data[2];
 			}
-			
-			xCenter = (xMax + xMin)/2;
-			yCenter = (yMax + yMin)/2;
-			zCenter = (zMax + zMin)/2;
-			
-			//center all coordinates
-			for(double[] data : calibrationValues) {
-				data[0] = data[0]-xCenter;
-				data[1] = data[1]-yCenter;
-				data[2] = data[2]-zCenter;
-			}
-			
-			System.out.println("xCenter "+xCenter+" yCenter "+yCenter+" zCenter "+zCenter);
-			
-			//Rotation
-			double maxVector = -Double.MAX_VALUE;
-			double maxVectorX = -Double.MAX_VALUE;
-			double maxVectorY = -Double.MAX_VALUE;
-			double maxVectorZ = -Double.MAX_VALUE;
-			
-			for(double[] data : calibrationValues) {
-				double vector = Math.pow(data[0], 2) + Math.pow(data[1], 2) + Math.pow(data[2], 2);
-				if(vector > maxVector) {
-					maxVector = vector;
-					maxVectorX = data[0];
-					maxVectorY = data[1];
-					maxVectorZ = data[2];
-				}
-			}
-			
+		}
+		
 //			System.out.println("RAW maxVectorX "+(maxVectorX+xCenter)+" maxVectorY "+(maxVectorY+yCenter)+" maxVectorZ "+(maxVectorZ+zCenter));
 //			System.out.println("Vector size ^2 "+(Math.pow(maxVectorX, 2) + Math.pow(maxVectorY, 2) + Math.pow(maxVectorZ, 2)));
 //			System.out.println("maxVectorX "+maxVectorX+" maxVectorY "+maxVectorY+" maxVectorZ "+maxVectorZ);
-			
-			alpha = Math.atan2(maxVectorZ, maxVectorX);
-			
-			if(maxVectorX < 0) {
-				alpha+=Math.PI;
-			}
-			
-			ca = Math.cos(alpha);
-			sa = Math.sin(alpha);
 		
-			double xRotated = ca*maxVectorX+ sa*maxVectorZ;
-			double yRotated = maxVectorY;
-			double zRotated = -sa*maxVectorX + ca*maxVectorZ;
+		alpha = Math.atan2(maxVectorZ, maxVectorX);
+		
+		if(maxVectorX < 0) {
+			alpha+=Math.PI;
+		}
+		
+		ca = Math.cos(alpha);
+		sa = Math.sin(alpha);
+	
+		double xRotated = ca*maxVectorX+ sa*maxVectorZ;
+		double yRotated = maxVectorY;
+		double zRotated = -sa*maxVectorX + ca*maxVectorZ;
 //			System.out.println();
 //			System.out.println("###FIRST ROTATION");
 //			System.out.println("Vector size rotated "+(Math.pow(xRotated, 2) + Math.pow(yRotated, 2) + Math.pow(zRotated, 2)));
 //			System.out.println("maxVectorXR "+xRotated+" maxVectorYR "+yRotated+" maxVectorZR "+zRotated);
 
-			beta = Math.atan2(yRotated, xRotated);
-			cb = Math.cos(-beta);
-			sb = Math.sin(-beta);
-			
-			if(xRotated < 0) {
-				beta+=Math.PI;
-			}
-
+		beta = Math.atan2(yRotated, xRotated);
+		cb = Math.cos(-beta);
+		sb = Math.sin(-beta);
+		
+		if(xRotated < 0) {
+			beta+=Math.PI;
+		}
+		
 //			System.out.println("alpha "+Math.toDegrees(alpha)+" beta "+Math.toDegrees(beta));
-			
+		
 //			double xRotated2 = cosb*xRotated - sinb*yRotated ;
 //			double yRotated2 = sinb*xRotated + cosb*yRotated ;
 //			double zRotated2 = zRotated ;
@@ -414,90 +458,120 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 //			System.out.println("maxVectorXR "+xRotated2+" maxVectorYR "+yRotated2+" maxVectorZR "+zRotated2);
 //			System.out.println();
 //			System.out.println("###SECOND AND THIRD ROTATION");
-				
-			for(double[] data : calibrationValues) {
-				double x = data[0];
-				double y = data[1];
-				double z = data[2];
-				
-				xRotated = cb*ca*x - sb*y + cb*sa*z;
-				yRotated = ca*sb*x + cb*y + sa*sb*z;
-				zRotated = -sa*x + ca*z;
-				
-				data[0] = xRotated;
-				data[1] = yRotated;
-				data[2] = zRotated;
+			
+		for(double[] data : calibrationValues) {
+			double x = data[0];
+			double y = data[1];
+			double z = data[2];
+			
+			xRotated = cb*ca*x - sb*y + cb*sa*z;
+			yRotated = ca*sb*x + cb*y + sa*sb*z;
+			zRotated = -sa*x + ca*z;
+			
+			data[0] = xRotated;
+			data[1] = yRotated;
+			data[2] = zRotated;
+		}
+		
+		maxVector = -Double.MAX_VALUE;
+		maxVectorX = -Double.MAX_VALUE;
+		maxVectorY = -Double.MAX_VALUE;
+		maxVectorZ = -Double.MAX_VALUE;
+		
+		for(double[] data : calibrationValues) {
+			double vector = Math.pow(data[1], 2) + Math.pow(data[2], 2);
+			if(vector > maxVector) {
+				maxVector = vector;
+				maxVectorX = data[0];
+				maxVectorY = data[1];
+				maxVectorZ = data[2];
 			}
-			
-			maxVector = -Double.MAX_VALUE;
-			maxVectorX = -Double.MAX_VALUE;
-			maxVectorY = -Double.MAX_VALUE;
-			maxVectorZ = -Double.MAX_VALUE;
-			
-			for(double[] data : calibrationValues) {
-				double vector = Math.pow(data[1], 2) + Math.pow(data[2], 2);
-				if(vector > maxVector) {
-					maxVector = vector;
-					maxVectorX = data[0];
-					maxVectorY = data[1];
-					maxVectorZ = data[2];
-				}
-			}
-			
+		}
+		
 //			System.out.println("maxVectorX "+maxVectorX+" maxVectorY "+maxVectorY+" maxVectorZ "+maxVectorZ);
-			
-			theta = Math.atan2(maxVectorZ,maxVectorY);
-			
-			if(maxVectorY < 0) {
-				theta+=Math.PI;
-			}
-			
-			ct = Math.cos(-theta);
-			st = Math.sin(-theta);
-			
+		
+		theta = Math.atan2(maxVectorZ,maxVectorY);
+		
+		if(maxVectorY < 0) {
+			theta+=Math.PI;
+		}
+		
+		ct = Math.cos(-theta);
+		st = Math.sin(-theta);
+		
 //			System.out.println("theta "+Math.toDegrees(theta));
+		
+		for(double[] data : calibrationValues) {
+			double y = data[1];
+			double z = data[2];
 			
-			for(double[] data : calibrationValues) {
-				double y = data[1];
-				double z = data[2];
-				
-				yRotated = ct*y - st*z;
-				zRotated = st*y + ct*z;
-				
-				data[1] = yRotated;
-				data[2] = zRotated;
-				
-			}
+			yRotated = ct*y - st*z;
+			zRotated = st*y + ct*z;
 			
-			double maxX = -Double.MAX_VALUE;
-			double maxY = -Double.MAX_VALUE;
-			double maxZ = -Double.MAX_VALUE;
+			data[1] = yRotated;
+			data[2] = zRotated;
 			
-			for(double[] data : calibrationValues) {
-				maxX = Math.max(data[0], maxX);
-				maxY = Math.max(data[1], maxY);
-				maxZ = Math.max(data[2], maxZ);
-			}
-			
-			scaleX = 1.0/maxX;
-			scaleY = 1.0/maxY;
-			scaleZ = 1.0/maxZ;
-			
-			double[] northTransformed = transformReading(north[0],north[1],north[2]);
-			
-			gps = Math.atan2(northTransformed[1],northTransformed[0]);
-			
-//				if(north[0] < 0)
-//					gps+=Math.PI;
-			
-			sgps = Math.sin(-gps);
-			cgps = Math.cos(-gps);
-			
-			double[] res = convert(north[0],north[1],north[2]);
-			
-			System.out.println("north transf "+northTransformed[0]+" "+northTransformed[1] +" "+northTransformed[2]);
-			System.out.println("gps angle "+gps);
-			System.out.println("RESULT "+res[0]+" "+res[1] +" "+res[2]);
+		}
+		
+		double maxX = -Double.MAX_VALUE;
+		double maxY = -Double.MAX_VALUE;
+		double maxZ = -Double.MAX_VALUE;
+		
+		for(double[] data : calibrationValues) {
+			maxX = Math.max(data[0], maxX);
+			maxY = Math.max(data[1], maxY);
+			maxZ = Math.max(data[2], maxZ);
+		}
+		
+		scaleX = 1.0/maxX;
+		scaleY = 1.0/maxY;
+		scaleZ = 1.0/maxZ;
+		
+		double[] northTransformed = transformReading(north[0],north[1],north[2]);
+		
+		gps = Math.atan2(northTransformed[1],northTransformed[0]);
+		
+//			if(north[0] < 0)
+//				gps+=Math.PI;
+		
+		sgps = Math.sin(-gps);
+		cgps = Math.cos(-gps);
+		
+		double[] res = convert(north[0],north[1],north[2]);
+		
+		toSave+=xCenter+" ";
+		toSave+=yCenter+" ";
+		toSave+=zCenter+" ";
+		toSave+=alpha+" ";
+		toSave+=ca+" ";
+		toSave+=sa+" ";
+		toSave+=beta+" ";
+		toSave+=cb+" ";
+		toSave+=sb+" ";
+		toSave+=theta+" ";
+		toSave+=ct+" ";
+		toSave+=st+" ";
+		toSave+=scaleX+" ";
+		toSave+=scaleY+" ";
+		toSave+=scaleZ+" ";
+		toSave+=gps+" ";
+		toSave+=sgps+" ";
+		toSave+=cgps+" ";
+		toSave+=north[0]+" ";
+		toSave+=north[1]+" ";
+		toSave+=north[2]+" ";
+		
+		try {
+			FileWriter fw = new FileWriter(new File(CALIBRATION_FILE));
+			fw.write(toSave);
+			fw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println("north transf "+northTransformed[0]+" "+northTransformed[1] +" "+northTransformed[2]);
+		System.out.println("gps angle "+gps);
+		System.out.println("RESULT "+res[0]+" "+res[1] +" "+res[2]);
 	}
 	
 	private double[] convert(double x, double y, double z) {

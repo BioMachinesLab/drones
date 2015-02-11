@@ -1,31 +1,32 @@
 package io.input;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Scanner;
+import network.messages.MotorMessage;
+import commoninterface.mathutils.Vector2d;
+import commoninterface.utils.CoordinateUtilities;
+import commoninterface.utils.jcoord.LatLon;
+import commoninterfaceimpl.RealAquaticDroneCI;
+import dataObjects.MotorSpeeds;
 
 public class FakeGPSModuleInput extends GPSModuleInput {
 	
-	private static final long INITIAL_SLEEP = 10*1000;
-	private static final long CYCLE_SLEEP = 5;//25
-	private static final String FILENAME = "logs/fakegps.log";
-	private Scanner s = null;
+	private static final long CYCLE_SLEEP = 100;//100 ms
+	private LatLon currentCoordinates = CoordinateUtilities.cartesianToGPS(new Vector2d(0,0));
+	private RealAquaticDroneCI drone;
 	
-	public FakeGPSModuleInput() {
+	public FakeGPSModuleInput(RealAquaticDroneCI drone) {
 		super(true);
-		messageParser = new MessageParser();
-		messageParser.start();
-		
-		try {
-			s = new Scanner(new File(FILENAME));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		
+		this.drone = drone;
 		FakeInputThread t = new FakeInputThread();
 		t.start();
-
+		updateData(currentCoordinates);
 		available = true;
+	}
+	
+	private void updateData(LatLon coord) {
+		currentCoordinates = coord;
+		gpsData.setFix(true);
+		gpsData.setLatitudeDecimal(currentCoordinates.getLat());
+		gpsData.setLongitudeDecimal(currentCoordinates.getLon());
 	}
 	
 	class FakeInputThread extends Thread {
@@ -33,71 +34,43 @@ public class FakeGPSModuleInput extends GPSModuleInput {
 		@Override
 		public void run() {
 			
+			double o = 0;
 			
-			System.out.println("Wait "+INITIAL_SLEEP+" milisec for FakeGPS");
-			try {
-				Thread.sleep(INITIAL_SLEEP);
-			} catch (InterruptedException e1) {
-				e1.printStackTrace();
-			}
-			
-			System.out.println("FakeGPS starting!");
-			
-			StringBuilder data = new StringBuilder();
-			
-			while(s.hasNextLine()) {
-				String line = s.nextLine().trim()+"\r\n";
-				data.append(line);
-			}
-			
-			System.out.println("Read from file ("+data.length()+")");
-			
-			int increment = 0;
-			
-			for(int i = 0 ; i < data.length() ; i+=increment) {
+			while(true) {
 				
-				increment = (int)(Math.random()*10+20);
+				MotorSpeeds spd = drone.getIOManager().getMotorSpeeds();
 				
-				if(i+increment <= data.length()) {
+				MotorMessage msg = spd.getNonBlockingSpeeds();
 				
-					String substring = data.substring(i, i+increment);
+				if(msg != null) {
+				
+					double left = msg.getLeftMotor();
+					double right = msg.getRightMotor();
 					
-					dataReceived(substring);
+					double totalSpeed = Math.abs(left+right)/2;
+					
+					if(left+right < 0)
+						totalSpeed*=-1;
+					
+					//[0;1] to cm/s
+					//10km/h = 270cm/s = 27.0cm/100ms 
+					totalSpeed*= 0.27/10;//2.5km/h
+					
+					//+90 because North is up, but cartesian math has the reference to the right
+					double orientation = Math.toRadians(drone.getCompassOrientationInDegrees() - 90)*-1;
+					Vector2d cartesian = CoordinateUtilities.GPSToCartesian(currentCoordinates);
+					
+					double x = cartesian.getX();
+					double y = cartesian.getY();
+					x+=Math.cos(orientation)*totalSpeed;
+					y+=Math.sin(orientation)*totalSpeed;
+					
+					updateData(CoordinateUtilities.cartesianToGPS(x,y));
+					
 					try {
 						Thread.sleep(CYCLE_SLEEP);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
-					}
-				}
-			}
-			
-			System.out.println("FakeGPS ending!");
-		}
-		
-		public void dataReceived(String received) {
-			
-			receivedDataBuffer.append(received);
-			
-			boolean keepGoing = true;
-
-			while (keepGoing) {
-				keepGoing = false;
-				int indexFirstDollar = receivedDataBuffer.indexOf("$");
-				
-				if(indexFirstDollar >= 0) {
-					
-					int indexSecondDollar = receivedDataBuffer.indexOf("$",indexFirstDollar+1);
-					
-					if(indexSecondDollar > 0) {
-					
-						String sub = receivedDataBuffer.substring(indexFirstDollar,indexSecondDollar).trim();
-		
-						if (messageParser != null && !sub.isEmpty() && sub.charAt(0) == '$') {
-							messageParser.processReceivedData(sub);
-							
-							receivedDataBuffer.delete(0,indexSecondDollar);
-							keepGoing = true;
-						}
 					}
 				}
 			}
