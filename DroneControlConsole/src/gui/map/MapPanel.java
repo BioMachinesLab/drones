@@ -314,10 +314,6 @@ public class MapPanel extends UpdatePanel {
 		}
 	}
 	
-	public void displayData(CompassMessage compassMessage) {
-		//TODO
-	}
-	
 	private boolean usefulRobotCoordinate(Coordinate n) {
 		
 		if(n.getLat() == -1 && n.getLon() == -1)

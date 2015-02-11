@@ -5,6 +5,9 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
@@ -12,10 +15,12 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import commoninterface.CIBehavior;
-
+import commoninterface.utils.CIArguments;
 import network.messages.BehaviorMessage;
 import threads.UpdateThread;
 import utils.ClassLoadHelper;
@@ -25,6 +30,7 @@ public class BehaviorsPanel extends UpdatePanel{
 	private UpdateThread thread;
 	private JLabel statusMessage;
 	private BehaviorMessage currentMessage;
+	private JTextArea config;
 	
 	public BehaviorsPanel() {
 		
@@ -34,14 +40,14 @@ public class BehaviorsPanel extends UpdatePanel{
 		
 		JPanel topPanel = new JPanel();
 		
-		topPanel.setLayout(new GridLayout(5,2));
+		topPanel.setLayout(new BorderLayout());
 		
 		JComboBox<Class<CIBehavior>> behaviors = new JComboBox<>();
 		behaviors.setPreferredSize(new Dimension(20,20));
 		
 		populateBehaviors(behaviors);
 		
-		topPanel.add(behaviors);
+		topPanel.add(behaviors, BorderLayout.NORTH);
 		
 		JButton start = new JButton("Start");
 		JButton stop = new JButton("Stop");
@@ -58,40 +64,19 @@ public class BehaviorsPanel extends UpdatePanel{
 			}
 		});
 		
-		topPanel.add(start);
-		topPanel.add(new JLabel(""));
-		topPanel.add(stop);
+		JPanel buttons = new JPanel();
+		buttons.add(start);
+		buttons.add(stop);
 		
-		JTextField argIndex = new JTextField(5);
-		JTextField argValue = new JTextField(5);
+		topPanel.add(buttons, BorderLayout.SOUTH);
 		
-		JButton argumentButton = new JButton("Set Argument");
+		config = new JTextArea(10,10);
+		JScrollPane scroll = new JScrollPane(config);
 		
-		argumentButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					int index = Integer.parseInt(argIndex.getText());
-					double value = Double.parseDouble(argValue.getText());
-					
-					argumentMessage((Class<CIBehavior>)behaviors.getSelectedItem(), index, value);
-				
-				} catch(Exception ex){
-					statusMessage.setText("Arguments not well formatted!");
-				}
-			}
-		});
-		
-		topPanel.add(new JLabel("Index"));
-		topPanel.add(argIndex);
-		
-		topPanel.add(new JLabel("Value"));
-		topPanel.add(argValue);
+		topPanel.add(scroll,BorderLayout.CENTER);
 		
 		statusMessage = new JLabel("");
 		statusMessage.setPreferredSize(new Dimension(10,20));
-		
-		topPanel.add(new JLabel());
-		topPanel.add(argumentButton);
 		
 		add(topPanel, BorderLayout.NORTH);
 		add(statusMessage, BorderLayout.SOUTH);
@@ -99,14 +84,28 @@ public class BehaviorsPanel extends UpdatePanel{
 	
 	private synchronized void statusMessage(Class<CIBehavior> className, boolean status) {
 		statusMessage.setText("");
-		currentMessage = new BehaviorMessage(className, status);
+		if(status)
+			currentMessage = new BehaviorMessage(className, config.getText().replaceAll("\\s+",""), status);
+		else
+			currentMessage = new BehaviorMessage(className, "", status);
+		
 		notifyAll();
 	}
 	
-	private synchronized void argumentMessage(Class<CIBehavior> className, int index, double value) {
-		statusMessage.setText("");
-		currentMessage = new BehaviorMessage(className, index, value);
-		notifyAll();
+	//TODO debug
+	public static int sizeof(Object obj) {
+		try {
+		    ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
+		    ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteOutputStream);
+	
+		    objectOutputStream.writeObject(obj);
+		    objectOutputStream.flush();
+		    objectOutputStream.close();
+	
+		    return byteOutputStream.toByteArray().length;
+		} catch(Exception e){}
+		
+		return 0;
 	}
 	
 	private void populateBehaviors(JComboBox<Class<CIBehavior>> list) {
@@ -143,9 +142,7 @@ public class BehaviorsPanel extends UpdatePanel{
 
 	public void displayData(BehaviorMessage message) {
 		String result = message.getSelectedBehavior().getSimpleName()+": ";
-		result+=message.changeStatusOrder() ?
-				(message.getSelectedStatus() ? "start" : "stop") :
-					message.getArgumentIndex()+"="+message.getArgumentValue();
+		result+= message.getSelectedStatus() ? "start" : "stop";
 		
 		statusMessage.setText(result);
 	}

@@ -85,7 +85,7 @@ public abstract class DroneConnection extends Thread {
 		} catch (Exception e ) {
 			e.printStackTrace();
 		}finally {
-			closeConnection();
+			console.disconnect();
 		}
 	}
 	
@@ -129,7 +129,6 @@ public abstract class DroneConnection extends Thread {
 				socket.close();
 				in.close();
 				out.close();
-				console.disconnect();
 			} catch (IOException e) {
 				System.err.println("Unable to close connection... is there an open connection?");
 			}

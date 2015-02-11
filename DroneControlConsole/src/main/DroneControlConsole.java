@@ -126,14 +126,20 @@ public class DroneControlConsole {
 		
 		updateThreads.clear();
 		
-		informationConnection.closeConnection();
-		informationConnection = null;
+		if(informationConnection != null) {
+			informationConnection.closeConnection();
+			informationConnection = null;
+		}
 		
-		motorConnection.closeConnection();
-		motorConnection = null;
+		if(motorConnection != null) {
+			motorConnection.closeConnection();
+			motorConnection = null;
+		}
 		
-		motorMessageSender.stopExecuting();
-		motorMessageSender = null;
+		if(motorMessageSender != null) {
+			motorMessageSender.stopExecuting();
+			motorMessageSender = null;
+		}
 		
 		gui.getConnectionPanel().disconnected();
 		connected = false;
@@ -172,7 +178,7 @@ public class DroneControlConsole {
 					gui.getMapPanel().displayData(di);
 				break;
 			default:
-				System.out.println("Uncategorized message >"+message+" from "+address);
+				System.out.println("Uncategorized message > "+message+" < from "+address);
 		}
 	}
 	

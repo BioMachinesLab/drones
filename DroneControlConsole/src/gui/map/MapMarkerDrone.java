@@ -48,7 +48,7 @@ public class MapMarkerDrone extends MapMarkerDot {
 		
 		int x = (int)position.getX();
 		int y = (int)position.getY();
-		
+
 		//we have to cheat in order for 0 degrees to point north
 		double angle = Math.toRadians(orientation + 180);
 		
