@@ -4,30 +4,22 @@ import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
 import commoninterface.LedState;
+import commoninterface.utils.CIArguments;
 
 public class TurnToOrientationCIBehavior extends CIBehavior {
 
 	private double targetOrientation = 0;
 	private double tolerance         = 10;
 	
-	public TurnToOrientationCIBehavior(String[] args, AquaticDroneCI drone, CILogger logger) {
-		super(args, drone, logger);
+	public TurnToOrientationCIBehavior(CIArguments args, AquaticDroneCI drone) {
+		super(args, drone);
 		
-		//TODO: Find a more elegant way to parse arguments
-		for (String arg : args) {
-			if (arg.startsWith("target=")) {
-				targetOrientation = Double.parseDouble(arg.substring(arg.indexOf("=") + 1));
-				logger.logMessage("Setting target orientation to: " + targetOrientation);
-			}
-			if (arg.startsWith("tolerance=")) {
-				tolerance = Double.parseDouble(arg.substring(arg.indexOf("=") + 1));
-				logger.logMessage("Setting tolerance to: " + tolerance);
-			}
-		}
+		targetOrientation = args.getArgumentAsDoubleOrSetDefault("target", targetOrientation);
+		tolerance = args.getArgumentAsDoubleOrSetDefault("tolerance", tolerance);
 	}
 
 	@Override
-	public void step() {
+	public void step(double timestep) {
 		double currentOrientation = drone.getCompassOrientationInDegrees();		
 		double difference = currentOrientation - targetOrientation;
 		

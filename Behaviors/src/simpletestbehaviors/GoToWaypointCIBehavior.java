@@ -1,14 +1,12 @@
 package simpletestbehaviors;
 
 import java.util.ArrayList;
-
 import objects.Waypoint;
-
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
 import commoninterface.LedState;
-import commoninterface.mathutils.Vector2d;
+import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
 
@@ -17,30 +15,23 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 	private double distanceTolerance = 3;
 	private double angleTolerance = 10;
 	
-	public GoToWaypointCIBehavior(String[] args, AquaticDroneCI drone, CILogger logger) {
-		super(args, drone, logger);
+	public GoToWaypointCIBehavior(CIArguments args, AquaticDroneCI drone) {
+		super(args, drone);
 		
-		//TODO: Find a more elegant way to parse arguments
-		for (String arg : args) {
-			if (arg.startsWith("distancetolerance=")) {
-				distanceTolerance = Double.parseDouble(arg.substring(arg.indexOf("=") + 1));
-				logger.logMessage("Setting distancetolerance to: " + distanceTolerance);
-			}
-			if (arg.startsWith("angletolerance=")) {
-				angleTolerance = Double.parseDouble(arg.substring(arg.indexOf("=") + 1));
-				logger.logMessage("Setting angletolerance to: " + angleTolerance);
-			}
-		}
-		
+		distanceTolerance = args.getArgumentAsDoubleOrSetDefault("distancetolerance", distanceTolerance);
+		angleTolerance = args.getArgumentAsDoubleOrSetDefault("angletolerance", angleTolerance);
 	}
 	
 	@Override
-	public void step() {
+	public void step(double timestep) {
 		
 		ArrayList<Waypoint> waypoints = Waypoint.getWaypoints(drone);
 		
-		if(waypoints.size() == 0)
+		if(waypoints.size() == 0) {
+			drone.setLed(0, LedState.OFF);
+			drone.setMotorSpeeds(0, 0);
 			return;
+		}
 		
 		double currentOrientation = drone.getCompassOrientationInDegrees();
 		double coordinatesAngle = CoordinateUtilities.angleInDegrees(drone.getGPSLatLon(),
