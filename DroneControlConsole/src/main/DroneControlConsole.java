@@ -94,7 +94,6 @@ public class DroneControlConsole {
 	
 	public synchronized void connect(String address) {
 		try {
-			
 			if(connected)
 				disconnect();
 			
