@@ -84,8 +84,11 @@ public class BehaviorsPanel extends UpdatePanel{
 	
 	private synchronized void statusMessage(Class<CIBehavior> className, boolean status) {
 		statusMessage.setText("");
+		
+		CIArguments translatedArgs = new CIArguments(config.getText().replaceAll("\\s+",""),true);
+		
 		if(status)
-			currentMessage = new BehaviorMessage(className, config.getText().replaceAll("\\s+",""), status);
+			currentMessage = new BehaviorMessage(className, translatedArgs.getCompleteArgumentString(), status);
 		else
 			currentMessage = new BehaviorMessage(className, "", status);
 		
