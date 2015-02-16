@@ -49,14 +49,11 @@ public class ControllerMessageHandler extends MessageHandler {
 		
 		if(response == null && m instanceof BehaviorMessage) {
 			BehaviorMessage bm = (BehaviorMessage)m;
-			System.out.println("Got it");
-			long t = System.currentTimeMillis();
 			
           	 if(bm.getSelectedStatus()) {
           		try {
               		Constructor<CIBehavior> constructor = bm.getSelectedBehavior().getConstructor(new Class[] { CIArguments.class, AquaticDroneCI.class});
-    				CIBehavior ctArgs = constructor.newInstance(new Object[] { new CIArguments(bm.getArguments(),true), drone });
-    				System.out.println(System.currentTimeMillis()-t);
+    				CIBehavior ctArgs = constructor.newInstance(new Object[] { new CIArguments(bm.getArguments()), drone });
     				drone.startBehavior(ctArgs);
           		} catch(ReflectiveOperationException e) {
           			e.printStackTrace();

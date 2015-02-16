@@ -1,7 +1,7 @@
 PROJECT= $(shell pwd)
 
 JSOURCEPATH = -sourcepath $(PROJECT)/src/
-ROOT_FILE = $(PROJECT)/src/main/Controller.java
+ROOT_FILE = $(PROJECT)/src/main/Main.java
 
 JDEST = $(PROJECT)/bin
 JCC = javac
@@ -11,7 +11,7 @@ default:
 	make clean && make build && make run
 
 build:
-	mkdir $(JDEST) && $(JCC) $(CLASSPATH) $(JSOURCEPATH) -d $(JDEST) $(ROOT_FILE)
+	mkdir $(JDEST) && $(JCC) -cp $(CLASSPATH) $(JSOURCEPATH) -d $(JDEST) $(ROOT_FILE)
 
 clean:
 	rm -rf $(JDEST)

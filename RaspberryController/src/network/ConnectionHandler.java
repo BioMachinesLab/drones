@@ -6,9 +6,9 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
+import network.messages.BehaviorMessage;
 import network.messages.Message;
 import network.messages.SystemStatusMessage;
-
 import commoninterfaceimpl.RealAquaticDroneCI;
 
 public class ConnectionHandler extends Thread {
