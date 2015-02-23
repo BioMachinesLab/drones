@@ -76,11 +76,11 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		try {
 
 			print("Initializing GPS!", false);
-
-			setupGPSReceiver();
-
+			
 			messageParser = new MessageParser();
 			messageParser.start();
+
+			setupGPSReceiver();
 
 			available = true;
 
@@ -110,6 +110,10 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 					receivedDataBuffer.append(event.getData());
 					
+//					if(event.getData().contains("PMTK")) {
+//						System.out.println("RAW "+event.getData());
+//					}
+					
 					boolean keepGoing = true;
 
 					while (keepGoing) {
@@ -123,8 +127,9 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 							if(indexSecondDollar >= 0 && indexSecondDollar < receivedDataBuffer.length()) {
 							
 								String sub = receivedDataBuffer.substring(indexFirstDollar,indexSecondDollar).trim();
-				
+								
 								if (messageParser != null && !sub.isEmpty() && sub.charAt(0) == '$') {
+//									System.out.println("SENDING "+sub);
 									messageParser.processReceivedData(sub);
 									keepGoing = true;
 								}
@@ -175,8 +180,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		/*
 		 * Closing old velocity serial
 		 */
-		serial.close();
 		serial.flush();
+		serial.close();
 		// ackResponses.clear();
 		Thread.sleep(1000);
 
@@ -194,16 +199,16 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		serial.write(command);
 		print("[COMMAND] " + command, false);
 
-		Thread.sleep(1000);
+		Thread.sleep(3000);
 
 		// Check if the command was successfully executed
 		String ack1 = getStringStartWithFromList("$PMTK001,220,3*30");
 		if (ack1 == null) {
 			/* throw new NotActiveException */System.out
-					.println("[GPS Module] The update frequency was not succefully changed!");
+					.println("[GPS Module] Update frequency was NOT succefully changed!");
 		} else {
-			String[] str = ack1.split(",");
-			ackResponses.remove(Integer.parseInt(str[1]));
+			System.out.println("[GPS Module] OK! Update frequency was succefully changed!");
+			ackResponses.remove(ack1);
 		}
 
 		// ackResponses.clear();
@@ -213,27 +218,26 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		 */
 		command = "$PMTK397,0*23\r\n";
 		serial.write(command);
+		serial.flush();
 
-		Thread.sleep(1000);
+		Thread.sleep(3000);
 
 		// Check if the command was successfully executed
 		String ack2 = getStringStartWithFromList("$PMTK001,397,3*3D");
 		if (ack2 == null) {
 			/* throw new NotActiveException */System.out
-					.println("[GPS Module] The navigation speed threshold was not succefully changed!");
+					.println("[GPS Module] Navigation speed threshold was NOT succefully changed!");
 		} else {
-			String[] str = ack2.split(",");
-			ackResponses.remove(Integer.parseInt(str[1]));
+			System.out.println("[GPS Module] OK! Navigation speed threshold was succefully changed!");
+			ackResponses.remove(ack2);
 		}
-
-		// ackResponses.clear();
 
 		if (ENABLE_SBAS) {
 			try {
 				enableSBAS();
+				System.out.println("[GPS Module] OK! SBAS was succefully enabled!");
 			} catch (InterruptedException e) {
-				/* throw new NotActiveException */System.out
-						.println("[GPS Module] The SBAS was not succefully enabled!");
+				System.out.println("[GPS Module] SBAS was NOT succefully enabled!");
 			}
 		}
 	}
@@ -403,13 +407,12 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		// serial.write("$PMTK513,1*28\r\n"); // DT Command. Which is the
 		// difference??
 
-		Thread.sleep(1000);
+		Thread.sleep(3000);
 
 		// Check if the command was successfully executed
 		String ack = getStringStartWithFromList("$PMTK001,313,3*31");
 		if (ack != null) {
-			String[] str = ack.split(",");
-			ackResponses.remove(Integer.parseInt(str[1]));
+			ackResponses.remove(ack);
 		}
 
 		return false;
@@ -589,19 +592,23 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				case "$GPRMC":
 					parseGPRMCSentence(split);
 					break;
+					
+				case "$PMTK":
+					parsePMTKData(name, fullString);
+					break;
 
 //				case "$GPVTG":
 //					parseGPVTGSentence(split);
 //					break;
 
 				default:
-					print("No parser for " + name + " sentence", false);
+//					print("No parser for " + name + " sentence", false);
 					break;
 				}
 			} catch (Exception e) {
-				System.out.println("[GPS] Error parsing " + name + "!");
-				System.out.println(fullString);
-				e.printStackTrace();
+//				System.out.println("[GPS] Error parsing " + name + "!");
+//				System.out.println(fullString);
+//				e.printStackTrace();
 			}
 		}
 
@@ -612,8 +619,6 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		 *            : PMTK sentence to be processed
 		 */
 		private void parsePMTKData(String name, String fullString) {
-
-
 			print("[Parsing PMTK]", false);
 			ackResponses.add(fullString);
 			print("[ACK] " + fullString, false);
