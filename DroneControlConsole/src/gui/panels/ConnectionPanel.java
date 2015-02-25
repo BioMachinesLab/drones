@@ -129,6 +129,15 @@ public class ConnectionPanel extends UpdatePanel {
 		}
 		lastUpdate.put(address, System.currentTimeMillis());
 	}
+	
+	public String[] getCurrentAddresses() {
+		String[] ips = new String[listModel.getSize()];
+		int i = 0;
+		for(Object o : listModel.toArray()) {
+			ips[i++] = (String)o;
+		}
+		return ips;
+	}
 
 	public synchronized void cleanupAddresses() {
 

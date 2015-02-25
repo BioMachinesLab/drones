@@ -7,7 +7,7 @@ import main.DroneControlConsole;
 
 public class InformationConnection extends DroneConnection {
 
-	private static int INFORMATION_PORT = 10101;
+	public static int INFORMATION_PORT = 10101;
 
 	public InformationConnection(DroneControlConsole console, InetAddress destHost)
 			throws IOException {

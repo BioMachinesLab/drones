@@ -107,7 +107,7 @@ public class GUI extends JFrame {
 		leftTopPanel.add(connectionPanel);
 
 		// Behaviors
-		behaviorsPanel = new BehaviorsPanel();
+		behaviorsPanel = new BehaviorsPanel(this);
 		leftTopPanel.add(behaviorsPanel);
 		leftPanel.add(leftTopPanel, BorderLayout.NORTH);
 
