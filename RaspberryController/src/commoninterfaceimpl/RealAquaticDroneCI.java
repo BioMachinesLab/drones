@@ -8,8 +8,6 @@ import io.output.ControllerOutput;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 import network.ConnectionHandler;
@@ -20,57 +18,53 @@ import network.broadcast.RealBroadcastHandler;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import objects.Entity;
-import simpletestbehaviors.ControllerCIBehavior;
-import simpletestbehaviors.GoToWaypointCIBehavior;
-import simpletestbehaviors.TurnToOrientationCIBehavior;
 import utils.NetworkUtils;
-import utils.Nmea0183ToDecimalConverter;
-import behaviors.CalibrationCIBehavior;
+
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
 import commoninterface.CISensor;
 import commoninterface.LedState;
 import commoninterface.network.broadcast.BroadcastHandler;
-import commoninterface.sensors.WaypointCISensor;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.jcoord.LatLon;
+
 import dataObjects.GPSData;
 
 public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
-	
-	private static long CYCLE_TIME = 100;//in miliseconds
+
+	private static long CYCLE_TIME = 100;// in miliseconds
 
 	private String status = "";
 	private String initMessages = "\n";
 	private IOManager ioManager;
 	private ControllerMessageHandler messageHandler;
-	
+
 	private ConnectionListener connectionListener;
 	private MotorConnectionListener motorConnectionListener;
 	private BroadcastHandler broadcastHandler;
-	
+
 	private List<MessageProvider> messageProviders = new ArrayList<MessageProvider>();
 	private ArrayList<CISensor> cisensors = new ArrayList<CISensor>();
-	
+
 	private CIArguments args;
 	private CILogger logger;
 	private long startTimeInMillis;
 	private double timestep = 0;
 	private double leftSpeed = 0;
 	private double rightSpeed = 0;
-	
+
 	private CIBehavior activeBehavior = null;
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
-	
+
 	@Override
-	public void begin(CIArguments args, CILogger logger) {		
+	public void begin(CIArguments args, CILogger logger) {
 		this.startTimeInMillis = System.currentTimeMillis();
-		this.args   = args;
-		this.logger = logger; 
-		
+		this.args = args;
+		this.logger = logger;
+
 		addShutdownHooks();
-		
+
 		initIO();
 		initMessageProviders();
 		initConnections();
@@ -82,120 +76,80 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 		logger.logMessage(initMessages);
 	}
-	
+
 	@Override
 	public void run() {
-		while(true) {
-			
+		while (true) {
+
 			long lastCycleTime = System.currentTimeMillis();
 			CIBehavior current = activeBehavior;
-			if(current != null) {
+			if (current != null) {
 				current.step(timestep);
-				if(current.getTerminateBehavior()) {
+				if (current.getTerminateBehavior()) {
 					stopActiveBehavior();
 				}
 				ioManager.setMotorSpeeds(leftSpeed, rightSpeed);
 			}
-			
-			if(broadcastHandler != null)
+
+			if (broadcastHandler != null)
 				broadcastHandler.update(timestep);
-			
-			long timeToSleep = CYCLE_TIME - (System.currentTimeMillis() - lastCycleTime);
-			
-			if(timeToSleep > 0) {
+
+			long timeToSleep = CYCLE_TIME
+					- (System.currentTimeMillis() - lastCycleTime);
+
+			if (timeToSleep > 0) {
 				try {
 					Thread.sleep(timeToSleep);
-				} catch (InterruptedException e) {}
+				} catch (InterruptedException e) {
+				}
 			}
-			
+
 			timestep++;
 		}
 	}
 
+	private void addShutdownHooks() {
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() {
+				shutdown();
+			}
+		});
+	}
+	
 	@Override
 	public void shutdown() {
 		logger.logMessage("# Shutting down Controller...");
-		
+
 		if (logger != null)
 			logger.stopLogging();
-		
+
 		ioManager.shutdown();
-		
+
 		System.out.println("# Finished Controller cleanup!");
 	}
 
-	@Override
-	public void setMotorSpeeds(double left, double right) {
-		leftSpeed = left;
-		rightSpeed = right;
-	}
+	public void reset() {
+		ioManager.shutdownMotors();
 
-	@Override
-	public double getCompassOrientationInDegrees() {
+		if (activeBehavior != null) {
+			activeBehavior.cleanUp();
+			activeBehavior = null;
+			ioManager.setMotorSpeeds(leftSpeed, rightSpeed);
+		}
 		try {
-			double orientation = ioManager.getCompassModule().getHeadingInDegrees();
-			return (orientation % 360.0);
-		} catch(Exception e){}
-		
-		return -1;
-	}
+			// make sure that the current control step is processed
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+		}
 
-	@Override
-	public LatLon getGPSLatLon() {
-		try {
-			GPSData gpsData = ioManager.getGpsModule().getReadings();
-			
-			if(gpsData.getLatitudeDecimal() == 0 || gpsData.getLongitudeDecimal() == 0)
-				return null;
-	
-			return new LatLon(gpsData.getLatitudeDecimal(),gpsData.getLongitudeDecimal());
-		} catch(Exception e){}
-		
-		return null;
-	}
-
-	@Override
-	public double getGPSOrientationInDegrees() {
-		try {
-			GPSData gpsData = ioManager.getGpsModule().getReadings();
-			return gpsData.getOrientation();
-		} catch(Exception e){}
-		
-		return -1;
-	}
-
-	@Override
-	public double getTimeSinceStart() {
-		long elapsedMillis =  System.currentTimeMillis() - this.startTimeInMillis;
-		
-		return ((double) elapsedMillis) / 1000.0;
 	}
 	
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
-	public void processInformationRequest(Message request, ConnectionHandler conn) {
+	public void processInformationRequest(Message request,
+			ConnectionHandler conn) {
 		messageHandler.addMessage(request, conn);
 	}
 
-	public String getInitMessages() {
-		return initMessages;
-	}
-
-	public List<MessageProvider> getMessageProviders() {
-		return messageProviders;
-	}
-
-
-	public IOManager getIOManager() {
-		return ioManager;
-	}
-		
+	// Init's
 	private void initIO() {
 		ioManager = new IOManager(this);
 		initMessages += ioManager.getInitMessages();
@@ -203,7 +157,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	private void initConnections() {
 		try {
-			
+
 			connectionListener = new ConnectionListener(this);
 			connectionListener.start();
 
@@ -212,7 +166,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 			motorConnectionListener = new MotorConnectionListener(this);
 			motorConnectionListener.start();
-			
+
 			broadcastHandler = new RealBroadcastHandler(this);
 
 			logger.logMessage(".");
@@ -223,7 +177,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 					+ e.getMessage() + ")\n";
 		}
 	}
-	
+
 	/**
 	 * Create a message provider for all the possible message provider classes
 	 * like the inputs, outputs, system information queries
@@ -243,10 +197,26 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		}
 	}
 
+	// Behaviors
+	public void startBehavior(CIBehavior b) {
+		stopActiveBehavior();
+		activeBehavior = b;
+	}
+
+	public void stopActiveBehavior() {
+		if (activeBehavior != null) {
+			activeBehavior.cleanUp();
+			activeBehavior = null;
+			ioManager.setMotorSpeeds(leftSpeed, rightSpeed);
+		}
+	}
+
+	// Setters
 	@Override
 	public void setLed(int index, LedState state) {
-		if(ioManager.getDebugLeds() != null) {
-			if (index >= 0 && index < ioManager.getDebugLeds().getNumberOfOutputs()) {
+		if (ioManager.getDebugLeds() != null) {
+			if (index >= 0
+					&& index < ioManager.getDebugLeds().getNumberOfOutputs()) {
 				switch (state) {
 				case ON:
 					ioManager.getDebugLeds().removeBlinkLed(index);
@@ -259,51 +229,31 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 				case BLINKING:
 					ioManager.getDebugLeds().addBlinkLed(index);
 					break;
-				} 
+				}
 			} else {
-				logger.logError("Invalid led index: " + index + ", must be >= 0 and < " + ioManager.getDebugLeds().getNumberOfOutputs());
+				logger.logError("Invalid led index: " + index
+						+ ", must be >= 0 and < "
+						+ ioManager.getDebugLeds().getNumberOfOutputs());
 			}
 		}
 	}
-	
+
 	@Override
-	public ArrayList<Entity> getEntities() {
-		return entities;
+	public void setMotorSpeeds(double left, double right) {
+		leftSpeed = left;
+		rightSpeed = right;
 	}
 
-	private void addShutdownHooks() {
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			public void run() {
-				shutdown();
-			}
-		});
-	}
-	
-	@Override
-	public ArrayList<CISensor> getCISensors() {
-		return cisensors;
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
-	public void reset() {
-		ioManager.shutdownMotors();
-		
-		if(activeBehavior != null) {
-			activeBehavior.cleanUp();
-			activeBehavior = null;
-			ioManager.setMotorSpeeds(leftSpeed, rightSpeed);
-		}
-		try {
-			//make sure that the current control step is processed
-			Thread.sleep(100);
-		} catch (InterruptedException e) {}
-		
-	}
-	
+	// Getters
 	@Override
 	public String getNetworkAddress() {
 		return NetworkUtils.getAddress();
 	}
-	
+
 	@Override
 	public BroadcastHandler getBroadcastHandler() {
 		return broadcastHandler;
@@ -312,17 +262,79 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	public CIBehavior getActiveBehavior() {
 		return activeBehavior;
 	}
-	
-	public void startBehavior(CIBehavior b) {
-		stopActiveBehavior();
-		activeBehavior = b;
+
+	@Override
+	public ArrayList<CISensor> getCISensors() {
+		return cisensors;
 	}
-	
-	public void stopActiveBehavior() {
-		if(activeBehavior != null) {
-			activeBehavior.cleanUp();
-			activeBehavior = null;
-			ioManager.setMotorSpeeds(leftSpeed, rightSpeed);
+
+	@Override
+	public ArrayList<Entity> getEntities() {
+		return entities;
+	}
+
+	public String getInitMessages() {
+		return initMessages;
+	}
+
+	public List<MessageProvider> getMessageProviders() {
+		return messageProviders;
+	}
+
+	@Override
+	public double getCompassOrientationInDegrees() {
+		try {
+			double orientation = ioManager.getCompassModule()
+					.getHeadingInDegrees();
+			return (orientation % 360.0);
+		} catch (Exception e) {
 		}
+
+		return -1;
 	}
+
+	@Override
+	public LatLon getGPSLatLon() {
+		try {
+			GPSData gpsData = ioManager.getGpsModule().getReadings();
+
+			if (gpsData.getLatitudeDecimal() == 0
+					|| gpsData.getLongitudeDecimal() == 0)
+				return null;
+
+			return new LatLon(gpsData.getLatitudeDecimal(),
+					gpsData.getLongitudeDecimal());
+		} catch (Exception e) {
+		}
+
+		return null;
+	}
+
+	@Override
+	public double getGPSOrientationInDegrees() {
+		try {
+			GPSData gpsData = ioManager.getGpsModule().getReadings();
+			return gpsData.getOrientation();
+		} catch (Exception e) {
+		}
+
+		return -1;
+	}
+
+	@Override
+	public double getTimeSinceStart() {
+		long elapsedMillis = System.currentTimeMillis()
+				- this.startTimeInMillis;
+
+		return ((double) elapsedMillis) / 1000.0;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public IOManager getIOManager() {
+		return ioManager;
+	}
+
 }

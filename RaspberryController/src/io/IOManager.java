@@ -4,7 +4,7 @@ import io.input.ControllerInput;
 import io.input.FakeGPSModuleInput;
 import io.input.FileGPSModuleInput;
 import io.input.GPSModuleInput;
-import io.input.I2CBatteryManagerInput;
+import io.input.I2CBatteryModuleInput;
 import io.input.I2CCompassModuleInput;
 //import io.output.BuzzerOutput;
 //import io.output.BuzzerOutput.BuzzerMode;
@@ -20,18 +20,17 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Scanner;
 
-import utils.Logger;
 import network.messages.MotorMessage;
+import utils.Logger;
 import behaviors.CalibrationCIBehavior;
 
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CFactory;
-
-import commoninterface.CIBehavior;
 import commoninterface.utils.CIArguments;
 import commoninterfaceimpl.RealAquaticDroneCI;
+
 import dataObjects.MotorSpeeds;
 
 public class IOManager {
@@ -44,12 +43,12 @@ public class IOManager {
 	// Inputs
 	private GPSModuleInput gpsModule;
 	private I2CCompassModuleInput compassModule;
-	private I2CBatteryManagerInput batteryManager;
+	private I2CBatteryModuleInput batteryManager;
 
 	// Outputs
 	private ReversableESCManagerOutputV2 escManager;
 	private DebugLedsOutput debugLeds;
-//	private BuzzerOutput buzzer;
+	// private BuzzerOutput buzzer;
 
 	// Hardware Instances
 	private GpioController gpioController;
@@ -140,7 +139,6 @@ public class IOManager {
 	}
 
 	private void initInputs() {
-
 		if (enabledIO.contains("compass") && enabledIO.contains("i2c")) {
 			// Compass Module Init
 			compassModule = new I2CCompassModuleInput(i2cBus);
@@ -154,21 +152,22 @@ public class IOManager {
 			}
 
 			if (enabledIO.contains("autocompasscalibration")) {
-				drone.startBehavior(new CalibrationCIBehavior(new CIArguments(""), drone));
+				drone.startBehavior(new CalibrationCIBehavior(new CIArguments(
+						""), drone));
 			}
 
 		}
 
 		if (enabledIO.contains("battery") && enabledIO.contains("i2c")) {
 			// Battery Module Init
-			// batteryManager = new I2CBatteryManagerInput();
-			// initMessages += "[INIT] BatteryManager: "
-			// + (batteryManager.isAvailable() ? "ok" : "not ok!") + "\n";
-			// if (batteryManager.isAvailable()) {
-			// batteryManager.start();
-			// inputs.add(batteryManager);
-			// System.out.print(".");
-			// }
+			batteryManager = new I2CBatteryModuleInput(i2cBus);
+			initMessages += "[INIT] BatteryManager: "
+					+ (batteryManager.isAvailable() ? "ok" : "not ok!") + "\n";
+			if (batteryManager.isAvailable()) {
+				batteryManager.start();
+				inputs.add(batteryManager);
+				System.out.print(".");
+			}
 		}
 
 		if (enabledIO.contains("gps")) {
@@ -199,8 +198,8 @@ public class IOManager {
 					System.out.print(".");
 				}
 			} catch (Exception e) {
-				initMessages += "[INIT] FileGPSModule: not ok! (" + e.getMessage()
-						+ ")\n";
+				initMessages += "[INIT] FileGPSModule: not ok! ("
+						+ e.getMessage() + ")\n";
 			}
 		} else if (enabledIO.contains("fakegps")) {
 			try {
@@ -214,8 +213,8 @@ public class IOManager {
 					System.out.print(".");
 				}
 			} catch (Exception e) {
-				initMessages += "[INIT] FakeGPSModule: not ok! (" + e.getMessage()
-						+ ")\n";
+				initMessages += "[INIT] FakeGPSModule: not ok! ("
+						+ e.getMessage() + ")\n";
 			}
 		}
 	}
@@ -226,7 +225,7 @@ public class IOManager {
 				// ESC Output Init
 				escManager = new ReversableESCManagerOutputV2(motorSpeeds,
 						gpioController);
-				
+
 				initMessages += "[INIT] ESCManager: "
 						+ (escManager.isAvailable() ? "ok" : "not ok!") + "\n";
 
@@ -241,13 +240,12 @@ public class IOManager {
 						+ ")\n";
 			}
 		}
-		
+
 		if (enabledIO.contains("servos") && enabledIO.contains("i2c")) {
 			try {
 				// ESC Output Init
-				escManager = new ServoOutput(motorSpeeds,
-						gpioController);
-				
+				escManager = new ServoOutput(motorSpeeds, gpioController);
+
 				initMessages += "[INIT] ServoManager: "
 						+ (escManager.isAvailable() ? "ok" : "not ok!") + "\n";
 
@@ -258,8 +256,8 @@ public class IOManager {
 				}
 
 			} catch (Exception e) {
-				initMessages += "[INIT] ServoManager: not ok! (" + e.getMessage()
-						+ ")\n";
+				initMessages += "[INIT] ServoManager: not ok! ("
+						+ e.getMessage() + ")\n";
 			}
 		}
 
@@ -283,25 +281,25 @@ public class IOManager {
 			}
 		}
 
-//		if (enabledIO.contains("buzzer")) {
-//			try {
-//				// Buzzer Init
-//				buzzer = new BuzzerOutput();
-//				initMessages += "[INIT] Buzzer: "
-//						+ (buzzer.isAvailable() ? "ok" : "not ok!") + "\n";
-//				if (buzzer.isAvailable()) {
-//					buzzer.start();
-//					outputs.add(buzzer);
-//
-//					buzzer.setValue(BuzzerMode.DOUBLE_BEEP);
-//
-//					System.out.print(".");
-//				}
-//			} catch (Exception e) {
-//				initMessages += "[INIT] Buzzer: not ok! (" + e.getMessage()
-//						+ ")\n";
-//			}
-//		}
+		// if (enabledIO.contains("buzzer")) {
+		// try {
+		// // Buzzer Init
+		// buzzer = new BuzzerOutput();
+		// initMessages += "[INIT] Buzzer: "
+		// + (buzzer.isAvailable() ? "ok" : "not ok!") + "\n";
+		// if (buzzer.isAvailable()) {
+		// buzzer.start();
+		// outputs.add(buzzer);
+		//
+		// buzzer.setValue(BuzzerMode.DOUBLE_BEEP);
+		//
+		// System.out.print(".");
+		// }
+		// } catch (Exception e) {
+		// initMessages += "[INIT] Buzzer: not ok! (" + e.getMessage()
+		// + ")\n";
+		// }
+		// }
 	}
 
 	public void shutdown() {
@@ -361,7 +359,7 @@ public class IOManager {
 		if (motorSpeeds != null)
 			motorSpeeds.setSpeeds(message);
 	}
-	
+
 	public MotorSpeeds getMotorSpeeds() {
 		return motorSpeeds;
 	}
@@ -370,7 +368,7 @@ public class IOManager {
 		return debugLeds;
 	}
 
-//	public BuzzerOutput getBuzzer() {
-//		return buzzer;
-//	}
+	// public BuzzerOutput getBuzzer() {
+	// return buzzer;
+	// }
 }

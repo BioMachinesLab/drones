@@ -32,10 +32,7 @@ public class FakeGPSModuleInput extends GPSModuleInput {
 	class FakeInputThread extends Thread {
 		
 		@Override
-		public void run() {
-			
-			double o = 0;
-			
+		public void run() {			
 			while(true) {
 				
 				MotorSpeeds spd = drone.getIOManager().getMotorSpeeds();

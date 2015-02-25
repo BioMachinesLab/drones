@@ -1,7 +1,6 @@
 package io.input;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -238,18 +237,13 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 
 	@Override
 	public void run() {
-		
-		
 		while (true) {
-			
 			double[] rawAxisReadings = readXYZ();
 
 			if(calibrationStatus) {
 				handleCalibration(rawAxisReadings[0], rawAxisReadings[1], rawAxisReadings[2]);
 			} else {
-			
 				double[] converted = convert(rawAxisReadings[0],rawAxisReadings[1],rawAxisReadings[2]);
-				
 				double heading = Math.atan2(converted[1],converted[0]);
 				
 				//Value for Lisbon is -2º (0.034906585 rad). Find more here: http://www.magnetic-declination.com
