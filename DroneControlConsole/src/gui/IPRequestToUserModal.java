@@ -12,13 +12,13 @@ import javax.swing.JTextField;
 
 import main.DroneControlConsole;
 
-public class IPRequestToUser extends JFrame {
+public class IPRequestToUserModal extends JFrame {
 	private static final long serialVersionUID = 1919821842077609484L;
 	private String DEFAULT_IP = "192.168.3.1";
 	private InetAddress ip = null;
 	private String ip_asString = "";
 
-	public IPRequestToUser(DroneControlConsole console) {
+	public IPRequestToUserModal(DroneControlConsole console) {
 		JPanel dialogJPane = new JPanel(new GridLayout(1, 1));
 
 		// JTextFields Construction

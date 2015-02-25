@@ -1,4 +1,4 @@
-package gui.map;
+package gui.panels.map;
 
 import gui.panels.UpdatePanel;
 

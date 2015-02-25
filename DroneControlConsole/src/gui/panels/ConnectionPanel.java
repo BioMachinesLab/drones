@@ -1,6 +1,6 @@
 package gui.panels;
 
-import gui.IPRequestToUser;
+import gui.IPRequestToUserModal;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -110,7 +110,7 @@ public class ConnectionPanel extends UpdatePanel {
 	}
 
 	public void connectTo() {
-		new IPRequestToUser(console);
+		new IPRequestToUserModal(console);
 	}
 
 	public synchronized void removeAddress(String address) {

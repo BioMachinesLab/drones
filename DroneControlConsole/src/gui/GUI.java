@@ -1,6 +1,5 @@
 package gui;
 
-import gui.map.MapPanel;
 import gui.panels.BehaviorsPanel;
 import gui.panels.CompassPanel;
 import gui.panels.ConnectionPanel;
@@ -8,6 +7,7 @@ import gui.panels.GPSPanel;
 import gui.panels.MessagesPanel;
 import gui.panels.MotorsPanel;
 import gui.panels.SystemInfoPanel;
+import gui.panels.map.MapPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Window;
