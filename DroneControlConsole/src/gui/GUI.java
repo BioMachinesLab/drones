@@ -80,9 +80,12 @@ public class GUI extends JFrame {
 		motorsPanel = new MotorsPanel();
 		rightPanel.add(motorsPanel, BorderLayout.NORTH);
 
+		
+		JPanel GPSCompassBatteriesPanel = new JPanel(new BorderLayout());
+		
 		// GPS
 		gpsPanel = new GPSPanel();
-		rightPanel.add(gpsPanel, BorderLayout.CENTER);
+		GPSCompassBatteriesPanel.add(gpsPanel, BorderLayout.NORTH);
 
 		// Compass and batteries
 		JPanel compassAndBatteriesPanel= new JPanel(new GridLayout(1,2));
@@ -91,8 +94,9 @@ public class GUI extends JFrame {
 		
 		compassAndBatteriesPanel.add(compassPanel);
 		compassAndBatteriesPanel.add(batteryPanel);
-		rightPanel.add(compassAndBatteriesPanel, BorderLayout.SOUTH);
+		GPSCompassBatteriesPanel.add(compassAndBatteriesPanel, BorderLayout.CENTER);
 
+		rightPanel.add(GPSCompassBatteriesPanel,BorderLayout.CENTER);
 
 		add(rightPanel, BorderLayout.EAST);
 

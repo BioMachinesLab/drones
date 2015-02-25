@@ -139,10 +139,12 @@ public class CompassPanel extends UpdatePanel {
         @Override
         public void paintComponent(Graphics g) {
         	
-			 int w = this.getSize().width;
-			 int h = this.getSize().height;
-			
-			 if (bufImage == null) {
+			 int w = getWidth();
+			 int h = getHeight();
+			 
+			 int maxSize = w - 45;
+			 
+			 if (bufImage == null || bufImage.getWidth(this) != w || bufImage.getHeight(this) != h) {
 			     bufImage = this.createImage(w, h);
 			     bufG = bufImage.getGraphics();
 			 }
@@ -154,10 +156,10 @@ public class CompassPanel extends UpdatePanel {
             Graphics2D g2d = (Graphics2D) bufG;
             
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            circleRadius = (int) (getWidth() * 0.45);
-            circleX = 50;
-            circleY = 20;
-
+            circleRadius = Math.min(h - 45,maxSize);
+            circleX = 25;
+            circleY = 24;
+            
             g2d.setColor(Color.BLACK);
             for (int angle = 0; angle <= 360; angle += 5) {
                 double sin = Math.sin(Math.toRadians(angle));
@@ -195,7 +197,8 @@ public class CompassPanel extends UpdatePanel {
             int rotationY = circleX + (circleRadius / 2);
             g2d.setColor(Color.green);
             int ovalRadius = 2;
-            g2d.fillOval((int)(circleX + (circleRadius / 2) + Math.cos(Math.toRadians(headingValue-90))*55) - ovalRadius, (int)(circleX + (circleRadius / 2) + Math.sin(Math.toRadians(headingValue-90))*55) - ovalRadius, ovalRadius*2, ovalRadius*2);
+            headingValue+=10;
+            g2d.fillOval((int)(circleX + (circleRadius / 2) + Math.cos(Math.toRadians(headingValue-90))*40) - ovalRadius, (int)(circleX + (circleRadius / 2) + Math.sin(Math.toRadians(headingValue-90))*40) - ovalRadius, ovalRadius*2, ovalRadius*2);
             AffineTransform old = g2d.getTransform();
             
             AffineTransform at = g2d.getTransform().getRotateInstance(Math.toRadians(headingValue), rotationX, rotationY);

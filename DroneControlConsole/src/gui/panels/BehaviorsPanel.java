@@ -4,6 +4,7 @@ import gui.GUI;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.ByteArrayOutputStream;
@@ -81,7 +82,7 @@ public class BehaviorsPanel extends UpdatePanel{
 			}
 		});
 		
-		JPanel buttons = new JPanel();
+		JPanel buttons = new JPanel(new GridLayout(2,2));
 		buttons.add(start);
 		buttons.add(stop);
 		buttons.add(deploy);

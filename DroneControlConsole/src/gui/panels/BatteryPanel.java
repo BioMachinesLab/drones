@@ -67,7 +67,7 @@ public class BatteryPanel extends UpdatePanel {
 		
 		JPanel temperaturePanel = new JPanel(new BorderLayout());
 		temperaturePanel.add(new JLabel("Temperature"), BorderLayout.WEST);
-		temperature=new JTextField("N/A");
+		temperature=new JTextField("N/A     ");
 		temperature.setEditable(false);
 		temperaturePanel.add(temperature,BorderLayout.EAST);
 
@@ -130,21 +130,23 @@ public class BatteryPanel extends UpdatePanel {
 			Rectangle vr = new Rectangle();
 			SwingUtilities.calculateInnerArea(c, vr);
 
+			//Insets are not working! I think it's because the
+			//panel is a child of another panel.
 			Rectangle or = c.getBounds();
 			Insets insets = c.getInsets();
 
 			if (vr.width <= 0 || vr.height <= 0) {
 				return;
 			}
-
-			int amountFull = getAmountFull(insets, or.width, or.height);
+			int amountFull = c.getHeight();
 
 			g.setColor(c.getBackground());
 			g.fill3DRect(vr.x, vr.y, vr.width + 1, vr.height, false);
 
 			// Set Correct color according to voltage
 			double voltage = ((double) progressBar.getValue() / I2CBatteryModuleInput.VOLTAGE_MULTIPLIER);
-			System.out.println("Voltage: " + voltage);
+			
+//			System.out.println("Voltage: " + voltage);
 			if (voltage > GOOD_VOLTAGE_THRESHOLD)
 				g.setColor(Color.GREEN);
 			else if (voltage >= WARNING_VOLTAGE_THRESHOLD)
@@ -158,26 +160,28 @@ public class BatteryPanel extends UpdatePanel {
 					amountFull, true);
 
 			if (progressBar.isStringPainted()) {
-				String voltageStr = voltage + "V";
+				String voltageStr = voltage+"";
+				
+				if(voltageStr.length() > 4)
+					voltageStr = voltageStr.substring(0,4);
+				
+				voltageStr+= " V";
 				String percentStr = "(" + progressBar.getString() + ")";
 
-				Point placementVoltage = getStringPlacement(g, voltageStr,
-						insets.left, insets.top, or.width - insets.left
-								- insets.right, or.height - insets.top
-								- insets.bottom);
-				Point placementPercent = getStringPlacement(g, percentStr,
-						insets.left, insets.top, or.width - insets.left
-								- insets.right, or.height - insets.top
-								- insets.bottom);
+				Point placement = getStringPlacement(g, voltageStr,
+						0, 30, c.getWidth()/2 , getHeight()/2);
 
-				g.setColor(Color.WHITE);
+				if(g.getColor() == Color.YELLOW || g.getColor() == Color.GREEN)
+					g.setColor(Color.BLACK);
+				else
+					g.setColor(Color.WHITE);
 
 				FontMetrics fm = g.getFontMetrics(progressBar.getFont());
 
-				g.drawString(voltageStr, placementVoltage.x, placementVoltage.y
+				g.drawString(voltageStr, placement.x, placement.y
 						+ fm.getAscent() - 8);
-				g.drawString(percentStr, placementPercent.x - 5,
-						placementVoltage.y + fm.getAscent() + 8);
+				g.drawString(percentStr, placement.x + 5,
+						placement.y + fm.getAscent() + 8);
 			}
 		}
 	}
@@ -226,7 +230,7 @@ public class BatteryPanel extends UpdatePanel {
 		DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols();
 		decimalFormatSymbols.setDecimalSeparator('.');
 		DecimalFormat decimalFormat = new DecimalFormat("##.##", decimalFormatSymbols);
-		temperature.setText(decimalFormat.format(temperatureVal)+" �C");
+		temperature.setText(decimalFormat.format(temperatureVal)+" C");
 		
 		notifyAll();
 	}
