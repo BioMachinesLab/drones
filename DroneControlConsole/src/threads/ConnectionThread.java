@@ -1,6 +1,6 @@
 package threads;
 
-import gui.ConnectionPanel;
+import gui.panels.ConnectionPanel;
 import main.DroneControlConsole;
 
 public class ConnectionThread extends UpdateThread {

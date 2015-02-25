@@ -1,4 +1,6 @@
-package gui;
+package gui.panels;
+
+import gui.GUI;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;

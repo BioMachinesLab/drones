@@ -1,7 +1,7 @@
 package threads;
 
-import gui.BehaviorsPanel;
-import gui.UpdatePanel;
+import gui.panels.BehaviorsPanel;
+import gui.panels.UpdatePanel;
 import main.DroneControlConsole;
 import network.messages.BehaviorMessage;
 

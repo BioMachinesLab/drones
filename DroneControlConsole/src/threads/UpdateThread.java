@@ -1,6 +1,6 @@
 package threads;
 
-import gui.UpdatePanel;
+import gui.panels.UpdatePanel;
 import main.DroneControlConsole;
 import network.messages.InformationRequest;
 import network.messages.InformationRequest.MessageType;

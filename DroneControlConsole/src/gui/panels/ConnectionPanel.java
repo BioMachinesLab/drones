@@ -1,4 +1,6 @@
-package gui;
+package gui.panels;
+
+import gui.IPRequestToUser;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;

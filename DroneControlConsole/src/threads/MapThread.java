@@ -1,7 +1,7 @@
 package threads;
 
-import gui.UpdatePanel;
 import gui.map.MapPanel;
+import gui.panels.UpdatePanel;
 import main.DroneControlConsole;
 import network.messages.EntityMessage;
 

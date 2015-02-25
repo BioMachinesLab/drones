@@ -1,6 +1,7 @@
 package gui.map;
 
-import gui.UpdatePanel;
+import gui.panels.UpdatePanel;
+
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -18,15 +19,18 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Iterator;
 import java.util.LinkedList;
+
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
 import network.messages.CompassMessage;
 import network.messages.EntityMessage;
 import objects.DroneLocation;
 import objects.Waypoint;
+
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 import org.openstreetmap.gui.jmapviewer.Layer;
@@ -40,6 +44,7 @@ import org.openstreetmap.gui.jmapviewer.tilesources.BingAerialTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOpenAerialTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOsmTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.OsmTileSource;
+
 import threads.UpdateThread;
 import dataObjects.GPSData;
 

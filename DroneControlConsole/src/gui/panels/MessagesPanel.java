@@ -1,4 +1,4 @@
-package gui;
+package gui.panels;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;

@@ -1,7 +1,7 @@
 package threads;
 
-import gui.MotorsPanel;
-import gui.UpdatePanel;
+import gui.panels.MotorsPanel;
+import gui.panels.UpdatePanel;
 import main.DroneControlConsole;
 
 public class MotorUpdateThread extends UpdateThread {
