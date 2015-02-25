@@ -3,7 +3,6 @@ package network;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.InetAddress;
 import java.net.Socket;
 import commoninterfaceimpl.RealAquaticDroneCI;
 import network.messages.BehaviorMessage;
@@ -38,15 +37,15 @@ public class BehaviorConnectionHandler extends ConnectionHandler {
 
 		out.reset();
 
-		out.writeObject(InetAddress.getLocalHost().getHostName());
-		out.flush();
-
-		clientName = (String) in.readObject();
-
-		System.out.println("[CONNECTION HANDLER] Client "
+		System.out.println("[BEHAVIOR HANDLER] Client "
 				+ socket.getInetAddress().getHostAddress() + " (" + clientName
 				+ ") connected");
-
 	}
 	
+	public synchronized void sendData(Object data) {
+		super.sendData(data);
+		//We only need to reply that we executed the Behavior,
+		//the handler won't have any other function afterwards
+		shutdownHandler();
+	}
 }
