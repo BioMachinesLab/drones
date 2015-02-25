@@ -67,7 +67,7 @@ public class BatteryPanel extends UpdatePanel {
 		
 		JPanel temperaturePanel = new JPanel(new BorderLayout());
 		temperaturePanel.add(new JLabel("Temperature"), BorderLayout.WEST);
-		temperature=new JTextField("NULL ºC");
+		temperature=new JTextField("N/A");
 		temperature.setEditable(false);
 		temperaturePanel.add(temperature,BorderLayout.EAST);
 
@@ -226,7 +226,7 @@ public class BatteryPanel extends UpdatePanel {
 		DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols();
 		decimalFormatSymbols.setDecimalSeparator('.');
 		DecimalFormat decimalFormat = new DecimalFormat("##.##", decimalFormatSymbols);
-		temperature.setText(decimalFormat.format(temperatureVal)+" ºC");
+		temperature.setText(decimalFormat.format(temperatureVal)+" ï¿½C");
 		
 		notifyAll();
 	}

@@ -1,14 +1,12 @@
 package network;
 
 import gui.panels.BehaviorsPanel;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 import network.messages.BehaviorMessage;
-import network.messages.Message;
 
 public class BehaviorSender extends Thread{
 	
@@ -64,7 +62,6 @@ public class BehaviorSender extends Thread{
 		@Override
 		public void run() {
 			try {
-				System.out.println(message);
 				ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
 				ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 				
