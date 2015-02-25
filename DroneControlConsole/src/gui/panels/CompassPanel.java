@@ -3,10 +3,13 @@ package gui.panels;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.LayoutManager;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
@@ -52,14 +55,14 @@ public class CompassPanel extends UpdatePanel {
 		comboBoxUpdateRate.setSelectedIndex(2);
 		refreshPanel.add(comboBoxUpdateRate, BorderLayout.EAST);
 		
-		JPanel right = new JPanel(new BorderLayout());
+		JPanel bottom = new JPanel(new GridLayout(2,1));
+		bottom.add(valuePanel);
+		bottom.add(refreshPanel);
 		
-		right.add(valuePanel, BorderLayout.NORTH);
-		right.add(refreshPanel, BorderLayout.SOUTH);
-		
-		add(right, BorderLayout.EAST);
-		compassDrawing = new CompassDrawingPanel();
-		add(compassDrawing, BorderLayout.WEST);
+		add(bottom, BorderLayout.SOUTH);
+
+		compassDrawing = new CompassDrawingPanel(new FlowLayout());
+		add(compassDrawing, BorderLayout.CENTER);
 		
 		comboBoxUpdateRate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -124,7 +127,13 @@ public class CompassPanel extends UpdatePanel {
 
         public CompassDrawingPanel() {
             setVisible(true);
-            setPreferredSize(new Dimension(150,150));
+            setPreferredSize(new Dimension(120,120));
+        }
+        
+        public CompassDrawingPanel(LayoutManager layout) {
+        	setLayout(layout);
+            setVisible(true);
+            setPreferredSize(new Dimension(120,120));
         }
         
         @Override
@@ -145,9 +154,9 @@ public class CompassPanel extends UpdatePanel {
             Graphics2D g2d = (Graphics2D) bufG;
             
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            circleRadius = (int) (getWidth() * 0.7);
-            circleX = 25;
-            circleY = 25;
+            circleRadius = (int) (getWidth() * 0.45);
+            circleX = 50;
+            circleY = 20;
 
             g2d.setColor(Color.BLACK);
             for (int angle = 0; angle <= 360; angle += 5) {

@@ -25,6 +25,9 @@ public class I2CBatteryModuleInput extends I2CInput {
 
 	private final static byte ENABLE_VALUE = (byte) 0xFF;
 	private final static byte DISABLE_VALUE = 0x00;
+	
+	public final static int VOLTAGE_MULTIPLIER = 1000;
+	public final static int TEMPERATURE_MULTIPLIER = 100;
 
 	/*
 	 * Other variables
@@ -149,7 +152,7 @@ public class I2CBatteryModuleInput extends I2CInput {
 			short cout = (short) ((cl | (ch << 8)) & 0xFFFF); // concatenate
 																// the MSB
 																// and LSB
-			return ((double) cout / 1000);
+			return ((double) cout / VOLTAGE_MULTIPLIER);
 		}
 	}
 
@@ -166,7 +169,7 @@ public class I2CBatteryModuleInput extends I2CInput {
 		short tout = (short) ((tl | (th << 8)) & 0xFFFF); // concat MSB
 															// and LSB
 
-		return ((double) tout / 100);
+		return ((double) tout / TEMPERATURE_MULTIPLIER);
 	}
 
 	@Override

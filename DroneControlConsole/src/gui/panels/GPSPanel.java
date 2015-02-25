@@ -35,7 +35,7 @@ public class GPSPanel extends UpdatePanel {
 	private JTextField textFieldVDOP;
 	private JTextField textFieldTime;
 	
-	private JLabel labelHasFix;
+	private JTextField labelHasFix;
 	
 	private UpdateThread thread;
 	
@@ -45,11 +45,7 @@ public class GPSPanel extends UpdatePanel {
 		setBorder(BorderFactory.createTitledBorder("GPS Data"));
 		setLayout(new BorderLayout());
 
-		JPanel left = new JPanel();
-		left.setLayout(new BorderLayout());
-		left.add(buildCoordinatesPanel(),BorderLayout.NORTH);
-		add(left,BorderLayout.WEST);
-		
+		add(buildCoordinatesPanel(),BorderLayout.WEST);
 		add(buildGPSFixInformationPanel(), BorderLayout.EAST);
 		add(buildRefreshPanel(), BorderLayout.SOUTH);
 	}
@@ -102,9 +98,8 @@ public class GPSPanel extends UpdatePanel {
 		coordinatesPanel.setLayout(new GridLayout(5,2));
 		
 		coordinatesPanel.add(new JLabel("Has Fix"));
-		labelHasFix = new JLabel();
+		labelHasFix = new JTextField("No Fix");
 		labelHasFix.setBackground(Color.RED);
-		labelHasFix.setBorder(new LineBorder(new Color(238,238,238), 4));
 		labelHasFix.setOpaque(true);
 		coordinatesPanel.add(labelHasFix);
 
@@ -193,8 +188,10 @@ public class GPSPanel extends UpdatePanel {
 		
 		if(data.isFix()) {
 			labelHasFix.setBackground(Color.GREEN);
+			labelHasFix.setText("Has Fix");
 		} else {
 			labelHasFix.setBackground(Color.RED);
+			labelHasFix.setText("No Fix");
 		}
 		
 		textFieldVelKmh.setText(Double.toString(data.getGroundSpeedKmh()));

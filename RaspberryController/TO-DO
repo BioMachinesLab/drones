@@ -2,8 +2,6 @@ TO-DO Hardware:
 	- Check https://code.google.com/p/i2c-gps-nav/ project. Possible alternative to UART population?
 	
 TO-DO Controller:
-	- Compass calibration
-	- Extract I2C manager to a separate class (already done on the I2CBusController, but not used, yet)
 	- Function "downloadLog", on GPSModuleInput (download the log from the GPS Receiver itself, into the raspberry)
 	- GPSModuleInput-> correct function
 		- getReleaseVersion
@@ -14,15 +12,3 @@ TO-DO Controller:
 		- disableAlwaysLocateStandby
 		- enableAIC
 		- disableAIC
-		to support the new use of Hash Map (similar to what was done on the setup function).
-
-
-TO-DO GUI:
-	- Integrate with JBotEvolver
-	
-TO-DO RPi image:
-	- Add set CLASSPATH to .bashrc as on 192.168.3.1
-	- Add update authorized_keys to the version currently on 192.168.3.1
-	
-		
-	

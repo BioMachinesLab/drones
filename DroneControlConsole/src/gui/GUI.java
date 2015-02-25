@@ -1,5 +1,6 @@
 package gui;
 
+import gui.panels.BatteryPanel;
 import gui.panels.BehaviorsPanel;
 import gui.panels.CompassPanel;
 import gui.panels.ConnectionPanel;
@@ -10,6 +11,7 @@ import gui.panels.SystemInfoPanel;
 import gui.panels.map.MapPanel;
 
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.Window;
 import java.lang.reflect.Method;
 
@@ -27,6 +29,7 @@ public class GUI extends JFrame {
 	private SystemInfoPanel sysInfoPanel;
 	private MessagesPanel msgPanel;
 	private CompassPanel compassPanel;
+	private BatteryPanel batteryPanel;
 	private MapPanel mapPanel;
 	private BehaviorsPanel behaviorsPanel;
 	private ConnectionPanel connectionPanel;
@@ -74,19 +77,22 @@ public class GUI extends JFrame {
 		JPanel rightPanel = new JPanel(new BorderLayout());
 
 		// Motors
-		JPanel motorsGPSPanel = new JPanel(new BorderLayout());
 		motorsPanel = new MotorsPanel();
-		motorsGPSPanel.add(motorsPanel, BorderLayout.NORTH);
+		rightPanel.add(motorsPanel, BorderLayout.NORTH);
 
 		// GPS
 		gpsPanel = new GPSPanel();
-		motorsGPSPanel.add(gpsPanel, BorderLayout.CENTER);
+		rightPanel.add(gpsPanel, BorderLayout.CENTER);
 
-		// Compass
+		// Compass and batteries
+		JPanel compassAndBatteriesPanel= new JPanel(new GridLayout(1,2));
 		compassPanel = new CompassPanel();
-		motorsGPSPanel.add(compassPanel, BorderLayout.SOUTH);
+		batteryPanel = new BatteryPanel();
+		
+		compassAndBatteriesPanel.add(compassPanel);
+		compassAndBatteriesPanel.add(batteryPanel);
+		rightPanel.add(compassAndBatteriesPanel, BorderLayout.SOUTH);
 
-		rightPanel.add(motorsGPSPanel, BorderLayout.NORTH);
 
 		add(rightPanel, BorderLayout.EAST);
 

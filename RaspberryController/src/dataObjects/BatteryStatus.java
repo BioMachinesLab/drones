@@ -10,6 +10,13 @@ public class BatteryStatus {
 		batteryID = -1;
 	}
 
+	public BatteryStatus(int batteryID, double[] cellsVoltages,
+			double batteryTemperature) {
+		this.batteryID = batteryID;
+		this.cellsVoltages = cellsVoltages;
+		this.batteryTemperature = batteryTemperature;
+	}
+
 	// Getters
 	public int getCellCount() {
 		if (cellsVoltages != null) {

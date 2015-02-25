@@ -1,15 +1,21 @@
 package gui.panels;
 
-import java.awt.BasicStroke;
+import io.input.I2CBatteryModuleInput;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -18,11 +24,12 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.plaf.basic.BasicProgressBarUI;
 
 import network.messages.BatteryMessage;
-import sun.swing.SwingUtilities2;
 import threads.UpdateThread;
 import dataObjects.BatteryStatus;
 
@@ -30,11 +37,20 @@ public class BatteryPanel extends UpdatePanel {
 	private final static int CELL_QUANTITY = 3;
 	private final static double MIN_VOLTAGE = 3.0;
 	private final static double MAX_VOLTAGE = 4.2;
-	
+
+	private final static double GOOD_VOLTAGE_THRESHOLD = 3.75;
+	private final static double WARNING_VOLTAGE_THRESHOLD = 3.3;
+	private final static double DANGEROUS_VOLTAGE_THRESHOLD = 3.1;
+
+	private final static double TEMPERATURE_NORMAL = 30;
+	private final static double TEMPERATURE_WARNING = 40;
+	private final static double TEMPERATURE_DANGER = 50;
+
 	private UpdateThread thread;
 	private long sleepTime = 1000;
 	private BatteryStatus batteryStatus = null;
-	private JProgressBar[] voltageMeters= new JProgressBar[CELL_QUANTITY];
+	private JProgressBar[] voltageMeters = new JProgressBar[CELL_QUANTITY];
+	private JTextField temperature;
 
 	public BatteryPanel() {
 		setLayout(new BorderLayout());
@@ -48,6 +64,12 @@ public class BatteryPanel extends UpdatePanel {
 				new String[] { "10 Hz", "5 Hz", "1 Hz", "0.1Hz" }));
 		comboBoxUpdateRate.setSelectedIndex(2);
 		refreshPanel.add(comboBoxUpdateRate, BorderLayout.EAST);
+		
+		JPanel temperaturePanel = new JPanel(new BorderLayout());
+		temperaturePanel.add(new JLabel("Temperature"), BorderLayout.WEST);
+		temperature=new JTextField("NULL ºC");
+		temperature.setEditable(false);
+		temperaturePanel.add(temperature,BorderLayout.EAST);
 
 		comboBoxUpdateRate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -72,83 +94,94 @@ public class BatteryPanel extends UpdatePanel {
 			}
 		});
 
-		JPanel jProgressBarsPanel = new JPanel(new GridLayout(1,CELL_QUANTITY));
-		for(int i =0;i<CELL_QUANTITY;i++){
-			//voltageMeters[i]=new JProgressBar(MIN_VOLTAGE,MAX_VOLTAGE);
+		JPanel jProgressBarsPanel = new JPanel(new GridLayout(1, CELL_QUANTITY));
+		for (int i = 0; i < CELL_QUANTITY; i++) {
+			voltageMeters[i] = new JProgressBar(
+					(int) (MIN_VOLTAGE * I2CBatteryModuleInput.VOLTAGE_MULTIPLIER),
+					(int) (MAX_VOLTAGE * I2CBatteryModuleInput.VOLTAGE_MULTIPLIER));
 			voltageMeters[i].setUI(new MyProgressUI());
-			
-			voltageMeters[i].setPreferredSize(new Dimension(50,10));
+
+			voltageMeters[i].setPreferredSize(new Dimension(50, 10));
 			voltageMeters[i].setValue(0);
 			voltageMeters[i].setForeground(Color.GREEN);
 			voltageMeters[i].setUI(new MyProgressUI());
 			voltageMeters[i].setStringPainted(true);
 			voltageMeters[i].setOrientation(SwingConstants.VERTICAL);
-			
+
 			jProgressBarsPanel.add(voltageMeters[i]);
 		}
+
+		JPanel southPanel = new JPanel(new GridLayout(2,1));
+		southPanel.add(temperaturePanel);
+		southPanel.add(refreshPanel);
 		
-		
-		this.add(refreshPanel, BorderLayout.SOUTH);
 		this.add(jProgressBarsPanel, BorderLayout.CENTER);
+		this.add(southPanel, BorderLayout.SOUTH);
 	}
 
 	private class MyProgressUI extends BasicProgressBarUI {
 
-        @Override
-        protected void paintDeterminate(Graphics g, JComponent c) {
-        	if (!(g instanceof Graphics2D)) {
-                return;
-            }
+		@Override
+		protected void paintDeterminate(Graphics g, JComponent c) {
+			if (!(g instanceof Graphics2D)) {
+				return;
+			}
 
-            Insets b = progressBar.getInsets(); // area for border
-            int barRectWidth = progressBar.getWidth() - (b.right + b.left);
-            int barRectHeight = progressBar.getHeight() - (b.top + b.bottom);
+			Rectangle vr = new Rectangle();
+			SwingUtilities.calculateInnerArea(c, vr);
 
-            if (barRectWidth <= 0 || barRectHeight <= 0) {
-                return;
-            }
+			Rectangle or = c.getBounds();
+			Insets insets = c.getInsets();
 
-            int cellLength = getCellLength();
-            int cellSpacing = getCellSpacing();
-            // amount of progress to draw
-            int amountFull = getAmountFull(b, barRectWidth, barRectHeight);
+			if (vr.width <= 0 || vr.height <= 0) {
+				return;
+			}
 
-            Graphics2D g2 = (Graphics2D)g;
-            g2.setColor(Color.BLUE);
-            
-            double percentage = amountFull/(double)barRectHeight;
-            double drawingPercentage = ((int)(percentage*100)/100.0);
-            int textPercentage = (int)Math.round(((amountFull/(double)barRectHeight-0.5)*200));
-            
-            barRectHeight-=25;
-            int top = b.top + 10;
-            
-            // draw the cells
-            if (cellSpacing == 0 && amountFull > 0) {
-                // draw one big Rect because there is no space between cells
-                g2.setStroke(new BasicStroke((float)barRectWidth,
-                        BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
-            } else {
-                // draw each individual cell
-                g2.setStroke(new BasicStroke((float)barRectWidth,
-                        BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL,
-                        0f, new float[] { cellLength, cellSpacing }, 0f));
-            }
-            if(percentage > 0.5) {
-            	g2.setColor(Color.GREEN);
-            	g2.drawLine(barRectWidth/2 + b.left, top + barRectHeight - (int)(barRectHeight*drawingPercentage), barRectWidth/2 + b.left, top + barRectHeight/2);
-            } else if(percentage < 0.5){
-            	g2.setColor(Color.RED);
-            	g2.drawLine(barRectWidth/2 + b.left, top + barRectHeight/2, barRectWidth/2 + b.left, top + barRectHeight - (int)(barRectHeight*drawingPercentage));
-            }
+			int amountFull = getAmountFull(insets, or.width, or.height);
 
-            g2.setColor(Color.BLACK);
-            String s = textPercentage+"%";
-            SwingUtilities2.drawString(progressBar, g2, textPercentage+"%",b.left+barRectWidth/3 - s.length()*1, b.top+barRectHeight/2 - 10);
-            
-        }
-    }
-	
+			g.setColor(c.getBackground());
+			g.fill3DRect(vr.x, vr.y, vr.width + 1, vr.height, false);
+
+			// Set Correct color according to voltage
+			double voltage = ((double) progressBar.getValue() / I2CBatteryModuleInput.VOLTAGE_MULTIPLIER);
+			System.out.println("Voltage: " + voltage);
+			if (voltage > GOOD_VOLTAGE_THRESHOLD)
+				g.setColor(Color.GREEN);
+			else if (voltage >= WARNING_VOLTAGE_THRESHOLD)
+				g.setColor(Color.YELLOW);
+			else if (voltage >= DANGEROUS_VOLTAGE_THRESHOLD)
+				g.setColor(Color.RED);
+			else if (voltage < DANGEROUS_VOLTAGE_THRESHOLD)
+				g.setColor(Color.BLACK);
+
+			g.fill3DRect(vr.x, vr.y + vr.height - amountFull, vr.width,
+					amountFull, true);
+
+			if (progressBar.isStringPainted()) {
+				String voltageStr = voltage + "V";
+				String percentStr = "(" + progressBar.getString() + ")";
+
+				Point placementVoltage = getStringPlacement(g, voltageStr,
+						insets.left, insets.top, or.width - insets.left
+								- insets.right, or.height - insets.top
+								- insets.bottom);
+				Point placementPercent = getStringPlacement(g, percentStr,
+						insets.left, insets.top, or.width - insets.left
+								- insets.right, or.height - insets.top
+								- insets.bottom);
+
+				g.setColor(Color.WHITE);
+
+				FontMetrics fm = g.getFontMetrics(progressBar.getFont());
+
+				g.drawString(voltageStr, placementVoltage.x, placementVoltage.y
+						+ fm.getAscent() - 8);
+				g.drawString(percentStr, placementPercent.x - 5,
+						placementVoltage.y + fm.getAscent() + 8);
+			}
+		}
+	}
+
 	private synchronized void wakeUpThread() {
 		notifyAll();
 		thread.interrupt();
@@ -176,6 +209,25 @@ public class BatteryPanel extends UpdatePanel {
 
 	public synchronized void displayData(BatteryMessage message) {
 		this.batteryStatus = message.getBatteryStatus();
+
+		for (int i = 0; i < CELL_QUANTITY; i++) {
+			voltageMeters[i]
+					.setValue((int) (batteryStatus.getCellsVoltages()[i] * I2CBatteryModuleInput.VOLTAGE_MULTIPLIER));
+		}
+		
+		double temperatureVal = batteryStatus.getBatteryTemperature();
+		if(temperatureVal<TEMPERATURE_WARNING)
+			temperature.setBackground(Color.GREEN);
+		else if(temperatureVal>=TEMPERATURE_WARNING && temperatureVal<TEMPERATURE_DANGER)
+			temperature.setBackground(Color.YELLOW);
+		else if(temperatureVal>=TEMPERATURE_DANGER)
+			temperature.setBackground(Color.RED);
+		
+		DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols();
+		decimalFormatSymbols.setDecimalSeparator('.');
+		DecimalFormat decimalFormat = new DecimalFormat("##.##", decimalFormatSymbols);
+		temperature.setText(decimalFormat.format(temperatureVal)+" ºC");
+		
 		notifyAll();
 	}
 }
