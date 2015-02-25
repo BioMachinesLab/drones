@@ -95,7 +95,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		}
 	}
 
-	protected void createSerial(int baudrate) {
+	protected void createSerial(final int baudrate) {
 
 		serial = SerialFactory.createInstance();
 
@@ -109,10 +109,6 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				try {
 
 					receivedDataBuffer.append(event.getData());
-					
-//					if(event.getData().contains("PMTK")) {
-//						System.out.println("RAW "+event.getData());
-//					}
 					
 					boolean keepGoing = true;
 
@@ -129,7 +125,6 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 								String sub = receivedDataBuffer.substring(indexFirstDollar,indexSecondDollar).trim();
 								
 								if (messageParser != null && !sub.isEmpty() && sub.charAt(0) == '$') {
-//									System.out.println("SENDING "+sub);
 									messageParser.processReceivedData(sub);
 									keepGoing = true;
 								}
@@ -167,6 +162,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		}
 
 		createSerial(DEFAULT_BAUD_RATE);
+		
+		Thread.sleep(1000);
 
 		/*
 		 * Change Baud Rate
@@ -176,13 +173,16 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		command += checksum + "\r\n";
 		serial.write(command);
 		print("[COMMAND] " + command, false);
+		
+		Thread.sleep(1000);
 
 		/*
 		 * Closing old velocity serial
 		 */
 		serial.flush();
 		serial.close();
-		// ackResponses.clear();
+		serial.shutdown();
+		
 		Thread.sleep(1000);
 
 		createSerial(TARGET_BAUD_RATE);
@@ -204,14 +204,11 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		// Check if the command was successfully executed
 		String ack1 = getStringStartWithFromList("$PMTK001,220,3*30");
 		if (ack1 == null) {
-			/* throw new NotActiveException */System.out
-					.println("[GPS Module] Update frequency was NOT succefully changed!");
+			System.out.println("[GPS Module] Update frequency was NOT succefully changed!");
 		} else {
 			System.out.println("[GPS Module] OK! Update frequency was succefully changed!");
 			ackResponses.remove(ack1);
 		}
-
-		// ackResponses.clear();
 
 		/*
 		 * Set navigation speed threshold to 0
@@ -225,21 +222,21 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		// Check if the command was successfully executed
 		String ack2 = getStringStartWithFromList("$PMTK001,397,3*3D");
 		if (ack2 == null) {
-			/* throw new NotActiveException */System.out
-					.println("[GPS Module] Navigation speed threshold was NOT succefully changed!");
+			System.out.println("[GPS Module] Navigation speed threshold was NOT succefully changed!");
 		} else {
 			System.out.println("[GPS Module] OK! Navigation speed threshold was succefully changed!");
 			ackResponses.remove(ack2);
 		}
 
 		if (ENABLE_SBAS) {
-			try {
-				enableSBAS();
+			boolean success = enableSBAS();
+			if(success)
 				System.out.println("[GPS Module] OK! SBAS was succefully enabled!");
-			} catch (InterruptedException e) {
+			else
 				System.out.println("[GPS Module] SBAS was NOT succefully enabled!");
-			}
 		}
+		
+		ackResponses.clear();
 	}
 
 	private String getStringStartWithFromList(String str) {
@@ -413,6 +410,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		String ack = getStringStartWithFromList("$PMTK001,313,3*31");
 		if (ack != null) {
 			ackResponses.remove(ack);
+			return true;
 		}
 
 		return false;

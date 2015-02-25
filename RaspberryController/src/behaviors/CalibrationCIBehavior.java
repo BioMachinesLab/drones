@@ -31,6 +31,10 @@ public class CalibrationCIBehavior extends CIBehavior {
 		}
 		
 		if(executing) {
+			double percentage = (System.currentTimeMillis() - startTime)/(double)(timeIncrement*2*1000)*100;
+			if((int)percentage % 5 == 0)
+				System.out.println(percentage+"%");
+			
 			if(System.currentTimeMillis() - startTime < timeIncrement*1000) {
 //				drone.setMotorSpeeds(speed, -speed);
 			} else if(System.currentTimeMillis() - startTime < timeIncrement*2*1000) {
@@ -51,6 +55,8 @@ public class CalibrationCIBehavior extends CIBehavior {
 	
 	@Override
 	public void cleanUp() {
+		if(executing)
+			drone.getIOManager().getCompassModule().endCalibration();
 		executed = false;
 		executing = false;
 		drone.setMotorSpeeds(0, 0);

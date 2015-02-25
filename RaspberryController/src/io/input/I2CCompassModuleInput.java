@@ -264,13 +264,6 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				this.headingInDegrees = (int)(heading * 180/Math.PI);
 			}
 			
-			if(!calibrationStatus) {
-//				System.out.println("RAW "+rawAxisReadings[0]+" "+rawAxisReadings[1]+" "+rawAxisReadings[2]);
-//				System.out.println("CORRECTED "+converted[0]+" "+converted[1]+" "+converted[2]);
-//				System.out.println("heading "+headingInDegrees);
-			}
-				
-
 			try {
 				Thread.sleep(I2C_DEVICE_UPDATE_DELAY);
 			} catch (InterruptedException e) {
@@ -286,7 +279,7 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 		vals[2] = z;
 		
 		//System.out.println(vals[0]+" "+vals[1]+" "+vals[2]);
-		
+		System.out.print(".");
 		calibrationValues.add(vals);
 	}
 	
@@ -295,35 +288,14 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 	}
 	
 	public void startCalibration() {
-		System.out.println("Calibration started! Point north and press a key");
 		
-		Scanner s = null;
+		double[] readings = readXYZ();
 		
-		try {
+		north[0]  = readings[0];
+		north[1]  = readings[1];
+		north[2]  = readings[2];
 		
-			s = new Scanner(System.in);
-			s.nextLine();
-			
-			double[] readings = readXYZ();
-			
-			north[0]  = readings[0];
-			north[1]  = readings[1];
-			north[2]  = readings[2];
-			
-			System.out.println("North acquired! Place the drone in water and press a key");
-			s.nextLine();
-			s.close();
-		
-		} catch(NoSuchElementException e) {
-			//this occurs when we remotely trigger the calibration behavior
-			double[] readings = readXYZ();
-			north[0]  = readings[0];
-			north[1]  = readings[1];
-			north[2]  = readings[2];
-		} finally {
-			if(s != null)
-				s.close();
-		}
+		System.out.println("North acquired. Rotate drone.");
 		
 		calibrationValues.clear();
 		calibrationStatus = true;
@@ -339,7 +311,7 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 		return headingInDegrees;
 	}
 	
-	private double[] readXYZ() {
+	public synchronized double[] readXYZ() {
 		
 		double[] readings = new double[3];
 		
@@ -377,6 +349,7 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 		double zMax = -Double.MAX_VALUE;
 		
 		for(double[] data : calibrationValues) {
+//			System.out.println(data[0]+" "+data[1]+" "+data[2]);
 			xMin = Math.min(data[0],xMin);
 			xMax = Math.max(data[0],xMax);
 			yMin = Math.min(data[1],yMin);
@@ -473,7 +446,7 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 		maxVectorZ = -Double.MAX_VALUE;
 		
 		for(double[] data : calibrationValues) {
-			double vector = Math.pow(data[1], 2) + Math.pow(data[2], 2);
+			double vector = Math.pow(data[0], 2) + Math.pow(data[1], 2) + Math.pow(data[2], 2);
 			if(vector > maxVector) {
 				maxVector = vector;
 				maxVectorX = data[0];
