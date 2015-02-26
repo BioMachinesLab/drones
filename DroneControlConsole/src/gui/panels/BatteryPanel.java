@@ -98,7 +98,7 @@ public class BatteryPanel extends UpdatePanel {
 		for (int i = 0; i < CELL_QUANTITY; i++) {
 			voltageMeters[i] = new JProgressBar(
 					(int) (MIN_VOLTAGE * I2CBatteryModuleInput.VOLTAGE_MULTIPLIER),
-					(int) (MAX_VOLTAGE * I2CBatteryModuleInput.VOLTAGE_MULTIPLIER));
+			     		(int) (MAX_VOLTAGE * I2CBatteryModuleInput.VOLTAGE_MULTIPLIER));
 			voltageMeters[i].setUI(new MyProgressUI());
 
 			voltageMeters[i].setPreferredSize(new Dimension(50, 10));

@@ -197,7 +197,6 @@ public class CompassPanel extends UpdatePanel {
             int rotationY = circleX + (circleRadius / 2);
             g2d.setColor(Color.green);
             int ovalRadius = 2;
-            headingValue+=10;
             g2d.fillOval((int)(circleX + (circleRadius / 2) + Math.cos(Math.toRadians(headingValue-90))*40) - ovalRadius, (int)(circleX + (circleRadius / 2) + Math.sin(Math.toRadians(headingValue-90))*40) - ovalRadius, ovalRadius*2, ovalRadius*2);
             AffineTransform old = g2d.getTransform();
             
