@@ -193,11 +193,11 @@ public class CompassPanel extends UpdatePanel {
             Polygon fillPoly = new Polygon(xPoints, yPoints, 4);
             Polygon outerPoly = new Polygon(xPoints, yPoints, 4);
 
-            int rotationX = circleX + (circleRadius / 2);
+            int rotationX = circleX + (circleRadius / 2);   
             int rotationY = circleX + (circleRadius / 2);
             g2d.setColor(Color.green);
             int ovalRadius = 2;
-            g2d.fillOval((int)(circleX + (circleRadius / 2) + Math.cos(Math.toRadians(headingValue-90))*40) - ovalRadius, (int)(circleX + (circleRadius / 2) + Math.sin(Math.toRadians(headingValue-90))*40) - ovalRadius, ovalRadius*2, ovalRadius*2);
+            g2d.fillOval((int)(circleX + (circleRadius / 2) + Math.cos(Math.toRadians(headingValue-90))*circleRadius/2) - ovalRadius, (int)(circleX + (circleRadius / 2) + Math.sin(Math.toRadians(headingValue-90))*circleRadius/2) - ovalRadius, ovalRadius*2, ovalRadius*2);
             AffineTransform old = g2d.getTransform();
             
             AffineTransform at = g2d.getTransform().getRotateInstance(Math.toRadians(headingValue), rotationX, rotationY);
