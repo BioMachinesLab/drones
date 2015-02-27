@@ -186,17 +186,26 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	 * like the inputs, outputs, system information queries
 	 */
 	private void initMessageProviders() {
-		messageProviders.add(new SystemInfoMessageProvider());
+		System.out.println("Creating Message Providers:");
+		//@miguelduarte42 SystemInfoMessageProvider takes ~20 seconds and it
+		//is not currently used, so I just removed it
+//		messageProviders.add(new SystemInfoMessageProvider());
+//		System.out.println("\tSystemInfoMessageProvider");
 		messageProviders.add(new SystemStatusMessageProvider(this));
+		System.out.println("\tSystemStatusMessageProvider");
 
 		for (ControllerInput i : ioManager.getInputs()) {
-			if (i instanceof MessageProvider)
+			if (i instanceof MessageProvider) {
 				messageProviders.add((MessageProvider) i);
+				System.out.println("\t"+i.getClass().getSimpleName());
+			}
 		}
 
 		for (ControllerOutput o : ioManager.getOutputs()) {
-			if (o instanceof MessageProvider)
+			if (o instanceof MessageProvider) {
 				messageProviders.add((MessageProvider) o);
+				System.out.println("\t"+o.getClass().getSimpleName());
+			}
 		}
 	}
 

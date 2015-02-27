@@ -91,7 +91,7 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 			north[1] = s.nextDouble();
 			north[2] = s.nextDouble();
 			s.close();
-			System.out.println("Compass calibration loaded from the file!");
+			System.out.println("[Compass] Calibration loaded from the file!");
 		} catch (IOException e) {}
 	}
 	
@@ -237,38 +237,39 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 
 	@Override
 	public void run() {
-		while (true) {
-			double[] rawAxisReadings = readXYZ();
-
-			if(calibrationStatus) {
-				handleCalibration(rawAxisReadings[0], rawAxisReadings[1], rawAxisReadings[2]);
-			} else {
-				double[] converted = convert(rawAxisReadings[0],rawAxisReadings[1],rawAxisReadings[2]);
-				double heading = Math.atan2(converted[1],converted[0]);
-				
-				//Value for Lisbon is -2º (0.034906585 rad). Find more here: http://www.magnetic-declination.com
-	//				double declinationAngle = 0.034906585;
-	//				heading += declinationAngle;
-				
-	//				heading = 2*Math.PI-heading;
-				
-				if(heading < 0) {
-					heading += 2*Math.PI;
+		try {
+			while (true) {
+				double[] rawAxisReadings = readXYZ();
+	
+				if(calibrationStatus) {
+					handleCalibration(rawAxisReadings[0], rawAxisReadings[1], rawAxisReadings[2]);
+				} else {
+					double[] converted = convert(rawAxisReadings[0],rawAxisReadings[1],rawAxisReadings[2]);
+					double heading = Math.atan2(converted[1],converted[0]);
+					
+					//Value for Lisbon is -2º (0.034906585 rad). Find more here: http://www.magnetic-declination.com
+		//				double declinationAngle = 0.034906585;
+		//				heading += declinationAngle;
+					
+		//				heading = 2*Math.PI-heading;
+					
+					if(heading < 0) {
+						heading += 2*Math.PI;
+					}
+					
+					if(heading > 2*Math.PI) {
+						heading -= 2*Math.PI;
+					}
+					
+					  // Convert radians to degrees for readability.
+					this.headingInDegrees = (int)(heading * 180/Math.PI);
 				}
 				
-				if(heading > 2*Math.PI) {
-					heading -= 2*Math.PI;
-				}
-				
-				  // Convert radians to degrees for readability.
-				this.headingInDegrees = (int)(heading * 180/Math.PI);
+				Thread.sleep(I2C_DEVICE_UPDATE_DELAY);
 			}
 			
-			try {
-				Thread.sleep(I2C_DEVICE_UPDATE_DELAY);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+		} catch (InterruptedException e) {
+			System.out.println("[Compass] Terminated!");
 		}
 	}
 	
@@ -325,12 +326,11 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 			} catch (IOException | InterruptedException e) {
 				try {
 					//after a PI4J exception, the next reading is usually crap. Get rid of it right away
-					System.out.println("Compass went haywire! Reconnecting...");
+//					System.out.println("Compass went haywire! Reconnecting...");
 					configureCompass();
 				}catch(Exception ex){
 					e.printStackTrace();
 				}
-				e.printStackTrace();
 			}
 		}
 		return readings;

@@ -1,5 +1,7 @@
 package main;
 
+import java.util.Scanner;
+
 import commoninterface.CILogger;
 import commoninterface.CIStdOutLogger;
 import commoninterface.utils.CIArguments;
@@ -12,6 +14,20 @@ public class Main {
 		CILogger logger = new CIStdOutLogger(drone);
 		drone.begin(new CIArguments(""),logger);
 		drone.start();
+		
+		try {
+			Scanner s = new Scanner(System.in);
+			while(s.hasNextLine()) {
+				String line = s.nextLine();
+				if(line.equals("q")) {
+					drone.shutdown();
+					break;
+				}
+			}
+			
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 }

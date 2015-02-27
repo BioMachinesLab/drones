@@ -148,12 +148,10 @@ public class IOManager {
 			if (compassModule.isAvailable()) {
 				compassModule.start();
 				inputs.add(compassModule);
-				System.out.print(".");
 			}
 
 			if (enabledIO.contains("autocompasscalibration")) {
-				drone.startBehavior(new CalibrationCIBehavior(new CIArguments(
-						""), drone));
+				drone.startBehavior(new CalibrationCIBehavior(new CIArguments(""), drone));
 			}
 
 		}
@@ -166,7 +164,6 @@ public class IOManager {
 			if (batteryManager.isAvailable()) {
 				batteryManager.start();
 				inputs.add(batteryManager);
-				System.out.print(".");
 			}
 		}
 
@@ -180,7 +177,6 @@ public class IOManager {
 				if (gpsModule.isAvailable()) {
 					gpsModule.enableLocalLog();
 					inputs.add(gpsModule);
-					System.out.print(".");
 				}
 			} catch (Exception e) {
 				initMessages += "[INIT] GPSModule: not ok! (" + e.getMessage()
@@ -195,7 +191,6 @@ public class IOManager {
 
 				if (gpsModule.isAvailable()) {
 					inputs.add(gpsModule);
-					System.out.print(".");
 				}
 			} catch (Exception e) {
 				initMessages += "[INIT] FileGPSModule: not ok! ("
@@ -210,7 +205,6 @@ public class IOManager {
 
 				if (gpsModule.isAvailable()) {
 					inputs.add(gpsModule);
-					System.out.print(".");
 				}
 			} catch (Exception e) {
 				initMessages += "[INIT] FakeGPSModule: not ok! ("
@@ -232,7 +226,6 @@ public class IOManager {
 				if (escManager.isAvailable()) {
 					escManager.start();
 					outputs.add(escManager);
-					System.out.print(".");
 				}
 
 			} catch (Exception e) {
@@ -252,7 +245,6 @@ public class IOManager {
 				if (escManager.isAvailable()) {
 					escManager.start();
 					outputs.add(escManager);
-					System.out.print(".");
 				}
 
 			} catch (Exception e) {
@@ -272,8 +264,6 @@ public class IOManager {
 					outputs.add(debugLeds);
 
 					debugLeds.addBlinkLed(0);
-
-					System.out.print(".");
 				}
 			} catch (Exception e) {
 				initMessages += "[INIT] DebugLEDs: not ok! (" + e.getMessage()
