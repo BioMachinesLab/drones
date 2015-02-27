@@ -6,13 +6,14 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import commoninterfaceimpl.RealAquaticDroneCI;
 import network.messages.BehaviorMessage;
+import network.messages.LogMessage;
 import network.messages.Message;
 
-public class BehaviorConnectionHandler extends ConnectionHandler {
+public class CommandConnectionHandler extends ConnectionHandler {
 	
 	private final static boolean DEBUG = false;
 	
-	public BehaviorConnectionHandler(Socket socket, RealAquaticDroneCI drone, ConnectionListener connectionListener) {
+	public CommandConnectionHandler(Socket socket, RealAquaticDroneCI drone, ConnectionListener connectionListener) {
 		super(socket, drone, connectionListener);
 	}
 
@@ -23,9 +24,13 @@ public class BehaviorConnectionHandler extends ConnectionHandler {
 
 	@Override
 	protected void processMessage(Message message) {
+		
+		if(DEBUG)
+			System.out.println("[CommandConnectionHandler] Received new message: "+message.getClass().getSimpleName());
+		
 		if (message instanceof BehaviorMessage) {
-			if(DEBUG)
-				System.out.println("[BehaviorConnectionHandler] Received new Behavior");
+			drone.processInformationRequest(message, this);
+		} else if(message instanceof LogMessage) {
 			drone.processInformationRequest(message, this);
 		}
 	}

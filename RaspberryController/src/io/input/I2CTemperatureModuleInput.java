@@ -60,15 +60,24 @@ public class I2CTemperatureModuleInput extends Thread implements ControllerInput
 		return temperature;
 	}
 
-	private double readTemperature() throws IOException, InterruptedException {
+	private double readTemperature() {
 		if (available) {
 			
 			byte[] bytes = new byte[2];
 			
-			int bytesRead = tmp102.read(bytes, 0, 2);
+			int bytesRead = 0;
+			int count = 0;
 			
-			if(bytesRead != 2)
-				throw new IOException("[Temperature Sensor] Incorrect number of bytes read!");
+			do {
+				
+				if(count++ > 10)
+					return -1;
+				
+				try {
+					bytesRead = tmp102.read(bytes, 0, 2);
+				} catch(Exception e) {}
+			
+			}while(bytesRead != 2);
 			
 			int res = ((int) (bytes[0] & 0x0ff) << 8) | (bytes[1] & 0x0ff);
 			
@@ -106,16 +115,11 @@ public class I2CTemperatureModuleInput extends Thread implements ControllerInput
 			
 			while (true) {
 				
-				try {
 				
 				temperature = readTemperature();
 				long elapsed = System.currentTimeMillis() - startTime;
 				
 				System.out.println((elapsed/1000)+" "+temperature);
-				
-				} catch(Exception e) {
-					e.printStackTrace();
-				}
 				
 				Thread.sleep(I2C_DEVICE_UPDATE_DELAY);
 			}

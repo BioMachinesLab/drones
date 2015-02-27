@@ -6,6 +6,7 @@ import java.util.Iterator;
 import network.messages.BehaviorMessage;
 import network.messages.EntityMessage;
 import network.messages.InformationRequest;
+import network.messages.LogMessage;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import network.messages.SystemStatusMessage;
@@ -63,6 +64,14 @@ public class ControllerMessageHandler extends MessageHandler {
           	 }
           	 bm.setArguments("");
           	 response = bm;
+		}
+		
+		if(response == null && m instanceof LogMessage) {
+			LogMessage lm = (LogMessage)m;
+			Logger logger = drone.getIOManager().getFileLogger();
+			
+			if(logger != null)
+				logger.addLog(lm.getLog());
 		}
 		
 		if (response == null) {

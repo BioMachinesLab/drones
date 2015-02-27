@@ -5,17 +5,17 @@ import java.net.Socket;
 
 import commoninterfaceimpl.RealAquaticDroneCI;
 
-public class BehaviorConnectionListener extends ConnectionListener {
+public class CommandConnectionListener extends ConnectionListener {
 	
 	private static int BEHAVIOR_PORT = 10103;
 	
-	public BehaviorConnectionListener(RealAquaticDroneCI drone) throws IOException {
+	public CommandConnectionListener(RealAquaticDroneCI drone) throws IOException {
 		super(drone, BEHAVIOR_PORT);
 	}
 	
 	@Override
 	protected void createHandler(Socket s) {
-		ConnectionHandler conn = new BehaviorConnectionHandler(s, drone, this);
+		ConnectionHandler conn = new CommandConnectionHandler(s, drone, this);
 		addConnection(conn);
 		conn.start();
 	}

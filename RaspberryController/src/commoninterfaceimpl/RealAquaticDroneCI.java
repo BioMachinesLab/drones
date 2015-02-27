@@ -1,14 +1,15 @@
 package commoninterfaceimpl;
 
 import io.IOManager;
-import io.SystemInfoMessageProvider;
 import io.SystemStatusMessageProvider;
 import io.input.ControllerInput;
 import io.output.ControllerOutput;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import network.BehaviorConnectionListener;
+
+import network.CommandConnectionListener;
 import network.ConnectionHandler;
 import network.ConnectionListener;
 import network.ControllerMessageHandler;
@@ -18,6 +19,7 @@ import network.messages.Message;
 import network.messages.MessageProvider;
 import objects.Entity;
 import utils.NetworkUtils;
+
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
@@ -26,6 +28,7 @@ import commoninterface.LedState;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.jcoord.LatLon;
+
 import dataObjects.GPSData;
 
 public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
@@ -39,7 +42,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	private ConnectionListener connectionListener;
 	private MotorConnectionListener motorConnectionListener;
-	private BehaviorConnectionListener behaviorConnectionListener;
+	private CommandConnectionListener commandConnectionListener;
 	private BroadcastHandler broadcastHandler;
 
 	private List<MessageProvider> messageProviders = new ArrayList<MessageProvider>();
@@ -167,8 +170,8 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			motorConnectionListener = new MotorConnectionListener(this);
 			motorConnectionListener.start();
 			
-			behaviorConnectionListener = new BehaviorConnectionListener(this);
-			behaviorConnectionListener.start();
+			commandConnectionListener = new CommandConnectionListener(this);
+			commandConnectionListener.start();
 
 			broadcastHandler = new RealBroadcastHandler(this);
 

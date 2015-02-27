@@ -20,6 +20,7 @@ public class Logger extends Thread {
 	
 	private String fileName = "";
 	private RealAquaticDroneCI drone;
+	private String extraLog = "";
 	
 	public Logger(RealAquaticDroneCI drone) {
 		this.drone = drone;
@@ -39,7 +40,14 @@ public class Logger extends Thread {
 			
 			while(true) {
 				try {
+					
+					if(!extraLog.isEmpty()) {
+						bw.write("#"+extraLog+"\n");
+						extraLog = "";
+					}
+					
 					bw.write(getLogString());
+					bw.flush();
 				} catch(Exception e) {
 					//ignore :)
 				}
@@ -58,6 +66,10 @@ public class Logger extends Thread {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public void addLog(String log) {
+		this.extraLog = log;
 	}
 	
 	private String getLogString() {

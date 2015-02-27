@@ -357,6 +357,10 @@ public class IOManager {
 	public DebugLedsOutput getDebugLeds() {
 		return debugLeds;
 	}
+	
+	public Logger getFileLogger() {
+		return fileLogger;
+	}
 
 	// public BuzzerOutput getBuzzer() {
 	// return buzzer;
