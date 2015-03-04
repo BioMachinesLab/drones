@@ -1,17 +1,17 @@
 package threads;
 
-import gui.panels.BehaviorsPanel;
+import gui.panels.CommandPanel;
 import gui.panels.UpdatePanel;
 import main.DroneControlConsole;
 import network.messages.BehaviorMessage;
 
 public class BehaviorMessageThread extends UpdateThread {
 	
-	private BehaviorsPanel behaviorsPanel;
+	private CommandPanel behaviorsPanel;
 
 	public BehaviorMessageThread(DroneControlConsole console, UpdatePanel panel) {
 		super(console, panel, null);
-		this.behaviorsPanel = (BehaviorsPanel)panel;
+		this.behaviorsPanel = (CommandPanel)panel;
 		behaviorsPanel.registerThread(this);
 	}
 	

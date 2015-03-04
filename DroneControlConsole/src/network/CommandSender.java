@@ -1,22 +1,21 @@
 package network;
 
-import gui.panels.BehaviorsPanel;
+import gui.panels.CommandPanel;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import network.messages.Message;
 
-import network.messages.BehaviorMessage;
-
-public class BehaviorSender extends Thread{
+public class CommandSender extends Thread{
 	
 	private static int BEHAVIOR_PORT = 10103;
 	
 	private String[] ips;
-	private BehaviorMessage message;
-	private BehaviorsPanel bp;
+	private Message message;
+	private CommandPanel bp;
 	
-	public BehaviorSender(BehaviorMessage message, String[] ips, BehaviorsPanel bp) {
+	public CommandSender(Message message, String[] ips, CommandPanel bp) {
 		this.ips = ips;
 		this.message = message;
 		this.bp = bp;
@@ -70,7 +69,7 @@ public class BehaviorSender extends Thread{
 				out.flush();
 				Object o = in.readObject();
 				
-				if(o == null || !(o instanceof BehaviorMessage)) {
+				if(o == null || !(o instanceof Message)) {
 					System.out.println("[BehaviorSender] Didn't receive the right confirmation!");
 				}
 				

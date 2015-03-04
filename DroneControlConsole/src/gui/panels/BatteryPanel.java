@@ -47,7 +47,7 @@ public class BatteryPanel extends UpdatePanel {
 	private final static double TEMPERATURE_DANGER = 50;
 
 	private UpdateThread thread;
-	private long sleepTime = 1000;
+	private long sleepTime = 10000;
 	private BatteryStatus batteryStatus = null;
 	private JProgressBar[] voltageMeters = new JProgressBar[CELL_QUANTITY];
 	private JTextField temperature;
@@ -62,7 +62,7 @@ public class BatteryPanel extends UpdatePanel {
 		JComboBox<String> comboBoxUpdateRate = new JComboBox<String>();
 		comboBoxUpdateRate.setModel(new DefaultComboBoxModel<String>(
 				new String[] { "10 Hz", "5 Hz", "1 Hz", "0.1Hz" }));
-		comboBoxUpdateRate.setSelectedIndex(2);
+		comboBoxUpdateRate.setSelectedIndex(3);
 		refreshPanel.add(comboBoxUpdateRate, BorderLayout.EAST);
 		
 		JPanel temperaturePanel = new JPanel(new BorderLayout());

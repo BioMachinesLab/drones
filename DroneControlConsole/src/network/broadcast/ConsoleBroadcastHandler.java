@@ -4,6 +4,13 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+
+import objects.DroneLocation;
+
+import commoninterface.network.broadcast.BroadcastMessage;
+import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
+import commoninterface.network.broadcast.PositionBroadcastMessage;
+
 import utils.NetworkUtils;
 import main.DroneControlConsole;
 
@@ -24,7 +31,7 @@ public class ConsoleBroadcastHandler {
 	}
 	
 	public void messageReceived(String address, String message) {
-		console.newBroadcastMessage(address, message);
+		newBroadcastMessage(address, message);
 	}
 	
 	public void sendMessage(String message) {
@@ -54,6 +61,28 @@ public class ConsoleBroadcastHandler {
 			} catch(IOException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+	
+public void newBroadcastMessage(String address, String message) {
+		
+		String[] split = message.split(BroadcastMessage.MESSAGE_SEPARATOR);
+		
+		switch(split[0]) {
+			case "HEARTBEAT":
+				long timeElapsed = HeartbeatBroadcastMessage.decode(message);
+				console.getGUI().getConnectionPanel().newAddress(address);
+				break;
+			case "GPS":
+				DroneLocation di = PositionBroadcastMessage.decode(address, message);
+				if(di != null) {
+					console.getGUI().getMapPanel().displayData(di);
+					console.getGUI().getConnectionPanel().newAddress(address);
+				}
+				
+				break;
+			default:
+				System.out.println("Uncategorized message > "+message+" < from "+address);
 		}
 	}
 	

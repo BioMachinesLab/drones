@@ -162,25 +162,6 @@ public class DroneControlConsole {
 			informationConnection.sendData(message);
 	}
 	
-	public void newBroadcastMessage(String address, String message) {
-		
-		String[] split = message.split(BroadcastMessage.MESSAGE_SEPARATOR);
-		
-		switch(split[0]) {
-			case "HEARTBEAT":
-				long timeElapsed = HeartbeatBroadcastMessage.decode(message);
-				gui.getConnectionPanel().newAddress(address);
-				break;
-			case "GPS":
-				DroneLocation di = PositionBroadcastMessage.decode(address, message);
-				if(di != null)
-					gui.getMapPanel().displayData(di);
-				break;
-			default:
-				System.out.println("Uncategorized message > "+message+" < from "+address);
-		}
-	}
-	
 	public GUI getGUI() {
 		return gui;
 	}

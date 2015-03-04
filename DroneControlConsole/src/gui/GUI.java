@@ -1,7 +1,7 @@
 package gui;
 
 import gui.panels.BatteryPanel;
-import gui.panels.BehaviorsPanel;
+import gui.panels.CommandPanel;
 import gui.panels.CompassPanel;
 import gui.panels.ConnectionPanel;
 import gui.panels.GPSPanel;
@@ -31,7 +31,7 @@ public class GUI extends JFrame {
 	private CompassPanel compassPanel;
 	private BatteryPanel batteryPanel;
 	private MapPanel mapPanel;
-	private BehaviorsPanel behaviorsPanel;
+	private CommandPanel behaviorsPanel;
 	private ConnectionPanel connectionPanel;
 
 	private DroneControlConsole console;
@@ -111,7 +111,7 @@ public class GUI extends JFrame {
 		leftTopPanel.add(connectionPanel);
 
 		// Behaviors
-		behaviorsPanel = new BehaviorsPanel(this);
+		behaviorsPanel = new CommandPanel(this);
 		leftTopPanel.add(behaviorsPanel);
 		leftPanel.add(leftTopPanel, BorderLayout.NORTH);
 
@@ -151,7 +151,7 @@ public class GUI extends JFrame {
 		return mapPanel;
 	}
 
-	public BehaviorsPanel getBehaviorsPanel() {
+	public CommandPanel getBehaviorsPanel() {
 		return behaviorsPanel;
 	}
 

@@ -30,7 +30,7 @@ public class CompassPanel extends UpdatePanel {
 	
 	private UpdateThread thread;
 	private JTextField heading;
-	private long sleepTime = 1000;
+	private long sleepTime = 10000;
 	private int headingValue = 0;
 	private CompassDrawingPanel compassDrawing;
 	
@@ -52,7 +52,7 @@ public class CompassPanel extends UpdatePanel {
 		JComboBox<String> comboBoxUpdateRate = new JComboBox<String>();
 		comboBoxUpdateRate.setModel(new DefaultComboBoxModel<String>(new String[] {
 				"10 Hz", "5 Hz", "1 Hz", "0.1Hz" }));
-		comboBoxUpdateRate.setSelectedIndex(2);
+		comboBoxUpdateRate.setSelectedIndex(3);
 		refreshPanel.add(comboBoxUpdateRate, BorderLayout.EAST);
 		
 		JPanel bottom = new JPanel(new GridLayout(2,1));

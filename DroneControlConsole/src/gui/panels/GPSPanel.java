@@ -39,7 +39,7 @@ public class GPSPanel extends UpdatePanel {
 	
 	private UpdateThread thread;
 	
-	private long sleepTime = 1000;
+	private long sleepTime = 10000;
 
 	public GPSPanel() {
 		setBorder(BorderFactory.createTitledBorder("GPS Data"));
@@ -57,7 +57,7 @@ public class GPSPanel extends UpdatePanel {
 		JComboBox<String> comboBoxUpdateRate = new JComboBox<String>();
 		comboBoxUpdateRate.setModel(new DefaultComboBoxModel<String>(new String[] {
 				"10 Hz", "5 Hz", "1 Hz", "0.1Hz" }));
-		comboBoxUpdateRate.setSelectedIndex(2);
+		comboBoxUpdateRate.setSelectedIndex(3);
 		add(comboBoxUpdateRate, BorderLayout.SOUTH);
 		
 		comboBoxUpdateRate.addActionListener(new ActionListener() {

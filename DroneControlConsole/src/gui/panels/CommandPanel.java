@@ -7,8 +7,6 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
@@ -18,15 +16,18 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
-import commoninterface.CIBehavior;
-import commoninterface.utils.CIArguments;
-import network.BehaviorSender;
+import network.CommandSender;
 import network.messages.BehaviorMessage;
+import network.messages.LogMessage;
+import network.messages.Message;
 import threads.UpdateThread;
 import utils.ClassLoadHelper;
+import commoninterface.CIBehavior;
+import commoninterface.utils.CIArguments;
 
-public class BehaviorsPanel extends UpdatePanel{
+public class CommandPanel extends UpdatePanel{
 	
 	private UpdateThread thread;
 	private JLabel statusMessage;
@@ -34,11 +35,11 @@ public class BehaviorsPanel extends UpdatePanel{
 	private JTextArea config;
 	private GUI gui; 
 	
-	public BehaviorsPanel(GUI gui) {
+	public CommandPanel(GUI gui) {
 		
 		this.gui = gui;
 		
-		setBorder(BorderFactory.createTitledBorder("Behaviors"));
+		setBorder(BorderFactory.createTitledBorder("Commands"));
 		
 		setLayout(new BorderLayout());
 		
@@ -72,21 +73,32 @@ public class BehaviorsPanel extends UpdatePanel{
 		
 		deploy.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				deploy((Class<CIBehavior>)behaviors.getSelectedItem(), true);
+				deployBehavior((Class<CIBehavior>)behaviors.getSelectedItem(), true);
 			}
 		});
 		
 		stopAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				deploy((Class<CIBehavior>)behaviors.getSelectedItem(), false);
+				deployBehavior((Class<CIBehavior>)behaviors.getSelectedItem(), false);
 			}
 		});
 		
-		JPanel buttons = new JPanel(new GridLayout(2,2));
+		JTextField logMessage = new JTextField();
+		JButton sendLog = new JButton("Send Log");
+		
+		sendLog.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				deployLog(logMessage.getText().trim());
+			}
+		});
+		
+		JPanel buttons = new JPanel(new GridLayout(3,2));
 		buttons.add(start);
 		buttons.add(stop);
 		buttons.add(deploy);
 		buttons.add(stopAll);
+		buttons.add(logMessage);
+		buttons.add(sendLog);
 		
 		topPanel.add(buttons, BorderLayout.SOUTH);
 		
@@ -115,9 +127,7 @@ public class BehaviorsPanel extends UpdatePanel{
 		notifyAll();
 	}
 	
-	private synchronized void deploy(Class<CIBehavior> className, boolean status) {
-		setText("Deploying...");
-		
+	private void deployBehavior(Class<CIBehavior> className, boolean status) {
 		CIArguments translatedArgs = new CIArguments(config.getText().replaceAll("\\s+",""),true);
 		BehaviorMessage m;
 		
@@ -126,23 +136,18 @@ public class BehaviorsPanel extends UpdatePanel{
 		else
 			m = new BehaviorMessage(className, "", status);
 		
-		new BehaviorSender(m, gui.getConnectionPanel().getCurrentAddresses(), this).start();
+		deploy(m);
 	}
 	
-	//TODO debug
-	public static int sizeof(Object obj) {
-		try {
-		    ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
-		    ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteOutputStream);
+	private void deployLog(String msg) {
+		LogMessage m = new LogMessage(msg);
+		deploy(m);
+	}
 	
-		    objectOutputStream.writeObject(obj);
-		    objectOutputStream.flush();
-		    objectOutputStream.close();
-	
-		    return byteOutputStream.toByteArray().length;
-		} catch(Exception e){}
+	private synchronized void deploy(Message m) {
+		setText("Deploying...");
 		
-		return 0;
+		new CommandSender(m, gui.getConnectionPanel().getCurrentAddresses(), this).start();
 	}
 	
 	public void setText(String text) {

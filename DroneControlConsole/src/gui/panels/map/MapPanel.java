@@ -99,14 +99,16 @@ public class MapPanel extends UpdatePanel {
         
         try {
         
-	        JComboBox<TileSource> tileSourceSelector = new JComboBox<>(new TileSource[] { new OsmTileSource.Mapnik(),
-	                new OsmTileSource.CycleMap(), new BingAerialTileSource(), new MapQuestOsmTileSource(), new MapQuestOpenAerialTileSource(),
-	                new OfflineOsmTileSource((new File("tiles").toURI().toURL()).toString(),1,20) });
+	        JComboBox<TileSource> tileSourceSelector = new JComboBox<>(new TileSource[] { new OfflineOsmTileSource((new File("tiles").toURI().toURL()).toString(),1,20) ,
+	        		new OsmTileSource.Mapnik(),
+	                new OsmTileSource.CycleMap(), new BingAerialTileSource(), new MapQuestOsmTileSource(), new MapQuestOpenAerialTileSource()});
 	        tileSourceSelector.addItemListener(new ItemListener() {
 	            public void itemStateChanged(ItemEvent e) {
 	                map().setTileSource((TileSource) e.getItem());
 	            }
 	        });
+	        
+	        map().setTileSource(tileSourceSelector.getItemAt(0));
 	        
 	        panelTop.add(tileSourceSelector);
 	        
@@ -137,14 +139,6 @@ public class MapPanel extends UpdatePanel {
         });
         panelTop.add(showMapMarker);
         ///
-        final JCheckBox showZoomControls = new JCheckBox("Zoom Controls");
-        showZoomControls.setSelected(map().getZoomContolsVisible());
-        showZoomControls.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                map().setZoomContolsVisible(showZoomControls.isSelected());
-            }
-        });
-        panelTop.add(showZoomControls);
         panelTop.add(fitMarkersButton);
 
         add(treeMap, BorderLayout.CENTER);
@@ -185,7 +179,7 @@ public class MapPanel extends UpdatePanel {
 //        map.setTileGridVisible(true);
         
         //Lisbon
-        map().setDisplayPosition(new Coordinate(38.7166700,-9.1333300), 11);
+        map().setDisplayPosition(new Coordinate(38.7166700,-9.1333300), 13);
 
         map().addMouseListener(new MouseAdapter() {
             @Override
