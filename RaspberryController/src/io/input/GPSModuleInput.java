@@ -228,6 +228,25 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			ackResponses.remove(ack2);
 		}
 
+		
+		/*
+		 * Disable always locate mode
+		 */
+		command = "$PMTK225,0*2B\r\n";
+		serial.write(command);
+		serial.flush();
+		
+		Thread.sleep(3000);
+		
+		// Check if the command was successfully executed
+		String ack3 = getStringStartWithFromList("$PMTK001,225,3*35");
+		if (ack3 == null) {
+			System.out.println("[GPS Module] Always locate mode was NOT succefully disabled!");
+		} else {
+			System.out.println("[GPS Module] OK! Always locate mode was succefully disabled!");
+			ackResponses.remove(ack3);
+		}
+		
 		if (ENABLE_SBAS) {
 			boolean success = enableSBAS();
 			if(success)
