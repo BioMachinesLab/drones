@@ -10,15 +10,15 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import main.DroneControlConsole;
+import main.RobotControlConsole;
 
 public class IPRequestToUserModal extends JFrame {
 	private static final long serialVersionUID = 1919821842077609484L;
-	private String DEFAULT_IP = "192.168.3.1";
+	private String DEFAULT_IP = "192.168.3.11";
 	private InetAddress ip = null;
 	private String ip_asString = "";
 
-	public IPRequestToUserModal(DroneControlConsole console) {
+	public IPRequestToUserModal(RobotControlConsole console) {
 		JPanel dialogJPane = new JPanel(new GridLayout(1, 1));
 
 		// JTextFields Construction

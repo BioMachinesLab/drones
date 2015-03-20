@@ -1,12 +1,8 @@
 package gui;
 
 import gui.panels.BatteryPanel;
-import gui.panels.CommandPanel;
 import gui.panels.CompassPanel;
-import gui.panels.ConnectionPanel;
 import gui.panels.GPSPanel;
-import gui.panels.MessagesPanel;
-import gui.panels.MotorsPanel;
 import gui.panels.SystemInfoPanel;
 import gui.panels.map.MapPanel;
 
@@ -23,21 +19,14 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import main.DroneControlConsole;
 
-public class GUI extends JFrame {
-	private MotorsPanel motorsPanel;
+public class DroneGUI extends RobotGUI {
 	private GPSPanel gpsPanel;
 	private SystemInfoPanel sysInfoPanel;
-	private MessagesPanel msgPanel;
 	private CompassPanel compassPanel;
 	private BatteryPanel batteryPanel;
 	private MapPanel mapPanel;
-	private CommandPanel behaviorsPanel;
-	private ConnectionPanel connectionPanel;
 
-	private DroneControlConsole console;
-
-	public GUI(DroneControlConsole console) {
-
+	public DroneGUI(DroneControlConsole console) {
 		this.console = console;
 
 		try {
@@ -52,7 +41,8 @@ public class GUI extends JFrame {
 		buildGUI();
 	}
 
-	private void buildGUI() {
+	@Override
+	protected void buildGUI() {
 		setTitle("HANCAD/ CORATAM Project - Drone Remote Console");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setResizable(true);
@@ -60,6 +50,7 @@ public class GUI extends JFrame {
 
 		setLayout(new BorderLayout());
 
+		createPanels();
 		createInfoPanel();
 		createMapPanel();
 		// createSysInfoPanel();
@@ -77,7 +68,6 @@ public class GUI extends JFrame {
 		JPanel rightPanel = new JPanel(new BorderLayout());
 
 		// Motors
-		motorsPanel = new MotorsPanel();
 		rightPanel.add(motorsPanel, BorderLayout.NORTH);
 
 		
@@ -107,16 +97,13 @@ public class GUI extends JFrame {
 		leftTopPanel.setAlignmentY(JPanel.CENTER_ALIGNMENT);
 
 		// Connection
-		connectionPanel = new ConnectionPanel(console);
 		leftTopPanel.add(connectionPanel);
 
 		// Behaviors
-		behaviorsPanel = new CommandPanel(this);
-		leftTopPanel.add(behaviorsPanel);
+		leftTopPanel.add(commandPanel);
 		leftPanel.add(leftTopPanel, BorderLayout.NORTH);
 
 		// Messages
-		msgPanel = new MessagesPanel();
 		leftPanel.add(msgPanel, BorderLayout.CENTER);
 
 		add(leftPanel, BorderLayout.WEST);
@@ -135,39 +122,12 @@ public class GUI extends JFrame {
 		return compassPanel;
 	}
 
-	public MessagesPanel getMessagesPanel() {
-		return msgPanel;
-	}
-
 	public SystemInfoPanel getSysInfoPanel() {
 		return sysInfoPanel;
-	}
-
-	public MotorsPanel getMotorsPanel() {
-		return motorsPanel;
 	}
 
 	public MapPanel getMapPanel() {
 		return mapPanel;
 	}
 
-	public CommandPanel getBehaviorsPanel() {
-		return behaviorsPanel;
-	}
-
-	public ConnectionPanel getConnectionPanel() {
-		return connectionPanel;
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static void enableOSXFullscreen(Window window) {
-		try {
-			Class util = Class.forName("com.apple.eawt.FullScreenUtilities");
-			Class params[] = new Class[] { Window.class, Boolean.TYPE };
-			Method method = util.getMethod("setWindowCanFullScreen", params);
-			method.invoke(util, window, true);
-		} catch (ClassNotFoundException e1) {
-		} catch (Exception e) {
-		}
-	}
 }

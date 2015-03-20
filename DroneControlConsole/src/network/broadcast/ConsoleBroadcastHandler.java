@@ -1,18 +1,19 @@
 package network.broadcast;
 
+import gui.DroneGUI;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+import main.RobotControlConsole;
 import objects.DroneLocation;
+import utils.NetworkUtils;
 
 import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
 import commoninterface.network.broadcast.PositionBroadcastMessage;
-
-import utils.NetworkUtils;
-import main.DroneControlConsole;
 
 public class ConsoleBroadcastHandler {
 	
@@ -20,10 +21,10 @@ public class ConsoleBroadcastHandler {
 	private static int BUFFER_LENGTH = 15000;
 	private BroadcastSender sender;
 	private BroadcastReceiver receiver;
-	private DroneControlConsole console;
+	private RobotControlConsole console;
 	private String ownAddress;
 	
-	public ConsoleBroadcastHandler(DroneControlConsole console) {
+	public ConsoleBroadcastHandler(RobotControlConsole console) {
 		this.console = console;
 		receiver = new BroadcastReceiver();
 		sender = new BroadcastSender();
@@ -64,7 +65,7 @@ public class ConsoleBroadcastHandler {
 		}
 	}
 	
-public void newBroadcastMessage(String address, String message) {
+	public void newBroadcastMessage(String address, String message) {
 		
 		String[] split = message.split(BroadcastMessage.MESSAGE_SEPARATOR);
 		
@@ -76,7 +77,9 @@ public void newBroadcastMessage(String address, String message) {
 			case "GPS":
 				DroneLocation di = PositionBroadcastMessage.decode(address, message);
 				if(di != null) {
-					console.getGUI().getMapPanel().displayData(di);
+					if(console.getGUI() instanceof DroneGUI) {
+						((DroneGUI)console.getGUI()).getMapPanel().displayData(di);
+					}
 					console.getGUI().getConnectionPanel().newAddress(address);
 				}
 				
@@ -92,6 +95,7 @@ public void newBroadcastMessage(String address, String message) {
 
 		public BroadcastReceiver() {
 			try {
+				System.out.println("receiver on the address: " + InetAddress.getByName("0.0.0.0") + ", port: " + PORT);
 				 socket = new DatagramSocket(PORT, InetAddress.getByName("0.0.0.0"));
 				 socket.setBroadcast(true);
 			} catch (Exception e) {
@@ -106,8 +110,9 @@ public void newBroadcastMessage(String address, String message) {
 				while (true) {
 					byte[] recvBuf = new byte[BUFFER_LENGTH];
 					DatagramPacket packet = new DatagramPacket(recvBuf,recvBuf.length);
+					System.out.println("waiting for packets ..");
 					socket.receive(packet);
-
+					System.out.println("packet received");
 					String message = new String(packet.getData()).trim();
 					
 					if(!packet.getAddress().getHostAddress().equals(ownAddress))

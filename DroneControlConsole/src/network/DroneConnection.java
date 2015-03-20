@@ -7,9 +7,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import main.DroneControlConsole;
+import main.RobotControlConsole;
 import network.messages.Message;
-import network.messages.EntityMessage;
 
 public abstract class DroneConnection extends Thread {
 	
@@ -20,11 +19,11 @@ public abstract class DroneConnection extends Thread {
 	protected ObjectOutputStream out;
 	protected InetAddress destHost;
 	protected String destHostName;
-	protected DroneControlConsole console;
+	protected RobotControlConsole console;
 	
 	protected boolean ready = false;
 	
-	public DroneConnection(DroneControlConsole console, InetAddress destHost, int port) throws IOException {
+	public DroneConnection(RobotControlConsole console, InetAddress destHost, int port) throws IOException {
 		this.socket = null;
 		this.in = null;
 		this.out = null;

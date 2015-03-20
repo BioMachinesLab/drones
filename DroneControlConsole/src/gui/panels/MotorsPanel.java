@@ -60,7 +60,7 @@ public class MotorsPanel extends UpdatePanel {
 		setBorder(BorderFactory.createTitledBorder("Motors Control"));
 		setLayout(new BorderLayout());
 		
-		setPreferredSize(new Dimension(300,270));
+		setPreferredSize(new Dimension(380,270));
 		
 		leftSlider = new JSlider(-100,100);
 		rightSlider = new JSlider(-100,100);

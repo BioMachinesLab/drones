@@ -1,14 +1,14 @@
 package threads;
 
 import gui.panels.UpdatePanel;
-import main.DroneControlConsole;
+import main.RobotControlConsole;
 import network.messages.InformationRequest;
 import network.messages.InformationRequest.MessageType;
 
 public class UpdateThread extends Thread {
 	
 	protected UpdatePanel panel;
-	protected DroneControlConsole console;
+	protected RobotControlConsole console;
 	protected boolean keepGoing = true;
 	protected MessageType type;
 	
@@ -20,7 +20,7 @@ public class UpdateThread extends Thread {
 	 * message is sent. This prevents the drone from being overrun with messages when connectivity  
 	 * issues appear.
 	 */
-	public UpdateThread(DroneControlConsole console, UpdatePanel panel, MessageType type) {
+	public UpdateThread(RobotControlConsole console, UpdatePanel panel, MessageType type) {
 		this.console = console;
 		this.panel = panel;
 		this.type = type;

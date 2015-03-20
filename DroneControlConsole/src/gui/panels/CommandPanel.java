@@ -1,6 +1,6 @@
 package gui.panels;
 
-import gui.GUI;
+import gui.RobotGUI;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -24,6 +24,7 @@ import network.messages.LogMessage;
 import network.messages.Message;
 import threads.UpdateThread;
 import utils.ClassLoadHelper;
+
 import commoninterface.CIBehavior;
 import commoninterface.utils.CIArguments;
 
@@ -33,9 +34,9 @@ public class CommandPanel extends UpdatePanel{
 	private JLabel statusMessage;
 	private BehaviorMessage currentMessage;
 	private JTextArea config;
-	private GUI gui; 
+	private RobotGUI gui; 
 	
-	public CommandPanel(GUI gui) {
+	public CommandPanel(RobotGUI gui) {
 		
 		this.gui = gui;
 		

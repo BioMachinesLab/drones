@@ -1,6 +1,6 @@
 package gui.panels;
 
-import gui.GUI;
+import gui.RobotGUI;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -21,7 +21,7 @@ import dataObjects.SystemInformationsData;
 
 public class SystemInfoPanel extends UpdatePanel {
 	private static final long serialVersionUID = 8457762280133417243L;
-	private GUI gui;
+	private RobotGUI gui;
 
 	// Hardware
 	private JPanel hardwareInformationsPanel;
@@ -85,7 +85,7 @@ public class SystemInfoPanel extends UpdatePanel {
 	
 	private long sleepTime = 10000;
 
-	public SystemInfoPanel(GUI gui) {
+	public SystemInfoPanel(RobotGUI gui) {
 		this.gui = gui;
 		setBorder(BorderFactory.createTitledBorder("System Informations"));
 		setLayout(null);

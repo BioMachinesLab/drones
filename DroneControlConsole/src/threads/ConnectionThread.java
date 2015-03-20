@@ -1,13 +1,13 @@
 package threads;
 
 import gui.panels.ConnectionPanel;
-import main.DroneControlConsole;
+import main.RobotControlConsole;
 
 public class ConnectionThread extends UpdateThread {
 	
 	private ConnectionPanel connectionPanel;
 
-	public ConnectionThread(DroneControlConsole console, ConnectionPanel panel) {
+	public ConnectionThread(RobotControlConsole console, ConnectionPanel panel) {
 		super(console, panel, null);
 		this.connectionPanel = (ConnectionPanel)panel;
 	}

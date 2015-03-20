@@ -2,13 +2,13 @@ package threads;
 
 import gui.panels.MotorsPanel;
 import gui.panels.UpdatePanel;
-import main.DroneControlConsole;
+import main.RobotControlConsole;
 
 public class MotorUpdateThread extends UpdateThread {
 	
 	private MotorsPanel motorPanel;
 
-	public MotorUpdateThread(DroneControlConsole console, UpdatePanel panel) {
+	public MotorUpdateThread(RobotControlConsole console, UpdatePanel panel) {
 		super(console, panel, null);
 		this.motorPanel = (MotorsPanel)panel;
 		motorPanel.registerThread(this);

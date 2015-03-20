@@ -3,6 +3,7 @@ package gamepad;
 import java.io.IOException;
 
 import main.DroneControlConsole;
+import main.RobotControlConsole;
 
 public class GamePad extends Thread {
 	
@@ -13,7 +14,7 @@ public class GamePad extends Thread {
 	private final static int HISTORY_SIZE = 20;
 	private final static int MAXIMUM_SPEED = 100;
 
-	private DroneControlConsole console;
+	private RobotControlConsole console;
 	private GamePadInput jinputGamepad;
 
 	private int lastRightMotorSpeed = 0;
@@ -28,7 +29,7 @@ public class GamePad extends Thread {
 		gamePad.run();
 	}
 
-	public GamePad(DroneControlConsole console) {
+	public GamePad(RobotControlConsole console) {
 		
 		for(GamePadType t : GamePadType.values()) {
 			

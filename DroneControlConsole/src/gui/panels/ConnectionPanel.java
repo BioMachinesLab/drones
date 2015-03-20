@@ -1,6 +1,7 @@
 package gui.panels;
 
 import gui.IPRequestToUserModal;
+
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -8,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Set;
+
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -16,7 +18,9 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+
 import main.DroneControlConsole;
+import main.RobotControlConsole;
 import threads.UpdateThread;
 
 public class ConnectionPanel extends UpdatePanel {
@@ -28,9 +32,9 @@ public class ConnectionPanel extends UpdatePanel {
 	private DefaultListModel<String> listModel = new DefaultListModel<String>();
 	private HashMap<String, Long> lastUpdate = new HashMap<String, Long>();
 	private JLabel currentConnection;
-	private DroneControlConsole console;
+	private RobotControlConsole console;
 
-	public ConnectionPanel(DroneControlConsole console) {
+	public ConnectionPanel(RobotControlConsole console) {
 
 		this.console = console;
 
