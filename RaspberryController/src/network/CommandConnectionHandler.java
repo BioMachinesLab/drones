@@ -44,7 +44,7 @@ public class CommandConnectionHandler extends ConnectionHandler {
 
 		out.reset();
 
-		System.out.println("[BEHAVIOR HANDLER] Client "
+		System.out.println("[CommandConnectionHandler] Client "
 				+ socket.getInetAddress().getHostAddress() + " (" + clientName
 				+ ") connected");
 	}

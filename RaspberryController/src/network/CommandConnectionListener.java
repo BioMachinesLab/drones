@@ -22,7 +22,7 @@ public class CommandConnectionListener extends ConnectionListener {
 	
 	public void closeConnections() {
 		if (!connections.isEmpty()) {
-			System.out.println("[CONNECTION HANDLER] Closing Connections!");
+			System.out.println("[CommandConnectionListener] Closing Connections!");
 			for (ConnectionHandler conn : connections) {
 				if (!conn.getSocket().isClosed())
 					conn.closeConnectionWthoutDiscardConnListener();

@@ -1,7 +1,6 @@
 package network;
 
 import java.lang.reflect.Constructor;
-
 import network.messages.BehaviorMessage;
 import network.messages.EntityMessage;
 import network.messages.InformationRequest;

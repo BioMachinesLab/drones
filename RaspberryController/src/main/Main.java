@@ -21,13 +21,13 @@ public class Main {
 				String line = s.nextLine();
 				if(line.equals("q")) {
 					drone.shutdown();
-					break;
+					s.close();
+					System.exit(0);
 				}
 			}
-			
 		} catch(Exception e) {
 			e.printStackTrace();
-		}
+		}	
 	}
 
 }

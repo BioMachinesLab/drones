@@ -53,6 +53,7 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 
 	private CIArguments args;
 	private CILogger logger;
+	private boolean run = true;
 	private long startTimeInMillis;
 	private double timestep = 0;
 	private double leftSpeed = 0;
@@ -83,7 +84,7 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 
 	@Override
 	public void run() {
-		while (true) {
+		while (run) {
 
 			long lastCycleTime = System.currentTimeMillis();
 			CIBehavior current = activeBehavior;
@@ -124,6 +125,8 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 	@Override
 	public void shutdown() {
 		logger.logMessage("# Shutting down Controller...");
+		
+		run = false;
 
 		if (logger != null)
 			logger.stopLogging();

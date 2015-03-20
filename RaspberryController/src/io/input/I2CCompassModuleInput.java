@@ -327,6 +327,7 @@ public class I2CCompassModuleInput extends Thread implements ControllerInput,
 				try {
 					//after a PI4J exception, the next reading is usually crap. Get rid of it right away
 //					System.out.println("Compass went haywire! Reconnecting...");
+					System.out.println("[I2CompassModule] Re-initing compass module");
 					configureCompass();
 				}catch(Exception ex){
 					e.printStackTrace();
