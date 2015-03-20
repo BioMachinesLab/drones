@@ -1,11 +1,12 @@
 package commoninterface.neuralnetwork.inputs;
 
 import commoninterface.CISensor;
+import commoninterface.utils.CIArguments;
 
 public class DroneCINNInput extends CINNInput {
 
-	public DroneCINNInput(CISensor sensor) {
-		super(sensor);
+	public DroneCINNInput(CISensor sensor, CIArguments args) {
+		super(sensor, args);
 	}
 	
 	@Override

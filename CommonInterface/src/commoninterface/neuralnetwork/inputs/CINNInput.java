@@ -13,7 +13,7 @@ public abstract class CINNInput implements Serializable {
 	
 	protected CISensor sensor;
 	
-	public CINNInput(CISensor s) {
+	public CINNInput(CISensor s, CIArguments args) {
 		this.sensor = s;
 	}
 	
@@ -42,7 +42,7 @@ public abstract class CINNInput implements Serializable {
 		
 		for(CISensor s : sensors) {
 			if(s.getId() == id) {
-				return (CINNInput)CIFactory.getInstance(args.getArgumentAsString("classname"), s);
+				return (CINNInput)CIFactory.getInstance(args.getArgumentAsString("classname"), s, args);
 			}
 		}
 		

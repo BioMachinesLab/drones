@@ -3,13 +3,15 @@ package commoninterface.neuralnetwork.outputs;
 import commoninterface.AquaticDroneCI;
 import commoninterface.utils.CIArguments;
 
-public class TwoWheelCINNOutput extends CINNOutput {
+public class PropellersCINNOutput extends CINNOutput {
 
 	private double leftSpeed;
 	private double rightSpeed;
+	private boolean forwardOnly = false;
 	
-	public TwoWheelCINNOutput(AquaticDroneCI drone, CIArguments args) {
+	public PropellersCINNOutput(AquaticDroneCI drone, CIArguments args) {
 		super(drone,args);
+		forwardOnly = args.getArgumentAsIntOrSetDefault("forwardonly", 0) == 1;
 	}
 	
 	@Override
@@ -19,11 +21,10 @@ public class TwoWheelCINNOutput extends CINNOutput {
 
 	@Override
 	public void setValue(int output, double value) {
-		
 		if (output == 0)
-			leftSpeed = value*2 - 1;
+			leftSpeed = forwardOnly ? value : value*2 - 1;
 		else
-			rightSpeed = value*2 - 1;
+			rightSpeed = forwardOnly ? value : value*2 - 1;
 	}
 
 	@Override

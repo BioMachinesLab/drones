@@ -1,13 +1,14 @@
 package commoninterface.neuralnetwork.outputs;
 
 import commoninterface.AquaticDroneCI;
+import commoninterface.utils.CIArguments;
 
 public class StopCINNOutput extends CINNOutput {
 
 	private boolean stop = false;
 	
-	public StopCINNOutput(AquaticDroneCI drone) {
-		super(drone);
+	public StopCINNOutput(AquaticDroneCI drone, CIArguments args) {
+		super(drone,args);
 	}
 	
 	@Override

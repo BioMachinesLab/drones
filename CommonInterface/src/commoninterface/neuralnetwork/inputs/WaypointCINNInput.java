@@ -2,11 +2,12 @@ package commoninterface.neuralnetwork.inputs;
 
 import commoninterface.CISensor;
 import commoninterface.sensors.WaypointCISensor;
+import commoninterface.utils.CIArguments;
 
 public class WaypointCINNInput extends CINNInput {
 
-	public WaypointCINNInput(CISensor sensor) {
-		super(sensor);
+	public WaypointCINNInput(CISensor sensor, CIArguments args) {
+		super(sensor, args);
 	}
 	
 	@Override

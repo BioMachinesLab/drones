@@ -11,7 +11,7 @@ public abstract class CINNOutput implements Serializable {
 	
 	protected AquaticDroneCI drone;
 	
-	public CINNOutput(AquaticDroneCI drone) {
+	public CINNOutput(AquaticDroneCI drone, CIArguments args) {
 		this.drone = drone;
 	}
 	
@@ -33,7 +33,7 @@ public abstract class CINNOutput implements Serializable {
 	}
 	
 	public static CINNOutput createOutput(AquaticDroneCI robot, CIArguments args) {
-		return (CINNOutput)CIFactory.getInstance(args.getArgumentAsString("classname"), robot);
+		return (CINNOutput)CIFactory.getInstance(args.getArgumentAsString("classname"), robot, args);
 	}
 
 
