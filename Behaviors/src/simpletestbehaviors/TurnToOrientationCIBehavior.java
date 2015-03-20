@@ -10,6 +10,8 @@ public class TurnToOrientationCIBehavior extends CIBehavior {
 
 	private double targetOrientation = 0;
 	private double tolerance         = 10;
+	double minX = 0;
+	double maxX = 0;
 	private AquaticDroneCI drone;
 	
 	public TurnToOrientationCIBehavior(CIArguments args, RobotCI drone) {
