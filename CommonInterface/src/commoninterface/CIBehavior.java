@@ -7,17 +7,17 @@ import commoninterface.utils.CIArguments;
  */
 public abstract class CIBehavior {
 	private CIArguments args;
-	protected AquaticDroneCI drone; 
+	protected RobotCI robot; 
 	
 	/**
 	 * Initialize the controller
 	 * 
 	 * @param args    Command-line arguments.
-	 * @param drone   Common drone hardware interface. 
+	 * @param robot   Common drone hardware interface. 
 	 * @param logger  Instance of the CI logger to use.
 	 */
-	public CIBehavior(CIArguments args, AquaticDroneCI drone) {
-		this.drone  = drone;
+	public CIBehavior(CIArguments args, RobotCI robot) {
+		this.robot  = robot;
 		this.args   = args;
 	}
 

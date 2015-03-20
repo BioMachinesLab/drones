@@ -9,9 +9,11 @@ public class PositionBroadcastMessage extends BroadcastMessage {
 
 	public static final String IDENTIFIER = "GPS";
 	private static final int UPDATE_TIME = 1*1000; //1 sec
+	private AquaticDroneCI drone;
 	
 	public PositionBroadcastMessage(AquaticDroneCI drone) {
 		super(drone, UPDATE_TIME, IDENTIFIER);
+		this.drone = drone;
 	}
 	
 	@Override

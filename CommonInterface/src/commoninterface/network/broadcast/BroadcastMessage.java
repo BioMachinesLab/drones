@@ -1,16 +1,16 @@
 package commoninterface.network.broadcast;
 
-import commoninterface.AquaticDroneCI;
+import commoninterface.RobotCI;
 
 public abstract class BroadcastMessage {
 	
 	public static final String MESSAGE_SEPARATOR = ";";
-	protected AquaticDroneCI drone;
+	protected RobotCI robot;
 	protected long updateTime = Long.MAX_VALUE;
 	protected String identifier;
 	
-	public BroadcastMessage(AquaticDroneCI drone, long updateTime, String identifier) {
-		this.drone = drone;
+	public BroadcastMessage(RobotCI robot, long updateTime, String identifier) {
+		this.robot = robot;
 		this.updateTime = updateTime;
 		this.identifier = identifier;
 	}

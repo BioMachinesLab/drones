@@ -2,9 +2,9 @@ package commoninterface;
 
 public class CIStdOutLogger implements CILogger 
 {	
-	private AquaticDroneCI droneCI;
+	private RobotCI droneCI;
 	
-	public CIStdOutLogger(AquaticDroneCI droneCI) {
+	public CIStdOutLogger(RobotCI droneCI) {
 		this.droneCI = droneCI;
 	}
 	

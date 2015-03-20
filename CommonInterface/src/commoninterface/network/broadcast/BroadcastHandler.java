@@ -5,7 +5,9 @@ import java.util.Iterator;
 
 import objects.DroneLocation;
 import objects.Entity;
+
 import commoninterface.AquaticDroneCI;
+import commoninterface.RobotCI;
 
 public abstract class BroadcastHandler {
 	
@@ -14,13 +16,11 @@ public abstract class BroadcastHandler {
 	protected static long CLEAN_ENTITIES_TIME = 100; //100 timesteps == 10 seconds
 	protected ArrayList<BroadcastMessage> broadcastMessages;
 	
-	protected AquaticDroneCI drone;
+	protected RobotCI drone;
 	
-	public BroadcastHandler(AquaticDroneCI drone) {
+	public BroadcastHandler(RobotCI drone, ArrayList<BroadcastMessage> broadcastMessages) {
 		this.drone = drone;
-		broadcastMessages = new ArrayList<BroadcastMessage>();
-		broadcastMessages.add(new HeartbeatBroadcastMessage(drone));
-		broadcastMessages.add(new PositionBroadcastMessage(drone));
+		this.broadcastMessages = broadcastMessages;
 	}
 	
 	public abstract void sendMessage(String message);
@@ -67,7 +67,7 @@ public abstract class BroadcastHandler {
 		}
 	}
 	
-	public AquaticDroneCI getDrone() {
+	public RobotCI getDrone() {
 		return drone;
 	}
 }
