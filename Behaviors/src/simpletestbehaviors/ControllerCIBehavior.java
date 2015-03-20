@@ -2,20 +2,22 @@ package simpletestbehaviors;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
-import commoninterface.CILogger;
 import commoninterface.CISensor;
+import commoninterface.RobotCI;
 import commoninterface.neuralnetwork.CINeuralNetwork;
 import commoninterface.utils.CIArguments;
 
 public class ControllerCIBehavior extends CIBehavior {
 	
 	private CINeuralNetwork network;
+	private AquaticDroneCI drone;
 	
-	public ControllerCIBehavior(CIArguments args, AquaticDroneCI drone) {
+	public ControllerCIBehavior(CIArguments args, RobotCI drone) {
 		super(args, drone);
+		this.drone = (AquaticDroneCI)drone;
 		
 		initSensors(new CIArguments(args.getArgumentAsString("sensors")));
-		network = CINeuralNetwork.getNeuralNetwork(drone, new CIArguments(args.getArgumentAsString("network")));
+		network = CINeuralNetwork.getNeuralNetwork(this.drone, new CIArguments(args.getArgumentAsString("network")));
 	}
 	
 	protected void initSensors(CIArguments args) {

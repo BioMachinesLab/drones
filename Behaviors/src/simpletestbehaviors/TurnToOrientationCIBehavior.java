@@ -2,17 +2,19 @@ package simpletestbehaviors;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
-import commoninterface.CILogger;
 import commoninterface.LedState;
+import commoninterface.RobotCI;
 import commoninterface.utils.CIArguments;
 
 public class TurnToOrientationCIBehavior extends CIBehavior {
 
 	private double targetOrientation = 0;
 	private double tolerance         = 10;
+	private AquaticDroneCI drone;
 	
-	public TurnToOrientationCIBehavior(CIArguments args, AquaticDroneCI drone) {
+	public TurnToOrientationCIBehavior(CIArguments args, RobotCI drone) {
 		super(args, drone);
+		this.drone = (AquaticDroneCI)drone;
 		
 		targetOrientation = args.getArgumentAsDoubleOrSetDefault("target", targetOrientation);
 		tolerance = args.getArgumentAsDoubleOrSetDefault("tolerance", tolerance);

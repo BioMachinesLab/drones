@@ -1,11 +1,13 @@
 package simpletestbehaviors;
 
 import java.util.ArrayList;
+
 import objects.Waypoint;
+
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
-import commoninterface.CILogger;
 import commoninterface.LedState;
+import commoninterface.RobotCI;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
@@ -14,9 +16,11 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 
 	private double distanceTolerance = 3;
 	private double angleTolerance = 10;
+	private AquaticDroneCI drone;
 	
-	public GoToWaypointCIBehavior(CIArguments args, AquaticDroneCI drone) {
+	public GoToWaypointCIBehavior(CIArguments args, RobotCI drone) {
 		super(args, drone);
+		this.drone = (AquaticDroneCI)drone;
 		
 		distanceTolerance = args.getArgumentAsDoubleOrSetDefault("distancetolerance", distanceTolerance);
 		angleTolerance = args.getArgumentAsDoubleOrSetDefault("angletolerance", angleTolerance);
