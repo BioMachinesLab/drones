@@ -4,16 +4,18 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import commoninterfaceimpl.RealAquaticDroneCI;
+
 import network.messages.BehaviorMessage;
 import network.messages.LogMessage;
 import network.messages.Message;
+
+import commoninterfaceimpl.RealRobotCI;
 
 public class CommandConnectionHandler extends ConnectionHandler {
 	
 	private final static boolean DEBUG = false;
 	
-	public CommandConnectionHandler(Socket socket, RealAquaticDroneCI drone, ConnectionListener connectionListener) {
+	public CommandConnectionHandler(Socket socket, RealRobotCI drone, ConnectionListener connectionListener) {
 		super(socket, drone, connectionListener);
 	}
 
@@ -29,9 +31,9 @@ public class CommandConnectionHandler extends ConnectionHandler {
 			System.out.println("[CommandConnectionHandler] Received new message: "+message.getClass().getSimpleName());
 		
 		if (message instanceof BehaviorMessage) {
-			drone.processInformationRequest(message, this);
+			robot.processInformationRequest(message, this);
 		} else if(message instanceof LogMessage) {
-			drone.processInformationRequest(message, this);
+			robot.processInformationRequest(message, this);
 		}
 	}
 

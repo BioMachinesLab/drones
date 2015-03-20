@@ -5,9 +5,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+
 import network.messages.Message;
 import network.messages.SystemStatusMessage;
-import commoninterfaceimpl.RealAquaticDroneCI;
+
+import commoninterfaceimpl.RealRobotCI;
 
 public class ConnectionHandler extends Thread {
 	
@@ -16,14 +18,14 @@ public class ConnectionHandler extends Thread {
 	protected Socket socket;
 	protected ObjectOutputStream out;
 	protected ObjectInputStream in;
-	protected RealAquaticDroneCI drone;
+	protected RealRobotCI robot;
 	protected String clientName = null;
 	protected ConnectionListener connectionListener;
 
-	public ConnectionHandler(Socket socket, RealAquaticDroneCI drone,
+	public ConnectionHandler(Socket socket, RealRobotCI robot,
 			ConnectionListener connectionListener) {
 		this.socket = socket;
-		this.drone = drone;
+		this.robot = robot;
 		this.connectionListener = connectionListener;
 	}
 
@@ -66,7 +68,7 @@ public class ConnectionHandler extends Thread {
 	protected void shutdownHandler() {
 		closeConnection();
 		if (connectionListener.getConnections().isEmpty()) {
-			drone.reset();
+			robot.reset();
 		}
 	}
 
@@ -74,7 +76,7 @@ public class ConnectionHandler extends Thread {
 		if(DEBUG)
 			System.out.println("[CONNECTION HANDLER] Information Request Message ("
 						+ message.getClass().getSimpleName() + ")");
-		drone.processInformationRequest(message, this);
+		robot.processInformationRequest(message, this);
 	}
 
 	protected void initConnection() throws IOException, ClassNotFoundException {
@@ -94,7 +96,7 @@ public class ConnectionHandler extends Thread {
 
 		// controller.processInformationRequest(new
 		// InformationRequest(MessageType.SYSTEM_STATUS), this);
-		sendData(new SystemStatusMessage(drone.getInitMessages()));
+		sendData(new SystemStatusMessage(robot.getInitMessages()));
 	}
 
 	public synchronized void closeConnection() {

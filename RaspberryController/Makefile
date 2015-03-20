@@ -16,5 +16,8 @@ build:
 clean:
 	rm -rf $(JDEST)
 
-run:
-	sudo java -cp $(CLASSPATH) main.Main
+drone:
+	java -cp $(CLASSPATH) main.Main
+
+thymio:
+	java -Djava.library.path=/usr/local/lib/jni/ -cp $(CLASSPATH) main.MainThymio

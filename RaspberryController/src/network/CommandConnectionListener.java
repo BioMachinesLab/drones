@@ -3,19 +3,19 @@ package network;
 import java.io.IOException;
 import java.net.Socket;
 
-import commoninterfaceimpl.RealAquaticDroneCI;
+import commoninterfaceimpl.RealRobotCI;
 
 public class CommandConnectionListener extends ConnectionListener {
 	
 	private static int BEHAVIOR_PORT = 10103;
 	
-	public CommandConnectionListener(RealAquaticDroneCI drone) throws IOException {
+	public CommandConnectionListener(RealRobotCI drone) throws IOException {
 		super(drone, BEHAVIOR_PORT);
 	}
 	
 	@Override
 	protected void createHandler(Socket s) {
-		ConnectionHandler conn = new CommandConnectionHandler(s, drone, this);
+		ConnectionHandler conn = new CommandConnectionHandler(s, robot, this);
 		addConnection(conn);
 		conn.start();
 	}

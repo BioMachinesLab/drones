@@ -1,7 +1,10 @@
 package network.broadcast;
 
-import commoninterface.AquaticDroneCI;
+import java.util.ArrayList;
+
+import commoninterface.RobotCI;
 import commoninterface.network.broadcast.BroadcastHandler;
+import commoninterface.network.broadcast.BroadcastMessage;
 
 /**
  * This class handles everything related to receiving and sending broadcast messages.
@@ -16,10 +19,10 @@ public class RealBroadcastHandler extends BroadcastHandler {
 	private BroadcastReceiver receiver;
 	private BroadcastSender sender;
 	
-	public RealBroadcastHandler(AquaticDroneCI drone) {
-		super(drone);
-		receiver = new BroadcastReceiver(this, drone.getNetworkAddress(), PORT);
-		sender = new BroadcastSender(drone.getNetworkAddress(), PORT);
+	public RealBroadcastHandler(RobotCI robot, ArrayList<BroadcastMessage> broadcastMessages) {
+		super(robot, broadcastMessages);
+		receiver = new BroadcastReceiver(this, robot.getNetworkAddress(), PORT);
+		sender = new BroadcastSender(robot.getNetworkAddress(), PORT);
 		receiver.start();
 		
 		initBroadcastThread();
@@ -45,7 +48,7 @@ public class RealBroadcastHandler extends BroadcastHandler {
 			System.out.println("RealBroadcastHandler received ["+message+"]");
 	}
 	
-	public AquaticDroneCI getDrone() {
+	public RobotCI getDrone() {
 		return drone;
 	}	
 }

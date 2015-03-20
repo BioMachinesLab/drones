@@ -1,17 +1,18 @@
 package io;
 
-import commoninterfaceimpl.RealAquaticDroneCI;
 import network.messages.InformationRequest;
 import network.messages.InformationRequest.MessageType;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import network.messages.SystemStatusMessage;
 
+import commoninterfaceimpl.RealRobotCI;
+
 public class SystemStatusMessageProvider implements MessageProvider {
 	
-	private RealAquaticDroneCI drone;
+	private RealRobotCI drone;
 	
-	public SystemStatusMessageProvider(RealAquaticDroneCI drone) {
+	public SystemStatusMessageProvider(RealRobotCI drone) {
 		this.drone = drone;
 	}
 	

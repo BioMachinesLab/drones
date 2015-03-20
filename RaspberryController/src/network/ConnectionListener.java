@@ -1,29 +1,29 @@
 package network;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
 import utils.NetworkUtils;
-import commoninterfaceimpl.RealAquaticDroneCI;
+
+import commoninterfaceimpl.RealRobotCI;
 
 public class ConnectionListener extends Thread {
 
 	private static final int DEFAULT_PORT = 10101;
 	protected ArrayList<ConnectionHandler> connections = new ArrayList<>();
-	protected RealAquaticDroneCI drone;
+	protected RealRobotCI robot;
 	protected int port;
 	protected ServerSocket serverSocket = null;
 
-	public ConnectionListener(RealAquaticDroneCI controller) throws IOException {
+	public ConnectionListener(RealRobotCI controller) throws IOException {
 		this(controller, DEFAULT_PORT);
 	}
 
-	public ConnectionListener(RealAquaticDroneCI drone, int port)
+	public ConnectionListener(RealRobotCI robot, int port)
 			throws IOException {
-		this.drone = drone;
+		this.robot = robot;
 		this.port = port;
 
 		serverSocket = new ServerSocket(port);
@@ -61,7 +61,7 @@ public class ConnectionListener extends Thread {
 	}
 
 	protected void createHandler(Socket s) {
-		ConnectionHandler conn = new ConnectionHandler(s, drone, this);
+		ConnectionHandler conn = new ConnectionHandler(s, robot, this);
 		addConnection(conn);
 		conn.start();
 	}

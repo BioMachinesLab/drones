@@ -1,27 +1,25 @@
 package network;
 
 import java.lang.reflect.Constructor;
-import java.util.Iterator;
 
 import network.messages.BehaviorMessage;
 import network.messages.EntityMessage;
 import network.messages.InformationRequest;
-import network.messages.LogMessage;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import network.messages.SystemStatusMessage;
 import objects.Entity;
-import utils.Logger;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
+import commoninterface.RobotCI;
 import commoninterface.utils.CIArguments;
-import commoninterfaceimpl.RealAquaticDroneCI;
+import commoninterfaceimpl.RealRobotCI;
 
 public class ControllerMessageHandler extends MessageHandler {
 	
-	private RealAquaticDroneCI drone;
+	private RealRobotCI drone;
 	
-	public ControllerMessageHandler(RealAquaticDroneCI c) {
+	public ControllerMessageHandler(RealRobotCI c) {
 		this.drone = c;
 	}
 	
@@ -53,7 +51,7 @@ public class ControllerMessageHandler extends MessageHandler {
 			
           	 if(bm.getSelectedStatus()) {
           		try {
-              		Constructor<CIBehavior> constructor = bm.getSelectedBehavior().getConstructor(new Class[] { CIArguments.class, AquaticDroneCI.class});
+              		Constructor<CIBehavior> constructor = bm.getSelectedBehavior().getConstructor(new Class[] { CIArguments.class, RobotCI.class});
     				CIBehavior ctArgs = constructor.newInstance(new Object[] { new CIArguments(bm.getArguments()), drone });
     				drone.startBehavior(ctArgs);
           		} catch(ReflectiveOperationException e) {
@@ -66,13 +64,14 @@ public class ControllerMessageHandler extends MessageHandler {
           	 response = bm;
 		}
 		
-		if(response == null && m instanceof LogMessage) {
-			LogMessage lm = (LogMessage)m;
-			Logger logger = drone.getIOManager().getFileLogger();
-			
-			if(logger != null)
-				logger.addLog(lm.getLog());
-		}
+		//TODO: Pass the FileLogger to the RobotCI 
+//		if(response == null && m instanceof LogMessage) {
+//			LogMessage lm = (LogMessage)m;
+//			Logger logger = drone.getIOManager().getFileLogger();
+//			
+//			if(logger != null)
+//				logger.addLog(lm.getLog());
+//		}
 		
 		if (response == null) {
 			

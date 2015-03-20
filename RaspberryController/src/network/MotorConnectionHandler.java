@@ -5,16 +5,18 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-import commoninterfaceimpl.RealAquaticDroneCI;
+
 import network.messages.Message;
 import network.messages.MotorMessage;
+
+import commoninterfaceimpl.RealRobotCI;
 
 public class MotorConnectionHandler extends ConnectionHandler {
 	
 	private final static boolean DEBUG = false;
 	
-	public MotorConnectionHandler(Socket socket, RealAquaticDroneCI drone, ConnectionListener connectionListener) {
-		super(socket, drone, connectionListener);
+	public MotorConnectionHandler(Socket socket, RealRobotCI robot, ConnectionListener connectionListener) {
+		super(socket, robot, connectionListener);
 	}
 
 	@Override
@@ -28,7 +30,7 @@ public class MotorConnectionHandler extends ConnectionHandler {
 			MotorMessage motorMessage = (MotorMessage) message;
 			if(DEBUG)
 				System.out.println("[MotorConnectionHandler] Got new speeds "+motorMessage.getLeftMotor()+" "+motorMessage.getRightMotor());
-			drone.getIOManager().setMotorSpeeds(motorMessage);
+			robot.setMotorSpeeds(motorMessage.getLeftMotor(), motorMessage.getRightMotor());
 		}
 	}
 
