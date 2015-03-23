@@ -110,9 +110,7 @@ public class ConsoleBroadcastHandler {
 				while (true) {
 					byte[] recvBuf = new byte[BUFFER_LENGTH];
 					DatagramPacket packet = new DatagramPacket(recvBuf,recvBuf.length);
-					System.out.println("waiting for packets ..");
 					socket.receive(packet);
-					System.out.println("packet received");
 					String message = new String(packet.getData()).trim();
 					
 					if(!packet.getAddress().getHostAddress().equals(ownAddress))
