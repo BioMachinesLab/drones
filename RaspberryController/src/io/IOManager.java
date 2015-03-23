@@ -117,11 +117,11 @@ public class IOManager {
 	 * devices ("physical layer"), like I2C and GPIO management instances
 	 */
 	private void initHardwareCommunicatonProtocols() {
-
 		if (enabledIO.contains("i2c")) {
 			try {
 				// Get I2C instance
 				i2cBus = I2CFactory.getInstance(I2CBus.BUS_1);
+				initMessages += ("\n[INIT] I2C Interface: ok!\n");
 			} catch (Exception e) {
 				initMessages += "\n[INIT] I2C Interface: not ok!\n";
 				e.printStackTrace();
@@ -131,6 +131,7 @@ public class IOManager {
 		if (enabledIO.contains("gpio")) {
 			try {
 				gpioController = GpioFactory.getInstance();
+				initMessages += ("\n[INIT] GPIO Controller: ok!\n");
 			} catch (Exception | Error e) {
 				initMessages += ("\n[INIT] GPIO Controller: not ok! ("
 						+ e.getMessage() + ")\n");
@@ -214,7 +215,7 @@ public class IOManager {
 	}
 
 	private void initOutputs() {
-		if (enabledIO.contains("esc") && enabledIO.contains("i2c")) {
+		if (enabledIO.contains("esc") && enabledIO.contains("gpio")) {
 			try {
 				// ESC Output Init
 				escManager = new ReversableESCManagerOutputV2(motorSpeeds,
@@ -234,7 +235,7 @@ public class IOManager {
 			}
 		}
 
-		if (enabledIO.contains("servos") && enabledIO.contains("i2c")) {
+		if (enabledIO.contains("servos") && enabledIO.contains("gpio")) {
 			try {
 				// ESC Output Init
 				escManager = new ServoOutput(motorSpeeds, gpioController);
@@ -253,7 +254,7 @@ public class IOManager {
 			}
 		}
 
-		if (enabledIO.contains("leds") && enabledIO.contains("i2c")) {
+		if (enabledIO.contains("leds") && enabledIO.contains("gpio")) {
 			try {
 				// Debug Leds Init
 				debugLeds = new DebugLedsOutput(gpioController);

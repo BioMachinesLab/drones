@@ -3,6 +3,7 @@ package behaviors;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
+import commoninterface.RobotCI;
 import commoninterface.utils.CIArguments;
 import commoninterfaceimpl.RealAquaticDroneCI;
 
@@ -16,7 +17,7 @@ public class CalibrationCIBehavior extends CIBehavior {
 	
 	private double speed = 0.2;
 	
-	public CalibrationCIBehavior(CIArguments args, AquaticDroneCI drone) {
+	public CalibrationCIBehavior(CIArguments args, RobotCI drone) {
 		super(args,drone);
 		this.drone = (RealAquaticDroneCI)drone;
 	}

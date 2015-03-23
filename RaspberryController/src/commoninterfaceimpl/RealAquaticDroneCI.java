@@ -88,11 +88,15 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 
 			long lastCycleTime = System.currentTimeMillis();
 			CIBehavior current = activeBehavior;
-			if (current != null) {
-				current.step(timestep);
-				if (current.getTerminateBehavior()) {
-					stopActiveBehavior();
+			try {
+				if (current != null) {
+					current.step(timestep);
+					if (current.getTerminateBehavior()) {
+						stopActiveBehavior();
+					}
 				}
+			} catch(Exception e){
+				e.printStackTrace();
 			}
 			
 			ioManager.setMotorSpeeds(leftSpeed, rightSpeed);
@@ -106,8 +110,7 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 			if (timeToSleep > 0) {
 				try {
 					Thread.sleep(timeToSleep);
-				} catch (InterruptedException e) {
-				}
+				} catch (InterruptedException e) {}
 			}
 
 			timestep++;

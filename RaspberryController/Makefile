@@ -17,7 +17,7 @@ clean:
 	rm -rf $(JDEST)
 
 drone:
-	java -cp $(CLASSPATH) main.Main
+	sudo java -cp $(CLASSPATH) main.Main
 
 thymio:
 	java -Djava.library.path=/usr/local/lib/jni/ -cp $(CLASSPATH) main.MainThymio
