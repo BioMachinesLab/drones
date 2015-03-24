@@ -5,8 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import utils.NetworkUtils;
-
+import commoninterface.network.NetworkUtils;
 import commoninterfaceimpl.RealRobotCI;
 
 public class ConnectionListener extends Thread {

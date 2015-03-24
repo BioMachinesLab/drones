@@ -1,9 +1,10 @@
 
-package simulation.robot;
+package network;
 
 import java.util.ArrayList;
 
 import simulation.Network;
+import simulation.robot.AquaticDrone;
 import commoninterface.RobotCI;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.broadcast.BroadcastMessage;

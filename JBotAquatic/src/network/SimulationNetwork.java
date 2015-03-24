@@ -1,4 +1,4 @@
-package environment.network;
+package network;
 
 import commoninterface.AquaticDroneCI;
 import simulation.Network;

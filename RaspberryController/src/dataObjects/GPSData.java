@@ -6,8 +6,9 @@ import objects.DroneLocation;
 
 import org.joda.time.LocalDateTime;
 
-import utils.NetworkUtils;
 import utils.Nmea0183ToDecimalConverter;
+
+import commoninterface.network.NetworkUtils;
 
 /**
  * Check http://aprs.gids.nl/nmea/ for more informations about the fields

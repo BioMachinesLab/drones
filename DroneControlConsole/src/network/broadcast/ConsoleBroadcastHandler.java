@@ -9,8 +9,8 @@ import java.net.InetAddress;
 
 import main.RobotControlConsole;
 import objects.DroneLocation;
-import utils.NetworkUtils;
 
+import commoninterface.network.NetworkUtils;
 import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
 import commoninterface.network.broadcast.PositionBroadcastMessage;
@@ -18,11 +18,13 @@ import commoninterface.network.broadcast.PositionBroadcastMessage;
 public class ConsoleBroadcastHandler {
 	
 	private static int PORT = 8888;
+	private static int RETRANSMIT_PORT = 8888+100;
 	private static int BUFFER_LENGTH = 15000;
 	private BroadcastSender sender;
 	private BroadcastReceiver receiver;
 	private RobotControlConsole console;
 	private String ownAddress;
+	private boolean retransmit = true;
 	
 	public ConsoleBroadcastHandler(RobotControlConsole console) {
 		this.console = console;
@@ -42,13 +44,20 @@ public class ConsoleBroadcastHandler {
 	class BroadcastSender {
 		
 		private DatagramSocket socket;
+		private DatagramSocket retransmitSocket;
 		
 		public BroadcastSender() {
 			try {
 				InetAddress ownInetAddress = InetAddress.getByName(NetworkUtils.getAddress());
 				ownAddress = ownInetAddress.getHostAddress();
+				System.out.println("SENDER "+ownInetAddress);
 				socket = new DatagramSocket(PORT+1, ownInetAddress);
 				socket.setBroadcast(true);
+				
+				if(retransmit) {
+					retransmitSocket = new DatagramSocket(RETRANSMIT_PORT-1,ownInetAddress);
+					retransmitSocket.setBroadcast(true);
+				}
 			} catch(Exception e) {
 				e.printStackTrace();
 			}
@@ -63,16 +72,31 @@ public class ConsoleBroadcastHandler {
 				e.printStackTrace();
 			}
 		}
+		
+		public void retransmit(String message) {
+			
+			if(!retransmit)
+				return;
+			
+			try {
+				byte[] sendData = message.getBytes();
+				DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName("255.255.255.255"), RETRANSMIT_PORT);
+				retransmitSocket.send(sendPacket);
+			} catch(IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public void newBroadcastMessage(String address, String message) {
 		
 		String[] split = message.split(BroadcastMessage.MESSAGE_SEPARATOR);
-		
 		switch(split[0]) {
 			case "HEARTBEAT":
-				long timeElapsed = HeartbeatBroadcastMessage.decode(message);
-				console.getGUI().getConnectionPanel().newAddress(address);
+				if(!address.equals(ownAddress)) {
+					long timeElapsed = HeartbeatBroadcastMessage.decode(message);
+					console.getGUI().getConnectionPanel().newAddress(address);
+				}
 				break;
 			case "GPS":
 				DroneLocation di = PositionBroadcastMessage.decode(address, message);
@@ -87,6 +111,9 @@ public class ConsoleBroadcastHandler {
 			default:
 				System.out.println("Uncategorized message > "+message+" < from "+address);
 		}
+		
+		if(retransmit)
+			sender.retransmit(message);
 	}
 	
 	class BroadcastReceiver extends Thread {
@@ -95,7 +122,7 @@ public class ConsoleBroadcastHandler {
 
 		public BroadcastReceiver() {
 			try {
-				System.out.println("receiver on the address: " + InetAddress.getByName("0.0.0.0") + ", port: " + PORT);
+				System.out.println("RECEIVER " + InetAddress.getByName("0.0.0.0") + ", port: " + PORT);
 				 socket = new DatagramSocket(PORT, InetAddress.getByName("0.0.0.0"));
 				 socket.setBroadcast(true);
 			} catch (Exception e) {
@@ -113,8 +140,8 @@ public class ConsoleBroadcastHandler {
 					socket.receive(packet);
 					String message = new String(packet.getData()).trim();
 					
-					if(!packet.getAddress().getHostAddress().equals(ownAddress))
-						messageReceived(packet.getAddress().getHostAddress(), message);
+//					if(!packet.getAddress().getHostAddress().equals(ownAddress))
+					messageReceived(packet.getAddress().getHostAddress(), message);
 				}
 
 			} catch (Exception e) {
