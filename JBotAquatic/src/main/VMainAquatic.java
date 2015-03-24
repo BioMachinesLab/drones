@@ -1,3 +1,4 @@
+package main;
 import evolutionaryrobotics.ViewerMain;
 import gui.CombinedGui;
 

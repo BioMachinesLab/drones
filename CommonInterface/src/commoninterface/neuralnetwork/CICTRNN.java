@@ -30,6 +30,7 @@ public class CICTRNN extends CINeuralNetwork {
 			
 	@Override
 	protected double[] propagateInputs(double[] inputValues) {		
+		
 		// Update delta state of hidden layer from inputs:
 	    for(int i = 0; i < numberOfHiddenNodes; i++) {
 	        hiddenDeltaStates[i] = -hiddenStates[i];
@@ -68,6 +69,16 @@ public class CICTRNN extends CINeuralNetwork {
 	        outputNeuronStates[i] = ((1.0)/(Math.exp(-(outputNeuronStates[i] + outputBiases[i])) + 1.0 ));
 	    }
 	    
+//	    String inputs = "";
+//	    String outputs = "";
+//	    for(double d : inputValues)
+//	    	inputs+=d+" ";
+//    	for(double d : outputNeuronStates)
+//    		outputs+=d+" ";
+//	    
+//    	System.out.println("Inputs: " + inputs);
+//    	System.out.println("Outputs: " + outputs);
+    	
 	    if(printValues) {
 	    	PrintWriter out;
 			try {

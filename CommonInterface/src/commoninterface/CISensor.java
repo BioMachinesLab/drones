@@ -10,12 +10,12 @@ import commoninterface.utils.CIArguments;
 public abstract class CISensor implements Serializable{
 	
 	protected int id = 0;
-	protected AquaticDroneCI drone;
+	protected RobotCI robot;
 	
-	public CISensor(int id, AquaticDroneCI drone, CIArguments args) {
+	public CISensor(int id, RobotCI robot, CIArguments args) {
 		super();
 		this.id = id;
-		this.drone = drone;
+		this.robot = robot;
 	}
 	
 	public abstract int getNumberOfSensors();
@@ -24,9 +24,9 @@ public abstract class CISensor implements Serializable{
 	
 	public abstract void update(double time, ArrayList<Entity> entities);
 	
-	public static CISensor getSensor(AquaticDroneCI drone, String name, CIArguments arguments) {
+	public static CISensor getSensor(RobotCI robot, String name, CIArguments arguments) {
 		int id = arguments.getArgumentAsIntOrSetDefault("id",0);
-		return (CISensor)CIFactory.getInstance(name, id, drone, arguments);
+		return (CISensor)CIFactory.getInstance(name, id, robot, arguments);
 	}
 	
 	public int getId() {

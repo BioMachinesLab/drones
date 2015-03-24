@@ -7,6 +7,7 @@ import java.util.Vector;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIFactory;
 import commoninterface.CISensor;
+import commoninterface.RobotCI;
 import commoninterface.utils.CIArguments;
 
 public abstract class CINNInput implements Serializable {
@@ -20,7 +21,7 @@ public abstract class CINNInput implements Serializable {
 	public abstract int getNumberOfInputValues();
 	public abstract double getValue(int index);
 	
-	public static Vector<CINNInput> getNNInputs(AquaticDroneCI robot, CIArguments args) {
+	public static Vector<CINNInput> getNNInputs(RobotCI robot, CIArguments args) {
 		Vector<CINNInput> nnInputs = new Vector<CINNInput>();
 		CIArguments inputs = new CIArguments(args.getArgumentAsString("inputs"));
 		
@@ -32,7 +33,7 @@ public abstract class CINNInput implements Serializable {
 		return nnInputs;
 	}
 	
-	public static CINNInput createInput(AquaticDroneCI robot, CIArguments args) {
+	public static CINNInput createInput(RobotCI robot, CIArguments args) {
 		int id = 0;
 		
 		if(args.getArgumentIsDefined("id"))

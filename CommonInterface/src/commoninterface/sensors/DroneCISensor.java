@@ -2,14 +2,15 @@ package commoninterface.sensors;
 
 import objects.DroneLocation;
 import objects.Entity;
-import commoninterface.AquaticDroneCI;
+
+import commoninterface.RobotCI;
 import commoninterface.utils.CIArguments;
 
 public class DroneCISensor extends ConeTypeCISensor{
 	
 
-	public DroneCISensor(int id, AquaticDroneCI drone, CIArguments args) {
-		super(id, drone, args);
+	public DroneCISensor(int id, RobotCI robot, CIArguments args) {
+		super(id, robot, args);
 	}
 
 	@Override

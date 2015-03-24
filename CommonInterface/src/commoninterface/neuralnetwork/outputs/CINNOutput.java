@@ -5,21 +5,22 @@ import java.util.Vector;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIFactory;
+import commoninterface.RobotCI;
 import commoninterface.utils.CIArguments;
 
 public abstract class CINNOutput implements Serializable {
 	
-	protected AquaticDroneCI drone;
+	protected RobotCI robot;
 	
-	public CINNOutput(AquaticDroneCI drone, CIArguments args) {
-		this.drone = drone;
+	public CINNOutput(RobotCI robot, CIArguments args) {
+		this.robot = robot;
 	}
 	
 	public abstract int getNumberOfOutputValues();
 	public abstract void setValue(int index, double value);
 	public abstract void apply();
 	
-	public static Vector<CINNOutput> getNNOutputs(AquaticDroneCI robot, CIArguments arguments) {
+	public static Vector<CINNOutput> getNNOutputs(RobotCI robot, CIArguments arguments) {
 		
 		CIArguments outputs = new CIArguments(arguments.getArgumentAsString("outputs"));
 		Vector<CINNOutput> nnOutputs = new Vector<CINNOutput>();
@@ -32,7 +33,7 @@ public abstract class CINNOutput implements Serializable {
 		return nnOutputs;
 	}
 	
-	public static CINNOutput createOutput(AquaticDroneCI robot, CIArguments args) {
+	public static CINNOutput createOutput(RobotCI robot, CIArguments args) {
 		return (CINNOutput)CIFactory.getInstance(args.getArgumentAsString("classname"), robot, args);
 	}
 

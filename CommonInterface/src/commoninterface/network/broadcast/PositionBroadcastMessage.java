@@ -1,8 +1,8 @@
 package commoninterface.network.broadcast;
 
 import objects.DroneLocation;
-
 import commoninterface.AquaticDroneCI;
+import commoninterface.RobotCI;
 import commoninterface.utils.jcoord.LatLon;
 
 public class PositionBroadcastMessage extends BroadcastMessage {
@@ -11,9 +11,9 @@ public class PositionBroadcastMessage extends BroadcastMessage {
 	private static final int UPDATE_TIME = 1*1000; //1 sec
 	private AquaticDroneCI drone;
 	
-	public PositionBroadcastMessage(AquaticDroneCI drone) {
-		super(drone, UPDATE_TIME, IDENTIFIER);
-		this.drone = drone;
+	public PositionBroadcastMessage(RobotCI robot) {
+		super(robot, UPDATE_TIME, IDENTIFIER);
+		this.drone = (AquaticDroneCI) robot;
 	}
 	
 	@Override

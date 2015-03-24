@@ -6,6 +6,7 @@ import java.util.Vector;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIFactory;
+import commoninterface.RobotCI;
 import commoninterface.neuralnetwork.inputs.CINNInput;
 import commoninterface.neuralnetwork.outputs.CINNOutput;
 import commoninterface.utils.CIArguments;
@@ -134,7 +135,7 @@ public abstract class CINeuralNetwork implements Serializable{
 	
 	public abstract void reset();
 	
-	public static CINeuralNetwork getNeuralNetwork(AquaticDroneCI robot, CIArguments arguments) {
+	public static CINeuralNetwork getNeuralNetwork(RobotCI robot, CIArguments arguments) {
 		
 		Vector<CINNInput> inputs = CINNInput.getNNInputs(robot, arguments);
 		Vector<CINNOutput> outputs = CINNOutput.getNNOutputs(robot, arguments);

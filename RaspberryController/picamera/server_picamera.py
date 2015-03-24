@@ -8,7 +8,7 @@ import sys
 from threading import Thread
 
 HOST = ''   # Symbolic name meaning all available interfaces
-PORT = 20100 # Arbitrary non-privileged port
+PORT = 20101 # Arbitrary non-privileged port
 
 class PictureThread(Thread):
 

@@ -1,6 +1,6 @@
 package commoninterface.neuralnetwork.outputs;
 
-import commoninterface.AquaticDroneCI;
+import commoninterface.RobotCI;
 import commoninterface.utils.CIArguments;
 
 public class PropellersCINNOutput extends CINNOutput {
@@ -9,8 +9,8 @@ public class PropellersCINNOutput extends CINNOutput {
 	private double rightSpeed;
 	private boolean forwardOnly = false;
 	
-	public PropellersCINNOutput(AquaticDroneCI drone, CIArguments args) {
-		super(drone,args);
+	public PropellersCINNOutput(RobotCI robot, CIArguments args) {
+		super(robot,args);
 		forwardOnly = args.getArgumentAsIntOrSetDefault("forwardonly", 0) == 1;
 	}
 	
@@ -29,7 +29,7 @@ public class PropellersCINNOutput extends CINNOutput {
 
 	@Override
 	public void apply() {
-		drone.setMotorSpeeds(leftSpeed, rightSpeed);
+		robot.setMotorSpeeds(leftSpeed, rightSpeed);
 	}
 
 }

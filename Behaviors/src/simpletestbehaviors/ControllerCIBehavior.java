@@ -1,6 +1,5 @@
 package simpletestbehaviors;
 
-import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
@@ -10,39 +9,38 @@ import commoninterface.utils.CIArguments;
 public class ControllerCIBehavior extends CIBehavior {
 	
 	private CINeuralNetwork network;
-	private AquaticDroneCI drone;
+//	private RobotCI drone;
 	
-	public ControllerCIBehavior(CIArguments args, RobotCI drone) {
-		super(args, drone);
-		this.drone = (AquaticDroneCI)drone;
+	public ControllerCIBehavior(CIArguments args, RobotCI robot) {
+		super(args, robot);
 		
 		initSensors(new CIArguments(args.getArgumentAsString("sensors")));
-		network = CINeuralNetwork.getNeuralNetwork(this.drone, new CIArguments(args.getArgumentAsString("network")));
+		network = CINeuralNetwork.getNeuralNetwork(robot, new CIArguments(args.getArgumentAsString("network")));
 	}
 	
 	protected void initSensors(CIArguments args) {
 		
-		drone.getCISensors().clear();
+		robot.getCISensors().clear();
 		
 		for(int i = 0 ; i < args.getNumberOfArguments() ; i++) {
 			CIArguments sensorArgs = new CIArguments(args.getArgumentAsString(args.getArgumentAt(i)));
-			CISensor s = CISensor.getSensor(drone,sensorArgs.getArgumentAsString("classname"), sensorArgs);
-			drone.getCISensors().add(s);
+			CISensor s = CISensor.getSensor(robot,sensorArgs.getArgumentAsString("classname"), sensorArgs);
+			robot.getCISensors().add(s);
 		}
 	}
 	
 	@Override
 	public void step(double timestep) {
-		
-		if(network == null || drone.getCISensors().isEmpty())
+			
+		if(network == null || robot.getCISensors().isEmpty())
 			return;
 		
 		//Sensors are updated here because other behaviors might
 		//not need sensors. Ideally, this should be moved to the
 		//main loop at the drone, but it would be heavier in terms
 		//of processing.
-		for(CISensor s : drone.getCISensors()) {
-			s.update(timestep, drone.getEntities());
+		for(CISensor s : robot.getCISensors()) {
+			s.update(timestep, robot.getEntities());
 		}
 		
 		network.controlStep(timestep);
@@ -50,7 +48,7 @@ public class ControllerCIBehavior extends CIBehavior {
 	
 	@Override
 	public void cleanUp() {
-		drone.setMotorSpeeds(0, 0);
+		robot.setMotorSpeeds(0, 0);
 		network.reset();
 	}
 	

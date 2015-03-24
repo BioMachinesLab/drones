@@ -1,22 +1,27 @@
 package commoninterface.sensors;
 
 import java.util.ArrayList;
+
 import objects.Entity;
 import objects.Waypoint;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CISensor;
+import commoninterface.RobotCI;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
 
 public class WaypointCISensor extends CISensor{
 	
+	private AquaticDroneCI drone;
 	private double[] readings = {0,0};
 	private double range = 1;
 
-	public WaypointCISensor(int id, AquaticDroneCI drone, CIArguments args) {
-		super(id, drone, args);
+	public WaypointCISensor(int id, RobotCI robot, CIArguments args) {
+		super(id, robot, args);
 		range = args.getArgumentAsDoubleOrSetDefault("range", range);
+		
+		drone = (AquaticDroneCI)robot;
 	}
 	
 	@Override

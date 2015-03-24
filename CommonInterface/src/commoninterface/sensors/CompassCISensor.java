@@ -5,14 +5,17 @@ import java.util.ArrayList;
 import objects.Entity;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CISensor;
+import commoninterface.RobotCI;
 import commoninterface.utils.CIArguments;
 
 public class CompassCISensor extends CISensor{
 	
+	private AquaticDroneCI drone;
 	private double reading = 0;
 
-	public CompassCISensor(int id, AquaticDroneCI drone, CIArguments args) {
-		super(id, drone, args);
+	public CompassCISensor(int id, RobotCI robot, CIArguments args) {
+		super(id, robot, args);
+		drone = (AquaticDroneCI) robot;
 	}
 
 	@Override

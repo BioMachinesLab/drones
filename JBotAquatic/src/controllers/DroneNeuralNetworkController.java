@@ -8,8 +8,8 @@ import simulation.robot.actuators.Actuator;
 import simulation.robot.sensors.Sensor;
 import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
-
 import commoninterface.AquaticDroneCI;
+import commoninterface.RobotCI;
 import commoninterface.neuralnetwork.CINeuralNetwork;
 import commoninterface.utils.CIArguments;
 
@@ -23,7 +23,7 @@ protected CINeuralNetwork neuralNetwork;
 	public DroneNeuralNetworkController(Simulator simulator, Robot robot, Arguments args) {
 		super(simulator, robot, args);
 		
-		neuralNetwork = CINeuralNetwork.getNeuralNetwork(((AquaticDroneCI) robot), new CIArguments(args.getArgumentAsString("network")));
+		neuralNetwork = CINeuralNetwork.getNeuralNetwork(((RobotCI) robot), new CIArguments(args.getArgumentAsString("network")));
 		
 		for(Sensor s : robot.getSensors()) {
 			if(s.getNumberExtraParameters() > 0)

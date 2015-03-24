@@ -16,7 +16,7 @@ import utils.CommandLine;
 
 
 public class CameraCaptureInput implements ControllerInput, MessageProvider {
-	private static final int PORT = 20100;
+	private static final int PORT = 20101;
 	
 	private CameraThread cameraThread;
 	protected boolean available = false;
@@ -150,10 +150,13 @@ public class CameraCaptureInput implements ControllerInput, MessageProvider {
 	            }
 	            
 	        } catch (UnknownHostException e) {
+	        	e.printStackTrace();
 	            System.err.println("Unknown Host.");
 	        } catch (IOException e) {
+	        	e.printStackTrace();
 	            System.err.println("Couldn't get I/O for  the connection.");
 	        } catch (InterruptedException e) {
+	        	e.printStackTrace();
 	        	System.err.println("Image thread interrupted.");
 			} finally {
 	            try {

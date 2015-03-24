@@ -6,8 +6,8 @@ import objects.Entity;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.CISensor;
+import commoninterface.RobotCI;
 import commoninterface.mathutils.GeometricCalculator;
-import commoninterface.mathutils.GeometricInfo;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
@@ -23,8 +23,10 @@ public abstract class ConeTypeCISensor extends CISensor {
 	protected GeometricCalculator geoCalc = new GeometricCalculator();
 	private Vector2d sensorPosition = new Vector2d();
 
-	public ConeTypeCISensor(int id, AquaticDroneCI drone, CIArguments args) {
-		super(id, drone, args);
+	private AquaticDroneCI drone;
+	
+	public ConeTypeCISensor(int id, RobotCI robot, CIArguments args) {
+		super(id, robot, args);
 		range = args.getArgumentAsDoubleOrSetDefault("range", range);
 		numberSensors = args.getArgumentAsIntOrSetDefault("numbersensors",
 				numberSensors);
@@ -33,7 +35,8 @@ public abstract class ConeTypeCISensor extends CISensor {
 
 		this.readings = new double[numberSensors];
 		this.angles = new double[numberSensors];
-
+		drone = (AquaticDroneCI)robot;
+		
 		setupPositions(numberSensors);
 	}
 

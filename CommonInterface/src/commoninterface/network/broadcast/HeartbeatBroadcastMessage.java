@@ -8,8 +8,8 @@ public class HeartbeatBroadcastMessage extends BroadcastMessage {
 	private static final int UPDATE_TIME = 5*1000; //5 sec
 	private static final long START_TIME = System.currentTimeMillis();
 	
-	public HeartbeatBroadcastMessage(RobotCI drone) {
-		super(drone, UPDATE_TIME, IDENTIFIER);
+	public HeartbeatBroadcastMessage(RobotCI robot) {
+		super(robot, UPDATE_TIME, IDENTIFIER);
 	}
 	
 	@Override

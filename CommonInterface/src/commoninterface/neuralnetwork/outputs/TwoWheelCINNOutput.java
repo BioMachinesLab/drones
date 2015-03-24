@@ -1,6 +1,6 @@
 package commoninterface.neuralnetwork.outputs;
 
-import commoninterface.AquaticDroneCI;
+import commoninterface.RobotCI;
 import commoninterface.utils.CIArguments;
 
 public class TwoWheelCINNOutput extends CINNOutput {
@@ -8,8 +8,8 @@ public class TwoWheelCINNOutput extends CINNOutput {
 	private double leftSpeed;
 	private double rightSpeed;
 	
-	public TwoWheelCINNOutput(AquaticDroneCI drone, CIArguments args) {
-		super(drone,args);
+	public TwoWheelCINNOutput(RobotCI robot, CIArguments args) {
+		super(robot,args);
 	}
 	
 	@Override
@@ -28,7 +28,7 @@ public class TwoWheelCINNOutput extends CINNOutput {
 
 	@Override
 	public void apply() {
-		drone.setMotorSpeeds(leftSpeed, rightSpeed);
+		robot.setMotorSpeeds(leftSpeed, rightSpeed);
 	}
 
 }
