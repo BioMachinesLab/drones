@@ -17,6 +17,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -26,7 +27,6 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import network.messages.CompassMessage;
 import network.messages.EntityMessage;
 import objects.DroneLocation;
 import objects.Waypoint;
@@ -46,7 +46,6 @@ import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOsmTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.OsmTileSource;
 
 import threads.UpdateThread;
-import dataObjects.GPSData;
 
 public class MapPanel extends UpdatePanel {
 	
@@ -60,7 +59,7 @@ public class MapPanel extends UpdatePanel {
     
     private int robotMarkerIndex = 0;
     
-    private LinkedList<MapMarker> robotPositions = new LinkedList<MapMarker>();
+    private HashMap<String,LinkedList<MapMarker>> robotPositions = new HashMap<String, LinkedList<MapMarker>>();
     private LinkedList<MapMarker> waypoints = new LinkedList<MapMarker>();
     
     private Waypoint droneWaypoint = null;
@@ -247,6 +246,14 @@ public class MapPanel extends UpdatePanel {
     	
     	Layer l = null;
     	
+    	LinkedList<MapMarker> robotMarkers = robotPositions.get(name);
+    	
+    	if(robotMarkers == null) {
+    		robotMarkers = new LinkedList<MapMarker>();
+    		robotPositions.put(name, robotMarkers);
+    	}
+    	
+    	
     	Iterator<MapMarker> i = map().getMapMarkerList().iterator();
     	
     	while(i.hasNext()) {
@@ -261,18 +268,18 @@ public class MapPanel extends UpdatePanel {
     		l = treeMap.addLayer(name);
     	}
     	
-    	if(!robotPositions.isEmpty()) {
+    	if(!robotMarkers.isEmpty()) {
     	
 	    	Style styleOld = new Style(Color.black, Color.LIGHT_GRAY, new BasicStroke(1), new Font("Dialog", Font.PLAIN, 0));
 	    	
 	    	//remove last value from previous iteration
-	    	MapMarker last = robotPositions.pollLast();
+	    	MapMarker last = robotMarkers.pollLast();
 	    	treeMap.removeFromLayer(last);
 	    	map().removeMapMarker(last);
 	    	
 	    	//add that same one with a different style
 	    	MapMarker old = new MapMarkerDot(l,""+robotMarkerIndex++,last.getCoordinate(), styleOld);
-	    	robotPositions.add(old);
+	    	robotMarkers.add(old);
 	    	l.add(old);
 	    	map().addMapMarker(old);
 	    	
@@ -283,15 +290,15 @@ public class MapPanel extends UpdatePanel {
     	MapMarker m = new MapMarkerDrone(l, name , c, styleNew, orientation);
     	l.add(m);
     	map().addMapMarker(m);
-    	robotPositions.add(m);
+    	robotMarkers.add(m);
     	
-    	while(robotPositions.size() > POSITION_HISTORY) {
-    		MapMarker old = robotPositions.pollFirst();
+    	while(robotMarkers.size() > POSITION_HISTORY) {
+    		MapMarker old = robotMarkers.pollFirst();
     		treeMap.removeFromLayer(old);
         	map().removeMapMarker(old);
     	}
     	
-    	if(robotPositions.size() == 1) {
+    	if(robotMarkers.size() == 1 && robotPositions.size() == 1) {
     		fitMarkersButton.doClick();
     	}
     }
@@ -308,20 +315,22 @@ public class MapPanel extends UpdatePanel {
 		
 		String droneName = di.getName().isEmpty() ? "drone" : di.getName();
 		
-		if(usefulRobotCoordinate(c(lat,lon))) {
+		if(usefulRobotCoordinate(di.getName(), c(lat,lon))) {
 			updateRobotPosition(droneName, c(lat,lon), orientation);
 		}
 	}
 	
-	private boolean usefulRobotCoordinate(Coordinate n) {
+	private boolean usefulRobotCoordinate(String name, Coordinate n) {
 		
 		if(n.getLat() == -1 && n.getLon() == -1)
 			return false;
 		
-		if(robotPositions.isEmpty())
+		LinkedList<MapMarker> robotMarkers = robotPositions.get(name); 
+		
+		if(robotMarkers == null || robotMarkers.isEmpty())
 			return true;
 		
-		Coordinate c = robotPositions.peekLast().getCoordinate();
+		Coordinate c = robotMarkers.peekLast().getCoordinate();
 		
 		if(c.getLat() == n.getLat() && c.getLon() == n.getLon())
 			return false;

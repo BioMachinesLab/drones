@@ -1,4 +1,4 @@
-package simulation.robot;
+package network;
 
 import java.util.ArrayList;
 
@@ -19,7 +19,7 @@ public class SimulatedBroadcastMessageSender {
 	
 	public void update(double step) {
 		
-		long time = (long)(step*10);//from simulator units to real time units
+		long time = (long)(step*100);//from simulator units to real time units
 				
 		for(int i = 0 ; i < broadcastMessages.size() ; i++) {
 			BroadcastMessage msg = broadcastMessages.get(i);

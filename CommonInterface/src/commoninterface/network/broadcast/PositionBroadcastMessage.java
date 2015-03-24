@@ -23,7 +23,7 @@ public class PositionBroadcastMessage extends BroadcastMessage {
 		
 		if(latLon != null) {
 			double orientation = drone.getCompassOrientationInDegrees();
-			return latLon.getLat()+MESSAGE_SEPARATOR+latLon.getLon()+MESSAGE_SEPARATOR+orientation;
+			return drone.getNetworkAddress()+MESSAGE_SEPARATOR+latLon.getLat()+MESSAGE_SEPARATOR+latLon.getLon()+MESSAGE_SEPARATOR+orientation;
 		}
 		return null;
 	}
@@ -31,12 +31,12 @@ public class PositionBroadcastMessage extends BroadcastMessage {
 	public static DroneLocation decode(String address, String message) {
 		String[] split = message.split(MESSAGE_SEPARATOR);
 		
-		if(split.length == 4) {
+		if(split.length == 5) {
 			return new DroneLocation(
-				Double.parseDouble(split[1]),
 				Double.parseDouble(split[2]),
 				Double.parseDouble(split[3]),
-				address
+				Double.parseDouble(split[4]),
+				split[1]
 			);
 		}
 		return null;
