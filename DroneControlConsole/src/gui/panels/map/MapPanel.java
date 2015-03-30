@@ -17,6 +17,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -35,17 +36,20 @@ import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 import org.openstreetmap.gui.jmapviewer.Layer;
 import org.openstreetmap.gui.jmapviewer.MapMarkerDot;
+import org.openstreetmap.gui.jmapviewer.MapPolygonImpl;
 import org.openstreetmap.gui.jmapviewer.OsmFileCacheTileLoader;
 import org.openstreetmap.gui.jmapviewer.OsmTileLoader;
 import org.openstreetmap.gui.jmapviewer.Style;
 import org.openstreetmap.gui.jmapviewer.interfaces.MapMarker;
+import org.openstreetmap.gui.jmapviewer.interfaces.MapObject;
 import org.openstreetmap.gui.jmapviewer.interfaces.TileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.BingAerialTileSource;
-import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOpenAerialTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOsmTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.OsmTileSource;
 
 import threads.UpdateThread;
+
+import commoninterface.utils.jcoord.LatLon;
 
 public class MapPanel extends UpdatePanel {
 	
@@ -64,6 +68,10 @@ public class MapPanel extends UpdatePanel {
     
     private Waypoint droneWaypoint = null;
     private UpdateThread thread = null;
+    
+    private ArrayList<Coordinate> geoFence = new ArrayList<Coordinate>();
+    private Layer geoFenceLayer;
+    private boolean editingGeoFence = false;
 
     /**
      * Constructs the {@code Demo}.
@@ -99,8 +107,7 @@ public class MapPanel extends UpdatePanel {
         try {
         
 	        JComboBox<TileSource> tileSourceSelector = new JComboBox<>(new TileSource[] { new OfflineOsmTileSource((new File("tiles").toURI().toURL()).toString(),1,20) ,
-	        		new OsmTileSource.Mapnik(),
-	                new OsmTileSource.CycleMap(), new BingAerialTileSource(), new MapQuestOsmTileSource(), new MapQuestOpenAerialTileSource()});
+	        		new OsmTileSource.Mapnik(), new BingAerialTileSource(), new MapQuestOsmTileSource()});
 	        tileSourceSelector.addItemListener(new ItemListener() {
 	            public void itemStateChanged(ItemEvent e) {
 	                map().setTileSource((TileSource) e.getItem());
@@ -127,55 +134,27 @@ public class MapPanel extends UpdatePanel {
                 treeMap.setTreeVisible(showTreeLayers.isSelected());
             }
         });
-        panelTop.add(showTreeLayers);
         
-        final JCheckBox showMapMarker = new JCheckBox("Markers");
-        showMapMarker.setSelected(map().getMapMarkersVisible());
-        showMapMarker.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                map().setMapMarkerVisible(showMapMarker.isSelected());
-            }
-        });
-        panelTop.add(showMapMarker);
-        ///
+        JButton geoFenceButton = new JButton("Add GeoFence");
+        geoFenceButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(!editingGeoFence) {
+					editingGeoFence = true;
+					clearGeoFence();
+					geoFenceButton.setText("Finish GeoFence");
+				} else {
+					editingGeoFence = false;
+					geoFenceButton.setText("Add GeoFence");
+				}
+			}
+		});
+        
+        panelTop.add(showTreeLayers);
         panelTop.add(fitMarkersButton);
-
+        panelTop.add(geoFenceButton);
         add(treeMap, BorderLayout.CENTER);
-
-        /*
-        LayerGroup germanyGroup = new LayerGroup("Germany");
-        Layer germanyWestLayer = germanyGroup.addLayer("Germany West");
-        Layer germanyEastLayer = germanyGroup.addLayer("Germany East");
-        MapMarkerDot eberstadt = new MapMarkerDot(germanyEastLayer, "Eberstadt", 49.814284999, 8.642065999);
-        MapMarkerDot ebersheim = new MapMarkerDot(germanyWestLayer, "Ebersheim", 49.91, 8.24);
-        MapMarkerDot empty = new MapMarkerDot(germanyEastLayer, 49.71, 8.64);
-        MapMarkerDot darmstadt = new MapMarkerDot(germanyEastLayer, "Darmstadt", 49.8588, 8.643);
-        map().addMapMarker(eberstadt);
-        map().addMapMarker(ebersheim);
-        map().addMapMarker(empty);
-        Layer franceLayer = treeMap.addLayer("France");
-        map().addMapMarker(new MapMarkerDot(franceLayer, "La Gallerie", 48.71, -1));
-        map().addMapMarker(new MapMarkerDot(43.604, 1.444));
-        map().addMapMarker(new MapMarkerCircle(53.343, -6.267, 0.666));
-        map().addMapRectangle(new MapRectangleImpl(new Coordinate(53.343, -6.267), new Coordinate(43.604, 1.444)));
-        map().addMapMarker(darmstadt);
-        treeMap.addLayer(germanyWestLayer);
-        treeMap.addLayer(germanyEastLayer);
-
-        MapPolygon bermudas = new MapPolygonImpl(c(49,1), c(45,10), c(40,5));
-        map().addMapPolygon( bermudas );
-        map().addMapPolygon( new MapPolygonImpl(germanyEastLayer, "Riedstadt", ebersheim, darmstadt, eberstadt, empty));
-
-        map().addMapMarker(new MapMarkerCircle(germanyWestLayer, "North of Suisse", new Coordinate(48, 7), .5));
-        Layer spain = treeMap.addLayer("Spain");
-        map().addMapMarker(new MapMarkerCircle(spain, "La Garena", new Coordinate(40.4838, -3.39), .002));
-        spain.setVisible(false);
-
-        Layer wales = treeMap.addLayer("UK");
-        map().addMapRectangle(new MapRectangleImpl(wales, "Wales", c(53.35,-4.57), c(51.64,-2.63)));
-         */
-        // map.setDisplayPosition(new Coordinate(49.807, 8.6), 11);
-//        map.setTileGridVisible(true);
+        
+        geoFenceLayer = treeMap.addLayer("GeoFence");
         
         //Lisbon
         map().setDisplayPosition(new Coordinate(38.7166700,-9.1333300), 13);
@@ -185,7 +164,10 @@ public class MapPanel extends UpdatePanel {
             public void mouseClicked(MouseEvent e) {
             	
                if(e.getButton() == MouseEvent.BUTTON3) {
-            	   addMarker(map().getPosition(e.getPoint()),"waypoint");
+            	   if(!editingGeoFence)
+            		   addMarker(map().getPosition(e.getPoint()),"waypoint");
+            	   else
+            		   addToGeoFence(map().getPosition(e.getPoint()));
 //            	   updateRobotPosition("drone", map().getPosition(e.getPoint()));
                 }
             }
@@ -213,7 +195,7 @@ public class MapPanel extends UpdatePanel {
         return new Coordinate(lat, lon);
     }
 
-    public void addMarker(Coordinate c, String name) {
+    public synchronized void addMarker(Coordinate c, String name) {
     	Layer l = null;
     	
     	for(Layer layer : treeMap.getLayers())
@@ -242,7 +224,7 @@ public class MapPanel extends UpdatePanel {
     	}
     }
     
-    public void updateRobotPosition(String name, Coordinate c, double orientation) {
+    public synchronized void updateRobotPosition(String name, Coordinate c, double orientation) {
     	
     	Layer l = null;
     	
@@ -258,7 +240,7 @@ public class MapPanel extends UpdatePanel {
     	
     	while(i.hasNext()) {
     		MapMarker m = i.next();
-    		if(m.getLayer().getName().equals(name)) {
+    		if(m.getLayer() != null && m.getLayer().getName().equals(name)) {
     			l = m.getLayer();
     			break;
     		}
@@ -367,4 +349,36 @@ public class MapPanel extends UpdatePanel {
 		System.out.println("TODO MapPanel");
 	}
 	
+	private synchronized void addToGeoFence(Coordinate coord) {
+		MapMarker marker = new MapMarkerDot(coord);
+		geoFence.add(coord);
+		geoFenceLayer.add(marker);
+		map().addMapMarker(marker);
+
+		map().removeAllMapPolygons();
+		MapPolygonImpl po = new MapPolygonImpl(geoFence);
+		geoFenceLayer.add(po);
+		map().addMapPolygon(po);
+	}
+	
+	private void clearGeoFence() {
+		
+		LinkedList<MapMarker> list = new LinkedList<MapMarker>();
+		
+		if(geoFenceLayer.getElements() != null) {
+			for(MapObject mo : geoFenceLayer.getElements()) {
+				if(mo instanceof MapMarker) {
+					list.add((MapMarker)mo);
+					map().removeMapMarker((MapMarker)mo);
+				}
+			}
+			
+			for(MapMarker m : list)
+				treeMap.removeFromLayer(m);
+			
+			geoFenceLayer.getElements().clear();
+			geoFence.clear();
+		}
+		map().removeAllMapPolygons();
+	}
 }

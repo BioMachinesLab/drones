@@ -94,7 +94,7 @@ public class JMapViewerTreeDrone extends JPanel{
             public void actionPerformed(ActionEvent arg0) {
                 setVisibleTexts(layer, true);
                 if(layer.getParent()!=null) layer.getParent().calculateVisibleTexts();
-                map.repaint();
+//                map.repaint();
             }
         });
         menuItemHide.addActionListener(new ActionListener(){
@@ -102,7 +102,7 @@ public class JMapViewerTreeDrone extends JPanel{
             public void actionPerformed(ActionEvent arg0) {
                 setVisibleTexts(layer, false);
                 if(layer.getParent()!=null) layer.getParent().calculateVisibleTexts();
-                map.repaint();
+//                map.repaint();
             }
         });
  
@@ -155,13 +155,13 @@ public class JMapViewerTreeDrone extends JPanel{
             splitPane.setRightComponent(map);
             add(splitPane, BorderLayout.CENTER);
         }else add(map, BorderLayout.CENTER);
-        repaint();
+//        repaint();
     }
     private void createRefresh(){
         tree.getModel().addTreeModelListener(new TreeModelListener() {
             @Override
             public void treeNodesChanged(final TreeModelEvent e) {
-                repaint();
+//                repaint();
             }
             @Override
             public void treeNodesInserted(TreeModelEvent arg0) {
