@@ -26,7 +26,7 @@ public class ThymioSensorsPanel extends UpdatePanel {
 	private ArrayList<JTextField> backSensorsReadings;
 	private ArrayList<JTextField> groundSensorsReadings;
 	
-	private long sleepTime = 30;
+	private long sleepTime = 10000;
 	
 	private UpdateThread thread;
 	

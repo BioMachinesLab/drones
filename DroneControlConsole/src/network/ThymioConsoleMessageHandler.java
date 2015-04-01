@@ -5,6 +5,7 @@ import main.ThymioControlConsole;
 import network.messages.BehaviorMessage;
 import network.messages.CameraCaptureMessage;
 import network.messages.Message;
+import network.messages.NeuralActivationsMessage;
 import network.messages.SystemStatusMessage;
 import network.messages.ThymioReadingsMessage;
 
@@ -26,6 +27,8 @@ public class ThymioConsoleMessageHandler extends MessageHandler {
 			((ThymioGUI)console.getGUI()).getReadingsPanel().displayData((ThymioReadingsMessage) message);
 		} else if (message instanceof CameraCaptureMessage) {
 			((ThymioGUI)console.getGUI()).getCapturePanel().displayData((CameraCaptureMessage) message);
+		} else if (message instanceof NeuralActivationsMessage) {
+			((ThymioGUI)console.getGUI()).getNeuralActivationsPanel().displayData((NeuralActivationsMessage) message);
 		}  else {
 			System.out.println("Received non recognise message type: " + message.getClass().toString());
 		}

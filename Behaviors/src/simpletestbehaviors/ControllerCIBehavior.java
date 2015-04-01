@@ -9,7 +9,7 @@ import commoninterface.utils.CIArguments;
 public class ControllerCIBehavior extends CIBehavior {
 	
 	private CINeuralNetwork network;
-//	private RobotCI drone;
+	private double currentTimeStep;
 	
 	public ControllerCIBehavior(CIArguments args, RobotCI robot) {
 		super(args, robot);
@@ -44,12 +44,21 @@ public class ControllerCIBehavior extends CIBehavior {
 		}
 		
 		network.controlStep(timestep);
+		currentTimeStep = timestep;
 	}
 	
 	@Override
 	public void cleanUp() {
 		robot.setMotorSpeeds(0, 0);
 		network.reset();
+	}
+	
+	public CINeuralNetwork getNeuralNetwork() {
+		return network;
+	}
+	
+	public double getCurrentTimeStep() {
+		return currentTimeStep;
 	}
 	
 }

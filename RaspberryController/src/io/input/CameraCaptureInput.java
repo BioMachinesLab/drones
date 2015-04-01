@@ -77,22 +77,24 @@ public class CameraCaptureInput implements ControllerInput, MessageProvider {
 		public void run() {
 			try {
 				
-				Thread.sleep(2000);
+				Thread.sleep(5000);
 				
 				socket = new Socket("127.0.0.1", PORT);
 	            inputStream = socket.getInputStream();
 	            
+	            System.out.println("[INIT] Picamera ready!");
+	            
 	            ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	            ByteArrayOutputStream extraBytes = new ByteArrayOutputStream();
 
-				int time = 0;
-	            long startTime = 0;
+//				int time = 0;
+//	            long startTime = 0;
 	            
 	            while(true){
 	            	
-	            	if(time == 1){
-	    				startTime = System.currentTimeMillis();
-	    			}
+//	            	if(time == 1){
+//	    				startTime = System.currentTimeMillis();
+//	    			}
 	            	
 	    			byte[] content = new byte[ 2048 ];  
 	    			int bytesRead = -1;  
@@ -137,15 +139,15 @@ public class CameraCaptureInput implements ControllerInput, MessageProvider {
 	    			baos.write(extraBytes.toByteArray());
 	    			extraBytes = new ByteArrayOutputStream();
 	    			
-	    			time ++;
+//	    			time ++;
 	    			
-	    			if(time > 1){
-	    				double t = System.currentTimeMillis()-startTime;
-		    			t/=1000;
-		    			
-		    			System.out.println("Captures: "+time);
-		    			System.out.println("FPS: "+(time/t));
-	    			}
+//	    			if(time > 1){
+//	    				double t = System.currentTimeMillis()-startTime;
+//		    			t/=1000;
+//		    			
+//		    			System.out.println("Captures: "+time);
+//		    			System.out.println("FPS: "+(time/t));
+//	    			}
 	    			
 	            }
 	            

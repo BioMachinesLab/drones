@@ -70,14 +70,14 @@ public class CICTRNN extends CINeuralNetwork {
 	    }
 	    
 //	    String inputs = "";
-//	    String outputs = "";
+	    String outputs = "";
 //	    for(double d : inputValues)
 //	    	inputs+=d+" ";
-//    	for(double d : outputNeuronStates)
-//    		outputs+=d+" ";
-//	    
+    	for(double d : outputNeuronStates)
+    		outputs+=d+" ";
+	    
 //    	System.out.println("Inputs: " + inputs);
-//    	System.out.println("Outputs: " + outputs);
+    	System.out.println("Outputs: " + outputs);
     	
 	    if(printValues) {
 	    	PrintWriter out;

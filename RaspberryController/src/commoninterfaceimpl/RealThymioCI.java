@@ -49,9 +49,12 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 	private CILogger logger;
 	private long startTimeInMillis;
 	private double timestep = 0;
+	private double behaviorTimeStep = 0;
 	private double leftSpeed = 0;
 	private double rightSpeed = 0;
 
+	private boolean startBehavior;
+	
 	private CIBehavior activeBehavior = null;
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
 	
@@ -82,7 +85,14 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 			long lastCycleTime = System.currentTimeMillis();
 			CIBehavior current = activeBehavior;
 			if (current != null) {
-				current.step(timestep);
+				if(startBehavior)
+					behaviorTimeStep = 0;
+				
+				current.step(behaviorTimeStep);
+				
+				if(startBehavior)
+					startBehavior = false;
+				
 				if (current.getTerminateBehavior()) {
 					stopActiveBehavior();
 				}
@@ -103,6 +113,7 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 			}
 
 			timestep++;
+			behaviorTimeStep++;
 		}
 	}
 	
@@ -201,6 +212,7 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 	public void startBehavior(CIBehavior b) {
 		stopActiveBehavior();
 		activeBehavior = b;
+		startBehavior = true;
 	}
 
 	public void stopActiveBehavior() {
