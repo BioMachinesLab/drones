@@ -17,7 +17,6 @@ import network.broadcast.RealBroadcastHandler;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import objects.Entity;
-
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
 import commoninterface.CISensor;
@@ -244,6 +243,7 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 		return broadcastHandler;
 	}
 
+	@Override
 	public CIBehavior getActiveBehavior() {
 		return activeBehavior;
 	}

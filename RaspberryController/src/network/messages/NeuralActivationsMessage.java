@@ -1,39 +1,35 @@
 package network.messages;
 
+import java.util.ArrayList;
+
 public class NeuralActivationsMessage extends Message {
 
-	private double timeStep;
-	private String[] inputsTitles;
-	private double[] inputsValues;
-	private String[] outputsTitles;
-	private double[] outputsValues;
+	private ArrayList<String> inputsTitles;
+	private ArrayList<Double[]> inputsValues;
+	private ArrayList<String> outputsTitles;
+	private ArrayList<Double[]> outputsValues;
 	
-	public NeuralActivationsMessage(double timeStep, String[] inputsTitles, double[] inputsValues, String[] outputsTitles, double[] outputsValues) {
-		this.timeStep = timeStep;
+	public NeuralActivationsMessage(ArrayList<String> inputsTitles, ArrayList<Double[]> inputsValues, ArrayList<String> outputsTitles, ArrayList<Double[]> outputsValues) {
 		this.inputsTitles = inputsTitles;
 		this.inputsValues = inputsValues;
 		this.outputsTitles = outputsTitles;
 		this.outputsValues = outputsValues;
 	}
-	
-	public double getTimeStep() {
-		return timeStep;
-	}
-	
-	public String[] getInputsTitles() {
+
+	public ArrayList<String> getInputsTitles() {
 		return inputsTitles;
 	}
 	
-	public double[] getInputsValues() {
-		return inputsValues;
-	}
-	
-	public String[] getOutputsTitles() {
+	public ArrayList<String> getOutputsTitles() {
 		return outputsTitles;
 	}
 	
-	public double[] getOutputsValues() {
-		return outputsValues;
+	public ArrayList<Double[]> getInputsValues() {
+		return inputsValues;
 	}
 	
+	public ArrayList<Double[]> getOutputsValues() {
+		return outputsValues;
+	}
+
 }

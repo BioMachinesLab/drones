@@ -47,7 +47,7 @@ public class UpdateThread extends Thread {
 	 * Try to keep the desired refresh rate by taking into account
 	 * the time lost waiting for an answer 
 	 */
-	private void calculateSleep(long timeAfterSending) {
+	protected void calculateSleep(long timeAfterSending) {
 		long timeElapsed = System.currentTimeMillis()-timeAfterSending;
 		long sleepTime = panel.getSleepTime();
 		

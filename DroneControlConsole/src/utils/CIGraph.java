@@ -72,7 +72,7 @@ public class CIGraph extends JPanel {
 		
 	}
 	
-	public void addData(Double value) {
+	public synchronized void addData(Double value) {
 		
 		if(value > max)
 			max = value;
@@ -92,12 +92,12 @@ public class CIGraph extends JPanel {
 		return legends.size()*LEGEND_SIZE+ORIGINAL_PAD_TOP;
 	}
 	
-	public void addLegend(String s) {
+	public synchronized void addLegend(String s) {
 		legends.add(s);
 		padTop+=LEGEND_SIZE;
 	}
 	
-	public void addDataList(Double[] dataList){
+	public synchronized void addDataList(Double[] dataList){
 		Vector<Double> aux = new Vector<Double>();
 		
 		for (int i = 0; i < dataList.length; i++) {
@@ -155,7 +155,7 @@ public class CIGraph extends JPanel {
 			repaint();
 	}
 
-	private void drawLegends(Graphics2D g2) {
+	private synchronized void drawLegends(Graphics2D g2) {
 		
 		FontMetrics metrics = g2.getFontMetrics(g2.getFont());
 		
@@ -306,7 +306,7 @@ public class CIGraph extends JPanel {
 		
 	}
 	
-	private void drawData(Graphics2D g2) {
+	private synchronized void drawData(Graphics2D g2) {
 		
 		int colorIndex = 0;
 		int w = getWidth();

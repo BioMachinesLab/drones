@@ -5,6 +5,8 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -19,6 +21,9 @@ import utils.CIGraph;
 
 public class NeuralActivationsPanel extends UpdatePanel {
 
+	private HashMap<String, ArrayList<Double>> inputsMap;
+	private HashMap<String, ArrayList<Double>> outputsMap;
+	
 	private CIGraph inputsGraph;;
 	private CIGraph outputsGraph;
 	
@@ -28,6 +33,10 @@ public class NeuralActivationsPanel extends UpdatePanel {
 	
 	public NeuralActivationsPanel() {
 		setLayout(new BorderLayout());
+		
+		inputsMap = new HashMap<String, ArrayList<Double>>();
+		outputsMap = new HashMap<String, ArrayList<Double>>();
+		
 		add(createGraphsPanel(), BorderLayout.CENTER);
 		add(createBottomPanel(), BorderLayout.SOUTH);
 	}
@@ -59,19 +68,38 @@ public class NeuralActivationsPanel extends UpdatePanel {
 	}
 	
 	private JPanel createBottomPanel(){
-		JPanel bottomPanel = new JPanel(new GridLayout(1,3));
+		JPanel bottomPanel = new JPanel(new GridLayout(1,4));
 		
 		JPanel p = new JPanel(new FlowLayout());
+		JButton startButton = new JButton("Start");
+		startButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JButton button = (JButton) e.getSource();
+				
+				if(button.getText().equals("Start")){
+					wakeUpThread();
+					button.setText("Stop");
+				}else{
+					threadWait();
+					button.setText("Start");
+				}
+			}
+		});
+		p.add(startButton);
+		
+		JPanel p2 = new JPanel(new FlowLayout());
 		JButton clearButton = new JButton("Clear");
 		clearButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
+				inputsGraph.clear();
+				outputsGraph.clear();
 			}
 		});
-		p.add(clearButton);
+		p2.add(clearButton);
 		
-		JPanel p2 = new JPanel(new FlowLayout());
+		JPanel p3 = new JPanel(new FlowLayout());
 		JButton exportButton = new JButton("Export");
 		exportButton.addActionListener(new ActionListener() {
 			@Override
@@ -79,10 +107,11 @@ public class NeuralActivationsPanel extends UpdatePanel {
 				
 			}
 		});
-		p2.add(exportButton);
+		p3.add(exportButton);
 		
 		bottomPanel.add(p);
 		bottomPanel.add(p2);
+		bottomPanel.add(p3);
 		bottomPanel.add(createRefreshRatePanel());
 		
 		return bottomPanel;
@@ -128,11 +157,65 @@ public class NeuralActivationsPanel extends UpdatePanel {
 	}
 	
 	public synchronized void displayData(NeuralActivationsMessage message) {
-		//?? =  message.getReadings();
+		ArrayList<String> inputTitles = message.getInputsTitles();
 		
-		//Receber a mensagem e trata-la
+		for (Double[] inputValues : message.getInputsValues()) {
+			for (int i = 0; i < inputValues.length; i++) 
+				addActivationValues(inputsMap, inputTitles.get(i), inputValues[i]);
+		}
+		
+		ArrayList<String> outputTitles = message.getOutputsTitles();
+		
+		for (Double[] outputValues: message.getOutputsValues()){
+			for (int i = 0; i < outputValues.length; i++) 
+				addActivationValues(outputsMap, outputTitles.get(i), outputValues[i]);
+		}
+		
+		inputsGraph.clear();
+		outputsGraph.clear();
+		
+		drawActivations(inputsMap, inputsGraph);
+		
+		for (String title : message.getInputsTitles())
+			inputsGraph.addLegend(title);
+		
+		drawActivations(outputsMap, outputsGraph);
+		
+		for (String title : message.getOutputsTitles())
+			outputsGraph.addLegend(title);
 		
 		notifyAll();
+	}
+
+	private synchronized void drawActivations(HashMap<String, ArrayList<Double>> map, CIGraph graph) {
+		boolean changeShowLast = true;
+		
+		for (String key : map.keySet()) {
+			ArrayList<Double> aux = map.get(key);
+			Double[] activations = new Double[aux.size()];
+			
+			for (int i = 0; i < aux.size(); i++)
+				activations[i] = aux.get(i);			
+			
+			if(changeShowLast){
+				graph.setShowLast(activations.length);
+				changeShowLast = false;
+			}
+			
+			graph.addDataList(activations);
+		}
+	}
+
+	private void addActivationValues(HashMap<String, ArrayList<Double>> activations, String title, double value) {
+		if(activations.containsKey(title)){
+			ArrayList<Double> values = activations.get(title);
+			values.add(value);
+			activations.put(title, values);
+		}else{
+			ArrayList<Double> values = new ArrayList<Double>();
+			values.add(value);
+			activations.put(title, values);
+		}
 	}
 	
 	@Override
