@@ -9,16 +9,16 @@ import network.messages.Message;
 
 public class CommandSender extends Thread{
 	
-	private static int BEHAVIOR_PORT = 10103;
+	private static int COMMAND_PORT = 10103;
 	
 	private String[] ips;
 	private Message message;
-	private CommandPanel bp;
+	private CommandPanel cp;
 	
 	public CommandSender(Message message, String[] ips, CommandPanel bp) {
 		this.ips = ips;
 		this.message = message;
-		this.bp = bp;
+		this.cp = bp;
 	}
 	
 	@Override
@@ -41,13 +41,13 @@ public class CommandSender extends Thread{
 			try {
 				st.join();
 				count++;
-				bp.setText("Deploying... "+count+"/"+sts.length);
+				cp.setText("Deploying... "+count+"/"+sts.length);
 			} catch(Exception e ) {
 				e.printStackTrace();
 			}
 		}
 		
-		bp.setText("Deployed!");
+		cp.setText("Deployed!");
 	}
 	
 	class SenderThread extends Thread {
@@ -55,7 +55,7 @@ public class CommandSender extends Thread{
 		private Socket socket;
 		
 		public SenderThread(String ip) throws IOException{
-			socket = new Socket(ip, BEHAVIOR_PORT);
+			socket = new Socket(ip, COMMAND_PORT);
 		} 
 		
 		@Override
@@ -70,7 +70,7 @@ public class CommandSender extends Thread{
 				Object o = in.readObject();
 				
 				if(o == null || !(o instanceof Message)) {
-					System.out.println("[BehaviorSender] Didn't receive the right confirmation!");
+					System.out.println("[CommandSender] Didn't receive the right confirmation!");
 				}
 				
 				out.close();

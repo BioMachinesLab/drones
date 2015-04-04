@@ -8,12 +8,11 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 import main.RobotControlConsole;
-import objects.RobotLocation;
-
 import commoninterface.network.NetworkUtils;
 import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
 import commoninterface.network.broadcast.PositionBroadcastMessage;
+import commoninterface.objects.RobotLocation;
 
 public class ConsoleBroadcastHandler {
 	

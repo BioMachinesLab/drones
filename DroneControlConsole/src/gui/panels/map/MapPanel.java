@@ -29,8 +29,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import network.messages.EntityMessage;
-import objects.RobotLocation;
-import objects.Waypoint;
 
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
@@ -48,7 +46,10 @@ import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOsmTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.OsmTileSource;
 
 import threads.UpdateThread;
-
+import commoninterface.objects.Entity;
+import commoninterface.objects.GeoFence;
+import commoninterface.objects.RobotLocation;
+import commoninterface.objects.Waypoint;
 import commoninterface.utils.jcoord.LatLon;
 
 public class MapPanel extends UpdatePanel {
@@ -66,10 +67,10 @@ public class MapPanel extends UpdatePanel {
     private HashMap<String,LinkedList<MapMarker>> robotPositions = new HashMap<String, LinkedList<MapMarker>>();
     private LinkedList<MapMarker> waypoints = new LinkedList<MapMarker>();
     
-    private Waypoint droneWaypoint = null;
+    private Waypoint waypoint = null;
     private UpdateThread thread = null;
     
-    private ArrayList<Coordinate> geoFence = new ArrayList<Coordinate>();
+    private GeoFence geoFence = new GeoFence("geofence");
     private Layer geoFenceLayer;
     private boolean editingGeoFence = false;
 
@@ -219,7 +220,7 @@ public class MapPanel extends UpdatePanel {
     	map().addMapMarker(m);
     	
     	synchronized(this) {
-    		droneWaypoint = new Waypoint("waypoint",new LatLon(c.getLat(),c.getLon()));
+    		waypoint = new Waypoint("waypoint",new LatLon(c.getLat(),c.getLon()));
     		notifyAll();
     	}
     }
@@ -323,8 +324,8 @@ public class MapPanel extends UpdatePanel {
 	}
 	
 	public synchronized EntityMessage getCurrentMessage() {
-		EntityMessage m = new EntityMessage(droneWaypoint);
-		droneWaypoint = null;
+		EntityMessage m = new EntityMessage(waypoint);
+		waypoint = null;
 		return m;
 	}
 	
@@ -340,7 +341,7 @@ public class MapPanel extends UpdatePanel {
 	
 	@Override
 	public synchronized void threadWait() {
-		while(droneWaypoint == null) {
+		while(waypoint == null) {
 			try {
 				wait();
 			} catch(Exception e){}
@@ -353,12 +354,17 @@ public class MapPanel extends UpdatePanel {
 	
 	private synchronized void addToGeoFence(Coordinate coord) {
 		MapMarker marker = new MapMarkerDot(coord);
-		geoFence.add(coord);
+		geoFence.addWaypoint(new LatLon(coord.getLat(),coord.getLon()));
 		geoFenceLayer.add(marker);
 		map().addMapMarker(marker);
+		
+		ArrayList<Coordinate> coords = new ArrayList<Coordinate>();
+		
+		for(Waypoint wp : geoFence.getWaypoints())
+			coords.add(new Coordinate(wp.getLatLon().getLat(), wp.getLatLon().getLon()));
 
 		map().removeAllMapPolygons();
-		MapPolygonImpl po = new MapPolygonImpl(geoFence);
+		MapPolygonImpl po = new MapPolygonImpl(coords);
 		geoFenceLayer.add(po);
 		map().addMapPolygon(po);
 	}
@@ -382,5 +388,18 @@ public class MapPanel extends UpdatePanel {
 			geoFence.clear();
 		}
 		map().removeAllMapPolygons();
+	}
+	
+	public LinkedList<Entity> getEntities() {
+		LinkedList<Entity> entities = new LinkedList<>();
+
+		if(!geoFence.getWaypoints().isEmpty()) {
+			entities.add(geoFence);
+		}
+		
+		if(waypoint != null)
+			entities.add(waypoint);
+		
+		return entities;
 	}
 }

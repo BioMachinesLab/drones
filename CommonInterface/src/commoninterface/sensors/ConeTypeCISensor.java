@@ -2,13 +2,13 @@ package commoninterface.sensors;
 
 import java.util.ArrayList;
 
-import objects.Entity;
-import objects.GeoEntity;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
 import commoninterface.mathutils.GeometricCalculator;
 import commoninterface.mathutils.Vector2d;
+import commoninterface.objects.Entity;
+import commoninterface.objects.GeoEntity;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;

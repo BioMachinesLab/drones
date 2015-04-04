@@ -1,11 +1,12 @@
 package evaluation;
 
 import java.util.ArrayList;
+
 import commoninterface.mathutils.Vector2d;
+import commoninterface.objects.Entity;
+import commoninterface.objects.Waypoint;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
-import objects.Entity;
-import objects.Waypoint;
 import simulation.Simulator;
 import simulation.robot.AquaticDrone;
 import simulation.util.Arguments;

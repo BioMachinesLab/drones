@@ -2,12 +2,11 @@ package dataObjects;
 
 import java.io.Serializable;
 
-import objects.RobotLocation;
-
 import org.joda.time.LocalDateTime;
 
 import utils.Nmea0183ToDecimalConverter;
 import commoninterface.network.NetworkUtils;
+import commoninterface.objects.RobotLocation;
 import commoninterface.utils.jcoord.LatLon;
 
 /**

@@ -6,9 +6,9 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 import network.messages.BehaviorMessage;
+import network.messages.EntitiesMessage;
 import network.messages.LogMessage;
 import network.messages.Message;
-
 import commoninterfaceimpl.RealRobotCI;
 
 public class CommandConnectionHandler extends ConnectionHandler {
@@ -33,6 +33,8 @@ public class CommandConnectionHandler extends ConnectionHandler {
 		if (message instanceof BehaviorMessage) {
 			robot.processInformationRequest(message, this);
 		} else if(message instanceof LogMessage) {
+			robot.processInformationRequest(message, this);
+		} else if(message instanceof EntitiesMessage) {
 			robot.processInformationRequest(message, this);
 		}
 	}

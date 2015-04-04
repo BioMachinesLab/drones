@@ -3,11 +3,10 @@ package commoninterface.network.broadcast;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import objects.RobotLocation;
-import objects.Entity;
-
 import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
+import commoninterface.objects.Entity;
+import commoninterface.objects.RobotLocation;
 
 public abstract class BroadcastHandler {
 	

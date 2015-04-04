@@ -1,4 +1,4 @@
-package objects;
+package commoninterface.objects;
 
 import java.util.ArrayList;
 

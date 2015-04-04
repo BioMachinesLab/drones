@@ -1,9 +1,8 @@
 package commoninterface.sensors;
 
-import objects.RobotLocation;
-import objects.Entity;
-
 import commoninterface.RobotCI;
+import commoninterface.objects.Entity;
+import commoninterface.objects.RobotLocation;
 import commoninterface.utils.CIArguments;
 
 public class DroneCISensor extends ConeTypeCISensor{

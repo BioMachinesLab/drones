@@ -5,17 +5,15 @@ import gui.RobotGUI;
 import network.DroneConsoleMessageHandler;
 import network.broadcast.ConsoleBroadcastHandler;
 import network.messages.InformationRequest.MessageType;
-import objects.RobotLocation;
 import threads.BehaviorMessageThread;
 import threads.ConnectionThread;
 import threads.MapThread;
 import threads.MotorUpdateThread;
 import threads.UpdateThread;
-
 import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
 import commoninterface.network.broadcast.PositionBroadcastMessage;
-
+import commoninterface.objects.RobotLocation;
 import dataObjects.ConsoleMotorSpeeds;
 
 public class DroneControlConsole extends RobotControlConsole {

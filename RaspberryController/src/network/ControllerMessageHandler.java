@@ -1,16 +1,21 @@
 package network;
 
 import java.lang.reflect.Constructor;
+import java.util.Iterator;
+import java.util.LinkedList;
+
 import network.messages.BehaviorMessage;
+import network.messages.EntitiesMessage;
 import network.messages.EntityMessage;
 import network.messages.InformationRequest;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import network.messages.SystemStatusMessage;
-import objects.Entity;
-import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.RobotCI;
+import commoninterface.objects.Entity;
+import commoninterface.objects.GeoFence;
+import commoninterface.objects.Waypoint;
 import commoninterface.utils.CIArguments;
 import commoninterfaceimpl.RealRobotCI;
 
@@ -34,33 +39,15 @@ public class ControllerMessageHandler extends MessageHandler {
 		}
 		
 		if(response == null && m instanceof EntityMessage) {
-			EntityMessage wm = (EntityMessage)m;
-			Entity e = wm.getEntity();
-			
-			if(drone.getEntities().contains(e)) {
-				drone.getEntities().remove(e);
-			}
-			
-			drone.getEntities().add(e);
-			response = m;
+			response = handleEntityMessage(m);
+		}
+		
+		if(response == null && m instanceof EntitiesMessage) {
+			response = handleEntitiesMessage(m);
 		}
 		
 		if(response == null && m instanceof BehaviorMessage) {
-			BehaviorMessage bm = (BehaviorMessage)m;
-			
-          	 if(bm.getSelectedStatus()) {
-          		try {
-              		Constructor<CIBehavior> constructor = bm.getSelectedBehavior().getConstructor(new Class[] { CIArguments.class, RobotCI.class});
-    				CIBehavior ctArgs = constructor.newInstance(new Object[] { new CIArguments(bm.getArguments()), drone });
-    				drone.startBehavior(ctArgs);
-          		} catch(ReflectiveOperationException e) {
-          			e.printStackTrace();
-          		}
-          	 } else {
-          		 drone.stopActiveBehavior();
-          	 }
-          	 bm.setArguments("");
-          	 response = bm;
+			handleBehaviorMessage(m);
 		}
 		
 		//TODO: Pass the FileLogger to the RobotCI 
@@ -87,5 +74,53 @@ public class ControllerMessageHandler extends MessageHandler {
 		}
 
 		pendingConnections[currentIndex].sendData(response);
+	}
+	
+	private Message handleEntityMessage(Message m) {
+		EntityMessage wm = (EntityMessage)m;
+		Entity e = wm.getEntity();
+		
+		if(drone.getEntities().contains(e)) {
+			drone.getEntities().remove(e);
+		}
+		
+		drone.getEntities().add(e);
+		return m;
+	}
+	
+	private Message handleEntitiesMessage(Message m) {
+		EntitiesMessage wm = (EntitiesMessage)m;
+		LinkedList<Entity> entities = wm.getEntities();
+		
+		Iterator<Entity> i = drone.getEntities().iterator();
+		
+		while(i.hasNext()) {
+			Entity e = i.next();
+			if(e instanceof GeoFence)
+				i.remove();
+			if(e instanceof Waypoint)
+				i.remove();
+		}
+		
+		drone.getEntities().addAll(entities);
+		return m;
+	}
+	
+	private Message handleBehaviorMessage(Message m) {
+		BehaviorMessage bm = (BehaviorMessage)m;
+		
+     	 if(bm.getSelectedStatus()) {
+     		try {
+         		Constructor<CIBehavior> constructor = bm.getSelectedBehavior().getConstructor(new Class[] { CIArguments.class, RobotCI.class});
+				CIBehavior ctArgs = constructor.newInstance(new Object[] { new CIArguments(bm.getArguments()), drone });
+				drone.startBehavior(ctArgs);
+     		} catch(ReflectiveOperationException e) {
+     			e.printStackTrace();
+     		}
+     	 } else {
+     		 drone.stopActiveBehavior();
+     	 }
+     	 bm.setArguments("");
+     	 return bm;
 	}
 }

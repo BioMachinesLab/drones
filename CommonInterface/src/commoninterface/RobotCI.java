@@ -2,8 +2,8 @@ package commoninterface;
 
 import java.util.ArrayList;
 
-import objects.Entity;
 import commoninterface.network.broadcast.BroadcastHandler;
+import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
 
 public interface RobotCI {

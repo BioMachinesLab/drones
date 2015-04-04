@@ -1,6 +1,5 @@
 package environment;
 
-import objects.Waypoint;
 import simulation.Simulator;
 import simulation.environment.Environment;
 import simulation.physicalobjects.LightPole;
@@ -9,6 +8,7 @@ import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
 import commoninterface.AquaticDroneCI;
 import commoninterface.mathutils.Vector2d;
+import commoninterface.objects.Waypoint;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
 
