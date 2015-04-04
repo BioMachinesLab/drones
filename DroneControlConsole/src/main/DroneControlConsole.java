@@ -5,7 +5,7 @@ import gui.RobotGUI;
 import network.DroneConsoleMessageHandler;
 import network.broadcast.ConsoleBroadcastHandler;
 import network.messages.InformationRequest.MessageType;
-import objects.DroneLocation;
+import objects.RobotLocation;
 import threads.BehaviorMessageThread;
 import threads.ConnectionThread;
 import threads.MapThread;

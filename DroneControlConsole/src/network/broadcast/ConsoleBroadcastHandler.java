@@ -8,7 +8,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 import main.RobotControlConsole;
-import objects.DroneLocation;
+import objects.RobotLocation;
 
 import commoninterface.network.NetworkUtils;
 import commoninterface.network.broadcast.BroadcastMessage;
@@ -99,7 +99,7 @@ public class ConsoleBroadcastHandler {
 				}
 				break;
 			case "GPS":
-				DroneLocation di = PositionBroadcastMessage.decode(address, message);
+				RobotLocation di = PositionBroadcastMessage.decode(address, message);
 				if(di != null) {
 					if(console.getGUI() instanceof DroneGUI) {
 						((DroneGUI)console.getGUI()).getMapPanel().displayData(di);

@@ -39,10 +39,10 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 		
 		double currentOrientation = drone.getCompassOrientationInDegrees();
 		double coordinatesAngle = CoordinateUtilities.angleInDegrees(drone.getGPSLatLon(),
-				new LatLon(waypoints.get(0).getLatitude(),waypoints.get(0).getLongitude()));
+				waypoints.get(0).getLatLon());
 		
 		double currentDistance = CoordinateUtilities.distanceInMeters(drone.getGPSLatLon(),
-				new LatLon(waypoints.get(0).getLatitude(),waypoints.get(0).getLongitude()));
+				waypoints.get(0).getLatLon());
 
 		double difference = currentOrientation - coordinatesAngle;
 		

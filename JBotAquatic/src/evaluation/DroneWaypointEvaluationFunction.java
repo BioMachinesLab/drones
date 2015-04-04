@@ -77,7 +77,7 @@ public class DroneWaypointEvaluationFunction extends EvaluationFunction{
 	}
 	
 	private double calculateDistance(Waypoint wp, AquaticDrone drone) {
-		Vector2d pos = CoordinateUtilities.GPSToCartesian(new LatLon(wp.getLatitude(), wp.getLongitude()));
+		Vector2d pos = CoordinateUtilities.GPSToCartesian(wp.getLatLon());
 		Vector2d robotPos = new Vector2d(drone.getPosition().getX(), drone.getPosition().getY());
 		return pos.distanceTo(robotPos);
 	}

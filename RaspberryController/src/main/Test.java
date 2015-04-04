@@ -10,6 +10,8 @@ public class Test {
 		
 		I2CBus i2cBus = null;
 		
+		boolean calibration = false;
+		
 		try {
 			i2cBus = I2CFactory.getInstance(I2CBus.BUS_1);
 		} catch (Exception e) {
@@ -17,15 +19,20 @@ public class Test {
 		}
 		
 		I2CCompassLSM303Input c = new I2CCompassLSM303Input(i2cBus);
-		c.startCalibration();
+		
+		if(calibration)
+			c.startCalibration();
+		
 		c.start();
 		
-		for(int i = 0 ; i < 20 ; i++) {
-			System.out.println("Sleeping... "+i);
-			Thread.sleep(1000);
+		if(calibration) {
+			for(int i = 0 ; i < 20 ; i++) {
+				System.out.println("Sleeping... "+i);
+				Thread.sleep(1000);
+			}
+			
+			c.endCalibration();
 		}
-		
-		c.endCalibration();
 	}
 	
 }

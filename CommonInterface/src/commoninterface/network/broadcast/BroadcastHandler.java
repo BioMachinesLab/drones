@@ -3,7 +3,7 @@ package commoninterface.network.broadcast;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import objects.DroneLocation;
+import objects.RobotLocation;
 import objects.Entity;
 
 import commoninterface.AquaticDroneCI;
@@ -38,7 +38,7 @@ public abstract class BroadcastHandler {
 				break;
 			case PositionBroadcastMessage.IDENTIFIER:
 				
-				DroneLocation dl = PositionBroadcastMessage.decode(address, message);
+				RobotLocation dl = PositionBroadcastMessage.decode(address, message);
 				dl.setTimestepReceived((long)(drone.getTimeSinceStart()/10));
 				drone.getEntities().remove(dl);
 				drone.getEntities().add(dl);
@@ -57,7 +57,7 @@ public abstract class BroadcastHandler {
 		
 		while(i.hasNext()) {
 			Entity e = i.next();
-			if(e instanceof DroneLocation) {
+			if(e instanceof RobotLocation) {
 				if(timestep - e.getTimestepReceived() > CLEAN_ENTITIES_TIME) {
 					i.remove();
 					if(DEBUG)

@@ -29,7 +29,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import network.messages.EntityMessage;
-import objects.DroneLocation;
+import objects.RobotLocation;
 import objects.Waypoint;
 
 import org.openstreetmap.gui.jmapviewer.Coordinate;
@@ -219,7 +219,7 @@ public class MapPanel extends UpdatePanel {
     	map().addMapMarker(m);
     	
     	synchronized(this) {
-    		droneWaypoint = new Waypoint(c.getLat(),c.getLon(),"waypoint");
+    		droneWaypoint = new Waypoint("waypoint",new LatLon(c.getLat(),c.getLon()));
     		notifyAll();
     	}
     }
@@ -285,10 +285,12 @@ public class MapPanel extends UpdatePanel {
     	}
     }
     
-    public void displayData(DroneLocation di) {
+    public void displayData(RobotLocation di) {
 		
-		double lat = di.getLatitude();
-		double lon = di.getLongitude();
+    	LatLon latLon = di.getLatLon();
+    	
+		double lat = latLon.getLat();
+		double lon = latLon.getLon();
 		
 		if(lat == 0 && lon == 0)
 			return;

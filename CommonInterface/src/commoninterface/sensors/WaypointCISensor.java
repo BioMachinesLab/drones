@@ -40,7 +40,10 @@ public class WaypointCISensor extends CISensor{
 		
 		for(Entity e : entities) {
 			if(e instanceof Waypoint) {
-				LatLon latLon = new LatLon(e.getLatitude(),e.getLongitude());
+				
+				Waypoint wp = (Waypoint)e;
+				
+				LatLon latLon = wp.getLatLon();
 				
 				double currentDistance = CoordinateUtilities.distanceInMeters(robotLatLon,latLon);
 				

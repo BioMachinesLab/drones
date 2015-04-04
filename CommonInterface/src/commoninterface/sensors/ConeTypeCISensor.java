@@ -3,7 +3,7 @@ package commoninterface.sensors;
 import java.util.ArrayList;
 
 import objects.Entity;
-
+import objects.GeoEntity;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
@@ -50,9 +50,15 @@ public abstract class ConeTypeCISensor extends CISensor {
 		}
 		
 		for (Entity e : entities) {
-			if (validEntity(e)) {
-				for(int j=0; j<numberSensors; j++) {			
-					readings[j] = Math.max(calculateContributionToSensor(j, new LatLon(e.getLatitude(),e.getLongitude())), readings[j]);
+			
+			if(e instanceof GeoEntity) {
+			
+				GeoEntity ge = (GeoEntity)e;
+				
+				if (validEntity(ge)) {
+					for(int j=0; j<numberSensors; j++) {			
+						readings[j] = Math.max(calculateContributionToSensor(j, ge.getLatLon()), readings[j]);
+					}
 				}
 			}
 		}

@@ -1,6 +1,6 @@
 package commoninterface.sensors;
 
-import objects.DroneLocation;
+import objects.RobotLocation;
 import objects.Entity;
 
 import commoninterface.RobotCI;
@@ -15,7 +15,7 @@ public class DroneCISensor extends ConeTypeCISensor{
 
 	@Override
 	public boolean validEntity(Entity e) {
-		return e instanceof DroneLocation;
+		return e instanceof RobotLocation;
 	}
 
 }

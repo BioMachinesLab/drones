@@ -19,10 +19,10 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 
 	private final static String CALIBRATION_FILE = "calibration.txt";
 
-	public final static int LSM303_ADDRESS = (0x3a >> 1); // 0x1D
-	public final static int LSM303_CTRL0 = 0x1F;
-	public final static int LSM303_REGISTER_ACCEL_OUT_X_L_A = 0x28;
-	public final static int LSM303_REGISTER_MAG_OUT_X_L_M = 0x08;
+	public final static byte LSM303_ADDRESS = (0x3a >> 1); // 0x1D
+	public final static byte LSM303_CTRL0 = 0x1F;
+	public final static byte LSM303_REGISTER_ACCEL_OUT_X_L_A = 0x28;
+	public final static byte LSM303_REGISTER_MAG_OUT_X_L_M = 0x08;
 
 	private I2CDevice compass;
 
@@ -64,20 +64,6 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 		}
 	}
 
-	private void readPreviousCalibration() {
-		try {
-			Scanner s = new Scanner(new File(CALIBRATION_FILE));
-			min[0] = s.nextInt();
-			min[1] = s.nextInt();
-			min[2] = s.nextInt();
-			max[0] = s.nextInt();
-			max[1] = s.nextInt();
-			max[2] = s.nextInt();
-			s.close();
-			System.out.println("[I2CompassLSM303] Calibration loaded from the file!");
-		} catch (Exception e) {}
-	}
-
 	private void configureCompass() {
 
 		try {
@@ -85,12 +71,17 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 			compass = i2cBus.getDevice(LSM303_ADDRESS);
 
 			// Enable accelerometer
-			compass.write(LSM303_CTRL0+2, (byte) 0x00);
-			compass.write(LSM303_CTRL0+1, (byte) 0x57); // 00100111
+			// AODR = 0101 (50 Hz ODR); AZEN = AYEN = AXEN = 1 (all axes enabled)
+			compass.write(0x20, (byte) 0x27);//57
+			// AFS = 0 (+/- 2 g full scale)
+			compass.write(0x23, (byte) 0x00);
 
 			// Enable magnetometer
+			// M_RES = 11 (high resolution mode); M_ODR = 001 (6.25 Hz ODR)
 			compass.write(LSM303_CTRL0+5, (byte) 0x64);
+			// MFS = 01 (+/- 4 gauss full scale)
 			compass.write(LSM303_CTRL0+6, (byte) 0x20);
+			// MLP = 0 (low power mode off); MD = 00 (continuous-conversion mode)
 			compass.write(LSM303_CTRL0+7, (byte) 0x00);
 
 			available = true;
@@ -138,16 +129,34 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 			calibrate();
 			
 		} else {
+			
+			byte[] accelData = new byte[6];
+			
+			int r = compass.read(LSM303_REGISTER_ACCEL_OUT_X_L_A | 0x80, accelData, 0, 6);
+			int x = accel12(accelData, 0);
+			int y = accel12(accelData, 2);
+			int z = accel12(accelData, 4);
+			  
+			System.out.println(x+" "+y+" "+z);
+			
+			if(1==1)
+				return;
 		
 			int accelX = readSingleValue(LSM303_REGISTER_ACCEL_OUT_X_L_A);
+			try{Thread.sleep(20);}catch(Exception e){}
 			int accelY = readSingleValue(LSM303_REGISTER_ACCEL_OUT_X_L_A+2);
+			try{Thread.sleep(20);}catch(Exception e){}
 			int accelZ = readSingleValue(LSM303_REGISTER_ACCEL_OUT_X_L_A+4);
+			try{Thread.sleep(20);}catch(Exception e){}
 			
 			double[] accel = new double[]{accelX, accelY, accelZ};
 	
 			int magX = readSingleValue(LSM303_REGISTER_MAG_OUT_X_L_M);
 			int magY = readSingleValue(LSM303_REGISTER_MAG_OUT_X_L_M+2);
 			int magZ = readSingleValue(LSM303_REGISTER_MAG_OUT_X_L_M+4);
+			
+			System.out.println("accel "+accelX+" "+accelY+" "+accelZ);
+//			System.out.println("mag "+magX+" "+magY+" "+magZ);
 			
 			magX-= (min[0] + max[0])/2;
 			magY-= (min[1] + max[1])/2;
@@ -156,23 +165,25 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 			double[] mag = new double[]{magX, magY, magZ};
 			
 			//compute E and N
+			double[] east = new double[3];
+			double[] north = new double[3];
 			
-			double[] east = vectorCross(mag, accel);
-			east = vectorNormalize(east);
-			double[] north = vectorCross(mag, east);
-			north = vectorNormalize(north);
+			vectorCross(mag, accel, east);
+			vectorNormalize(east);
+			vectorCross(accel, east, north);
+			vectorNormalize(north);
 			
 			double[] from = new double[]{1, 0 ,0};
 			
 		    double heading =
-		    		Math.toDegrees(Math.atan2(
-		    				vectorDot(east, from),
-		    				vectorDot(north, from)
-		    			));
+		    		Math.atan2(
+		    			vectorDot(east, from),
+		    			vectorDot(north, from)
+		    		) * 180 / Math.PI;
 		    if (heading < 0) heading += 360;
 			
 		    this.headingInDegrees = (int)heading;
-		    System.out.println("Heading: "+headingInDegrees);
+//		    System.out.println(headingInDegrees);
 		}
 	}
 	
@@ -195,29 +206,51 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 		}
 	}
 	
-	private void calibrate() {
+	private short[] readAcc() throws IOException{
+		compass.write((byte)((LSM303_REGISTER_ACCEL_OUT_X_L_A | (1 << 7)) & 0xFF));
 		
+		byte[] temp = new byte[6];
+		
+		compass.read(temp,0,6);
+		
+		short[] res = new short[3];
+		
+		res[0] = (short)((temp[0] | (temp[1] << 8)) & 0xFFFF);
+		res[1] = (short)((temp[2] | (temp[3] << 8)) & 0xFFFF);
+		res[2] = (short)((temp[4] | (temp[5] << 8)) & 0xFFFF);
+		
+		return res;
+	}
+	
+	private void readPreviousCalibration() {
 		try {
+			Scanner s = new Scanner(new File(CALIBRATION_FILE));
+			min[0] = s.nextInt();
+			min[1] = s.nextInt();
+			min[2] = s.nextInt();
+			max[0] = s.nextInt();
+			max[1] = s.nextInt();
+			max[2] = s.nextInt();
+			s.close();
+			System.out.println("[I2CompassLSM303] Calibration loaded from the file!");
+		} catch (Exception e) {}
+	}
+	
+	private void calibrate() throws IOException {
 		
-			int magX = readSingleValue(LSM303_REGISTER_MAG_OUT_X_L_M);
-			int magY = readSingleValue(LSM303_REGISTER_MAG_OUT_X_L_M+2);
-			int magZ = readSingleValue(LSM303_REGISTER_MAG_OUT_X_L_M+4);
-			
-			if(magX > max[0]) max[0] = magX;
-			if(magY > max[1]) max[1] = magY;
-			if(magZ > max[2]) max[2] = magZ;
-			
-			if(magX < min[0]) min[0] = magX;
-			if(magY < min[1]) min[1] = magY;
-			if(magZ < min[2]) min[2] = magZ;
-			
-			System.out.println("min = {"+min[0]+","+min[1]+","+min[2]+"} max = {"+max[0]+","+max[1]+","+max[2]+"} ");
+		int magX = readSingleValue(LSM303_REGISTER_MAG_OUT_X_L_M);
+		int magY = readSingleValue(LSM303_REGISTER_MAG_OUT_X_L_M+2);
+		int magZ = readSingleValue(LSM303_REGISTER_MAG_OUT_X_L_M+4);
 		
-		} catch(Exception e) {
-			e.printStackTrace();
-			configureCompass();
-		}
+		min[0] = Math.min(magX,min[0]);
+		min[1] = Math.min(magY,min[1]);
+		min[2] = Math.min(magZ,min[2]);
 		
+		max[0] = Math.max(magX,max[0]);
+		max[1] = Math.max(magY,max[1]);
+		max[2] = Math.max(magZ,max[2]);
+		
+		System.out.println("min "+min[0]+" "+min[1]+" "+min[2]+" max "+max[0]+" "+max[1]+" "+max[2]);
 	}
 
 	@Override
@@ -238,21 +271,19 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 		int l = compass.read(addr);
 		int h = compass.read(addr+1);
 		
+		System.out.println(l+" "+h);
+		
 		short out = (short)((l | (h << 8)) & 0xFFFF);
 		return out;
 	}
 	
-	private static double[] vectorCross(double[] a, double[] b) {
-		double[] out = new double[3];
-		
+	private static void vectorCross(double[] a, double[] b, double[] out) {
 		//out->x = (a->y * b->z) - (a->z * b->y)
 		out[0] = (a[1] * b[2]) - (a[2] * b[1]);
 		//out->y = (a->z * b->x) - (a->x * b->z)
 		out[1] = (a[2] * b[0]) - (a[0] * b[2]);
 		//out->z = (a->x * b->y) - (a->y * b->x)
 		out[2] = (a[0] * b[1]) - (a[1] * b[0]);
-		
-		return out;
 	}
 	
 	private static double vectorDot(double[] a, double[] b) {
@@ -260,12 +291,18 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 		return (a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]);
 	}
 	
-	private static double[] vectorNormalize(double[] a) {
-		double[] out = new double[3];
+	private static void vectorNormalize(double[] a) {
 		double mag = Math.sqrt(vectorDot(a,a));
-		out[0] = a[0]/mag;
-		out[1] = a[1]/mag;
-		out[2] = a[2]/mag;
-		return out;
-	}	
+		a[0]/= mag;
+		a[1]/= mag;
+		a[2]/= mag;
+	}
+	
+	private static int accel12(byte[] list, int idx)
+	  {
+	    int n = list[idx] | (list[idx+1] << 8); // Low, high bytes
+	    if (n > 32767) 
+	      n -= 65536;                           // 2's complement signed
+	    return n >> 4;                          // 12-bit resolution
+	  }
 }

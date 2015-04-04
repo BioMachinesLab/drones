@@ -2,65 +2,17 @@ package objects;
 
 import java.io.Serializable;
 
-import commoninterface.mathutils.Vector2d;
-
 public abstract class Entity implements Serializable{
 	
-	protected double latitude;
-	protected double longitude;
-	protected double orientation;
 	protected String name = "";
-	protected Vector2d latLon;
 	protected long timestepReceived = 0;
 	
-	public Entity(double lat, double lon) {
-		this.latitude = lat;
-		this.longitude = lon;
-	}
-	
-	public Entity(double lat, double lon, double orientation) {
-		this(lat, lon);
-		this.orientation = orientation;
-	}
-	
-	public Entity(double lat, double lon, String name) {
-		this(lat, lon);
+	public Entity(String name) {
 		this.name = name;
-	}
-	
-	public Entity(double lat, double lon, double orientation, String name) {
-		this(lat, lon, orientation);
-		this.name = name;
-	}
-	
-	public double getLatitude() {
-		return latitude;
-	}
-	
-	public double getLongitude() {
-		return longitude;
 	}
 	
 	public String getName() {
 		return name;
-	}
-	
-	public double getOrientation() {
-		return orientation;
-	}
-	
-	public Vector2d getLatLon() {
-		if(latLon == null)
-			latLon = new Vector2d(latitude, longitude);
-		return latLon;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
 	}
 	
 	public void setTimestepReceived(long timestep) {
@@ -69,6 +21,14 @@ public abstract class Entity implements Serializable{
 	
 	public long getTimestepReceived() {
 		return timestepReceived;
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		return result;
 	}
 
 	@Override
