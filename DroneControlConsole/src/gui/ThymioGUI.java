@@ -1,5 +1,6 @@
 package gui;
 
+import gui.panels.NeuralActivationsPanel;
 import gui.panels.ThymioCapturePanel;
 import gui.panels.ThymioSensorsPanel;
 
@@ -18,6 +19,7 @@ public class ThymioGUI extends RobotGUI {
 
 	private ThymioSensorsPanel readingsPanel;
 	private ThymioCapturePanel capturePanel;
+	private NeuralActivationsPanel neuralActivationsPanel;
 	
 	public ThymioGUI(ThymioControlConsole console) {
 		this.console = console;
@@ -45,9 +47,15 @@ public class ThymioGUI extends RobotGUI {
 		createPanels();
 		createInfoPanel();
 		createCameraPanel();
+		createNeuralActivationsPanel();
 
 		pack();
 		setLocationRelativeTo(null);
+	}
+
+	private void createNeuralActivationsPanel() {
+		neuralActivationsPanel = new NeuralActivationsPanel();
+		commandPanel.getNeuralActivationsWindow().add(neuralActivationsPanel, BorderLayout.CENTER);
 	}
 
 	private void createCameraPanel() {
@@ -82,6 +90,10 @@ public class ThymioGUI extends RobotGUI {
 		leftPanel.add(msgPanel, BorderLayout.CENTER);
 
 		add(leftPanel, BorderLayout.WEST);
+	}
+	
+	public NeuralActivationsPanel getNeuralActivationsPanel() {
+		return neuralActivationsPanel;
 	}
 	
 	public ThymioSensorsPanel getReadingsPanel() {

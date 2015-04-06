@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -40,12 +41,16 @@ public class CommandPanel extends UpdatePanel{
 	private RobotGUI gui; 
 	private boolean dronePanel = false;
 	
+	private JFrame neuralActivationsWindow;
+	
 	public CommandPanel(RobotGUI gui) {
 		
 		if(gui instanceof DroneGUI)
 			dronePanel = true;
 		
 		this.gui = gui;
+		
+		initNeuralActivationsWindow();
 		
 		setBorder(BorderFactory.createTitledBorder("Commands"));
 		
@@ -131,8 +136,24 @@ public class CommandPanel extends UpdatePanel{
 		statusMessage = new JLabel("");
 		statusMessage.setPreferredSize(new Dimension(10,20));
 		
+		JButton plotButton = new JButton("Plot Neural Activations");
+		plotButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				neuralActivationsWindow.setVisible(true);
+			}
+		});
+		
 		add(topPanel, BorderLayout.NORTH);
+		add(plotButton);
 		add(statusMessage, BorderLayout.SOUTH);
+	}
+
+	private void initNeuralActivationsWindow() {
+		neuralActivationsWindow = new JFrame("Neural Network Activations");
+		neuralActivationsWindow.setSize(950, 600);
+		neuralActivationsWindow.setLocationRelativeTo(gui);
+		neuralActivationsWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	}
 	
 	private synchronized void statusMessage(Class<CIBehavior> className, boolean status) {
@@ -212,6 +233,10 @@ public class CommandPanel extends UpdatePanel{
 	@Override
 	public long getSleepTime() {
 		return 0;
+	}
+	
+	public JFrame getNeuralActivationsWindow() {
+		return neuralActivationsWindow;
 	}
 
 	public void displayData(BehaviorMessage message) {

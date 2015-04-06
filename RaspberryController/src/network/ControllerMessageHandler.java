@@ -1,6 +1,7 @@
 package network;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -10,7 +11,9 @@ import network.messages.EntityMessage;
 import network.messages.InformationRequest;
 import network.messages.Message;
 import network.messages.MessageProvider;
+import network.messages.NeuralActivationsMessage;
 import network.messages.SystemStatusMessage;
+import simpletestbehaviors.ControllerCIBehavior;
 import commoninterface.CIBehavior;
 import commoninterface.RobotCI;
 import commoninterface.objects.Entity;
@@ -32,32 +35,39 @@ public class ControllerMessageHandler extends MessageHandler {
 		Message request = pendingMessages[currentIndex];
 		Message response = null;
 		
-		for (MessageProvider p : drone.getMessageProviders()) {
+		if(request instanceof InformationRequest && ((InformationRequest)request).getMessageTypeQuery().equals(InformationRequest.MessageType.NEURAL_ACTIVATIONS)){
+			if (drone.getActiveBehavior() instanceof ControllerCIBehavior)
+				response = createNeuralActivationMessage();
+			
+		}else{
+			
+			for (MessageProvider p : drone.getMessageProviders()) {
 			response = p.getMessage(request);
 			if (response != null)
 				break;
-		}
+			}
 		
-		if(response == null && m instanceof EntityMessage) {
-			response = handleEntityMessage(m);
-		}
+			if(response == null && m instanceof EntityMessage) {
+				response = handleEntityMessage(m);
+			}
 		
-		if(response == null && m instanceof EntitiesMessage) {
-			response = handleEntitiesMessage(m);
-		}
+			if(response == null && m instanceof EntitiesMessage) {
+				response = handleEntitiesMessage(m);
+			}
 		
-		if(response == null && m instanceof BehaviorMessage) {
-			handleBehaviorMessage(m);
+			if(response == null && m instanceof BehaviorMessage) {
+				handleBehaviorMessage(m);
+			}
+			
+			//TODO: Pass the FileLogger to the RobotCI 
+//			if(response == null && m instanceof LogMessage) {
+//				LogMessage lm = (LogMessage)m;
+//				Logger logger = drone.getIOManager().getFileLogger();
+//				
+//				if(logger != null)
+//					logger.addLog(lm.getLog());
+//			}
 		}
-		
-		//TODO: Pass the FileLogger to the RobotCI 
-//		if(response == null && m instanceof LogMessage) {
-//			LogMessage lm = (LogMessage)m;
-//			Logger logger = drone.getIOManager().getFileLogger();
-//			
-//			if(logger != null)
-//				logger.addLog(lm.getLog());
-//		}
 		
 		if (response == null) {
 			
@@ -74,6 +84,18 @@ public class ControllerMessageHandler extends MessageHandler {
 		}
 
 		pendingConnections[currentIndex].sendData(response);
+	}
+
+	@SuppressWarnings("unchecked")
+	private NeuralActivationsMessage createNeuralActivationMessage() {
+		ArrayList<?>[] info = ((ControllerCIBehavior)drone.getActiveBehavior()).getNeuralNetworkActivations();
+		
+		ArrayList<String> inputsTitles = (ArrayList<String>) info[0];
+		ArrayList<String> outputsTitles = (ArrayList<String>) info[1];
+		ArrayList<Double[]> inputsValues = (ArrayList<Double[]>) info[2];
+		ArrayList<Double[]> outputsValues = (ArrayList<Double[]>) info[3];
+		
+		return new NeuralActivationsMessage(inputsTitles, inputsValues, outputsTitles, outputsValues);
 	}
 	
 	private Message handleEntityMessage(Message m) {

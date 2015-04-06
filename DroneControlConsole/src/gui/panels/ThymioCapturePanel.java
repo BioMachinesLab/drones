@@ -22,7 +22,7 @@ public class ThymioCapturePanel extends UpdatePanel{
 	private UpdateThread thread;
 	private JLabel picLabel;
 	
-	private long sleepTime = 30;
+	private long sleepTime = 1000;
 	
 	public ThymioCapturePanel() {
 		setBorder(BorderFactory.createTitledBorder("Camera"));

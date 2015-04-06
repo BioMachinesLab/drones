@@ -27,4 +27,6 @@ public abstract class RealRobotCI extends Thread implements RobotCI {
 	public abstract void stopActiveBehavior();
 	
 	public abstract String getStatus();
+	
+	public abstract CIBehavior getActiveBehavior();
 }
