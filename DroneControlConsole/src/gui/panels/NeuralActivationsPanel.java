@@ -5,6 +5,9 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -13,7 +16,10 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+
+import com.sun.corba.se.impl.ior.WireObjectKeyTemplate;
 
 import network.messages.NeuralActivationsMessage;
 import threads.UpdateThread;
@@ -31,11 +37,14 @@ public class NeuralActivationsPanel extends UpdatePanel {
 
 	private UpdateThread thread;
 	
+	private boolean notifyThread;
+	
 	public NeuralActivationsPanel() {
 		setLayout(new BorderLayout());
 		
 		inputsMap = new HashMap<String, ArrayList<Double>>();
 		outputsMap = new HashMap<String, ArrayList<Double>>();
+		notifyThread = true;
 		
 		add(createGraphsPanel(), BorderLayout.CENTER);
 		add(createBottomPanel(), BorderLayout.SOUTH);
@@ -78,10 +87,11 @@ public class NeuralActivationsPanel extends UpdatePanel {
 				JButton button = (JButton) e.getSource();
 				
 				if(button.getText().equals("Start")){
+					notifyThread = true;
 					wakeUpThread();
 					button.setText("Stop");
 				}else{
-					threadWait();
+					notifyThread = false;
 					button.setText("Start");
 				}
 			}
@@ -95,6 +105,8 @@ public class NeuralActivationsPanel extends UpdatePanel {
 			public void actionPerformed(ActionEvent e) {
 				inputsGraph.clear();
 				outputsGraph.clear();
+				inputsMap.clear();
+				outputsMap.clear();
 			}
 		});
 		p2.add(clearButton);
@@ -104,8 +116,45 @@ public class NeuralActivationsPanel extends UpdatePanel {
 		exportButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
+				try {
+					FileWriter writer = new FileWriter(new File("neural_activations.txt"));
+					
+					int recordSteps = -1;
+					writer.write("#");
+					for (String sensorName : inputsMap.keySet()) {
+						writer.write(sensorName + "\t");
+						
+						if(recordSteps < 0)
+							recordSteps = inputsMap.get(sensorName).size();
+					}
+					
+					for (String actuatorName : outputsMap.keySet()) 
+						writer.write(actuatorName + "\t");
+					
+					writer.write("\n");
+					
+					for (int i = 0; i < recordSteps; i++) {
+						writer.write((i+1) + "\t");
+						
+						for (String key : inputsMap.keySet()) 
+							writer.write(inputsMap.get(key).get(i) + "\t");
+						
+						for (String key : outputsMap.keySet()) 
+							writer.write(outputsMap.get(key).get(i) + "\t");
+						
+						writer.write("\n");
+					}
+					
+					writer.write("\n");
+					
+					writer.close();
+					
+					JOptionPane.showMessageDialog(null, "Neural Network Activations Exported");
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
 			}
+			
 		});
 		p3.add(exportButton);
 		
@@ -184,7 +233,8 @@ public class NeuralActivationsPanel extends UpdatePanel {
 		for (String title : message.getOutputsTitles())
 			outputsGraph.addLegend(title);
 		
-		notifyAll();
+		if(notifyThread)
+			notifyAll();
 	}
 
 	private synchronized void drawActivations(HashMap<String, ArrayList<Double>> map, CIGraph graph) {

@@ -2,13 +2,12 @@ package dataObjects;
 
 import java.io.Serializable;
 
-import objects.DroneLocation;
-
 import org.joda.time.LocalDateTime;
 
 import utils.Nmea0183ToDecimalConverter;
-
 import commoninterface.network.NetworkUtils;
+import commoninterface.objects.RobotLocation;
+import commoninterface.utils.jcoord.LatLon;
 
 /**
  * Check http://aprs.gids.nl/nmea/ for more informations about the fields
@@ -255,8 +254,8 @@ public class GPSData implements Serializable {
 		return str;
 	}
 
-	public DroneLocation toDroneLocation() {
-		return new DroneLocation(latitudeDecimal, longitudeDecimal, orientation, address);
+	public RobotLocation toDroneLocation() {
+		return new RobotLocation(address, new LatLon(latitudeDecimal,longitudeDecimal), orientation);
 	}
 
 	public String getDroneAddress() {

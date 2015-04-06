@@ -1,5 +1,6 @@
 package gui.panels;
 
+import gui.DroneGUI;
 import gui.RobotGUI;
 
 import java.awt.BorderLayout;
@@ -8,6 +9,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -21,12 +23,13 @@ import javax.swing.JTextField;
 
 import network.CommandSender;
 import network.messages.BehaviorMessage;
+import network.messages.EntitiesMessage;
 import network.messages.LogMessage;
 import network.messages.Message;
 import threads.UpdateThread;
 import utils.ClassLoadHelper;
-
 import commoninterface.CIBehavior;
+import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
 
 public class CommandPanel extends UpdatePanel{
@@ -36,10 +39,14 @@ public class CommandPanel extends UpdatePanel{
 	private BehaviorMessage currentMessage;
 	private JTextArea config;
 	private RobotGUI gui; 
+	private boolean dronePanel = false;
 	
 	private JFrame neuralActivationsWindow;
 	
 	public CommandPanel(RobotGUI gui) {
+		
+		if(gui instanceof DroneGUI)
+			dronePanel = true;
 		
 		this.gui = gui;
 		
@@ -98,13 +105,26 @@ public class CommandPanel extends UpdatePanel{
 			}
 		});
 		
-		JPanel buttons = new JPanel(new GridLayout(3,2));
+		JPanel buttons = new JPanel(new GridLayout(dronePanel ? 4 : 3,2));
 		buttons.add(start);
 		buttons.add(stop);
 		buttons.add(deploy);
 		buttons.add(stopAll);
 		buttons.add(logMessage);
 		buttons.add(sendLog);
+		
+		if(dronePanel) {
+			
+			JButton entitiesButton = new JButton("Deploy Entities");
+			
+			buttons.add(entitiesButton);
+			
+			entitiesButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					deployEntities();
+				}
+			});
+		}
 		
 		topPanel.add(buttons, BorderLayout.SOUTH);
 		
@@ -158,6 +178,13 @@ public class CommandPanel extends UpdatePanel{
 		else
 			m = new BehaviorMessage(className, "", status);
 		
+		deploy(m);
+	}
+	
+	private void deployEntities() {
+		DroneGUI droneGUI = (DroneGUI)gui;
+		LinkedList<Entity> entities = droneGUI.getMapPanel().getEntities();
+		EntitiesMessage m = new EntitiesMessage(entities);
 		deploy(m);
 	}
 	

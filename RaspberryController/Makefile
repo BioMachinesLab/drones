@@ -18,6 +18,9 @@ clean:
 
 drone:
 	sudo java -cp $(CLASSPATH) main.Main
+	
+test:
+	sudo java -cp $(CLASSPATH) main.Test
 
 thymio:
 	java -Djava.library.path=/usr/local/lib/jni/ -cp $(CLASSPATH) main.MainThymio

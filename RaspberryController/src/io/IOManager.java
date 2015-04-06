@@ -5,6 +5,7 @@ import io.input.FakeGPSModuleInput;
 import io.input.FileGPSModuleInput;
 import io.input.GPSModuleInput;
 import io.input.I2CBatteryModuleInput;
+import io.input.I2CCompassLSM303Input;
 import io.input.I2CCompassModuleInput;
 //import io.output.BuzzerOutput;
 //import io.output.BuzzerOutput.BuzzerMode;
@@ -28,9 +29,9 @@ import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CFactory;
+
 import commoninterface.utils.CIArguments;
 import commoninterfaceimpl.RealAquaticDroneCI;
-
 import dataObjects.MotorSpeeds;
 
 public class IOManager {
@@ -42,7 +43,7 @@ public class IOManager {
 
 	// Inputs
 	private GPSModuleInput gpsModule;
-	private I2CCompassModuleInput compassModule;
+	private I2CCompassLSM303Input compassModule;
 	private I2CBatteryModuleInput batteryManager;
 
 	// Outputs
@@ -108,7 +109,7 @@ public class IOManager {
 		return gpsModule;
 	}
 
-	public I2CCompassModuleInput getCompassModule() {
+	public I2CCompassLSM303Input getCompassModule() {
 		return compassModule;
 	}
 
@@ -142,8 +143,8 @@ public class IOManager {
 	private void initInputs() {
 		if (enabledIO.contains("compass") && enabledIO.contains("i2c")) {
 			// Compass Module Init
-			compassModule = new I2CCompassModuleInput(i2cBus);
-			initMessages += "[INIT] I2CCompassModule: "
+			compassModule = new I2CCompassLSM303Input(i2cBus);
+			initMessages += "[INIT] I2CCompassLSM303Input: "
 					+ (compassModule.isAvailable() ? "ok" : "not ok!") + "\n";
 
 			if (compassModule.isAvailable()) {

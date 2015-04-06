@@ -1,6 +1,5 @@
 package environment;
 
-import objects.Waypoint;
 import simulation.Simulator;
 import simulation.environment.Environment;
 import simulation.physicalobjects.LightPole;
@@ -9,6 +8,7 @@ import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
 import commoninterface.AquaticDroneCI;
 import commoninterface.mathutils.Vector2d;
+import commoninterface.objects.Waypoint;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
 
@@ -41,7 +41,7 @@ public class WaypointEnvironment extends Environment{
 			double x = distance > 0 ? distance : width/2/3;
 			double y = 0;
 			LatLon latLon = CoordinateUtilities.cartesianToGPS(new Vector2d(x,y));
-			Waypoint wp = new Waypoint(latLon.getLat(), latLon.getLon(), "wp"+i);
+			Waypoint wp = new Waypoint("wp"+i, latLon);
 			for(Robot r : simulator.getRobots())
 				((AquaticDroneCI)r).getEntities().add(wp);
 			LightPole lp = new LightPole(simulator, "wp"+i, x, y, 1.5);

@@ -17,8 +17,6 @@ import network.MotorConnectionListener;
 import network.broadcast.RealBroadcastHandler;
 import network.messages.Message;
 import network.messages.MessageProvider;
-import objects.Entity;
-
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
@@ -29,9 +27,9 @@ import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
 import commoninterface.network.broadcast.PositionBroadcastMessage;
+import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.jcoord.LatLon;
-
 import dataObjects.GPSData;
 
 public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {

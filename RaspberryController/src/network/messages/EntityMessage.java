@@ -1,6 +1,6 @@
 package network.messages;
 
-import objects.Entity;
+import commoninterface.objects.Entity;
 
 public class EntityMessage extends Message {
 	

@@ -343,7 +343,7 @@ public class CIGraph extends JPanel {
 		g2.setStroke(originalStroke);
 	}
 	
-	public void clear() {
+	public synchronized void clear() {
 		simpleData.clear();
 		listOfData.clear();
 		legends.clear();

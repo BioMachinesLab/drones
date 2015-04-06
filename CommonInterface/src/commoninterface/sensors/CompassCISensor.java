@@ -2,10 +2,10 @@ package commoninterface.sensors;
 
 import java.util.ArrayList;
 
-import objects.Entity;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
+import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
 
 public class CompassCISensor extends CISensor{

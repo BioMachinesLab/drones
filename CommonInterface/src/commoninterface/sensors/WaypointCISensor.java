@@ -2,11 +2,11 @@ package commoninterface.sensors;
 
 import java.util.ArrayList;
 
-import objects.Entity;
-import objects.Waypoint;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
+import commoninterface.objects.Entity;
+import commoninterface.objects.Waypoint;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
@@ -40,7 +40,10 @@ public class WaypointCISensor extends CISensor{
 		
 		for(Entity e : entities) {
 			if(e instanceof Waypoint) {
-				LatLon latLon = new LatLon(e.getLatitude(),e.getLongitude());
+				
+				Waypoint wp = (Waypoint)e;
+				
+				LatLon latLon = wp.getLatLon();
 				
 				double currentDistance = CoordinateUtilities.distanceInMeters(robotLatLon,latLon);
 				

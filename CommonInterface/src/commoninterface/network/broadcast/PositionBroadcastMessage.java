@@ -1,8 +1,8 @@
 package commoninterface.network.broadcast;
 
-import objects.DroneLocation;
 import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
+import commoninterface.objects.RobotLocation;
 import commoninterface.utils.jcoord.LatLon;
 
 public class PositionBroadcastMessage extends BroadcastMessage {
@@ -28,15 +28,17 @@ public class PositionBroadcastMessage extends BroadcastMessage {
 		return null;
 	}
 	
-	public static DroneLocation decode(String address, String message) {
+	public static RobotLocation decode(String address, String message) {
 		String[] split = message.split(MESSAGE_SEPARATOR);
 		
 		if(split.length == 5) {
-			return new DroneLocation(
-				Double.parseDouble(split[2]),
-				Double.parseDouble(split[3]),
-				Double.parseDouble(split[4]),
-				split[1]
+			return new RobotLocation(
+				split[1],
+				new LatLon(
+						Double.parseDouble(split[2]),
+						Double.parseDouble(split[3])
+				),
+				Double.parseDouble(split[4])
 			);
 		}
 		return null;

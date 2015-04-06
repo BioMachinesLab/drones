@@ -16,7 +16,7 @@ import network.MotorConnectionListener;
 import network.broadcast.RealBroadcastHandler;
 import network.messages.Message;
 import network.messages.MessageProvider;
-import objects.Entity;
+
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
 import commoninterface.CISensor;
@@ -25,6 +25,7 @@ import commoninterface.network.NetworkUtils;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
+import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
 
 public class RealThymioCI extends RealRobotCI implements ThymioCI {

@@ -3,11 +3,10 @@ package commoninterface.sensors;
 import java.util.ArrayList;
 import java.util.List;
 
-import objects.Entity;
-
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
 import commoninterface.ThymioCI;
+import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
 
 public class RealThymioIRCISensor extends CISensor {

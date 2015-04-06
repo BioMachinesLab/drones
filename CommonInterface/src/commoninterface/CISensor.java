@@ -3,8 +3,7 @@ package commoninterface;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import objects.Entity;
-
+import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
 
 public abstract class CISensor implements Serializable{
