@@ -130,18 +130,6 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 			
 		} else {
 			
-			byte[] accelData = new byte[6];
-			
-			int r = compass.read(LSM303_REGISTER_ACCEL_OUT_X_L_A | 0x80, accelData, 0, 6);
-			int x = accel12(accelData, 0);
-			int y = accel12(accelData, 2);
-			int z = accel12(accelData, 4);
-			  
-			System.out.println(x+" "+y+" "+z);
-			
-			if(1==1)
-				return;
-		
 			int accelX = readSingleValue(LSM303_REGISTER_ACCEL_OUT_X_L_A);
 			try{Thread.sleep(20);}catch(Exception e){}
 			int accelY = readSingleValue(LSM303_REGISTER_ACCEL_OUT_X_L_A+2);
@@ -155,7 +143,7 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 			int magY = readSingleValue(LSM303_REGISTER_MAG_OUT_X_L_M+2);
 			int magZ = readSingleValue(LSM303_REGISTER_MAG_OUT_X_L_M+4);
 			
-			System.out.println("accel "+accelX+" "+accelY+" "+accelZ);
+//			System.out.println("accel "+accelX+" "+accelY+" "+accelZ);
 //			System.out.println("mag "+magX+" "+magY+" "+magZ);
 			
 			magX-= (min[0] + max[0])/2;
@@ -183,7 +171,6 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 		    if (heading < 0) heading += 360;
 			
 		    this.headingInDegrees = (int)heading;
-//		    System.out.println(headingInDegrees);
 		}
 	}
 	
@@ -271,8 +258,6 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 		int l = compass.read(addr);
 		int h = compass.read(addr+1);
 		
-		System.out.println(l+" "+h);
-		
 		short out = (short)((l | (h << 8)) & 0xFFFF);
 		return out;
 	}
@@ -301,8 +286,9 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 	private static int accel12(byte[] list, int idx)
 	  {
 	    int n = list[idx] | (list[idx+1] << 8); // Low, high bytes
-	    if (n > 32767) 
-	      n -= 65536;                           // 2's complement signed
-	    return n >> 4;                          // 12-bit resolution
+//	    if (n > 32767) 
+//	      n -= 65536;                           // 2's complement signed
+//	    return n >> 4;                          // 12-bit resolution
+	    return n;
 	  }
 }
