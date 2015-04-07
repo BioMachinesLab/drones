@@ -12,7 +12,7 @@ public class FileGPSModuleInput extends GPSModuleInput {
 	private Scanner s = null;
 	
 	public FileGPSModuleInput() {
-		super(true);
+		super(false, true);
 		messageParser = new MessageParser();
 		messageParser.start();
 		

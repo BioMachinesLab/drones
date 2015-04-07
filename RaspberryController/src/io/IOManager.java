@@ -172,7 +172,7 @@ public class IOManager {
 		if (enabledIO.contains("gps")) {
 			try {
 				// GPS Module Init
-				gpsModule = new GPSModuleInput();
+				gpsModule = new GPSModuleInput(enabledIO.contains("gpsExternalAntenna"));
 				initMessages += "[INIT] GPSModule: "
 						+ (gpsModule.isAvailable() ? "ok" : "not ok!") + "\n";
 

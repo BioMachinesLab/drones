@@ -65,15 +65,18 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			.synchronizedList(new ArrayList<String>());
 	protected MessageParser messageParser;
 
+	private boolean externalAntenna = false;
 	protected boolean available = false;
 	private boolean enable = false;
 
-	public GPSModuleInput(boolean fake) {
+	public GPSModuleInput(boolean externalAntenna, boolean fake) {
+		this.externalAntenna = externalAntenna;
 		if (!fake)
 			init();
 	}
 
-	public GPSModuleInput() {
+	public GPSModuleInput(boolean externalAntenna) {
+		this.externalAntenna = externalAntenna;
 		init();
 	}
 
@@ -237,12 +240,12 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		command = "$PMTK220," + ECHO_DELAY + "*";
 		checksum = nmeaUtils.calculateNMEAChecksum(command);
 		command += checksum;
-		if(sendCommandAndCheckAnswer(command, "$PMTK001,220,3*30")){
+		if (sendCommandAndCheckAnswer(command, "$PMTK001,220,3*30")) {
 			System.out
-			.println("[GPS Module] OK! Update echo frequency was succefully changed!");
-		}else{
+					.println("[GPS Module] OK! Update echo frequency was succefully changed!");
+		} else {
 			System.out
-			.println("[GPS Module] Update echo frequency was NOT succefully changed!");
+					.println("[GPS Module] Update echo frequency was NOT succefully changed!");
 		}
 
 		/*
@@ -289,6 +292,12 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			else
 				System.out
 						.println("[GPS Module] SBAS was NOT succefully enabled!");
+		}
+
+		if (externalAntenna) {
+			enableExternalAntenna();
+		} else {
+			disableExternalAntenna();
 		}
 
 		ackResponses.clear();
@@ -415,20 +424,32 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		return sendCommandAndCheckAnswer("$PMTK313,0*2F", "$PMTK001,313,3*31");
 	}
 
-	public boolean standbyGPS()throws InterruptedException{
+	public boolean standbyGPS() throws InterruptedException {
 		if (enable) {
-			return sendCommandAndCheckAnswer("$PMTK161,0*28", "$PMTK001,161,3*36");
+			return sendCommandAndCheckAnswer("$PMTK161,0*28",
+					"$PMTK001,161,3*36");
 		} else {
 			return true;
 		}
 	}
 
-	public boolean wakeUpGPS() throws InterruptedException{
+	public boolean wakeUpGPS() throws InterruptedException {
 		if (!enable) {
-			return sendCommandAndCheckAnswer("$PMTK010,002*2D", "$PMTK001,010,3*31");
+			return sendCommandAndCheckAnswer("$PMTK010,002*2D",
+					"$PMTK001,010,3*31");
 		} else {
 			return true;
 		}
+	}
+
+	public void enableExternalAntenna() throws InterruptedException {
+		// check it here https://github.com/adafruit/Adafruit-GPS-Library/blob/master/Adafruit_GPS.h
+		serialWrite("$PGCMD,33,1*6C\r\n", false);
+	}
+
+	public void disableExternalAntenna() throws InterruptedException {
+		// check it here https://github.com/adafruit/Adafruit-GPS-Library/blob/master/Adafruit_GPS.h
+		serialWrite("$PGCMD,33,0*6D\r\n", false);
 	}
 
 	/*
