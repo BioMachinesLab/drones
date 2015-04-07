@@ -48,9 +48,12 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 	private final static int TARGET_BAUD_RATE = 57600;
 
 	/* In milliseconds on [100,10000] interval */
-	private final static int UPDATE_DELAY = 100;
+	private final static int ECHO_DELAY = 200;
 
-	/* Can only be enabled when update rate is less or equal than 5Hz (200ms) */
+	/* In milliseconds on [200,10000] interval */
+	private final static int FIX_UPDATE = 200;
+
+	/* Can only be enabled when echo rate is less or equal than 5Hz (200ms) */
 	private final static boolean ENABLE_SBAS = true;
 
 	private final static String COM_PORT = Serial.DEFAULT_COM_PORT;
@@ -63,6 +66,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 	protected MessageParser messageParser;
 
 	protected boolean available = false;
+	private boolean enable = false;
 
 	public GPSModuleInput(boolean fake) {
 		if (!fake)
@@ -75,7 +79,6 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 	public void init() {
 		try {
-
 			print("Initializing GPS!", false);
 
 			messageParser = new MessageParser();
@@ -84,7 +87,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			setupGPSReceiver();
 
 			available = true;
-
+			enable = true;
 		} catch (NotActiveException | IllegalArgumentException
 				| InterruptedException e) {
 			System.err.println("[GPS Module] Error initializing GPSModule! ("
@@ -97,7 +100,6 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 	}
 
 	protected void createSerial(final int baudrate) {
-
 		serial = SerialFactory.createInstance();
 
 		serial.addListener(new SerialDataEventListener() {
@@ -187,13 +189,17 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 	@SuppressWarnings("unused")
 	private void setupGPSReceiver() throws NotActiveException,
 			InterruptedException, IllegalArgumentException {
-		if (UPDATE_DELAY < 100 || UPDATE_DELAY > 10000) {
+		if (ECHO_DELAY < 100 || ECHO_DELAY > 10000) {
 			throw new IllegalArgumentException(
-					"[GPS Module] Frequency must be in [100,10000] interval!");
+					"[GPS Module] Echo frequency must be in [100,10000] interval!");
+		}
+
+		if (FIX_UPDATE < 200 || FIX_UPDATE > 10000) {
+			throw new IllegalArgumentException(
+					"[GPS Module] Fix update frequency must be in [200,10000] interval!");
 		}
 
 		createSerial(DEFAULT_BAUD_RATE);
-
 		Thread.sleep(1000);
 
 		/*
@@ -208,7 +214,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		Thread.sleep(1000);
 
 		/*
-		 * Closing old velocity serial
+		 * Closing old velocity serial stream and open a new with the new
+		 * velocity
 		 */
 		try {
 			serial.flush();
@@ -220,70 +227,58 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		}
 
 		Thread.sleep(1000);
-
 		createSerial(TARGET_BAUD_RATE);
-
-		print("Started new baud rate!", false);
+		print("[GPS Module] Started new baud rate!", false);
 		Thread.sleep(1000);
 
 		/*
-		 * Change Update Frequency
+		 * Change Information Echo Frequency
 		 */
-		command = "$PMTK220," + UPDATE_DELAY + "*";
+		command = "$PMTK220," + ECHO_DELAY + "*";
 		checksum = nmeaUtils.calculateNMEAChecksum(command);
-		command += checksum + "\r\n";
-		serialWrite(command, true);
-		print("[COMMAND] " + command, false);
-
-		Thread.sleep(3000);
-
-		// Check if the command was successfully executed
-		String ack1 = getStringStartWithFromList("$PMTK001,220,3*30");
-		if (ack1 == null) {
+		command += checksum;
+		if(sendCommandAndCheckAnswer(command, "$PMTK001,220,3*30")){
 			System.out
-					.println("[GPS Module] Update frequency was NOT succefully changed!");
+			.println("[GPS Module] OK! Update echo frequency was succefully changed!");
+		}else{
+			System.out
+			.println("[GPS Module] Update echo frequency was NOT succefully changed!");
+		}
+
+		/*
+		 * Change Fix update frequency
+		 */
+		command = "$PMTK300," + FIX_UPDATE + ",0,0,0,0*";
+		checksum = nmeaUtils.calculateNMEAChecksum(command);
+		command += checksum;
+		if (sendCommandAndCheckAnswer(command, "$PMTK001,300,3*33")) {
+			System.out
+					.println("[GPS Module] OK! Update fix frequency was succefully changed!");
 		} else {
 			System.out
-					.println("[GPS Module] OK! Update frequency was succefully changed!");
-			ackResponses.remove(ack1);
+					.println("[GPS Module] Update fix frequency was NOT succefully changed!");
 		}
 
 		/*
 		 * Set navigation speed threshold to 0
 		 */
-		command = "$PMTK397,0*23\r\n";
-		serialWrite(command, true);
-
-		Thread.sleep(3000);
-
-		// Check if the command was successfully executed
-		String ack2 = getStringStartWithFromList("$PMTK001,397,3*3D");
-		if (ack2 == null) {
-			System.out
-					.println("[GPS Module] Navigation speed threshold was NOT succefully changed!");
-		} else {
+		if (sendCommandAndCheckAnswer("$PMTK397,0*23", "$PMTK001,397,3*3D")) {
 			System.out
 					.println("[GPS Module] OK! Navigation speed threshold was succefully changed!");
-			ackResponses.remove(ack2);
+		} else {
+			System.out
+					.println("[GPS Module] Navigation speed threshold was NOT succefully changed!");
 		}
 
 		/*
 		 * Disable always locate mode
 		 */
-		command = "$PMTK225,0*2B\r\n";
-		serialWrite(command, false);
-
-		Thread.sleep(3000);
-
-		// Check if the command was successfully executed
-		String ack3 = getStringStartWithFromList("$PMTK001,225,3*35");
-		if (ack3 == null) {
-			System.out
-					.println("[GPS Module] Always locate mode was NOT succefully disabled!");
-		} else {
+		if (sendCommandAndCheckAnswer("$PMTK225,0*2B\r\n", "$PMTK001,225,3*35")) {
 			System.out
 					.println("[GPS Module] OK! Always locate mode was succefully disabled!");
-			ackResponses.remove(ack3);
+		} else {
+			System.out
+					.println("[GPS Module] Always locate mode was NOT succefully disabled!");
 		}
 
 		if (ENABLE_SBAS) {
@@ -297,6 +292,20 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		}
 
 		ackResponses.clear();
+	}
+
+	private boolean sendCommandAndCheckAnswer(String command, String answer)
+			throws InterruptedException {
+		serialWrite(command + "\r\n", false);
+
+		Thread.sleep(1000);
+		String ack = getStringStartWithFromList(answer);
+		if (ack != null) {
+			ackResponses.remove(ack);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	private String getStringStartWithFromList(String str) {
@@ -368,128 +377,58 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 	}
 
 	public boolean startLog() throws InterruptedException {
-		serialWrite("$PMTK185,0*22\r\n", false);
-
-		Thread.sleep(1000);
-		int index = ackResponses.lastIndexOf("$PMTK001,185,3*3C");
-		if (index != -1) {
-			ackResponses.remove(index);
-			return true;
-		}
-
-		return false;
-
+		return sendCommandAndCheckAnswer("$PMTK185,0*22", "$PMTK001,185,3*3C");
 	}
 
 	public boolean stopLog() throws InterruptedException {
-		serialWrite("$PMTK185,1*23\r\n", false);
-
-		Thread.sleep(1000);
-		int index = ackResponses.lastIndexOf("$PMTK001,185,3*3C");
-		if (index != -1) {
-			ackResponses.remove(index);
-			return true;
-		}
-
-		return false;
+		return sendCommandAndCheckAnswer("$PMTK185,1*23", "$PMTK001,185,3*3C");
 	}
 
 	public boolean eraseLog() throws InterruptedException {
-		serialWrite("$PMTK184,1*22\r\n", false);
-
-		Thread.sleep(1000);
-		int index = ackResponses.lastIndexOf("$PMTK001,184,3*3D");
-		if (index != -1) {
-			ackResponses.remove(index);
-			return true;
-		}
-
-		return false;
+		return sendCommandAndCheckAnswer("$PMTK184,1*22", "$PMTK001,184,3*3D");
 	}
 
 	public boolean enableAlwaysLocateStandby() throws InterruptedException {
-		serialWrite("$PMTK225,8*23\r\n", false);
-
-		Thread.sleep(1000);
-		int index = ackResponses.lastIndexOf("$PMTK001,225,3*35");
-		if (index != -1) {
-			ackResponses.remove(index);
-			return true;
-		}
-
-		return false;
+		return sendCommandAndCheckAnswer("$PMTK225,8*23", "$PMTK001,225,3*35");
 	}
 
 	public boolean disableAlwaysLocateStandby() throws InterruptedException {
-		serialWrite("$PMTK225,0*2B\r\n", false);
-
-		Thread.sleep(1000);
-		int index = ackResponses.lastIndexOf("$PMTK001,225,3*35");
-		if (index != -1) {
-			ackResponses.remove(index);
-			return true;
-		}
-
-		return false;
+		return sendCommandAndCheckAnswer("$PMTK225,0*2B", "$PMTK001,225,3*35");
 	}
 
 	public boolean enableAIC() throws InterruptedException {
-		serialWrite("$PMTK286,1*23\r\n", false);
-
-		Thread.sleep(1000);
-		int index = ackResponses.lastIndexOf("$PMTK001,286,3*3C");
-		if (index != -1) {
-			ackResponses.remove(index);
-			return true;
-		}
-
-		return false;
+		return sendCommandAndCheckAnswer("$PMTK286,1*23", "$PMTK001,286,3*3C");
 	}
 
 	public boolean disableAIC() throws InterruptedException {
-		serialWrite("$PMTK286,0*23\r\n", false);
-
-		Thread.sleep(1000);
-		int index = ackResponses.lastIndexOf("$PMTK001,286,3*3C");
-		if (index != -1) {
-			ackResponses.remove(index);
-			return true;
-		}
-
-		return false;
+		return sendCommandAndCheckAnswer("$PMTK286,0*23", "$PMTK001,286,3*3C");
 	}
 
 	public boolean enableSBAS() throws InterruptedException {
-		serialWrite("$PMTK313,1*2E\r\n", false);
 		// serial.write("$PMTK513,1*28\r\n"); // DT Command. Which is the
 		// difference??
-
-		Thread.sleep(3000);
-
-		// Check if the command was successfully executed
-		String ack = getStringStartWithFromList("$PMTK001,313,3*31");
-		if (ack != null) {
-			ackResponses.remove(ack);
-			return true;
-		}
-
-		return false;
+		return sendCommandAndCheckAnswer("$PMTK313,1*2E", "$PMTK001,313,3*31");
 	}
 
 	public boolean disableSBAS() throws InterruptedException {
-		serialWrite("$PMTK313,0*2F\r\n", false);
 		// serial.write("$PMTK513,0*29\r\n"); // DT Command. Which is the
+		return sendCommandAndCheckAnswer("$PMTK313,0*2F", "$PMTK001,313,3*31");
+	}
 
-		Thread.sleep(1000);
-
-		// Check if the command was successfully executed
-		String ack = getStringStartWithFromList("$PMTK001,313,3*31");
-		if (ack != null) {
-			String[] str = ack.split(",");
-			ackResponses.remove(Integer.parseInt(str[1]));
+	public boolean standbyGPS()throws InterruptedException{
+		if (enable) {
+			return sendCommandAndCheckAnswer("$PMTK161,0*28", "$PMTK001,161,3*36");
+		} else {
+			return true;
 		}
+	}
 
-		return false;
+	public boolean wakeUpGPS() throws InterruptedException{
+		if (!enable) {
+			return sendCommandAndCheckAnswer("$PMTK010,002*2D", "$PMTK001,010,3*31");
+		} else {
+			return true;
+		}
 	}
 
 	/*
