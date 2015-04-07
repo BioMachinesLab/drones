@@ -9,31 +9,6 @@
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/Behaviors"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/CommonInterface"/>
-	<classpathentry kind="lib" path="/Pi4J_IT_Version/lib/pi4j-core.jar" sourcepath="/Pi4J_IT_Version/lib/pi4j-core-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/Pi4J_IT_Version/lib/pi4j-core-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="/Pi4J_IT_Version/lib/pi4j-device.jar" sourcepath="/Pi4J_IT_Version/lib/pi4j-device-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/Pi4J_IT_Version/lib/pi4j-device-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="/Pi4J_IT_Version/lib/pi4j-example.jar" sourcepath="/Pi4J_IT_Version/lib/pi4j-example-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/Pi4J_IT_Version/lib/pi4j-example-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="/Pi4J_IT_Version/lib/pi4j-gpio-extension.jar" sourcepath="/Pi4J_IT_Version/lib/pi4j-gpio-extension-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/Pi4J_IT_Version/lib/pi4j-gpio-extension-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="/Pi4J_IT_Version/lib/pi4j-service.jar" sourcepath="/Pi4J_IT_Version/lib/pi4j-service-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/Pi4J_IT_Version/lib/pi4j-service-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="lib/cgi-0.6.jar"/>
 	<classpathentry kind="lib" path="lib/dbus-java-bin-2.7.jar"/>
 	<classpathentry kind="lib" path="lib/dbus-java-viewer-2.7.jar"/>
@@ -43,5 +18,30 @@
 	<classpathentry kind="lib" path="lib/io-0.1.jar"/>
 	<classpathentry kind="lib" path="lib/libdbus-java-2.7.jar"/>
 	<classpathentry kind="lib" path="lib/unix-0.5.jar"/>
+	<classpathentry kind="lib" path="/Pi4J_Libraries/lib/pi4j-core.jar" sourcepath="/Pi4J_Libraries/lib/pi4j-core-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/Pi4J_IT_Version/lib/pi4j-core-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/Pi4J_Libraries/lib/pi4j-device.jar" sourcepath="/Pi4J_Libraries/lib/pi4j-device-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/Pi4J_IT_Version/lib/pi4j-device-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/Pi4J_Libraries/lib/pi4j-example.jar" sourcepath="/Pi4J_Libraries/lib/pi4j-example-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/Pi4J_IT_Version/lib/pi4j-example-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/Pi4J_Libraries/lib/pi4j-gpio-extension.jar" sourcepath="/Pi4J_Libraries/lib/pi4j-gpio-extension-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/Pi4J_IT_Version/lib/pi4j-gpio-extension-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/Pi4J_Libraries/lib/pi4j-service.jar" sourcepath="/Pi4J_Libraries/lib/pi4j-service-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/Pi4J_IT_Version/lib/pi4j-service-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

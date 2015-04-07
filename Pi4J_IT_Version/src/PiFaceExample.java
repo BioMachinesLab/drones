@@ -11,7 +11,7 @@
  * this project can be found here:  http://www.pi4j.com/
  * **********************************************************************
  * %%
- * Copyright (C) 2012 - 2014 Pi4J
+ * Copyright (C) 2012 - 2015 Pi4J
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import com.pi4j.device.piface.PiFaceLed;
 import com.pi4j.device.piface.PiFaceRelay;
 import com.pi4j.device.piface.PiFaceSwitch;
 import com.pi4j.device.piface.impl.PiFaceDevice;
-import com.pi4j.wiringpi.Spi;
+import com.pi4j.io.spi.SpiChannel;
 
 import java.io.IOException;
 
@@ -57,7 +57,7 @@ public class PiFaceExample {
         System.out.println("<--Pi4J--> Pi-Face GPIO Example ... started.");
         
         // create the Pi-Face controller
-        final PiFace piface = new PiFaceDevice(PiFace.DEFAULT_ADDRESS, Spi.CHANNEL_0);
+        final PiFace piface = new PiFaceDevice(PiFace.DEFAULT_ADDRESS, SpiChannel.CS0);
 
         // -----------------------------------------------------------------
         // create a button listener for SWITCH #1
