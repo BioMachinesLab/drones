@@ -1,8 +1,9 @@
+import java.io.IOException;
+
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialDataEvent;
-import com.pi4j.io.serial.SerialDataListener;
+import com.pi4j.io.serial.SerialDataEventListener;
 import com.pi4j.io.serial.SerialFactory;
-import com.pi4j.io.serial.SerialPortException;
 
 /**
  * This example code demonstrates how to perform serial communications using the
@@ -34,13 +35,20 @@ public class SerialReadingExample {
 		final Serial serial = SerialFactory.createInstance();
 
 		// create and register the serial data listener
-		serial.addListener(new SerialDataListener() {
+		serial.addListener(new SerialDataEventListener() {
+
 			@Override
 			public void dataReceived(SerialDataEvent event) {
-				// print out the data received to the console
-				if (!printed) {
-					System.out.print(event.getData());
-					printed = true;
+				try {
+					// print out the data received to the console
+					if (!printed) {
+						System.out.print(event.getAsciiString());
+						printed = true;
+					}
+				} catch (IOException e) {
+					System.err
+							.println("Error while reading the serial stream as ASCII String ("
+									+ e.getMessage() + ")");
 				}
 			}
 		});
@@ -49,7 +57,7 @@ public class SerialReadingExample {
 			// open the default serial port provided on the GPIO header
 			serial.open(Serial.DEFAULT_COM_PORT, 9600);
 
-		} catch (SerialPortException ex) {
+		} catch (IOException ex) {
 			System.out
 					.println(" ==>> SERIAL SETUP FAILED : " + ex.getMessage());
 			return;

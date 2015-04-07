@@ -1,6 +1,8 @@
+import java.io.IOException;
+
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialDataEvent;
-import com.pi4j.io.serial.SerialDataListener;
+import com.pi4j.io.serial.SerialDataEventListener;
 import com.pi4j.io.serial.SerialFactory;
 
 public class SerialReaderWriter {
@@ -12,20 +14,37 @@ public class SerialReaderWriter {
 	public SerialReaderWriter() throws InterruptedException {
 		serial = SerialFactory.createInstance();
 
-		serial.addListener(new SerialDataListener() {
+		serial.addListener(new SerialDataEventListener() {
+
 			@Override
 			public void dataReceived(SerialDataEvent event) {
-				System.out.print(event.getData());
+				try {
+					System.out.print(event.getAsciiString());
+				} catch (IOException e) {
+					System.err
+							.println("Error while reading the serial stream as ASCII String ("
+									+ e.getMessage() + ")");
+				}
 			}
 		});
 
 		System.out.println("Initializing GPS!");
-		serial.open(COM_PORT, BAUD_RATE);
+		try {
+			serial.open(COM_PORT, BAUD_RATE);
+		} catch (IOException e) {
+			System.err.println("Error while opening serial stream ("
+					+ e.getMessage() + ")");
+		}
 
 		Thread.sleep(5000);
 
 		System.out.println("[Writting....]");
-		serial.write("$PMTK251,57600*2C\r\n");
+		try {
+			serial.write("$PMTK251,57600*2C\r\n");
+		} catch (IOException e) {
+			System.err.println("Error while writing to serial stream ("
+					+ e.getMessage() + ")");
+		}
 
 		Thread.sleep(5000);
 	}
