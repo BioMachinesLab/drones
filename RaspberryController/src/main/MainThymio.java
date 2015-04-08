@@ -12,8 +12,7 @@ public class MainThymio {
 
 	public static void main(String[] args) {
 		RealThymioCI thymio = new RealThymioCI();
-		CIStdOutLogger logger = new CIStdOutLogger(thymio);
-		thymio.begin(new CIArguments(""),logger);
+		thymio.begin(new CIArguments(""));
 		thymio.start();
 		
 		try {

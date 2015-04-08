@@ -9,11 +9,13 @@ import network.messages.BehaviorMessage;
 import network.messages.EntitiesMessage;
 import network.messages.EntityMessage;
 import network.messages.InformationRequest;
+import network.messages.LogMessage;
 import network.messages.Message;
 import network.messages.MessageProvider;
 import network.messages.NeuralActivationsMessage;
 import network.messages.SystemStatusMessage;
 import simpletestbehaviors.ControllerCIBehavior;
+
 import commoninterface.CIBehavior;
 import commoninterface.RealRobotCI;
 import commoninterface.RobotCI;
@@ -24,13 +26,14 @@ import commoninterface.objects.GeoFence;
 import commoninterface.objects.Waypoint;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.ClassLoadHelper;
+import commoninterface.utils.RobotLogger;
 
 public class ControllerMessageHandler extends MessageHandler {
 	
-	private RealRobotCI drone;
+	private RealRobotCI robot;
 	
 	public ControllerMessageHandler(RealRobotCI c) {
-		this.drone = c;
+		this.robot = c;
 	}
 	
 	@Override
@@ -39,13 +42,14 @@ public class ControllerMessageHandler extends MessageHandler {
 		Message response = null;
 		
 		if(request instanceof InformationRequest && ((InformationRequest)request).getMessageTypeQuery().equals(InformationRequest.MessageType.NEURAL_ACTIVATIONS)){
-			if (drone.getActiveBehavior() instanceof ControllerCIBehavior)
+			if (robot.getActiveBehavior() instanceof ControllerCIBehavior)
 				response = createNeuralActivationMessage();
 			
 		}else{
 			
-			for (MessageProvider p : drone.getMessageProviders()) {
+			for (MessageProvider p : robot.getMessageProviders()) {
 			response = p.getMessage(request);
+			
 			if (response != null)
 				break;
 			}
@@ -63,13 +67,14 @@ public class ControllerMessageHandler extends MessageHandler {
 			}
 			
 			//TODO: Pass the FileLogger to the RobotCI 
-//			if(response == null && m instanceof LogMessage) {
-//				LogMessage lm = (LogMessage)m;
-//				Logger logger = drone.getIOManager().getFileLogger();
-//				
-//				if(logger != null)
-//					logger.addLog(lm.getLog());
-//			}
+			if(response == null && m instanceof LogMessage) {
+				LogMessage lm = (LogMessage)m;
+				
+				RobotLogger logger = robot.getLogger();
+				
+				if(logger != null)
+					logger.logMessage(lm.getLog());
+			}
 		}
 		
 		if (response == null) {
@@ -91,7 +96,7 @@ public class ControllerMessageHandler extends MessageHandler {
 
 	@SuppressWarnings("unchecked")
 	private NeuralActivationsMessage createNeuralActivationMessage() {
-		ArrayList<?>[] info = ((ControllerCIBehavior)drone.getActiveBehavior()).getNeuralNetworkActivations();
+		ArrayList<?>[] info = ((ControllerCIBehavior)robot.getActiveBehavior()).getNeuralNetworkActivations();
 		
 		ArrayList<String> inputsTitles = (ArrayList<String>) info[0];
 		ArrayList<String> outputsTitles = (ArrayList<String>) info[1];
@@ -105,11 +110,11 @@ public class ControllerMessageHandler extends MessageHandler {
 		EntityMessage wm = (EntityMessage)m;
 		Entity e = wm.getEntity();
 		
-		if(drone.getEntities().contains(e)) {
-			drone.getEntities().remove(e);
+		if(robot.getEntities().contains(e)) {
+			robot.getEntities().remove(e);
 		}
 		
-		drone.getEntities().add(e);
+		robot.getEntities().add(e);
 		return m;
 	}
 	
@@ -117,7 +122,7 @@ public class ControllerMessageHandler extends MessageHandler {
 		EntitiesMessage wm = (EntitiesMessage)m;
 		LinkedList<Entity> entities = wm.getEntities();
 		
-		Iterator<Entity> i = drone.getEntities().iterator();
+		Iterator<Entity> i = robot.getEntities().iterator();
 		
 		while(i.hasNext()) {
 			Entity e = i.next();
@@ -127,7 +132,7 @@ public class ControllerMessageHandler extends MessageHandler {
 				i.remove();
 		}
 		
-		drone.getEntities().addAll(entities);
+		robot.getEntities().addAll(entities);
 		return m;
 	}
 	
@@ -145,13 +150,13 @@ public class ControllerMessageHandler extends MessageHandler {
      			
      			Class<CIBehavior> chosenClass = (Class<CIBehavior>)classes.get(0);
          		Constructor<CIBehavior> constructor = chosenClass.getConstructor(new Class[] { CIArguments.class, RobotCI.class});
-				CIBehavior ctArgs = constructor.newInstance(new Object[] { new CIArguments(bm.getArguments()), drone });
-				drone.startBehavior(ctArgs);
+				CIBehavior ctArgs = constructor.newInstance(new Object[] { new CIArguments(bm.getArguments()), robot });
+				robot.startBehavior(ctArgs);
      		} catch(ReflectiveOperationException e) {
      			e.printStackTrace();
      		}
      	 } else {
-     		 drone.stopActiveBehavior();
+     		 robot.stopActiveBehavior();
      	 }
      	 bm.setArguments("");
      	 return bm;

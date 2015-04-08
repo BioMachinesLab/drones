@@ -5,13 +5,15 @@ import java.util.List;
 
 import network.messages.Message;
 import network.messages.MessageProvider;
-
 import commoninterface.CIBehavior;
 import commoninterface.RobotCI;
 import commoninterface.network.ConnectionHandler;
 import commoninterface.objects.Entity;
+import commoninterface.utils.RobotLogger;
 
 public abstract class RealRobotCI extends Thread implements RobotCI {
+	
+	protected RobotLogger logger;
 
 	public abstract void reset();
 	
@@ -30,4 +32,8 @@ public abstract class RealRobotCI extends Thread implements RobotCI {
 	public abstract String getStatus();
 	
 	public abstract CIBehavior getActiveBehavior();
+	
+	public RobotLogger getLogger() {
+		return logger;
+	}
 }

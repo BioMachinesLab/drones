@@ -47,7 +47,6 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 	private ArrayList<CISensor> cisensors = new ArrayList<CISensor>();
 
 	private CIArguments args;
-	private CILogger logger;
 	private long startTimeInMillis;
 	private double timestep = 0;
 	private double behaviorTimeStep = 0;
@@ -60,10 +59,9 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
 	
 	@Override
-	public void begin(CIArguments args, CILogger logger) {
+	public void begin(CIArguments args) {
 		this.startTimeInMillis = System.currentTimeMillis();
 		this.args = args;
-		this.logger = logger;
 
 		addShutdownHooks();
 

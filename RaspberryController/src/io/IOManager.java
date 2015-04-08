@@ -6,30 +6,22 @@ import io.input.FileGPSModuleInput;
 import io.input.GPSModuleInput;
 import io.input.I2CBatteryModuleInput;
 import io.input.I2CCompassLSM303Input;
-import io.input.I2CCompassModuleInput;
-//import io.output.BuzzerOutput;
-//import io.output.BuzzerOutput.BuzzerMode;
 import io.output.ControllerOutput;
 import io.output.DebugLedsOutput;
 import io.output.ReversableESCManagerOutputV2;
 import io.output.ServoOutput;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Scanner;
-
 import network.messages.MotorMessage;
-import utils.Logger;
 import behaviors.CalibrationCIBehavior;
-
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CFactory;
-
 import commoninterface.utils.CIArguments;
 import commoninterfaceimpl.RealAquaticDroneCI;
 import dataObjects.MotorSpeeds;
@@ -62,8 +54,6 @@ public class IOManager {
 
 	private LinkedList<String> enabledIO = new LinkedList<String>();
 
-	private Logger fileLogger;
-
 	public IOManager(RealAquaticDroneCI drone) {
 		this.drone = drone;
 		motorSpeeds = new MotorSpeeds();
@@ -75,8 +65,7 @@ public class IOManager {
 		initInputs();
 
 		if (enabledIO.contains("filelogger")) {
-			fileLogger = new Logger(drone);
-			fileLogger.start();
+			drone.startLogger();
 		}
 
 	}
@@ -299,9 +288,6 @@ public class IOManager {
 		if (escManager != null)
 			shutdownMotors();
 
-		if (fileLogger != null)
-			fileLogger.interrupt();
-
 		if (compassModule != null)
 			compassModule.interrupt();
 
@@ -360,11 +346,4 @@ public class IOManager {
 		return debugLeds;
 	}
 	
-	public Logger getFileLogger() {
-		return fileLogger;
-	}
-
-	// public BuzzerOutput getBuzzer() {
-	// return buzzer;
-	// }
 }

@@ -11,7 +11,7 @@ public interface RobotCI {
 	/**
 	 * Start the drone hardware
 	 */
-	public void    begin(CIArguments args, CILogger logger);
+	public void    begin(CIArguments args);
 	
 	/**
 	 * Stop the drone hardware
