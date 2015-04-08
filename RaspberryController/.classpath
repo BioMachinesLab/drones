@@ -43,5 +43,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/Pi4J_IT_Version/lib/pi4j-service-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/Pi4J_Libraries"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
