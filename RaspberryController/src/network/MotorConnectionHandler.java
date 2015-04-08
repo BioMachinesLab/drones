@@ -9,7 +9,9 @@ import java.net.Socket;
 import network.messages.Message;
 import network.messages.MotorMessage;
 
-import commoninterfaceimpl.RealRobotCI;
+import commoninterface.RealRobotCI;
+import commoninterface.network.ConnectionHandler;
+import commoninterface.network.ConnectionListener;
 
 public class MotorConnectionHandler extends ConnectionHandler {
 	

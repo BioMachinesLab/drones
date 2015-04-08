@@ -1,4 +1,4 @@
-package utils;
+package commoninterface.utils;
 
 import java.util.Scanner;
 
@@ -7,7 +7,7 @@ import java.util.Scanner;
  * 
  * @author VCosta
  */
-public class NMEA_Utils {
+public class NMEAUtils {
 	/**
 	 * Main function to call the desired function
 	 * 
@@ -15,7 +15,7 @@ public class NMEA_Utils {
 	 */
 	public static void main(String[] args) {
 		// new NMEAUtils().calculateNMEAChecksum();
-		new NMEA_Utils().checkNMEAChecksum();
+		new NMEAUtils().checkNMEAChecksum();
 	}
 
 	/**

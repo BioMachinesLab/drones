@@ -1,5 +1,6 @@
 package network.messages;
 
+import network.messages.Message;
 import dataObjects.BatteryStatus;
 
 public class BatteryMessage extends Message {

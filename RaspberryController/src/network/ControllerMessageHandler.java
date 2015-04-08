@@ -14,13 +14,16 @@ import network.messages.MessageProvider;
 import network.messages.NeuralActivationsMessage;
 import network.messages.SystemStatusMessage;
 import simpletestbehaviors.ControllerCIBehavior;
+
 import commoninterface.CIBehavior;
+import commoninterface.RealRobotCI;
 import commoninterface.RobotCI;
+import commoninterface.network.ConnectionHandler;
+import commoninterface.network.MessageHandler;
 import commoninterface.objects.Entity;
 import commoninterface.objects.GeoFence;
 import commoninterface.objects.Waypoint;
 import commoninterface.utils.CIArguments;
-import commoninterfaceimpl.RealRobotCI;
 
 public class ControllerMessageHandler extends MessageHandler {
 	

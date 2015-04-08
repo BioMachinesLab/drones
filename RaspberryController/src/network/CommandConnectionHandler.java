@@ -9,7 +9,10 @@ import network.messages.BehaviorMessage;
 import network.messages.EntitiesMessage;
 import network.messages.LogMessage;
 import network.messages.Message;
-import commoninterfaceimpl.RealRobotCI;
+
+import commoninterface.RealRobotCI;
+import commoninterface.network.ConnectionHandler;
+import commoninterface.network.ConnectionListener;
 
 public class CommandConnectionHandler extends ConnectionHandler {
 	

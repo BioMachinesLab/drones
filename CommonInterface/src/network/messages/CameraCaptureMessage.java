@@ -1,5 +1,7 @@
 package network.messages;
 
+import network.messages.Message;
+
 
 public class CameraCaptureMessage extends Message {
 

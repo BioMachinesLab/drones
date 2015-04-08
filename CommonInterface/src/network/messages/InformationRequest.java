@@ -1,5 +1,7 @@
 package network.messages;
 
+import network.messages.Message;
+
 public class InformationRequest extends Message {
 	
 	public static enum MessageType {

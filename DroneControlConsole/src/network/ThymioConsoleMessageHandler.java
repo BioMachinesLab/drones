@@ -9,6 +9,9 @@ import network.messages.NeuralActivationsMessage;
 import network.messages.SystemStatusMessage;
 import network.messages.ThymioReadingsMessage;
 
+import commoninterface.network.ConnectionHandler;
+import commoninterface.network.MessageHandler;
+
 public class ThymioConsoleMessageHandler extends MessageHandler {
 	
 	private ThymioControlConsole console;

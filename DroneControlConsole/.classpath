@@ -18,7 +18,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/JMapViewer.jar" sourcepath="/Users/robot/Downloads/jmapviewer-1.06"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/RaspberryController"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Behaviors"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/CommonInterface"/>
 	<classpathentry kind="lib" path="/Pi4J_Libraries/lib/pi4j-core-javadoc.jar"/>

@@ -1,9 +1,9 @@
 package io.output;
 
 import java.io.IOException;
-
 import network.messages.MotorMessage;
-import utils.Math_Utils;
+import commoninterface.utils.MathUtils;
+
 import dataObjects.MotorSpeeds;
 
 public class ESCManagerOutput extends Thread implements
@@ -61,7 +61,7 @@ public class ESCManagerOutput extends Thread implements
 			if (value == 0) {
 				L_value = STOP_L_VALUE;
 			} else {
-				L_value = (int) Math_Utils.map(value, 0, 1, MIN_L_VALUE,
+				L_value = (int) MathUtils.map(value, 0, 1, MIN_L_VALUE,
 						MAX_L_VALUE);
 			}
 			break;
@@ -69,7 +69,7 @@ public class ESCManagerOutput extends Thread implements
 			if (value == 0) {
 				R_value = STOP_R_VALUE;
 			} else {
-				R_value = (int) Math_Utils.map(value, 0, 1, MIN_R_VALUE,
+				R_value = (int) MathUtils.map(value, 0, 1, MIN_R_VALUE,
 						MAX_R_VALUE);
 			}
 			break;

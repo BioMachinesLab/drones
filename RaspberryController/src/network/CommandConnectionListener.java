@@ -3,7 +3,9 @@ package network;
 import java.io.IOException;
 import java.net.Socket;
 
-import commoninterfaceimpl.RealRobotCI;
+import commoninterface.RealRobotCI;
+import commoninterface.network.ConnectionHandler;
+import commoninterface.network.ConnectionListener;
 
 public class CommandConnectionListener extends ConnectionListener {
 	

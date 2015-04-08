@@ -1,5 +1,7 @@
 package network.messages;
 
+import network.messages.Message;
+
 public class CompassMessage extends Message {
 	private static final long serialVersionUID = 7925900141790370630L;
 	private int heading;

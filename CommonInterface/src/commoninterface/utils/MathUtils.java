@@ -1,6 +1,6 @@
-package utils;
+package commoninterface.utils;
 
-public class Math_Utils {
+public class MathUtils {
 	/**
 	 * Re-maps a number from one range to another. That is, a value of fromLow
 	 * would get mapped to toLow, a value of fromHigh to toHigh, values

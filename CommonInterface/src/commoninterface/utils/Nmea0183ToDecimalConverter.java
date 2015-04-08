@@ -1,4 +1,4 @@
-package utils;
+package commoninterface.utils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

@@ -1,7 +1,5 @@
 package gui.panels;
 
-import io.input.I2CBatteryModuleInput;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -45,6 +43,9 @@ public class BatteryPanel extends UpdatePanel {
 	private final static double TEMPERATURE_NORMAL = 30;
 	private final static double TEMPERATURE_WARNING = 40;
 	private final static double TEMPERATURE_DANGER = 50;
+	
+	public final static int VOLTAGE_MULTIPLIER = 1000;
+	public final static int TEMPERATURE_MULTIPLIER = 100;
 
 	private UpdateThread thread;
 	private long sleepTime = 10000;
@@ -97,8 +98,8 @@ public class BatteryPanel extends UpdatePanel {
 		JPanel jProgressBarsPanel = new JPanel(new GridLayout(1, CELL_QUANTITY));
 		for (int i = 0; i < CELL_QUANTITY; i++) {
 			voltageMeters[i] = new JProgressBar(
-					(int) (MIN_VOLTAGE * I2CBatteryModuleInput.VOLTAGE_MULTIPLIER),
-			     		(int) (MAX_VOLTAGE * I2CBatteryModuleInput.VOLTAGE_MULTIPLIER));
+					(int) (MIN_VOLTAGE * VOLTAGE_MULTIPLIER),
+			     		(int) (MAX_VOLTAGE * VOLTAGE_MULTIPLIER));
 			voltageMeters[i].setUI(new MyProgressUI());
 
 			voltageMeters[i].setPreferredSize(new Dimension(50, 10));
@@ -144,7 +145,7 @@ public class BatteryPanel extends UpdatePanel {
 			g.fill3DRect(vr.x, vr.y, vr.width + 1, vr.height, false);
 
 			// Set Correct color according to voltage
-			double voltage = ((double) progressBar.getValue() / I2CBatteryModuleInput.VOLTAGE_MULTIPLIER);
+			double voltage = ((double) progressBar.getValue() / VOLTAGE_MULTIPLIER);
 			
 //			System.out.println("Voltage: " + voltage);
 			if (voltage > GOOD_VOLTAGE_THRESHOLD)
@@ -216,7 +217,7 @@ public class BatteryPanel extends UpdatePanel {
 
 		for (int i = 0; i < CELL_QUANTITY; i++) {
 			voltageMeters[i]
-					.setValue((int) (batteryStatus.getCellsVoltages()[i] * I2CBatteryModuleInput.VOLTAGE_MULTIPLIER));
+					.setValue((int) (batteryStatus.getCellsVoltages()[i] * VOLTAGE_MULTIPLIER));
 		}
 		
 		double temperatureVal = batteryStatus.getBatteryTemperature();

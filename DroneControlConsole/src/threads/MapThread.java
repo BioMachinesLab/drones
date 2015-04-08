@@ -1,9 +1,9 @@
 package threads;
 
+import network.messages.EntityMessage;
 import gui.panels.UpdatePanel;
 import gui.panels.map.MapPanel;
 import main.DroneControlConsole;
-import network.messages.EntityMessage;
 
 public class MapThread extends UpdateThread {
 	

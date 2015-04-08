@@ -1,7 +1,6 @@
 package main;
 
 import java.util.Scanner;
-
 import commoninterface.CILogger;
 import commoninterface.CIStdOutLogger;
 import commoninterface.utils.CIArguments;

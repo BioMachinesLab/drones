@@ -2,6 +2,8 @@ package network.messages;
 
 import java.util.ArrayList;
 
+import network.messages.Message;
+
 public class NeuralActivationsMessage extends Message {
 
 	private ArrayList<String> inputsTitles;

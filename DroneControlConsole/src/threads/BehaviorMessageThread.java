@@ -1,9 +1,9 @@
 package threads;
 
+import network.messages.BehaviorMessage;
 import gui.panels.CommandPanel;
 import gui.panels.UpdatePanel;
 import main.RobotControlConsole;
-import network.messages.BehaviorMessage;
 
 public class BehaviorMessageThread extends UpdateThread {
 	

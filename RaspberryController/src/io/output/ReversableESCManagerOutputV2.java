@@ -3,13 +3,13 @@ package io.output;
 import java.io.IOException;
 
 import network.messages.MotorMessage;
-import utils.Math_Utils;
 
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
+import commoninterface.utils.MathUtils;
 
 import dataObjects.MotorSpeeds;
 
@@ -74,10 +74,10 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 		
 		if (value != 0) {
 			if (value > 0) {
-				finalVal = (int) (Math_Utils.map(value, 0, 1, MIN_FW_VALUE,
+				finalVal = (int) (MathUtils.map(value, 0, 1, MIN_FW_VALUE,
 						MAX_VALUE));
 			} else if (value < 0) {
-				finalVal = (int) (Math_Utils.map(value, -1, 0, MIN_VALUE,
+				finalVal = (int) (MathUtils.map(value, -1, 0, MIN_VALUE,
 						MIN_BW_VALUE));
 			}
 		}

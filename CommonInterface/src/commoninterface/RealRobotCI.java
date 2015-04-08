@@ -1,13 +1,14 @@
-package commoninterfaceimpl;
+package commoninterface;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import network.ConnectionHandler;
 import network.messages.Message;
 import network.messages.MessageProvider;
+
 import commoninterface.CIBehavior;
 import commoninterface.RobotCI;
+import commoninterface.network.ConnectionHandler;
 import commoninterface.objects.Entity;
 
 public abstract class RealRobotCI extends Thread implements RobotCI {

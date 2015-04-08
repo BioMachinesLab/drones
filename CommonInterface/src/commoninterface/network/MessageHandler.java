@@ -1,4 +1,4 @@
-package network;
+package commoninterface.network;
 
 import network.messages.Message;
 

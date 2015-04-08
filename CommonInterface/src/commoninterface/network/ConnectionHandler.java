@@ -1,4 +1,4 @@
-package network;
+package commoninterface.network;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -9,7 +9,7 @@ import java.net.Socket;
 import network.messages.Message;
 import network.messages.SystemStatusMessage;
 
-import commoninterfaceimpl.RealRobotCI;
+import commoninterface.RealRobotCI;
 
 public class ConnectionHandler extends Thread {
 	

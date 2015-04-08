@@ -10,18 +10,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import network.CommandConnectionListener;
-import network.ConnectionHandler;
-import network.ConnectionListener;
 import network.ControllerMessageHandler;
 import network.MotorConnectionListener;
 import network.broadcast.RealBroadcastHandler;
 import network.messages.Message;
 import network.messages.MessageProvider;
+
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
 import commoninterface.CISensor;
 import commoninterface.LedState;
+import commoninterface.RealRobotCI;
+import commoninterface.network.ConnectionHandler;
+import commoninterface.network.ConnectionListener;
 import commoninterface.network.NetworkUtils;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.broadcast.BroadcastMessage;
@@ -30,6 +32,7 @@ import commoninterface.network.broadcast.PositionBroadcastMessage;
 import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.jcoord.LatLon;
+
 import dataObjects.GPSData;
 
 public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {

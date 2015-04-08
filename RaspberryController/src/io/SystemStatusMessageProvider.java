@@ -6,7 +6,7 @@ import network.messages.Message;
 import network.messages.MessageProvider;
 import network.messages.SystemStatusMessage;
 
-import commoninterfaceimpl.RealRobotCI;
+import commoninterface.RealRobotCI;
 
 public class SystemStatusMessageProvider implements MessageProvider {
 	

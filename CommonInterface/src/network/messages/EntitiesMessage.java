@@ -1,6 +1,8 @@
 package network.messages;
 
 import java.util.LinkedList;
+
+import network.messages.Message;
 import commoninterface.objects.Entity;
 
 public class EntitiesMessage extends Message {
