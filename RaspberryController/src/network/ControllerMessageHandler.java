@@ -14,7 +14,6 @@ import network.messages.MessageProvider;
 import network.messages.NeuralActivationsMessage;
 import network.messages.SystemStatusMessage;
 import simpletestbehaviors.ControllerCIBehavior;
-
 import commoninterface.CIBehavior;
 import commoninterface.RealRobotCI;
 import commoninterface.RobotCI;
@@ -24,6 +23,7 @@ import commoninterface.objects.Entity;
 import commoninterface.objects.GeoFence;
 import commoninterface.objects.Waypoint;
 import commoninterface.utils.CIArguments;
+import commoninterface.utils.ClassLoadHelper;
 
 public class ControllerMessageHandler extends MessageHandler {
 	
@@ -59,7 +59,7 @@ public class ControllerMessageHandler extends MessageHandler {
 			}
 		
 			if(response == null && m instanceof BehaviorMessage) {
-				handleBehaviorMessage(m);
+				response = handleBehaviorMessage(m);
 			}
 			
 			//TODO: Pass the FileLogger to the RobotCI 
@@ -136,7 +136,15 @@ public class ControllerMessageHandler extends MessageHandler {
 		
      	 if(bm.getSelectedStatus()) {
      		try {
-         		Constructor<CIBehavior> constructor = bm.getSelectedBehavior().getConstructor(new Class[] { CIArguments.class, RobotCI.class});
+     			
+     			ArrayList<Class<?>> classes = ClassLoadHelper.findRelatedClasses(bm.getSelectedBehavior());
+     			
+     			if(classes == null || classes.isEmpty()) {
+     				return null;
+     			}
+     			
+     			Class<CIBehavior> chosenClass = (Class<CIBehavior>)classes.get(0);
+         		Constructor<CIBehavior> constructor = chosenClass.getConstructor(new Class[] { CIArguments.class, RobotCI.class});
 				CIBehavior ctArgs = constructor.newInstance(new Object[] { new CIArguments(bm.getArguments()), drone });
 				drone.startBehavior(ctArgs);
      		} catch(ReflectiveOperationException e) {

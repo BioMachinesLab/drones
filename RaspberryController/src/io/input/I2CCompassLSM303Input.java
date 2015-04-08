@@ -175,6 +175,12 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 	}
 	
 	public void startCalibration() {
+		
+		min = new int[]{ Integer.MAX_VALUE, Integer.MAX_VALUE,
+				Integer.MAX_VALUE };
+		max = new int[]{ -Integer.MAX_VALUE, -Integer.MAX_VALUE,
+				-Integer.MAX_VALUE };
+		
 		calibrationStatus = true;
 	}
 	
