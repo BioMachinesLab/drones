@@ -65,18 +65,15 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			.synchronizedList(new ArrayList<String>());
 	protected MessageParser messageParser;
 
-	private boolean externalAntenna = false;
 	protected boolean available = false;
 	private boolean enable = false;
 
-	public GPSModuleInput(boolean externalAntenna, boolean fake) {
-		this.externalAntenna = externalAntenna;
+	public GPSModuleInput(boolean fake) {
 		if (!fake)
 			init();
 	}
 
-	public GPSModuleInput(boolean externalAntenna) {
-		this.externalAntenna = externalAntenna;
+	public GPSModuleInput() {
 		init();
 	}
 
@@ -276,14 +273,26 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		/*
 		 * Disable always locate mode
 		 */
-		if (sendCommandAndCheckAnswer("$PMTK225,0*2B\r\n", "$PMTK001,225,3*35")) {
+		if (disableAlwaysLocateStandby()) {
 			System.out
 					.println("[GPS Module] OK! Always locate mode was succefully disabled!");
 		} else {
 			System.out
 					.println("[GPS Module] Always locate mode was NOT succefully disabled!");
 		}
+		
+		/*
+		 * Enable AIC
+		 */
+		if(enableAIC()){
+			System.out.println("[GPS Module] OK! AIC mode sucessfully activated!");
+		}else{
+			System.out.println("[GPS Module] AIC mode NOT sucessfully activated!");
+		}
 
+		/*
+		 * Set SBAS mode
+		 */
 		if (ENABLE_SBAS) {
 			boolean success = enableSBAS();
 			if (success)
@@ -292,12 +301,6 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			else
 				System.out
 						.println("[GPS Module] SBAS was NOT succefully enabled!");
-		}
-
-		if (externalAntenna) {
-			enableExternalAntenna();
-		} else {
-			disableExternalAntenna();
 		}
 
 		ackResponses.clear();
@@ -442,12 +445,12 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		}
 	}
 
-	public void enableExternalAntenna() throws InterruptedException {
+	public void enableMessagesOnExternalAntenna() throws InterruptedException {
 		// check it here https://github.com/adafruit/Adafruit-GPS-Library/blob/master/Adafruit_GPS.h
 		serialWrite("$PGCMD,33,1*6C\r\n", false);
 	}
 
-	public void disableExternalAntenna() throws InterruptedException {
+	public void disableMessagesOnExternalAntenna() throws InterruptedException {
 		// check it here https://github.com/adafruit/Adafruit-GPS-Library/blob/master/Adafruit_GPS.h
 		serialWrite("$PGCMD,33,0*6D\r\n", false);
 	}
