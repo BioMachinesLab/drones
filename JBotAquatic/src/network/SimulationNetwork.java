@@ -1,6 +1,8 @@
 package network;
 
 import commoninterface.AquaticDroneCI;
+import commoninterface.RobotCI;
+import commoninterface.ThymioCI;
 import simulation.Network;
 import simulation.Simulator;
 import simulation.robot.Robot;
@@ -18,6 +20,9 @@ public class SimulationNetwork extends Network {
 			if(r instanceof AquaticDroneCI) {
 				AquaticDroneCI aq = (AquaticDroneCI)r;
 				aq.getBroadcastHandler().messageReceived(senderAddress, msg);
+			}else if(r instanceof ThymioCI){
+				ThymioCI thymio = (ThymioCI)r;
+				thymio.getBroadcastHandler().messageReceived(senderAddress, msg);
 			}
 		}
 	}

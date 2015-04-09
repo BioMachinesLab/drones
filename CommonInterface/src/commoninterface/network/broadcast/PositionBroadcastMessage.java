@@ -12,7 +12,7 @@ public class PositionBroadcastMessage extends BroadcastMessage {
 	private AquaticDroneCI drone;
 	
 	public PositionBroadcastMessage(RobotCI robot) {
-		super(robot, UPDATE_TIME, IDENTIFIER);
+		super(UPDATE_TIME, IDENTIFIER);
 		this.drone = (AquaticDroneCI) robot;
 	}
 	

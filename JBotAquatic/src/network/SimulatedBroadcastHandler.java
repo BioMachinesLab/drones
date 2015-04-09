@@ -20,10 +20,10 @@ public class SimulatedBroadcastHandler extends BroadcastHandler {
 
 	@Override
 	public void sendMessage(String message) {
-		AquaticDrone r = (AquaticDrone)drone;
+		AquaticDrone r = (AquaticDrone)robot;
 		Network net = r.getSimulator().getNetwork();
 		if(net != null)
-			net.send(drone.getNetworkAddress(), message);
+			net.send(robot.getNetworkAddress(), message);
 	}
 
 	@Override

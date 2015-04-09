@@ -15,10 +15,10 @@ public abstract class BroadcastHandler {
 	protected static long CLEAN_ENTITIES_TIME = 100; //100 timesteps == 10 seconds
 	protected ArrayList<BroadcastMessage> broadcastMessages;
 	
-	protected RobotCI drone;
+	protected RobotCI robot;
 	
 	public BroadcastHandler(RobotCI drone, ArrayList<BroadcastMessage> broadcastMessages) {
-		this.drone = drone;
+		this.robot = drone;
 		this.broadcastMessages = broadcastMessages;
 	}
 	
@@ -26,7 +26,7 @@ public abstract class BroadcastHandler {
 	
 	public void messageReceived(String address, String message) {
 
-		if(address.equals(drone.getNetworkAddress()))
+		if(address.equals(robot.getNetworkAddress()))
 			return;
 		
 		String identifier = message.split(BroadcastMessage.MESSAGE_SEPARATOR)[0];
@@ -38,11 +38,14 @@ public abstract class BroadcastHandler {
 			case PositionBroadcastMessage.IDENTIFIER:
 				
 				RobotLocation dl = PositionBroadcastMessage.decode(address, message);
-				dl.setTimestepReceived((long)(drone.getTimeSinceStart()/10));
-				drone.getEntities().remove(dl);
-				drone.getEntities().add(dl);
+				dl.setTimestepReceived((long)(robot.getTimeSinceStart()/10));
+				robot.getEntities().remove(dl);
+				robot.getEntities().add(dl);
 				if(DEBUG)
 					System.out.println("Added DroneLocation "+dl);
+				break;
+			case VirtualPositionBroadcastMessage.IDENTIFIER:
+//				VirtualPositionBroadcastMessage.decode(address, message, robot);
 				break;
 		}
 	}
@@ -52,7 +55,7 @@ public abstract class BroadcastHandler {
 	}
 	
 	protected void cleanupEntities(double timestep) {
-		Iterator<Entity> i = drone.getEntities().iterator();
+		Iterator<Entity> i = robot.getEntities().iterator();
 		
 		while(i.hasNext()) {
 			Entity e = i.next();
@@ -67,6 +70,6 @@ public abstract class BroadcastHandler {
 	}
 	
 	public RobotCI getDrone() {
-		return drone;
+		return robot;
 	}
 }

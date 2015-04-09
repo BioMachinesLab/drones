@@ -20,6 +20,7 @@ import commoninterface.CILogger;
 import commoninterface.CISensor;
 import commoninterface.RealRobotCI;
 import commoninterface.ThymioCI;
+import commoninterface.mathutils.Vector2d;
 import commoninterface.network.ConnectionHandler;
 import commoninterface.network.ConnectionListener;
 import commoninterface.network.NetworkUtils;
@@ -58,6 +59,8 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 	
 	private CIBehavior activeBehavior = null;
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
+	
+	private Vector2d virtualPosition;
 	
 	@Override
 	public void begin(CIArguments args, CILogger logger) {
@@ -286,6 +289,16 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 
 	public ThymioIOManager getIOManager() {
 		return ioManager;
+	}
+
+	@Override
+	public Vector2d getVirtualPosition() {
+		return virtualPosition;
+	}
+	
+	@Override
+	public void setVirtualPosition(double x, double y) {
+		virtualPosition.set(x, y);
 	}
 	
 }
