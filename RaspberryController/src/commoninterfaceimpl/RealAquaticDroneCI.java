@@ -9,19 +9,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import utils.FileLogger;
 import network.CommandConnectionListener;
 import network.ControllerMessageHandler;
 import network.MotorConnectionListener;
 import network.broadcast.RealBroadcastHandler;
-import network.messages.Message;
-import network.messages.MessageProvider;
-
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
 import commoninterface.CISensor;
 import commoninterface.LedState;
 import commoninterface.RealRobotCI;
+import commoninterface.dataobjects.GPSData;
 import commoninterface.network.ConnectionHandler;
 import commoninterface.network.ConnectionListener;
 import commoninterface.network.NetworkUtils;
@@ -29,11 +28,11 @@ import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
 import commoninterface.network.broadcast.PositionBroadcastMessage;
+import commoninterface.network.messages.Message;
+import commoninterface.network.messages.MessageProvider;
 import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.jcoord.LatLon;
-
-import dataObjects.GPSData;
 
 public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 
@@ -53,21 +52,19 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 	private ArrayList<CISensor> cisensors = new ArrayList<CISensor>();
 
 	private CIArguments args;
-	private CILogger logger;
 	private boolean run = true;
 	private long startTimeInMillis;
 	private double timestep = 0;
 	private double leftSpeed = 0;
 	private double rightSpeed = 0;
-
+	
 	private CIBehavior activeBehavior = null;
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
 
 	@Override
-	public void begin(CIArguments args, CILogger logger) {
+	public void begin(CIArguments args) {
 		this.startTimeInMillis = System.currentTimeMillis();
 		this.args = args;
-		this.logger = logger;
 
 		addShutdownHooks();
 
@@ -134,6 +131,7 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 
 		if (logger != null)
 			logger.stopLogging();
+		
 
 		ioManager.shutdown();
 
@@ -373,6 +371,12 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 
 	public IOManager getIOManager() {
 		return ioManager;
+	}
+	
+	public void startLogger() {
+		FileLogger fileLogger = new FileLogger(this);
+		fileLogger.start();
+		this.logger = fileLogger;
 	}
 
 }

@@ -27,9 +27,9 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.plaf.basic.BasicProgressBarUI;
 
-import network.messages.BatteryMessage;
+import commoninterface.dataobjects.BatteryStatus;
+import commoninterface.network.messages.BatteryMessage;
 import threads.UpdateThread;
-import dataObjects.BatteryStatus;
 
 public class BatteryPanel extends UpdatePanel {
 	private final static int CELL_QUANTITY = 3;

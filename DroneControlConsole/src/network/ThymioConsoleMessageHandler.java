@@ -2,15 +2,14 @@ package network;
 
 import gui.ThymioGUI;
 import main.ThymioControlConsole;
-import network.messages.BehaviorMessage;
-import network.messages.CameraCaptureMessage;
-import network.messages.Message;
-import network.messages.NeuralActivationsMessage;
-import network.messages.SystemStatusMessage;
-import network.messages.ThymioReadingsMessage;
-
 import commoninterface.network.ConnectionHandler;
 import commoninterface.network.MessageHandler;
+import commoninterface.network.messages.BehaviorMessage;
+import commoninterface.network.messages.CameraCaptureMessage;
+import commoninterface.network.messages.Message;
+import commoninterface.network.messages.NeuralActivationsMessage;
+import commoninterface.network.messages.SystemStatusMessage;
+import commoninterface.network.messages.ThymioReadingsMessage;
 
 public class ThymioConsoleMessageHandler extends MessageHandler {
 	

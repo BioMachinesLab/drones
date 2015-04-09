@@ -7,14 +7,13 @@ import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
-import network.messages.CompassMessage;
-import network.messages.InformationRequest;
-import network.messages.Message;
-import network.messages.MessageProvider;
-import network.messages.SystemStatusMessage;
-
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
+import commoninterface.network.messages.CompassMessage;
+import commoninterface.network.messages.InformationRequest;
+import commoninterface.network.messages.Message;
+import commoninterface.network.messages.MessageProvider;
+import commoninterface.network.messages.SystemStatusMessage;
 
 public class I2CCompassModuleInput extends Thread implements ControllerInput,
 		MessageProvider {

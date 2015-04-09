@@ -1,6 +1,6 @@
-package network.messages;
+package commoninterface.network.messages;
 
-import network.messages.Message;
+import commoninterface.network.messages.Message;
 
 public class MotorMessage extends Message {
 	private static final long serialVersionUID = -8317383403438281892L;

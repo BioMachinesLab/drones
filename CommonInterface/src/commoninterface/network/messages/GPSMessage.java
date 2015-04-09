@@ -1,7 +1,7 @@
-package network.messages;
+package commoninterface.network.messages;
 
-import network.messages.Message;
-import dataObjects.GPSData;
+import commoninterface.dataobjects.GPSData;
+import commoninterface.network.messages.Message;
 
 public class GPSMessage extends Message {
 	private static final long serialVersionUID = -7540879836376808265L;

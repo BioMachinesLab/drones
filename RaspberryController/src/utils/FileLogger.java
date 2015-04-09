@@ -4,6 +4,7 @@ import io.input.ControllerInput;
 import io.input.GPSModuleInput;
 import io.input.I2CCompassModuleInput;
 import io.output.ControllerOutput;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -11,10 +12,12 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import commoninterfaceimpl.RealAquaticDroneCI;
-import dataObjects.GPSData;
 
-public class Logger extends Thread {
+import commoninterface.dataobjects.GPSData;
+import commoninterface.utils.RobotLogger;
+import commoninterfaceimpl.RealAquaticDroneCI;
+
+public class FileLogger extends Thread implements RobotLogger {
 	
 	private final static long SLEEP_TIME = 100;
 	
@@ -22,7 +25,7 @@ public class Logger extends Thread {
 	private RealAquaticDroneCI drone;
 	private String extraLog = "";
 	
-	public Logger(RealAquaticDroneCI drone) {
+	public FileLogger(RealAquaticDroneCI drone) {
 		this.drone = drone;
 		DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy_HH-mm-ss");
 		fileName = dateFormat.format(new Date());
@@ -68,11 +71,10 @@ public class Logger extends Thread {
 		}
 	}
 	
-	public void addLog(String log) {
-		this.extraLog = log;
-	}
-	
 	private String getLogString() {
+		
+		//TODO add ANN inputs and outputs
+		
 		List<ControllerInput> inputs = drone.getIOManager().getInputs();
 		List<ControllerOutput> outputs = drone.getIOManager().getOutputs();
 		
@@ -98,5 +100,20 @@ public class Logger extends Thread {
 		}
 		return result+"\n";
 		
+	}
+
+	@Override
+	public void stopLogging() {
+		interrupt();
+	}
+
+	@Override
+	public void logMessage(String string) {
+		this.extraLog+= string;
+	}
+
+	@Override
+	public void logError(String string) {
+		this.extraLog+="ERROR: "+string;
 	}
 }

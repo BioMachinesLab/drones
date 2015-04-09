@@ -1,7 +1,8 @@
 package threads;
 
-import network.messages.InformationRequest;
-import network.messages.InformationRequest.MessageType;
+import commoninterface.network.messages.InformationRequest;
+import commoninterface.network.messages.InformationRequest.MessageType;
+
 import gui.panels.UpdatePanel;
 import main.RobotControlConsole;
 

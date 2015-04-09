@@ -1,4 +1,4 @@
-package network.messages;
+package commoninterface.network.messages;
 
 import java.io.IOException;
 import java.io.Serializable;

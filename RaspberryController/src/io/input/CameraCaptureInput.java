@@ -8,10 +8,11 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import network.messages.CameraCaptureMessage;
-import network.messages.InformationRequest;
-import network.messages.Message;
-import network.messages.MessageProvider;
+import commoninterface.network.messages.CameraCaptureMessage;
+import commoninterface.network.messages.InformationRequest;
+import commoninterface.network.messages.Message;
+import commoninterface.network.messages.MessageProvider;
+
 import utils.CommandLine;
 
 

@@ -13,7 +13,8 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import network.messages.CameraCaptureMessage;
+import commoninterface.network.messages.CameraCaptureMessage;
+
 import threads.UpdateThread;
 
 public class ThymioCapturePanel extends UpdatePanel{

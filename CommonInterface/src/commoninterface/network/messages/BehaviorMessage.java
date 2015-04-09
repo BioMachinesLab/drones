@@ -1,16 +1,15 @@
-package network.messages;
+package commoninterface.network.messages;
 
-import network.messages.Message;
-import commoninterface.CIBehavior;
+import commoninterface.network.messages.Message;
 
 public class BehaviorMessage extends Message{
 	
-	protected Class<CIBehavior> selectedBehavior;
+	protected String selectedBehavior;
 	protected boolean selectedStatus = false;
 	protected String args;
 	
 	
-	public BehaviorMessage(Class<CIBehavior> selectedBehavior, String args, boolean selectedStatus) {
+	public BehaviorMessage(String selectedBehavior, String args, boolean selectedStatus) {
 		this.selectedBehavior = selectedBehavior;
 		this.args = args;
 		this.selectedStatus = selectedStatus;
@@ -20,7 +19,7 @@ public class BehaviorMessage extends Message{
 		return selectedStatus;
 	}
 	
-	public Class<CIBehavior> getSelectedBehavior() {
+	public String getSelectedBehavior() {
 		return selectedBehavior;
 	}
 	

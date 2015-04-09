@@ -12,9 +12,6 @@ import network.CommandConnectionListener;
 import network.ControllerMessageHandler;
 import network.MotorConnectionListener;
 import network.broadcast.RealBroadcastHandler;
-import network.messages.Message;
-import network.messages.MessageProvider;
-
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
 import commoninterface.CISensor;
@@ -27,6 +24,8 @@ import commoninterface.network.NetworkUtils;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
+import commoninterface.network.messages.Message;
+import commoninterface.network.messages.MessageProvider;
 import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
 
@@ -48,7 +47,6 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 	private ArrayList<CISensor> cisensors = new ArrayList<CISensor>();
 
 	private CIArguments args;
-	private CILogger logger;
 	private long startTimeInMillis;
 	private double timestep = 0;
 	private double behaviorTimeStep = 0;
@@ -63,10 +61,9 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 	private Vector2d virtualPosition;
 	
 	@Override
-	public void begin(CIArguments args, CILogger logger) {
+	public void begin(CIArguments args) {
 		this.startTimeInMillis = System.currentTimeMillis();
 		this.args = args;
-		this.logger = logger;
 
 		addShutdownHooks();
 

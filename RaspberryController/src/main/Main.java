@@ -10,8 +10,7 @@ public class Main {
 	
 	public static void main(String[] args) {
 		RealAquaticDroneCI drone = new RealAquaticDroneCI();
-		CILogger logger = new CIStdOutLogger(drone);
-		drone.begin(new CIArguments(""),logger);
+		drone.begin(new CIArguments(""));
 		drone.start();
 		
 		try {

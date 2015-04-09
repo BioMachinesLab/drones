@@ -1,10 +1,11 @@
 package main;
 
+import commoninterface.network.messages.InformationRequest.MessageType;
+
 import gui.RobotGUI;
 import gui.ThymioGUI;
 import network.ThymioConsoleMessageHandler;
 import network.broadcast.ConsoleBroadcastHandler;
-import network.messages.InformationRequest.MessageType;
 import threads.BehaviorMessageThread;
 import threads.ConnectionThread;
 import threads.MotorUpdateThread;

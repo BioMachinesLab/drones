@@ -1,8 +1,8 @@
-package network.messages;
+package commoninterface.network.messages;
 
 import java.util.List;
 
-import network.messages.Message;
+import commoninterface.network.messages.Message;
 
 public class ThymioReadingsMessage extends Message {
 

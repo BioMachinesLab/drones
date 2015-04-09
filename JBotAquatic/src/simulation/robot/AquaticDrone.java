@@ -1,7 +1,6 @@
 package simulation.robot;
 
 import java.util.ArrayList;
-
 import mathutils.MathUtils;
 import mathutils.Vector2d;
 import net.jafama.FastMath;
@@ -13,7 +12,6 @@ import simulation.robot.sensors.CompassSensor;
 import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
 import commoninterface.AquaticDroneCI;
-import commoninterface.CILogger;
 import commoninterface.CISensor;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.broadcast.BroadcastMessage;
@@ -173,7 +171,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	}
 
 	@Override
-	public void begin(CIArguments args, CILogger logger) {
+	public void begin(CIArguments args) {
 		
 	}
 
