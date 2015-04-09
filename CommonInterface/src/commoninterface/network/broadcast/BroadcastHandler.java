@@ -5,6 +5,7 @@ import java.util.Iterator;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
+import commoninterface.ThymioCI;
 import commoninterface.objects.Entity;
 import commoninterface.objects.RobotLocation;
 
@@ -45,7 +46,7 @@ public abstract class BroadcastHandler {
 					System.out.println("Added DroneLocation "+dl);
 				break;
 			case VirtualPositionBroadcastMessage.IDENTIFIER:
-//				VirtualPositionBroadcastMessage.decode(address, message, robot);
+				VirtualPositionBroadcastMessage.decode(address, message, (ThymioCI)robot);
 				break;
 		}
 	}
