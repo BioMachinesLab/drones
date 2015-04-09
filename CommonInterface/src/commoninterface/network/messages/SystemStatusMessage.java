@@ -1,6 +1,6 @@
-package network.messages;
+package commoninterface.network.messages;
 
-import network.messages.Message;
+import commoninterface.network.messages.Message;
 
 public class SystemStatusMessage extends Message {
 	private static final long serialVersionUID = -3082091690910649178L;

@@ -22,13 +22,12 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import network.CommandSender;
-import network.messages.BehaviorMessage;
-import network.messages.EntitiesMessage;
-import network.messages.LogMessage;
-import network.messages.Message;
 import threads.UpdateThread;
-
 import commoninterface.CIBehavior;
+import commoninterface.network.messages.BehaviorMessage;
+import commoninterface.network.messages.EntitiesMessage;
+import commoninterface.network.messages.LogMessage;
+import commoninterface.network.messages.Message;
 import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.ClassLoadHelper;

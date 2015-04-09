@@ -3,11 +3,11 @@ package commoninterface;
 import java.util.ArrayList;
 import java.util.List;
 
-import network.messages.Message;
-import network.messages.MessageProvider;
 import commoninterface.CIBehavior;
 import commoninterface.RobotCI;
 import commoninterface.network.ConnectionHandler;
+import commoninterface.network.messages.Message;
+import commoninterface.network.messages.MessageProvider;
 import commoninterface.objects.Entity;
 import commoninterface.utils.RobotLogger;
 

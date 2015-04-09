@@ -1,6 +1,6 @@
-package network.messages;
+package commoninterface.network.messages;
 
-import network.messages.Message;
+import commoninterface.network.messages.Message;
 
 public class LogMessage extends Message {
 	private static final long serialVersionUID = 7925900141790370630L;

@@ -1,4 +1,4 @@
-package dataObjects;
+package commoninterface.dataobjects;
 
 public class BatteryStatus {
 	private int batteryID;

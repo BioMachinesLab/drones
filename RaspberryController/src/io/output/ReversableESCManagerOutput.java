@@ -2,11 +2,9 @@ package io.output;
 
 import java.io.IOException;
 
-import network.messages.MotorMessage;
-
+import commoninterface.dataobjects.MotorSpeeds;
+import commoninterface.network.messages.MotorMessage;
 import commoninterface.utils.MathUtils;
-
-import dataObjects.MotorSpeeds;
 
 public class ReversableESCManagerOutput extends Thread implements
 		ControllerOutput {

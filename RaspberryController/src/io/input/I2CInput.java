@@ -2,10 +2,9 @@ package io.input;
 
 import java.io.IOException;
 
-import network.messages.MessageProvider;
-
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
+import commoninterface.network.messages.MessageProvider;
 
 public abstract class I2CInput extends Thread implements ControllerInput,
 		MessageProvider {

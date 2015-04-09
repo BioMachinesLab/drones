@@ -1,7 +1,7 @@
-package network.messages;
+package commoninterface.network.messages;
 
-import network.messages.Message;
-import dataObjects.BatteryStatus;
+import commoninterface.dataobjects.BatteryStatus;
+import commoninterface.network.messages.Message;
 
 public class BatteryMessage extends Message {
 	private static final long serialVersionUID = 8202553628283198093L;

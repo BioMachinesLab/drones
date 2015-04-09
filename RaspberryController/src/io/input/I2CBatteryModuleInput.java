@@ -2,14 +2,13 @@ package io.input;
 
 import java.io.IOException;
 
-import network.messages.BatteryMessage;
-import network.messages.InformationRequest;
-import network.messages.Message;
-import network.messages.SystemStatusMessage;
-
 import com.pi4j.io.i2c.I2CBus;
 
-import dataObjects.BatteryStatus;
+import commoninterface.dataobjects.BatteryStatus;
+import commoninterface.network.messages.BatteryMessage;
+import commoninterface.network.messages.InformationRequest;
+import commoninterface.network.messages.Message;
+import commoninterface.network.messages.SystemStatusMessage;
 
 public class I2CBatteryModuleInput extends I2CInput {
 	private final static int ADDR = 0x20;

@@ -10,21 +10,25 @@ import io.output.ControllerOutput;
 import io.output.DebugLedsOutput;
 import io.output.ReversableESCManagerOutputV2;
 import io.output.ServoOutput;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Scanner;
-import network.messages.MotorMessage;
+
 import behaviors.CalibrationCIBehavior;
+
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CFactory;
+
+import commoninterface.dataobjects.MotorSpeeds;
+import commoninterface.network.messages.MotorMessage;
 import commoninterface.utils.CIArguments;
 import commoninterfaceimpl.RealAquaticDroneCI;
-import dataObjects.MotorSpeeds;
 
 public class IOManager {
 

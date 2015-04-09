@@ -19,9 +19,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import network.messages.NeuralActivationsMessage;
-
 import com.sun.corba.se.impl.ior.WireObjectKeyTemplate;
+import commoninterface.network.messages.NeuralActivationsMessage;
 
 import threads.UpdateThread;
 import utils.CIGraph;

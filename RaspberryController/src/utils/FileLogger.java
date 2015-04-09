@@ -13,9 +13,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import commoninterface.dataobjects.GPSData;
 import commoninterface.utils.RobotLogger;
 import commoninterfaceimpl.RealAquaticDroneCI;
-import dataObjects.GPSData;
 
 public class FileLogger extends Thread implements RobotLogger {
 	

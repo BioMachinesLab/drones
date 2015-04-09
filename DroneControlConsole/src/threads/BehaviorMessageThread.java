@@ -1,6 +1,7 @@
 package threads;
 
-import network.messages.BehaviorMessage;
+import commoninterface.network.messages.BehaviorMessage;
+
 import gui.panels.CommandPanel;
 import gui.panels.UpdatePanel;
 import main.RobotControlConsole;

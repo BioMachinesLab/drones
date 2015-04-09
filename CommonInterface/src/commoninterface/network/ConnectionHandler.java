@@ -6,10 +6,9 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
-import network.messages.Message;
-import network.messages.SystemStatusMessage;
-
 import commoninterface.RealRobotCI;
+import commoninterface.network.messages.Message;
+import commoninterface.network.messages.SystemStatusMessage;
 
 public class ConnectionHandler extends Thread {
 	

@@ -1,4 +1,4 @@
-package dataObjects;
+package commoninterface.dataobjects;
 
 import java.io.Serializable;
 

@@ -1,6 +1,7 @@
 package threads;
 
-import network.messages.EntityMessage;
+import commoninterface.network.messages.EntityMessage;
+
 import gui.panels.UpdatePanel;
 import gui.panels.map.MapPanel;
 import main.DroneControlConsole;

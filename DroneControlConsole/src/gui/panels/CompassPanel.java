@@ -23,7 +23,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import network.messages.CompassMessage;
+import commoninterface.network.messages.CompassMessage;
+
 import threads.UpdateThread;
 
 public class CompassPanel extends UpdatePanel {

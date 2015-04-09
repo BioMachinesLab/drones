@@ -1,6 +1,6 @@
 package commoninterface.network;
 
-import network.messages.Message;
+import commoninterface.network.messages.Message;
 
 /**
  * This class implements a circular queue of messages. The objective is to

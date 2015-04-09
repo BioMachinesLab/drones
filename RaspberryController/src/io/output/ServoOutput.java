@@ -2,12 +2,11 @@ package io.output;
 
 import java.io.IOException;
 
-import network.messages.MotorMessage;
-
 import com.pi4j.io.gpio.GpioController;
-import commoninterface.utils.MathUtils;
 
-import dataObjects.MotorSpeeds;
+import commoninterface.dataobjects.MotorSpeeds;
+import commoninterface.network.messages.MotorMessage;
+import commoninterface.utils.MathUtils;
 
 public class ServoOutput extends ReversableESCManagerOutputV2 {
 	

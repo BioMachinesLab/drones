@@ -2,15 +2,14 @@ package network;
 
 import gui.DroneGUI;
 import main.DroneControlConsole;
-import network.messages.BehaviorMessage;
-import network.messages.CompassMessage;
-import network.messages.EntityMessage;
-import network.messages.GPSMessage;
-import network.messages.Message;
-import network.messages.SystemStatusMessage;
-
 import commoninterface.network.ConnectionHandler;
 import commoninterface.network.MessageHandler;
+import commoninterface.network.messages.BehaviorMessage;
+import commoninterface.network.messages.CompassMessage;
+import commoninterface.network.messages.EntityMessage;
+import commoninterface.network.messages.GPSMessage;
+import commoninterface.network.messages.Message;
+import commoninterface.network.messages.SystemStatusMessage;
 
 public class DroneConsoleMessageHandler extends MessageHandler {
 	
