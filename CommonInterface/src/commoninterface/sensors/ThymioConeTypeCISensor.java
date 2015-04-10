@@ -55,9 +55,9 @@ public abstract class ThymioConeTypeCISensor extends CISensor {
 	}
 	
 	protected double calculateContributionToSensor(int sensorNumber, VirtualEntity e) {
-		if(thymio.getVirtualPosition() != null){
+		if(thymio.getVirtualPosition() != null && thymio.getVirtualOrientation() != null){
 			double distance = thymio.getVirtualPosition().distanceTo(e.getPosition());
-			double sensorAngle = angles[sensorNumber];
+			double sensorAngle = angles[sensorNumber] + thymio.getVirtualOrientation();
 			
 			if(distance < getRange() && sensorAngle < (openingAngle / 2.0) && (sensorAngle > (-openingAngle / 2.0))) 
 				return (getRange() - distance) / getRange();

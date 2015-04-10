@@ -27,4 +27,18 @@ public interface ThymioCI extends RobotCI {
 	 * @param new virtual x and y of the thymio
 	 */
 	public void setVirtualPosition(double x, double y);
+	
+	/**
+	 * Get the virtual orientation of the thymio
+	 * 
+	 * @return virtual orientation of the thmyio
+	 */
+	public Double getVirtualOrientation();
+	
+	/**
+	 * Set the virtual orientation of the thymio
+	 * 
+	 * @param virtual orientation of the thymio
+	 */
+	public void setVirtualOrientation(double orientation);
 }

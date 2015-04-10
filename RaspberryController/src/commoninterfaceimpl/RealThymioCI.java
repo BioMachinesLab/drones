@@ -59,6 +59,7 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
 	
 	private Vector2d virtualPosition;
+	private Double virtualOrientation;
 	
 	@Override
 	public void begin(CIArguments args) {
@@ -295,7 +296,20 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 	
 	@Override
 	public void setVirtualPosition(double x, double y) {
-		virtualPosition.set(x, y);
+		if(virtualPosition == null)
+			virtualPosition = new Vector2d(x, y);
+		else
+			virtualPosition.set(x, y);
+	}
+	
+	@Override
+	public Double getVirtualOrientation() {
+		return virtualOrientation;
+	}
+
+	@Override
+	public void setVirtualOrientation(double orientation) {
+		virtualOrientation = orientation;
 	}
 	
 }

@@ -21,35 +21,38 @@ public class VirtualPositionBroadcastMessage extends BroadcastMessage {
 	private String address;
 	private double xPosition;
 	private double yPosition;
+	private double orientation;
 	
-	public VirtualPositionBroadcastMessage(VirtualPositionType type, String address, double xPosition, double yPosition) {
+	public VirtualPositionBroadcastMessage(VirtualPositionType type, String address, double xPosition, double yPosition, double orientation) {
 		super(UPDATE_TIME, IDENTIFIER);
 		this.type = type;
 		this.address = address;
 		this.xPosition = xPosition;
 		this.yPosition = yPosition;
+		this.orientation = orientation;
 	}
 
 	@Override
 	protected String getMessage() {
-		return type + BroadcastMessage.MESSAGE_SEPARATOR + address + BroadcastMessage.MESSAGE_SEPARATOR + xPosition + BroadcastMessage.MESSAGE_SEPARATOR + yPosition;
+		return type + BroadcastMessage.MESSAGE_SEPARATOR + address + BroadcastMessage.MESSAGE_SEPARATOR + xPosition + BroadcastMessage.MESSAGE_SEPARATOR + yPosition + BroadcastMessage.MESSAGE_SEPARATOR + orientation;
 	}
 	
 	public static void decode(String address, String message, ThymioCI thymio) {
 		String[] split = message.split(MESSAGE_SEPARATOR);
-		thymio.getEntities().clear();
 		
-		if(split.length == 4){	
-			String receivedType = split[0];
-			String receivedAddress = split[1];
-			double receivedX = Double.valueOf(split[2]);
-			double receivedY = Double.valueOf(split[3]);
+		if(split.length == 6){	
+			String receivedType = split[1];
+			String receivedAddress = split[2];
+			double receivedX = Double.valueOf(split[3]);
+			double receivedY = Double.valueOf(split[4]);
+			double receivedOrientation = Double.valueOf(split[5]);
 			
 			if(receivedType.equals(VirtualPositionType.ROBOT.toString())){
 				
-				if(thymio.getNetworkAddress().equals(receivedAddress))
+				if(thymio.getNetworkAddress().equals(receivedAddress)){
 					thymio.setVirtualPosition(receivedX, receivedY);
-				else{
+					thymio.setVirtualOrientation(receivedOrientation);
+				}else{
 					removeEntityByName(thymio.getEntities(), receivedAddress);
 					thymio.getEntities().add(new ThymioEntity(receivedAddress, new Vector2d(receivedX, receivedY)));
 				}
