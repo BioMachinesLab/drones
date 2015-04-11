@@ -88,6 +88,10 @@ public abstract class ThymioConeTypeCISensor extends CISensor {
 		return range;
 	}
 	
+	public double getOpeningAngle() {
+		return openingAngle;
+	}
+	
 	@Override
 	public int getNumberOfSensors() {
 		return readings.length;

@@ -70,7 +70,7 @@ public class VirtualPositionBroadcastMessage extends BroadcastMessage {
 		Entity entityToRemove = null;
 		
 		for (Entity e : entities) {
-			if(e.getName().equals(entityToRemove)){
+			if(e.getName().equals(receivedAddress)){
 				entityToRemove = e;
 				break;
 			}
