@@ -10,7 +10,7 @@ On the current prototype, identified with as Prototype V, we already equipped it
 
 In this repository, you can find our code that runs both on the RaspberryPi for the drone's autonomous control, and on a remote computer for monitoring or sending commands. More information can be found at [http://biomachineslab.com](http://biomachineslab.com)
 
-<iframe title="YouTube video player" width="480" height="390" src="http://www.youtube.com/watch?v=U68stGztNWA?autoplay=1" frameborder="0" allowfullscreen>< /iframe>
+<iframe title="YouTube video player" width="480" height="390" src="http://www.youtube.com/watch?v=U68stGztNWA?autoplay=1" frameborder="0" allowfullscreen></iframe>
 
 <a href='http://www.youtube.com/watch?feature=player_embedded&v=U68stGztNWA' target='_blank'><img src='http://img.youtube.com/vi/U68stGztNWA/0.jpg' width='425' height=344 /></a>
 
