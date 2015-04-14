@@ -23,7 +23,7 @@ import commoninterface.utils.CoordinateUtilities;
 
 public class CITwoDRenderer extends TwoDRenderer {
 	
-	private static final double ENTITY_DIAMETER = 0.04;
+	private static final double ENTITY_DIAMETER = 0.08;
 	
 	private int droneID;
 	private boolean seeSensors;
@@ -44,7 +44,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 		RobotCI robotci = (RobotCI) robot;
 		int circleDiameter = bigRobots ? (int)Math.max(10,Math.round(ENTITY_DIAMETER * scale)) : (int) Math.round(ENTITY_DIAMETER * scale);
 		
-		graphics.setColor(Color.GRAY);
+		graphics.setColor(Color.GREEN.darker());
 		if(robot.getId() == droneID){
 			for (Entity entity : robotci.getEntities()) {
 				if(entity instanceof GeoEntity){
