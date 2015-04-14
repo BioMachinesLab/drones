@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import simpletestbehaviors.ChangeWaypointCIBehavior;
 import utils.FileLogger;
 import network.CommandConnectionListener;
 import network.ControllerMessageHandler;
@@ -31,6 +32,7 @@ import commoninterface.network.broadcast.PositionBroadcastMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
 import commoninterface.objects.Entity;
+import commoninterface.objects.Waypoint;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.jcoord.LatLon;
 
@@ -60,6 +62,10 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 	
 	private CIBehavior activeBehavior = null;
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
+	
+	private Waypoint activeWaypoint;
+	
+	private ArrayList<CIBehavior> alwaysActiveBehaviors = new ArrayList<CIBehavior>(); 
 
 	@Override
 	public void begin(CIArguments args) {
@@ -71,13 +77,16 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 		initIO();
 		initMessageProviders();
 		initConnections();
-
+		
 		messageHandler = new ControllerMessageHandler(this);
 		messageHandler.start();
+		
+		alwaysActiveBehaviors.add(new ChangeWaypointCIBehavior(new CIArguments(""), this));
 
 		setStatus("Running!\n");
 
-		logger.logMessage(initMessages);
+		if(logger != null)
+			logger.logMessage(initMessages);
 	}
 
 	@Override
@@ -87,6 +96,10 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 			long lastCycleTime = System.currentTimeMillis();
 			CIBehavior current = activeBehavior;
 			try {
+				
+				for(CIBehavior b : alwaysActiveBehaviors)
+					b.step(timestep);
+				
 				if (current != null) {
 					current.step(timestep);
 					if (current.getTerminateBehavior()) {
@@ -125,7 +138,8 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 	
 	@Override
 	public void shutdown() {
-		logger.logMessage("# Shutting down Controller...");
+		if(logger != null)
+			logger.logMessage("# Shutting down Controller...");
 		
 		run = false;
 
@@ -175,7 +189,8 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 			connectionListener = new ConnectionListener(this);
 			connectionListener.start();
 
-			logger.logMessage(".");
+			if(logger != null)
+				logger.logMessage(".");
 			initMessages += "[INIT] ConnectionListener: ok\n";
 
 			motorConnectionListener = new MotorConnectionListener(this);
@@ -190,7 +205,8 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 					
 			broadcastHandler = new RealBroadcastHandler(this, broadcastMessages);
 
-			logger.logMessage(".");
+			if(logger != null)
+				logger.logMessage(".");
 			initMessages += "[INIT] MotorConnectionListener: ok\n";
 
 		} catch (IOException e) {
@@ -263,7 +279,8 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 					break;
 				}
 			} else {
-				logger.logError("Invalid led index: " + index
+				if(logger != null)
+					logger.logError("Invalid led index: " + index
 						+ ", must be >= 0 and < "
 						+ ioManager.getDebugLeds().getNumberOfOutputs());
 			}
@@ -377,6 +394,16 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 		FileLogger fileLogger = new FileLogger(this);
 		fileLogger.start();
 		this.logger = fileLogger;
+	}
+	
+	@Override
+	public Waypoint getActiveWaypoint() {
+		return activeWaypoint;
+	}
+	
+	@Override
+	public void setActiveWaypoint(Waypoint wp) {
+		this.activeWaypoint = wp;	
 	}
 
 }

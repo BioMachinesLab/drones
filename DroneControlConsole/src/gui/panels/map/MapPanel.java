@@ -64,9 +64,9 @@ public class MapPanel extends UpdatePanel {
     private int robotMarkerIndex = 0;
     
     private HashMap<String,LinkedList<MapMarker>> robotPositions = new HashMap<String, LinkedList<MapMarker>>();
-    private LinkedList<MapMarker> waypoints = new LinkedList<MapMarker>();
+    private LinkedList<MapMarker> waypointMarkers = new LinkedList<MapMarker>();
     
-    private Waypoint waypoint = null;
+    private LinkedList<Waypoint> waypoints = new LinkedList<Waypoint>();
     private UpdateThread thread = null;
     
     private GeoFence geoFence = new GeoFence("geofence");
@@ -135,7 +135,14 @@ public class MapPanel extends UpdatePanel {
             }
         });
         
-        JButton geoFenceButton = new JButton("Add GeoFence");
+        JButton clearWaypointsButton = new JButton("Clear Waypoints");
+        clearWaypointsButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				clearWaypoints();
+			}
+		});
+        
+        JButton geoFenceButton = new JButton(" Add GeoFence ");
         geoFenceButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(!editingGeoFence) {
@@ -144,7 +151,7 @@ public class MapPanel extends UpdatePanel {
 					geoFenceButton.setText("Finish GeoFence");
 				} else {
 					editingGeoFence = false;
-					geoFenceButton.setText("Add GeoFence");
+					geoFenceButton.setText(" Add GeoFence ");
 				}
 			}
 		});
@@ -152,6 +159,7 @@ public class MapPanel extends UpdatePanel {
         panelTop.add(showTreeLayers);
         panelTop.add(fitMarkersButton);
         panelTop.add(geoFenceButton);
+        panelTop.add(clearWaypointsButton);
         add(treeMap, BorderLayout.CENTER);
         
         geoFenceLayer = treeMap.addLayer("GeoFence");
@@ -165,7 +173,7 @@ public class MapPanel extends UpdatePanel {
             	
                if(e.getButton() == MouseEvent.BUTTON3) {
             	   if(!editingGeoFence)
-            		   addMarker(map().getPosition(e.getPoint()),"waypoint");
+            		   addMarker(map().getPosition(e.getPoint()));
             	   else
             		   addToGeoFence(map().getPosition(e.getPoint()));
 //            	   updateRobotPosition("drone", map().getPosition(e.getPoint()));
@@ -195,32 +203,32 @@ public class MapPanel extends UpdatePanel {
         return new Coordinate(lat, lon);
     }
 
-    public synchronized void addMarker(Coordinate c, String name) {
+    public synchronized void addMarker(Coordinate c) {
+    	
+    	String layerName = "waypoints";
+    	
     	Layer l = null;
     	
     	for(Layer layer : treeMap.getLayers())
-    		if(layer.getName().equals(name))
+    		if(layer.getName().equals("waypoints"))
     			l = layer;
 
     	if(l == null) {
-    		l = treeMap.addLayer(name);
-    	} else {
-    		MapMarker old = waypoints.peekFirst();
-    		treeMap.removeFromLayer(old);
-    		map().removeMapMarker(old);
+    		l = treeMap.addLayer(layerName);
     	}
     	
-    	waypoints.clear();
+    	String markerName = "waypoint"+waypoints.size();
     	
-    	MapMarker m = new MapMarkerDot(l, name , c);
+    	MapMarker m = new MapMarkerDot(l, markerName , c);
     	l.add(m);
-    	waypoints.add(m);
+    	waypointMarkers.add(m);
     	
     	map().addMapMarker(m);
     	
     	synchronized(this) {
-    		waypoint = new Waypoint("waypoint",new LatLon(c.getLat(),c.getLon()));
-    		notifyAll();
+    		Waypoint waypoint = new Waypoint(markerName, new LatLon(c.getLat(),c.getLon()));
+    		waypoints.add(waypoint);
+//    		notifyAll();
     	}
     }
     
@@ -322,12 +330,6 @@ public class MapPanel extends UpdatePanel {
 		return true;
 	}
 	
-	public synchronized EntityMessage getCurrentMessage() {
-		EntityMessage m = new EntityMessage(waypoint);
-		waypoint = null;
-		return m;
-	}
-	
 	@Override
 	public long getSleepTime() {
 		return 10;
@@ -340,7 +342,7 @@ public class MapPanel extends UpdatePanel {
 	
 	@Override
 	public synchronized void threadWait() {
-		while(waypoint == null) {
+		while(true) {
 			try {
 				wait();
 			} catch(Exception e){}
@@ -389,6 +391,17 @@ public class MapPanel extends UpdatePanel {
 		map().removeAllMapPolygons();
 	}
 	
+	private void clearWaypoints() {
+		
+		for(MapMarker m : waypointMarkers) {
+	    	treeMap.removeFromLayer(m);
+	    	map().removeMapMarker(m);
+		}
+    	
+    	waypoints.clear();
+    	waypointMarkers.clear();
+	}
+	
 	public LinkedList<Entity> getEntities() {
 		LinkedList<Entity> entities = new LinkedList<>();
 
@@ -396,8 +409,8 @@ public class MapPanel extends UpdatePanel {
 			entities.add(geoFence);
 		}
 		
-		if(waypoint != null)
-			entities.add(waypoint);
+		if(waypoints != null)
+			entities.addAll(waypoints);
 		
 		return entities;
 	}

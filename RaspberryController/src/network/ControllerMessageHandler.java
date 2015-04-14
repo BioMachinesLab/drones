@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import simpletestbehaviors.ControllerCIBehavior;
+import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.RealRobotCI;
 import commoninterface.RobotCI;
@@ -113,6 +114,13 @@ public class ControllerMessageHandler extends MessageHandler {
 			robot.getEntities().remove(e);
 		}
 		
+		if(e instanceof Waypoint && robot instanceof AquaticDroneCI) {
+			ArrayList<Waypoint> wps = Waypoint.getWaypoints(robot);
+			
+			if(wps.isEmpty())
+				((AquaticDroneCI) robot).setActiveWaypoint((Waypoint)e);
+		}
+		
 		robot.getEntities().add(e);
 		return m;
 	}
@@ -132,6 +140,14 @@ public class ControllerMessageHandler extends MessageHandler {
 		}
 		
 		robot.getEntities().addAll(entities);
+		
+		if(robot instanceof AquaticDroneCI) {
+			ArrayList<Waypoint> wps = Waypoint.getWaypoints(robot);
+			
+			if(!wps.isEmpty())
+				((AquaticDroneCI) robot).setActiveWaypoint(wps.get(0));
+		}
+		
 		return m;
 	}
 	

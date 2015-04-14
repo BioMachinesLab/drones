@@ -21,11 +21,6 @@ public class MapThread extends UpdateThread {
 
 		while (keepGoing) {
 			panel.threadWait();
-			
-			EntityMessage msg = mapPanel.getCurrentMessage();
-			
-			if(msg != null)
-				console.sendData(msg);
 		}
 	}
 }

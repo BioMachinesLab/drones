@@ -143,7 +143,7 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 			int magZ = readSingleValue(LSM303_REGISTER_MAG_OUT_X_L_M+4);
 			
 //			System.out.println("accel "+accelX+" "+accelY+" "+accelZ);
-//			System.out.println("mag "+magX+" "+magY+" "+magZ);
+			System.out.println("mag "+magX+" "+magY+" "+magZ);
 			
 			magX-= (min[0] + max[0])/2;
 			magY-= (min[1] + max[1])/2;
@@ -196,22 +196,6 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	private short[] readAcc() throws IOException{
-		compass.write((byte)((LSM303_REGISTER_ACCEL_OUT_X_L_A | (1 << 7)) & 0xFF));
-		
-		byte[] temp = new byte[6];
-		
-		compass.read(temp,0,6);
-		
-		short[] res = new short[3];
-		
-		res[0] = (short)((temp[0] | (temp[1] << 8)) & 0xFFFF);
-		res[1] = (short)((temp[2] | (temp[3] << 8)) & 0xFFFF);
-		res[2] = (short)((temp[4] | (temp[5] << 8)) & 0xFFFF);
-		
-		return res;
 	}
 	
 	private void readPreviousCalibration() {
