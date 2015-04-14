@@ -6,6 +6,8 @@ import commoninterface.CISensor;
 import commoninterface.RobotCI;
 import commoninterface.ThymioCI;
 import commoninterface.mathutils.GeometricCalculator;
+import commoninterface.mathutils.GeometricInfo;
+import commoninterface.mathutils.Vector2d;
 import commoninterface.objects.Entity;
 import commoninterface.objects.VirtualEntity;
 import commoninterface.utils.CIArguments;
@@ -18,6 +20,7 @@ public abstract class ThymioConeTypeCISensor extends CISensor {
 	protected int numberSensors = 1;
 	protected double openingAngle = Math.toRadians(90);
 	protected GeometricCalculator geoCalc = new GeometricCalculator();
+	protected Vector2d sensorPosition = new Vector2d();
 
 	private ThymioCI thymio;
 	
@@ -52,18 +55,30 @@ public abstract class ThymioConeTypeCISensor extends CISensor {
 				}
 			}
 		}
+		
 	}
 	
 	protected double calculateContributionToSensor(int sensorNumber, VirtualEntity e) {
 		if(thymio.getVirtualPosition() != null && thymio.getVirtualOrientation() != null){
-			double distance = thymio.getVirtualPosition().distanceTo(e.getPosition());
-			double sensorAngle = angles[sensorNumber] + thymio.getVirtualOrientation();
+			GeometricInfo sensorInfo = getSensorGeometricInfo(sensorNumber, e.getPosition());
 			
-			if(distance < getRange() && sensorAngle < (openingAngle / 2.0) && (sensorAngle > (-openingAngle / 2.0))) 
-				return (getRange() - distance) / getRange();
-			
+			if((sensorInfo.getDistance() < getRange()) && 
+			   (sensorInfo.getAngle() < (openingAngle / 2.0)) && 
+			   (sensorInfo.getAngle() > (-openingAngle / 2.0))) {
+
+				return (getRange() - sensorInfo.getDistance()) / getRange();
+			}
 		}
 		return 0;
+	}
+	
+	private GeometricInfo getSensorGeometricInfo(int sensorNumber, Vector2d toPoint){
+		double orientation=angles[sensorNumber]+thymio.getVirtualOrientation();
+		sensorPosition.set(Math.cos(orientation) * thymio.getThymioRadius() + thymio.getVirtualPosition().getX(),
+				Math.sin(orientation) * thymio.getThymioRadius() + thymio.getVirtualPosition().getY());
+		
+		GeometricInfo sensorInfo = geoCalc.getGeometricInfoBetweenPoints(sensorPosition, orientation, toPoint);
+		return sensorInfo;
 	}
 	
 	public void setupPositions(int numberSensors) {

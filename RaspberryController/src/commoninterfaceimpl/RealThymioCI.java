@@ -311,5 +311,10 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 	public void setVirtualOrientation(double orientation) {
 		virtualOrientation = orientation;
 	}
+
+	@Override
+	public double getThymioRadius() {
+		return 0.08;
+	}
 	
 }

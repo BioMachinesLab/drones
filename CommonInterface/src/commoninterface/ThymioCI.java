@@ -41,4 +41,11 @@ public interface ThymioCI extends RobotCI {
 	 * @param virtual orientation of the thymio
 	 */
 	public void setVirtualOrientation(double orientation);
+	
+	/**
+	 * Radius of the thymio
+	 * 
+	 * @return value of the radius of the thymio
+	 */
+	public double getThymioRadius();
 }
