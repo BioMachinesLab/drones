@@ -22,15 +22,15 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import network.CommandSender;
-import network.messages.BehaviorMessage;
-import network.messages.EntitiesMessage;
-import network.messages.LogMessage;
-import network.messages.Message;
 import threads.UpdateThread;
-import utils.ClassLoadHelper;
 import commoninterface.CIBehavior;
+import commoninterface.network.messages.BehaviorMessage;
+import commoninterface.network.messages.EntitiesMessage;
+import commoninterface.network.messages.LogMessage;
+import commoninterface.network.messages.Message;
 import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
+import commoninterface.utils.ClassLoadHelper;
 
 public class CommandPanel extends UpdatePanel{
 	
@@ -40,8 +40,14 @@ public class CommandPanel extends UpdatePanel{
 	private JTextArea config;
 	private RobotGUI gui; 
 	private boolean dronePanel = false;
-	
 	private JFrame neuralActivationsWindow;
+	
+	/*
+	 * author: @miguelduarte42
+	 * This has to be this way because some behaviors are specific to the RaspberryController,
+	 * and this project cannot include RaspberryController because of PI4J.
+	 */
+	private String[] hardcodedClasses = new String[]{"CalibrationCIBehavior"};
 	
 	public CommandPanel(RobotGUI gui) {
 		
@@ -60,7 +66,7 @@ public class CommandPanel extends UpdatePanel{
 		
 		topPanel.setLayout(new BorderLayout());
 		
-		JComboBox<Class<CIBehavior>> behaviors = new JComboBox<>();
+		JComboBox<String> behaviors = new JComboBox<>();
 		behaviors.setPreferredSize(new Dimension(20,20));
 		
 		populateBehaviors(behaviors);
@@ -74,25 +80,25 @@ public class CommandPanel extends UpdatePanel{
 		
 		start.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				statusMessage((Class<CIBehavior>)behaviors.getSelectedItem(), true);
+				statusMessage((String)behaviors.getSelectedItem(), true);
 			}
 		});
 		
 		stop.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				statusMessage((Class<CIBehavior>)behaviors.getSelectedItem(), false);
+				statusMessage((String)behaviors.getSelectedItem(), false);
 			}
 		});
 		
 		deploy.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				deployBehavior((Class<CIBehavior>)behaviors.getSelectedItem(), true);
+				deployBehavior((String)behaviors.getSelectedItem(), true);
 			}
 		});
 		
 		stopAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				deployBehavior((Class<CIBehavior>)behaviors.getSelectedItem(), false);
+				deployBehavior((String)behaviors.getSelectedItem(), false);
 			}
 		});
 		
@@ -156,7 +162,7 @@ public class CommandPanel extends UpdatePanel{
 		neuralActivationsWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	}
 	
-	private synchronized void statusMessage(Class<CIBehavior> className, boolean status) {
+	private synchronized void statusMessage(String className, boolean status) {
 		setText("");
 		
 		CIArguments translatedArgs = new CIArguments(config.getText().replaceAll("\\s+",""),true);
@@ -169,7 +175,7 @@ public class CommandPanel extends UpdatePanel{
 		notifyAll();
 	}
 	
-	private void deployBehavior(Class<CIBehavior> className, boolean status) {
+	private void deployBehavior(String className, boolean status) {
 		CIArguments translatedArgs = new CIArguments(config.getText().replaceAll("\\s+",""),true);
 		BehaviorMessage m;
 		
@@ -203,11 +209,14 @@ public class CommandPanel extends UpdatePanel{
 		statusMessage.setText(text);
 	}
 	
-	private void populateBehaviors(JComboBox<Class<CIBehavior>> list) {
+	private void populateBehaviors(JComboBox<String> list) {
 		ArrayList<Class<?>> classes = ClassLoadHelper.findRelatedClasses(CIBehavior.class);
 		for(Class<?> c : classes) {
-			list.addItem((Class<CIBehavior>)c);
+			list.addItem(c.getSimpleName());
 		}
+		
+		for(String s : hardcodedClasses)
+			list.addItem(s);
 	}
 	
 	public BehaviorMessage getCurrentMessage() {
@@ -240,7 +249,7 @@ public class CommandPanel extends UpdatePanel{
 	}
 
 	public void displayData(BehaviorMessage message) {
-		String result = message.getSelectedBehavior().getSimpleName()+": ";
+		String result = message.getSelectedBehavior()+": ";
 		result+= message.getSelectedStatus() ? "start" : "stop";
 		
 		setText(result);

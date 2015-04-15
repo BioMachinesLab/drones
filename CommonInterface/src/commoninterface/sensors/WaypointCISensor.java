@@ -32,43 +32,30 @@ public class WaypointCISensor extends CISensor{
 	@Override
 	public void update(double time, ArrayList<Entity> entities) {
 		
-		double closestDistance = Double.MAX_VALUE;
-		
 		LatLon robotLatLon = drone.getGPSLatLon();
 		
-		boolean found = false;
+		Waypoint wp = drone.getActiveWaypoint();
 		
-		for(Entity e : entities) {
-			if(e instanceof Waypoint) {
+		if(wp != null) {
 				
-				Waypoint wp = (Waypoint)e;
-				
-				LatLon latLon = wp.getLatLon();
-				
-				double currentDistance = CoordinateUtilities.distanceInMeters(robotLatLon,latLon);
-				
-				if(currentDistance < closestDistance) {
-				
-					double currentOrientation = drone.getCompassOrientationInDegrees();
-					double coordinatesAngle = CoordinateUtilities.angleInDegrees(robotLatLon,latLon);
-					
-					double difference = currentOrientation - coordinatesAngle;
-					
-					difference%=360;
-					
-					if(difference > 180){
-						difference = -((180 -difference) + 180);
-					}
-					
-					readings[0] = difference;
-					readings[1] = currentDistance;
-					found = true;
-					closestDistance = currentDistance;
-				}
+			LatLon latLon = wp.getLatLon();
+			
+			double currentDistance = CoordinateUtilities.distanceInMeters(robotLatLon,latLon);
+			
+			double currentOrientation = drone.getCompassOrientationInDegrees();
+			double coordinatesAngle = CoordinateUtilities.angleInDegrees(robotLatLon,latLon);
+			
+			double difference = currentOrientation - coordinatesAngle;
+			
+			difference%=360;
+			
+			if(difference > 180){
+				difference = -((180 -difference) + 180);
 			}
-		}
-		
-		if(!found) {
+			
+			readings[0] = difference;
+			readings[1] = currentDistance;
+		}  else {
 			//If there is no waypoint, the sensor
 			//should act as if the robot arrived at a waypoint
 			readings[0] = 0.5;

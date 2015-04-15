@@ -2,13 +2,14 @@ package network;
 
 import gui.DroneGUI;
 import main.DroneControlConsole;
-import network.messages.BehaviorMessage;
-import network.messages.CompassMessage;
-import network.messages.GPSMessage;
-import network.messages.Message;
-import network.messages.SystemInformationsMessage;
-import network.messages.SystemStatusMessage;
-import network.messages.EntityMessage;
+import commoninterface.network.ConnectionHandler;
+import commoninterface.network.MessageHandler;
+import commoninterface.network.messages.BehaviorMessage;
+import commoninterface.network.messages.CompassMessage;
+import commoninterface.network.messages.EntityMessage;
+import commoninterface.network.messages.GPSMessage;
+import commoninterface.network.messages.Message;
+import commoninterface.network.messages.SystemStatusMessage;
 
 public class DroneConsoleMessageHandler extends MessageHandler {
 	
@@ -22,8 +23,6 @@ public class DroneConsoleMessageHandler extends MessageHandler {
 	protected void processMessage(Message message, ConnectionHandler c) {
 		if (message instanceof GPSMessage) {
 			((DroneGUI)console.getGUI()).getGPSPanel().displayData(((GPSMessage) message).getGPSData());
-		} else if (message instanceof SystemInformationsMessage) {
-			((DroneGUI)console.getGUI()).getSysInfoPanel().displayData(((SystemInformationsMessage) message).getSysInformations());
 		} else if (message instanceof SystemStatusMessage) {
 			((DroneGUI)console.getGUI()).getMessagesPanel().displayData((SystemStatusMessage) message);
 		} else if (message instanceof CompassMessage) {

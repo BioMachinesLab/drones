@@ -7,8 +7,9 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import commoninterface.network.messages.Message;
+
 import main.RobotControlConsole;
-import network.messages.Message;
 
 public abstract class DroneConnection extends Thread {
 	

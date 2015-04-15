@@ -8,7 +8,7 @@ JCC = javac
 .SUFFIXES: .java .class
 
 default:
-	make clean && make build && make run
+	make clean && make build && make drone
 
 build:
 	mkdir $(JDEST) && $(JCC) -cp $(CLASSPATH) $(JSOURCEPATH) -d $(JDEST) $(ROOT_FILE)

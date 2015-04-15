@@ -4,7 +4,6 @@ import gui.DroneGUI;
 import gui.RobotGUI;
 import network.DroneConsoleMessageHandler;
 import network.broadcast.ConsoleBroadcastHandler;
-import network.messages.InformationRequest.MessageType;
 import threads.BehaviorMessageThread;
 import threads.ConnectionThread;
 import threads.MapThread;
@@ -13,6 +12,7 @@ import threads.UpdateThread;
 import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
 import commoninterface.network.broadcast.PositionBroadcastMessage;
+import commoninterface.network.messages.InformationRequest.MessageType;
 import commoninterface.objects.RobotLocation;
 import dataObjects.ConsoleMotorSpeeds;
 
@@ -54,7 +54,7 @@ public class DroneControlConsole extends RobotControlConsole {
 		updateThreads.add(new MotorUpdateThread(this, gui.getMotorsPanel()));
 		updateThreads.add(new UpdateThread(this, ((DroneGUI)gui).getCompassPanel(), MessageType.COMPASS));
 		updateThreads.add(new BehaviorMessageThread(this, gui.getBehaviorsPanel()));
-		updateThreads.add(new MapThread(this, ((DroneGUI)gui).getMapPanel()));
+//		updateThreads.add(new MapThread(this, ((DroneGUI)gui).getMapPanel()));
 		
 		for(UpdateThread t : updateThreads)
 			t.start();

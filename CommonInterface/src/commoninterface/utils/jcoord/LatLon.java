@@ -323,10 +323,17 @@ public class LatLon implements Serializable {
     double latTo = Math.toRadians(ll.getLat());
     double lngFrom = Math.toRadians(getLon());
     double lngTo = Math.toRadians(ll.getLon());
+    
+    double acos = Math.sin(latFrom) * Math.sin(latTo) + Math.cos(latFrom)
+            * Math.cos(latTo) * Math.cos(lngTo - lngFrom);
+    
+    if(acos > 1)
+    	acos = 1;
+    if(acos < -1)
+    	acos = -1;
 
     double d =
-        Math.acos(Math.sin(latFrom) * Math.sin(latTo) + Math.cos(latFrom)
-            * Math.cos(latTo) * Math.cos(lngTo - lngFrom))
+        Math.acos(acos)
             * er;
 
     return d;

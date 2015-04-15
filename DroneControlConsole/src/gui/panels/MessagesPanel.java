@@ -13,9 +13,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 
-import network.messages.SystemStatusMessage;
-
 import org.joda.time.LocalDateTime;
+
+import commoninterface.network.messages.SystemStatusMessage;
 
 import threads.UpdateThread;
 

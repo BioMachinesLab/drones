@@ -15,7 +15,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import network.messages.ThymioReadingsMessage;
+import commoninterface.network.messages.ThymioReadingsMessage;
+
 import threads.UpdateThread;
 
 public class ThymioSensorsPanel extends UpdatePanel {

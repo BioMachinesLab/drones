@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import javax.swing.JOptionPane;
 
 import network.InformationConnection;
-import network.MessageHandler;
 import network.MotorConnection;
 import network.MotorMessageSender;
-import network.messages.Message;
 import threads.UpdateThread;
+import commoninterface.network.MessageHandler;
+import commoninterface.network.messages.Message;
 import dataObjects.ConsoleMotorSpeeds;
 
 public abstract class RobotControlConsole {

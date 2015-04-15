@@ -1,6 +1,6 @@
 package dataObjects;
 
-import network.messages.MotorMessage;
+import commoninterface.network.messages.MotorMessage;
 
 public class MotorSpeeds {
 

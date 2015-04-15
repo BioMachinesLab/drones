@@ -14,6 +14,5 @@ public abstract class GeoEntity extends Entity {
 	public LatLon getLatLon() {
 		return latLon;
 	}
-	
 
 }

@@ -1,12 +1,11 @@
 package io;
 
-import network.messages.InformationRequest;
-import network.messages.InformationRequest.MessageType;
-import network.messages.Message;
-import network.messages.MessageProvider;
-import network.messages.SystemStatusMessage;
-
-import commoninterfaceimpl.RealRobotCI;
+import commoninterface.RealRobotCI;
+import commoninterface.network.messages.InformationRequest;
+import commoninterface.network.messages.Message;
+import commoninterface.network.messages.MessageProvider;
+import commoninterface.network.messages.SystemStatusMessage;
+import commoninterface.network.messages.InformationRequest.MessageType;
 
 public class SystemStatusMessageProvider implements MessageProvider {
 	

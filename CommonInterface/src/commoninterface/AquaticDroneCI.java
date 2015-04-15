@@ -1,5 +1,6 @@
 package commoninterface;
 
+import commoninterface.objects.Waypoint;
 import commoninterface.utils.jcoord.LatLon;
 
 /**
@@ -40,5 +41,9 @@ public interface AquaticDroneCI extends RobotCI{
 	 * @param state the state of the led
 	 */
 	public void setLed (int index, LedState state);
+	
+	public void setActiveWaypoint(Waypoint wp);
+	
+	public Waypoint getActiveWaypoint();
 	
 }

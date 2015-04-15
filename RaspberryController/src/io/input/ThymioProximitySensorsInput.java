@@ -4,11 +4,11 @@ import io.ThymioIOManager;
 
 import java.util.List;
 
-import network.messages.InformationRequest;
-import network.messages.Message;
-import network.messages.MessageProvider;
-import network.messages.SystemStatusMessage;
-import network.messages.ThymioReadingsMessage;
+import commoninterface.network.messages.InformationRequest;
+import commoninterface.network.messages.Message;
+import commoninterface.network.messages.MessageProvider;
+import commoninterface.network.messages.SystemStatusMessage;
+import commoninterface.network.messages.ThymioReadingsMessage;
 
 public class ThymioProximitySensorsInput implements ControllerInput, MessageProvider {
 

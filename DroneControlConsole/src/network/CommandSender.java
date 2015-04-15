@@ -1,11 +1,13 @@
 package network;
 
 import gui.panels.CommandPanel;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import network.messages.Message;
+
+import commoninterface.network.messages.Message;
 
 public class CommandSender extends Thread{
 	

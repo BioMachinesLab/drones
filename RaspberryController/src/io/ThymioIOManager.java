@@ -11,10 +11,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
-import network.messages.MotorMessage;
-
 import org.freedesktop.dbus.DBusConnection;
 import org.freedesktop.dbus.exceptions.DBusException;
+
+import commoninterface.network.messages.MotorMessage;
 
 import utils.CommandLine;
 import ch.epfl.mobots.AsebaNetwork;

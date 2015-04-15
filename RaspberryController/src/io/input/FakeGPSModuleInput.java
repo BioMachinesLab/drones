@@ -1,11 +1,11 @@
 package io.input;
 
-import network.messages.MotorMessage;
+import commoninterface.dataobjects.MotorSpeeds;
 import commoninterface.mathutils.Vector2d;
+import commoninterface.network.messages.MotorMessage;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
 import commoninterfaceimpl.RealAquaticDroneCI;
-import dataObjects.MotorSpeeds;
 
 public class FakeGPSModuleInput extends GPSModuleInput {
 

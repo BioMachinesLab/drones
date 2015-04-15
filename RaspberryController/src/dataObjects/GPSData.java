@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.joda.time.LocalDateTime;
 
-import utils.Nmea0183ToDecimalConverter;
+import commoninterface.utils.Nmea0183ToDecimalConverter;
 import commoninterface.network.NetworkUtils;
 import commoninterface.objects.RobotLocation;
 import commoninterface.utils.jcoord.LatLon;

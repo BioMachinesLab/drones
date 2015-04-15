@@ -5,11 +5,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-import network.messages.BehaviorMessage;
-import network.messages.EntitiesMessage;
-import network.messages.LogMessage;
-import network.messages.Message;
-import commoninterfaceimpl.RealRobotCI;
+import commoninterface.RealRobotCI;
+import commoninterface.network.ConnectionHandler;
+import commoninterface.network.ConnectionListener;
+import commoninterface.network.messages.BehaviorMessage;
+import commoninterface.network.messages.EntitiesMessage;
+import commoninterface.network.messages.LogMessage;
+import commoninterface.network.messages.Message;
 
 public class CommandConnectionHandler extends ConnectionHandler {
 	

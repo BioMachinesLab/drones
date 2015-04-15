@@ -12,22 +12,20 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import network.messages.GPSMessage;
-import network.messages.InformationRequest;
-import network.messages.Message;
-import network.messages.MessageProvider;
-import network.messages.SystemStatusMessage;
-
 import org.joda.time.LocalDateTime;
-
-import utils.NMEA_Utils;
 
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialDataEvent;
 import com.pi4j.io.serial.SerialDataEventListener;
 import com.pi4j.io.serial.SerialFactory;
 
-import dataObjects.GPSData;
+import commoninterface.dataobjects.GPSData;
+import commoninterface.network.messages.GPSMessage;
+import commoninterface.network.messages.InformationRequest;
+import commoninterface.network.messages.Message;
+import commoninterface.network.messages.MessageProvider;
+import commoninterface.network.messages.SystemStatusMessage;
+import commoninterface.utils.NMEAUtils;
 
 public class GPSModuleInput implements ControllerInput, MessageProvider,
 		Serializable {
@@ -57,7 +55,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 	private final static boolean ENABLE_SBAS = true;
 
 	private final static String COM_PORT = Serial.DEFAULT_COM_PORT;
-	private NMEA_Utils nmeaUtils = new NMEA_Utils();
+	private NMEAUtils nmeaUtils = new NMEAUtils();
 	private Serial serial; // Serial connection
 	protected StringBuffer receivedDataBuffer = new StringBuffer();
 	protected GPSData gpsData = new GPSData(); // Contains the obtained info

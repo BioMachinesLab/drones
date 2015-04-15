@@ -9,22 +9,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 import network.CommandConnectionListener;
-import network.ConnectionHandler;
-import network.ConnectionListener;
 import network.ControllerMessageHandler;
 import network.MotorConnectionListener;
 import network.broadcast.RealBroadcastHandler;
-import network.messages.Message;
-import network.messages.MessageProvider;
-
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
 import commoninterface.CISensor;
+import commoninterface.RealRobotCI;
 import commoninterface.ThymioCI;
+import commoninterface.mathutils.Vector2d;
+import commoninterface.network.ConnectionHandler;
+import commoninterface.network.ConnectionListener;
 import commoninterface.network.NetworkUtils;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
+import commoninterface.network.messages.Message;
+import commoninterface.network.messages.MessageProvider;
 import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
 
@@ -46,7 +47,6 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 	private ArrayList<CISensor> cisensors = new ArrayList<CISensor>();
 
 	private CIArguments args;
-	private CILogger logger;
 	private long startTimeInMillis;
 	private double timestep = 0;
 	private double behaviorTimeStep = 0;
@@ -58,11 +58,13 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 	private CIBehavior activeBehavior = null;
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
 	
+	private Vector2d virtualPosition;
+	private Double virtualOrientation;
+	
 	@Override
-	public void begin(CIArguments args, CILogger logger) {
+	public void begin(CIArguments args) {
 		this.startTimeInMillis = System.currentTimeMillis();
 		this.args = args;
-		this.logger = logger;
 
 		addShutdownHooks();
 
@@ -285,6 +287,34 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 
 	public ThymioIOManager getIOManager() {
 		return ioManager;
+	}
+
+	@Override
+	public Vector2d getVirtualPosition() {
+		return virtualPosition;
+	}
+	
+	@Override
+	public void setVirtualPosition(double x, double y) {
+		if(virtualPosition == null)
+			virtualPosition = new Vector2d(x, y);
+		else
+			virtualPosition.set(x, y);
+	}
+	
+	@Override
+	public Double getVirtualOrientation() {
+		return virtualOrientation;
+	}
+
+	@Override
+	public void setVirtualOrientation(double orientation) {
+		virtualOrientation = orientation;
+	}
+
+	@Override
+	public double getThymioRadius() {
+		return 0.08;
 	}
 	
 }

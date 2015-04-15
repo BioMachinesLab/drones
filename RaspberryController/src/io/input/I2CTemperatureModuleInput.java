@@ -2,14 +2,13 @@ package io.input;
 
 import java.io.IOException;
 
-import network.messages.InformationRequest;
-import network.messages.Message;
-import network.messages.MessageProvider;
-import network.messages.SystemStatusMessage;
-import network.messages.TemperatureMessage;
-
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
+import commoninterface.network.messages.InformationRequest;
+import commoninterface.network.messages.Message;
+import commoninterface.network.messages.MessageProvider;
+import commoninterface.network.messages.SystemStatusMessage;
+import commoninterface.network.messages.TemperatureMessage;
 
 public class I2CTemperatureModuleInput extends Thread implements ControllerInput,
 		MessageProvider {

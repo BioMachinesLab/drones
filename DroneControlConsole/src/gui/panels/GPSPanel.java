@@ -17,8 +17,9 @@ import javax.swing.border.LineBorder;
 
 import org.joda.time.LocalDateTime;
 
+import commoninterface.dataobjects.GPSData;
+
 import threads.UpdateThread;
-import dataObjects.GPSData;
 
 public class GPSPanel extends UpdatePanel {
 	private static final long serialVersionUID = 6535539451990270799L;

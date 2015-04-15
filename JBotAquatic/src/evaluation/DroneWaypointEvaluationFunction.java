@@ -1,12 +1,10 @@
 package evaluation;
 
 import java.util.ArrayList;
-
 import commoninterface.mathutils.Vector2d;
 import commoninterface.objects.Entity;
 import commoninterface.objects.Waypoint;
 import commoninterface.utils.CoordinateUtilities;
-import commoninterface.utils.jcoord.LatLon;
 import simulation.Simulator;
 import simulation.robot.AquaticDrone;
 import simulation.util.Arguments;
@@ -22,15 +20,23 @@ public class DroneWaypointEvaluationFunction extends EvaluationFunction{
 	private Waypoint wp;
 	private int steps = 0;
 	private double bonus = 0;
+	@ArgumentsAnnotation(name="avoiddistance", defaultValue="0")
+	private double avoidDistance = 0;
+	@ArgumentsAnnotation(name="kill", defaultValue="0")
+	private boolean kill = false;
+	private double penalty = 0;
 
 	public DroneWaypointEvaluationFunction(Arguments args) {
 		super(args);
 		targetDistance = args.getArgumentAsDoubleOrSetDefault("targetdistance", targetDistance);
+		avoidDistance = args.getArgumentAsDoubleOrSetDefault("avoiddistance", avoidDistance);
+		kill = args.getArgumentAsDoubleOrSetDefault("kill", 0) == 1;
 	}
 
 	@Override
 	public void update(Simulator simulator) {
 		AquaticDrone drone = (AquaticDrone)simulator.getRobots().get(0);
+		boolean insideWP = false;
 		
 		if(!configured) {
 			steps = simulator.getEnvironment().getSteps();
@@ -49,6 +55,7 @@ public class DroneWaypointEvaluationFunction extends EvaluationFunction{
 			
 			if(currentDistance < targetDistance) {
 				fitness = 1.0;
+				insideWP = true;
 				
 				bonus+=(0.5/steps);
 				
@@ -56,16 +63,38 @@ public class DroneWaypointEvaluationFunction extends EvaluationFunction{
 					bonus+=(1.0/steps);
 				}
 				
+				
 			} else {
 				fitness = (startingDistance-currentDistance)/startingDistance;
 			}
 		}
 		
+		if(!insideWP && avoidDistance > 0) {
+			
+			double highestPenalty = 0;
+			
+			for(int i = 1 ; i < simulator.getRobots().size() ; i++) {
+				AquaticDrone other = (AquaticDrone)simulator.getRobots().get(i);
+				
+				double dist = CoordinateUtilities.distanceInMeters(drone.getGPSLatLon(), other.getGPSLatLon());
+				
+				if(dist < avoidDistance)
+					highestPenalty= Math.max(1-(dist/avoidDistance),highestPenalty);
+			}
+			penalty-=highestPenalty/simulator.getEnvironment().getSteps()*5;
+		}
+		
+		if(kill && !insideWP && drone.isInvolvedInCollison()) {
+			simulator.stopSimulation();
+			fitness = 0;
+			bonus = 0;
+			penalty = 0;
+		}
 	}
 	
 	@Override
 	public double getFitness() {
-		return fitness + bonus;
+		return fitness + bonus + (bonus > 0 ? penalty : 0);
 	}
 	
 	private Waypoint getWaypoint(AquaticDrone drone) {

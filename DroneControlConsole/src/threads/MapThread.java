@@ -1,9 +1,10 @@
 package threads;
 
+import commoninterface.network.messages.EntityMessage;
+
 import gui.panels.UpdatePanel;
 import gui.panels.map.MapPanel;
 import main.DroneControlConsole;
-import network.messages.EntityMessage;
 
 public class MapThread extends UpdateThread {
 	
@@ -20,11 +21,6 @@ public class MapThread extends UpdateThread {
 
 		while (keepGoing) {
 			panel.threadWait();
-			
-			EntityMessage msg = mapPanel.getCurrentMessage();
-			
-			if(msg != null)
-				console.sendData(msg);
 		}
 	}
 }

@@ -2,9 +2,9 @@ package io.output;
 
 import java.io.IOException;
 
-import network.messages.MotorMessage;
-import utils.Math_Utils;
-import dataObjects.MotorSpeeds;
+import commoninterface.dataobjects.MotorSpeeds;
+import commoninterface.network.messages.MotorMessage;
+import commoninterface.utils.MathUtils;
 
 public class ReversableESCManagerOutput extends Thread implements
 		ControllerOutput {
@@ -57,9 +57,9 @@ public class ReversableESCManagerOutput extends Thread implements
 				lValue = CENTRAL_VALUE;
 			} else {
 				if(value > 0.5) {
-					lValue = (int)(Math_Utils.map(value, 0.5, 1, MIN_FW_VALUE, MAX_VALUE));
+					lValue = (int)(MathUtils.map(value, 0.5, 1, MIN_FW_VALUE, MAX_VALUE));
 				} else if(value < 0.5) {
-					lValue = (int)(Math_Utils.map(value, 0, 0.5, MIN_VALUE, MIN_BW_VALUE));
+					lValue = (int)(MathUtils.map(value, 0, 0.5, MIN_VALUE, MIN_BW_VALUE));
 				}
 			}
 			break;
@@ -68,9 +68,9 @@ public class ReversableESCManagerOutput extends Thread implements
 				rValue = CENTRAL_VALUE;
 			} else {
 				if(value > 0.5) {
-					rValue = (int)(Math_Utils.map(value, 0.5, 1, MIN_FW_VALUE, MAX_VALUE));
+					rValue = (int)(MathUtils.map(value, 0.5, 1, MIN_FW_VALUE, MAX_VALUE));
 				} else if(value < 0.5) {
-					rValue = (int)(Math_Utils.map(value, 0, 0.5, MIN_VALUE, MIN_BW_VALUE));
+					rValue = (int)(MathUtils.map(value, 0, 0.5, MIN_VALUE, MIN_BW_VALUE));
 				}
 			}
 			break;

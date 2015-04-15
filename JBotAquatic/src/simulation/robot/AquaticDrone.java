@@ -6,20 +6,23 @@ import mathutils.MathUtils;
 import mathutils.Vector2d;
 import net.jafama.FastMath;
 import network.SimulatedBroadcastHandler;
+import simpletestbehaviors.ChangeWaypointCIBehavior;
 import simulation.Simulator;
+import simulation.physicalobjects.PhysicalObject;
 import simulation.robot.actuator.PropellersActuator;
 import simulation.robot.actuators.Actuator;
 import simulation.robot.sensors.CompassSensor;
 import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
 import commoninterface.AquaticDroneCI;
-import commoninterface.CILogger;
+import commoninterface.CIBehavior;
 import commoninterface.CISensor;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
 import commoninterface.network.broadcast.PositionBroadcastMessage;
 import commoninterface.objects.Entity;
+import commoninterface.objects.Waypoint;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
@@ -34,12 +37,18 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	private ArrayList<CISensor> cisensors = new ArrayList<CISensor>();
 	private PropellersActuator propellers;
 	private SimulatedBroadcastHandler broadcastHandler;
+	private Waypoint activeWaypoint;
 	
 	@ArgumentsAnnotation(name="gpserror", defaultValue = "0.0")
 	private double gpsError = 0;
 	
 	@ArgumentsAnnotation(name="compasserror", defaultValue = "0.0")
 	private double compassError = 0;
+	
+	@ArgumentsAnnotation(name="commrange", defaultValue = "0.0")
+	private double commRange = 0.0;
+	
+	private ArrayList<CIBehavior> alwaysActiveBehaviors = new ArrayList<CIBehavior>();
 	
 	public AquaticDrone(Simulator simulator, Arguments args) {
 		super(simulator, args);
@@ -52,6 +61,12 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		
 		gpsError = args.getArgumentAsDoubleOrSetDefault("gpserror", gpsError);
 		compassError = Math.toRadians(args.getArgumentAsDoubleOrSetDefault("compasserror", compassError));
+		commRange = args.getArgumentAsDoubleOrSetDefault("commrange", commRange);
+		
+		if(commRange == 0)
+			throw new RuntimeException("[AquaticDrone] CommRange is at 0!");
+		
+		alwaysActiveBehaviors.add(new ChangeWaypointCIBehavior(new CIArguments(""), this));
 		
 		sensors.add(new CompassSensor(simulator, sensors.size()+1, this, args));
 		actuators.add(new PropellersActuator(simulator, actuators.size()+1, args));
@@ -59,6 +74,13 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	
 	@Override
 	public void shutdown() {}
+	
+	@Override
+	public void updateSensors(double simulationStep,ArrayList<PhysicalObject> teleported) {
+		for(CIBehavior b : alwaysActiveBehaviors)
+			b.step(simulationStep);
+		super.updateSensors(simulationStep, teleported);
+	}
 
 	public void setMotorSpeeds(double leftMotorPercentage, double rightMotorPercentage) {
 		if(propellers == null)
@@ -98,7 +120,6 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	
 	@Override
 	public double getGPSOrientationInDegrees() {
-		// TODO how should we model this? add error? 
 		return getCompassOrientationInDegrees();
 	}
 
@@ -163,7 +184,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		position.set(
 				position.getX() + timeDelta * velocity.getX(), 
 				position.getY() + timeDelta * velocity.getY());
-			
+		
 		for (Actuator actuator : actuators) {
 			actuator.apply(this);
 		}
@@ -171,9 +192,13 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		broadcastHandler.update(time);
 
 	}
+	
+	public double getCommRange() {
+		return commRange;
+	}
 
 	@Override
-	public void begin(CIArguments args, CILogger logger) {
+	public void begin(CIArguments args) {
 		
 	}
 
@@ -199,5 +224,15 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	
 	public Simulator getSimulator() {
 		return simulator;
+	}
+	
+	@Override
+	public Waypoint getActiveWaypoint() {
+		return activeWaypoint;
+	}
+	
+	@Override
+	public void setActiveWaypoint(Waypoint wp) {
+		this.activeWaypoint = wp;
 	}
 }

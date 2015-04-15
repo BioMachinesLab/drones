@@ -1,16 +1,13 @@
 package commoninterface.network.broadcast;
 
-import commoninterface.RobotCI;
 
 public abstract class BroadcastMessage {
 	
 	public static final String MESSAGE_SEPARATOR = ";";
-	protected RobotCI robot;
 	protected long updateTime = Long.MAX_VALUE;
 	protected String identifier;
 	
-	public BroadcastMessage(RobotCI robot, long updateTime, String identifier) {
-		this.robot = robot;
+	public BroadcastMessage(long updateTime, String identifier) {
 		this.updateTime = updateTime;
 		this.identifier = identifier;
 	}

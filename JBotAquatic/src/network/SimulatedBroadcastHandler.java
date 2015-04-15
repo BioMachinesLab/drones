@@ -8,6 +8,9 @@ import simulation.robot.AquaticDrone;
 import commoninterface.RobotCI;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.broadcast.BroadcastMessage;
+import commoninterface.network.broadcast.PositionBroadcastMessage;
+import commoninterface.objects.RobotLocation;
+import commoninterface.utils.CoordinateUtilities;
 
 public class SimulatedBroadcastHandler extends BroadcastHandler {
 
@@ -17,13 +20,45 @@ public class SimulatedBroadcastHandler extends BroadcastHandler {
 		super(drone, broadcastMessages);
 		sender = new SimulatedBroadcastMessageSender(this, this.broadcastMessages);
 	}
+	
+	@Override
+	public void messageReceived(String address, String message) {
+
+		if(address.equals(robot.getNetworkAddress()))
+			return;
+		
+		String identifier = message.split(BroadcastMessage.MESSAGE_SEPARATOR)[0];
+		
+		switch(identifier) {
+			case PositionBroadcastMessage.IDENTIFIER:
+				
+				RobotLocation dl = PositionBroadcastMessage.decode(address, message);
+				
+				if(robot instanceof AquaticDrone) {
+					AquaticDrone drone = (AquaticDrone)robot;
+					if(CoordinateUtilities.distanceInMeters(drone.getGPSLatLon(),dl.getLatLon()) > drone.getCommRange())
+						robot.getEntities().remove(dl);
+				} else {
+					dl.setTimestepReceived((long)(robot.getTimeSinceStart()/10));
+					robot.getEntities().remove(dl);
+					robot.getEntities().add(dl);
+					if(DEBUG)
+						System.out.println("Added DroneLocation "+dl);
+				}
+				
+				break;
+			default:
+				super.messageReceived(address, message);
+				break;
+		}
+	}
 
 	@Override
 	public void sendMessage(String message) {
-		AquaticDrone r = (AquaticDrone)drone;
+		AquaticDrone r = (AquaticDrone)robot;
 		Network net = r.getSimulator().getNetwork();
 		if(net != null)
-			net.send(drone.getNetworkAddress(), message);
+			net.send(robot.getNetworkAddress(), message);
 	}
 
 	@Override
