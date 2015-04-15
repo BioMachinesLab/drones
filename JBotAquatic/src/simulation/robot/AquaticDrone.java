@@ -45,6 +45,9 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	@ArgumentsAnnotation(name="compasserror", defaultValue = "0.0")
 	private double compassError = 0;
 	
+	@ArgumentsAnnotation(name="commrange", defaultValue = "0.0")
+	private double commRange = 0.0;
+	
 	private ArrayList<CIBehavior> alwaysActiveBehaviors = new ArrayList<CIBehavior>();
 	
 	public AquaticDrone(Simulator simulator, Arguments args) {
@@ -58,6 +61,10 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		
 		gpsError = args.getArgumentAsDoubleOrSetDefault("gpserror", gpsError);
 		compassError = Math.toRadians(args.getArgumentAsDoubleOrSetDefault("compasserror", compassError));
+		commRange = args.getArgumentAsDoubleOrSetDefault("commrange", commRange);
+		
+		if(commRange == 0)
+			throw new RuntimeException("[AquaticDrone] CommRange is at 0!");
 		
 		alwaysActiveBehaviors.add(new ChangeWaypointCIBehavior(new CIArguments(""), this));
 		
@@ -113,7 +120,6 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	
 	@Override
 	public double getGPSOrientationInDegrees() {
-		// TODO how should we model this? add error? 
 		return getCompassOrientationInDegrees();
 	}
 
@@ -179,15 +185,16 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 				position.getX() + timeDelta * velocity.getX(), 
 				position.getY() + timeDelta * velocity.getY());
 		
-		if(Double.isNaN(position.getX()))
-			System.out.println("wow");
-			
 		for (Actuator actuator : actuators) {
 			actuator.apply(this);
 		}
 		
 		broadcastHandler.update(time);
 
+	}
+	
+	public double getCommRange() {
+		return commRange;
 	}
 
 	@Override

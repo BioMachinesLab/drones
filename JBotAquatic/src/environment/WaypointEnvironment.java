@@ -43,7 +43,7 @@ public class WaypointEnvironment extends Environment{
 			r.setOrientation(simulator.getRandom().nextDouble()*Math.PI*2);
 		
 		for(int i = 0 ; i < otherRobots ; i++) {
-			AquaticDrone drone = new AquaticDrone(simulator, new Arguments("gpserror=1.0,radius=0.20,diameter=0.40"));
+			AquaticDrone drone = new AquaticDrone(simulator, new Arguments("gpserror=1.0,radius=0.20,diameter=0.40,commrange=0.01"));
 			
 			double dist = (distance)*simulator.getRandom().nextDouble()+5;
 			double angle = simulator.getRandom().nextDouble()*Math.PI*2;

@@ -160,7 +160,8 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 			vectorCross(accel, east, north);
 			vectorNormalize(north);
 			
-			double[] from = new double[]{1, 0 ,0};
+			//depending on how the compass is physically oriented
+			double[] from = new double[]{0, 1 ,0};
 			
 		    double heading =
 		    		Math.atan2(

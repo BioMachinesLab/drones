@@ -23,7 +23,7 @@ import commoninterface.utils.CoordinateUtilities;
 
 public class CITwoDRenderer extends TwoDRenderer {
 	
-	private static final double ENTITY_DIAMETER = 0.08;
+	private static final double ENTITY_DIAMETER = 1.08;
 	
 	private int droneID;
 	private boolean seeSensors;
