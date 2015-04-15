@@ -63,18 +63,15 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			.synchronizedList(new ArrayList<String>());
 	protected MessageParser messageParser;
 
-	private boolean externalAntenna = false;
 	protected boolean available = false;
 	private boolean enable = false;
 
-	public GPSModuleInput(boolean externalAntenna, boolean fake) {
-		this.externalAntenna = externalAntenna;
+	public GPSModuleInput(boolean fake) {
 		if (!fake)
 			init();
 	}
 
-	public GPSModuleInput(boolean externalAntenna) {
-		this.externalAntenna = externalAntenna;
+	public GPSModuleInput() {
 		init();
 	}
 
@@ -292,12 +289,6 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 						.println("[GPS Module] SBAS was NOT succefully enabled!");
 		}
 
-		if (externalAntenna) {
-			enableExternalAntenna();
-		} else {
-			disableExternalAntenna();
-		}
-
 		ackResponses.clear();
 	}
 
@@ -438,16 +429,6 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		} else {
 			return true;
 		}
-	}
-
-	public void enableExternalAntenna() throws InterruptedException {
-		// check it here https://github.com/adafruit/Adafruit-GPS-Library/blob/master/Adafruit_GPS.h
-		serialWrite("$PGCMD,33,1*6C\r\n", false);
-	}
-
-	public void disableExternalAntenna() throws InterruptedException {
-		// check it here https://github.com/adafruit/Adafruit-GPS-Library/blob/master/Adafruit_GPS.h
-		serialWrite("$PGCMD,33,0*6D\r\n", false);
 	}
 
 	/*
