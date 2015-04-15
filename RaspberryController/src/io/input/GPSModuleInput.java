@@ -271,14 +271,26 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		/*
 		 * Disable always locate mode
 		 */
-		if (sendCommandAndCheckAnswer("$PMTK225,0*2B\r\n", "$PMTK001,225,3*35")) {
+		if (disableAlwaysLocateStandby()) {
 			System.out
 					.println("[GPS Module] OK! Always locate mode was succefully disabled!");
 		} else {
 			System.out
 					.println("[GPS Module] Always locate mode was NOT succefully disabled!");
 		}
+		
+		/*
+		 * Enable AIC
+		 */
+		if(enableAIC()){
+			System.out.println("[GPS Module] OK! AIC mode sucessfully activated!");
+		}else{
+			System.out.println("[GPS Module] AIC mode NOT sucessfully activated!");
+		}
 
+		/*
+		 * Set SBAS mode
+		 */
 		if (ENABLE_SBAS) {
 			boolean success = enableSBAS();
 			if (success)
@@ -429,6 +441,17 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		} else {
 			return true;
 		}
+
+	}
+
+	public void enableMessagesOnExternalAntenna() throws InterruptedException {
+		// check it here https://github.com/adafruit/Adafruit-GPS-Library/blob/master/Adafruit_GPS.h
+		serialWrite("$PGCMD,33,1*6C\r\n", false);
+	}
+
+	public void disableMessagesOnExternalAntenna() throws InterruptedException {
+		// check it here https://github.com/adafruit/Adafruit-GPS-Library/blob/master/Adafruit_GPS.h
+		serialWrite("$PGCMD,33,0*6D\r\n", false);
 	}
 
 	/*
