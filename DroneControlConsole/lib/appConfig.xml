@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
-<entry key="BBoxXY.MinX">0</entry>
 <entry key="WaitAfterNrTiles">true</entry>
+<entry key="BBoxXY.MinX">0</entry>
 <entry key="SlippyMapNoDownload">false</entry>
 <entry key="WaitSeconds">2</entry>
 <entry key="WaitNrTiles">10</entry>
@@ -10,21 +10,21 @@
 <entry key="ProxyServerPassword"/>
 <entry key="OverwriteExistingFiles">true</entry>
 <entry key="UseProxyServer">false</entry>
-<entry key="BBoxLatLon.MinLon">-9.16577</entry>
 <entry key="DownloadThreads">1</entry>
+<entry key="BBoxLatLon.MinLon">-9.15831</entry>
 <entry key="UrlSquare.Radius">5</entry>
 <entry key="ProxyServerPort"/>
-<entry key="BBoxLatLon.MinLat">38.74391</entry>
 <entry key="MinimumAgeInDays">7</entry>
+<entry key="BBoxLatLon.MinLat">38.74625</entry>
 <entry key="TileSortingPolicy">2</entry>
 <entry key="GPX.Corridor">0</entry>
-<entry key="LastZoom">15,16,17,18,19,20</entry>
+<entry key="LastZoom">17</entry>
 <entry key="InputPanelIndex">1</entry>
 <entry key="GPX.GpxFile"/>
 <entry key="UrlSquare.PasteUrl"/>
 <entry key="ProxyServer"/>
 <entry key="TileServer">Mapnik</entry>
-<entry key="BBoxLatLon.MaxLon">-9.14569</entry>
+<entry key="BBoxLatLon.MaxLon">-9.14595</entry>
 <entry key="SlippyMapSaveTiles">false</entry>
 <entry key="UseProxyServerAuth">false</entry>
 <entry key="BBoxXY.MaxY">0</entry>
@@ -32,5 +32,5 @@
 <entry key="ProxyServerUser"/>
 <entry key="BBoxXY.MinY">0</entry>
 <entry key="BBoxXY.MaxX">0</entry>
-<entry key="BBoxLatLon.MaxLat">38.75797</entry>
+<entry key="BBoxLatLon.MaxLat">38.75917</entry>
 </properties>

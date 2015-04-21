@@ -60,7 +60,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		broadcastHandler = new SimulatedBroadcastHandler(this, broadcastMessages);
 		
 		gpsError = args.getArgumentAsDoubleOrSetDefault("gpserror", gpsError);
-		compassError = Math.toRadians(args.getArgumentAsDoubleOrSetDefault("compasserror", compassError));
+		compassError = args.getArgumentAsDoubleOrSetDefault("compasserror", compassError);
 		commRange = args.getArgumentAsDoubleOrSetDefault("commrange", commRange);
 		
 		if(commRange == 0)

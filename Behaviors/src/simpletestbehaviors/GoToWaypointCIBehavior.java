@@ -59,15 +59,23 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 			if (Math.abs(difference) <= angleTolerance) {
 				System.out.println("front");
 				drone.setLed(0, LedState.ON);
-				drone.setMotorSpeeds(1.0, 1.0);
+				
+				double reduction = 1-(1.0*(Math.abs(difference)/angleTolerance));
+				
+				if(difference < 0)
+					drone.setMotorSpeeds(1.0, reduction);
+				else if(difference > 0)
+					drone.setMotorSpeeds(reduction, 1.0);
+				else
+					drone.setMotorSpeeds(1.0, 1.0);
 			}else {
 				drone.setLed(0, LedState.BLINKING);
 				if (difference > 0) {
 					System.out.println("left");
-					drone.setMotorSpeeds(0, 0.2);
+					drone.setMotorSpeeds(0, 0.1);
 				} else {
 					System.out.println("right");
-					drone.setMotorSpeeds(0.2, 0);
+					drone.setMotorSpeeds(0.1, 0);
 				}
 			}
 		}

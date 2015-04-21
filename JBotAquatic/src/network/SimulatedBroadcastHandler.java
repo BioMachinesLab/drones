@@ -5,10 +5,12 @@ import java.util.ArrayList;
 
 import simulation.Network;
 import simulation.robot.AquaticDrone;
+
 import commoninterface.RobotCI;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.PositionBroadcastMessage;
+import commoninterface.objects.Entity;
 import commoninterface.objects.RobotLocation;
 import commoninterface.utils.CoordinateUtilities;
 
@@ -38,10 +40,14 @@ public class SimulatedBroadcastHandler extends BroadcastHandler {
 					AquaticDrone drone = (AquaticDrone)robot;
 					if(CoordinateUtilities.distanceInMeters(drone.getGPSLatLon(),dl.getLatLon()) > drone.getCommRange())
 						robot.getEntities().remove(dl);
+					else {
+						replaceEntity(dl);
+						if(DEBUG)
+							System.out.println("Added DroneLocation "+dl);
+					}
+						
 				} else {
-					dl.setTimestepReceived((long)(robot.getTimeSinceStart()/10));
-					robot.getEntities().remove(dl);
-					robot.getEntities().add(dl);
+					replaceEntity(dl);
 					if(DEBUG)
 						System.out.println("Added DroneLocation "+dl);
 				}
@@ -51,6 +57,12 @@ public class SimulatedBroadcastHandler extends BroadcastHandler {
 				super.messageReceived(address, message);
 				break;
 		}
+	}
+	
+	private void replaceEntity(Entity e) {
+		e.setTimestepReceived((long)(robot.getTimeSinceStart()/10));
+		robot.getEntities().remove(e);
+		robot.getEntities().add(e);
 	}
 
 	@Override
