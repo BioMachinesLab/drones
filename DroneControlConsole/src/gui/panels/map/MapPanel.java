@@ -106,8 +106,9 @@ public class MapPanel extends UpdatePanel {
         
         try {
         
-	        JComboBox<TileSource> tileSourceSelector = new JComboBox<>(new TileSource[] { new OfflineOsmTileSource((new File("tiles").toURI().toURL()).toString(),1,20) ,
-	        		new OsmTileSource.Mapnik(), new BingAerialTileSource(), new MapQuestOsmTileSource()});
+	        JComboBox<TileSource> tileSourceSelector = new JComboBox<>(new TileSource[] { new OfflineOsmTileSource((new File("tiles").toURI().toURL()).toString(),1,19) ,
+//	        		new OsmTileSource.Mapnik(), new BingAerialTileSource(), new MapQuestOsmTileSource()
+	        });
 	        tileSourceSelector.addItemListener(new ItemListener() {
 	            public void itemStateChanged(ItemEvent e) {
 	                map().setTileSource((TileSource) e.getItem());
@@ -288,9 +289,9 @@ public class MapPanel extends UpdatePanel {
         	map().removeMapMarker(old);
     	}
     	
-    	if(robotMarkers.size() == 1 && robotPositions.size() == 1) {
-    		fitMarkersButton.doClick();
-    	}
+//    	if(robotMarkers.size() == 1 && robotPositions.size() == 1) {
+//    		fitMarkersButton.doClick();
+//    	}
     }
     
     public void displayData(RobotLocation di) {
@@ -351,6 +352,20 @@ public class MapPanel extends UpdatePanel {
 
 	public void displayData(EntityMessage message) {
 		System.out.println("TODO MapPanel");
+	}
+	
+	public void clearHistory() {
+		
+		for(String s : robotPositions.keySet()) {
+		
+			LinkedList<MapMarker> robotMarkers = robotPositions.get(s);
+		
+			while(!robotMarkers.isEmpty()) {
+	    		MapMarker old = robotMarkers.pollFirst();
+	    		treeMap.removeFromLayer(old);
+	        	map().removeMapMarker(old);
+	    	}
+		}
 	}
 	
 	private synchronized void addToGeoFence(Coordinate coord) {

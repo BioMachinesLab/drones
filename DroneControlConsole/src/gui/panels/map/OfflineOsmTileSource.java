@@ -28,5 +28,10 @@ public class OfflineOsmTileSource extends AbstractOsmTileSource {
 	public TileUpdate getTileUpdate() {
 		return TileUpdate.None;
 	}
+	
+	@Override
+	public String getExtension() {
+		return "jpeg";
+	}
 
 }
