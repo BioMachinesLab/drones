@@ -5,8 +5,9 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RadialGradientPaint;
 import java.awt.geom.Point2D;
-
+import java.util.LinkedList;
 import net.jafama.FastMath;
+import simulation.physicalobjects.Line;
 import simulation.robot.Robot;
 import simulation.robot.sensors.ConeTypeSensor;
 import simulation.robot.sensors.Sensor;
@@ -16,7 +17,9 @@ import commoninterface.RobotCI;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.objects.Entity;
 import commoninterface.objects.GeoEntity;
+import commoninterface.objects.GeoFence;
 import commoninterface.objects.VirtualEntity;
+import commoninterface.objects.Waypoint;
 import commoninterface.sensors.ConeTypeCISensor;
 import commoninterface.sensors.ThymioConeTypeCISensor;
 import commoninterface.utils.CoordinateUtilities;
@@ -44,23 +47,49 @@ public class CITwoDRenderer extends TwoDRenderer {
 		RobotCI robotci = (RobotCI) robot;
 		int circleDiameter = bigRobots ? (int)Math.max(10,Math.round(ENTITY_DIAMETER * scale)) : (int) Math.round(ENTITY_DIAMETER * scale);
 		
-		graphics.setColor(Color.GREEN.darker());
 		if(robot.getId() == droneID){
 			for (Entity entity : robotci.getEntities()) {
 				if(entity instanceof GeoEntity){
+					graphics.setColor(Color.GREEN.darker());
 					GeoEntity e = (GeoEntity)entity;
 					Vector2d pos = CoordinateUtilities.GPSToCartesian(e.getLatLon());
 					int x = (int) (transformX(pos.x) - circleDiameter / 2);
 					int y = (int) (transformY(pos.y) - circleDiameter / 2);
 					graphics.fillOval(x, y, circleDiameter, circleDiameter);
 				}else if (entity instanceof VirtualEntity){
+					graphics.setColor(Color.GREEN.darker());
 					VirtualEntity e = (VirtualEntity)entity;
 					int x = (int) (transformX(e.getX()) - circleDiameter / 2);
 					int y = (int) (transformY(e.getY()) - circleDiameter / 2);
 					graphics.fillOval(x, y, circleDiameter, circleDiameter);
+				} else if(entity instanceof GeoFence) {
+					drawGeoFence((GeoFence)entity);					
 				}
 			}
 		}
+	}
+	
+	protected void drawGeoFence(GeoFence geo) {
+		LinkedList<Waypoint> waypoints = geo.getWaypoints();
+		
+		for(int i = 1 ; i < waypoints.size() ; i++) {
+			
+			Waypoint wa = waypoints.get(i-1);
+			Waypoint wb = waypoints.get(i);
+			Vector2d va = CoordinateUtilities.GPSToCartesian(wa.getLatLon());
+			Vector2d vb = CoordinateUtilities.GPSToCartesian(wb.getLatLon());
+			
+			Line l = new Line(simulator,"line"+i,va.getX(),va.getY(),vb.getX(),vb.getY());
+			drawLine(l);
+		}
+		
+		Waypoint wa = waypoints.get(waypoints.size()-1);
+		Waypoint wb = waypoints.get(0);
+		Vector2d va = CoordinateUtilities.GPSToCartesian(wa.getLatLon());
+		Vector2d vb = CoordinateUtilities.GPSToCartesian(wb.getLatLon());
+		
+		Line l = new Line(simulator,"line0",va.getX(),va.getY(),vb.getX(),vb.getY());
+		drawLine(l);
 	}
 	
 	@Override

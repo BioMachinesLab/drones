@@ -3,8 +3,6 @@ package commoninterface.neuralnetwork.inputs;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Vector;
-
-import commoninterface.AquaticDroneCI;
 import commoninterface.CIFactory;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;

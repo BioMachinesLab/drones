@@ -22,6 +22,7 @@ import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
 import commoninterface.network.broadcast.PositionBroadcastMessage;
 import commoninterface.objects.Entity;
+import commoninterface.objects.GeoFence;
 import commoninterface.objects.Waypoint;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;

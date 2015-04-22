@@ -21,9 +21,8 @@ public abstract class ConeTypeCISensor extends CISensor {
 	protected int numberSensors = 1;
 	protected double openingAngle = Math.toRadians(90);
 	protected GeometricCalculator geoCalc = new GeometricCalculator();
-	private Vector2d sensorPosition = new Vector2d();
 
-	private AquaticDroneCI drone;
+	protected AquaticDroneCI drone;
 	
 	public ConeTypeCISensor(int id, RobotCI robot, CIArguments args) {
 		super(id, robot, args);
