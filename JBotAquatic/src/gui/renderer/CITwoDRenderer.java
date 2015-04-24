@@ -5,7 +5,9 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RadialGradientPaint;
 import java.awt.geom.Point2D;
+import java.util.Iterator;
 import java.util.LinkedList;
+
 import net.jafama.FastMath;
 import simulation.physicalobjects.Line;
 import simulation.robot.Robot;
@@ -48,7 +50,12 @@ public class CITwoDRenderer extends TwoDRenderer {
 		int circleDiameter = bigRobots ? (int)Math.max(10,Math.round(ENTITY_DIAMETER * scale)) : (int) Math.round(ENTITY_DIAMETER * scale);
 		
 		if(robot.getId() == droneID){
-			for (Entity entity : robotci.getEntities()) {
+			
+			//to prevent ConcurrentModificationExceptions
+			Object[] entities = (Object[])robotci.getEntities().toArray();
+			
+			for(Object o: entities) {
+				Entity entity = (Entity)o;
 				if(entity instanceof GeoEntity){
 					graphics.setColor(Color.GREEN.darker());
 					GeoEntity e = (GeoEntity)entity;

@@ -1,17 +1,15 @@
-package network;
+package commoninterface.network;
 
 import java.io.IOException;
 import java.net.Socket;
 
-import commoninterface.RealRobotCI;
-import commoninterface.network.ConnectionHandler;
-import commoninterface.network.ConnectionListener;
+import commoninterface.RobotCI;
 
 public class MotorConnectionListener extends ConnectionListener {
 	
 	private static int MOTOR_PORT = 10102;
 
-	public MotorConnectionListener(RealRobotCI drone) throws IOException{
+	public MotorConnectionListener(RobotCI drone) throws IOException{
 		super(drone, MOTOR_PORT);
 	}
 	

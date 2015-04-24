@@ -1,17 +1,14 @@
-package network;
+package commoninterface.network;
 
 import java.io.IOException;
 import java.net.Socket;
-
-import commoninterface.RealRobotCI;
-import commoninterface.network.ConnectionHandler;
-import commoninterface.network.ConnectionListener;
+import commoninterface.RobotCI;
 
 public class CommandConnectionListener extends ConnectionListener {
 	
 	private static int BEHAVIOR_PORT = 10103;
 	
-	public CommandConnectionListener(RealRobotCI drone) throws IOException {
+	public CommandConnectionListener(RobotCI drone) throws IOException {
 		super(drone, BEHAVIOR_PORT);
 	}
 	

@@ -1,7 +1,9 @@
 package simulation.robot;
 
 import java.util.ArrayList;
-
+import java.util.Iterator;
+import java.util.LinkedList;
+import org.joda.time.LocalDateTime;
 import mathutils.MathUtils;
 import mathutils.Vector2d;
 import net.jafama.FastMath;
@@ -17,10 +19,20 @@ import simulation.util.ArgumentsAnnotation;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CISensor;
+import commoninterface.dataobjects.GPSData;
+import commoninterface.network.ConnectionHandler;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
 import commoninterface.network.broadcast.PositionBroadcastMessage;
+import commoninterface.network.messages.BehaviorMessage;
+import commoninterface.network.messages.CompassMessage;
+import commoninterface.network.messages.EntitiesMessage;
+import commoninterface.network.messages.EntityMessage;
+import commoninterface.network.messages.GPSMessage;
+import commoninterface.network.messages.InformationRequest;
+import commoninterface.network.messages.Message;
+import commoninterface.network.messages.SystemStatusMessage;
 import commoninterface.objects.Entity;
 import commoninterface.objects.GeoFence;
 import commoninterface.objects.Waypoint;
@@ -77,6 +89,11 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	public void shutdown() {}
 	
 	@Override
+	public void setWheelSpeed(double left, double right) {
+		super.setWheelSpeed(left, right);
+	}
+	
+	@Override
 	public void updateSensors(double simulationStep,ArrayList<PhysicalObject> teleported) {
 		for(CIBehavior b : alwaysActiveBehaviors)
 			b.step(simulationStep);
@@ -86,9 +103,9 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	public void setMotorSpeeds(double leftMotorPercentage, double rightMotorPercentage) {
 		if(propellers == null)
 			propellers = (PropellersActuator) getActuatorByType(PropellersActuator.class);
+		
 		propellers.setLeftPercentage(leftMotorPercentage);
 		propellers.setRightPercentage(rightMotorPercentage);
-		propellers.apply(this);
 	}
 
 	@Override
@@ -167,6 +184,8 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		
 		orientation = MathUtils.modPI2(orientation + motorModel(rightWheelSpeed-leftWheelSpeed)*lw);
 		
+//		System.out.println(leftWheelSpeed+" "+rightWheelSpeed+" "+Math.toDegrees(orientation));
+		
 		double accelDirection = (rightWheelSpeed+leftWheelSpeed) < 0 ? -1 : 1;
 		double lengthOfAcc = accelarationConstant * (leftWheelSpeed + rightWheelSpeed);
 		
@@ -235,5 +254,147 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	@Override
 	public void setActiveWaypoint(Waypoint wp) {
 		this.activeWaypoint = wp;
+	}
+	
+	@Override
+	public String getInitMessages() {
+		return "Simulated drone with ID "+getId();
+	}
+	
+	@Override
+	public void processInformationRequest(Message request, ConnectionHandler conn) {
+		Message response = null;
+		
+		if(request instanceof InformationRequest && ((InformationRequest)request).getMessageTypeQuery() == InformationRequest.MessageType.NEURAL_ACTIVATIONS){
+			//TODO
+//			if (getActiveBehavior() instanceof ControllerCIBehavior)
+//				response = createNeuralActivationMessage();
+			
+		}else{
+			
+			if(response == null && request instanceof InformationRequest
+					&& ((InformationRequest) request).getMessageTypeQuery() == InformationRequest.MessageType.COMPASS) {
+				response = new CompassMessage((int)getCompassOrientationInDegrees());
+			} else if(response == null && request instanceof InformationRequest
+					&& ((InformationRequest) request).getMessageTypeQuery() == InformationRequest.MessageType.GPS) {
+				GPSData gps = new GPSData();
+				LatLon latLon = getGPSLatLon();
+				gps.setLatitudeDecimal(latLon.getLat());
+				gps.setLongitudeDecimal(latLon.getLon());
+				gps.setFix(true);
+				gps.setDate(LocalDateTime.now());
+				response = new GPSMessage(gps);
+			} else if(response == null && request instanceof EntityMessage) {
+				response = handleEntityMessage(request);
+			} else if(response == null && request instanceof EntitiesMessage) {
+				response = handleEntitiesMessage(request);
+			} else if(response == null && request instanceof BehaviorMessage) {
+				response = handleBehaviorMessage(request);
+			}
+			
+			//TODO: Pass the FileLogger to the RobotCI
+			//TODO
+//			if(response == null && request instanceof LogMessage) {
+//				LogMessage lm = (LogMessage)request;
+//				
+//				RobotLogger logger = robot.getLogger();
+//				
+//				if(logger != null)
+//					logger.logMessage(lm.getLog());
+//			}
+		}
+		
+		if (response == null) {
+			
+			String sResponse = "No message provider for the current request (";
+			
+			if(request instanceof InformationRequest) {
+				InformationRequest ir = (InformationRequest)request;
+				sResponse+=ir.getMessageTypeQuery() + ")";
+			} else {
+				sResponse+=request.getClass().getSimpleName() + ")";
+			}
+			
+			response = new SystemStatusMessage(sResponse);
+		}
+		
+		conn.sendData(response);
+	}
+	
+	private Message handleEntityMessage(Message m) {
+		EntityMessage wm = (EntityMessage)m;
+		Entity e = wm.getEntity();
+		
+		if(getEntities().contains(e)) {
+			getEntities().remove(e);
+		}
+		
+		if(e instanceof Waypoint) {
+			ArrayList<Waypoint> wps = Waypoint.getWaypoints(this);
+			
+			if(wps.isEmpty())
+				setActiveWaypoint((Waypoint)e);
+		}
+		
+		getEntities().add(e);
+		return m;
+	}
+	
+	private Message handleEntitiesMessage(Message m) {
+		EntitiesMessage wm = (EntitiesMessage)m;
+		LinkedList<Entity> entities = wm.getEntities();
+		
+		Iterator<Entity> i = getEntities().iterator();
+		
+		while(i.hasNext()) {
+			Entity e = i.next();
+			if(e instanceof GeoFence)
+				i.remove();
+			if(e instanceof Waypoint)
+				i.remove();
+		}
+		
+		getEntities().addAll(entities);
+		
+		ArrayList<Waypoint> wps = Waypoint.getWaypoints(this);
+		
+		if(!wps.isEmpty())
+			setActiveWaypoint(wps.get(0));
+		
+		return m;
+	}
+	
+	private Message handleBehaviorMessage(Message m) {
+		//TODO
+		return null;
+		/*BehaviorMessage bm = (BehaviorMessage)m;
+		
+     	 if(bm.getSelectedStatus()) {
+     		try {
+     			
+     			ArrayList<Class<?>> classes = ClassLoadHelper.findRelatedClasses(bm.getSelectedBehavior());
+     			
+     			if(classes == null || classes.isEmpty()) {
+     				return null;
+     			}
+     			
+     			Class<CIBehavior> chosenClass = (Class<CIBehavior>)classes.get(0);
+         		Constructor<CIBehavior> constructor = chosenClass.getConstructor(new Class[] { CIArguments.class, RobotCI.class});
+				CIBehavior ctArgs = constructor.newInstance(new Object[] { new CIArguments(bm.getArguments()), this });
+				startBehavior(ctArgs);
+     		} catch(ReflectiveOperationException e) {
+     			e.printStackTrace();
+     		}
+     	 } else {
+     		 robot.stopActiveBehavior();
+     	 }
+     	 bm.setArguments("");
+     	 return bm;*/
+	}
+	
+	@Override
+	public void reset() {
+		leftWheelSpeed = 0;
+		rightWheelSpeed = 0;
 	}
 }

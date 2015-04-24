@@ -1,4 +1,4 @@
-package network;
+package commoninterface.network;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -6,9 +6,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
-import commoninterface.RealRobotCI;
-import commoninterface.network.ConnectionHandler;
-import commoninterface.network.ConnectionListener;
+import commoninterface.RobotCI;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MotorMessage;
 
@@ -16,7 +14,7 @@ public class MotorConnectionHandler extends ConnectionHandler {
 	
 	private final static boolean DEBUG = false;
 	
-	public MotorConnectionHandler(Socket socket, RealRobotCI robot, ConnectionListener connectionListener) {
+	public MotorConnectionHandler(Socket socket, RobotCI robot, ConnectionListener connectionListener) {
 		super(socket, robot, connectionListener);
 	}
 

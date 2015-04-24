@@ -6,20 +6,21 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 import commoninterface.RealRobotCI;
+import commoninterface.RobotCI;
 
 public class ConnectionListener extends Thread {
 
 	private static final int DEFAULT_PORT = 10101;
 	protected ArrayList<ConnectionHandler> connections = new ArrayList<>();
-	protected RealRobotCI robot;
+	protected RobotCI robot;
 	protected int port;
 	protected ServerSocket serverSocket = null;
 
-	public ConnectionListener(RealRobotCI controller) throws IOException {
+	public ConnectionListener(RobotCI controller) throws IOException {
 		this(controller, DEFAULT_PORT);
 	}
 
-	public ConnectionListener(RealRobotCI robot, int port)
+	public ConnectionListener(RobotCI robot, int port)
 			throws IOException {
 		this.robot = robot;
 		this.port = port;
@@ -71,6 +72,15 @@ public class ConnectionListener extends Thread {
 				if (!conn.getSocket().isClosed())
 					conn.closeConnectionWthoutDiscardConnListener();
 			}
+		}
+	}
+	
+	public void shutdown() {
+		closeConnections();
+		try {
+			serverSocket.close();
+		} catch (IOException e) {
+			System.out.println("[CONNECTION HANDLER] Unable to close server socket.... there was an open socket?");
 		}
 	}
 

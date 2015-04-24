@@ -1,17 +1,15 @@
-package network;
+package commoninterface.network;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import simpletestbehaviors.ControllerCIBehavior;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.RealRobotCI;
 import commoninterface.RobotCI;
-import commoninterface.network.ConnectionHandler;
-import commoninterface.network.MessageHandler;
+import commoninterface.controllers.ControllerCIBehavior;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.network.messages.EntitiesMessage;
 import commoninterface.network.messages.EntityMessage;
@@ -38,17 +36,16 @@ public class ControllerMessageHandler extends MessageHandler {
 	
 	@Override
 	protected void processMessage(Message m, ConnectionHandler c) {
-		Message request = pendingMessages[currentIndex];
 		Message response = null;
 		
-		if(request instanceof InformationRequest && ((InformationRequest)request).getMessageTypeQuery().equals(InformationRequest.MessageType.NEURAL_ACTIVATIONS)){
+		if(m instanceof InformationRequest && ((InformationRequest)m).getMessageTypeQuery().equals(InformationRequest.MessageType.NEURAL_ACTIVATIONS)){
 			if (robot.getActiveBehavior() instanceof ControllerCIBehavior)
 				response = createNeuralActivationMessage();
 			
 		}else{
 			
 			for (MessageProvider p : robot.getMessageProviders()) {
-			response = p.getMessage(request);
+			response = p.getMessage(m);
 			
 			if (response != null)
 				break;
@@ -85,7 +82,7 @@ public class ControllerMessageHandler extends MessageHandler {
 				InformationRequest ir = (InformationRequest)m;
 				sResponse+=ir.getMessageTypeQuery() + ")";
 			} else {
-				sResponse+=request.getClass().getSimpleName() + ")";
+				sResponse+=m.getClass().getSimpleName() + ")";
 			}
 			
 			response = new SystemStatusMessage(sResponse);

@@ -1,13 +1,11 @@
-package network;
+package commoninterface.network;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-import commoninterface.RealRobotCI;
-import commoninterface.network.ConnectionHandler;
-import commoninterface.network.ConnectionListener;
+import commoninterface.RobotCI;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.network.messages.EntitiesMessage;
 import commoninterface.network.messages.LogMessage;
@@ -17,7 +15,7 @@ public class CommandConnectionHandler extends ConnectionHandler {
 	
 	private final static boolean DEBUG = false;
 	
-	public CommandConnectionHandler(Socket socket, RealRobotCI drone, ConnectionListener connectionListener) {
+	public CommandConnectionHandler(Socket socket, RobotCI drone, ConnectionListener connectionListener) {
 		super(socket, drone, connectionListener);
 	}
 

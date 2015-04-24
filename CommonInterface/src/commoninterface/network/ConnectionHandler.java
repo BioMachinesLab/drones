@@ -5,8 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-
-import commoninterface.RealRobotCI;
+import commoninterface.RobotCI;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.SystemStatusMessage;
 
@@ -17,11 +16,11 @@ public class ConnectionHandler extends Thread {
 	protected Socket socket;
 	protected ObjectOutputStream out;
 	protected ObjectInputStream in;
-	protected RealRobotCI robot;
+	protected RobotCI robot;
 	protected String clientName = null;
 	protected ConnectionListener connectionListener;
 
-	public ConnectionHandler(Socket socket, RealRobotCI robot,
+	public ConnectionHandler(Socket socket, RobotCI robot,
 			ConnectionListener connectionListener) {
 		this.socket = socket;
 		this.robot = robot;

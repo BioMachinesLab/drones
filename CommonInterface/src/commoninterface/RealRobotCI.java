@@ -14,12 +14,6 @@ import commoninterface.utils.RobotLogger;
 public abstract class RealRobotCI extends Thread implements RobotCI {
 	
 	protected RobotLogger logger;
-
-	public abstract void reset();
-	
-	public abstract void processInformationRequest(Message request,ConnectionHandler conn);
-	
-	public abstract String getInitMessages();
 	
 	public abstract List<MessageProvider> getMessageProviders();
 	

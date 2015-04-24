@@ -1,26 +1,49 @@
 package network;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 import simulation.Network;
 import simulation.Simulator;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
 import commoninterface.AquaticDroneCI;
+import commoninterface.CIBehavior;
+import commoninterface.RobotCI;
+import commoninterface.network.CommandConnectionListener;
+import commoninterface.network.ConnectionHandler;
+import commoninterface.network.ConnectionListener;
+import commoninterface.network.MotorConnectionListener;
 import commoninterface.network.NetworkUtils;
+import commoninterface.network.messages.BehaviorMessage;
+import commoninterface.network.messages.EntitiesMessage;
+import commoninterface.network.messages.Message;
+import commoninterface.objects.Entity;
+import commoninterface.objects.GeoFence;
+import commoninterface.objects.Waypoint;
+import commoninterface.utils.CIArguments;
+import commoninterface.utils.ClassLoadHelper;
 
 public class MixedNetwork extends Network {
 	
-	protected int port = 8888;//port shoudl be 8988 when running control console on the same computer
+	protected int port = 8888;//port should be 8988 when running control console on the same computer
 	protected int SEND_PORT = 8888;
 	
 	private MixedBroadcastReceiver receiver;
 	private MixedBroadcastSender sender;
 	private static MixedNetwork mixedNetwork;
 	private boolean continueExecution = true;
+	
+	private ConnectionListener controllerListener;
+	private CommandConnectionListener commandListener;
+	private MotorConnectionListener motorListener;
+	private GatewayRobot gatewayRobot;
 	
 	public MixedNetwork(Arguments args, Simulator sim) {
 		super(args, sim);
@@ -37,6 +60,16 @@ public class MixedNetwork extends Network {
 			receiver = new MixedBroadcastReceiver(InetAddress.getByName("0.0.0.0"), port);
 			sender = new MixedBroadcastSender(InetAddress.getByName(NetworkUtils.getAddress()), port);
 			receiver.start();
+			
+			gatewayRobot = new GatewayRobot(this);
+			
+			controllerListener = new ConnectionListener(gatewayRobot);
+			controllerListener.start();
+			motorListener = new MotorConnectionListener(gatewayRobot);
+			motorListener.start();
+			commandListener = new CommandConnectionListener(gatewayRobot);
+			commandListener.start();
+			
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -75,6 +108,26 @@ public class MixedNetwork extends Network {
 		continueExecution = false;
 		receiver.stopExecution();
 		sender.stopExecution();
+		controllerListener.closeConnections();
+		controllerListener.shutdown();
+		motorListener.closeConnections();
+		motorListener.shutdown();
+		commandListener.closeConnections();
+		commandListener.shutdown();
+	}
+	
+	public void processInformationRequest(Message request, ConnectionHandler conn) {
+		if(!sim.getRobots().isEmpty()) {
+			RobotCI robot = (RobotCI)sim.getRobots().get(0);
+			robot.processInformationRequest(request, conn);
+		}
+	}
+	
+	public void setMotorSpeeds(double leftMotor, double rightMotor) {
+		if(!sim.getRobots().isEmpty()) {
+			RobotCI robot = (RobotCI)sim.getRobots().get(0);
+			robot.setMotorSpeeds(leftMotor, rightMotor);
+		}
 	}
 	
 	class MixedBroadcastReceiver extends Thread{
@@ -151,5 +204,6 @@ public class MixedNetwork extends Network {
 			if(socket != null)
 				socket.close();
 		}
-	}
+	}	
+	
 }

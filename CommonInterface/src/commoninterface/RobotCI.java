@@ -2,7 +2,9 @@ package commoninterface;
 
 import java.util.ArrayList;
 
+import commoninterface.network.ConnectionHandler;
 import commoninterface.network.broadcast.BroadcastHandler;
+import commoninterface.network.messages.Message;
 import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
 
@@ -66,5 +68,22 @@ public interface RobotCI {
 	 * @return the BroadcastHandler
 	 */
 	public BroadcastHandler getBroadcastHandler();
+	
+	/**
+	 * Process a request that has been sent via the network
+	 */
+	public void processInformationRequest(Message request, ConnectionHandler conn);
+	
+	/**
+	 * Gets the status message of the robot's initialization procedure.
+	 * 
+	 * @return the status message
+	 */
+	public String getInitMessages();
+	
+	/**
+	 * Resets the status of the robot, for instance, stops the wheels, turns off any active behavior.
+	 */
+	public void reset();
 	
 }

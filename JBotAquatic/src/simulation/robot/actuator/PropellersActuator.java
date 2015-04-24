@@ -3,6 +3,7 @@ package simulation.robot.actuator;
 import java.util.Random;
 
 import simulation.Simulator;
+import simulation.robot.AquaticDrone;
 import simulation.robot.DifferentialDriveRobot;
 import simulation.robot.Robot;
 import simulation.robot.actuators.Actuator;
@@ -43,10 +44,10 @@ public class PropellersActuator extends Actuator {
 	@Override
 	public void apply(Robot robot) {
 		
-		leftSpeed*= (1 + random.nextGaussian() * NOISESTDEV);
-		rightSpeed*= (1 + random.nextGaussian() * NOISESTDEV);
+		double ls = leftSpeed * (1 + random.nextGaussian() * NOISESTDEV);
+		double rs = rightSpeed * (1 + random.nextGaussian() * NOISESTDEV);
 		
-		((DifferentialDriveRobot) robot).setWheelSpeed(leftSpeed, rightSpeed);
+		((AquaticDrone) robot).setWheelSpeed(ls, rs);
 	}
 
 	@Override

@@ -4,14 +4,13 @@ import io.IOManager;
 import io.SystemStatusMessageProvider;
 import io.input.ControllerInput;
 import io.output.ControllerOutput;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import simpletestbehaviors.ChangeWaypointCIBehavior;
 import utils.FileLogger;
-import network.CommandConnectionListener;
-import network.ControllerMessageHandler;
-import network.MotorConnectionListener;
 import network.broadcast.RealBroadcastHandler;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
@@ -19,8 +18,11 @@ import commoninterface.CISensor;
 import commoninterface.LedState;
 import commoninterface.RealRobotCI;
 import commoninterface.dataobjects.GPSData;
+import commoninterface.network.CommandConnectionListener;
 import commoninterface.network.ConnectionHandler;
 import commoninterface.network.ConnectionListener;
+import commoninterface.network.ControllerMessageHandler;
+import commoninterface.network.MotorConnectionListener;
 import commoninterface.network.NetworkUtils;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.broadcast.BroadcastMessage;

@@ -1,4 +1,4 @@
-package simpletestbehaviors;
+package commoninterface.controllers;
 
 import java.util.ArrayList;
 

@@ -107,7 +107,7 @@ public class MapPanel extends UpdatePanel {
         try {
         
 	        JComboBox<TileSource> tileSourceSelector = new JComboBox<>(new TileSource[] { new OfflineOsmTileSource((new File("tiles").toURI().toURL()).toString(),1,19) ,
-//	        		new OsmTileSource.Mapnik(), new BingAerialTileSource(), new MapQuestOsmTileSource()
+	        		new OsmTileSource.Mapnik(), new BingAerialTileSource(), new MapQuestOsmTileSource()
 	        });
 	        tileSourceSelector.addItemListener(new ItemListener() {
 	            public void itemStateChanged(ItemEvent e) {
