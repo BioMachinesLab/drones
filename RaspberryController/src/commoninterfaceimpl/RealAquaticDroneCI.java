@@ -4,11 +4,9 @@ import io.IOManager;
 import io.SystemStatusMessageProvider;
 import io.input.ControllerInput;
 import io.output.ControllerOutput;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import simpletestbehaviors.ChangeWaypointCIBehavior;
 import utils.FileLogger;
 import network.CommandConnectionListener;
@@ -17,7 +15,6 @@ import network.MotorConnectionListener;
 import network.broadcast.RealBroadcastHandler;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
-import commoninterface.CILogger;
 import commoninterface.CISensor;
 import commoninterface.LedState;
 import commoninterface.RealRobotCI;
@@ -85,8 +82,7 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 
 		setStatus("Running!\n");
 
-		if(logger != null)
-			logger.logMessage(initMessages);
+		log(initMessages);
 	}
 
 	@Override
@@ -138,8 +134,7 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 	
 	@Override
 	public void shutdown() {
-		if(logger != null)
-			logger.logMessage("# Shutting down Controller...");
+		log("# Shutting down Controller...");
 		
 		run = false;
 
@@ -189,8 +184,6 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 			connectionListener = new ConnectionListener(this);
 			connectionListener.start();
 
-			if(logger != null)
-				logger.logMessage(".");
 			initMessages += "[INIT] ConnectionListener: ok\n";
 
 			motorConnectionListener = new MotorConnectionListener(this);
@@ -205,8 +198,6 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 					
 			broadcastHandler = new RealBroadcastHandler(this, broadcastMessages);
 
-			if(logger != null)
-				logger.logMessage(".");
 			initMessages += "[INIT] MotorConnectionListener: ok\n";
 
 		} catch (IOException e) {
@@ -248,12 +239,14 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 	public void startBehavior(CIBehavior b) {
 		stopActiveBehavior();
 		activeBehavior = b;
+		log("Starting CIBehavior "+b.getClass().getSimpleName());
 	}
 
 	@Override
 	public void stopActiveBehavior() {
 		if (activeBehavior != null) {
 			activeBehavior.cleanUp();
+			log("Stopping CIBehavior "+activeBehavior.getClass().getSimpleName());
 			activeBehavior = null;
 			ioManager.setMotorSpeeds(leftSpeed, rightSpeed);
 		}
@@ -404,6 +397,11 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 	@Override
 	public void setActiveWaypoint(Waypoint wp) {
 		this.activeWaypoint = wp;	
+	}
+	
+	private void log(String msg) {
+		if(logger != null)
+			logger.logMessage(msg);
 	}
 
 }

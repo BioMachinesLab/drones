@@ -19,8 +19,8 @@ import commoninterface.utils.jcoord.LatLon;
 
 public class LogVisualizer extends JFrame {
 	
-//	private String file = "../JBotAquatic/selected_logs/motor_failure_22_04_2015/values_09-04-2015_03-43-39.log";
-	private String file = "../JBotAquatic/logs/22_04_2015/values_09-04-2015_01-17-56.log";
+	private String file = "../JBotAquatic/selected_logs/motor_failure_22_04_2015/values_09-04-2015_03-43-39.log";
+//	private String file = "../JBotAquatic/logs/22_04_2015/values_09-04-2015_01-17-56.log";
 	private Graph graph;
 	private MapPanel map;
 	private JSlider slider;

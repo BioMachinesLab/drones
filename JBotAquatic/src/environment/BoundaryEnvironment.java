@@ -20,20 +20,23 @@ public class BoundaryEnvironment extends Environment{
 	@ArgumentsAnnotation(name="distance", defaultValue="5")
 	private double distance = 5;
 	@ArgumentsAnnotation(name="random", defaultValue="0.1")
-	private double rand = 0.1;
+	private double rand = 0.5;
+	@ArgumentsAnnotation(name="multi", defaultValue="0")
+	private int multi = 0;
 	
 	public BoundaryEnvironment(Simulator simulator, Arguments args) {
 		super(simulator, args);
 		
 		distance = args.getArgumentAsDoubleOrSetDefault("distance", distance);
 		rand = args.getArgumentAsDoubleOrSetDefault("random", rand);
+		multi = args.getArgumentAsIntOrSetDefault("multi", multi);
 	}
 
 	@Override
 	public void setup(Simulator simulator) {
 		super.setup(simulator);
 		
-		double dist = distance + distance*rand*simulator.getRandom().nextDouble()*2-rand;
+		double dist = distance + distance*rand;
 		
 		for(Robot r : simulator.getRobots()) {
 			double x = dist*2*simulator.getRandom().nextDouble() - dist;
@@ -42,28 +45,24 @@ public class BoundaryEnvironment extends Environment{
 			r.setOrientation(simulator.getRandom().nextDouble()*Math.PI*2);
 		}
 		
-		AquaticDroneCI drone = (AquaticDroneCI)robots.get(0);		
 		
 		GeoFence fence = new GeoFence("fence");
 		
-		while(fence.getWaypoints().size() < 3) {
-			
-			fence.clear();
-		
-			addNode(fence,-1,-1,simulator.getRandom());
-			addNode(fence,-1,0,simulator.getRandom());
-			addNode(fence,-1,1,simulator.getRandom());
-			addNode(fence,0,1,simulator.getRandom());
-			addNode(fence,1,1,simulator.getRandom());
-			addNode(fence,1,0,simulator.getRandom());
-			addNode(fence,1,-1,simulator.getRandom());
-			addNode(fence,0,-1,simulator.getRandom());
-		
-		}
+		addNode(fence,-1,-1,simulator.getRandom());
+		addNode(fence,-1,0,simulator.getRandom());
+		addNode(fence,-1,1,simulator.getRandom());
+		addNode(fence,0,1,simulator.getRandom());
+		addNode(fence,1,1,simulator.getRandom());
+		addNode(fence,1,0,simulator.getRandom());
+		addNode(fence,1,-1,simulator.getRandom());
+		addNode(fence,0,-1,simulator.getRandom());
 		
 		addLines(fence.getWaypoints(), simulator);
 		
-		drone.getEntities().add(fence);
+		for(Robot r : robots) {
+			AquaticDroneCI drone = (AquaticDroneCI)r;
+			drone.getEntities().add(fence);
+		}
 	}
 	
 	private void addLines(LinkedList<Waypoint> waypoints, Simulator simulator) {
@@ -94,8 +93,8 @@ public class BoundaryEnvironment extends Environment{
 		y*=distance;
 		
 		if(rand > 0) {
-			x+= r.nextDouble() * distance;
-			y+= r.nextDouble() * distance;
+			x+= r.nextDouble() * rand * distance * 2 - rand*distance;
+			y+= r.nextDouble() * rand * distance * 2 - rand*distance;
 		}
 		
 		fence.addWaypoint(CoordinateUtilities.cartesianToGPS(new commoninterface.mathutils.Vector2d(x, y)));

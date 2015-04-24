@@ -20,13 +20,12 @@ public class GeoFenceCISensor extends ConeTypeCISensor{
 	
 	protected int numberOfRays = 7;
 	protected double[][] rayReadings;
-	protected Vector2d[][] cones;
-	protected Vector2d[] sensorPositions;
+	public Vector2d[][] cones;
 	private ArrayList<Line> lines = new ArrayList<Line>();
+	private Vector2d robotPosition;
 
 	public GeoFenceCISensor(int id, RobotCI robot, CIArguments args) {
 		super(id, robot, args);
-		
 		
 		numberOfRays = args.getArgumentAsIntOrSetDefault("numberofrays", numberOfRays);
 		
@@ -35,13 +34,12 @@ public class GeoFenceCISensor extends ConeTypeCISensor{
 		
 		rayReadings = new double[numberSensors][numberOfRays];
 		
-		sensorPositions = new Vector2d[numberSensors];
 		cones = new Vector2d[numberSensors][numberOfRays];
 		for(int i = 0 ; i < numberSensors ; i++) {
-			sensorPositions[i] = new Vector2d();
 			for(int j = 0 ; j < numberOfRays ; j++)
 				cones[i][j] = new Vector2d();
 		}
+		
 	}
 	
 	@Override
@@ -59,7 +57,9 @@ public class GeoFenceCISensor extends ConeTypeCISensor{
 			}
 			
 			for(Line l : lines) {
-				calculateSourceContributions(l);
+				for(int j=0; j<numberSensors; j++){
+					calculateContributionToSensor(j, l);
+				}
 			}
 			
 			for(int i = 0; i < numberSensors; i++){
@@ -79,25 +79,22 @@ public class GeoFenceCISensor extends ConeTypeCISensor{
 		try {
 			
 			for(int sensorNumber = 0 ; sensorNumber < numberSensors ; sensorNumber++) {
-				double orientation = angles[sensorNumber] + Math.toRadians(drone.getCompassOrientationInDegrees());
 				
-				Vector2d robotPosition = CoordinateUtilities.GPSToCartesian(drone.getGPSLatLon());
+				//We have to subtract 90 degrees and negate because the math functions were made
+				//for JBotEvolver, in which the reference orientation is to the east, not the north,
+				//and the orientation increases counter-clockwise instead of clockwise
+				double orientation = - (angles[sensorNumber] + Math.toRadians(drone.getCompassOrientationInDegrees()) - Math.PI/2);
 				
-				sensorPositions[sensorNumber].set(
-						Math.cos(orientation) + robotPosition.getX(),
-						Math.sin(orientation) + robotPosition.getY()
-					);
+				robotPosition = CoordinateUtilities.GPSToCartesian(drone.getGPSLatLon());
 				
 				double alpha = (this.openingAngle)/(numberOfRays-1);
 				
 				double halfOpening = openingAngle/2.0;
 				
 				for(int i = 0 ; i < numberOfRays ; i++) {
-					//the multiplication by 5 is necessary because of the close/far objects estimation
-					//the number 5 is arbitrary
 					cones[sensorNumber][i].set(
-							Math.cos(orientation - halfOpening + alpha*i)* range*5 + sensorPositions[sensorNumber].getX(),
-							Math.sin(orientation - halfOpening + alpha*i)* range*5 + sensorPositions[sensorNumber].getY()
+							Math.cos(orientation - halfOpening + alpha*i)* range + robotPosition.getX(),
+							Math.sin(orientation - halfOpening + alpha*i)* range + robotPosition.getY()
 						 );
 				}
 			}
@@ -114,10 +111,11 @@ public class GeoFenceCISensor extends ConeTypeCISensor{
 			Vector2d cone = cones[sensorNumber][i];
 			
 			Vector2d intersection = null;
-			intersection = l.intersectsWithLineSegment(sensorPositions[sensorNumber], cone);
+			intersection = l.intersectsWithLineSegment(robotPosition, cone);
 			
 			if(intersection != null) {
-				double distance = intersection.distanceTo(sensorPositions[sensorNumber]);
+				
+				double distance = intersection.distanceTo(robotPosition);
 				cone.angle(intersection);
 				
 				if(distance < range) {
@@ -130,14 +128,6 @@ public class GeoFenceCISensor extends ConeTypeCISensor{
 			}
 		}
 		return inputValue;
-	}
-	
-	protected void calculateSourceContributions(Line source) {
-		for(int j=0; j<numberSensors; j++){
-			if(openingAngle > 0.018){ //1degree
-				calculateContributionToSensor(j, source);
-			}
-		}
 	}
 	
 	private void updateLines(double time, ArrayList<Entity> entities) {
@@ -188,6 +178,5 @@ public class GeoFenceCISensor extends ConeTypeCISensor{
 		if(e instanceof GeoFence)
 			return true;
 		return false;
-	}
-	
+	}	
 }

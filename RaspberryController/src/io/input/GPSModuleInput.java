@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialDataEvent;
@@ -65,6 +67,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 	protected boolean available = false;
 	private boolean enable = false;
+	
+	private boolean alreadySetDate = false;
 
 	public GPSModuleInput(boolean fake) {
 		if (!fake)
@@ -752,11 +756,22 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 						miliseconds /= 10;
 
 					LocalDateTime date = new LocalDateTime(
-							Integer.parseInt(d[2]) + 100,
+							Integer.parseInt(d[2]) + 2000,
 							Integer.parseInt(d[1]), Integer.parseInt(d[0]),
 							Integer.parseInt(t[0]), Integer.parseInt(t[1]),
 							Integer.parseInt(t[2]), miliseconds);
 					gpsData.setDate(date);
+					
+					if(!alreadySetDate) {
+						DateTimeFormatter f = DateTimeFormat.forPattern("EEE MMM d HH:mm:ss 'UTC' YYYY");
+						Runtime.getRuntime()
+						.exec(new String[] {
+								"bash",
+								"-c",
+								"sudo date --set \""+date.toString(f)+"\";" }).waitFor();
+						alreadySetDate = true;
+					}
+					
 				} catch (Exception e) {
 					// this part is optional!
 				}

@@ -10,7 +10,7 @@ import gui.evolution.EvolutionGui;
 public class EMain {
 	public static void main(String[] args) throws Exception {
 		
-		String configName = "boundaries.conf";
+		String configName = "boundaries_multi.conf";
 		
 		try {
 			args = new String[]{configName};

@@ -1,6 +1,8 @@
 package evaluation;
 
 import java.util.ArrayList;
+
+import commoninterface.utils.CoordinateUtilities;
 import mathutils.Vector2d;
 import simulation.Simulator;
 import simulation.physicalobjects.Line;
@@ -9,6 +11,7 @@ import simulation.physicalobjects.PhysicalObjectType;
 import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
+import simulation.util.ArgumentsAnnotation;
 import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
 
 public class DroneGeoFenceEvaluationFunction extends EvaluationFunction{
@@ -18,6 +21,9 @@ public class DroneGeoFenceEvaluationFunction extends EvaluationFunction{
 	private double resolution = 1;
 	private double width = 5,height = 5;
 	
+	@ArgumentsAnnotation(name="avoiddistance", defaultValue="0")
+	private double avoidDistance = 0;
+	
 	private double v = 0;
 	private double max = 0;
 	private double penalty = 0;
@@ -25,6 +31,7 @@ public class DroneGeoFenceEvaluationFunction extends EvaluationFunction{
 	public DroneGeoFenceEvaluationFunction(Arguments args) {
 		super(args);
 		resolution = args.getArgumentAsDoubleOrSetDefault("resolution", resolution);
+		avoidDistance = args.getArgumentAsDoubleOrSetDefault("avoiddistance", avoidDistance);
 	}
 	
 	public void setup(Simulator simulator) {
@@ -70,9 +77,9 @@ public class DroneGeoFenceEvaluationFunction extends EvaluationFunction{
 			
 			AquaticDrone r = (AquaticDrone)robots.get(i);
 			
-			if(!insideLines(new Vector2d(r.getPosition().getX(),r.getPosition().getY()), simulator)) {
-				penalty+=1.0/simulator.getEnvironment().getSteps();
-			}
+//			if(!insideLines(new Vector2d(r.getPosition().getX(),r.getPosition().getY()), simulator)) {
+//				penalty+=1.0/simulator.getEnvironment().getSteps();
+//			}
 			
 			double x = r.getPosition().getX();
 			double y = r.getPosition().getY();
@@ -86,8 +93,25 @@ public class DroneGeoFenceEvaluationFunction extends EvaluationFunction{
 					v++;
 				}
 			}
+
+			double highestPenalty = 0;
+			
+			for(int j = 0 ; j < simulator.getRobots().size() ; j++) {
+				
+				if(i == j)
+					break;
+				
+				AquaticDrone other = (AquaticDrone)simulator.getRobots().get(j);
+				
+				double dist = r.getPosition().distanceTo(other.getPosition());
+				
+				if(dist < avoidDistance)
+					highestPenalty= Math.max(1-(dist/avoidDistance),highestPenalty);
+			}
+			penalty+= highestPenalty/simulator.getEnvironment().getSteps()*5;
+			
 		}
-		fitness = v/max - penalty;
+		fitness = (v/max - penalty)/robots.size();
 //		printGrid();
 	}
 	
