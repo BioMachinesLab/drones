@@ -40,8 +40,12 @@ public abstract class BroadcastHandler {
 				
 				RobotLocation dl = PositionBroadcastMessage.decode(address, message);
 				dl.setTimestepReceived((long)(robot.getTimeSinceStart()/10));
-				robot.getEntities().remove(dl);
-				robot.getEntities().add(dl);
+				
+				synchronized(robot.getEntities()){
+					robot.getEntities().remove(dl);
+					robot.getEntities().add(dl);
+				}
+				
 				if(DEBUG)
 					System.out.println("Added DroneLocation "+dl);
 				break;
@@ -56,15 +60,18 @@ public abstract class BroadcastHandler {
 	}
 	
 	protected void cleanupEntities(double timestep) {
-		Iterator<Entity> i = robot.getEntities().iterator();
+		synchronized(robot.getEntities()) {
 		
-		while(i.hasNext()) {
-			Entity e = i.next();
-			if(e instanceof RobotLocation) {
-				if(timestep - e.getTimestepReceived() > CLEAN_ENTITIES_TIME) {
-					i.remove();
-					if(DEBUG)
-						System.out.println("Removed Entity "+e);
+			Iterator<Entity> i = robot.getEntities().iterator();
+			
+			while(i.hasNext()) {
+				Entity e = i.next();
+				if(e instanceof RobotLocation) {
+					if(timestep - e.getTimestepReceived() > CLEAN_ENTITIES_TIME) {
+						i.remove();
+						if(DEBUG)
+							System.out.println("Removed Entity "+e);
+					}
 				}
 			}
 		}

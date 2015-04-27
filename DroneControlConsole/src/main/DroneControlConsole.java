@@ -2,12 +2,14 @@ package main;
 
 import gui.DroneGUI;
 import gui.RobotGUI;
+import gui.ThymioGUI;
 import network.DroneConsoleMessageHandler;
 import network.broadcast.ConsoleBroadcastHandler;
 import threads.BehaviorMessageThread;
 import threads.ConnectionThread;
 import threads.MapThread;
 import threads.MotorUpdateThread;
+import threads.NetworkActivationsUpdateThread;
 import threads.UpdateThread;
 import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
@@ -54,6 +56,7 @@ public class DroneControlConsole extends RobotControlConsole {
 		updateThreads.add(new MotorUpdateThread(this, gui.getMotorsPanel()));
 		updateThreads.add(new UpdateThread(this, ((DroneGUI)gui).getCompassPanel(), MessageType.COMPASS));
 		updateThreads.add(new BehaviorMessageThread(this, gui.getBehaviorsPanel()));
+		updateThreads.add(new NetworkActivationsUpdateThread(this, ((DroneGUI)gui).getNeuralActivationsPanel(), MessageType.NEURAL_ACTIVATIONS));
 //		updateThreads.add(new MapThread(this, ((DroneGUI)gui).getMapPanel()));
 		
 		for(UpdateThread t : updateThreads)

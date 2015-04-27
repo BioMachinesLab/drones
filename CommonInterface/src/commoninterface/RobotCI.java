@@ -1,12 +1,14 @@
 package commoninterface;
 
 import java.util.ArrayList;
-
+import java.util.List;
 import commoninterface.network.ConnectionHandler;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.messages.Message;
+import commoninterface.network.messages.MessageProvider;
 import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
+import commoninterface.utils.RobotLogger;
 
 public interface RobotCI {
 
@@ -85,5 +87,46 @@ public interface RobotCI {
 	 * Resets the status of the robot, for instance, stops the wheels, turns off any active behavior.
 	 */
 	public void reset();
+	
+	/**
+	 * Gets the list of MessageProviders. The MessageProviders are responsible for 
+	 * replying to information requests. 
+	 * 
+	 * @return the list of MessageProviders
+	 */
+	public List<MessageProvider> getMessageProviders();
+	
+	/**
+	 * Gets the current status message of the robot.
+	 * 
+	 * @return the status message
+	 */
+	public String getStatus();
+	
+	/**
+	 * Gets the behavior that is currently controlling the robot.
+	 * 
+	 * @return the current behavior, or null if no behavior is active
+	 */
+	public CIBehavior getActiveBehavior();
+	
+	/**
+	 * Starts a specific behavior.
+	 * 
+	 * @param the behavior that will control the robot
+	 */
+	public void startBehavior(CIBehavior b);
+	
+	/**
+	 * Stops the currently active behavior.
+	 */
+	public void stopActiveBehavior();
+	
+	/**
+	 * Gets the robot's logger.
+	 * 
+	 * @return the logger
+	 */
+	public RobotLogger getLogger();
 	
 }

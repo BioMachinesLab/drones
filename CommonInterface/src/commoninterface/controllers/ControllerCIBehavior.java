@@ -43,7 +43,7 @@ public class ControllerCIBehavior extends CIBehavior {
 	
 	@Override
 	public void step(double timestep) {
-			
+		
 		if(network == null || robot.getCISensors().isEmpty())
 			return;
 		

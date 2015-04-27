@@ -1,11 +1,14 @@
 package gui;
 
+import java.awt.BorderLayout;
 import java.awt.Window;
 import java.lang.reflect.Method;
+
 import gui.panels.CommandPanel;
 import gui.panels.ConnectionPanel;
 import gui.panels.MessagesPanel;
 import gui.panels.MotorsPanel;
+import gui.panels.NeuralActivationsPanel;
 
 import javax.swing.JFrame;
 
@@ -18,20 +21,16 @@ public abstract class RobotGUI extends JFrame {
 	protected CommandPanel commandPanel;
 	protected MessagesPanel msgPanel;
 	protected RobotControlConsole console;
+	protected NeuralActivationsPanel neuralActivationsPanel;
 	
 	protected void createPanels(){
-		//Motors
 		motorsPanel = new MotorsPanel();
-		
-		// Connection
 		connectionPanel = new ConnectionPanel(console);
-		
-		// Commands
 		commandPanel = new CommandPanel(this);
-
-		// Messages
 		msgPanel = new MessagesPanel();
-				
+		
+		neuralActivationsPanel = new NeuralActivationsPanel();
+		commandPanel.getNeuralActivationsWindow().add(neuralActivationsPanel, BorderLayout.CENTER);
 	}
 	
 	public MotorsPanel getMotorsPanel() {
@@ -48,6 +47,10 @@ public abstract class RobotGUI extends JFrame {
 	
 	public MessagesPanel getMessagesPanel() {
 		return msgPanel;
+	}
+	
+	public NeuralActivationsPanel getNeuralActivationsPanel() {
+		return neuralActivationsPanel;
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
