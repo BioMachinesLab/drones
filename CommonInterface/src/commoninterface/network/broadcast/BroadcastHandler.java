@@ -26,7 +26,7 @@ public abstract class BroadcastHandler {
 	public abstract void sendMessage(String message);
 	
 	public void messageReceived(String address, String message) {
-
+		
 		if(address.equals(robot.getNetworkAddress()))
 			return;
 		

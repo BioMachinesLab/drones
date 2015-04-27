@@ -5,7 +5,6 @@ import java.util.ArrayList;
 
 import simulation.Network;
 import simulation.robot.AquaticDrone;
-
 import commoninterface.RobotCI;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.broadcast.BroadcastMessage;
@@ -35,6 +34,9 @@ public class SimulatedBroadcastHandler extends BroadcastHandler {
 			case PositionBroadcastMessage.IDENTIFIER:
 				
 				RobotLocation dl = PositionBroadcastMessage.decode(address, message);
+				
+				if(robot.getNetworkAddress().equals(dl.getName()))
+					break;
 				
 				if(robot instanceof AquaticDrone) {
 					AquaticDrone drone = (AquaticDrone)robot;

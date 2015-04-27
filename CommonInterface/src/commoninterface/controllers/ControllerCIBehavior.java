@@ -8,6 +8,7 @@ import commoninterface.RobotCI;
 import commoninterface.neuralnetwork.CINeuralNetwork;
 import commoninterface.neuralnetwork.inputs.CINNInput;
 import commoninterface.neuralnetwork.outputs.CINNOutput;
+import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
 
 public class ControllerCIBehavior extends CIBehavior {
@@ -51,8 +52,11 @@ public class ControllerCIBehavior extends CIBehavior {
 		//not need sensors. Ideally, this should be moved to the
 		//main loop at the drone, but it would be heavier in terms
 		//of processing.
+		
+		Object[] entities = robot.getEntities().toArray();
+		
 		for(CISensor s : robot.getCISensors()) {
-			s.update(timestep, robot.getEntities());
+			s.update(timestep,entities);
 		}
 		
 		network.controlStep(timestep);

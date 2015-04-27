@@ -56,7 +56,7 @@ public class DroneControlConsole extends RobotControlConsole {
 		updateThreads.add(new MotorUpdateThread(this, gui.getMotorsPanel()));
 		updateThreads.add(new UpdateThread(this, ((DroneGUI)gui).getCompassPanel(), MessageType.COMPASS));
 		updateThreads.add(new BehaviorMessageThread(this, gui.getBehaviorsPanel()));
-		updateThreads.add(new NetworkActivationsUpdateThread(this, ((DroneGUI)gui).getNeuralActivationsPanel(), MessageType.NEURAL_ACTIVATIONS));
+		updateThreads.add(new NetworkActivationsUpdateThread(this, gui.getNeuralActivationsPanel(), MessageType.NEURAL_ACTIVATIONS));
 //		updateThreads.add(new MapThread(this, ((DroneGUI)gui).getMapPanel()));
 		
 		for(UpdateThread t : updateThreads)

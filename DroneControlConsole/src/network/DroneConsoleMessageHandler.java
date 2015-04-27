@@ -10,28 +10,27 @@ import commoninterface.network.messages.GPSMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.SystemStatusMessage;
 
-public class DroneConsoleMessageHandler extends MessageHandler {
-	
-	private DroneControlConsole console;
+public class DroneConsoleMessageHandler extends ControlConsoleMessageHandler {
 	
 	public DroneConsoleMessageHandler(DroneControlConsole console) {
-		this.console = console;
+		super(console);
 	}
 
 	@Override
 	protected Message processMessage(Message message) {
-		if (message instanceof GPSMessage) {
+		
+		Message m = super.processMessage(message);
+		
+		if(m != null) {
+			return null;
+		} else if (message instanceof GPSMessage) {
 			((DroneGUI)console.getGUI()).getGPSPanel().displayData(((GPSMessage) message).getGPSData());
-		} else if (message instanceof SystemStatusMessage) {
-			((DroneGUI)console.getGUI()).getMessagesPanel().displayData((SystemStatusMessage) message);
 		} else if (message instanceof CompassMessage) {
 			((DroneGUI)console.getGUI()).getCompassPanel().displayData((CompassMessage) message);
-		} else if (message instanceof BehaviorMessage) {
-			((DroneGUI)console.getGUI()).getBehaviorsPanel().displayData((BehaviorMessage) message);
 		} else if (message instanceof EntityMessage) {
 			((DroneGUI)console.getGUI()).getMapPanel().displayData((EntityMessage) message);
 		}else {
-			System.out.println("Received non recognise message type: " + message.getClass().toString());
+			System.out.println("Received non recognized message type: " + message.getClass().toString());
 		}
 		return null;
 	}

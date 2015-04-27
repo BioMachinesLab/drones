@@ -31,7 +31,7 @@ public class InsideBoundaryCISensor extends CISensor{
 	}
 
 	@Override
-	public void update(double time, ArrayList<Entity> entities) {
+	public void update(double time, Object[] entities) {
 		
 		updateLines(time, entities);
 		
@@ -46,11 +46,11 @@ public class InsideBoundaryCISensor extends CISensor{
 		return 1;
 	}
 	
-	private void updateLines(double time, ArrayList<Entity> entities) {
+	private void updateLines(double time, Object[] entities) {
 		
 		GeoFence fence = null;
 		
-		for(Entity e : entities) {
+		for(Object e : entities) {
 			if(e instanceof GeoFence) {
 				fence = (GeoFence)e;
 				break;

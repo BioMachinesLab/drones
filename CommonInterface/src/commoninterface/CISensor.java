@@ -21,7 +21,7 @@ public abstract class CISensor implements Serializable{
 	
 	public abstract double getSensorReading(int sensorNumber);
 	
-	public abstract void update(double time, ArrayList<Entity> entities);
+	public abstract void update(double time, Object[] entities);
 	
 	public static CISensor getSensor(RobotCI robot, String name, CIArguments arguments) {
 		int id = arguments.getArgumentAsIntOrSetDefault("id",0);

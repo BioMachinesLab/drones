@@ -86,10 +86,6 @@ public class ThymioGUI extends RobotGUI {
 		add(leftPanel, BorderLayout.WEST);
 	}
 	
-	public NeuralActivationsPanel getNeuralActivationsPanel() {
-		return neuralActivationsPanel;
-	}
-	
 	public ThymioSensorsPanel getReadingsPanel() {
 		return readingsPanel;
 	}
