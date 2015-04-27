@@ -3,15 +3,12 @@ package gui;
 import java.awt.BorderLayout;
 import java.awt.Window;
 import java.lang.reflect.Method;
-
 import gui.panels.CommandPanel;
 import gui.panels.ConnectionPanel;
 import gui.panels.MessagesPanel;
 import gui.panels.MotorsPanel;
 import gui.panels.NeuralActivationsPanel;
-
 import javax.swing.JFrame;
-
 import main.RobotControlConsole;
 
 public abstract class RobotGUI extends JFrame {

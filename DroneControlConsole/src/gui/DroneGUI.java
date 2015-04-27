@@ -3,16 +3,10 @@ package gui;
 import gui.panels.BatteryPanel;
 import gui.panels.CompassPanel;
 import gui.panels.GPSPanel;
-import gui.panels.NeuralActivationsPanel;
 import gui.panels.SystemInfoPanel;
-import gui.panels.UpdatePanel;
 import gui.panels.map.MapPanel;
-
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.awt.Window;
-import java.lang.reflect.Method;
-
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;

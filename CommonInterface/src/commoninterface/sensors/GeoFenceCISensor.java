@@ -43,7 +43,7 @@ public class GeoFenceCISensor extends ConeTypeCISensor{
 	}
 	
 	@Override
-	public void update(double time, ArrayList<Entity> entities) {
+	public void update(double time, Object[] entities) {
 		updateCones();
 		
 		updateLines(time, entities);
@@ -130,11 +130,11 @@ public class GeoFenceCISensor extends ConeTypeCISensor{
 		return inputValue;
 	}
 	
-	private void updateLines(double time, ArrayList<Entity> entities) {
+	private void updateLines(double time, Object[] entities) {
 		
 		GeoFence fence = null;
 		
-		for(Entity e : entities) {
+		for(Object e : entities) {
 			if(e instanceof GeoFence) {
 				fence = (GeoFence)e;
 				break;

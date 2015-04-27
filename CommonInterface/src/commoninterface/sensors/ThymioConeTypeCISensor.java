@@ -37,16 +37,16 @@ public abstract class ThymioConeTypeCISensor extends CISensor {
 		setupPositions(numberSensors);
 	}
 
-	public abstract boolean validEntity(Entity e);
+	public abstract boolean validEntity(Object e);
 
 	@Override
-	public void update(double time, ArrayList<Entity> entities) {
+	public void update(double time, Object[] entities) {
 		
 		for(int j = 0; j < readings.length; j++){
 			readings[j] = 0.0;
 		}
 		
-		for (Entity e : entities) {
+		for (Object e : entities) {
 			if (validEntity(e)) {
 				for(int j=0; j<numberSensors; j++) {
 					if(openingAngle > 0.018){ //1degree

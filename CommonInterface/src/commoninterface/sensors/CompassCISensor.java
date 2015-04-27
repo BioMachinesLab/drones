@@ -24,7 +24,7 @@ public class CompassCISensor extends CISensor{
 	}
 
 	@Override
-	public void update(double time, ArrayList<Entity> entities) {
+	public void update(double time, Object[] entities) {
 		reading = drone.getCompassOrientationInDegrees();	
 	}
 	
