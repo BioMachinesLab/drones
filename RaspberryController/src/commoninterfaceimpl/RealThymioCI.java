@@ -9,8 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import network.broadcast.RealBroadcastHandler;
+import utils.ThymioFileLogger;
+
 import commoninterface.CIBehavior;
-import commoninterface.CILogger;
 import commoninterface.CISensor;
 import commoninterface.RealRobotCI;
 import commoninterface.ThymioCI;
@@ -161,7 +162,7 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 	
 	// Init's
 	private void initIO() {
-		ioManager = new ThymioIOManager();
+		ioManager = new ThymioIOManager(this);
 		initMessages += ioManager.getInitMessages();
 	}
 	
@@ -289,6 +290,12 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 		return ioManager;
 	}
 
+	public void startLogger() {
+		ThymioFileLogger fileLogger = new ThymioFileLogger(this);
+		fileLogger.start();
+		this.logger = fileLogger;
+	}
+	
 	@Override
 	public Vector2d getVirtualPosition() {
 		return virtualPosition;
