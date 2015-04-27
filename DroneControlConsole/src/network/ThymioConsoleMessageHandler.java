@@ -2,7 +2,6 @@ package network;
 
 import gui.ThymioGUI;
 import main.ThymioControlConsole;
-import commoninterface.network.ConnectionHandler;
 import commoninterface.network.MessageHandler;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.network.messages.CameraCaptureMessage;
@@ -20,7 +19,7 @@ public class ThymioConsoleMessageHandler extends MessageHandler {
 	}
 
 	@Override
-	protected void processMessage(Message message, ConnectionHandler c) {
+	protected Message processMessage(Message message) {
 		if (message instanceof SystemStatusMessage) {
 			((ThymioGUI)console.getGUI()).getMessagesPanel().displayData((SystemStatusMessage) message);
 		} else if (message instanceof BehaviorMessage) {
@@ -34,5 +33,7 @@ public class ThymioConsoleMessageHandler extends MessageHandler {
 		}  else {
 			System.out.println("Received non recognise message type: " + message.getClass().toString());
 		}
+		
+		return null;
 	}
 }

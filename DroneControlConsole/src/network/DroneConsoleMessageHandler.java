@@ -2,7 +2,6 @@ package network;
 
 import gui.DroneGUI;
 import main.DroneControlConsole;
-import commoninterface.network.ConnectionHandler;
 import commoninterface.network.MessageHandler;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.network.messages.CompassMessage;
@@ -20,7 +19,7 @@ public class DroneConsoleMessageHandler extends MessageHandler {
 	}
 
 	@Override
-	protected void processMessage(Message message, ConnectionHandler c) {
+	protected Message processMessage(Message message) {
 		if (message instanceof GPSMessage) {
 			((DroneGUI)console.getGUI()).getGPSPanel().displayData(((GPSMessage) message).getGPSData());
 		} else if (message instanceof SystemStatusMessage) {
@@ -34,5 +33,6 @@ public class DroneConsoleMessageHandler extends MessageHandler {
 		}else {
 			System.out.println("Received non recognise message type: " + message.getClass().toString());
 		}
+		return null;
 	}
 }

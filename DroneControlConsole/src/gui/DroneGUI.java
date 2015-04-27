@@ -3,7 +3,9 @@ package gui;
 import gui.panels.BatteryPanel;
 import gui.panels.CompassPanel;
 import gui.panels.GPSPanel;
+import gui.panels.NeuralActivationsPanel;
 import gui.panels.SystemInfoPanel;
+import gui.panels.UpdatePanel;
 import gui.panels.map.MapPanel;
 
 import java.awt.BorderLayout;
@@ -113,7 +115,7 @@ public class DroneGUI extends RobotGUI {
 		sysInfoPanel = new SystemInfoPanel(this);
 		add(sysInfoPanel, BorderLayout.SOUTH);
 	}
-
+	
 	public GPSPanel getGPSPanel() {
 		return gpsPanel;
 	}

@@ -12,9 +12,14 @@ import network.broadcast.RealBroadcastHandler;
 import commoninterface.CIBehavior;
 import commoninterface.CILogger;
 import commoninterface.CISensor;
-import commoninterface.RealRobotCI;
+import commoninterface.RobotCI;
 import commoninterface.ThymioCI;
 import commoninterface.mathutils.Vector2d;
+import commoninterface.messageproviders.BehaviorMessageProvider;
+import commoninterface.messageproviders.EntitiesMessageProvider;
+import commoninterface.messageproviders.EntityMessageProvider;
+import commoninterface.messageproviders.LogMessageProvider;
+import commoninterface.messageproviders.NeuralActivationsMessageProvider;
 import commoninterface.network.CommandConnectionListener;
 import commoninterface.network.ConnectionHandler;
 import commoninterface.network.ConnectionListener;
@@ -28,8 +33,9 @@ import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
 import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
+import commoninterface.utils.RobotLogger;
 
-public class RealThymioCI extends RealRobotCI implements ThymioCI {
+public class RealThymioCI extends Thread  implements ThymioCI {
 
 	private static long CYCLE_TIME = 100;// in miliseconds
 
@@ -60,6 +66,8 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 	
 	private Vector2d virtualPosition;
 	private Double virtualOrientation;
+	
+	private RobotLogger logger;
 	
 	@Override
 	public void begin(CIArguments args) {
@@ -177,6 +185,17 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 				System.out.println("\t"+i.getClass().getSimpleName());
 			}
 		}
+		
+		messageProviders.add(new EntityMessageProvider(this));
+		System.out.println("\tEntityMessageProvider");
+		messageProviders.add(new EntitiesMessageProvider(this));
+		System.out.println("\tEntitiesMessageProvider");
+		messageProviders.add(new BehaviorMessageProvider(this));
+		System.out.println("\tBehaviorMessageProvider");
+		messageProviders.add(new NeuralActivationsMessageProvider(this));
+		System.out.println("\tNeuralActivationsMessageProvider");
+		messageProviders.add(new LogMessageProvider(this));
+		System.out.println("\tLogMessageProvider");
 
 	}
 	
@@ -315,6 +334,11 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 	@Override
 	public double getThymioRadius() {
 		return 0.08;
+	}
+	
+	@Override
+	public RobotLogger getLogger() {
+		return logger;
 	}
 	
 }

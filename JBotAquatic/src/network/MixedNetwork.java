@@ -61,7 +61,7 @@ public class MixedNetwork extends Network {
 			sender = new MixedBroadcastSender(InetAddress.getByName(NetworkUtils.getAddress()), port);
 			receiver.start();
 			
-			gatewayRobot = new GatewayRobot(this);
+			gatewayRobot = new GatewayRobot(sim);
 			
 			controllerListener = new ConnectionListener(gatewayRobot);
 			controllerListener.start();
@@ -81,7 +81,16 @@ public class MixedNetwork extends Network {
 		if(!continueExecution)
 			return;
 		
-		for(Robot r : sim.getRobots()) {
+		for(int i = 0 ; i < sim.getRobots().size() ; i++) {
+			Robot r = sim.getRobots().get(i);
+			if(r instanceof AquaticDroneCI) {
+				AquaticDroneCI aq = (AquaticDroneCI)r;
+				aq.getBroadcastHandler().messageReceived(senderAddress, msg);
+			}
+		}
+		
+		for(int i = 0 ; i < sim.getRobots().size() ; i++) {
+			Robot r = sim.getRobots().get(i);
 			if(r instanceof AquaticDroneCI) {
 				AquaticDroneCI aq = (AquaticDroneCI)r;
 				aq.getBroadcastHandler().messageReceived(senderAddress, msg);
@@ -95,7 +104,8 @@ public class MixedNetwork extends Network {
 		if(!continueExecution)
 			return;
 		
-		for(Robot r : sim.getRobots()) {
+		for(int i = 0 ; i < sim.getRobots().size() ; i++) {
+			Robot r = sim.getRobots().get(i);
 			if(r instanceof AquaticDroneCI) {
 				AquaticDroneCI aq = (AquaticDroneCI)r;
 				aq.getBroadcastHandler().messageReceived(senderAddress, msg);
@@ -114,20 +124,6 @@ public class MixedNetwork extends Network {
 		motorListener.shutdown();
 		commandListener.closeConnections();
 		commandListener.shutdown();
-	}
-	
-	public void processInformationRequest(Message request, ConnectionHandler conn) {
-		if(!sim.getRobots().isEmpty()) {
-			RobotCI robot = (RobotCI)sim.getRobots().get(0);
-			robot.processInformationRequest(request, conn);
-		}
-	}
-	
-	public void setMotorSpeeds(double leftMotor, double rightMotor) {
-		if(!sim.getRobots().isEmpty()) {
-			RobotCI robot = (RobotCI)sim.getRobots().get(0);
-			robot.setMotorSpeeds(leftMotor, rightMotor);
-		}
 	}
 	
 	class MixedBroadcastReceiver extends Thread{

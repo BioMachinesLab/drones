@@ -1,21 +1,29 @@
 package network;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import simulation.Simulator;
+import simulation.robot.Robot;
+
+import commoninterface.CIBehavior;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
 import commoninterface.network.ConnectionHandler;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.messages.Message;
+import commoninterface.network.messages.MessageProvider;
 import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
+import commoninterface.utils.RobotLogger;
 
 public class GatewayRobot implements RobotCI {
 	
-	private MixedNetwork mixedNetwork;
+	private int chosenIndex = 0;
+	private Simulator sim;
 	
-	public GatewayRobot(MixedNetwork mixedNetwork) {
-		this.mixedNetwork = mixedNetwork;
+	public GatewayRobot(Simulator sim) {
+		this.sim = sim;
 	}
 
 	@Override
@@ -23,10 +31,22 @@ public class GatewayRobot implements RobotCI {
 
 	@Override
 	public void shutdown() {}
-
-	@Override
+	
+	public void processInformationRequest(Message request, ConnectionHandler conn) {
+		for(int i = 0 ; i < sim.getRobots().size() ; i++) {
+			Robot r = sim.getRobots().get(i);
+			if(r instanceof RobotCI) {
+				RobotCI robot = (RobotCI)r;
+				robot.processInformationRequest(request, i == chosenIndex ? conn : null);
+			}
+		}
+	}
+	
 	public void setMotorSpeeds(double leftMotor, double rightMotor) {
-		mixedNetwork.setMotorSpeeds(leftMotor, rightMotor);
+		if(sim.getRobots().size() > chosenIndex) {
+			RobotCI robot = (RobotCI)sim.getRobots().get(chosenIndex);
+			robot.setMotorSpeeds(leftMotor, rightMotor);
+		}
 	}
 
 	@Override
@@ -55,17 +75,57 @@ public class GatewayRobot implements RobotCI {
 	}
 
 	@Override
-	public void processInformationRequest(Message request,
-			ConnectionHandler conn) {
-		mixedNetwork.processInformationRequest(request, conn);
-	}
-
-	@Override
 	public String getInitMessages() {
 		return null;
 	}
 
 	@Override
 	public void reset() {}
+	
+	@Override
+	public RobotLogger getLogger() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<MessageProvider> getMessageProviders() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public String getStatus() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public void startBehavior(CIBehavior b) {
+		for(int i = 0 ; i < sim.getRobots().size() ; i++) {
+			Robot r = sim.getRobots().get(i);
+			if(r instanceof RobotCI) {
+				RobotCI robot = (RobotCI)r;
+				robot.startBehavior(b);
+			}
+		}
+	}
+	
+	@Override
+	public void stopActiveBehavior() {
+		for(int i = 0 ; i < sim.getRobots().size() ; i++) {
+			Robot r = sim.getRobots().get(i);
+			if(r instanceof RobotCI) {
+				RobotCI robot = (RobotCI)r;
+				robot.stopActiveBehavior();
+			}
+		}
+	}
+	
+	@Override
+	public CIBehavior getActiveBehavior() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }
