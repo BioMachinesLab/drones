@@ -16,7 +16,7 @@ public class MotorUpdateThread extends UpdateThread {
 	
 	@Override
 	public void run() {
-
+		
 		while (keepGoing) {
 			panel.threadWait();
 			console.getMotorSpeeds().setLimit(motorPanel.getMotorLimit());

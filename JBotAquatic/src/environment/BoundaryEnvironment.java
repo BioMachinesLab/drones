@@ -46,23 +46,23 @@ public class BoundaryEnvironment extends Environment{
 		}
 		
 		
-		GeoFence fence = new GeoFence("fence");
-		
-		addNode(fence,-1,-1,simulator.getRandom());
-		addNode(fence,-1,0,simulator.getRandom());
-		addNode(fence,-1,1,simulator.getRandom());
-		addNode(fence,0,1,simulator.getRandom());
-		addNode(fence,1,1,simulator.getRandom());
-		addNode(fence,1,0,simulator.getRandom());
-		addNode(fence,1,-1,simulator.getRandom());
-		addNode(fence,0,-1,simulator.getRandom());
-		
-		addLines(fence.getWaypoints(), simulator);
-		
-		for(Robot r : robots) {
-			AquaticDroneCI drone = (AquaticDroneCI)r;
-			drone.getEntities().add(fence);
-		}
+//		GeoFence fence = new GeoFence("fence");
+//		
+//		addNode(fence,-1,-1,simulator.getRandom());
+//		addNode(fence,-1,0,simulator.getRandom());
+//		addNode(fence,-1,1,simulator.getRandom());
+//		addNode(fence,0,1,simulator.getRandom());
+//		addNode(fence,1,1,simulator.getRandom());
+//		addNode(fence,1,0,simulator.getRandom());
+//		addNode(fence,1,-1,simulator.getRandom());
+//		addNode(fence,0,-1,simulator.getRandom());
+//		
+//		addLines(fence.getWaypoints(), simulator);
+//		
+//		for(Robot r : robots) {
+//			AquaticDroneCI drone = (AquaticDroneCI)r;
+//			drone.getEntities().add(fence);
+//		}
 	}
 	
 	private void addLines(LinkedList<Waypoint> waypoints, Simulator simulator) {

@@ -145,9 +145,11 @@ public class GeoFenceCISensor extends ConeTypeCISensor{
 			lines.clear();
 		} else {
 			LinkedList<Waypoint> waypoints = fence.getWaypoints();
-			
+
 			//force this every 100 seconds just to be on the safe side
 			if(waypoints.size() != lines.size() || (time % 1000) == 0) {
+				lines.clear();
+				
 				for(int i = 1 ; i < waypoints.size() ; i++) {
 					
 					Waypoint wa = waypoints.get(i-1);
