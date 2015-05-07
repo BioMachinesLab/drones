@@ -2,8 +2,6 @@ package commoninterface.network.broadcast;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-
-import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
 import commoninterface.ThymioCI;
 import commoninterface.objects.Entity;
@@ -39,7 +37,7 @@ public abstract class BroadcastHandler {
 			case PositionBroadcastMessage.IDENTIFIER:
 				
 				RobotLocation dl = PositionBroadcastMessage.decode(address, message);
-				dl.setTimestepReceived((long)(robot.getTimeSinceStart()/10));
+				dl.setTimestepReceived((long)(robot.getTimeSinceStart() * 10));
 				
 				synchronized(robot.getEntities()){
 					robot.getEntities().remove(dl);
@@ -70,7 +68,7 @@ public abstract class BroadcastHandler {
 					if(timestep - e.getTimestepReceived() > CLEAN_ENTITIES_TIME) {
 						i.remove();
 						if(DEBUG)
-							System.out.println("Removed Entity "+e);
+							System.out.println("Removed Entity during cleanup");
 					}
 				}
 			}

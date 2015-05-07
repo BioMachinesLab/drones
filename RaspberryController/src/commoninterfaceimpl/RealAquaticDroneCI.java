@@ -391,7 +391,6 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	public double getTimeSinceStart() {
 		long elapsedMillis = System.currentTimeMillis()
 				- this.startTimeInMillis;
-
 		return ((double) elapsedMillis) / 1000.0;
 	}
 

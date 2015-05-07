@@ -48,4 +48,9 @@ public abstract class Entity implements Serializable{
 		return true;
 	}
 	
+	@Override
+	public String toString() {
+		return name;
+	}
+	
 }
