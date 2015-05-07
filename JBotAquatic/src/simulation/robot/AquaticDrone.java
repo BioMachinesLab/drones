@@ -99,7 +99,6 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	@Override
 	public void updateSensors(double simulationStep, ArrayList<PhysicalObject> teleported) {
 		super.updateSensors(simulationStep, teleported);
-		
 		for(CIBehavior b : alwaysActiveBehaviors)
 			b.step(simulationStep);
 		
@@ -151,7 +150,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 
 	@Override
 	public double getTimeSinceStart() {
-		return simulator.getTime()*10;
+		return ((double)simulator.getTime())/10.0;
 	}
 	
 	@Override

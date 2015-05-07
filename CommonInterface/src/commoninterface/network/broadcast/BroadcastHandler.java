@@ -43,7 +43,6 @@ public abstract class BroadcastHandler {
 					robot.getEntities().remove(dl);
 					robot.getEntities().add(dl);
 				}
-				
 				if(DEBUG)
 					System.out.println("Added DroneLocation "+dl);
 				break;
