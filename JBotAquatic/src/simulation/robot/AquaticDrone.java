@@ -2,7 +2,6 @@ package simulation.robot;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import mathutils.MathUtils;
 import mathutils.Vector2d;
 import net.jafama.FastMath;
@@ -190,8 +189,6 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		double lw = Math.signum(rightWheelSpeed-leftWheelSpeed);
 		
 		orientation = MathUtils.modPI2(orientation + motorModel(rightWheelSpeed-leftWheelSpeed)*lw);
-		
-//		System.out.println(leftWheelSpeed+" "+rightWheelSpeed+" "+Math.toDegrees(orientation));
 		
 		double accelDirection = (rightWheelSpeed+leftWheelSpeed) < 0 ? -1 : 1;
 		double lengthOfAcc = accelarationConstant * (leftWheelSpeed + rightWheelSpeed);
