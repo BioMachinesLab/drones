@@ -19,7 +19,7 @@ import commoninterface.utils.jcoord.LatLon;
 
 public class LogVisualizer extends JFrame {
 	
-	private String file = "../JBotAquatic/selected_logs/motor_failure_22_04_2015/values_09-04-2015_03-43-39.log";
+	private String file = "../JBotAquatic/selected_logs/success_1drone_07_05_2015/logs/values_6-5-2015_15-51-27.6.log";
 //	private String file = "../JBotAquatic/logs/22_04_2015/values_09-04-2015_01-17-56.log";
 	private Graph graph;
 	private MapPanel map;
@@ -105,25 +105,30 @@ public class LogVisualizer extends JFrame {
 				
 				Scanner sl = new Scanner(l);
 				
-				LogData d = new LogData();
+				try {
 				
-				d.time = sl.next();
+					LogData d = new LogData();
+					
+					d.time = sl.next();
+					
+					double lat = sl.nextDouble();
+					double lon = sl.nextDouble();
+					
+					d.latLon = new LatLon(lat,lon);
+					
+					d.GPSorientation = sl.nextDouble();
+					d.compassOrientation = sl.nextDouble();
+					d.GPSspeed = sl.nextDouble();
+					String date = sl.next();
+					d.leftSpeed = sl.nextDouble();
+					d.rightSpeed = sl.nextDouble();
+					d.lastComment = lastComment;
+					
+					d.timestep = step++;
+					
+					data.add(d);
 				
-				double lat = sl.nextDouble();
-				double lon = sl.nextDouble();
-				
-				d.latLon = new LatLon(lat,lon);
-				
-				d.GPSorientation = sl.nextDouble();
-				d.compassOrientation = sl.nextDouble();
-				d.GPSspeed = sl.nextDouble();
-				d.leftSpeed = sl.nextDouble();
-				d.rightSpeed = sl.nextDouble();
-				d.lastComment = lastComment;
-				
-				d.timestep = step++;
-				
-				data.add(d);
+				}catch(Exception e){}
 				
 				sl.close();
 				

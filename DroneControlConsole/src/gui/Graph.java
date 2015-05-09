@@ -124,7 +124,6 @@ public class Graph extends JPanel {
 
 	public void paint(Graphics g) {
 		super.paint(g);
-		
 		Graphics2D g2 = (Graphics2D) g;
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
 
@@ -152,8 +151,7 @@ public class Graph extends JPanel {
 			g2.draw(new Line2D.Double(pad, mousePosition.getY(), lw, mousePosition.getY()));
 			
 			g2.setStroke(originalStroke);
-		}else
-			repaint();
+		}
 	}
 
 	private void drawLegends(Graphics2D g2) {
