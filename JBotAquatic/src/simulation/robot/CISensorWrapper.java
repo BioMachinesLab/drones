@@ -7,9 +7,9 @@ import simulation.physicalobjects.PhysicalObject;
 import simulation.robot.sensors.Sensor;
 import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
-
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
+import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
 
 public class CISensorWrapper extends Sensor{
@@ -34,7 +34,11 @@ public class CISensorWrapper extends Sensor{
 	
 	@Override
 	public void update(double time, ArrayList<PhysicalObject> teleported) {
-		cisensor.update(time, ((RobotCI)this.robot).getEntities());
+		
+		//We were having concurrency issues with the entities arraylist
+		Object[] entities = ((RobotCI)this.robot).getEntities().toArray();
+		
+		cisensor.update(time, entities);
 	}
 
 }

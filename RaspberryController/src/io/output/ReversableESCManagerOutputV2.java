@@ -26,11 +26,14 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 	private final static int MIN_VALUE = 132;
 	private final static int MAX_VALUE = 168;
 
-	private final static int MIN_FW_VALUE = 155;
+	private final static int MIN_FW_VALUE = 156;
 	private final static int MIN_BW_VALUE = 145;
 
 	private int lValue = CENTRAL_VALUE_LEFT;
 	private int rValue = CENTRAL_VALUE_RIGHT;
+	
+	private int prevLValue = CENTRAL_VALUE_LEFT;
+	private int prevRValue = CENTRAL_VALUE_RIGHT;
 	
 	private double lReceivedValue = 0;
 	private double rReceivedValue = 0;
@@ -93,7 +96,12 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 	private void writeValueToESC() {
 		// long time = System.currentTimeMillis();
 		try {
+			
 			try {
+				
+				preventStuckMotors();
+				
+				//set the real speed
 				Runtime.getRuntime()
 						.exec(new String[] {
 								"bash",
@@ -102,6 +110,9 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 										+ " > /dev/servoblaster; echo "
 										+ RIGHT_ESC + "=" + rValue
 										+ " > /dev/servoblaster;" }).waitFor();
+				
+				prevLValue = lValue;
+				prevRValue = rValue;
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -113,6 +124,35 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 		}
 		// System.out.println("Time to update motor "
 		// + (System.currentTimeMillis() - time));
+	}
+	
+	private void preventStuckMotors() {
+		int addVal = 5;
+		
+		try {
+			
+			String str = "";
+	
+			if(prevLValue == CENTRAL_VALUE_LEFT && lValue-MIN_FW_VALUE <= addVal && lValue-MIN_FW_VALUE >= 0) {
+				str+= "echo " + LEFT_ESC + "=" + (MIN_FW_VALUE+15)
+						+ " > /dev/servoblaster;";
+				
+			}
+			if(prevRValue == CENTRAL_VALUE_RIGHT && rValue-MIN_FW_VALUE <= addVal && rValue-MIN_FW_VALUE >= 0) {
+				str+= "echo " + RIGHT_ESC + "=" + (MIN_FW_VALUE+15)
+						+ " > /dev/servoblaster;";
+			}
+			
+			if(!str.isEmpty()) {
+				Runtime.getRuntime()
+				.exec(new String[] {
+						"bash",
+						"-c",
+						str}).waitFor();
+				Thread.sleep(100);
+			}
+		
+		} catch(Exception e){}
 	}
 
 	public void disableMotors() {

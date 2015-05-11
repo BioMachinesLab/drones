@@ -23,6 +23,7 @@ public class ConsoleBroadcastHandler {
 	private BroadcastReceiver receiver;
 	private RobotControlConsole console;
 	private String ownAddress;
+	//TODO this has to be true for the mixed experiments to work
 	private boolean retransmit = true;
 	
 	public ConsoleBroadcastHandler(RobotControlConsole console) {

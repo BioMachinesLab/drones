@@ -12,7 +12,7 @@ public class ThymioCISensor extends ThymioConeTypeCISensor {
 	}
 
 	@Override
-	public boolean validEntity(Entity e) {
+	public boolean validEntity(Object e) {
 		return e instanceof ThymioEntity;
 	}
 

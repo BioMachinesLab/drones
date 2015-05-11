@@ -5,6 +5,8 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -14,16 +16,15 @@ import java.util.HashMap;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import com.sun.corba.se.impl.ior.WireObjectKeyTemplate;
-import commoninterface.network.messages.NeuralActivationsMessage;
-
 import threads.UpdateThread;
 import utils.CIGraph;
+import commoninterface.network.messages.NeuralActivationsMessage;
 
 public class NeuralActivationsPanel extends UpdatePanel {
 
@@ -33,18 +34,28 @@ public class NeuralActivationsPanel extends UpdatePanel {
 	private CIGraph inputsGraph;;
 	private CIGraph outputsGraph;
 	
+	private JPanel inputsCheckBoxesPanel = new JPanel();
+	private JPanel outputsCheckBoxesPanel = new JPanel();
+	
 	private long sleepTime = 10000;
 
 	private UpdateThread thread;
 	
 	private boolean notifyThread;
+	private boolean createCheckBoxes;
+	
+	private ArrayList<String> selectedInputsTitles;
+	private ArrayList<String> selectedOutputsTitles;
 	
 	public NeuralActivationsPanel() {
 		setLayout(new BorderLayout());
 		
 		inputsMap = new HashMap<String, ArrayList<Double>>();
 		outputsMap = new HashMap<String, ArrayList<Double>>();
+		selectedInputsTitles = new ArrayList<String>();
+		selectedOutputsTitles = new ArrayList<String>();
 		notifyThread = true;
+		createCheckBoxes = true;
 		
 		add(createGraphsPanel(), BorderLayout.CENTER);
 		add(createBottomPanel(), BorderLayout.SOUTH);
@@ -60,6 +71,7 @@ public class NeuralActivationsPanel extends UpdatePanel {
 		outputsGraph = new CIGraph();
 		
 		inputPanel.setBorder(BorderFactory.createTitledBorder("Inputs Graph"));
+		inputPanel.add(inputsCheckBoxesPanel, BorderLayout.NORTH);
 		inputsGraph.setxLabel("Steps");
 		inputsGraph.setyLabel("Activations");
 		
@@ -67,6 +79,7 @@ public class NeuralActivationsPanel extends UpdatePanel {
 		panel.add(inputPanel);
 		
 		outputPanel.setBorder(BorderFactory.createTitledBorder("Outputs Graph"));
+		outputPanel.add(outputsCheckBoxesPanel, BorderLayout.NORTH);
 		outputsGraph.setxLabel("Steps");
 		outputsGraph.setyLabel("Activations");
 		
@@ -208,12 +221,22 @@ public class NeuralActivationsPanel extends UpdatePanel {
 	public synchronized void displayData(NeuralActivationsMessage message) {
 		ArrayList<String> inputTitles = message.getInputsTitles();
 		
+		if(createCheckBoxes){
+			createCheckBoxes(inputTitles, inputsCheckBoxesPanel, selectedInputsTitles);
+		}
+		
 		for (Double[] inputValues : message.getInputsValues()) {
 			for (int i = 0; i < inputValues.length; i++) 
 				addActivationValues(inputsMap, inputTitles.get(i), inputValues[i]);
 		}
 		
 		ArrayList<String> outputTitles = message.getOutputsTitles();
+		
+		if(createCheckBoxes){
+			createCheckBoxes(outputTitles, outputsCheckBoxesPanel, selectedOutputsTitles);
+			validate();
+			createCheckBoxes = false;
+		}
 		
 		for (Double[] outputValues: message.getOutputsValues()){
 			for (int i = 0; i < outputValues.length; i++) 
@@ -223,12 +246,12 @@ public class NeuralActivationsPanel extends UpdatePanel {
 		inputsGraph.clear();
 		outputsGraph.clear();
 		
-		drawActivations(inputsMap, inputsGraph);
+		drawActivations(inputsMap, inputsGraph, selectedInputsTitles);
 		
 		for (String title : message.getInputsTitles())
 			inputsGraph.addLegend(title);
 		
-		drawActivations(outputsMap, outputsGraph);
+		drawActivations(outputsMap, outputsGraph, selectedOutputsTitles);
 		
 		for (String title : message.getOutputsTitles())
 			outputsGraph.addLegend(title);
@@ -237,7 +260,7 @@ public class NeuralActivationsPanel extends UpdatePanel {
 			notifyAll();
 	}
 
-	private synchronized void drawActivations(HashMap<String, ArrayList<Double>> map, CIGraph graph) {
+	private synchronized void drawActivations(HashMap<String, ArrayList<Double>> map, CIGraph graph, ArrayList<String> selectedTitles) {
 		boolean changeShowLast = true;
 		
 		for (String key : map.keySet()) {
@@ -252,7 +275,12 @@ public class NeuralActivationsPanel extends UpdatePanel {
 				changeShowLast = false;
 			}
 			
-			graph.addDataList(activations);
+			if(selectedTitles.isEmpty()){
+				graph.addDataList(activations);
+			}else if(selectedTitles.contains(key)){
+				graph.addDataList(activations);
+			}
+			
 		}
 	}
 
@@ -265,6 +293,25 @@ public class NeuralActivationsPanel extends UpdatePanel {
 			ArrayList<Double> values = new ArrayList<Double>();
 			values.add(value);
 			activations.put(title, values);
+		}
+	}
+	
+	private void createCheckBoxes(ArrayList<String> titles, JPanel checkBoxesPanel, ArrayList<String> selectedTitles) {
+		if(titles.size() > 0){
+			int rows = (int) Math.round(titles.size() / 4.0 + 0.25);
+			int cols = (titles.size() < 4) ? titles.size() : 4;
+			
+			checkBoxesPanel.setLayout(new GridLayout(rows, cols));
+			
+			for (String title : titles) {
+				JLabel label = new JLabel(title);
+				JCheckBox checkBox = new JCheckBox();
+				
+				checkBox.addItemListener(new CheckBoxListener(checkBox, title, selectedTitles));
+				
+				checkBoxesPanel.add(label);
+				checkBoxesPanel.add(checkBox);
+			}
 		}
 	}
 	
@@ -292,4 +339,25 @@ public class NeuralActivationsPanel extends UpdatePanel {
 		return sleepTime;
 	}
 
+	class CheckBoxListener implements ItemListener {
+		private JCheckBox checkBox;
+		private String title;
+		private ArrayList<String> selectedTitles;
+
+		public CheckBoxListener(JCheckBox checkBox, String title, ArrayList<String> selectedTitles) {
+			this.checkBox = checkBox;
+			this.title = title;
+			this.selectedTitles = selectedTitles;
+		}
+		
+		@Override
+		public void itemStateChanged(ItemEvent e) {
+			if(checkBox.isSelected())
+				selectedTitles.add(title);
+			else
+				selectedTitles.remove(title);
+		}
+		
+	}
+	
 }

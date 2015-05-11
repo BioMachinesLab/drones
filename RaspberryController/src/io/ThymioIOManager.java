@@ -15,7 +15,7 @@ import org.freedesktop.dbus.DBusConnection;
 import org.freedesktop.dbus.exceptions.DBusException;
 
 import commoninterface.network.messages.MotorMessage;
-
+import commoninterfaceimpl.RealThymioCI;
 import utils.CommandLine;
 import ch.epfl.mobots.AsebaNetwork;
 import ch.epfl.mobots.Aseba.ThymioRemoteConnection;
@@ -35,12 +35,16 @@ public class ThymioIOManager {
 	
 	private LinkedList<String> enabledIO = new LinkedList<String>();
 	
-	public ThymioIOManager() {
+	public ThymioIOManager(RealThymioCI thymio) {
 		try {
 			loadConfigurations();
 			
 			initThymioConnection();
 			initInputs();
+			
+			if (enabledIO.contains("filelogger")) {
+				thymio.startLogger();
+			}
 			
 		} catch (DBusException e) {
 			initMessages += ("\n[INIT] DBus/Aseba: not ok! ("+ e.getMessage() + ")\n");

@@ -36,7 +36,10 @@ public abstract class MessageHandler extends Thread {
 					} catch(Exception e){}
 				}
 				
-				processMessage(pendingMessages[currentIndex], pendingConnections[currentIndex]);
+				Message response = processMessage(pendingMessages[currentIndex]);
+				
+				if(response != null)
+					pendingConnections[currentIndex].sendData(response);
 				
 				pendingMessages[currentIndex] = null;
 				pendingConnections[currentIndex] = null;
@@ -49,7 +52,7 @@ public abstract class MessageHandler extends Thread {
 		}
 	}
 	
-	protected abstract void processMessage(Message m, ConnectionHandler c);
+	protected abstract Message processMessage(Message m);
 	
 	/**
 	 * Adds the message to the queue and moves the pointer to the next position.

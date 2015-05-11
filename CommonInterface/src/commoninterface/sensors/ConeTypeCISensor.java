@@ -42,13 +42,13 @@ public abstract class ConeTypeCISensor extends CISensor {
 	public abstract boolean validEntity(Entity e);
 
 	@Override
-	public void update(double time, ArrayList<Entity> entities) {
+	public void update(double time, Object[] entities) {
 		
 		for(int j = 0; j < readings.length; j++){
 			readings[j] = 0.0;
 		}
 		
-		for (Entity e : entities) {
+		for (Object e : entities) {
 			
 			if(e instanceof GeoEntity) {
 			

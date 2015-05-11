@@ -53,13 +53,18 @@ public class VirtualPositionBroadcastMessage extends BroadcastMessage {
 					thymio.setVirtualPosition(receivedX, receivedY);
 					thymio.setVirtualOrientation(receivedOrientation);
 				}else{
-					removeEntityByName(thymio.getEntities(), receivedAddress);
-					thymio.getEntities().add(new ThymioEntity(receivedAddress, new Vector2d(receivedX, receivedY)));
+					synchronized(thymio.getEntities()){
+						removeEntityByName(thymio.getEntities(), receivedAddress);
+						thymio.getEntities().add(new ThymioEntity(receivedAddress, new Vector2d(receivedX, receivedY)));
+					}
 				}
 				
 			}else if(receivedType.equals(VirtualPositionType.PREY.toString())){
-				removeEntityByName(thymio.getEntities(), receivedAddress);
-				thymio.getEntities().add(new PreyEntity(receivedAddress, new Vector2d(receivedX, receivedY)));
+				
+				synchronized(thymio.getEntities()){
+					removeEntityByName(thymio.getEntities(), receivedAddress);
+					thymio.getEntities().add(new PreyEntity(receivedAddress, new Vector2d(receivedX, receivedY)));
+				}			
 			}
 			
 		}

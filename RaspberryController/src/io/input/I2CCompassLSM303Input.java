@@ -143,7 +143,7 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 			int magZ = readSingleValue(LSM303_REGISTER_MAG_OUT_X_L_M+4);
 			
 //			System.out.println("accel "+accelX+" "+accelY+" "+accelZ);
-			System.out.println("mag "+magX+" "+magY+" "+magZ);
+//			System.out.println("mag "+magX+" "+magY+" "+magZ);
 			
 			magX-= (min[0] + max[0])/2;
 			magY-= (min[1] + max[1])/2;

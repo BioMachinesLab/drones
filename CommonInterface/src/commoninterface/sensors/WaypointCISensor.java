@@ -30,7 +30,7 @@ public class WaypointCISensor extends CISensor{
 	}
 
 	@Override
-	public void update(double time, ArrayList<Entity> entities) {
+	public void update(double time, Object[] entities) {
 		
 		LatLon robotLatLon = drone.getGPSLatLon();
 		

@@ -1,8 +1,8 @@
 package gui;
 
-import gui.panels.NeuralActivationsPanel;
 import gui.panels.ThymioCapturePanel;
 import gui.panels.ThymioSensorsPanel;
+import gui.panels.ThymioVirtualPositionPanel;
 
 import java.awt.BorderLayout;
 
@@ -19,7 +19,7 @@ public class ThymioGUI extends RobotGUI {
 
 	private ThymioSensorsPanel readingsPanel;
 	private ThymioCapturePanel capturePanel;
-	private NeuralActivationsPanel neuralActivationsPanel;
+	private ThymioVirtualPositionPanel virtualPositionPanel;
 	
 	public ThymioGUI(ThymioControlConsole console) {
 		this.console = console;
@@ -47,16 +47,11 @@ public class ThymioGUI extends RobotGUI {
 		createPanels();
 		createInfoPanel();
 		createCameraPanel();
-		createNeuralActivationsPanel();
 
 		pack();
 		setLocationRelativeTo(null);
 	}
 
-	private void createNeuralActivationsPanel() {
-		neuralActivationsPanel = new NeuralActivationsPanel();
-		commandPanel.getNeuralActivationsWindow().add(neuralActivationsPanel, BorderLayout.CENTER);
-	}
 
 	private void createCameraPanel() {
 		capturePanel = new ThymioCapturePanel();
@@ -71,6 +66,10 @@ public class ThymioGUI extends RobotGUI {
 
 		readingsPanel = new ThymioSensorsPanel();
 		rightPanel.add(readingsPanel, BorderLayout.CENTER);
+		
+		virtualPositionPanel = new ThymioVirtualPositionPanel();
+		rightPanel.add(virtualPositionPanel, BorderLayout.SOUTH);
+		
 		add(rightPanel, BorderLayout.EAST);
 
 		JPanel leftPanel = new JPanel(new BorderLayout());
@@ -92,16 +91,16 @@ public class ThymioGUI extends RobotGUI {
 		add(leftPanel, BorderLayout.WEST);
 	}
 	
-	public NeuralActivationsPanel getNeuralActivationsPanel() {
-		return neuralActivationsPanel;
-	}
-	
 	public ThymioSensorsPanel getReadingsPanel() {
 		return readingsPanel;
 	}
 	
 	public ThymioCapturePanel getCapturePanel() {
 		return capturePanel;
+	}
+	
+	public ThymioVirtualPositionPanel getVirtualPositionPanel() {
+		return virtualPositionPanel;
 	}
 	
 }

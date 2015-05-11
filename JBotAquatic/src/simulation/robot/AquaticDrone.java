@@ -1,11 +1,13 @@
 package simulation.robot;
 
 import java.util.ArrayList;
-
+import java.util.List;
 import mathutils.MathUtils;
 import mathutils.Vector2d;
 import net.jafama.FastMath;
 import network.SimulatedBroadcastHandler;
+import network.messageproviders.CompassMessageProvider;
+import network.messageproviders.GPSMessageProvider;
 import simpletestbehaviors.ChangeWaypointCIBehavior;
 import simulation.Simulator;
 import simulation.physicalobjects.PhysicalObject;
@@ -17,15 +19,23 @@ import simulation.util.ArgumentsAnnotation;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CISensor;
+import commoninterface.messageproviders.BehaviorMessageProvider;
+import commoninterface.messageproviders.EntitiesMessageProvider;
+import commoninterface.messageproviders.EntityMessageProvider;
+import commoninterface.messageproviders.LogMessageProvider;
+import commoninterface.messageproviders.NeuralActivationsMessageProvider;
+import commoninterface.network.ConnectionHandler;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
 import commoninterface.network.broadcast.PositionBroadcastMessage;
+import commoninterface.network.messages.Message;
+import commoninterface.network.messages.MessageProvider;
 import commoninterface.objects.Entity;
-import commoninterface.objects.GeoFence;
 import commoninterface.objects.Waypoint;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
+import commoninterface.utils.RobotLogger;
 import commoninterface.utils.jcoord.LatLon;
 
 public class AquaticDrone extends DifferentialDriveRobot implements AquaticDroneCI{
@@ -49,7 +59,11 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	@ArgumentsAnnotation(name="commrange", defaultValue = "0.0")
 	private double commRange = 0.0;
 	
+	private ArrayList<MessageProvider> messageProviders;
 	private ArrayList<CIBehavior> alwaysActiveBehaviors = new ArrayList<CIBehavior>();
+	private CIBehavior activeBehavior;
+	
+	private RobotLogger logger;
 	
 	public AquaticDrone(Simulator simulator, Arguments args) {
 		super(simulator, args);
@@ -77,18 +91,27 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	public void shutdown() {}
 	
 	@Override
-	public void updateSensors(double simulationStep,ArrayList<PhysicalObject> teleported) {
+	public void setWheelSpeed(double left, double right) {
+		super.setWheelSpeed(left, right);
+	}
+	
+	@Override
+	public void updateSensors(double simulationStep, ArrayList<PhysicalObject> teleported) {
+		super.updateSensors(simulationStep, teleported);
 		for(CIBehavior b : alwaysActiveBehaviors)
 			b.step(simulationStep);
-		super.updateSensors(simulationStep, teleported);
+		
+		if(activeBehavior != null) {
+			activeBehavior.step(simulationStep);
+		}
 	}
 
 	public void setMotorSpeeds(double leftMotorPercentage, double rightMotorPercentage) {
 		if(propellers == null)
 			propellers = (PropellersActuator) getActuatorByType(PropellersActuator.class);
+		
 		propellers.setLeftPercentage(leftMotorPercentage);
 		propellers.setRightPercentage(rightMotorPercentage);
-		propellers.apply(this);
 	}
 
 	@Override
@@ -126,7 +149,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 
 	@Override
 	public double getTimeSinceStart() {
-		return simulator.getTime()*10;
+		return ((double)simulator.getTime())/10.0;
 	}
 	
 	@Override
@@ -156,7 +179,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	
 	@Override
 	public void updateActuators(Double time, double timeDelta) {
-		
+
 		if(stopTimestep > 0) {
 			rightWheelSpeed = 0;
 			leftWheelSpeed = 0;
@@ -236,4 +259,96 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	public void setActiveWaypoint(Waypoint wp) {
 		this.activeWaypoint = wp;
 	}
+	
+	@Override
+	public String getInitMessages() {
+		return "Simulated drone with ID "+getId();
+	}
+	
+	@Override
+	public void processInformationRequest(Message request, ConnectionHandler conn) {
+		Message response = null;
+		
+		for (MessageProvider p : getMessageProviders()) {
+			response = p.getMessage(request);
+			
+			if (response != null)
+				break;
+		}
+		
+		if(conn != null && response != null) {
+			conn.sendData(response);
+		}
+	}
+	
+	@Override
+	public void reset() {
+		leftWheelSpeed = 0;
+		rightWheelSpeed = 0;
+	}
+
+	@Override
+	public RobotLogger getLogger() {
+		return logger;
+	}
+	
+	@Override
+	public List<MessageProvider> getMessageProviders() {
+		
+		//We only do this here because messageProviders might not be necessary
+		//most of the times, and it saves simulation time
+		if(messageProviders == null) {
+			initMessageProviders();
+		}
+		
+		return messageProviders;
+	}
+	
+	private void initMessageProviders() {
+		messageProviders = new ArrayList<MessageProvider>();
+		
+		messageProviders.add(new CompassMessageProvider(this));
+		messageProviders.add(new GPSMessageProvider(this));
+		messageProviders.add(new EntityMessageProvider(this));
+		messageProviders.add(new EntitiesMessageProvider(this));
+		messageProviders.add(new BehaviorMessageProvider(this));
+		messageProviders.add(new NeuralActivationsMessageProvider(this));
+		messageProviders.add(new LogMessageProvider(this));
+	}
+	
+	@Override
+	public String getStatus() {
+		if(getActiveBehavior() != null)
+			return "Running behavior "+getActiveBehavior().getClass().getSimpleName();
+		return "Idle";
+	}
+	
+	@Override
+	public void startBehavior(CIBehavior b) {
+		stopActiveBehavior();
+		activeBehavior = b;
+		activeBehavior.start();
+		log("Starting CIBehavior "+b.getClass().getSimpleName());
+	}
+
+	@Override
+	public void stopActiveBehavior() {
+		if (activeBehavior != null) {
+			activeBehavior.cleanUp();
+			log("Stopping CIBehavior "+activeBehavior.getClass().getSimpleName());
+			activeBehavior = null;
+			setMotorSpeeds(0, 0);
+		}
+	}
+	
+	@Override
+	public CIBehavior getActiveBehavior() {
+		return activeBehavior;
+	}
+	
+	private void log(String msg) {
+		if(logger != null)
+			logger.logMessage(msg);
+	}
+	
 }

@@ -30,7 +30,7 @@ public class RealThymioIRCISensor extends CISensor {
 	}
 
 	@Override
-	public void update(double time, ArrayList<Entity> entities) {
+	public void update(double time, Object[] entities) {
 		readings = thymio.getInfraredSensorsReadings();
 	}
 

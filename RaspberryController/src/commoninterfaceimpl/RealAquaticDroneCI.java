@@ -9,21 +9,24 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import network.broadcast.RealBroadcastHandler;
 import simpletestbehaviors.ChangeWaypointCIBehavior;
 import utils.FileLogger;
-import network.CommandConnectionListener;
-import network.ControllerMessageHandler;
-import network.MotorConnectionListener;
-import network.broadcast.RealBroadcastHandler;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
-import commoninterface.CILogger;
 import commoninterface.CISensor;
 import commoninterface.LedState;
-import commoninterface.RealRobotCI;
 import commoninterface.dataobjects.GPSData;
+import commoninterface.messageproviders.BehaviorMessageProvider;
+import commoninterface.messageproviders.EntitiesMessageProvider;
+import commoninterface.messageproviders.EntityMessageProvider;
+import commoninterface.messageproviders.LogMessageProvider;
+import commoninterface.messageproviders.NeuralActivationsMessageProvider;
+import commoninterface.network.CommandConnectionListener;
 import commoninterface.network.ConnectionHandler;
 import commoninterface.network.ConnectionListener;
+import commoninterface.network.ControllerMessageHandler;
+import commoninterface.network.MotorConnectionListener;
 import commoninterface.network.NetworkUtils;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.broadcast.BroadcastMessage;
@@ -34,9 +37,10 @@ import commoninterface.network.messages.MessageProvider;
 import commoninterface.objects.Entity;
 import commoninterface.objects.Waypoint;
 import commoninterface.utils.CIArguments;
+import commoninterface.utils.RobotLogger;
 import commoninterface.utils.jcoord.LatLon;
 
-public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
+public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	private static long CYCLE_TIME = 100;// in miliseconds
 
@@ -66,6 +70,8 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 	private Waypoint activeWaypoint;
 	
 	private ArrayList<CIBehavior> alwaysActiveBehaviors = new ArrayList<CIBehavior>(); 
+	
+	private RobotLogger logger;
 
 	@Override
 	public void begin(CIArguments args) {
@@ -85,8 +91,7 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 
 		setStatus("Running!\n");
 
-		if(logger != null)
-			logger.logMessage(initMessages);
+		log(initMessages);
 	}
 
 	@Override
@@ -138,8 +143,7 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 	
 	@Override
 	public void shutdown() {
-		if(logger != null)
-			logger.logMessage("# Shutting down Controller...");
+		log("# Shutting down Controller...");
 		
 		run = false;
 
@@ -189,8 +193,6 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 			connectionListener = new ConnectionListener(this);
 			connectionListener.start();
 
-			if(logger != null)
-				logger.logMessage(".");
 			initMessages += "[INIT] ConnectionListener: ok\n";
 
 			motorConnectionListener = new MotorConnectionListener(this);
@@ -205,8 +207,6 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 					
 			broadcastHandler = new RealBroadcastHandler(this, broadcastMessages);
 
-			if(logger != null)
-				logger.logMessage(".");
 			initMessages += "[INIT] MotorConnectionListener: ok\n";
 
 		} catch (IOException e) {
@@ -241,6 +241,17 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 				System.out.println("\t"+o.getClass().getSimpleName());
 			}
 		}
+		
+		messageProviders.add(new EntityMessageProvider(this));
+		System.out.println("\tEntityMessageProvider");
+		messageProviders.add(new EntitiesMessageProvider(this));
+		System.out.println("\tEntitiesMessageProvider");
+		messageProviders.add(new BehaviorMessageProvider(this));
+		System.out.println("\tBehaviorMessageProvider");
+		messageProviders.add(new NeuralActivationsMessageProvider(this));
+		System.out.println("\tNeuralActivationsMessageProvider");
+		messageProviders.add(new LogMessageProvider(this));
+		System.out.println("\tLogMessageProvider");
 	}
 
 	// Behaviors
@@ -248,12 +259,15 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 	public void startBehavior(CIBehavior b) {
 		stopActiveBehavior();
 		activeBehavior = b;
+		activeBehavior.start();
+		log("Starting CIBehavior "+b.getClass().getSimpleName());
 	}
 
 	@Override
 	public void stopActiveBehavior() {
 		if (activeBehavior != null) {
 			activeBehavior.cleanUp();
+			log("Stopping CIBehavior "+activeBehavior.getClass().getSimpleName());
 			activeBehavior = null;
 			ioManager.setMotorSpeeds(leftSpeed, rightSpeed);
 		}
@@ -377,7 +391,6 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 	public double getTimeSinceStart() {
 		long elapsedMillis = System.currentTimeMillis()
 				- this.startTimeInMillis;
-
 		return ((double) elapsedMillis) / 1000.0;
 	}
 
@@ -404,6 +417,16 @@ public class RealAquaticDroneCI extends RealRobotCI implements AquaticDroneCI {
 	@Override
 	public void setActiveWaypoint(Waypoint wp) {
 		this.activeWaypoint = wp;	
+	}
+	
+	private void log(String msg) {
+		if(logger != null)
+			logger.logMessage(msg);
+	}
+	
+	@Override
+	public RobotLogger getLogger() {
+		return logger;
 	}
 
 }

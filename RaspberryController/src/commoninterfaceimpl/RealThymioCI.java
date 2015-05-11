@@ -8,18 +8,24 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import network.CommandConnectionListener;
-import network.ControllerMessageHandler;
-import network.MotorConnectionListener;
 import network.broadcast.RealBroadcastHandler;
+import utils.ThymioFileLogger;
 import commoninterface.CIBehavior;
-import commoninterface.CILogger;
 import commoninterface.CISensor;
-import commoninterface.RealRobotCI;
+import commoninterface.RobotCI;
 import commoninterface.ThymioCI;
 import commoninterface.mathutils.Vector2d;
+import commoninterface.messageproviders.BehaviorMessageProvider;
+import commoninterface.messageproviders.EntitiesMessageProvider;
+import commoninterface.messageproviders.EntityMessageProvider;
+import commoninterface.messageproviders.LogMessageProvider;
+import commoninterface.messageproviders.NeuralActivationsMessageProvider;
+import commoninterface.messageproviders.ThymioVirtualPositionMessageProvider;
+import commoninterface.network.CommandConnectionListener;
 import commoninterface.network.ConnectionHandler;
 import commoninterface.network.ConnectionListener;
+import commoninterface.network.ControllerMessageHandler;
+import commoninterface.network.MotorConnectionListener;
 import commoninterface.network.NetworkUtils;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.broadcast.BroadcastMessage;
@@ -28,8 +34,9 @@ import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
 import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
+import commoninterface.utils.RobotLogger;
 
-public class RealThymioCI extends RealRobotCI implements ThymioCI {
+public class RealThymioCI extends Thread  implements ThymioCI {
 
 	private static long CYCLE_TIME = 100;// in miliseconds
 
@@ -60,6 +67,8 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 	
 	private Vector2d virtualPosition;
 	private Double virtualOrientation;
+	
+	private RobotLogger logger;
 	
 	@Override
 	public void begin(CIArguments args) {
@@ -161,7 +170,7 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 	
 	// Init's
 	private void initIO() {
-		ioManager = new ThymioIOManager();
+		ioManager = new ThymioIOManager(this);
 		initMessages += ioManager.getInitMessages();
 	}
 	
@@ -177,7 +186,20 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 				System.out.println("\t"+i.getClass().getSimpleName());
 			}
 		}
-
+		
+		messageProviders.add(new EntityMessageProvider(this));
+		System.out.println("\tEntityMessageProvider");
+		messageProviders.add(new EntitiesMessageProvider(this));
+		System.out.println("\tEntitiesMessageProvider");
+		messageProviders.add(new BehaviorMessageProvider(this));
+		System.out.println("\tBehaviorMessageProvider");
+		messageProviders.add(new NeuralActivationsMessageProvider(this));
+		System.out.println("\tNeuralActivationsMessageProvider");
+		messageProviders.add(new LogMessageProvider(this));
+		System.out.println("\tLogMessageProvider");
+		messageProviders.add(new ThymioVirtualPositionMessageProvider(this));
+		System.out.println("\tThymioVirtualPositionMessageProvider");
+		
 	}
 	
 	private void initConnections() {
@@ -289,6 +311,12 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 		return ioManager;
 	}
 
+	public void startLogger() {
+		ThymioFileLogger fileLogger = new ThymioFileLogger(this);
+		fileLogger.start();
+		this.logger = fileLogger;
+	}
+	
 	@Override
 	public Vector2d getVirtualPosition() {
 		return virtualPosition;
@@ -315,6 +343,11 @@ public class RealThymioCI extends RealRobotCI implements ThymioCI {
 	@Override
 	public double getThymioRadius() {
 		return 0.08;
+	}
+	
+	@Override
+	public RobotLogger getLogger() {
+		return logger;
 	}
 	
 }

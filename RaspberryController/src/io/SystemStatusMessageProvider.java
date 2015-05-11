@@ -1,18 +1,18 @@
 package io;
 
-import commoninterface.RealRobotCI;
+import commoninterface.RobotCI;
 import commoninterface.network.messages.InformationRequest;
+import commoninterface.network.messages.InformationRequest.MessageType;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
 import commoninterface.network.messages.SystemStatusMessage;
-import commoninterface.network.messages.InformationRequest.MessageType;
 
 public class SystemStatusMessageProvider implements MessageProvider {
 	
-	private RealRobotCI drone;
+	private RobotCI robot;
 	
-	public SystemStatusMessageProvider(RealRobotCI drone) {
-		this.drone = drone;
+	public SystemStatusMessageProvider(RobotCI robot) {
+		this.robot = robot;
 	}
 	
 	@Override
@@ -21,7 +21,7 @@ public class SystemStatusMessageProvider implements MessageProvider {
 		if(request instanceof InformationRequest) {
 			InformationRequest infoRequest = (InformationRequest)request;
 			if(infoRequest.getMessageTypeQuery() == MessageType.SYSTEM_STATUS)
-				return new SystemStatusMessage(drone.getStatus());
+				return new SystemStatusMessage(robot.getStatus());
 		}
 		
 		return null;

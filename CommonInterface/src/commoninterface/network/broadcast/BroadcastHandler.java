@@ -2,8 +2,6 @@ package commoninterface.network.broadcast;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-
-import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
 import commoninterface.ThymioCI;
 import commoninterface.objects.Entity;
@@ -26,7 +24,7 @@ public abstract class BroadcastHandler {
 	public abstract void sendMessage(String message);
 	
 	public void messageReceived(String address, String message) {
-
+		
 		if(address.equals(robot.getNetworkAddress()))
 			return;
 		
@@ -39,9 +37,12 @@ public abstract class BroadcastHandler {
 			case PositionBroadcastMessage.IDENTIFIER:
 				
 				RobotLocation dl = PositionBroadcastMessage.decode(address, message);
-				dl.setTimestepReceived((long)(robot.getTimeSinceStart()/10));
-				robot.getEntities().remove(dl);
-				robot.getEntities().add(dl);
+				dl.setTimestepReceived((long)(robot.getTimeSinceStart() * 10));
+				
+				synchronized(robot.getEntities()){
+					robot.getEntities().remove(dl);
+					robot.getEntities().add(dl);
+				}
 				if(DEBUG)
 					System.out.println("Added DroneLocation "+dl);
 				break;
@@ -56,15 +57,18 @@ public abstract class BroadcastHandler {
 	}
 	
 	protected void cleanupEntities(double timestep) {
-		Iterator<Entity> i = robot.getEntities().iterator();
+		synchronized(robot.getEntities()) {
 		
-		while(i.hasNext()) {
-			Entity e = i.next();
-			if(e instanceof RobotLocation) {
-				if(timestep - e.getTimestepReceived() > CLEAN_ENTITIES_TIME) {
-					i.remove();
-					if(DEBUG)
-						System.out.println("Removed Entity "+e);
+			Iterator<Entity> i = robot.getEntities().iterator();
+			
+			while(i.hasNext()) {
+				Entity e = i.next();
+				if(e instanceof RobotLocation) {
+					if(timestep - e.getTimestepReceived() > CLEAN_ENTITIES_TIME) {
+						i.remove();
+						if(DEBUG)
+							System.out.println("Removed Entity during cleanup");
+					}
 				}
 			}
 		}
