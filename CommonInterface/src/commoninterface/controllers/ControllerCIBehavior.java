@@ -77,10 +77,14 @@ public class ControllerCIBehavior extends CIBehavior {
 	
 	private synchronized void updateNetworkActivations(CINeuralNetwork network){
 		if(inputsNames.isEmpty()){
-			for (CINNInput input : network.getInputs()) {
-				for (int i = 0; i < input.getNumberOfInputValues(); i++) 
-					inputsNames.add(input.getClass().getSimpleName() + "_" + i);
+			
+			for (CISensor sensor : robot.getCISensors()) {
+				for (int i = 0; i < sensor.getNumberOfSensors(); i++) {
+					String inputName = sensor.getClass().getSimpleName().replace("Sensor","NNInput");
+					inputsNames.add(inputName + "_" + i);
+				}
 			}
+			
 		}
 		
 		if(outputsNames.isEmpty()){
