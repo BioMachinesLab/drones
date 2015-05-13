@@ -10,7 +10,6 @@ import java.util.List;
 
 import network.broadcast.RealBroadcastHandler;
 import utils.ThymioFileLogger;
-
 import commoninterface.CIBehavior;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
@@ -21,6 +20,7 @@ import commoninterface.messageproviders.EntitiesMessageProvider;
 import commoninterface.messageproviders.EntityMessageProvider;
 import commoninterface.messageproviders.LogMessageProvider;
 import commoninterface.messageproviders.NeuralActivationsMessageProvider;
+import commoninterface.messageproviders.ThymioVirtualPositionMessageProvider;
 import commoninterface.network.CommandConnectionListener;
 import commoninterface.network.ConnectionHandler;
 import commoninterface.network.ConnectionListener;
@@ -197,7 +197,9 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 		System.out.println("\tNeuralActivationsMessageProvider");
 		messageProviders.add(new LogMessageProvider(this));
 		System.out.println("\tLogMessageProvider");
-
+		messageProviders.add(new ThymioVirtualPositionMessageProvider(this));
+		System.out.println("\tThymioVirtualPositionMessageProvider");
+		
 	}
 	
 	private void initConnections() {
