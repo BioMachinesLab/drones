@@ -13,6 +13,8 @@ import commoninterface.utils.jcoord.LatLon;
  */
 public interface AquaticDroneCI extends RobotCI{
 	
+	public enum DroneType {DRONE,ENEMY};
+	
 	/**
 	 * Get the orientation read from the compass in degrees [0, 359].
 	 * 
@@ -45,5 +47,9 @@ public interface AquaticDroneCI extends RobotCI{
 	public void setActiveWaypoint(Waypoint wp);
 	
 	public Waypoint getActiveWaypoint();
+	
+	public DroneType getDroneType();
+	
+	public void setDroneType(DroneType droneType);
 	
 }

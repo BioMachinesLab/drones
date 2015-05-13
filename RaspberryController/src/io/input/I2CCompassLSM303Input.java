@@ -16,7 +16,7 @@ import commoninterface.network.messages.SystemStatusMessage;
 public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 		MessageProvider {
 
-	private final static String CALIBRATION_FILE = "calibration.txt";
+	private final static String CALIBRATION_FILE = "config/calibration.txt";
 
 	public final static byte LSM303_ADDRESS = (0x3a >> 1); // 0x1D
 	public final static byte LSM303_CTRL0 = 0x1F;
@@ -30,6 +30,8 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 	private boolean tryAgainAfterError = false;
 	private boolean calibrationStatus = false;
 	private int headingInDegrees = 0;
+	
+	private int offset = 0;
 
 	private int[] min = { Integer.MAX_VALUE, Integer.MAX_VALUE,
 			Integer.MAX_VALUE };
@@ -170,7 +172,7 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 		    		) * 180 / Math.PI;
 		    if (heading < 0) heading += 360;
 			
-		    this.headingInDegrees = (int)heading;
+		    this.headingInDegrees = (int)heading + offset;
 		}
 	}
 	
@@ -273,12 +275,7 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 		a[2]/= mag;
 	}
 	
-	private static int accel12(byte[] list, int idx)
-	  {
-	    int n = list[idx] | (list[idx+1] << 8); // Low, high bytes
-//	    if (n > 32767) 
-//	      n -= 65536;                           // 2's complement signed
-//	    return n >> 4;                          // 12-bit resolution
-	    return n;
-	  }
+	public void setOffset(int offset) {
+		this.offset = offset;
+	}
 }

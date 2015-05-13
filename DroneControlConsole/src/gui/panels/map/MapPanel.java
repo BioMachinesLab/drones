@@ -44,6 +44,7 @@ import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOsmTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.OsmTileSource;
 
 import threads.UpdateThread;
+import commoninterface.AquaticDroneCI;
 import commoninterface.network.messages.EntityMessage;
 import commoninterface.objects.Entity;
 import commoninterface.objects.GeoFence;
@@ -106,7 +107,7 @@ public class MapPanel extends UpdatePanel {
         
         try {
         
-	        JComboBox<TileSource> tileSourceSelector = new JComboBox<>(new TileSource[] { new OfflineOsmTileSource((new File("tiles").toURI().toURL()).toString(),1,22) ,
+	        JComboBox<TileSource> tileSourceSelector = new JComboBox<>(new TileSource[] { new OfflineOsmTileSource((new File("tiles").toURI().toURL()).toString(),1,19) ,
 	        		new OsmTileSource.Mapnik(), new BingAerialTileSource(), new MapQuestOsmTileSource()
 	        });
 	        tileSourceSelector.addItemListener(new ItemListener() {
@@ -163,7 +164,7 @@ public class MapPanel extends UpdatePanel {
         panelTop.add(clearWaypointsButton);
         add(treeMap, BorderLayout.CENTER);
         
-        geoFenceLayer = treeMap.addLayer("GeoFence");
+        geoFenceLayer = treeMap.addLayer("_GeoFence");
         
         //Lisbon
         map().setDisplayPosition(new Coordinate(38.7166700,-9.1333300), 13);
@@ -233,7 +234,19 @@ public class MapPanel extends UpdatePanel {
     	}
     }
     
-    public synchronized void updateRobotPosition(String name, Coordinate c, double orientation) {
+    public synchronized void updateRobotPosition(RobotLocation di) {
+    	
+    	LatLon latLon = di.getLatLon();
+    	
+		double lat = latLon.getLat();
+		double lon = latLon.getLon();
+		
+		if(lat == 0 && lon == 0)
+			return;
+		
+		double orientation = di.getOrientation();
+		
+		String name = di.getName().isEmpty() ? "drone" : di.getName();
     	
     	Layer l = null;
     	
@@ -276,9 +289,20 @@ public class MapPanel extends UpdatePanel {
 	    	
     	}
     	
-    	//add the new one with the new style
-    	Style styleNew = new Style(Color.RED, Color.green, new BasicStroke(1), new Font("Dialog", Font.PLAIN, 12));
-    	MapMarker m = new MapMarkerDrone(l, name , c, styleNew, orientation);
+    	Style styleNew = null;
+    	
+    	switch(di.getDroneType()) {
+    		case DRONE:
+    			styleNew = new Style(Color.RED, Color.green, new BasicStroke(1), new Font("Dialog", Font.PLAIN, 12));
+    			break;
+    		case ENEMY:
+    			styleNew = new Style(Color.RED, Color.RED, new BasicStroke(1), new Font("Dialog", Font.PLAIN, 12));
+    			break;
+    		default:
+    			styleNew = new Style(Color.RED, Color.green, new BasicStroke(1), new Font("Dialog", Font.PLAIN, 12));
+    	}
+    	
+    	MapMarker m = new MapMarkerDrone(l, name , c(lat,lon), styleNew, orientation);
     	l.add(m);
     	map().addMapMarker(m);
     	robotMarkers.add(m);
@@ -289,9 +313,9 @@ public class MapPanel extends UpdatePanel {
         	map().removeMapMarker(old);
     	}
     	
-//    	if(robotMarkers.size() == 1 && robotPositions.size() == 1) {
-//    		fitMarkersButton.doClick();
-//    	}
+    	if(robotMarkers.size() == 1 && robotPositions.size() == 1) {
+    		fitMarkersButton.doClick();
+    	}
     }
     
     public void displayData(RobotLocation di) {
@@ -304,12 +328,8 @@ public class MapPanel extends UpdatePanel {
 		if(lat == 0 && lon == 0)
 			return;
 		
-		double orientation = di.getOrientation();
-		
-		String droneName = di.getName().isEmpty() ? "drone" : di.getName();
-		
 		if(usefulRobotCoordinate(di.getName(), c(lat,lon))) {
-			updateRobotPosition(droneName, c(lat,lon), orientation);
+			updateRobotPosition(di);
 		}
 	}
 	

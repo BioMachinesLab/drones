@@ -63,6 +63,8 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	private ArrayList<CIBehavior> alwaysActiveBehaviors = new ArrayList<CIBehavior>();
 	private CIBehavior activeBehavior;
 	
+	private DroneType droneType = DroneType.DRONE;
+	
 	private RobotLogger logger;
 	
 	public AquaticDrone(Simulator simulator, Arguments args) {
@@ -351,4 +353,13 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 			logger.logMessage(msg);
 	}
 	
+	@Override
+	public DroneType getDroneType() {
+		return droneType;
+	}
+	
+	@Override
+	public void setDroneType(DroneType droneType) {
+		this.droneType = droneType;
+	}
 }

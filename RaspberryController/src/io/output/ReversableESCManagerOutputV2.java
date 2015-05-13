@@ -26,7 +26,7 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 	private final static int MIN_VALUE = 132;
 	private final static int MAX_VALUE = 168;
 
-	private final static int MIN_FW_VALUE = 156;
+	private final static int MIN_FW_VALUE = 155;
 	private final static int MIN_BW_VALUE = 145;
 
 	private int lValue = CENTRAL_VALUE_LEFT;
@@ -99,7 +99,7 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 			
 			try {
 				
-				preventStuckMotors();
+//				preventStuckMotors();
 				
 				//set the real speed
 				Runtime.getRuntime()

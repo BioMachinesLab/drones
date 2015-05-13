@@ -5,9 +5,11 @@ import io.SystemStatusMessageProvider;
 import io.input.ControllerInput;
 import io.output.ControllerOutput;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import network.broadcast.RealBroadcastHandler;
 import simpletestbehaviors.ChangeWaypointCIBehavior;
@@ -43,6 +45,7 @@ import commoninterface.utils.jcoord.LatLon;
 public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	private static long CYCLE_TIME = 100;// in miliseconds
+	private static String DRONE_CONFIG = "config/drone_general.conf";
 
 	private String status = "";
 	private String initMessages = "\n";
@@ -69,6 +72,8 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	
 	private Waypoint activeWaypoint;
 	
+	private DroneType droneType = DroneType.DRONE;
+	
 	private ArrayList<CIBehavior> alwaysActiveBehaviors = new ArrayList<CIBehavior>(); 
 	
 	private RobotLogger logger;
@@ -83,6 +88,8 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		initIO();
 		initMessageProviders();
 		initConnections();
+		
+		readGeneralConfig();
 		
 		messageHandler = new ControllerMessageHandler(this);
 		messageHandler.start();
@@ -427,6 +434,50 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	@Override
 	public RobotLogger getLogger() {
 		return logger;
+	}
+	
+	@Override
+	public DroneType getDroneType() {
+		return droneType;
+	}
+	
+	@Override
+	public void setDroneType(DroneType droneType) {
+		this.droneType = droneType;
+	}
+	
+	private void readGeneralConfig() {
+		File f = new File(DRONE_CONFIG);
+		
+		if(f.exists()) {
+			
+			Scanner s = null;
+			
+			try {
+				s = new Scanner(f);
+				
+				while(s.hasNextLine()) {
+					String line = s.nextLine();
+					String[] split = line.split(" ");
+					
+					if(split[0] == "dronetype") {
+						setDroneType(DroneType.values()[Integer.parseInt(split[1])]);
+						initMessages += "[INIT] Set DroneType as "+getDroneType().toString()+"\n";
+					} else if(split[0] == "compassoffset") {
+						ioManager.getCompassModule().setOffset(Integer.parseInt(split[1]));
+						initMessages += "[INIT] Set Compass offset to "+split[1]+"\n";
+					}
+				}
+				
+				s.close();
+				
+			} catch(Exception e) {
+				initMessages += "[INIT] No "+DRONE_CONFIG+" file found.\n";
+			} finally {
+				if(s != null)
+					s.close();
+			}
+		}
 	}
 
 }

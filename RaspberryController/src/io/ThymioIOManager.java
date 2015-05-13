@@ -23,7 +23,7 @@ import ch.epfl.mobots.Aseba.ThymioRemoteConnection;
 
 public class ThymioIOManager {
 	
-	private final static String CONFIG_FILE = "thymio_io_config.conf";
+	private final static String CONFIG_FILE = "config/thymio_io.conf";
 	
 	private ArrayList<ControllerInput> inputs = new ArrayList<ControllerInput>();
 	

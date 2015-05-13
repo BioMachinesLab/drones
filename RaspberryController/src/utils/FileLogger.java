@@ -2,21 +2,14 @@ package utils;
 
 import io.input.ControllerInput;
 import io.input.GPSModuleInput;
-import io.input.I2CCompassModuleInput;
 import io.output.ControllerOutput;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-
 import commoninterface.controllers.ControllerCIBehavior;
 import commoninterface.dataobjects.GPSData;
 import commoninterface.neuralnetwork.CINeuralNetwork;
@@ -101,6 +94,8 @@ public class FileLogger extends Thread implements RobotLogger {
 			for(int i = 0 ; i < o.getNumberOfOutputs() ; i++)
 				result+=o.getValue(i)+"\t";
 		}
+		
+		result+=drone.getDroneType()+"\t";
 		
 		if(drone.getActiveBehavior() instanceof ControllerCIBehavior) {
 			ControllerCIBehavior controller = (ControllerCIBehavior)drone.getActiveBehavior();

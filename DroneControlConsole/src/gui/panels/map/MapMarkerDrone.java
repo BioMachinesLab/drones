@@ -3,6 +3,7 @@ package gui.panels.map;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -37,7 +38,9 @@ public class MapMarkerDrone extends MapMarkerDot {
         g.setColor(getColor());
         g.drawOval(position.x - size_h, position.y - size_h, size, size);
 
-        if(getLayer()==null||getLayer().isVisibleTexts()) paintText(g, position);
+        if(getLayer()==null||getLayer().isVisibleTexts()) {
+        	paintText(g, position);
+        }
         
         drawOrientation(g,position,radius);
 	}
@@ -69,5 +72,17 @@ public class MapMarkerDrone extends MapMarkerDot {
 		
 		graphics.setColor(c);
 	}
+	
+	public void paintText(Graphics g, Point position) {
+        if(getName()!=null && g!=null && position!=null){
+            if(getFont()==null){
+                Font f = getDefaultFont();
+                setFont(new Font(f.getName(), Font.BOLD, f.getSize()));
+            }
+            g.setColor(Color.WHITE);
+            g.setFont(getFont());
+            g.drawString(getName(), position.x+MapMarkerDot.DOT_RADIUS+2, position.y+MapMarkerDot.DOT_RADIUS);
+        }
+    }
 
 }

@@ -32,7 +32,7 @@ import commoninterfaceimpl.RealAquaticDroneCI;
 
 public class IOManager {
 
-	private final static String CONFIG_FILE = "io_config.conf";
+	private final static String CONFIG_FILE = "config/drone_io.conf";
 
 	private ArrayList<ControllerOutput> outputs = new ArrayList<ControllerOutput>();
 	private ArrayList<ControllerInput> inputs = new ArrayList<ControllerInput>();

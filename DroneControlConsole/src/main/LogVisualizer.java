@@ -14,6 +14,7 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import commoninterface.AquaticDroneCI;
 import commoninterface.objects.RobotLocation;
 import commoninterface.utils.jcoord.LatLon;
 
@@ -81,7 +82,7 @@ public class LogVisualizer extends JFrame {
 		for(int i = 0 ; i < step ; i++) {
 			leftData[i] = data.get(i).leftSpeed;
 			rightData[i] = data.get(i).rightSpeed;
-			map.displayData(new RobotLocation("robot", data.get(i).latLon, data.get(i).compassOrientation));
+			map.displayData(new RobotLocation("robot", data.get(i).latLon, data.get(i).compassOrientation, data.get(i).droneType));
 		}
 		graph.addDataList(leftData);
 		graph.addDataList(rightData);
@@ -122,6 +123,9 @@ public class LogVisualizer extends JFrame {
 					String date = sl.next();
 					d.leftSpeed = sl.nextDouble();
 					d.rightSpeed = sl.nextDouble();
+					
+					d.droneType = AquaticDroneCI.DroneType.valueOf(sl.next());
+					
 					d.lastComment = lastComment;
 					
 					d.timestep = step++;
@@ -154,6 +158,7 @@ public class LogVisualizer extends JFrame {
 		double leftSpeed;
 		double rightSpeed;
 		String lastComment;
+		AquaticDroneCI.DroneType droneType;
 	}
 
 }

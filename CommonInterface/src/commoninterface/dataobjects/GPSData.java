@@ -254,9 +254,9 @@ public class GPSData implements Serializable {
 		return str;
 	}
 
-	public RobotLocation toDroneLocation() {
-		return new RobotLocation(address, new LatLon(latitudeDecimal,longitudeDecimal), orientation);
-	}
+//	public RobotLocation toDroneLocation() {
+//		return new RobotLocation(address, new LatLon(latitudeDecimal,longitudeDecimal), orientation);
+//	}
 
 	public String getDroneAddress() {
 		return address;
