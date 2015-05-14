@@ -1,7 +1,5 @@
 package simpletestbehaviors;
 
-import java.util.ArrayList;
-
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.LedState;
@@ -9,7 +7,6 @@ import commoninterface.RobotCI;
 import commoninterface.objects.Waypoint;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
-import commoninterface.utils.jcoord.LatLon;
 
 public class GoToWaypointCIBehavior extends CIBehavior {
 
@@ -28,9 +25,9 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 	@Override
 	public void step(double timestep) {
 		
-		ArrayList<Waypoint> waypoints = Waypoint.getWaypoints(drone);
+		Waypoint wp = drone.getActiveWaypoint();
 		
-		if(waypoints.size() == 0) {
+		if(wp == null) {
 			drone.setLed(0, LedState.OFF);
 			drone.setMotorSpeeds(0, 0);
 			return;
@@ -38,10 +35,10 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 		
 		double currentOrientation = drone.getCompassOrientationInDegrees();
 		double coordinatesAngle = CoordinateUtilities.angleInDegrees(drone.getGPSLatLon(),
-				waypoints.get(0).getLatLon());
+				wp.getLatLon());
 		
 		double currentDistance = CoordinateUtilities.distanceInMeters(drone.getGPSLatLon(),
-				waypoints.get(0).getLatLon());
+				wp.getLatLon());
 
 		double difference = currentOrientation - coordinatesAngle;
 		
@@ -52,12 +49,10 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 		}
 		
 		if(Math.abs(currentDistance) < distanceTolerance){
-			System.out.println("stop");
 			drone.setLed(0, LedState.OFF);
 			drone.setMotorSpeeds(0, 0);
 		}else{
 			if (Math.abs(difference) <= angleTolerance) {
-				System.out.println("front");
 				drone.setLed(0, LedState.ON);
 				
 				double reduction = 1-(1.0*(Math.abs(difference)/angleTolerance));
@@ -71,10 +66,8 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 			}else {
 				drone.setLed(0, LedState.BLINKING);
 				if (difference > 0) {
-					System.out.println("left");
 					drone.setMotorSpeeds(0, 0.1);
 				} else {
-					System.out.println("right");
 					drone.setMotorSpeeds(0.1, 0);
 				}
 			}

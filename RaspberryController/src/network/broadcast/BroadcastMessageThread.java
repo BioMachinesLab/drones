@@ -29,12 +29,14 @@ public class BroadcastMessageThread extends Thread{
 					long timeUntilMessage = System.currentTimeMillis() - timeLastMsg[i] - msg.getUpdateTimeInMiliseconds();
 					
 					if(timeUntilMessage >= 0) {
-						String msgStr = msg.encode();
+						String[] msgs = msg.encode();
 						
-						if(msgStr != null) {
-							broadcastHandler.sendMessage(msgStr);
-							timeLastMsg[i] = System.currentTimeMillis();
-							minToWait = Math.min(msg.getUpdateTimeInMiliseconds(), minToWait);
+						for(String msgStr : msgs) {
+							if(msgStr != null) {
+								broadcastHandler.sendMessage(msgStr);
+								timeLastMsg[i] = System.currentTimeMillis();
+								minToWait = Math.min(msg.getUpdateTimeInMiliseconds(), minToWait);
+							}
 						}
 					} else {
 						minToWait = Math.min(-timeUntilMessage, minToWait);

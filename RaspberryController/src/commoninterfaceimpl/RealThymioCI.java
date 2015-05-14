@@ -350,4 +350,21 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 		return logger;
 	}
 	
+	@Override
+	public double getLeftMotorSpeed() {
+		return leftSpeed;
+	}
+	
+	@Override
+	public double getRightMotorSpeed() {
+		return rightSpeed;
+	}
+	
+	@Override
+	public void replaceEntity(Entity e) {
+		synchronized(entities){
+			entities.remove(e);
+			entities.add(e);
+		}
+	}
 }

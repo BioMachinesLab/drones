@@ -1,2 +1,7 @@
 /bin/
 /.DS_Store
+/experiments/
+/logs/
+/selected_logs/
+/mount.sh
+/output.log

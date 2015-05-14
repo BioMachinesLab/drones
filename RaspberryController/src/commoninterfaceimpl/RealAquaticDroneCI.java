@@ -19,6 +19,7 @@ import commoninterface.CIBehavior;
 import commoninterface.CISensor;
 import commoninterface.LedState;
 import commoninterface.dataobjects.GPSData;
+import commoninterface.instincts.AvoidDronesInstinct;
 import commoninterface.messageproviders.BehaviorMessageProvider;
 import commoninterface.messageproviders.EntitiesMessageProvider;
 import commoninterface.messageproviders.EntityMessageProvider;
@@ -34,6 +35,7 @@ import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
 import commoninterface.network.broadcast.PositionBroadcastMessage;
+import commoninterface.network.broadcast.SharedDroneBroadcastMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
 import commoninterface.objects.Entity;
@@ -95,6 +97,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		messageHandler.start();
 		
 		alwaysActiveBehaviors.add(new ChangeWaypointCIBehavior(new CIArguments(""), this));
+		alwaysActiveBehaviors.add(new AvoidDronesInstinct(new CIArguments(""), this));
 
 		setStatus("Running!\n");
 
@@ -109,15 +112,16 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			CIBehavior current = activeBehavior;
 			try {
 				
-				for(CIBehavior b : alwaysActiveBehaviors)
-					b.step(timestep);
-				
 				if (current != null) {
 					current.step(timestep);
 					if (current.getTerminateBehavior()) {
 						stopActiveBehavior();
 					}
 				}
+				
+				for(CIBehavior b : alwaysActiveBehaviors)
+					b.step(timestep);
+				
 			} catch(Exception e){
 				e.printStackTrace();
 			}
@@ -209,8 +213,10 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			commandConnectionListener.start();
 
 			ArrayList<BroadcastMessage> broadcastMessages = new ArrayList<BroadcastMessage>();
+			
 			broadcastMessages.add(new HeartbeatBroadcastMessage(this));
 			broadcastMessages.add(new PositionBroadcastMessage(this));
+			broadcastMessages.add(new SharedDroneBroadcastMessage(this));
 					
 			broadcastHandler = new RealBroadcastHandler(this, broadcastMessages);
 
@@ -477,6 +483,24 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 				if(s != null)
 					s.close();
 			}
+		}
+	}
+	
+	@Override
+	public double getLeftMotorSpeed() {
+		return leftSpeed;
+	}
+	
+	@Override
+	public double getRightMotorSpeed() {
+		return rightSpeed;
+	}
+
+	@Override
+	public void replaceEntity(Entity e) {
+		synchronized(entities){
+			entities.remove(e);
+			entities.add(e);
 		}
 	}
 

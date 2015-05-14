@@ -63,8 +63,7 @@ public class SimulatedBroadcastHandler extends BroadcastHandler {
 	
 	private void replaceEntity(Entity e) {
 		e.setTimestepReceived((long)(robot.getTimeSinceStart()*10));
-		robot.getEntities().remove(e);
-		robot.getEntities().add(e);
+		robot.replaceEntity(e);
 	}
 
 	@Override

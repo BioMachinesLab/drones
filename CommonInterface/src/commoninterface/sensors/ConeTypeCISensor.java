@@ -1,12 +1,9 @@
 package commoninterface.sensors;
 
-import java.util.ArrayList;
-
 import commoninterface.AquaticDroneCI;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
 import commoninterface.mathutils.GeometricCalculator;
-import commoninterface.mathutils.Vector2d;
 import commoninterface.objects.Entity;
 import commoninterface.objects.GeoEntity;
 import commoninterface.utils.CIArguments;
@@ -56,16 +53,17 @@ public abstract class ConeTypeCISensor extends CISensor {
 				
 				if (validEntity(ge)) {
 					for(int j=0; j<numberSensors; j++) {			
-						readings[j] = Math.max(calculateContributionToSensor(j, ge.getLatLon()), readings[j]);
+						readings[j] = Math.max(calculateContributionToSensor(j, ge), readings[j]);
 					}
 				}
 			}
 		}
 	}
 	
-	protected double calculateContributionToSensor(int sensorNumber, LatLon e) {
+	protected double calculateContributionToSensor(int sensorNumber, GeoEntity ge) {
 		
 		LatLon droneLatLon = drone.getGPSLatLon();
+		LatLon e = ge.getLatLon();
 		
 		double distance = CoordinateUtilities.distanceInMeters(droneLatLon, e);
 		
@@ -82,6 +80,7 @@ public abstract class ConeTypeCISensor extends CISensor {
 				relativeAngle+=2*Math.PI;
 			
 			if((relativeAngle < (openingAngle / 2.0)) && (relativeAngle > (-openingAngle / 2.0))) {
+				sensedEntity(ge);
 				return (getRange() - distance) / getRange();
 			}
 		}
@@ -119,4 +118,7 @@ public abstract class ConeTypeCISensor extends CISensor {
 	public int getNumberOfSensors() {
 		return readings.length;
 	}
+	
+	protected void sensedEntity(Entity e){}
+	
 }

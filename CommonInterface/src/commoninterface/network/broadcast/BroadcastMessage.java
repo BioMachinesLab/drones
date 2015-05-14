@@ -11,14 +11,21 @@ public abstract class BroadcastMessage {
 		this.updateTime = updateTime;
 		this.identifier = identifier;
 	}
-
+	
 	protected abstract String getMessage();
 		
-	public String encode() {
+	public String[] encode() {
+		
+		String[] messages = new String[1];
+		
 		String msg = getMessage();
 		if(msg != null) {
-			return identifier+MESSAGE_SEPARATOR+msg;
+			messages[0] = identifier+MESSAGE_SEPARATOR+msg;
 		}
+		
+		if(messages[0] != null)
+			return messages;
+		
 		return null;
 	}
 	

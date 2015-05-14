@@ -2,6 +2,7 @@ package simulation.robot;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import mathutils.MathUtils;
 import mathutils.Vector2d;
 import net.jafama.FastMath;
@@ -19,6 +20,8 @@ import simulation.util.ArgumentsAnnotation;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CISensor;
+import commoninterface.instincts.AvoidDronesInstinct;
+import commoninterface.instincts.AvoidEntitiesInstinct;
 import commoninterface.messageproviders.BehaviorMessageProvider;
 import commoninterface.messageproviders.EntitiesMessageProvider;
 import commoninterface.messageproviders.EntityMessageProvider;
@@ -29,6 +32,7 @@ import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
 import commoninterface.network.broadcast.PositionBroadcastMessage;
+import commoninterface.network.broadcast.SharedDroneBroadcastMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
 import commoninterface.objects.Entity;
@@ -67,13 +71,19 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	
 	private RobotLogger logger;
 	
+	private double leftPercentage = 0;
+	private double rightPercentage = 0;
+	
 	public AquaticDrone(Simulator simulator, Arguments args) {
 		super(simulator, args);
 		this.simulator = simulator;
 		
 		ArrayList<BroadcastMessage> broadcastMessages = new ArrayList<BroadcastMessage>();
+		
 		broadcastMessages.add(new HeartbeatBroadcastMessage(this));
 		broadcastMessages.add(new PositionBroadcastMessage(this));
+		broadcastMessages.add(new SharedDroneBroadcastMessage(this));
+		
 		broadcastHandler = new SimulatedBroadcastHandler(this, broadcastMessages);
 		
 		gpsError = args.getArgumentAsDoubleOrSetDefault("gpserror", gpsError);
@@ -84,6 +94,9 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 			throw new RuntimeException("[AquaticDrone] CommRange is at 0!");
 		
 		alwaysActiveBehaviors.add(new ChangeWaypointCIBehavior(new CIArguments(""), this));
+		
+		if(args.getArgumentAsIntOrSetDefault("avoiddrones", 1) == 1)
+			alwaysActiveBehaviors.add(new AvoidDronesInstinct(new CIArguments(""), this));
 		
 		sensors.add(new CompassSensor(simulator, sensors.size()+1, this, args));
 		actuators.add(new PropellersActuator(simulator, actuators.size()+1, args));
@@ -100,17 +113,19 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	@Override
 	public void updateSensors(double simulationStep, ArrayList<PhysicalObject> teleported) {
 		super.updateSensors(simulationStep, teleported);
-		for(CIBehavior b : alwaysActiveBehaviors)
-			b.step(simulationStep);
 		
 		if(activeBehavior != null) {
 			activeBehavior.step(simulationStep);
 		}
+		
 	}
 
 	public void setMotorSpeeds(double leftMotorPercentage, double rightMotorPercentage) {
 		if(propellers == null)
 			propellers = (PropellersActuator) getActuatorByType(PropellersActuator.class);
+		
+		leftPercentage = leftMotorPercentage;
+		rightPercentage = rightMotorPercentage;
 		
 		propellers.setLeftPercentage(leftMotorPercentage);
 		propellers.setRightPercentage(rightMotorPercentage);
@@ -181,6 +196,9 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	
 	@Override
 	public void updateActuators(Double time, double timeDelta) {
+		
+		for(CIBehavior b : alwaysActiveBehaviors)
+			b.step(time);
 
 		if(stopTimestep > 0) {
 			rightWheelSpeed = 0;
@@ -361,5 +379,25 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	@Override
 	public void setDroneType(DroneType droneType) {
 		this.droneType = droneType;
+		
 	}
+	
+	@Override
+	public double getLeftMotorSpeed() {
+		return leftPercentage;
+	}
+	
+	@Override
+	public double getRightMotorSpeed() {
+		return rightPercentage;
+	}
+	
+	@Override
+	public void replaceEntity(Entity e) {
+		synchronized(entities){
+			entities.remove(e);
+			entities.add(e);
+		}
+	}
+	
 }

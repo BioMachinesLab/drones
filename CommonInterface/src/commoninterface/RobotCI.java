@@ -33,7 +33,21 @@ public interface RobotCI {
 	 * @param leftMotor speed of the left motor [-1,1].
 	 * @param rightMotor speed of the right motor [-1,1].
 	 */
-	public void    setMotorSpeeds(double leftMotor, double rightMotor);
+	public void setMotorSpeeds(double leftMotor, double rightMotor);
+	
+	/**
+	 * Get the current left motor speed of the robot.
+	 * 
+	 * @return the left motor speed
+	 */
+	public double getLeftMotorSpeed();
+	
+	/**
+	 * Get the current right motor speed of the robot.
+	 * 
+	 * @return the right motor speed
+	 */
+	public double getRightMotorSpeed();
 	
 	/**
 	 * Get time elapsed since the controller was started (in seconds).
@@ -48,6 +62,11 @@ public interface RobotCI {
 	 * @return the list with all the current entities.
 	 */
 	public ArrayList<Entity> getEntities();
+	
+	/**
+	 * Replaces an old entity with a more recent one.
+	 */
+	public void replaceEntity(Entity e);
 	
 	/**
 	 * Get the list of registered sensors.

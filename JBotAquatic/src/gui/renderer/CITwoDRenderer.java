@@ -20,6 +20,8 @@ import commoninterface.mathutils.Vector2d;
 import commoninterface.objects.Entity;
 import commoninterface.objects.GeoEntity;
 import commoninterface.objects.GeoFence;
+import commoninterface.objects.RobotLocation;
+import commoninterface.objects.SharedDroneLocation;
 import commoninterface.objects.VirtualEntity;
 import commoninterface.objects.Waypoint;
 import commoninterface.sensors.ConeTypeCISensor;
@@ -57,7 +59,14 @@ public class CITwoDRenderer extends TwoDRenderer {
 			for(Object o: entities) {
 				Entity entity = (Entity)o;
 				if(entity instanceof GeoEntity){
-					graphics.setColor(Color.GREEN.darker());
+					
+					if(entity instanceof SharedDroneLocation)
+						graphics.setColor(Color.BLUE.darker());
+					else if(entity instanceof RobotLocation)
+						graphics.setColor(Color.GREEN.darker());
+					else
+						graphics.setColor(Color.yellow.darker());
+					
 					GeoEntity e = (GeoEntity)entity;
 					Vector2d pos = CoordinateUtilities.GPSToCartesian(e.getLatLon());
 					int x = (int) (transformX(pos.x) - circleDiameter / 2);

@@ -2,13 +2,10 @@ package environment;
 
 import java.util.LinkedList;
 import java.util.Random;
-
 import mathutils.Vector2d;
-import commoninterface.AquaticDroneCI;
 import commoninterface.objects.GeoFence;
 import commoninterface.objects.Waypoint;
 import commoninterface.utils.CoordinateUtilities;
-import commoninterface.utils.Line;
 import simulation.Simulator;
 import simulation.environment.Environment;
 import simulation.robot.Robot;
@@ -18,11 +15,11 @@ import simulation.util.ArgumentsAnnotation;
 public class BoundaryEnvironment extends Environment{
 	
 	@ArgumentsAnnotation(name="distance", defaultValue="5")
-	private double distance = 5;
+	protected double distance = 5;
 	@ArgumentsAnnotation(name="random", defaultValue="0.1")
-	private double rand = 0.5;
+	protected double rand = 0.5;
 	@ArgumentsAnnotation(name="multi", defaultValue="0")
-	private int multi = 0;
+	protected int multi = 0;
 	
 	public BoundaryEnvironment(Simulator simulator, Arguments args) {
 		super(simulator, args);
@@ -65,7 +62,7 @@ public class BoundaryEnvironment extends Environment{
 //		}
 	}
 	
-	private void addLines(LinkedList<Waypoint> waypoints, Simulator simulator) {
+	protected void addLines(LinkedList<Waypoint> waypoints, Simulator simulator) {
 		
 		for(int i = 1 ; i < waypoints.size() ; i++) {
 			
@@ -87,7 +84,7 @@ public class BoundaryEnvironment extends Environment{
 		addObject(l);
 	}
 	
-	private void addNode(GeoFence fence, double x, double y, Random r) {
+	protected void addNode(GeoFence fence, double x, double y, Random r) {
 		
 		x*=distance;
 		y*=distance;

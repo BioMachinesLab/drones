@@ -127,5 +127,28 @@ public class GatewayRobot implements RobotCI {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	@Override
+	public double getLeftMotorSpeed() {
+		Robot r = sim.getRobots().get(chosenIndex);
+		if(r instanceof RobotCI) {
+			return ((RobotCI)r).getLeftMotorSpeed();
+		}
+		return 0;
+	}
+	
+	@Override
+	public double getRightMotorSpeed() {
+		Robot r = sim.getRobots().get(chosenIndex);
+		if(r instanceof RobotCI) {
+			return ((RobotCI)r).getRightMotorSpeed();
+		}
+		return 0;
+	}
+	
+	@Override
+	public void replaceEntity(Entity e) {
+		// TODO Auto-generated method stub
+	}
 
 }

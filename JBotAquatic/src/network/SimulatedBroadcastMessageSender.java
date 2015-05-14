@@ -27,7 +27,11 @@ public class SimulatedBroadcastMessageSender {
 			long timeUntilMessage = time - timeLastMsg[i] - msg.getUpdateTimeInMiliseconds();
 			
 			if(timeUntilMessage >= 0) {
-				broadcastHandler.sendMessage(msg.encode());
+				String[] msgs = msg.encode();
+				if(msgs != null) {
+					for(String m : msgs)
+						broadcastHandler.sendMessage(m);
+				}
 				timeLastMsg[i] = time;
 			}
 		}
