@@ -8,6 +8,7 @@ import commoninterface.ThymioCI;
 import commoninterface.objects.Entity;
 import commoninterface.objects.RobotLocation;
 import commoninterface.objects.SharedDroneLocation;
+import commoninterface.objects.ThymioSharedEntity;
 
 public abstract class BroadcastHandler {
 	
@@ -59,6 +60,14 @@ public abstract class BroadcastHandler {
 					System.out.println("Added SharedDroneLocation "+location);
 				
 				break;
+			case SharedThymioBroadcastMessage.IDENTIFIER:
+				ThymioSharedEntity tse = SharedThymioBroadcastMessage.decode(message);
+				tse.setTimestepReceived((long)(robot.getTimeSinceStart() * 10));
+				robot.replaceEntity(tse);
+				if(DEBUG)
+					System.out.println("Added ThymioSharedEntity "+tse);
+				
+				break;
 		}
 	}
 	
@@ -68,15 +77,12 @@ public abstract class BroadcastHandler {
 	
 	protected void cleanupEntities(double timestep) {
 		synchronized(robot.getEntities()) {
-		
 			Iterator<Entity> i = robot.getEntities().iterator();
 			
 			while(i.hasNext()) {
 				Entity e = i.next();
 				if(e instanceof RobotLocation || e instanceof SharedDroneLocation) {
-					
 					if(timestep - e.getTimestepReceived() > CLEAN_ENTITIES_TIME) {
-						
 						i.remove();
 						if(DEBUG)
 							System.out.println("Removed Entity during cleanup");

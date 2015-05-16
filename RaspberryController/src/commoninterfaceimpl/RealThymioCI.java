@@ -10,9 +10,9 @@ import java.util.List;
 
 import network.broadcast.RealBroadcastHandler;
 import utils.ThymioFileLogger;
+
 import commoninterface.CIBehavior;
 import commoninterface.CISensor;
-import commoninterface.RobotCI;
 import commoninterface.ThymioCI;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.messageproviders.BehaviorMessageProvider;
@@ -30,6 +30,7 @@ import commoninterface.network.NetworkUtils;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
+import commoninterface.network.broadcast.SharedThymioBroadcastMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
 import commoninterface.objects.Entity;
@@ -221,6 +222,7 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 			
 			ArrayList<BroadcastMessage> broadcastMessages = new ArrayList<BroadcastMessage>();
 			broadcastMessages.add(new HeartbeatBroadcastMessage(this));
+			broadcastMessages.add(new SharedThymioBroadcastMessage(this));
 			broadcastHandler = new RealBroadcastHandler(this,broadcastMessages);
 
 			logger.logMessage(".");

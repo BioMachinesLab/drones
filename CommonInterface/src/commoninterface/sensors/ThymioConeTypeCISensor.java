@@ -1,14 +1,11 @@
 package commoninterface.sensors;
 
-import java.util.ArrayList;
-
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
 import commoninterface.ThymioCI;
 import commoninterface.mathutils.GeometricCalculator;
 import commoninterface.mathutils.GeometricInfo;
 import commoninterface.mathutils.Vector2d;
-import commoninterface.objects.Entity;
 import commoninterface.objects.VirtualEntity;
 import commoninterface.utils.CIArguments;
 
@@ -65,7 +62,7 @@ public abstract class ThymioConeTypeCISensor extends CISensor {
 			if((sensorInfo.getDistance() < getRange()) && 
 			   (sensorInfo.getAngle() < (openingAngle / 2.0)) && 
 			   (sensorInfo.getAngle() > (-openingAngle / 2.0))) {
-
+				sensedEntity(e);
 				return (getRange() - sensorInfo.getDistance()) / getRange();
 			}
 		}
@@ -111,4 +108,7 @@ public abstract class ThymioConeTypeCISensor extends CISensor {
 	public int getNumberOfSensors() {
 		return readings.length;
 	}
+	
+	protected void sensedEntity(VirtualEntity ve){}
+	
 }

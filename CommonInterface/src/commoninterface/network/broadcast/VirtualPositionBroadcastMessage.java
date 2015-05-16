@@ -1,10 +1,7 @@
 package commoninterface.network.broadcast;
 
-import java.util.ArrayList;
-
 import commoninterface.ThymioCI;
 import commoninterface.mathutils.Vector2d;
-import commoninterface.objects.Entity;
 import commoninterface.objects.PreyEntity;
 import commoninterface.objects.ThymioEntity;
 
@@ -47,42 +44,26 @@ public class VirtualPositionBroadcastMessage extends BroadcastMessage {
 			double receivedY = Double.valueOf(split[4]);
 			double receivedOrientation = Double.valueOf(split[5]);
 			
-			if(receivedType.equals(VirtualPositionType.ROBOT.toString())){
-				
-				if(thymio.getNetworkAddress().equals(receivedAddress)){
-					thymio.setVirtualPosition(receivedX, receivedY);
-					thymio.setVirtualOrientation(receivedOrientation);
-				}else{
-					synchronized(thymio.getEntities()){
-						removeEntityByName(thymio.getEntities(), receivedAddress);
-						thymio.getEntities().add(new ThymioEntity(receivedAddress, new Vector2d(receivedX, receivedY)));
-					}
-				}
-				
-			}else if(receivedType.equals(VirtualPositionType.PREY.toString())){
-				
-				synchronized(thymio.getEntities()){
-					removeEntityByName(thymio.getEntities(), receivedAddress);
-					thymio.getEntities().add(new PreyEntity(receivedAddress, new Vector2d(receivedX, receivedY)));
-				}			
-			}
+			VirtualPositionType received = VirtualPositionType.valueOf(receivedType);
 			
-		}
-		
-	}
-	
-	private static void removeEntityByName(ArrayList<Entity> entities, String receivedAddress){
-		Entity entityToRemove = null;
-		
-		for (Entity e : entities) {
-			if(e.getName().equals(receivedAddress)){
-				entityToRemove = e;
-				break;
+			switch(received) {
+				case ROBOT:
+					if(thymio.getNetworkAddress().equals(receivedAddress)){
+						thymio.setVirtualPosition(receivedX, receivedY);
+						thymio.setVirtualOrientation(receivedOrientation);
+					}else{
+						ThymioEntity te = new ThymioEntity(receivedAddress, new Vector2d(receivedX, receivedY));
+						thymio.replaceEntity(te);
+					}
+					break;
+				case PREY:
+					PreyEntity pe = new PreyEntity(receivedAddress, new Vector2d(receivedX, receivedY));
+					thymio.replaceEntity(pe);
+					break;
+				default:
 			}
 		}
 		
-		if(entityToRemove != null)
-			entities.remove(entityToRemove);
 	}
 	
 }
