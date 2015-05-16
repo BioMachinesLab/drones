@@ -99,7 +99,7 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 			
 			try {
 				
-//				preventStuckMotors();
+				preventStuckMotors();
 				
 				//set the real speed
 				Runtime.getRuntime()
@@ -134,12 +134,12 @@ public class ReversableESCManagerOutputV2 extends Thread implements
 			String str = "";
 	
 			if(prevLValue == CENTRAL_VALUE_LEFT && lValue-MIN_FW_VALUE <= addVal && lValue-MIN_FW_VALUE >= 0) {
-				str+= "echo " + LEFT_ESC + "=" + (MIN_FW_VALUE+15)
+				str+= "echo " + LEFT_ESC + "=" + 175
 						+ " > /dev/servoblaster;";
 				
 			}
 			if(prevRValue == CENTRAL_VALUE_RIGHT && rValue-MIN_FW_VALUE <= addVal && rValue-MIN_FW_VALUE >= 0) {
-				str+= "echo " + RIGHT_ESC + "=" + (MIN_FW_VALUE+15)
+				str+= "echo " + RIGHT_ESC + "=" + 175
 						+ " > /dev/servoblaster;";
 			}
 			

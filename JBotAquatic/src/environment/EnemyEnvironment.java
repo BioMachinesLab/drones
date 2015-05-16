@@ -17,7 +17,8 @@ public class EnemyEnvironment extends BoundaryEnvironment{
 	
 	@Override
 	public void setup(Simulator simulator) {
-		super.setup(simulator);
+		simulator.getRandom().nextDouble();
+		this.setup = true;
 		
 		double dist = distance + distance*rand;
 		

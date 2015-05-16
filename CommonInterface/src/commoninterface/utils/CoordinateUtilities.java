@@ -13,7 +13,7 @@ public class CoordinateUtilities implements Serializable {
 	 * 
 	 * @miguelduarte42
 	 */
-	private final static UTMRef REFERENCE_UTM = new LatLon(38.756112, -9.153242).toUTMRef();
+	private final static UTMRef REFERENCE_UTM = new LatLon(38.766084, -9.093461).toUTMRef();
 	
 	public static Vector2d GPSToCartesian(LatLon coordinate) {
 		

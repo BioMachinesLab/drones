@@ -31,11 +31,13 @@ public class BroadcastMessageThread extends Thread{
 					if(timeUntilMessage >= 0) {
 						String[] msgs = msg.encode();
 						
-						for(String msgStr : msgs) {
-							if(msgStr != null) {
-								broadcastHandler.sendMessage(msgStr);
-								timeLastMsg[i] = System.currentTimeMillis();
-								minToWait = Math.min(msg.getUpdateTimeInMiliseconds(), minToWait);
+						if(msgs != null) {
+							for(String msgStr : msgs) {
+								if(msgStr != null) {
+									broadcastHandler.sendMessage(msgStr);
+									timeLastMsg[i] = System.currentTimeMillis();
+									minToWait = Math.min(msg.getUpdateTimeInMiliseconds(), minToWait);
+								}
 							}
 						}
 					} else {

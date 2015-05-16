@@ -2,7 +2,9 @@ package environment;
 
 import java.util.LinkedList;
 import java.util.Random;
+
 import mathutils.Vector2d;
+import commoninterface.AquaticDroneCI;
 import commoninterface.objects.GeoFence;
 import commoninterface.objects.Waypoint;
 import commoninterface.utils.CoordinateUtilities;
@@ -43,23 +45,23 @@ public class BoundaryEnvironment extends Environment{
 		}
 		
 		
-//		GeoFence fence = new GeoFence("fence");
-//		
-//		addNode(fence,-1,-1,simulator.getRandom());
-//		addNode(fence,-1,0,simulator.getRandom());
-//		addNode(fence,-1,1,simulator.getRandom());
-//		addNode(fence,0,1,simulator.getRandom());
-//		addNode(fence,1,1,simulator.getRandom());
-//		addNode(fence,1,0,simulator.getRandom());
-//		addNode(fence,1,-1,simulator.getRandom());
-//		addNode(fence,0,-1,simulator.getRandom());
-//		
-//		addLines(fence.getWaypoints(), simulator);
-//		
-//		for(Robot r : robots) {
-//			AquaticDroneCI drone = (AquaticDroneCI)r;
-//			drone.getEntities().add(fence);
-//		}
+		GeoFence fence = new GeoFence("fence");
+		
+		addNode(fence,-1,-1,simulator.getRandom());
+		addNode(fence,-1,0,simulator.getRandom());
+		addNode(fence,-1,1,simulator.getRandom());
+		addNode(fence,0,1,simulator.getRandom());
+		addNode(fence,1,1,simulator.getRandom());
+		addNode(fence,1,0,simulator.getRandom());
+		addNode(fence,1,-1,simulator.getRandom());
+		addNode(fence,0,-1,simulator.getRandom());
+		
+		addLines(fence.getWaypoints(), simulator);
+		
+		for(Robot r : robots) {
+			AquaticDroneCI drone = (AquaticDroneCI)r;
+			drone.getEntities().add(fence);
+		}
 	}
 	
 	protected void addLines(LinkedList<Waypoint> waypoints, Simulator simulator) {

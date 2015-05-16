@@ -51,7 +51,7 @@ public class AvoidEntitiesInstinct extends CIBehavior{
 							
 							if(angle < 0) {
 								desiredLeft = 0;
-							}else {
+							} else {
 								desiredRight = 0;
 							}
 						}
