@@ -209,7 +209,6 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 			connectionListener = new ConnectionListener(this);
 			connectionListener.start();
 
-			logger.logMessage(".");
 			initMessages += "[INIT] ConnectionListener: ok\n";
 
 			motorConnectionListener = new MotorConnectionListener(this);
@@ -223,7 +222,6 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 			broadcastMessages.add(new SharedThymioBroadcastMessage(this));
 			broadcastHandler = new RealBroadcastHandler(this,broadcastMessages);
 
-			logger.logMessage(".");
 			initMessages += "[INIT] MotorConnectionListener: ok\n";
 
 		} catch (IOException e) {

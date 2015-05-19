@@ -1,4 +1,4 @@
-package dataObjects;
+package objects;
 
 public class BatteryStatus {
 	private int batteryID;

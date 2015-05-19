@@ -7,7 +7,9 @@ import java.util.LinkedList;
 import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
 import commoninterface.entities.Entity;
+import commoninterface.entities.GeoEntity;
 import commoninterface.entities.GeoFence;
+import commoninterface.entities.ObstacleLocation;
 import commoninterface.entities.Waypoint;
 import commoninterface.network.messages.EntitiesMessage;
 import commoninterface.network.messages.Message;
@@ -28,17 +30,30 @@ public class EntitiesMessageProvider implements MessageProvider{
 			EntitiesMessage wm = (EntitiesMessage)m;
 			LinkedList<Entity> entities = wm.getEntities();
 			
-			Iterator<Entity> i = robot.getEntities().iterator();
+			synchronized(robot.getEntities()) {
 			
-			while(i.hasNext()) {
-				Entity e = i.next();
-				if(e instanceof GeoFence)
-					i.remove();
-				if(e instanceof Waypoint)
-					i.remove();
+				Iterator<Entity> i = robot.getEntities().iterator();
+				
+				while(i.hasNext()) {
+					Entity e = i.next();
+					if(e instanceof GeoFence ||
+							e instanceof Waypoint ||
+							e instanceof ObstacleLocation) {
+						log("entity removed "+e.getName());
+						i.remove();
+					}
+				}
+				
+				robot.getEntities().addAll(entities);
 			}
 			
-			robot.getEntities().addAll(entities);
+			for(Entity e : entities) {
+				if(e instanceof GeoEntity) {
+					GeoEntity ge = (GeoEntity)e;
+					String str = ge.getLatLon().getLat()+" "+ge.getLatLon().getLon();
+					log("entity added"+e.getClass().getSimpleName()+" "+e.getName()+" "+str);
+				}
+			}
 			
 			if(robot instanceof AquaticDroneCI) {
 				ArrayList<Waypoint> wps = Waypoint.getWaypoints(robot);
@@ -46,11 +61,13 @@ public class EntitiesMessageProvider implements MessageProvider{
 				if(!wps.isEmpty())
 					((AquaticDroneCI) robot).setActiveWaypoint(wps.get(0));
 			}
-			
 			return m;
 		}
-		
 		return null;
 	}
-
+	
+	private void log(String msg) {
+		if(robot.getLogger() != null)
+			robot.getLogger().logMessage(msg);
+	}
 }

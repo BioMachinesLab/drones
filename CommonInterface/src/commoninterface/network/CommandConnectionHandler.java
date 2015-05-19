@@ -30,11 +30,9 @@ public class CommandConnectionHandler extends ConnectionHandler {
 		if(DEBUG)
 			System.out.println("[CommandConnectionHandler] Received new message: "+message.getClass().getSimpleName());
 		
-		if (message instanceof BehaviorMessage) {
-			robot.processInformationRequest(message, this);
-		} else if(message instanceof LogMessage) {
-			robot.processInformationRequest(message, this);
-		} else if(message instanceof EntitiesMessage) {
+		if (message instanceof BehaviorMessage ||
+				message instanceof LogMessage ||
+				message instanceof EntitiesMessage) {
 			robot.processInformationRequest(message, this);
 		}
 	}

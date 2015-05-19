@@ -1,12 +1,6 @@
 package commoninterface.messageproviders;
 
-import java.util.ArrayList;
-
-import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
-import commoninterface.entities.Entity;
-import commoninterface.entities.Waypoint;
-import commoninterface.network.messages.EntityMessage;
 import commoninterface.network.messages.LogMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;

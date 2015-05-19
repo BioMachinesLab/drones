@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -13,12 +14,12 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 
 import org.joda.time.LocalDateTime;
 
 import commoninterface.dataobjects.GPSData;
-
 import threads.UpdateThread;
 
 public class GPSPanel extends UpdatePanel {
@@ -99,9 +100,11 @@ public class GPSPanel extends UpdatePanel {
 		coordinatesPanel.setLayout(new GridLayout(5,2));
 		
 		coordinatesPanel.add(new JLabel("Has Fix"));
-		labelHasFix = new JTextField("No Fix");
+		labelHasFix = new JTextField(" No Fix");
 		labelHasFix.setBackground(Color.RED);
 		labelHasFix.setOpaque(true);
+		Border b = BorderFactory.createLineBorder(new Color(238,238,238),3);
+		labelHasFix.setBorder(b);
 		coordinatesPanel.add(labelHasFix);
 
 		coordinatesPanel.add(new JLabel("Latitude"));
@@ -189,10 +192,10 @@ public class GPSPanel extends UpdatePanel {
 		
 		if(data.isFix()) {
 			labelHasFix.setBackground(Color.GREEN);
-			labelHasFix.setText("Has Fix");
+			labelHasFix.setText(" Has Fix");
 		} else {
 			labelHasFix.setBackground(Color.RED);
-			labelHasFix.setText("No Fix");
+			labelHasFix.setText(" No Fix");
 		}
 		
 		textFieldVelKmh.setText(Double.toString(data.getGroundSpeedKmh()));
