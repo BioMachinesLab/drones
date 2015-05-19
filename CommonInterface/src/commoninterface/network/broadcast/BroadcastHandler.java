@@ -5,10 +5,10 @@ import java.util.Iterator;
 
 import commoninterface.RobotCI;
 import commoninterface.ThymioCI;
-import commoninterface.objects.Entity;
-import commoninterface.objects.RobotLocation;
-import commoninterface.objects.SharedDroneLocation;
-import commoninterface.objects.ThymioSharedEntity;
+import commoninterface.entities.Entity;
+import commoninterface.entities.RobotLocation;
+import commoninterface.entities.SharedDroneLocation;
+import commoninterface.entities.ThymioSharedEntity;
 
 public abstract class BroadcastHandler {
 	

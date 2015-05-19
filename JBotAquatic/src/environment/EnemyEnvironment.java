@@ -6,7 +6,7 @@ import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
 import commoninterface.AquaticDroneCI.DroneType;
-import commoninterface.objects.GeoFence;
+import commoninterface.entities.GeoFence;
 import controllers.GoToWayPointController;
 
 public class EnemyEnvironment extends BoundaryEnvironment{

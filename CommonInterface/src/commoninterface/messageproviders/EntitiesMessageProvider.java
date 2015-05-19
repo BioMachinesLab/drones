@@ -3,14 +3,15 @@ package commoninterface.messageproviders;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
+
 import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
+import commoninterface.entities.Entity;
+import commoninterface.entities.GeoFence;
+import commoninterface.entities.Waypoint;
 import commoninterface.network.messages.EntitiesMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
-import commoninterface.objects.Entity;
-import commoninterface.objects.GeoFence;
-import commoninterface.objects.Waypoint;
 
 public class EntitiesMessageProvider implements MessageProvider{
 	

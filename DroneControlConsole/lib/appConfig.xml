@@ -18,19 +18,19 @@
 <entry key="BBoxLatLon.MinLat">38.74625</entry>
 <entry key="TileSortingPolicy">2</entry>
 <entry key="GPX.Corridor">0</entry>
-<entry key="LastZoom">17</entry>
+<entry key="LastZoom">12-18</entry>
 <entry key="InputPanelIndex">1</entry>
-<entry key="GPX.GpxFile"/>
 <entry key="UrlSquare.PasteUrl"/>
+<entry key="GPX.GpxFile"/>
+<entry key="TileServer">openstreetmap.fr</entry>
 <entry key="ProxyServer"/>
-<entry key="TileServer">Mapnik</entry>
 <entry key="BBoxLatLon.MaxLon">-9.14595</entry>
 <entry key="SlippyMapSaveTiles">false</entry>
 <entry key="UseProxyServerAuth">false</entry>
-<entry key="BBoxXY.MaxY">0</entry>
 <entry key="ShowTilePreview">true</entry>
-<entry key="ProxyServerUser"/>
-<entry key="BBoxXY.MinY">0</entry>
-<entry key="BBoxXY.MaxX">0</entry>
+<entry key="BBoxXY.MaxY">0</entry>
 <entry key="BBoxLatLon.MaxLat">38.75917</entry>
+<entry key="BBoxXY.MaxX">0</entry>
+<entry key="BBoxXY.MinY">0</entry>
+<entry key="ProxyServerUser"/>
 </properties>

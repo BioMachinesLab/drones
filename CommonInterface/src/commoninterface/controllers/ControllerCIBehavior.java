@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import commoninterface.CIBehavior;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
+import commoninterface.entities.Entity;
 import commoninterface.neuralnetwork.CINeuralNetwork;
 import commoninterface.neuralnetwork.inputs.CINNInput;
 import commoninterface.neuralnetwork.outputs.CINNOutput;
-import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
 
 public class ControllerCIBehavior extends CIBehavior {

@@ -2,7 +2,7 @@ package commoninterface.network.broadcast;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
-import commoninterface.objects.RobotLocation;
+import commoninterface.entities.RobotLocation;
 import commoninterface.utils.jcoord.LatLon;
 
 public class PositionBroadcastMessage extends BroadcastMessage {

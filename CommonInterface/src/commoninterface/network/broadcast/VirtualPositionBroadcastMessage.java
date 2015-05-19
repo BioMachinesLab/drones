@@ -1,9 +1,9 @@
 package commoninterface.network.broadcast;
 
 import commoninterface.ThymioCI;
+import commoninterface.entities.PreyEntity;
+import commoninterface.entities.ThymioEntity;
 import commoninterface.mathutils.Vector2d;
-import commoninterface.objects.PreyEntity;
-import commoninterface.objects.ThymioEntity;
 
 
 public class VirtualPositionBroadcastMessage extends BroadcastMessage {

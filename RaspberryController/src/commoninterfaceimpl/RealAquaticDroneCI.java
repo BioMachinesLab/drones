@@ -5,11 +5,10 @@ import io.SystemStatusMessageProvider;
 import io.input.ControllerInput;
 import io.output.ControllerOutput;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Scanner;
 
 import network.broadcast.RealBroadcastHandler;
 import simpletestbehaviors.ChangeWaypointCIBehavior;
@@ -19,7 +18,10 @@ import commoninterface.CIBehavior;
 import commoninterface.CISensor;
 import commoninterface.LedState;
 import commoninterface.dataobjects.GPSData;
+import commoninterface.entities.Entity;
+import commoninterface.entities.Waypoint;
 import commoninterface.instincts.AvoidDronesInstinct;
+import commoninterface.instincts.AvoidObstaclesInstinct;
 import commoninterface.messageproviders.BehaviorMessageProvider;
 import commoninterface.messageproviders.EntitiesMessageProvider;
 import commoninterface.messageproviders.EntityMessageProvider;
@@ -38,8 +40,6 @@ import commoninterface.network.broadcast.PositionBroadcastMessage;
 import commoninterface.network.broadcast.SharedDroneBroadcastMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
-import commoninterface.objects.Entity;
-import commoninterface.objects.Waypoint;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.RobotLogger;
 import commoninterface.utils.jcoord.LatLon;
@@ -47,7 +47,6 @@ import commoninterface.utils.jcoord.LatLon;
 public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	private static long CYCLE_TIME = 100;// in miliseconds
-	private static String DRONE_CONFIG = "config/drone_general.conf";
 
 	private String status = "";
 	private String initMessages = "\n";
@@ -62,7 +61,6 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	private List<MessageProvider> messageProviders = new ArrayList<MessageProvider>();
 	private ArrayList<CISensor> cisensors = new ArrayList<CISensor>();
 
-	private CIArguments args;
 	private boolean run = true;
 	private long startTimeInMillis;
 	private double timestep = 0;
@@ -81,23 +79,23 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	private RobotLogger logger;
 
 	@Override
-	public void begin(CIArguments args) {
+	public void begin(HashMap<String,CIArguments> args) {
 		this.startTimeInMillis = System.currentTimeMillis();
-		this.args = args;
 
 		addShutdownHooks();
 
-		initIO();
+		initIO(args.get("io"));
 		initMessageProviders();
 		initConnections();
 		
-		readGeneralConfig();
+		configureArguments(args.get("general"));
 		
 		messageHandler = new ControllerMessageHandler(this);
 		messageHandler.start();
 		
 		alwaysActiveBehaviors.add(new ChangeWaypointCIBehavior(new CIArguments(""), this));
 		alwaysActiveBehaviors.add(new AvoidDronesInstinct(new CIArguments(""), this));
+		alwaysActiveBehaviors.add(new AvoidObstaclesInstinct(new CIArguments(""), this));
 
 		setStatus("Running!\n");
 
@@ -113,14 +111,16 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			try {
 				
 				if (current != null) {
+					
 					current.step(timestep);
+					
+					for(CIBehavior b : alwaysActiveBehaviors)
+						b.step(timestep);
+					
 					if (current.getTerminateBehavior()) {
 						stopActiveBehavior();
 					}
 				}
-				
-				for(CIBehavior b : alwaysActiveBehaviors)
-					b.step(timestep);
 				
 			} catch(Exception e){
 				e.printStackTrace();
@@ -191,8 +191,8 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	}
 
 	// Init's
-	private void initIO() {
-		ioManager = new IOManager(this);
+	private void initIO(CIArguments args) {
+		ioManager = new IOManager(this, args);
 		initMessages += ioManager.getInitMessages();
 	}
 
@@ -452,38 +452,15 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		this.droneType = droneType;
 	}
 	
-	private void readGeneralConfig() {
-		File f = new File(DRONE_CONFIG);
+	private void configureArguments(CIArguments args) {
+		if(args.getArgumentIsDefined("dronetype"))
+			this.setDroneType(DroneType.values()[args.getArgumentAsInt("dronetype")]);
 		
-		if(f.exists()) {
-			
-			Scanner s = null;
-			
-			try {
-				s = new Scanner(f);
-				
-				while(s.hasNextLine()) {
-					String line = s.nextLine();
-					String[] split = line.split(" ");
-					
-					if(split[0] == "dronetype") {
-						setDroneType(DroneType.values()[Integer.parseInt(split[1])]);
-						initMessages += "[INIT] Set DroneType as "+getDroneType().toString()+"\n";
-					} else if(split[0] == "compassoffset") {
-						ioManager.getCompassModule().setOffset(Integer.parseInt(split[1]));
-						initMessages += "[INIT] Set Compass offset to "+split[1]+"\n";
-					}
-				}
-				
-				s.close();
-				
-			} catch(Exception e) {
-				initMessages += "[INIT] No "+DRONE_CONFIG+" file found.\n";
-			} finally {
-				if(s != null)
-					s.close();
-			}
-		}
+		if(args.getFlagIsTrue("filelogger"))
+			this.startLogger();
+		
+		if(args.getArgumentIsDefined("compassoffset") && ioManager.getCompassModule() != null)
+			ioManager.getCompassModule().setOffset(args.getArgumentAsInt("compassoffset"));
 	}
 	
 	@Override

@@ -1,12 +1,14 @@
 package commoninterface;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import commoninterface.entities.Entity;
 import commoninterface.network.ConnectionHandler;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
-import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.RobotLogger;
 
@@ -15,7 +17,7 @@ public interface RobotCI {
 	/**
 	 * Start the drone hardware
 	 */
-	public void    begin(CIArguments args);
+	public void    begin(HashMap<String,CIArguments> args);
 	
 	/**
 	 * Stop the drone hardware

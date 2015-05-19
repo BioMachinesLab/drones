@@ -5,9 +5,9 @@ import java.util.LinkedList;
 import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
 import commoninterface.AquaticDroneCI.DroneType;
-import commoninterface.objects.Entity;
-import commoninterface.objects.RobotLocation;
-import commoninterface.objects.SharedDroneLocation;
+import commoninterface.entities.Entity;
+import commoninterface.entities.RobotLocation;
+import commoninterface.entities.SharedDroneLocation;
 import commoninterface.utils.jcoord.LatLon;
 
 public class SharedDroneBroadcastMessage extends BroadcastMessage {
@@ -60,7 +60,8 @@ public class SharedDroneBroadcastMessage extends BroadcastMessage {
 		LinkedList<String> tempMessages = new LinkedList<String>();
 		
 		
-		for(Entity e : robot.getEntities()) {
+		for(Object o : robot.getEntities().toArray()) {
+			Entity e = (Entity)o;
 			if(e instanceof SharedDroneLocation) {
 				SharedDroneLocation loc = (SharedDroneLocation)e;
 				if(loc.getDroneType() == DroneType.ENEMY && robot.getNetworkAddress().equals(loc.getObserverAddress())) {

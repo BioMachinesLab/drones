@@ -1,6 +1,6 @@
 package commoninterface;
 
-import commoninterface.objects.Waypoint;
+import commoninterface.entities.Waypoint;
 import commoninterface.utils.jcoord.LatLon;
 
 /**

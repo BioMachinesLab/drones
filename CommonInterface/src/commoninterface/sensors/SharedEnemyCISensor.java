@@ -2,9 +2,9 @@ package commoninterface.sensors;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
-import commoninterface.objects.Entity;
-import commoninterface.objects.RobotLocation;
-import commoninterface.objects.SharedDroneLocation;
+import commoninterface.entities.Entity;
+import commoninterface.entities.RobotLocation;
+import commoninterface.entities.SharedDroneLocation;
 import commoninterface.utils.CIArguments;
 
 public class SharedEnemyCISensor extends ConeTypeCISensor{

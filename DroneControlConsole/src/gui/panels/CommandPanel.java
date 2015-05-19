@@ -8,8 +8,11 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Scanner;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -24,15 +27,17 @@ import javax.swing.JTextField;
 import network.CommandSender;
 import threads.UpdateThread;
 import commoninterface.CIBehavior;
+import commoninterface.entities.Entity;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.network.messages.EntitiesMessage;
 import commoninterface.network.messages.LogMessage;
 import commoninterface.network.messages.Message;
-import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.ClassLoadHelper;
 
 public class CommandPanel extends UpdatePanel{
+	
+	private static String CONTROLLERS_FOLDER = "controllers"; 
 	
 	private UpdateThread thread;
 	private JLabel statusMessage;
@@ -62,16 +67,27 @@ public class CommandPanel extends UpdatePanel{
 		
 		setLayout(new BorderLayout());
 		
-		JPanel topPanel = new JPanel();
+		JPanel topPanel = new JPanel(new BorderLayout());
 		
-		topPanel.setLayout(new BorderLayout());
+		JPanel comboBoxes = new JPanel(new BorderLayout());
 		
-		JComboBox<String> behaviors = new JComboBox<>();
+		JComboBox<String> behaviors = new JComboBox<String>();
 		behaviors.setPreferredSize(new Dimension(20,20));
-		
 		populateBehaviors(behaviors);
+		comboBoxes.add(behaviors, BorderLayout.NORTH);
 		
-		topPanel.add(behaviors, BorderLayout.NORTH);
+		JComboBox<String> controllers = new JComboBox<String>();
+		controllers.setPreferredSize(new Dimension(20,20));
+		populateControllers(controllers);
+		comboBoxes.add(controllers, BorderLayout.SOUTH);
+		
+		controllers.addActionListener (new ActionListener () {
+		    public void actionPerformed(ActionEvent e) {
+		        loadController((String)controllers.getSelectedItem());
+		    }
+		});
+		
+		topPanel.add(comboBoxes,BorderLayout.NORTH);
 		
 		JButton start = new JButton("Start");
 		JButton stop = new JButton("Stop");
@@ -219,6 +235,19 @@ public class CommandPanel extends UpdatePanel{
 			list.addItem(s);
 	}
 	
+	private void populateControllers(JComboBox<String> list) {
+		list.addItem("");
+		
+		File controllersFolder = new File(CONTROLLERS_FOLDER);
+		
+		if(controllersFolder.exists() && controllersFolder.isDirectory()) {
+			for(String s : controllersFolder.list()) {
+				if(s.endsWith(".conf"))
+					list.addItem(s);
+			}
+		}
+	}
+	
 	public BehaviorMessage getCurrentMessage() {
 		BehaviorMessage result = currentMessage;
 		currentMessage = null;
@@ -253,5 +282,28 @@ public class CommandPanel extends UpdatePanel{
 		result+= message.getSelectedStatus() ? "start" : "stop";
 		
 		setText(result);
+	}
+	
+	private void loadController(String file) {
+		
+		if(!file.isEmpty()) {
+			File f = new File(CONTROLLERS_FOLDER+"/"+file);
+			
+			if(f.exists()) {
+				try {
+					Scanner s = new Scanner(f);
+					String result = "";
+					
+					while(s.hasNextLine())
+						result+=s.nextLine()+"\n";
+					
+					config.setText(result);
+				} catch(IOException e) {
+					e.printStackTrace();
+				}
+			}
+		} else {
+			config.setText("");
+		}
 	}
 }

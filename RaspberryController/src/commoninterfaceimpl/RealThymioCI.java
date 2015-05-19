@@ -6,14 +6,15 @@ import io.input.ControllerInput;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import network.broadcast.RealBroadcastHandler;
 import utils.ThymioFileLogger;
-
 import commoninterface.CIBehavior;
 import commoninterface.CISensor;
 import commoninterface.ThymioCI;
+import commoninterface.entities.Entity;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.messageproviders.BehaviorMessageProvider;
 import commoninterface.messageproviders.EntitiesMessageProvider;
@@ -33,7 +34,6 @@ import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
 import commoninterface.network.broadcast.SharedThymioBroadcastMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
-import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.RobotLogger;
 
@@ -54,7 +54,6 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 	private List<MessageProvider> messageProviders = new ArrayList<MessageProvider>();
 	private ArrayList<CISensor> cisensors = new ArrayList<CISensor>();
 
-	private CIArguments args;
 	private long startTimeInMillis;
 	private double timestep = 0;
 	private double behaviorTimeStep = 0;
@@ -72,13 +71,12 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 	private RobotLogger logger;
 	
 	@Override
-	public void begin(CIArguments args) {
+	public void begin(HashMap<String,CIArguments> args) {
 		this.startTimeInMillis = System.currentTimeMillis();
-		this.args = args;
 
 		addShutdownHooks();
 
-		initIO();
+		initIO(args.get("io"));
 		initMessageProviders();
 		initConnections();
 
@@ -170,8 +168,8 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 	}
 	
 	// Init's
-	private void initIO() {
-		ioManager = new ThymioIOManager(this);
+	private void initIO(CIArguments args) {
+		ioManager = new ThymioIOManager(this, args);
 		initMessages += ioManager.getInitMessages();
 	}
 	

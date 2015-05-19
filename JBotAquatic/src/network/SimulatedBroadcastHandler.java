@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import simulation.Network;
 import simulation.robot.AquaticDrone;
 import commoninterface.RobotCI;
+import commoninterface.entities.Entity;
+import commoninterface.entities.RobotLocation;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.PositionBroadcastMessage;
-import commoninterface.objects.Entity;
-import commoninterface.objects.RobotLocation;
 import commoninterface.utils.CoordinateUtilities;
 
 public class SimulatedBroadcastHandler extends BroadcastHandler {

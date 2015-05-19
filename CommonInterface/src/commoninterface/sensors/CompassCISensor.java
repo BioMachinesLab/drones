@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
-import commoninterface.objects.Entity;
+import commoninterface.entities.Entity;
 import commoninterface.utils.CIArguments;
 
 public class CompassCISensor extends CISensor{

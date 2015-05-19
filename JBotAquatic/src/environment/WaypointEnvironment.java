@@ -1,6 +1,7 @@
 package environment;
 
 import java.util.ArrayList;
+
 import simulation.Simulator;
 import simulation.environment.Environment;
 import simulation.physicalobjects.LightPole;
@@ -9,8 +10,8 @@ import simulation.robot.Robot;
 import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
 import commoninterface.AquaticDroneCI;
+import commoninterface.entities.Waypoint;
 import commoninterface.mathutils.Vector2d;
-import commoninterface.objects.Waypoint;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
 

@@ -3,18 +3,12 @@ package io;
 import io.input.CameraCaptureInput;
 import io.input.ControllerInput;
 import io.input.ThymioProximitySensorsInput;
-
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Scanner;
-
 import org.freedesktop.dbus.DBusConnection;
 import org.freedesktop.dbus.exceptions.DBusException;
-
 import commoninterface.network.messages.MotorMessage;
+import commoninterface.utils.CIArguments;
 import commoninterfaceimpl.RealThymioCI;
 import utils.CommandLine;
 import ch.epfl.mobots.AsebaNetwork;
@@ -22,8 +16,6 @@ import ch.epfl.mobots.Aseba.ThymioRemoteConnection;
 
 
 public class ThymioIOManager {
-	
-	private final static String CONFIG_FILE = "config/thymio_io.conf";
 	
 	private ArrayList<ControllerInput> inputs = new ArrayList<ControllerInput>();
 	
@@ -33,16 +25,13 @@ public class ThymioIOManager {
 	
 	private String initMessages = "\n";
 	
-	private LinkedList<String> enabledIO = new LinkedList<String>();
-	
-	public ThymioIOManager(RealThymioCI thymio) {
+	public ThymioIOManager(RealThymioCI thymio, CIArguments args) {
 		try {
-			loadConfigurations();
 			
 			initThymioConnection();
-			initInputs();
+			initInputs(args);
 			
-			if (enabledIO.contains("filelogger")) {
+			if (args.getFlagIsTrue("filelogger")) {
 				thymio.startLogger();
 			}
 			
@@ -52,41 +41,17 @@ public class ThymioIOManager {
 		}
 	}
 
-	private void loadConfigurations() {
-
-		try {
-			Scanner s = new Scanner(new File(CONFIG_FILE));
-			while (s.hasNextLine()) {
-				String line = s.nextLine();
-
-				// So we can put comments on the io_config.conf
-				if (line.startsWith("#") || line.length() < 2) {
-					continue;
-				}
-
-				String[] split = line.split(" ");
-				if (split[1].equals("1"))
-					enabledIO.add(split[0]);
-			}
-			s.close();
-
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-
-	}
-	
 	private void initThymioConnection() throws DBusException {
 		DBusConnection conn = DBusConnection.getConnection(DBusConnection.SESSION);
 		AsebaNetwork recvInterface = (AsebaNetwork) conn.getRemoteObject("ch.epfl.mobots.Aseba", "/", AsebaNetwork.class);
 		thymioRemoteConnection = new ThymioRemoteConnection(recvInterface);
 	}
 
-	private void initInputs(){
+	private void initInputs(CIArguments args){
 		ThymioProximitySensorsInput proximitySensorsInput = new ThymioProximitySensorsInput(this);
 		inputs.add(proximitySensorsInput);
 		
-		if (enabledIO.contains("picamera")) {
+		if (args.getFlagIsTrue("picamera")) {
 			cameraInput = new CameraCaptureInput();
 			inputs.add(cameraInput);
 			initMessages += "[INIT] Raspberry Camera initialized \n";

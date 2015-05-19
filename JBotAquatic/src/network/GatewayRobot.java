@@ -1,19 +1,19 @@
 package network;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import simulation.Simulator;
 import simulation.robot.Robot;
-
 import commoninterface.CIBehavior;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
+import commoninterface.entities.Entity;
 import commoninterface.network.ConnectionHandler;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
-import commoninterface.objects.Entity;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.RobotLogger;
 
@@ -27,7 +27,7 @@ public class GatewayRobot implements RobotCI {
 	}
 
 	@Override
-	public void begin(CIArguments args) {}
+	public void begin(HashMap<String,CIArguments> args) {}
 
 	@Override
 	public void shutdown() {}

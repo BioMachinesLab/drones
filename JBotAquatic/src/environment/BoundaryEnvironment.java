@@ -5,8 +5,8 @@ import java.util.Random;
 
 import mathutils.Vector2d;
 import commoninterface.AquaticDroneCI;
-import commoninterface.objects.GeoFence;
-import commoninterface.objects.Waypoint;
+import commoninterface.entities.GeoFence;
+import commoninterface.entities.Waypoint;
 import commoninterface.utils.CoordinateUtilities;
 import simulation.Simulator;
 import simulation.environment.Environment;

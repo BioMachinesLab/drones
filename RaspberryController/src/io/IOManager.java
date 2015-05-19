@@ -10,29 +10,18 @@ import io.output.ControllerOutput;
 import io.output.DebugLedsOutput;
 import io.output.ReversableESCManagerOutputV2;
 import io.output.ServoOutput;
-
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Scanner;
-
-import behaviors.CalibrationCIBehavior;
-
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CFactory;
-
 import commoninterface.dataobjects.MotorSpeeds;
 import commoninterface.network.messages.MotorMessage;
 import commoninterface.utils.CIArguments;
 import commoninterfaceimpl.RealAquaticDroneCI;
 
 public class IOManager {
-
-	private final static String CONFIG_FILE = "config/drone_io.conf";
 
 	private ArrayList<ControllerOutput> outputs = new ArrayList<ControllerOutput>();
 	private ArrayList<ControllerInput> inputs = new ArrayList<ControllerInput>();
@@ -56,46 +45,13 @@ public class IOManager {
 	private RealAquaticDroneCI drone;
 	private MotorSpeeds motorSpeeds;
 
-	private LinkedList<String> enabledIO = new LinkedList<String>();
-
-	public IOManager(RealAquaticDroneCI drone) {
+	public IOManager(RealAquaticDroneCI drone, CIArguments args) {
 		this.drone = drone;
 		motorSpeeds = new MotorSpeeds();
 
-		loadConfigurations();
-
-		initHardwareCommunicatonProtocols();
-		initOutputs();
-		initInputs();
-
-		if (enabledIO.contains("filelogger")) {
-			drone.startLogger();
-		}
-
-	}
-
-	private void loadConfigurations() {
-
-		try {
-			Scanner s = new Scanner(new File(CONFIG_FILE));
-			while (s.hasNextLine()) {
-				String line = s.nextLine();
-
-				// So we can put comments on the io_config.conf
-				if (line.startsWith("#") || line.length() < 2) {
-					continue;
-				}
-
-				String[] split = line.split(" ");
-				if (split[1].equals("1"))
-					enabledIO.add(split[0]);
-			}
-			s.close();
-
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-
+		initHardwareCommunicatonProtocols(args);
+		initOutputs(args);
+		initInputs(args);
 	}
 
 	public GPSModuleInput getGpsModule() {
@@ -110,8 +66,8 @@ public class IOManager {
 	 * Initialize the Hardware protocols shared and used on input and output
 	 * devices ("physical layer"), like I2C and GPIO management instances
 	 */
-	private void initHardwareCommunicatonProtocols() {
-		if (enabledIO.contains("i2c")) {
+	private void initHardwareCommunicatonProtocols(CIArguments args) {
+		if (args.getFlagIsTrue("i2c")) {
 			try {
 				// Get I2C instance
 				i2cBus = I2CFactory.getInstance(I2CBus.BUS_1);
@@ -122,7 +78,7 @@ public class IOManager {
 			}
 		}
 
-		if (enabledIO.contains("gpio")) {
+		if (args.getFlagIsTrue("gpio")) {
 			try {
 				gpioController = GpioFactory.getInstance();
 				initMessages += ("\n[INIT] GPIO Controller: ok!\n");
@@ -133,8 +89,8 @@ public class IOManager {
 		}
 	}
 
-	private void initInputs() {
-		if (enabledIO.contains("compass") && enabledIO.contains("i2c")) {
+	private void initInputs(CIArguments args) {
+		if (args.getFlagIsTrue("compass") && args.getFlagIsTrue("i2c")) {
 			// Compass Module Init
 			compassModule = new I2CCompassLSM303Input(i2cBus);
 			initMessages += "[INIT] I2CCompassLSM303Input: "
@@ -145,13 +101,9 @@ public class IOManager {
 				inputs.add(compassModule);
 			}
 
-			if (enabledIO.contains("autocompasscalibration")) {
-				drone.startBehavior(new CalibrationCIBehavior(new CIArguments(""), drone));
-			}
-
 		}
 
-		if (enabledIO.contains("battery") && enabledIO.contains("i2c")) {
+		if (args.getFlagIsTrue("battery") && args.getFlagIsTrue("i2c")) {
 			// Battery Module Init
 			batteryManager = new I2CBatteryModuleInput(i2cBus);
 			initMessages += "[INIT] BatteryManager: "
@@ -162,7 +114,7 @@ public class IOManager {
 			}
 		}
 
-		if (enabledIO.contains("gps")) {
+		if (args.getFlagIsTrue("gps")) {
 			try {
 				// GPS Module Init
 				gpsModule = new GPSModuleInput();
@@ -177,7 +129,7 @@ public class IOManager {
 				initMessages += "[INIT] GPSModule: not ok! (" + e.getMessage()
 						+ ")\n";
 			}
-		} else if (enabledIO.contains("filegps")) {
+		} else if (args.getFlagIsTrue("filegps")) {
 			try {
 				// GPS Module Init
 				gpsModule = new FileGPSModuleInput();
@@ -191,7 +143,7 @@ public class IOManager {
 				initMessages += "[INIT] FileGPSModule: not ok! ("
 						+ e.getMessage() + ")\n";
 			}
-		} else if (enabledIO.contains("fakegps")) {
+		} else if (args.getFlagIsTrue("fakegps")) {
 			try {
 				// GPS Module Init
 				gpsModule = new FakeGPSModuleInput(drone);
@@ -208,8 +160,8 @@ public class IOManager {
 		}
 	}
 
-	private void initOutputs() {
-		if (enabledIO.contains("esc") && enabledIO.contains("gpio")) {
+	private void initOutputs(CIArguments args) {
+		if (args.getFlagIsTrue("esc") && args.getFlagIsTrue("gpio")) {
 			try {
 				// ESC Output Init
 				escManager = new ReversableESCManagerOutputV2(motorSpeeds,
@@ -229,7 +181,7 @@ public class IOManager {
 			}
 		}
 
-		if (enabledIO.contains("servos") && enabledIO.contains("gpio")) {
+		if (args.getFlagIsTrue("servos") && args.getFlagIsTrue("gpio")) {
 			try {
 				// ESC Output Init
 				escManager = new ServoOutput(motorSpeeds, gpioController);
@@ -248,7 +200,7 @@ public class IOManager {
 			}
 		}
 
-		if (enabledIO.contains("leds") && enabledIO.contains("gpio")) {
+		if (args.getFlagIsTrue("leds") && args.getFlagIsTrue("gpio")) {
 			try {
 				// Debug Leds Init
 				debugLeds = new DebugLedsOutput(gpioController);

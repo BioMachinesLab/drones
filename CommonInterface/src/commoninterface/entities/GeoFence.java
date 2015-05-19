@@ -1,4 +1,4 @@
-package commoninterface.objects;
+package commoninterface.entities;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

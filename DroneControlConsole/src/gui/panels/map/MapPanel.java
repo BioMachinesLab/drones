@@ -1,7 +1,6 @@
 package gui.panels.map;
 
 import gui.panels.UpdatePanel;
-
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -21,13 +20,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 import org.openstreetmap.gui.jmapviewer.Layer;
@@ -42,14 +39,12 @@ import org.openstreetmap.gui.jmapviewer.interfaces.TileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.BingAerialTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOsmTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.OsmTileSource;
-
 import threads.UpdateThread;
-import commoninterface.AquaticDroneCI;
+import commoninterface.entities.Entity;
+import commoninterface.entities.GeoFence;
+import commoninterface.entities.RobotLocation;
+import commoninterface.entities.Waypoint;
 import commoninterface.network.messages.EntityMessage;
-import commoninterface.objects.Entity;
-import commoninterface.objects.GeoFence;
-import commoninterface.objects.RobotLocation;
-import commoninterface.objects.Waypoint;
 import commoninterface.utils.jcoord.LatLon;
 
 public class MapPanel extends UpdatePanel {
@@ -60,7 +55,7 @@ public class MapPanel extends UpdatePanel {
 
     private JButton fitMarkersButton;
     
-    private static int POSITION_HISTORY = 100;
+    private static int POSITION_HISTORY = 10;
     
     private int robotMarkerIndex = 0;
     
@@ -221,7 +216,8 @@ public class MapPanel extends UpdatePanel {
     	
     	String markerName = "waypoint"+waypoints.size();
     	
-    	MapMarker m = new MapMarkerDot(l, markerName , c);
+    	MapMarker m = new MapMarkerWaypoint(l, markerName , c);
+    	
     	l.add(m);
     	waypointMarkers.add(m);
     	

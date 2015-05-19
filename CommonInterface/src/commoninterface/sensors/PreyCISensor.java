@@ -1,9 +1,9 @@
 package commoninterface.sensors;
 
 import commoninterface.RobotCI;
-import commoninterface.objects.PreyEntity;
-import commoninterface.objects.ThymioSharedEntity;
-import commoninterface.objects.VirtualEntity;
+import commoninterface.entities.PreyEntity;
+import commoninterface.entities.ThymioSharedEntity;
+import commoninterface.entities.VirtualEntity;
 import commoninterface.utils.CIArguments;
 
 public class PreyCISensor extends ThymioConeTypeCISensor {

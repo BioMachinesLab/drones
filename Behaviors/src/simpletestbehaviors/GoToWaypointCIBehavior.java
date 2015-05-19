@@ -4,7 +4,7 @@ import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.LedState;
 import commoninterface.RobotCI;
-import commoninterface.objects.Waypoint;
+import commoninterface.entities.Waypoint;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 

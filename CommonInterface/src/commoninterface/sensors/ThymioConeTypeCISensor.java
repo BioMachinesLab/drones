@@ -3,10 +3,10 @@ package commoninterface.sensors;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
 import commoninterface.ThymioCI;
+import commoninterface.entities.VirtualEntity;
 import commoninterface.mathutils.GeometricCalculator;
 import commoninterface.mathutils.GeometricInfo;
 import commoninterface.mathutils.Vector2d;
-import commoninterface.objects.VirtualEntity;
 import commoninterface.utils.CIArguments;
 
 public abstract class ThymioConeTypeCISensor extends CISensor {

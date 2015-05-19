@@ -2,11 +2,13 @@ package commoninterface.utils;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -711,6 +713,103 @@ public class CIArguments implements Serializable {
 		for(String s : strings)
 			arg = arg.replaceFirst("__PLACEHOLDER__", CLASS_NAME_TAG+"="+s);
 		return arg;
+	}
+	
+	public static HashMap<String, CIArguments> parseArgs(String[] args)
+			throws IOException, ClassNotFoundException {
+		String optionsFilename = null;
+		
+//		 for(String s : args)
+//			 System.out.println(s);
+
+		int currentIndex = 0;
+
+		// if (args.length == 1) {
+		// if (args[currentIndex].equalsIgnoreCase("-h")
+		// || args[currentIndex].equalsIgnoreCase("--help")
+		// || args[currentIndex].equalsIgnoreCase("help")) {
+		// System.out.println(Util.usageToString());
+		// System.exit(0);
+		// }
+		
+		if (args[0].charAt(0) != '-') {
+			optionsFilename = args[0];
+			String[] argsFromFile = readOptionsFromFile(optionsFilename);
+			String[] argsFromCommandline = args;
+			String[] newArgs = new String[argsFromFile.length + args.length - 1];
+
+			// System.out.println("file: " + argsFromFile.length + " cmd: " +
+			// args.length + ", new: " + newArgs.length);
+
+			for (int i = 0; i < argsFromFile.length; i++) {
+				newArgs[i] = argsFromFile[i];
+			}
+
+			for (int i = 1; i < argsFromCommandline.length; i++) {
+				newArgs[argsFromFile.length + i - 1] = argsFromCommandline[i];
+			}
+
+			args = newArgs;
+		}
+
+		HashMap<String, CIArguments> result = new HashMap<String, CIArguments>();
+
+		while (currentIndex < args.length) {
+			if (currentIndex + 1 == args.length) {
+				throw new RuntimeException(("Error: " + args[currentIndex]
+						+ " misses an argument"));
+			}
+
+			if (!args[currentIndex].equalsIgnoreCase("--random-seed")
+					&& args[currentIndex + 1].charAt(0) == '-') {
+				throw new RuntimeException("Error: Argument for " + args[currentIndex]
+				                                 						+ " cannot start with a '-' (and therefore cannot be "
+				                                						+ args[currentIndex + 1] + ")");
+			}
+
+			String key = args[currentIndex].toLowerCase();
+			// this replaces the big ol' if then
+			// System.out.println(args[currentIndex]+" # "+args[currentIndex+1]);
+			result.put(
+					key,
+					createOrPrependArguments(result.get(key),
+							args[currentIndex + 1],true));
+
+			currentIndex += 2;
+		}
+
+		String commandLine = "";
+
+		for (String s : args) {
+			if (s.startsWith("--"))
+				commandLine += "\n";
+			commandLine += s + " ";
+		}
+		
+//		Arguments commandLineArguments = new Arguments(commandLine.trim(),true);
+//		result.put("commandline",result);
+		
+		if(optionsFilename != null && result.get("--output") != null) {
+			String pop = null;
+			
+			if(result.containsKey("--population")){
+				pop = result.get("--population").getCompleteArgumentString();
+			}else{
+				pop = result.get("--populationa").getCompleteArgumentString();
+			}
+			
+			if(pop != null && pop.contains("load")) {
+				String output = result.get("--output").getCompleteArgumentString();
+				
+				String parent = new File(optionsFilename).getParent();
+				
+				if(!parent.equals(output)) {
+					result.put("--output", new CIArguments(parent));
+				}
+			}
+		}
+		
+		return result;
 	}
 	
 }

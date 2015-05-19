@@ -1,10 +1,7 @@
 package main;
 
+import java.util.HashMap;
 import java.util.Scanner;
-
-import simpletestbehaviors.ThymioRandomWalkCIBehavior;
-
-import commoninterface.CIStdOutLogger;
 import commoninterface.utils.CIArguments;
 import commoninterfaceimpl.RealThymioCI;
 
@@ -12,16 +9,21 @@ public class MainThymio {
 
 	public static void main(String[] args) {
 		RealThymioCI thymio = new RealThymioCI();
-		thymio.begin(new CIArguments(""));
-		thymio.start();
 		
 		try {
+		
+			HashMap<String,CIArguments> arg = CIArguments.parseArgs(new String[]{"config/thymio.conf"});
+			
+			thymio.begin(arg);
+			thymio.start();
+		
 			Scanner s = new Scanner(System.in);
 			while(s.hasNextLine()) {
 				String line = s.nextLine();
 				if(line.equals("q")) {
 					thymio.shutdown();
-					break;
+					s.close();
+					System.exit(0);
 				}
 			}
 			

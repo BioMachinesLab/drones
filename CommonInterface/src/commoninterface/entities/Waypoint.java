@@ -1,4 +1,4 @@
-package commoninterface.objects;
+package commoninterface.entities;
 
 import java.util.ArrayList;
 
@@ -14,7 +14,9 @@ public class Waypoint extends GeoEntity {
 	public static ArrayList<Waypoint> getWaypoints(RobotCI robot) {
 		ArrayList<Waypoint> waypoints = new ArrayList<Waypoint>();
 		
-		for(Entity e : robot.getEntities()) {
+		for(Object o : robot.getEntities().toArray()) { 
+			Entity e = (Entity)o;
+		
 			if(e instanceof Waypoint)
 				waypoints.add((Waypoint)e);
 		}

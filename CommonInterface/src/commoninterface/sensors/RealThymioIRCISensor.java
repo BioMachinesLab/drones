@@ -6,7 +6,7 @@ import java.util.List;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
 import commoninterface.ThymioCI;
-import commoninterface.objects.Entity;
+import commoninterface.entities.Entity;
 import commoninterface.utils.CIArguments;
 
 public class RealThymioIRCISensor extends CISensor {

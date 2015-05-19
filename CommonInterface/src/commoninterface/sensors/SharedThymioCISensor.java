@@ -1,7 +1,7 @@
 package commoninterface.sensors;
 
 import commoninterface.RobotCI;
-import commoninterface.objects.ThymioSharedEntity;
+import commoninterface.entities.ThymioSharedEntity;
 import commoninterface.utils.CIArguments;
 
 public class SharedThymioCISensor extends ThymioConeTypeCISensor {

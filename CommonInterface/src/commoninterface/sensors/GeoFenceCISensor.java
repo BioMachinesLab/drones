@@ -2,11 +2,12 @@ package commoninterface.sensors;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+
 import commoninterface.RobotCI;
+import commoninterface.entities.Entity;
+import commoninterface.entities.GeoFence;
+import commoninterface.entities.Waypoint;
 import commoninterface.mathutils.Vector2d;
-import commoninterface.objects.Entity;
-import commoninterface.objects.GeoFence;
-import commoninterface.objects.Waypoint;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.Line;

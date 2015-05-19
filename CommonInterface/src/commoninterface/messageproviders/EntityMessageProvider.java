@@ -4,11 +4,11 @@ import java.util.ArrayList;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
+import commoninterface.entities.Entity;
+import commoninterface.entities.Waypoint;
 import commoninterface.network.messages.EntityMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
-import commoninterface.objects.Entity;
-import commoninterface.objects.Waypoint;
 
 public class EntityMessageProvider implements MessageProvider{
 	

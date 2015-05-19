@@ -1,4 +1,4 @@
-package commoninterface.objects;
+package commoninterface.entities;
 
 import commoninterface.mathutils.Vector2d;
 

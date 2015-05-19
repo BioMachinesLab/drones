@@ -15,7 +15,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import commoninterface.AquaticDroneCI;
-import commoninterface.objects.RobotLocation;
+import commoninterface.entities.RobotLocation;
 import commoninterface.utils.jcoord.LatLon;
 
 public class LogVisualizer extends JFrame {

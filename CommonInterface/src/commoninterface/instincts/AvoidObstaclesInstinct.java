@@ -1,25 +1,18 @@
 package commoninterface.instincts;
 
-import commoninterface.AquaticDroneCI;
-import commoninterface.CIBehavior;
 import commoninterface.RobotCI;
 import commoninterface.entities.Entity;
-import commoninterface.entities.GeoEntity;
+import commoninterface.entities.ObstacleLocation;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
 
-public class AvoidEntitiesInstinct extends CIBehavior{
+public class AvoidObstaclesInstinct extends AvoidEntitiesInstinct{
 	
-	protected double safetyDistance = 5;
-	protected AquaticDroneCI drone;
-	
-	public AvoidEntitiesInstinct(CIArguments args, RobotCI robot) {
+	public AvoidObstaclesInstinct(CIArguments args, RobotCI robot) {
 		super(args, robot);
-		drone = (AquaticDroneCI)robot;
-		safetyDistance = args.getArgumentAsDoubleOrSetDefault("safetydistance",safetyDistance);
 	}
-
+	
 	@Override
 	public void step(double timestep) {
 		
@@ -39,11 +32,11 @@ public class AvoidEntitiesInstinct extends CIBehavior{
 			
 			if(validEntity(e)) {
 				
-				GeoEntity ge = (GeoEntity)e;
+				ObstacleLocation ge = (ObstacleLocation)e;
 				LatLon droneLatLon = drone.getGPSLatLon();
 				LatLon geLatLon = ge.getLatLon();
 				
-				double distance = CoordinateUtilities.distanceInMeters(droneLatLon, geLatLon);
+				double distance = CoordinateUtilities.distanceInMeters(droneLatLon, geLatLon) - ge.getRadius();
 				
 				if(distance < safetyDistance) {
 					
@@ -69,24 +62,9 @@ public class AvoidEntitiesInstinct extends CIBehavior{
 			drone.setMotorSpeeds(desiredLeft, desiredRight);
 		
 	}
-	
-	protected double getAngle(LatLon d, LatLon e) {
 
-		double absoluteAngle = Math.toRadians(CoordinateUtilities.angleInDegrees(d, e)); 
-		double sensorAngle = Math.toRadians(this.drone.getCompassOrientationInDegrees());
-		
-		double relativeAngle = sensorAngle - absoluteAngle;
-		
-		while(relativeAngle > Math.PI)
-			relativeAngle-=2*Math.PI;
-		while(relativeAngle < -Math.PI)
-			relativeAngle+=2*Math.PI;
-		
-		return Math.toDegrees(relativeAngle);
-	}
-	
 	protected boolean validEntity(Entity e) {
-		return e instanceof GeoEntity;
+		return e instanceof ObstacleLocation;
 	}
 
 }

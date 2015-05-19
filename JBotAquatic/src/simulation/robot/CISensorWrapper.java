@@ -9,7 +9,7 @@ import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
-import commoninterface.objects.Entity;
+import commoninterface.entities.Entity;
 import commoninterface.utils.CIArguments;
 
 public class CISensorWrapper extends Sensor{

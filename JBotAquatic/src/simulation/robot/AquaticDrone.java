@@ -1,6 +1,7 @@
 package simulation.robot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import mathutils.MathUtils;
@@ -20,8 +21,9 @@ import simulation.util.ArgumentsAnnotation;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CISensor;
+import commoninterface.entities.Entity;
+import commoninterface.entities.Waypoint;
 import commoninterface.instincts.AvoidDronesInstinct;
-import commoninterface.instincts.AvoidEntitiesInstinct;
 import commoninterface.messageproviders.BehaviorMessageProvider;
 import commoninterface.messageproviders.EntitiesMessageProvider;
 import commoninterface.messageproviders.EntityMessageProvider;
@@ -35,8 +37,6 @@ import commoninterface.network.broadcast.PositionBroadcastMessage;
 import commoninterface.network.broadcast.SharedDroneBroadcastMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
-import commoninterface.objects.Entity;
-import commoninterface.objects.Waypoint;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.RobotLogger;
@@ -242,9 +242,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	}
 
 	@Override
-	public void begin(CIArguments args) {
-		
-	}
+	public void begin(HashMap<String,CIArguments> args) {}
 
 	@Override
 	public ArrayList<Entity> getEntities() {

@@ -4,9 +4,9 @@ import java.util.LinkedList;
 
 import commoninterface.RobotCI;
 import commoninterface.AquaticDroneCI.DroneType;
+import commoninterface.entities.Entity;
+import commoninterface.entities.ThymioSharedEntity;
 import commoninterface.mathutils.Vector2d;
-import commoninterface.objects.Entity;
-import commoninterface.objects.ThymioSharedEntity;
 
 
 public class SharedThymioBroadcastMessage extends BroadcastMessage {

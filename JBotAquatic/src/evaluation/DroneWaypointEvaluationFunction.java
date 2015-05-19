@@ -1,9 +1,10 @@
 package evaluation;
 
 import java.util.ArrayList;
+
+import commoninterface.entities.Entity;
+import commoninterface.entities.Waypoint;
 import commoninterface.mathutils.Vector2d;
-import commoninterface.objects.Entity;
-import commoninterface.objects.Waypoint;
 import commoninterface.utils.CoordinateUtilities;
 import simulation.Simulator;
 import simulation.robot.AquaticDrone;
