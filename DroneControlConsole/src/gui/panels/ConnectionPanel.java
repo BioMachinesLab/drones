@@ -24,6 +24,7 @@ import main.RobotControlConsole;
 import threads.UpdateThread;
 
 public class ConnectionPanel extends UpdatePanel {
+	private static final long serialVersionUID = -4874186493593218098L;
 
 	private static final long SLEEP_TIME = 10 * 1000;
 	private static final long TIME_THRESHOLD = 10 * 1000;
@@ -117,6 +118,11 @@ public class ConnectionPanel extends UpdatePanel {
 			if (address.equals(listModel.getElementAt(i))) {
 				listModel.remove(i);
 				lastUpdate.remove(address);
+
+				if (console instanceof DroneControlConsole) {
+					((DroneControlConsole) console).getDronesSet().removeDrone(
+							address);
+				}
 			}
 		}
 	}
@@ -127,12 +133,12 @@ public class ConnectionPanel extends UpdatePanel {
 		}
 		lastUpdate.put(address, System.currentTimeMillis());
 	}
-	
+
 	public String[] getCurrentAddresses() {
 		String[] ips = new String[listModel.getSize()];
 		int i = 0;
-		for(Object o : listModel.toArray()) {
-			ips[i++] = (String)o;
+		for (Object o : listModel.toArray()) {
+			ips[i++] = (String) o;
 		}
 		return ips;
 	}
@@ -152,6 +158,7 @@ public class ConnectionPanel extends UpdatePanel {
 
 		for (String s : toRemove) {
 			removeAddress(s);
+			// remove droneData from droneSet
 		}
 	}
 

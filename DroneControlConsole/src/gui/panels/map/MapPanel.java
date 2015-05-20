@@ -1,13 +1,11 @@
 package gui.panels.map;
 
 import gui.panels.UpdatePanel;
-
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
-import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,13 +20,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 import org.openstreetmap.gui.jmapviewer.Layer;
@@ -43,12 +39,10 @@ import org.openstreetmap.gui.jmapviewer.interfaces.TileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.BingAerialTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOsmTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.OsmTileSource;
-
 import threads.UpdateThread;
 import commoninterface.entities.Entity;
 import commoninterface.entities.GeoEntity;
 import commoninterface.entities.GeoFence;
-import commoninterface.entities.ObstacleLocation;
 import commoninterface.entities.RobotLocation;
 import commoninterface.entities.Waypoint;
 import commoninterface.network.messages.EntityMessage;
@@ -57,26 +51,29 @@ import commoninterface.utils.jcoord.LatLon;
 public class MapPanel extends UpdatePanel {
 	
 	private static final long serialVersionUID = 1L;
-	private static int OBSTACLE_RADIUS = 2;
-	private static int POSITION_HISTORY = 10;
 
     private JMapViewerTreeDrone treeMap = null;
+
+    private JButton fitMarkersButton;
+    
+    private static int POSITION_HISTORY = 10;
     
     private int robotMarkerIndex = 0;
     
     private HashMap<String,LinkedList<MapMarker>> robotPositions = new HashMap<String, LinkedList<MapMarker>>();
+    private LinkedList<MapMarker> waypointMarkers = new LinkedList<MapMarker>();
+    
+    private LinkedList<Waypoint> waypoints = new LinkedList<Waypoint>();
     private UpdateThread thread = null;
     
     private GeoFence geoFence = new GeoFence("geofence");
-    private LinkedList<Waypoint> waypoints = new LinkedList<Waypoint>();
-    private LinkedList<MapMarker> waypointMarkers = new LinkedList<MapMarker>();
-    private LinkedList<ObstacleLocation> obstacles = new LinkedList<ObstacleLocation>();
-    private LinkedList<MapMarker> obstacleMarkers = new LinkedList<MapMarker>();
-    
     private Layer geoFenceLayer;
     private boolean editingGeoFence = false;
-    private boolean addingObstacle = false;
 
+    /**
+     * Constructs the {@code Demo}.
+     * @throws MalformedURLException 
+     */
     public MapPanel() {
 
         treeMap = new JMapViewerTreeDrone("Zones");
@@ -84,16 +81,19 @@ public class MapPanel extends UpdatePanel {
         // final JMapViewer map = new JMapViewer(new MemoryTileCache(),4);
         // map.setTileLoader(new OsmFileCacheTileLoader(map));
         // new DefaultMapController(map);
-        setBorder(BorderFactory.createTitledBorder("Map"));
+
         setLayout(new BorderLayout());
-        JPanel panelTop = new JPanel(new GridLayout(2,3));
+        JPanel panel = new JPanel();
+        JPanel panelTop = new JPanel();
         JPanel helpPanel = new JPanel();
 
-        add(panelTop, BorderLayout.NORTH);
+        add(panel, BorderLayout.NORTH);
         add(helpPanel, BorderLayout.SOUTH);
+        panel.setLayout(new BorderLayout());
+        panel.add(panelTop, BorderLayout.NORTH);
         JLabel helpLabel = new JLabel("Left mouse: move // Double left click or mouse wheel: zoom // Right click: add markers");
         helpPanel.add(helpLabel);
-        JButton fitMarkersButton = new JButton("Fit Markers");
+        fitMarkersButton = new JButton("Fit Markers");
         fitMarkersButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
@@ -126,6 +126,20 @@ public class MapPanel extends UpdatePanel {
         	e.printStackTrace();
         }
         
+        final JCheckBox showTreeLayers = new JCheckBox("Tree Layers");
+        showTreeLayers.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                treeMap.setTreeVisible(showTreeLayers.isSelected());
+            }
+        });
+        
+        JButton clearWaypointsButton = new JButton("Clear Waypoints");
+        clearWaypointsButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				clearWaypoints();
+			}
+		});
+        
         JButton geoFenceButton = new JButton(" Add GeoFence ");
         geoFenceButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -140,33 +154,10 @@ public class MapPanel extends UpdatePanel {
 			}
 		});
         
-        JButton clearWaypointsButton = new JButton("Clear Waypoints");
-        clearWaypointsButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				clearWaypoints();
-			}
-		});
-        
-        JButton addObstacleButton = new JButton("Add Obstacle");
-        addObstacleButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				addingObstacle = true;
-			}
-		});
-        
-        JButton clearObstaclesButton = new JButton("Clear Obstacles");
-        clearObstaclesButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				clearObstacles();
-			}
-		});
-        
-        panelTop.add(clearWaypointsButton);
-        panelTop.add(clearObstaclesButton);
+        panelTop.add(showTreeLayers);
         panelTop.add(fitMarkersButton);
         panelTop.add(geoFenceButton);
-        panelTop.add(addObstacleButton);        
-        
+        panelTop.add(clearWaypointsButton);
         add(treeMap, BorderLayout.CENTER);
         
         geoFenceLayer = treeMap.addLayer("_GeoFence");
@@ -179,12 +170,19 @@ public class MapPanel extends UpdatePanel {
             public void mouseClicked(MouseEvent e) {
             	
                if(e.getButton() == MouseEvent.BUTTON3) {
+<<<<<<< HEAD
             	   if(addingObstacle)
             		   addObstacle(map().getPosition(e.getPoint()));
             	   else if(editingGeoFence)
             		   addToGeoFence(map().getPosition(e.getPoint()));
             	   else
             		   addWaypoint(map().getPosition(e.getPoint()));
+=======
+            	   if(!editingGeoFence)
+            		   addMarker(map().getPosition(e.getPoint()));
+            	   else
+            		   addToGeoFence(map().getPosition(e.getPoint()));
+>>>>>>> branch 'master' of https://github.com/BioMachinesLab/drones.git
 //            	   updateRobotPosition("drone", map().getPosition(e.getPoint()));
                 }
             }
@@ -422,14 +420,12 @@ public class MapPanel extends UpdatePanel {
 	public LinkedList<Entity> getEntities() {
 		LinkedList<Entity> entities = new LinkedList<>();
 
-		if(!geoFence.getWaypoints().isEmpty())
+		if(!geoFence.getWaypoints().isEmpty()) {
 			entities.add(geoFence);
+		}
 		
 		if(waypoints != null)
 			entities.addAll(waypoints);
-		
-		if(obstacles != null)
-			entities.addAll(obstacles);
 		
 		return entities;
 	}

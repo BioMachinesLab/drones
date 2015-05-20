@@ -9,8 +9,8 @@ public class MotorConnectionListener extends ConnectionListener {
 	
 	private static int MOTOR_PORT = 10102;
 
-	public MotorConnectionListener(RobotCI drone) throws IOException{
-		super(drone, MOTOR_PORT);
+	public MotorConnectionListener(RobotCI robot) throws IOException{
+		super(robot, MOTOR_PORT);
 	}
 	
 	@Override

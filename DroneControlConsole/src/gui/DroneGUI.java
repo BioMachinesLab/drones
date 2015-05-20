@@ -5,8 +5,10 @@ import gui.panels.CompassPanel;
 import gui.panels.GPSPanel;
 import gui.panels.SystemInfoPanel;
 import gui.panels.map.MapPanel;
+
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -16,6 +18,8 @@ import javax.swing.UnsupportedLookAndFeelException;
 import main.DroneControlConsole;
 
 public class DroneGUI extends RobotGUI {
+	private static final long serialVersionUID = 1835233364751980805L;
+	
 	private GPSPanel gpsPanel;
 	private SystemInfoPanel sysInfoPanel;
 	private CompassPanel compassPanel;
@@ -66,23 +70,23 @@ public class DroneGUI extends RobotGUI {
 		// Motors
 		rightPanel.add(motorsPanel, BorderLayout.NORTH);
 
-		
 		JPanel GPSCompassBatteriesPanel = new JPanel(new BorderLayout());
-		
+
 		// GPS
 		gpsPanel = new GPSPanel();
 		GPSCompassBatteriesPanel.add(gpsPanel, BorderLayout.NORTH);
 
 		// Compass and batteries
-		JPanel compassAndBatteriesPanel= new JPanel(new GridLayout(1,2));
+		JPanel compassAndBatteriesPanel = new JPanel(new GridLayout(1, 2));
 		compassPanel = new CompassPanel();
 		batteryPanel = new BatteryPanel();
-		
+
 		compassAndBatteriesPanel.add(compassPanel);
 		compassAndBatteriesPanel.add(batteryPanel);
-		GPSCompassBatteriesPanel.add(compassAndBatteriesPanel, BorderLayout.CENTER);
+		GPSCompassBatteriesPanel.add(compassAndBatteriesPanel,
+				BorderLayout.CENTER);
 
-		rightPanel.add(GPSCompassBatteriesPanel,BorderLayout.CENTER);
+		rightPanel.add(GPSCompassBatteriesPanel, BorderLayout.CENTER);
 
 		add(rightPanel, BorderLayout.EAST);
 
@@ -109,7 +113,7 @@ public class DroneGUI extends RobotGUI {
 		sysInfoPanel = new SystemInfoPanel(this);
 		add(sysInfoPanel, BorderLayout.SOUTH);
 	}
-	
+
 	public GPSPanel getGPSPanel() {
 		return gpsPanel;
 	}
@@ -125,5 +129,6 @@ public class DroneGUI extends RobotGUI {
 	public MapPanel getMapPanel() {
 		return mapPanel;
 	}
+
 
 }

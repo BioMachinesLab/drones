@@ -7,23 +7,23 @@ public class DronesSet {
 		private HashMap<String, DroneData> dronesSet = new HashMap<>();
 		
 		public void addDrone(DroneData drone){
-			dronesSet.put(drone.getName(), drone);
+			dronesSet.put(drone.getIpAddr().getHostAddress(), drone);
 		}
 		
-		public void removeDrone(String droneName){
-			dronesSet.remove(droneName);
+		public void removeDrone(String ipAddr){
+			dronesSet.remove(ipAddr);
 		}
 		
 		public void removeDrone(DroneData drone){
-			dronesSet.remove(drone.getName(), drone);
+			dronesSet.remove(drone.getIpAddr().getHostAddress(), drone);
 		}
 		
-		public DroneData getDrone(String name){
-			return dronesSet.get(name);
+		public DroneData getDrone(String ipAddr){
+			return dronesSet.get(ipAddr);
 		}
 		
-		public boolean existsDrone(String name){
-			return dronesSet.containsKey(name);
+		public boolean existsDrone(String ipAddr){
+			return dronesSet.containsKey(ipAddr);
 		}
 		
 		public ArrayList<DroneData> getDronesSet(){

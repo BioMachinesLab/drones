@@ -1,9 +1,11 @@
 package commoninterface.network;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+
 import commoninterface.RobotCI;
 
 public class ConnectionListener extends Thread {
@@ -18,8 +20,7 @@ public class ConnectionListener extends Thread {
 		this(controller, DEFAULT_PORT);
 	}
 
-	public ConnectionListener(RobotCI robot, int port)
-			throws IOException {
+	public ConnectionListener(RobotCI robot, int port) throws IOException {
 		this.robot = robot;
 		this.port = port;
 
@@ -30,11 +31,17 @@ public class ConnectionListener extends Thread {
 	public void run() {
 
 		try {
-			System.out
-					.println("[CONNECTION HANDLER] Connection Handler Initialized on "
-							+ NetworkUtils.getAddress("wlan0")
-							+ ":"
-							+ port);
+			if (System.getProperty("os.name").equals("Linux")
+					&& System.getProperty("os.arch").equals("arm")) {
+				System.out
+						.println("[CONNECTION HANDLER] Connection Handler Initialized on "
+								+ NetworkUtils.getAddress("wlan0") + ":" + port);
+			} else {
+				System.out
+				.println("[CONNECTION HANDLER] Connection Handler Initialized on "
+						+ InetAddress.getLocalHost().getHostAddress() + ":" + port);
+			}
+			
 			System.out
 					.println("[CONNECTION HANDLER] Waiting for connection requests!");
 			while (true) {
@@ -72,13 +79,14 @@ public class ConnectionListener extends Thread {
 			}
 		}
 	}
-	
+
 	public void shutdown() {
 		closeConnections();
 		try {
 			serverSocket.close();
 		} catch (IOException e) {
-			System.out.println("[CONNECTION HANDLER] Unable to close server socket.... there was an open socket?");
+			System.out
+					.println("[CONNECTION HANDLER] Unable to close server socket.... there was an open socket?");
 		}
 	}
 
