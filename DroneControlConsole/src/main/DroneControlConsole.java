@@ -11,8 +11,10 @@ import threads.NetworkActivationsUpdateThread;
 import threads.UpdateThread;
 import commoninterface.network.messages.InformationRequest.MessageType;
 import dataObjects.ConsoleMotorSpeeds;
+import dataObjects.DronesSet;
 
 public class DroneControlConsole extends RobotControlConsole {
+	private DronesSet dronesSet = new DronesSet();
 	
 	public DroneControlConsole() {
 		try {
@@ -66,4 +68,7 @@ public class DroneControlConsole extends RobotControlConsole {
 		new DroneControlConsole();
 	}
 	
+	public DronesSet getDronesSet() {
+		return dronesSet;
+	}
 }
