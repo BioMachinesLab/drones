@@ -46,6 +46,7 @@ import org.openstreetmap.gui.jmapviewer.tilesources.OsmTileSource;
 
 import threads.UpdateThread;
 import commoninterface.entities.Entity;
+import commoninterface.entities.GeoEntity;
 import commoninterface.entities.GeoFence;
 import commoninterface.entities.ObstacleLocation;
 import commoninterface.entities.RobotLocation;
@@ -183,7 +184,7 @@ public class MapPanel extends UpdatePanel {
             	   else if(editingGeoFence)
             		   addToGeoFence(map().getPosition(e.getPoint()));
             	   else
-            		   addMarker(map().getPosition(e.getPoint()));
+            		   addWaypoint(map().getPosition(e.getPoint()));
 //            	   updateRobotPosition("drone", map().getPosition(e.getPoint()));
                 }
             }
@@ -211,7 +212,7 @@ public class MapPanel extends UpdatePanel {
         return new Coordinate(lat, lon);
     }
 
-    public synchronized void addMarker(Coordinate c) {
+    public synchronized void addWaypoint(Coordinate c) {
     	
     	String layerName = "waypoints";
     	
@@ -321,7 +322,7 @@ public class MapPanel extends UpdatePanel {
     	}
     	
     	if(robotMarkers.size() == 1 && robotPositions.size() == 1) {
-    		map().setDisplayToFitMapMarkers();
+//    		map().setDisplayToFitMapMarkers();
     	}
     }
     
@@ -381,20 +382,6 @@ public class MapPanel extends UpdatePanel {
 		System.out.println("TODO MapPanel");
 	}
 	
-	public void clearHistory() {
-		
-		for(String s : robotPositions.keySet()) {
-		
-			LinkedList<MapMarker> robotMarkers = robotPositions.get(s);
-		
-			while(!robotMarkers.isEmpty()) {
-	    		MapMarker old = robotMarkers.pollFirst();
-	    		treeMap.removeFromLayer(old);
-	        	map().removeMapMarker(old);
-	    	}
-		}
-	}
-	
 	private synchronized void addToGeoFence(Coordinate coord) {
 		MapMarker marker = new MapMarkerDot(coord);
 		geoFence.addWaypoint(new LatLon(coord.getLat(),coord.getLon()));
@@ -412,37 +399,25 @@ public class MapPanel extends UpdatePanel {
 		map().addMapPolygon(po);
 	}
 	
-	private void clearGeoFence() {
+	private synchronized void addGeoFence(GeoFence geo) {
+		ArrayList<Coordinate> coords = new ArrayList<Coordinate>();
 		
-		LinkedList<MapMarker> list = new LinkedList<MapMarker>();
-		
-		if(geoFenceLayer.getElements() != null) {
-			for(MapObject mo : geoFenceLayer.getElements()) {
-				if(mo instanceof MapMarker) {
-					list.add((MapMarker)mo);
-					map().removeMapMarker((MapMarker)mo);
-				}
-			}
+		for(Waypoint wp : geo.getWaypoints()) {
+			Coordinate coord = c(wp.getLatLon().getLat(), wp.getLatLon().getLon());
 			
-			for(MapMarker m : list)
-				treeMap.removeFromLayer(m);
-			
-			geoFenceLayer.getElements().clear();
-			geoFence.clear();
+			MapMarker marker = new MapMarkerDot(coord);
+			geoFence.addWaypoint(new LatLon(coord.getLat(),coord.getLon()));
+			geoFenceLayer.add(marker);
+			map().addMapMarker(marker);
+			coords.add(new Coordinate(wp.getLatLon().getLat(), wp.getLatLon().getLon()));
 		}
+
 		map().removeAllMapPolygons();
+		MapPolygonImpl po = new MapPolygonImpl(coords);
+		geoFenceLayer.add(po);
+		map().addMapPolygon(po);
 	}
-	
-	private void clearWaypoints() {
-		
-		for(MapMarker m : waypointMarkers) {
-	    	treeMap.removeFromLayer(m);
-	    	map().removeMapMarker(m);
-		}
-    	
-    	waypoints.clear();
-    	waypointMarkers.clear();
-	}
+
 	
 	public LinkedList<Entity> getEntities() {
 		LinkedList<Entity> entities = new LinkedList<>();
@@ -484,7 +459,6 @@ public class MapPanel extends UpdatePanel {
     	synchronized(this) {
     		ObstacleLocation ol = new ObstacleLocation(markerName, new LatLon(c.getLat(),c.getLon()),OBSTACLE_RADIUS);
     		obstacles.add(ol);
-//    		notifyAll();
     	}
 		
 		addingObstacle = false;
@@ -501,4 +475,67 @@ public class MapPanel extends UpdatePanel {
     	obstacleMarkers.clear();
 	}
 	
+	private synchronized void clearGeoFence() {
+		
+		LinkedList<MapMarker> list = new LinkedList<MapMarker>();
+		
+		if(geoFenceLayer.getElements() != null) {
+			for(MapObject mo : geoFenceLayer.getElements()) {
+				if(mo instanceof MapMarker) {
+					list.add((MapMarker)mo);
+					map().removeMapMarker((MapMarker)mo);
+				}
+			}
+			
+			for(MapMarker m : list)
+				treeMap.removeFromLayer(m);
+			
+			geoFenceLayer.getElements().clear();
+			geoFence.clear();
+		}
+		map().removeAllMapPolygons();
+	}
+	
+	private void clearWaypoints() {
+		
+		for(MapMarker m : waypointMarkers) {
+	    	treeMap.removeFromLayer(m);
+	    	map().removeMapMarker(m);
+		}
+    	
+    	waypoints.clear();
+    	waypointMarkers.clear();
+	}
+	
+	public void clearHistory() {
+		
+		for(String s : robotPositions.keySet()) {
+		
+			LinkedList<MapMarker> robotMarkers = robotPositions.get(s);
+		
+			while(!robotMarkers.isEmpty()) {
+	    		MapMarker old = robotMarkers.pollFirst();
+	    		treeMap.removeFromLayer(old);
+	        	map().removeMapMarker(old);
+	    	}
+		}
+	}
+	
+	public void replaceEntities(ArrayList<Entity> entities) {
+		clearObstacles();
+		clearGeoFence();
+		clearWaypoints();
+		
+		for(Entity e : entities) {
+			if(e instanceof GeoEntity) {
+				GeoEntity ge = (GeoEntity)e;
+				if(ge instanceof Waypoint)
+					addWaypoint(c(ge.getLatLon().getLat(),ge.getLatLon().getLon()));
+				if(ge instanceof ObstacleLocation)
+					addObstacle(c(ge.getLatLon().getLat(),ge.getLatLon().getLon()));
+			}
+			if(e instanceof GeoFence)
+				addGeoFence((GeoFence)e);
+		}
+	}
 }
