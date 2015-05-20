@@ -2,7 +2,10 @@ package dataObjects;
 
 import java.net.InetAddress;
 
+import commoninterface.dataobjects.GPSData;
 import commoninterface.entities.RobotLocation;
+import commoninterface.network.messages.BehaviorMessage;
+import commoninterface.network.messages.NeuralActivationsMessage;
 
 public class DroneData {
 	/*
@@ -17,6 +20,12 @@ public class DroneData {
 	// Telemetry Informations
 	private RobotLocation robotLocation;
 	private double compassOrientation;
+	private GPSData gpsData;
+
+	// System informations and status
+	private String systemStatusMessage = "";
+	private BehaviorMessage behaviourMessage;
+	private NeuralActivationsMessage neuralActivations;
 
 	/*
 	 * Methods
@@ -56,6 +65,21 @@ public class DroneData {
 		return compassOrientation;
 	}
 
+	public String getSystemStatusMessage() {
+		return systemStatusMessage;
+	}
+
+	public BehaviorMessage getBehaviour() {
+		return behaviourMessage;
+	}
+
+	public NeuralActivationsMessage getNeuralActivations() {
+		return neuralActivations;
+	}
+
+	public GPSData getGPSData(){
+		return gpsData;
+	}
 	// Setters
 	public void setTimeSinceLastHeartbeat(long timeSinceLastHeartbeat) {
 		this.timeSinceLastHeartbeat = timeSinceLastHeartbeat;
@@ -70,4 +94,19 @@ public class DroneData {
 		this.compassOrientation = compassOrientation;
 	}
 
+	public void setSystemStatusMessage(String systemStatusMessage) {
+		this.systemStatusMessage = systemStatusMessage;
+	}
+
+	public void setBehaviour(BehaviorMessage behaviourMessage) {
+		this.behaviourMessage = behaviourMessage;
+	}
+
+	public void setNeuralActivations(NeuralActivationsMessage neuralActivations) {
+		this.neuralActivations = neuralActivations;
+	}
+
+	public void setGPSData(GPSData gpsData){
+		this.gpsData=gpsData;
+	}
 }

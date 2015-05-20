@@ -8,7 +8,7 @@ import commoninterface.CIStdOutLogger;
 import commoninterface.utils.CIArguments;
 import commoninterfaceimpl.RealAquaticDroneCI;
 
-public class Main {
+public class MainAquaticDrone {
 	
 	public static void main(String[] args) {
 		
