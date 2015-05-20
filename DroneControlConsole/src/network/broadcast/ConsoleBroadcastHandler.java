@@ -6,13 +6,19 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
+import main.DroneControlConsole;
 import main.RobotControlConsole;
+
 import commoninterface.entities.RobotLocation;
 import commoninterface.network.NetworkUtils;
 import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
 import commoninterface.network.broadcast.PositionBroadcastMessage;
+
+import dataObjects.DroneData;
+import dataObjects.DronesSet;
 
 public class ConsoleBroadcastHandler {
 	
@@ -96,6 +102,7 @@ public class ConsoleBroadcastHandler {
 				if(!address.equals(ownAddress)) {
 					long timeElapsed = HeartbeatBroadcastMessage.decode(message);
 					console.getGUI().getConnectionPanel().newAddress(address);
+					updateDroneData(address, split[0], timeElapsed);
 				}
 				break;
 			case "GPS":
@@ -105,6 +112,7 @@ public class ConsoleBroadcastHandler {
 						((DroneGUI)console.getGUI()).getMapPanel().displayData(di);
 					}
 					console.getGUI().getConnectionPanel().newAddress(address);
+					updateDroneData(address, split[0], di);
 				}
 				
 				break;
@@ -114,6 +122,46 @@ public class ConsoleBroadcastHandler {
 		
 		if(retransmit)
 			sender.retransmit(message);
+	}
+	
+	private void updateDroneData(String address, String msgType, Object obj) {
+		if (console instanceof DroneControlConsole) {
+			try {
+				DronesSet dronesSet = ((DroneControlConsole) console)
+						.getDronesSet();
+				DroneData drone;
+				boolean exists = false;
+
+				if (!dronesSet.existsDrone(address)) {
+					drone = new DroneData(InetAddress.getByName(address));
+				} else {
+					drone = dronesSet.getDrone(address);
+					exists = true;
+				}
+
+				switch (msgType) {
+				case "HEARTBEAT":
+					drone.setTimeSinceLastHeartbeat((long) obj);
+					break;
+				case "GPS":
+					drone.setRobotLocation((RobotLocation) obj);
+					break;
+				default:
+					System.out
+							.println("Uncategorized message type to update on drone data, from "
+									+ address);
+				}
+
+				if (!exists) {
+					dronesSet.addDrone(drone);
+				}
+			} catch (UnknownHostException e) {
+				System.err
+						.println("UnknownHostException on ConsoleBroadcastHandler....\n"
+								+ e.getMessage());
+			}
+
+		}	
 	}
 	
 	class BroadcastReceiver extends Thread {
