@@ -326,7 +326,7 @@ public class MapPanel extends UpdatePanel {
     	}
     }
     
-    public void displayData(RobotLocation di) {
+    public synchronized void displayData(RobotLocation di) {
 		
     	LatLon latLon = di.getLatLon();
     	
@@ -341,7 +341,7 @@ public class MapPanel extends UpdatePanel {
 		}
 	}
 	
-	private boolean usefulRobotCoordinate(String name, Coordinate n) {
+	private synchronized boolean usefulRobotCoordinate(String name, Coordinate n) {
 		
 		if(n.getLat() == -1 && n.getLon() == -1)
 			return false;

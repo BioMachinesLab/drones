@@ -221,6 +221,8 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			broadcastHandler = new RealBroadcastHandler(this, broadcastMessages);
 
 			initMessages += "[INIT] MotorConnectionListener: ok\n";
+			
+			log("IP "+getNetworkAddress());
 
 		} catch (IOException e) {
 			initMessages += "[INIT] Unable to start Network Connection Listeners! ("
