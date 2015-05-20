@@ -76,7 +76,7 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 
 		addShutdownHooks();
 
-		initIO(args.get("io"));
+		initIO(args.get("--io"));
 		initMessageProviders();
 		initConnections();
 
