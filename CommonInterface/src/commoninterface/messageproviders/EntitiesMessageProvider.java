@@ -50,17 +50,10 @@ public class EntitiesMessageProvider implements MessageProvider{
 			for(Entity e : entities) {
 				if(e instanceof GeoEntity) {
 					GeoEntity ge = (GeoEntity)e;
-					String str = ge.getLatLon().getLat()+" "+ge.getLatLon().getLon();
-					log("entity added "+e.getClass().getSimpleName()+" "+e.getName()+" "+str);
+					log(ge.getLogMessage());
 				} else if(e instanceof GeoFence) {
 					GeoFence gf = (GeoFence)e;
-					
-					String str = "";
-					
-					for(Waypoint w : gf.getWaypoints())
-						str+= w.getLatLon().getLat()+" "+w.getLatLon().getLon()+" ";
-					
-					log("entity added "+e.getClass().getSimpleName()+" "+e.getName()+" "+gf.getWaypoints().size()+" "+str);
+					log(gf.getLogMessage());
 				}
 			}
 			

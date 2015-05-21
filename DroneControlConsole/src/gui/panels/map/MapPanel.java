@@ -1,7 +1,6 @@
 package gui.panels.map;
 
 import gui.panels.UpdatePanel;
-
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -22,13 +21,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 import org.openstreetmap.gui.jmapviewer.Layer;
@@ -43,7 +40,6 @@ import org.openstreetmap.gui.jmapviewer.interfaces.TileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.BingAerialTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOsmTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.OsmTileSource;
-
 import threads.UpdateThread;
 import commoninterface.entities.Entity;
 import commoninterface.entities.GeoEntity;
@@ -81,9 +77,6 @@ public class MapPanel extends UpdatePanel {
 
         treeMap = new JMapViewerTreeDrone("Zones");
         
-        // final JMapViewer map = new JMapViewer(new MemoryTileCache(),4);
-        // map.setTileLoader(new OsmFileCacheTileLoader(map));
-        // new DefaultMapController(map);
         setBorder(BorderFactory.createTitledBorder("Map"));
         setLayout(new BorderLayout());
         JPanel panelTop = new JPanel(new GridLayout(2,3));
@@ -185,7 +178,6 @@ public class MapPanel extends UpdatePanel {
             		   addToGeoFence(map().getPosition(e.getPoint()));
             	   else
             		   addWaypoint(map().getPosition(e.getPoint()));
-//            	   updateRobotPosition("drone", map().getPosition(e.getPoint()));
                 }
             }
         });

@@ -1,13 +1,10 @@
 package commoninterface.controllers;
 
 import java.util.ArrayList;
-
 import commoninterface.CIBehavior;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
-import commoninterface.entities.Entity;
 import commoninterface.neuralnetwork.CINeuralNetwork;
-import commoninterface.neuralnetwork.inputs.CINNInput;
 import commoninterface.neuralnetwork.outputs.CINNOutput;
 import commoninterface.utils.CIArguments;
 
@@ -18,10 +15,15 @@ public class ControllerCIBehavior extends CIBehavior {
 	private ArrayList<String> outputsNames;
 	private ArrayList<Double[]> inputs;
 	private ArrayList<Double[]> outputs;
+	private CIArguments args;
 	
 	public ControllerCIBehavior(CIArguments args, RobotCI robot) {
 		super(args, robot);
-		
+		this.args = args;
+	}
+	
+	@Override
+	public void start() {
 		inputsNames = new ArrayList<String>();
 		outputsNames = new ArrayList<String>();
 		inputs = new ArrayList<Double[]>();

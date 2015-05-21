@@ -1,7 +1,6 @@
 package main;
 
 import gui.panels.map.MapPanel;
-
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Scanner;
-
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -19,11 +17,9 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-
 import commoninterface.AquaticDroneCI;
 import commoninterface.entities.Entity;
 import commoninterface.entities.GeoFence;
@@ -35,7 +31,6 @@ import commoninterface.utils.jcoord.LatLon;
 public class LogVisualizer extends JFrame {
 	
 	private static String FOLDER = "logs";
-//	private Graph graph;
 	private MapPanel map;
 	private JSlider slider;
 	private ArrayList<LogData> allData;
@@ -43,6 +38,8 @@ public class LogVisualizer extends JFrame {
 	private PlayThread playThread;
 	private JLabel currentStepLabel;
 	private DateTimeFormatter hourFormatter = DateTimeFormat.forPattern("HH:mm:ss.SS");
+	private String IPforEntities = "1";
+	private int lastIncrementStep = 0;
 	
 	public static void main(String[] args) {
 		new LogVisualizer();
@@ -57,18 +54,14 @@ public class LogVisualizer extends JFrame {
 			playThread = new PlayThread();
 			playThread.start();
 		
-//			graph = new Graph();
 			map = new MapPanel();
 			
 			setLayout(new BorderLayout());
 			
 			add(map,BorderLayout.CENTER);
-//			add(graph, BorderLayout.EAST);
 			
 			slider = new JSlider(0,allData.size());
 			slider.setValue(0);
-//			slider.setMajorTickSpacing(100);
-//			slider.setMinorTickSpacing(10);
 			slider.setPaintTicks(true);
 			slider.setPaintLabels(true);
 			
@@ -129,7 +122,6 @@ public class LogVisualizer extends JFrame {
 	}
 	
 	private void moveTo(int step) {
-//		graph.clear();
 		
 		if(step > allData.size()){
 			playThread.pause();
@@ -139,28 +131,17 @@ public class LogVisualizer extends JFrame {
 		currentStep = step;
 		map.clearHistory();
 		
-//		graph.setShowLast(1000);
-		
-//		Double[] leftData = new Double[step];
-//		Double[] rightData = new Double[step];
-		
 		for(int i = 0 ; i < step ; i++) {
 			LogData d = allData.get(i);
 			
-//			leftData[i] = d.leftSpeed;
-//			rightData[i] = d.rightSpeed;
 			map.displayData(new RobotLocation(d.ip, d.latLon, d.compassOrientation, d.droneType));
 			
-			if(d.entities != null) {
+			if(d.entities != null && d.ip.equals(IPforEntities)) {
 				map.replaceEntities(d.entities);
 			}
 		}
 		
 		updateCurrentStepLabel();
-//		graph.addDataList(leftData);
-//		graph.addDataList(rightData);
-//		graph.addLegend("Left Motor");
-//		graph.addLegend("Right Motor");
 		
 	}
 	
@@ -171,15 +152,22 @@ public class LogVisualizer extends JFrame {
 			return;
 		}
 		
-		currentStep++;
-		LogData d = allData.get(currentStep);
-		
-		map.displayData(new RobotLocation(d.ip, d.latLon, d.compassOrientation, d.droneType));
-		
-		if(d.entities != null) {
-			map.replaceEntities(d.entities);
+		if(lastIncrementStep == currentStep) {
+			currentStep++;
+			slider.setValue(currentStep);
+			LogData d = allData.get(currentStep);
+			
+			map.displayData(new RobotLocation(d.ip, d.latLon, d.compassOrientation, d.droneType));
+			
+			if(d.entities != null && d.ip.equals(IPforEntities)) {
+				map.replaceEntities(d.entities);
+			}
+			updateCurrentStepLabel();
+		} else {
+			moveTo(currentStep);
 		}
-		updateCurrentStepLabel();
+		
+		lastIncrementStep = currentStep;
 	}
 	
 	private ArrayList<LogData> readFile() throws IOException {
@@ -241,7 +229,7 @@ public class LogVisualizer extends JFrame {
 							
 							d.leftSpeed = left;
 							d.rightSpeed = right;
-						
+							
 						} catch(Exception e){}
 						
 						d.droneType = AquaticDroneCI.DroneType.valueOf(sl.next());
@@ -252,6 +240,8 @@ public class LogVisualizer extends JFrame {
 						
 						d.entities = new ArrayList<Entity>();
 						d.entities.addAll(currentEntities);
+						
+						d.file = file;
 						
 						data.add(d);
 					
@@ -348,11 +338,13 @@ public class LogVisualizer extends JFrame {
 	
 	private void updateCurrentStepLabel() {
 		
-		LogData d = allData.get(currentStep);
-		
-		String text = "Step: "+currentStep+"/"+allData.size();
-		text+="\t Time: "+d.date.toString(hourFormatter)+" ("+(1/playThread.getMultiplier())+"x)";
-		currentStepLabel.setText(text);
+		if(currentStep < allData.size()) {
+			LogData d = allData.get(currentStep);
+			
+			String text = "Step: "+currentStep+"/"+allData.size();
+			text+="\t Time: "+d.date.toString(hourFormatter)+" ("+(1/playThread.getMultiplier())+"x)";
+			currentStepLabel.setText(text);
+		}
 	}
 	
 	private long compareTimeWithNextStep() {
@@ -377,8 +369,10 @@ public class LogVisualizer extends JFrame {
 			while(true) {
 				
 				try {
-					if(!play)
-						wait();
+					synchronized(this) {
+						if(!play)
+							wait();
+					}
 					
 					incrementPlay();
 					
@@ -434,6 +428,7 @@ public class LogVisualizer extends JFrame {
 	
 	public class LogData implements Comparable<LogData>{
 		String time;
+		String file;
 		String ip;
 		int timestep;
 		LatLon latLon;

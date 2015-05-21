@@ -15,4 +15,9 @@ public abstract class GeoEntity extends Entity {
 		return latLon;
 	}
 
+	public String getLogMessage() {
+		String str = getLatLon().getLat()+" "+getLatLon().getLon();
+		return "entity added "+getClass().getSimpleName()+" "+getName()+" "+str;
+	}
+
 }

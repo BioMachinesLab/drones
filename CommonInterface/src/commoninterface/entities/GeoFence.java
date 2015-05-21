@@ -47,5 +47,14 @@ public class GeoFence extends Entity {
 		
 		return geoFences;
 	}
+
+	public String getLogMessage() {
+		String str = "";
+		
+		for(Waypoint w : getWaypoints())
+			str+= w.getLatLon().getLat()+" "+w.getLatLon().getLon()+" ";
+		
+		return "entity added "+getClass().getSimpleName()+" "+getName()+" "+getWaypoints().size()+" "+str;
+	}
 	
 }
