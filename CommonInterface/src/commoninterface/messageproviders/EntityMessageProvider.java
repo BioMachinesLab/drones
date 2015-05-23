@@ -34,7 +34,7 @@ public class EntityMessageProvider implements MessageProvider{
 			if(e instanceof GeoEntity) {
 				GeoEntity ge = (GeoEntity)e;
 				String str = ge.getLatLon().getLat()+" "+ge.getLatLon().getLon();
-				log("entity added"+e.getClass().getSimpleName()+" "+e.getName()+" "+str);
+				log("entity added "+e.getClass().getSimpleName()+" "+e.getName()+" "+str);
 			}
 			
 			if(e instanceof Waypoint && robot instanceof AquaticDroneCI) {

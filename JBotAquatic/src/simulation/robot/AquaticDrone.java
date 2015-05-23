@@ -100,6 +100,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		
 		sensors.add(new CompassSensor(simulator, sensors.size()+1, this, args));
 		actuators.add(new PropellersActuator(simulator, actuators.size()+1, args));
+		log("IP "+getNetworkAddress());
 	}
 	
 	@Override

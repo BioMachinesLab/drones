@@ -84,11 +84,11 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 		addShutdownHooks();
 
-		initIO(args.get("io"));
+		initIO(args.get("--io"));
 		initMessageProviders();
 		initConnections();
 		
-		configureArguments(args.get("general"));
+		configureArguments(args.get("--general"));
 		
 		messageHandler = new ControllerMessageHandler(this);
 		messageHandler.start();
@@ -221,6 +221,8 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			broadcastHandler = new RealBroadcastHandler(this, broadcastMessages);
 
 			initMessages += "[INIT] MotorConnectionListener: ok\n";
+			
+			log("IP "+getNetworkAddress());
 
 		} catch (IOException e) {
 			initMessages += "[INIT] Unable to start Network Connection Listeners! ("

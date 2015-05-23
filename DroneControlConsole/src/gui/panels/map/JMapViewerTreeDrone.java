@@ -161,19 +161,15 @@ public class JMapViewerTreeDrone extends JPanel{
         tree.getModel().addTreeModelListener(new TreeModelListener() {
             @Override
             public void treeNodesChanged(final TreeModelEvent e) {
-//                repaint();
             }
             @Override
             public void treeNodesInserted(TreeModelEvent arg0) {
-                // TODO Auto-generated method stub
             }
             @Override
             public void treeNodesRemoved(TreeModelEvent arg0) {
-                // TODO Auto-generated method stub
             }
             @Override
             public void treeStructureChanged(TreeModelEvent arg0) {
-                // TODO Auto-generated method stub
             }
         });
     }

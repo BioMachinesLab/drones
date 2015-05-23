@@ -1,31 +1,48 @@
 package main;
 
-import gui.Graph;
 import gui.panels.map.MapPanel;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.Scanner;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import commoninterface.AquaticDroneCI;
+import commoninterface.entities.Entity;
+import commoninterface.entities.GeoFence;
+import commoninterface.entities.ObstacleLocation;
 import commoninterface.entities.RobotLocation;
+import commoninterface.entities.Waypoint;
 import commoninterface.utils.jcoord.LatLon;
 
 public class LogVisualizer extends JFrame {
 	
-	private String file = "../JBotAquatic/selected_logs/success_1drone_07_05_2015/logs/values_6-5-2015_15-51-27.6.log";
-//	private String file = "../JBotAquatic/logs/22_04_2015/values_09-04-2015_01-17-56.log";
-	private Graph graph;
+	private static String FOLDER = "logs";
+//	private Graph graph;
 	private MapPanel map;
 	private JSlider slider;
-	private ArrayList<LogData> data;
+	private ArrayList<LogData> allData;
+	private int currentStep = 0;
+	private PlayThread playThread;
+	private JLabel currentStepLabel;
+	private DateTimeFormatter hourFormatter = DateTimeFormat.forPattern("HH:mm:ss.SS");
 	
 	public static void main(String[] args) {
 		new LogVisualizer();
@@ -34,33 +51,74 @@ public class LogVisualizer extends JFrame {
 	public LogVisualizer() {
 		
 		try {
-			data = readFile();
+			allData = readFile();
+			Collections.sort(allData);
+			
+			playThread = new PlayThread();
+			playThread.start();
 		
-			graph = new Graph();
+//			graph = new Graph();
 			map = new MapPanel();
 			
 			setLayout(new BorderLayout());
 			
-			add(map,BorderLayout.WEST);
-			add(graph, BorderLayout.CENTER);
+			add(map,BorderLayout.CENTER);
+//			add(graph, BorderLayout.EAST);
 			
-			slider = new JSlider(0,data.size());
+			slider = new JSlider(0,allData.size());
 			slider.setValue(0);
-			slider.setMajorTickSpacing(100);
-			slider.setMinorTickSpacing(10);
+//			slider.setMajorTickSpacing(100);
+//			slider.setMinorTickSpacing(10);
 			slider.setPaintTicks(true);
 			slider.setPaintLabels(true);
 			
 			slider.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
+					currentStep = slider.getValue();
 					slider.setToolTipText(""+slider.getValue());
-					moveTo(slider.getValue());
+					if(!playThread.isPlaying())
+						moveTo(slider.getValue());
 				}
 			});
 			
-			add(slider, BorderLayout.SOUTH);
+			JButton playButton = new JButton("Play/Pause");
+			playButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					playThread.toggle();
+				}
+			});
 			
-			setSize(1500, 800);
+			currentStepLabel = new JLabel();
+			updateCurrentStepLabel();
+			
+			JButton slower = new JButton("Speed --");
+			slower.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					playThread.playSlower();
+				}
+			});
+			
+			JButton faster = new JButton("Speed ++");
+			faster.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					playThread.playFaster();
+				}
+			});
+			
+			JPanel controlsPanel = new JPanel(new BorderLayout());
+			JPanel buttonsPanel = new JPanel();
+			
+			buttonsPanel.add(slower);
+			buttonsPanel.add(playButton);
+			buttonsPanel.add(faster);
+			
+			controlsPanel.add(currentStepLabel, BorderLayout.NORTH);
+			controlsPanel.add(slider, BorderLayout.CENTER);
+			controlsPanel.add(buttonsPanel, BorderLayout.SOUTH);
+			
+			add(controlsPanel,BorderLayout.SOUTH);
+			
+			setSize(800, 800);
 			setVisible(true);
 			setLocationRelativeTo(null);
 			setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -71,85 +129,312 @@ public class LogVisualizer extends JFrame {
 	}
 	
 	private void moveTo(int step) {
-		graph.clear();
+//		graph.clear();
+		
+		if(step > allData.size()){
+			playThread.pause();
+			return;
+		}
+		
+		currentStep = step;
 		map.clearHistory();
 		
-		graph.setShowLast(1000);
+//		graph.setShowLast(1000);
 		
-		Double[] leftData = new Double[step];
-		Double[] rightData = new Double[step];
+//		Double[] leftData = new Double[step];
+//		Double[] rightData = new Double[step];
 		
 		for(int i = 0 ; i < step ; i++) {
-			leftData[i] = data.get(i).leftSpeed;
-			rightData[i] = data.get(i).rightSpeed;
-			map.displayData(new RobotLocation("robot", data.get(i).latLon, data.get(i).compassOrientation, data.get(i).droneType));
+			LogData d = allData.get(i);
+			
+//			leftData[i] = d.leftSpeed;
+//			rightData[i] = d.rightSpeed;
+			map.displayData(new RobotLocation(d.ip, d.latLon, d.compassOrientation, d.droneType));
+			
+			if(d.entities != null) {
+				map.replaceEntities(d.entities);
+			}
 		}
-		graph.addDataList(leftData);
-		graph.addDataList(rightData);
-		graph.addLegend("Left Motor");
-		graph.addLegend("Right Motor");
+		
+		updateCurrentStepLabel();
+//		graph.addDataList(leftData);
+//		graph.addDataList(rightData);
+//		graph.addLegend("Left Motor");
+//		graph.addLegend("Right Motor");
 		
 	}
 	
+	private void incrementPlay() {
+		
+		if(currentStep + 1 > allData.size()){
+			playThread.pause();
+			return;
+		}
+		
+		currentStep++;
+		LogData d = allData.get(currentStep);
+		
+		map.displayData(new RobotLocation(d.ip, d.latLon, d.compassOrientation, d.droneType));
+		
+		if(d.entities != null) {
+			map.replaceEntities(d.entities);
+		}
+		updateCurrentStepLabel();
+	}
+	
 	private ArrayList<LogData> readFile() throws IOException {
-		Scanner s = new Scanner(new File(file));
 		
-		String lastComment = "";
-		ArrayList<LogData> data = new  ArrayList<LogData>();
+		File folder = new File(FOLDER);
 		
-		int step = 0;
+		ArrayList<LogData> result = new ArrayList<LogData>();
 		
-		while(s.hasNext()) {
-			String l = s.nextLine();
+		DateTimeFormatter dtf = DateTimeFormat.forPattern("dd-MM-yyyy_HH:mm:ss.SS");
+		
+		for(String file : folder.list()) {
 			
-			if(!l.startsWith("[") && !l.startsWith("#") && !l.trim().isEmpty()) {
+			System.out.println(file);
+			
+			if(!file.contains(".log"))
+				continue;
+		
+			Scanner s = new Scanner(new File(FOLDER+"/"+file));
+			
+			String lastComment = "";
+			ArrayList<LogData> data = new  ArrayList<LogData>();
+			
+			int step = 0;
+			
+			String ip = "";
+			
+			ArrayList<Entity> currentEntities = new ArrayList<Entity>();
+			
+			while(s.hasNext()) {
+				String l = s.nextLine();
 				
-				Scanner sl = new Scanner(l);
+				if(!l.startsWith("[") && !l.startsWith("#") && !l.trim().isEmpty()) {
+					
+					Scanner sl = new Scanner(l);
+					
+					try {
+					
+						LogData d = new LogData();
+						
+						d.time = sl.next();
+						
+						double lat = sl.nextDouble();
+						double lon = sl.nextDouble();
+						
+						d.latLon = new LatLon(lat,lon);
+						
+						d.GPSorientation = sl.nextDouble();
+						d.compassOrientation = sl.nextDouble();
+						d.GPSspeed = sl.nextDouble();
+						
+						String dateStr = sl.next();
+						
+						try {
+							
+							d.date = dtf.parseDateTime(dateStr);
+						
+							double left = sl.nextDouble();
+							double right = sl.nextDouble();
+							
+							d.leftSpeed = left;
+							d.rightSpeed = right;
+						
+						} catch(Exception e){}
+						
+						d.droneType = AquaticDroneCI.DroneType.valueOf(sl.next());
+						
+						d.lastComment = lastComment;
+						
+						d.timestep = step++;
+						
+						d.entities = new ArrayList<Entity>();
+						d.entities.addAll(currentEntities);
+						
+						data.add(d);
+					
+					}catch(Exception e){
+						System.out.println(l);
+						e.printStackTrace();
+					}
+					
+					sl.close();
+					
+				} else if(l.startsWith("#")){
+					
+					if(l.startsWith("#entity")) {
+						handleEntity(l,currentEntities);
+					} if(l.startsWith("#IP")) {
+						ip = l.replace("#IP ", "").trim();
+					} else
+						lastComment = l.substring(1);
+				}
+			}
+			
+			System.out.println(step);
+			
+			if(!ip.isEmpty()) {
 				
-				try {
+				for(LogData d : data)
+					d.ip = ip;
 				
-					LogData d = new LogData();
-					
-					d.time = sl.next();
-					
-					double lat = sl.nextDouble();
-					double lon = sl.nextDouble();
-					
-					d.latLon = new LatLon(lat,lon);
-					
-					d.GPSorientation = sl.nextDouble();
-					d.compassOrientation = sl.nextDouble();
-					d.GPSspeed = sl.nextDouble();
-					String date = sl.next();
-					d.leftSpeed = sl.nextDouble();
-					d.rightSpeed = sl.nextDouble();
-					
-					d.droneType = AquaticDroneCI.DroneType.valueOf(sl.next());
-					
-					d.lastComment = lastComment;
-					
-					d.timestep = step++;
-					
-					data.add(d);
+				result.addAll(data);
+			}
+			
+			s.close();
+		}
+		
+		return result;
+	}
+	
+	private void handleEntity(String line, ArrayList<Entity> entities) {
+		Scanner s = new Scanner(line);
+		s.next();//ignore first token
+		
+		String event = s.next();
+		
+		if(event.equals("added")) {
+			
+			String className = s.next();
+			
+			String name = s.next();
+			
+			if(className.equals(GeoFence.class.getSimpleName())) {
 				
-				}catch(Exception e){}
+				GeoFence fence = new GeoFence(name);
 				
-				sl.close();
+				int number = s.nextInt();
 				
-			} else if(l.startsWith("#")){
-				lastComment = l.substring(1);
+				for(int i = 0 ; i < number ; i++) {
+					double lat = s.nextDouble();
+					double lon = s.nextDouble();
+					fence.addWaypoint(new LatLon(lat,lon));					
+				}
+				entities.add(fence);
+			} else if(className.equals(Waypoint.class.getSimpleName())) {
+				
+				double lat = s.nextDouble();
+				double lon = s.nextDouble();
+				Waypoint wp = new Waypoint(name, new LatLon(lat,lon));
+				entities.remove(wp);
+				entities.add(wp);
+				
+			} else if(className.equals(ObstacleLocation.class.getSimpleName())) {
+				
+				double lat = s.nextDouble();
+				double lon = s.nextDouble();
+				
+				double radius = s.nextDouble();
+				entities.add(new ObstacleLocation(name, new LatLon(lat,lon),radius));
+			}
+			
+		} else if(event.equals("removed")) {
+			
+			String name = s.next();
+			
+			Iterator<Entity> i = entities.iterator();
+			while(i.hasNext()) {
+				if(i.next().getName().equals(name)) {
+					i.remove();
+					break;
+				}
 			}
 		}
 		
 		s.close();
-		
-		System.out.println(data.size());
-		
-		return data;
 	}
 	
-	public class LogData {
+	private void updateCurrentStepLabel() {
+		
+		LogData d = allData.get(currentStep);
+		
+		String text = "Step: "+currentStep+"/"+allData.size();
+		text+="\t Time: "+d.date.toString(hourFormatter)+" ("+(1/playThread.getMultiplier())+"x)";
+		currentStepLabel.setText(text);
+	}
+	
+	private long compareTimeWithNextStep() {
+		
+		if(currentStep + 1 < allData.size()) {
+			DateTime d1 = allData.get(currentStep).date;
+			DateTime d2 = allData.get(currentStep + 1).date;
+			return d2.getMillis() - d1.getMillis();
+		}
+		
+		return 0;
+	}
+	
+	public class PlayThread extends Thread {
+		
+		private boolean play = false;
+		private double multiplier = 1.0;
+		
+		@Override
+		public void run() {
+			
+			while(true) {
+				
+				try {
+					if(!play)
+						wait();
+					
+					incrementPlay();
+					
+					long time = (long)(compareTimeWithNextStep()*multiplier);
+					
+					if(time > 1000)
+						time = 1000;
+					
+					Thread.sleep(time);
+					
+				} catch(Exception e){}
+			}
+		}
+		
+		public synchronized void play() {
+			play = true;
+			notify();
+		}
+		
+		public void toggle() {
+			if(play)
+				pause();
+			else
+				play();
+		}
+		
+		public void pause() {
+			play = false;
+		}
+		
+		public void playFaster() {
+			multiplier*=0.5;
+			updateCurrentStepLabel();
+			interrupt();
+		}
+		
+		public void playSlower() {
+			if(multiplier < Math.pow(2, 4)) {
+				multiplier*=2;
+				updateCurrentStepLabel();
+				interrupt();
+			}
+		}
+		
+		public boolean isPlaying() {
+			return play;
+		}
+		
+		public double getMultiplier() {
+			return multiplier;
+		}
+	}
+	
+	public class LogData implements Comparable<LogData>{
 		String time;
+		String ip;
 		int timestep;
 		LatLon latLon;
 		double GPSorientation;
@@ -157,8 +442,15 @@ public class LogVisualizer extends JFrame {
 		double GPSspeed;
 		double leftSpeed;
 		double rightSpeed;
+		DateTime date;
 		String lastComment;
 		AquaticDroneCI.DroneType droneType;
+		ArrayList<Entity> entities = null;
+		
+		@Override
+		public int compareTo(LogData o) {
+			return date.compareTo(o.date);
+		}
 	}
 
 }
