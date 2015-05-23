@@ -3,6 +3,7 @@ package gui;
 import gui.panels.BatteryPanel;
 import gui.panels.CompassPanel;
 import gui.panels.GPSPanel;
+import gui.panels.ServerPanel;
 import gui.panels.SystemInfoPanel;
 import gui.panels.map.MapPanel;
 
@@ -19,12 +20,13 @@ import main.DroneControlConsole;
 
 public class DroneGUI extends RobotGUI {
 	private static final long serialVersionUID = 1835233364751980805L;
-	
+
 	private GPSPanel gpsPanel;
 	private SystemInfoPanel sysInfoPanel;
 	private CompassPanel compassPanel;
 	private BatteryPanel batteryPanel;
 	private MapPanel mapPanel;
+	private ServerPanel serverPanel;
 
 	public DroneGUI(DroneControlConsole console) {
 		this.console = console;
@@ -106,6 +108,10 @@ public class DroneGUI extends RobotGUI {
 		// Messages
 		leftPanel.add(msgPanel, BorderLayout.CENTER);
 
+		// Mobile Application Server
+		serverPanel=new ServerPanel(this);
+		leftPanel.add(serverPanel, BorderLayout.SOUTH);
+
 		add(leftPanel, BorderLayout.WEST);
 	}
 
@@ -129,6 +135,5 @@ public class DroneGUI extends RobotGUI {
 	public MapPanel getMapPanel() {
 		return mapPanel;
 	}
-
 
 }

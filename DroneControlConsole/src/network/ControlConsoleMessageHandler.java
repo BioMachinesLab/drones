@@ -33,7 +33,7 @@ public abstract class ControlConsoleMessageHandler extends MessageHandler {
 			
 			return message;
 		} else if (message instanceof BehaviorMessage) {
-			(console.getGUI()).getBehaviorsPanel().displayData((BehaviorMessage) message);
+			(console.getGUI()).getCommandPanel().displayData((BehaviorMessage) message);
 			
 			if(updateDronesSet){
 				((DroneControlConsole) console).getDronesSet().getDrone(message.getSenderIPAddr()).setBehaviour(((BehaviorMessage) message));

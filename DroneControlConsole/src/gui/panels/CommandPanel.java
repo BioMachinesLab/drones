@@ -34,130 +34,135 @@ import commoninterface.network.messages.LogMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.ClassLoadHelper;
+import java.awt.Font;
 
-public class CommandPanel extends UpdatePanel{
-	
-	private static String CONTROLLERS_FOLDER = "controllers"; 
-	
+public class CommandPanel extends UpdatePanel {
+
+	private static String CONTROLLERS_FOLDER = "controllers";
+
 	private UpdateThread thread;
 	private JLabel statusMessage;
 	private BehaviorMessage currentMessage;
 	private JTextArea config;
-	private RobotGUI gui; 
+	private RobotGUI gui;
 	private boolean dronePanel = false;
 	private JFrame neuralActivationsWindow;
-	
+
+	private ArrayList<String> availableBehaviors = new ArrayList<String>();
+	private ArrayList<String> availableControllers = new ArrayList<String>();
+
 	/*
-	 * author: @miguelduarte42
-	 * This has to be this way because some behaviors are specific to the RaspberryController,
-	 * and this project cannot include RaspberryController because of PI4J.
+	 * author: @miguelduarte42 This has to be this way because some behaviors
+	 * are specific to the RaspberryController, and this project cannot include
+	 * RaspberryController because of PI4J.
 	 */
-	private String[] hardcodedClasses = new String[]{"CalibrationCIBehavior"};
-	
+	private String[] hardcodedClasses = new String[] { "CalibrationCIBehavior" };
+
 	public CommandPanel(RobotGUI gui) {
-		
-		if(gui instanceof DroneGUI)
+
+		if (gui instanceof DroneGUI)
 			dronePanel = true;
-		
+
 		this.gui = gui;
-		
+
 		initNeuralActivationsWindow();
-		
+
 		setBorder(BorderFactory.createTitledBorder("Commands"));
-		
+
 		setLayout(new BorderLayout());
-		
+
 		JPanel topPanel = new JPanel(new BorderLayout());
-		
+
 		JPanel comboBoxes = new JPanel(new BorderLayout());
-		
+
 		JComboBox<String> behaviors = new JComboBox<String>();
-		behaviors.setPreferredSize(new Dimension(20,20));
+		behaviors.setPreferredSize(new Dimension(20, 20));
 		populateBehaviors(behaviors);
 		comboBoxes.add(behaviors, BorderLayout.NORTH);
-		
+
 		JComboBox<String> controllers = new JComboBox<String>();
-		controllers.setPreferredSize(new Dimension(20,20));
+		controllers.setPreferredSize(new Dimension(20, 20));
 		populateControllers(controllers);
 		comboBoxes.add(controllers, BorderLayout.SOUTH);
-		
-		controllers.addActionListener (new ActionListener () {
-		    public void actionPerformed(ActionEvent e) {
-		        loadController((String)controllers.getSelectedItem());
-		    }
+
+		controllers.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				loadController((String) controllers.getSelectedItem());
+			}
 		});
-		
-		topPanel.add(comboBoxes,BorderLayout.NORTH);
-		
+
+		topPanel.add(comboBoxes, BorderLayout.NORTH);
+
 		JButton start = new JButton("Start");
 		JButton stop = new JButton("Stop");
 		JButton deploy = new JButton("Deploy");
 		JButton stopAll = new JButton("Stop All");
-		
+
 		start.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				statusMessage((String)behaviors.getSelectedItem(), true);
+				statusMessage((String) behaviors.getSelectedItem(), true);
 			}
 		});
-		
+
 		stop.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				statusMessage((String)behaviors.getSelectedItem(), false);
+				statusMessage((String) behaviors.getSelectedItem(), false);
 			}
 		});
-		
+
 		deploy.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				deployBehavior((String)behaviors.getSelectedItem(), true);
+				deployBehavior((String) behaviors.getSelectedItem(), true);
 			}
 		});
-		
+
 		stopAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				deployBehavior((String)behaviors.getSelectedItem(), false);
+				deployBehavior((String) behaviors.getSelectedItem(), false);
 			}
 		});
-		
+
 		JTextField logMessage = new JTextField();
 		JButton sendLog = new JButton("Send Log");
-		
+
 		sendLog.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				deployLog(logMessage.getText().trim());
 			}
 		});
-		
-		JPanel buttons = new JPanel(new GridLayout(dronePanel ? 4 : 3,2));
+
+		JPanel buttons = new JPanel(new GridLayout(dronePanel ? 4 : 3, 2));
 		buttons.add(start);
 		buttons.add(stop);
 		buttons.add(deploy);
 		buttons.add(stopAll);
 		buttons.add(logMessage);
 		buttons.add(sendLog);
-		
-		if(dronePanel) {
-			
+
+		if (dronePanel) {
+
 			JButton entitiesButton = new JButton("Deploy Entities");
-			
+
 			buttons.add(entitiesButton);
-			
+
 			entitiesButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					deployEntities();
 				}
 			});
 		}
-		
+
 		topPanel.add(buttons, BorderLayout.SOUTH);
-		
-		config = new JTextArea(10,10);
+
+		config = new JTextArea(7, 8);
+		config.setFont(new Font("Monospaced", Font.PLAIN, 11));
 		JScrollPane scroll = new JScrollPane(config);
-		
-		topPanel.add(scroll,BorderLayout.CENTER);
-		
+
+		topPanel.add(scroll, BorderLayout.CENTER);
+
 		statusMessage = new JLabel("");
-		statusMessage.setPreferredSize(new Dimension(10,20));
-		
+		statusMessage.setPreferredSize(new Dimension(10, 20));
+
 		JButton plotButton = new JButton("Plot Neural Activations");
 		plotButton.addActionListener(new ActionListener() {
 			@Override
@@ -165,7 +170,7 @@ public class CommandPanel extends UpdatePanel{
 				neuralActivationsWindow.setVisible(true);
 			}
 		});
-		
+
 		add(topPanel, BorderLayout.NORTH);
 		add(plotButton);
 		add(statusMessage, BorderLayout.SOUTH);
@@ -175,79 +180,90 @@ public class CommandPanel extends UpdatePanel{
 		neuralActivationsWindow = new JFrame("Neural Network Activations");
 		neuralActivationsWindow.setSize(950, 600);
 		neuralActivationsWindow.setLocationRelativeTo(gui);
-		neuralActivationsWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		neuralActivationsWindow
+				.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	}
-	
+
 	private synchronized void statusMessage(String className, boolean status) {
 		setText("");
-		
-		CIArguments translatedArgs = new CIArguments(config.getText().replaceAll("\\s+",""),true);
-		
-		if(status)
-			currentMessage = new BehaviorMessage(className, translatedArgs.getCompleteArgumentString(), status);
+
+		CIArguments translatedArgs = new CIArguments(config.getText()
+				.replaceAll("\\s+", ""), true);
+
+		if (status)
+			currentMessage = new BehaviorMessage(className,
+					translatedArgs.getCompleteArgumentString(), status);
 		else
 			currentMessage = new BehaviorMessage(className, "", status);
-		
+
 		notifyAll();
 	}
-	
+
 	private void deployBehavior(String className, boolean status) {
-		CIArguments translatedArgs = new CIArguments(config.getText().replaceAll("\\s+",""),true);
+		CIArguments translatedArgs = new CIArguments(config.getText()
+				.replaceAll("\\s+", ""), true);
 		BehaviorMessage m;
-		
-		if(status)
-			m = new BehaviorMessage(className, translatedArgs.getCompleteArgumentString(), status);
+
+		if (status)
+			m = new BehaviorMessage(className,
+					translatedArgs.getCompleteArgumentString(), status);
 		else
 			m = new BehaviorMessage(className, "", status);
-		
+
 		deploy(m);
 	}
-	
+
 	private void deployEntities() {
-		DroneGUI droneGUI = (DroneGUI)gui;
+		DroneGUI droneGUI = (DroneGUI) gui;
 		LinkedList<Entity> entities = droneGUI.getMapPanel().getEntities();
 		EntitiesMessage m = new EntitiesMessage(entities);
 		deploy(m);
 	}
-	
+
 	private void deployLog(String msg) {
 		LogMessage m = new LogMessage(msg);
 		deploy(m);
 	}
-	
+
 	private synchronized void deploy(Message m) {
 		setText("Deploying...");
-		
-		new CommandSender(m, gui.getConnectionPanel().getCurrentAddresses(), this).start();
+
+		new CommandSender(m, gui.getConnectionPanel().getCurrentAddresses(),
+				this).start();
 	}
-	
+
 	public void setText(String text) {
 		statusMessage.setText(text);
 	}
-	
+
 	private void populateBehaviors(JComboBox<String> list) {
-		ArrayList<Class<?>> classes = ClassLoadHelper.findRelatedClasses(CIBehavior.class);
-		for(Class<?> c : classes) {
+		ArrayList<Class<?>> classes = ClassLoadHelper
+				.findRelatedClasses(CIBehavior.class);
+		for (Class<?> c : classes) {
 			list.addItem(c.getSimpleName());
+			availableBehaviors.add(c.getSimpleName());
 		}
-		
-		for(String s : hardcodedClasses)
+
+		for (String s : hardcodedClasses) {
 			list.addItem(s);
+			availableBehaviors.add(s);
+		}
 	}
-	
+
 	private void populateControllers(JComboBox<String> list) {
 		list.addItem("");
-		
+
 		File controllersFolder = new File(CONTROLLERS_FOLDER);
-		
-		if(controllersFolder.exists() && controllersFolder.isDirectory()) {
-			for(String s : controllersFolder.list()) {
-				if(s.endsWith(".conf"))
+
+		if (controllersFolder.exists() && controllersFolder.isDirectory()) {
+			for (String s : controllersFolder.list()) {
+				if (s.endsWith(".conf"))
 					list.addItem(s);
+				availableControllers.add(s);
 			}
 		}
 	}
-	
+
 	public BehaviorMessage getCurrentMessage() {
 		BehaviorMessage result = currentMessage;
 		currentMessage = null;
@@ -261,49 +277,62 @@ public class CommandPanel extends UpdatePanel{
 
 	@Override
 	public synchronized void threadWait() {
-		while(currentMessage == null) {
+		while (currentMessage == null) {
 			try {
 				wait();
-			} catch(Exception e){}
+			} catch (Exception e) {
+			}
 		}
 	}
-	
+
 	@Override
 	public long getSleepTime() {
 		return 0;
 	}
-	
+
 	public JFrame getNeuralActivationsWindow() {
 		return neuralActivationsWindow;
 	}
 
 	public void displayData(BehaviorMessage message) {
-		String result = message.getSelectedBehavior()+": ";
-		result+= message.getSelectedStatus() ? "start" : "stop";
-		
+		String result = message.getSelectedBehavior() + ": ";
+		result += message.getSelectedStatus() ? "start" : "stop";
+
 		setText(result);
 	}
-	
+
 	private void loadController(String file) {
-		
-		if(!file.isEmpty()) {
-			File f = new File(CONTROLLERS_FOLDER+"/"+file);
-			
-			if(f.exists()) {
+
+		if (!file.isEmpty()) {
+			File f = new File(CONTROLLERS_FOLDER + "/" + file);
+
+			if (f.exists()) {
+				Scanner s = null;
 				try {
-					Scanner s = new Scanner(f);
+					s = new Scanner(f);
 					String result = "";
-					
-					while(s.hasNextLine())
-						result+=s.nextLine()+"\n";
-					
+
+					while (s.hasNextLine())
+						result += s.nextLine() + "\n";
+
 					config.setText(result);
-				} catch(IOException e) {
+				} catch (IOException e) {
 					e.printStackTrace();
+				} finally {
+					if (s != null)
+						s.close();
 				}
 			}
 		} else {
 			config.setText("");
 		}
+	}
+
+	public ArrayList<String> getAvailableBehaviors() {
+		return availableBehaviors;
+	}
+
+	public ArrayList<String> getAvailableControllers() {
+		return availableControllers;
 	}
 }
