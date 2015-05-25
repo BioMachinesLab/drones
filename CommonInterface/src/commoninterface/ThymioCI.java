@@ -15,6 +15,13 @@ public interface ThymioCI extends RobotCI {
 	public List<Short> getInfraredSensorsReadings();
 	
 	/**
+	 * Get the readings from the Raspberry Pi Camera
+	 * 
+	 * @return the readings of the picamera
+	 */
+	public double[] getCameraReadings();
+	
+	/**
 	 * Get the virtual position of the thymio
 	 * 
 	 * @return virtual x and y of the thymio

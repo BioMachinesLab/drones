@@ -293,6 +293,12 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 	public List<Short> getInfraredSensorsReadings() {
 		return (List<Short>) ioManager.getProximitySensorsReadings();
 	}
+	
+	@Override
+	public double[] getCameraReadings() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	@Override
 	public double getTimeSinceStart() {
