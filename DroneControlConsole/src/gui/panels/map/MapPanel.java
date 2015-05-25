@@ -53,7 +53,6 @@ import commoninterface.utils.jcoord.LatLon;
 public class MapPanel extends UpdatePanel {
 	
 	private static final long serialVersionUID = 1L;
-	private static int OBSTACLE_RADIUS = 2;
 	private static int POSITION_HISTORY = 10;
 
     private JMapViewerTreeDrone treeMap = null;
@@ -411,8 +410,8 @@ public class MapPanel extends UpdatePanel {
 	}
 
 	
-	public LinkedList<Entity> getEntities() {
-		LinkedList<Entity> entities = new LinkedList<>();
+	public ArrayList<Entity> getEntities() {
+		ArrayList<Entity> entities = new ArrayList<Entity>();
 
 		if(!geoFence.getWaypoints().isEmpty())
 			entities.add(geoFence);
@@ -449,7 +448,7 @@ public class MapPanel extends UpdatePanel {
     	map().addMapMarker(m);
     	
     	synchronized(this) {
-    		ObstacleLocation ol = new ObstacleLocation(markerName, new LatLon(c.getLat(),c.getLon()),OBSTACLE_RADIUS);
+    		ObstacleLocation ol = new ObstacleLocation(markerName, new LatLon(c.getLat(),c.getLon()));
     		obstacles.add(ol);
     	}
 		

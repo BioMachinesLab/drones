@@ -23,7 +23,7 @@ public abstract class RobotGUI extends JFrame {
 	protected void createPanels(){
 		motorsPanel = new MotorsPanel();
 		connectionPanel = new ConnectionPanel(console);
-		commandPanel = new CommandPanel(this);
+		commandPanel = new CommandPanel(console, this);
 		msgPanel = new MessagesPanel();
 		
 		neuralActivationsPanel = new NeuralActivationsPanel();

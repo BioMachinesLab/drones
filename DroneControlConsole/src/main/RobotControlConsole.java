@@ -12,8 +12,11 @@ import network.InformationConnection;
 import network.MotorConnection;
 import network.MotorMessageSender;
 import threads.UpdateThread;
+import utils.BroadcastLogger;
+
 import commoninterface.network.MessageHandler;
 import commoninterface.network.messages.Message;
+
 import dataObjects.ConsoleMotorSpeeds;
 
 public abstract class RobotControlConsole {
@@ -30,12 +33,14 @@ public abstract class RobotControlConsole {
 	protected MotorConnection motorConnection;
 	
 	protected ArrayList<UpdateThread> updateThreads = new ArrayList<UpdateThread>();
-	private boolean connected = false;
+	protected boolean connected = false;
+	protected BroadcastLogger logger;
 	
 	public void setupGamepad() {
 		try {
 			gamePad = new GamePad(this);
 			gamePad.start();
+			
 		} catch(UnsatisfiedLinkError e) {
 			e.printStackTrace();
 		}

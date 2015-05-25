@@ -1,18 +1,19 @@
 package commoninterface.entities;
 
 import java.util.LinkedHashSet;
-
-import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
 import commoninterface.utils.jcoord.LatLon;
 
 public class ObstacleLocation extends GeoEntity{
 	
-	private double radius;
+	private double radius = 2;
 
 	public ObstacleLocation(String name, LatLon latLon, double radius) {
 		super(name, latLon);
 		this.radius = radius;
+	}
+	public ObstacleLocation(String name, LatLon latLon) {
+		super(name, latLon);
 	}
 	
 	public double getRadius() {

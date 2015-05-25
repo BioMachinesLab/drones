@@ -2,8 +2,6 @@ package commoninterface.messageproviders;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
-
 import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
 import commoninterface.entities.Entity;
@@ -28,7 +26,7 @@ public class EntitiesMessageProvider implements MessageProvider{
 		
 		if(m instanceof EntitiesMessage) {
 			EntitiesMessage wm = (EntitiesMessage)m;
-			LinkedList<Entity> entities = wm.getEntities();
+			ArrayList<Entity> entities = wm.getEntities();
 			
 			synchronized(robot.getEntities()) {
 			

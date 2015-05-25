@@ -38,8 +38,8 @@ public class BoundaryEnvironment extends Environment{
 		double dist = distance + distance*rand;
 		
 		for(Robot r : simulator.getRobots()) {
-			double x = dist*2*simulator.getRandom().nextDouble() - dist;
-			double y = dist*2*simulator.getRandom().nextDouble() - dist;
+			double x = (dist*2*simulator.getRandom().nextDouble() - dist)*0.5;
+			double y = (dist*2*simulator.getRandom().nextDouble() - dist)*0.5;
 			r.setPosition(new Vector2d(x, y));
 			r.setOrientation(simulator.getRandom().nextDouble()*Math.PI*2);
 		}

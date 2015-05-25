@@ -12,8 +12,8 @@ import commoninterface.entities.ThymioSharedEntity;
 
 public abstract class BroadcastHandler {
 	
+	public static int PORT = 8888;
 	protected static boolean DEBUG = false;
-	protected static int PORT = 8888;
 	protected static long CLEAN_ENTITIES_TIME = 100; //100 timesteps == 10 seconds
 	protected ArrayList<BroadcastMessage> broadcastMessages;
 	

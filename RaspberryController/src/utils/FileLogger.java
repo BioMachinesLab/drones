@@ -23,12 +23,13 @@ public class FileLogger extends Thread implements RobotLogger {
 	private String fileName = "";
 	private RealAquaticDroneCI drone;
 	private String extraLog = "";
-	private DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("d-M-Y_HH:mm:ss.SS");
+	private DateTimeFormatter fileFormatter = DateTimeFormat.forPattern("dd-MM-YY_HH:mm:ss");
+	private DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("dd-MM-YY_HH:mm:ss.SS");
 	private DateTimeFormatter hourFormatter = DateTimeFormat.forPattern("HH:mm:ss.SS");
 	
 	public FileLogger(RealAquaticDroneCI drone) {
 		this.drone = drone;
-		fileName = new LocalDateTime().toString(dateFormatter);
+		fileName = new LocalDateTime().toString(fileFormatter);
 	}
 	
 	@Override

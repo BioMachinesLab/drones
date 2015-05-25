@@ -11,7 +11,6 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.Scanner;
 
 import javax.swing.BorderFactory;
@@ -24,10 +23,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import main.DroneControlConsole;
+import main.RobotControlConsole;
 import network.CommandSender;
 import threads.UpdateThread;
 import commoninterface.CIBehavior;
 import commoninterface.entities.Entity;
+import commoninterface.network.broadcast.EntitiesBroadcastMessage;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.network.messages.EntitiesMessage;
 import commoninterface.network.messages.LogMessage;
@@ -44,6 +46,7 @@ public class CommandPanel extends UpdatePanel{
 	private BehaviorMessage currentMessage;
 	private JTextArea config;
 	private RobotGUI gui; 
+	private RobotControlConsole console;
 	private boolean dronePanel = false;
 	private JFrame neuralActivationsWindow;
 	
@@ -54,12 +57,15 @@ public class CommandPanel extends UpdatePanel{
 	 */
 	private String[] hardcodedClasses = new String[]{"CalibrationCIBehavior"};
 	
-	public CommandPanel(RobotGUI gui) {
+	public CommandPanel(RobotControlConsole console, RobotGUI gui) {
+		
+		this.console = console;
+		
+		this.gui = gui;
 		
 		if(gui instanceof DroneGUI)
 			dronePanel = true;
 		
-		this.gui = gui;
 		
 		initNeuralActivationsWindow();
 		
@@ -205,9 +211,19 @@ public class CommandPanel extends UpdatePanel{
 	
 	private void deployEntities() {
 		DroneGUI droneGUI = (DroneGUI)gui;
-		LinkedList<Entity> entities = droneGUI.getMapPanel().getEntities();
+		ArrayList<Entity> entities = droneGUI.getMapPanel().getEntities();
 		EntitiesMessage m = new EntitiesMessage(entities);
 		deploy(m);
+		
+		EntitiesBroadcastMessage msg = new EntitiesBroadcastMessage(entities);
+		if(console instanceof DroneControlConsole) {
+			//Messages get lost sometimes!!!
+			for(int j = 0 ; j < 5 ; j++) {
+					(((DroneControlConsole)console).getBroadcastHandler()).sendMessage(msg.encode()[0]);
+				try {Thread.sleep(100);} catch (InterruptedException e) {}
+			}
+		}
+		
 	}
 	
 	private void deployLog(String msg) {
@@ -298,6 +314,8 @@ public class CommandPanel extends UpdatePanel{
 						result+=s.nextLine()+"\n";
 					
 					config.setText(result);
+					
+					s.close();
 				} catch(IOException e) {
 					e.printStackTrace();
 				}

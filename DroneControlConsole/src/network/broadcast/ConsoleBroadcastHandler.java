@@ -7,30 +7,31 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 import main.DroneControlConsole;
 import main.RobotControlConsole;
-
+import commoninterface.entities.Entity;
 import commoninterface.entities.RobotLocation;
 import commoninterface.network.NetworkUtils;
 import commoninterface.network.broadcast.BroadcastMessage;
+import commoninterface.network.broadcast.EntitiesBroadcastMessage;
 import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
 import commoninterface.network.broadcast.PositionBroadcastMessage;
-
 import dataObjects.DroneData;
 import dataObjects.DronesSet;
 
 public class ConsoleBroadcastHandler {
 	
-	private static int PORT = 8888;
-	private static int RETRANSMIT_PORT = 8888+100;
-	private static int BUFFER_LENGTH = 15000;
+	public static int PORT = 8888;
+	public static int BUFFER_LENGTH = 15000;
+	public static int RETRANSMIT_PORT = 8888+100;
 	private BroadcastSender sender;
 	private BroadcastReceiver receiver;
 	private RobotControlConsole console;
 	private String ownAddress;
 	//TODO this has to be true for the mixed experiments to work
-	private boolean retransmit = false;
+	private boolean retransmit = true;
 	
 	public ConsoleBroadcastHandler(RobotControlConsole console) {
 		this.console = console;
@@ -114,7 +115,14 @@ public class ConsoleBroadcastHandler {
 					console.getGUI().getConnectionPanel().newAddress(address);
 					updateDroneData(address, split[0], di);
 				}
-				
+				break;
+			case "ENTITIES":
+				if(!address.equals(ownAddress)) {
+					ArrayList<Entity> entities = EntitiesBroadcastMessage.decode(address, message);
+					if(console instanceof DroneControlConsole) {
+						((DroneGUI)((DroneControlConsole)console).getGUI()).getMapPanel().replaceEntities(entities);
+					}
+				}
 				break;
 			default:
 				System.out.println("Uncategorized message > "+message+" < from "+address);
@@ -186,6 +194,7 @@ public class ConsoleBroadcastHandler {
 					byte[] recvBuf = new byte[BUFFER_LENGTH];
 					DatagramPacket packet = new DatagramPacket(recvBuf,recvBuf.length);
 					socket.receive(packet);
+					
 					String message = new String(packet.getData()).trim();
 					
 //					if(!packet.getAddress().getHostAddress().equals(ownAddress))

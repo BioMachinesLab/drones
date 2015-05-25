@@ -9,12 +9,15 @@ import threads.ConnectionThread;
 import threads.MotorUpdateThread;
 import threads.NetworkActivationsUpdateThread;
 import threads.UpdateThread;
+import utils.BroadcastLogger;
 import commoninterface.network.messages.InformationRequest.MessageType;
 import dataObjects.ConsoleMotorSpeeds;
 import dataObjects.DronesSet;
 
 public class DroneControlConsole extends RobotControlConsole {
+	
 	private DronesSet dronesSet = new DronesSet();
+	private ConsoleBroadcastHandler broadcastHandler;
 	
 	public DroneControlConsole() {
 		try {
@@ -24,7 +27,7 @@ public class DroneControlConsole extends RobotControlConsole {
 			gui = setupGUI();
 			setupGamepad();
 			
-			new ConsoleBroadcastHandler(this);
+			broadcastHandler = new ConsoleBroadcastHandler(this);
 			messageHandler = new DroneConsoleMessageHandler(this);
 			messageHandler.start();
 			
@@ -70,5 +73,9 @@ public class DroneControlConsole extends RobotControlConsole {
 	
 	public DronesSet getDronesSet() {
 		return dronesSet;
+	}
+	
+	public ConsoleBroadcastHandler getBroadcastHandler() {
+		return broadcastHandler;
 	}
 }
