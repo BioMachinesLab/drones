@@ -52,7 +52,7 @@ public class ThymioControlConsole extends RobotControlConsole {
 		updateThreads.add(new UpdateThread(this, ((ThymioGUI)gui).getVirtualPositionPanel(), MessageType.THYMIO_VIRTUAL_POSITION));
 		updateThreads.add(new NetworkActivationsUpdateThread(this, ((ThymioGUI)gui).getNeuralActivationsPanel(), MessageType.NEURAL_ACTIVATIONS));
 		updateThreads.add(new MotorUpdateThread(this, gui.getMotorsPanel()));
-		updateThreads.add(new BehaviorMessageThread(this, gui.getBehaviorsPanel()));
+		updateThreads.add(new BehaviorMessageThread(this, gui.getCommandPanel()));
 		
 		for(UpdateThread t : updateThreads)
 			t.start();

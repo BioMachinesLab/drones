@@ -2,61 +2,155 @@ package network.server;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import commoninterface.RobotCI;
-import commoninterface.network.ConnectionHandler;
-import commoninterface.network.ConnectionListener;
+import main.DroneControlConsole;
 
-public class ServerConnectionListener extends ConnectionListener {
-	private static int SERVER_PORT = 10110;
+public class ServerConnectionListener implements ServerObservated {
+	public static int SERVER_PORT = 10110;
+
+	protected ArrayList<ServerConnectionHandler> connections = new ArrayList<ServerConnectionHandler>();
+	protected int port;
+	protected ServerSocket serverSocket = null;
 	private AtomicBoolean enable = new AtomicBoolean();
+	private DroneControlConsole console;
+	private ServerObserver observer;
+	private MobileApplicationServer server;
 
-	public ServerConnectionListener(RobotCI controller) throws IOException {
-		super(controller, SERVER_PORT);
+	public ServerConnectionListener(DroneControlConsole console) {
+		this.console = console;
 	}
 
-	@Override
-	protected void createHandler(Socket s) {
-		ConnectionHandler conn = new ServerConnectionHandler(s, robot, this);
-		addConnection(conn);
-		conn.start();
+	protected void addConnection(ServerConnectionHandler conn) {
+		connections.add(conn);
 	}
 
-	@Override
-	public void run() {
-		try {
+	public void closeConnections() {
+		if (!connections.isEmpty()) {
 			System.out
-					.println("[SERVER CONNECTION LISTENER] Connection Handler Initialized on "
-							+ InetAddress.getLocalHost().getHostAddress() + ":" + port);
-			System.out
-					.println("[SERVER CONNECTION LISTENER] Waiting for connection requests!");
-			while (enable.get()) {
-				Socket socket = serverSocket.accept();
-				createHandler(socket);
+					.println("[SERVER CONNECTION LISTENER] Closing Connections!");
+			for (ServerConnectionHandler conn : connections) {
+				if (!conn.getSocket().isClosed())
+					conn.closeConnection();
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
+		}
+	}
+
+	public void stopServer() {
+		if (server != null) {
+			enable.set(false);
+
+			closeConnections();
 			try {
 				serverSocket.close();
 			} catch (IOException e) {
 				System.out
 						.println("[SERVER CONNECTION LISTENER] Unable to close server socket.... there was an open socket?");
 			}
+
+			observer.setOfflineServer();
+			server = null;
+			connections.clear();
 		}
 	}
-	
-	@Override
-	public synchronized void start() {
-		enable.set(true);
-		super.start();
-	};
-	
-	@Override
-	public void shutdown() {
-		enable.set(false);
-		super.shutdown();
+
+	public synchronized void removeConnection(ServerConnectionHandler conn) {
+		connections.remove(conn);
+	}
+
+	public ArrayList<ServerConnectionHandler> getConnections() {
+		return connections;
+	}
+
+	public void startServer() {
+		startServer(SERVER_PORT);
+	}
+
+	public void startServer(int port) {
+		if (server == null) {
+			try {
+				this.port = port;
+				serverSocket = new ServerSocket(port);
+				enable.set(true);
+
+				server = new MobileApplicationServer(this);
+				server.start();
+			} catch (IOException e) {
+				System.err.println(e.getMessage());
+				observer.setOfflineServer();
+			}
+		}
+	}
+
+	public DroneControlConsole getConsole() {
+		return console;
+	}
+
+	public void setObserver(ServerObserver observer) {
+		this.observer = observer;
+	}
+
+	public boolean isRunning() {
+		return enable.get();
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public int getClientQuantity() {
+		return connections.size();
+	}
+
+	class MobileApplicationServer extends Thread {
+		private ServerConnectionListener serverConnectionListener;
+
+		public MobileApplicationServer(
+				ServerConnectionListener serverConnectionListener) {
+			this.serverConnectionListener = serverConnectionListener;
+		}
+
+		@Override
+		public void run() {
+			try {
+				System.out
+						.println("[SERVER CONNECTION LISTENER] Server initialized on "
+								+ InetAddress.getLocalHost().getHostAddress()
+								+ ":" + port);
+				System.out
+						.println("[SERVER CONNECTION LISTENER] Waiting for connection requests!");
+
+				observer.setOnlineServer();
+
+				while (enable.get()) {
+					Socket socket = serverSocket.accept();
+					createHandler(socket);
+				}
+				observer.setOfflineServer();
+			} catch (IOException e) {
+				observer.setOfflineServer();
+				if (!e.getMessage().equals("socket closed")) {
+					observer.setMessage("Error on server");
+					System.err.println(e.getMessage());
+				}
+			} finally {
+				try {
+					serverSocket.close();
+				} catch (IOException e) {
+					System.out
+							.println("[SERVER CONNECTION LISTENER] Unable to close server socket.... there was an open socket?");
+				}
+			}
+		}
+
+		protected void createHandler(Socket s) {
+			ServerConnectionHandler conn = new ServerConnectionHandler(s,
+					serverConnectionListener);
+			addConnection(conn);
+			conn.start();
+		}
 	}
 }

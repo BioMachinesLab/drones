@@ -18,6 +18,7 @@ import org.joda.time.LocalDateTime;
 import commoninterface.network.messages.SystemStatusMessage;
 
 import threads.UpdateThread;
+import java.awt.Font;
 
 public class MessagesPanel extends UpdatePanel {
 	private static final long serialVersionUID = 5958293256864880036L;
@@ -34,7 +35,8 @@ public class MessagesPanel extends UpdatePanel {
 		setBorder(BorderFactory.createTitledBorder("Drone Messages"));
 		setLayout(new BorderLayout());
 		
-		messageArea = new JTextArea(10,1);
+		messageArea = new JTextArea(5,1);
+		messageArea.setFont(new Font("Monospaced", Font.PLAIN, 11));
 		messageArea.setEditable(false);
 
 		scrollPane = new JScrollPane(messageArea);
