@@ -4,15 +4,15 @@ import gui.DroneGUI;
 import gui.RobotGUI;
 import network.DroneConsoleMessageHandler;
 import network.broadcast.ConsoleBroadcastHandler;
-import network.server.ServerConnectionHandler;
 import network.server.ServerConnectionListener;
 import threads.BehaviorMessageThread;
 import threads.ConnectionThread;
 import threads.MotorUpdateThread;
 import threads.NetworkActivationsUpdateThread;
 import threads.UpdateThread;
-import utils.BroadcastLogger;
+
 import commoninterface.network.messages.InformationRequest.MessageType;
+
 import dataObjects.ConsoleMotorSpeeds;
 import dataObjects.DronesSet;
 
