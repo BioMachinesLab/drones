@@ -32,9 +32,9 @@ public class ConsoleBroadcastHandler {
 	private RobotControlConsole console;
 	private String ownAddress;
 
-	//TODO this has to be true for the mixed experiments to work
-	private boolean retransmit = true;
-	
+	// TODO this has to be true for the mixed experiments to work
+	private boolean retransmit = false;
+
 	public ConsoleBroadcastHandler(RobotControlConsole console) {
 		this.console = console;
 		receiver = new BroadcastReceiver();
@@ -107,53 +107,57 @@ public class ConsoleBroadcastHandler {
 				e.printStackTrace();
 			}
 		}
-		
+
 		public void shutdown() {
-			if(socket != null)
+			if (socket != null)
 				socket.close();
-			if(retransmitSocket != null)
+			if (retransmitSocket != null)
 				retransmitSocket.close();
 		}
 	}
-	
+
 	public void newBroadcastMessage(String address, String message) {
-		
+
 		String[] split = message.split(BroadcastMessage.MESSAGE_SEPARATOR);
-		switch(split[0]) {
-			case "HEARTBEAT":
-				if(!address.equals(ownAddress)) {
-					long timeElapsed = HeartbeatBroadcastMessage.decode(message);
-					console.getGUI().getConnectionPanel().newAddress(address);
-					updateDroneData(address, split[0], timeElapsed);
+		switch (split[0]) {
+		case "HEARTBEAT":
+			if (!address.equals(ownAddress)) {
+				long timeElapsed = HeartbeatBroadcastMessage.decode(message);
+				console.getGUI().getConnectionPanel().newAddress(address);
+				updateDroneData(address, split[0], timeElapsed);
+			}
+			break;
+		case "GPS":
+			RobotLocation di = PositionBroadcastMessage
+					.decode(address, message);
+			if (di != null) {
+				if (console.getGUI() instanceof DroneGUI) {
+					((DroneGUI) console.getGUI()).getMapPanel().displayData(di);
 				}
-				break;
-			case "GPS":
-				RobotLocation di = PositionBroadcastMessage.decode(address, message);
-				if(di != null) {
-					if(console.getGUI() instanceof DroneGUI) {
-						((DroneGUI)console.getGUI()).getMapPanel().displayData(di);
-					}
-					console.getGUI().getConnectionPanel().newAddress(address);
-					updateDroneData(address, split[0], di);
+				console.getGUI().getConnectionPanel().newAddress(address);
+				updateDroneData(address, split[0], di);
+			}
+			break;
+		case "ENTITIES":
+			if (!address.equals(ownAddress)) {
+				ArrayList<Entity> entities = EntitiesBroadcastMessage.decode(
+						address, message);
+				if (console instanceof DroneControlConsole) {
+					((DroneGUI) ((DroneControlConsole) console).getGUI())
+							.getMapPanel().replaceEntities(entities);
 				}
-				break;
-			case "ENTITIES":
-				if(!address.equals(ownAddress)) {
-					ArrayList<Entity> entities = EntitiesBroadcastMessage.decode(address, message);
-					if(console instanceof DroneControlConsole) {
-						((DroneGUI)((DroneControlConsole)console).getGUI()).getMapPanel().replaceEntities(entities);
-					}
-				}
-				break;
-			default:
-				System.out.println("Uncategorized message > "+message+" < from "+address);
+			}
+			break;
+		default:
+			System.out.println("Uncategorized message > " + message
+					+ " < from " + address);
 		}
-		
+
 		if (retransmit)
 			sender.retransmit(message);
-		
+
 	}
-		
+
 	private void updateDroneData(String address, String msgType, Object obj) {
 		if (console instanceof DroneControlConsole) {
 			try {
@@ -163,7 +167,9 @@ public class ConsoleBroadcastHandler {
 				boolean exists = false;
 
 				if (!dronesSet.existsDrone(address)) {
-					drone = new DroneData(InetAddress.getByName(address));
+					drone = new DroneData();
+					drone.setIpAddr(InetAddress.getByName(address));
+					drone.setName("<no name>");
 				} else {
 					drone = dronesSet.getDrone(address);
 					exists = true;
@@ -219,7 +225,7 @@ public class ConsoleBroadcastHandler {
 					DatagramPacket packet = new DatagramPacket(recvBuf,
 							recvBuf.length);
 					socket.receive(packet);
-					
+
 					String message = new String(packet.getData()).trim();
 
 					// if(!packet.getAddress().getHostAddress().equals(ownAddress))

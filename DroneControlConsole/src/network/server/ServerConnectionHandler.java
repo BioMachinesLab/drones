@@ -1,16 +1,16 @@
 package network.server;
 
-import gui.DroneGUI;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.ArrayList;
 
-import commoninterface.RobotCI;
-import commoninterface.network.ConnectionHandler;
-import commoninterface.network.ConnectionListener;
+import network.server.messages.DronesInformationRequest;
+import network.server.messages.DronesInformationResponse;
+import network.server.messages.ServerMessage;
+import network.server.messages.ServerMessage.MessageType;
 import commoninterface.network.messages.Message;
 import dataObjects.DroneData;
 import dataObjects.ServerStatusData;
@@ -54,19 +54,50 @@ public class ServerConnectionHandler extends Thread {
 		}
 	}
 
-	private void processData(Object data) {
-		// if(data.type == Server informations request)
-		ServerStatusData serverStatus = new ServerStatusData();
-		serverStatus.setAvailableBehaviors(connectionListener.getConsole().getGUI().getCommandPanel().getAvailableBehaviors());
-		serverStatus.setAvailableControllers(connectionListener.getConsole().getGUI().getCommandPanel().getAvailableControllers());
-		serverStatus.setConnectedClientsQty(connectionListener.getClientQuantity());
-		// send to client (serverStatus)
-		
-		// if(data.type == All Drones data information)
-		// send to client (connectionListener.getConsole().getDronesSet());
-		
-		// if(data.type == Specific Drones data information)
-		// send to client (connectionListener.getConsole().getDronesSet().getDrone(data.getIpAddr));
+	private void processData(Object data) throws ClassNotFoundException {
+		if (data instanceof ServerMessage) {
+			switch (((ServerMessage) data).getMessageType()) {
+			case DRONES_INFORMATION_REQUEST:
+				DronesInformationResponse response1 = new DronesInformationResponse(
+						MessageType.DRONES_INFORMATION_RESPONSE);
+				ArrayList<DroneData> dronesIdentification = (connectionListener
+						.getConsole().getDronesSet()
+						.getDrones(((DronesInformationRequest) data)
+								.getDroneIdentification()));
+				response1.setDronesData(dronesIdentification);
+				// send to client (response1);
+				break;
+
+			case CONECTED_DRONE_INFORMATIONS_REQUEST:
+				DronesInformationResponse response2 = new DronesInformationResponse(
+						MessageType.CONECTED_DRONE_INFORMATIONS_RESPONSE);
+
+				response2.setDronesData(connectionListener.getConsole()
+						.getDronesSet().getDronesSet());
+				// send to client (response2);
+				break;
+
+			case SERVER_INFORMATIONS_REQUEST:
+				ServerStatusData serverStatus = new ServerStatusData();
+				serverStatus.setAvailableBehaviors(connectionListener
+						.getConsole().getGUI().getCommandPanel()
+						.getAvailableBehaviors());
+				serverStatus.setAvailableControllers(connectionListener
+						.getConsole().getGUI().getCommandPanel()
+						.getAvailableControllers());
+				serverStatus.setConnectedClientsQty(connectionListener
+						.getClientQuantity());
+				// send to client (serverStatus)
+				break;
+			default:
+				System.out.println("Received message with type: "
+						+ ((ServerMessage) data).getMessageType());
+				break;
+			}
+		} else {
+			throw new ClassNotFoundException(
+					"Unable to process the receied object");
+		}
 	}
 
 	protected void shutdownHandler() {
