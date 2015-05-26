@@ -23,7 +23,7 @@ public class DroneConsoleMessageHandler extends ControlConsoleMessageHandler {
 			return null;
 		} else if (message instanceof GPSMessage) {
 			((DroneGUI)console.getGUI()).getGPSPanel().displayData(((GPSMessage) message).getGPSData());
-			((DroneControlConsole) console).getDronesSet().getDrone(message.getSenderIPAddr()).setGPSData(((GPSMessage) message).getGPSData());
+			//((DroneControlConsole) console).getDronesSet().getDrone(message.getSenderIPAddr()).setGPSData(((GPSMessage) message).getGPSData());
 			
 		} else if (message instanceof CompassMessage) {
 			((DroneGUI)console.getGUI()).getCompassPanel().displayData((CompassMessage) message);

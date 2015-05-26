@@ -1,13 +1,18 @@
 package dataObjects;
 
+import java.io.Serializable;
 import java.net.InetAddress;
+
+import network.server.BehaviorServerMessage;
+import network.server.GPSServerData;
+import network.server.NeuralActivationsServerMessage;
 
 import commoninterface.dataobjects.GPSData;
 import commoninterface.entities.RobotLocation;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.network.messages.NeuralActivationsMessage;
 
-public class DroneData {
+public class DroneData implements Serializable {
 	/*
 	 * Variables
 	 */
@@ -20,12 +25,12 @@ public class DroneData {
 	// Telemetry Informations
 	private RobotLocation robotLocation;
 	private double compassOrientation;
-	private GPSData gpsData;
+	private GPSServerData gpsData;
 
 	// System informations and status
 	private String systemStatusMessage = "";
-	private BehaviorMessage behaviourMessage;
-	private NeuralActivationsMessage neuralActivations;
+	private BehaviorServerMessage behaviourMessage;
+	private NeuralActivationsServerMessage neuralActivations;
 
 	/*
 	 * Methods
@@ -74,14 +79,14 @@ public class DroneData {
 	}
 
 	public BehaviorMessage getBehaviour() {
-		return behaviourMessage;
+		return behaviourMessage.getAsBehaviorMessage();
 	}
 
 	public NeuralActivationsMessage getNeuralActivations() {
-		return neuralActivations;
+		return neuralActivations.getAsNeuralActivationsMessage();
 	}
 
-	public GPSData getGPSData() {
+	public GPSServerData getGPSData() {
 		return gpsData;
 	}
 
@@ -112,24 +117,33 @@ public class DroneData {
 	}
 
 	public void setBehaviour(BehaviorMessage behaviourMessage) {
-		this.behaviourMessage = behaviourMessage;
+		this.behaviourMessage = new BehaviorServerMessage(behaviourMessage);
 	}
 
 	public void setNeuralActivations(NeuralActivationsMessage neuralActivations) {
-		this.neuralActivations = neuralActivations;
+		this.neuralActivations = new NeuralActivationsServerMessage(
+				neuralActivations);
 	}
 
-	public void setGPSData(GPSData gpsData) {
-		this.gpsData = gpsData;
+	public void setGPSData(GPSServerData gpsData) {
+		//this.gpsData = new GPSServerData();
+		
+		//this.gpsData
+		//this.gpsData = gpsData;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof DroneData) {
-			return ((DroneData) obj).getIpAddr().equals(ipAddr)
-					&& ((DroneData) obj).getName().equals(name);
+			DroneData drone = ((DroneData) obj);
+			return (drone.getIpAddr() == null && ipAddr == null || drone
+					.getIpAddr().equals(ipAddr))
+					&& (drone.getName() == null && name == null || drone
+							.getName().equals(name));
+
 		} else {
 			return false;
 		}
 	}
+
 }
