@@ -27,23 +27,6 @@ public class DroneData {
 	private BehaviorMessage behaviourMessage;
 	private NeuralActivationsMessage neuralActivations;
 
-	/*
-	 * Methods
-	 */
-	// Constructors
-	public DroneData(InetAddress ipAddr, String name) {
-		this.ipAddr = ipAddr;
-		this.name = name;
-	}
-
-	public DroneData(String name) {
-		this(null, name);
-	}
-
-	public DroneData(InetAddress ipAddr) {
-		this(ipAddr, "<no name>");
-	}
-
 	// Getters
 	public String getName() {
 		return name;
@@ -77,10 +60,19 @@ public class DroneData {
 		return neuralActivations;
 	}
 
-	public GPSData getGPSData(){
+	public GPSData getGPSData() {
 		return gpsData;
 	}
+
 	// Setters
+	public void setIpAddr(InetAddress ipAddr) {
+		this.ipAddr = ipAddr;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public void setTimeSinceLastHeartbeat(long timeSinceLastHeartbeat) {
 		this.timeSinceLastHeartbeat = timeSinceLastHeartbeat;
 	}
@@ -106,7 +98,17 @@ public class DroneData {
 		this.neuralActivations = neuralActivations;
 	}
 
-	public void setGPSData(GPSData gpsData){
-		this.gpsData=gpsData;
+	public void setGPSData(GPSData gpsData) {
+		this.gpsData = gpsData;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof DroneData) {
+			return ((DroneData) obj).getIpAddr().equals(ipAddr)
+					&& ((DroneData) obj).getName().equals(name);
+		} else {
+			return false;
+		}
 	}
 }
