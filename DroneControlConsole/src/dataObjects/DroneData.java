@@ -125,13 +125,6 @@ public class DroneData implements Serializable {
 				neuralActivations);
 	}
 
-	public void setGPSData(GPSServerData gpsData) {
-		//this.gpsData = new GPSServerData();
-		
-		//this.gpsData
-		//this.gpsData = gpsData;
-	}
-
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof DroneData) {

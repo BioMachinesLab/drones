@@ -9,7 +9,7 @@ import commoninterface.network.NetworkUtils;
 import commoninterface.utils.Nmea0183ToDecimalConverter;
 
 public class GPSServerData implements Serializable {
-	private final static int NUMBER_OF_PARAMETERS = 15;
+	private final static int NUMBER_OF_PARAMETERS = 16;
 	private long PRINT_NUMBER = 0;
 
 	private String address;
@@ -66,7 +66,7 @@ public class GPSServerData implements Serializable {
 	public int getNumberOfParameters() {
 		return NUMBER_OF_PARAMETERS;
 	}
-
+	
 	// Getters And Setters
 	public String getLatitude() {
 		return latitude;
@@ -252,5 +252,27 @@ public class GPSServerData implements Serializable {
 	public String getDroneAddress() {
 		return address;
 	}
-	
+
+	public void chewData(GPSData gpsData) {
+		this.latitudeDecimal = gpsData.getLatitudeDecimal();
+		this.longitudeDecimal = gpsData.getLongitudeDecimal();
+		this.latitude = gpsData.getLatitude();
+		this.longitude = gpsData.getLongitude();
+		this.altitude = gpsData.getAltitude();
+
+		this.fix = gpsData.isFix();
+		this.fixType = gpsData.getFixType();
+		this.numberOfSatellitesInView = gpsData.getNumberOfSatellitesInView();
+		this.numberOfSatellitesInUse = gpsData.getNumberOfSatellitesInUse();
+		this.HDOP = gpsData.getHDOP();
+		this.PDOP = gpsData.getPDOP();
+		this.VDOP = gpsData.getVDOP();
+		this.GPSSourceType = gpsData.getGPSSourceType();
+
+		this.groundSpeedKnts = gpsData.getGroundSpeedKnts();
+		this.groundSpeedKmh = gpsData.getGroundSpeedKmh();
+		this.orientation = gpsData.getOrientation();
+
+		this.date = gpsData.getDate().toString();
+	}
 }
