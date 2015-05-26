@@ -27,6 +27,27 @@ public class DroneData {
 	private BehaviorMessage behaviourMessage;
 	private NeuralActivationsMessage neuralActivations;
 
+	/*
+	 * Methods
+	 */
+	// Constructors
+	public DroneData(InetAddress ipAddr, String name) {
+		this.ipAddr = ipAddr;
+		this.name = name;
+	}
+
+	public DroneData(String name) {
+		this(null, name);
+	}
+
+	public DroneData(InetAddress ipAddr) {
+		this(ipAddr, "<no name>");
+	}
+
+	public DroneData() {
+		this(null, "<no name>");
+	}
+
 	// Getters
 	public String getName() {
 		return name;

@@ -10,8 +10,10 @@ import java.util.ArrayList;
 import network.server.messages.DronesInformationRequest;
 import network.server.messages.DronesInformationResponse;
 import network.server.messages.ServerMessage;
-import network.server.messages.ServerMessage.MessageType;
+import network.server.messages.ServerStatusResponse;
+
 import commoninterface.network.messages.Message;
+
 import dataObjects.DroneData;
 import dataObjects.ServerStatusData;
 
@@ -58,23 +60,13 @@ public class ServerConnectionHandler extends Thread {
 		if (data instanceof ServerMessage) {
 			switch (((ServerMessage) data).getMessageType()) {
 			case DRONES_INFORMATION_REQUEST:
-				DronesInformationResponse response1 = new DronesInformationResponse(
-						MessageType.DRONES_INFORMATION_RESPONSE);
+				DronesInformationResponse responseA = new DronesInformationResponse();
 				ArrayList<DroneData> dronesIdentification = (connectionListener
 						.getConsole().getDronesSet()
 						.getDrones(((DronesInformationRequest) data)
 								.getDroneIdentification()));
-				response1.setDronesData(dronesIdentification);
-				// send to client (response1);
-				break;
-
-			case CONECTED_DRONE_INFORMATIONS_REQUEST:
-				DronesInformationResponse response2 = new DronesInformationResponse(
-						MessageType.CONECTED_DRONE_INFORMATIONS_RESPONSE);
-
-				response2.setDronesData(connectionListener.getConsole()
-						.getDronesSet().getDronesSet());
-				// send to client (response2);
+				responseA.setDronesData(dronesIdentification);
+				// send to client (responseA);
 				break;
 
 			case SERVER_INFORMATIONS_REQUEST:
@@ -87,7 +79,9 @@ public class ServerConnectionHandler extends Thread {
 						.getAvailableControllers());
 				serverStatus.setConnectedClientsQty(connectionListener
 						.getClientQuantity());
-				// send to client (serverStatus)
+				ServerStatusResponse responseB = new ServerStatusResponse();
+				responseB.setServerStatusData(serverStatus);
+				// send to client (responseB)
 				break;
 			default:
 				System.out.println("Received message with type: "

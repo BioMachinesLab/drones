@@ -32,7 +32,7 @@ public class DronesSet {
 
 	public ArrayList<DroneData> getDrones(
 			ArrayList<String> dronesIdentifications) {
-		if (!dronesIdentifications.isEmpty()) {
+		if (dronesIdentifications != null && !dronesIdentifications.isEmpty()) {
 			ArrayList<DroneData> dronesData = new ArrayList<DroneData>();
 
 			for (String str : dronesIdentifications) {
@@ -41,7 +41,7 @@ public class DronesSet {
 
 			return dronesData;
 		} else {
-			return null;
+			return new ArrayList<DroneData>(dronesSet.values());
 		}
 	}
 }
