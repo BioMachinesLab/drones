@@ -7,8 +7,8 @@ public class GPSMessage extends Message {
 	private static final long serialVersionUID = -7540879836376808265L;
 	private GPSData gpsData;
 
-	public GPSMessage(GPSData gpsData) {
-		super();
+	public GPSMessage(GPSData gpsData, String senderHostname) {
+		super(senderHostname);
 		this.gpsData = gpsData;
 	}
 

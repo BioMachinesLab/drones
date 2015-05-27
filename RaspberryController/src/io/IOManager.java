@@ -92,7 +92,7 @@ public class IOManager {
 	private void initInputs(CIArguments args) {
 		if (args.getFlagIsTrue("compass") && args.getFlagIsTrue("i2c")) {
 			// Compass Module Init
-			compassModule = new I2CCompassLSM303Input(i2cBus);
+			compassModule = new I2CCompassLSM303Input(i2cBus, drone);
 			initMessages += "[INIT] I2CCompassLSM303Input: "
 					+ (compassModule.isAvailable() ? "ok" : "not ok!") + "\n";
 
@@ -105,7 +105,7 @@ public class IOManager {
 
 		if (args.getFlagIsTrue("battery") && args.getFlagIsTrue("i2c")) {
 			// Battery Module Init
-			batteryManager = new I2CBatteryModuleInput(i2cBus);
+			batteryManager = new I2CBatteryModuleInput(i2cBus, drone);
 			initMessages += "[INIT] BatteryManager: "
 					+ (batteryManager.isAvailable() ? "ok" : "not ok!") + "\n";
 			if (batteryManager.isAvailable()) {
@@ -117,7 +117,7 @@ public class IOManager {
 		if (args.getFlagIsTrue("gps")) {
 			try {
 				// GPS Module Init
-				gpsModule = new GPSModuleInput();
+				gpsModule = new GPSModuleInput(drone);
 				initMessages += "[INIT] GPSModule: "
 						+ (gpsModule.isAvailable() ? "ok" : "not ok!") + "\n";
 
@@ -286,7 +286,8 @@ public class IOManager {
 
 	public void setMotorSpeeds(double left, double right) {
 		if (motorSpeeds != null)
-			motorSpeeds.setSpeeds(new MotorMessage(left, right));
+			motorSpeeds.setSpeeds(new MotorMessage(left, right, drone
+					.getNetworkAddress()));
 	}
 
 	public void setMotorSpeeds(MotorMessage message) {
@@ -301,5 +302,5 @@ public class IOManager {
 	public DebugLedsOutput getDebugLeds() {
 		return debugLeds;
 	}
-	
+
 }

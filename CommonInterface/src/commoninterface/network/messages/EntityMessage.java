@@ -8,7 +8,8 @@ public class EntityMessage extends Message {
 	private static final long serialVersionUID = 7355614915881468297L;
 	private Entity entity;
 	
-	public EntityMessage(Entity e) {
+	public EntityMessage(Entity e, String senderHostname) {
+		super(senderHostname);
 		this.entity = e;
 	}
 	

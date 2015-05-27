@@ -20,7 +20,7 @@ import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialDataEvent;
 import com.pi4j.io.serial.SerialDataEventListener;
 import com.pi4j.io.serial.SerialFactory;
-
+import commoninterface.RobotCI;
 import commoninterface.dataobjects.GPSData;
 import commoninterface.network.messages.GPSMessage;
 import commoninterface.network.messages.InformationRequest;
@@ -36,6 +36,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 	private final static String FILE_NAME = "/home/pi/RaspberryController/logs/GPSLog_";
 	private boolean localLog = false;
 	private PrintWriter localLogPrintWriterOut;
+	private RobotCI robotCI;
 
 	private final static boolean DEBUG_MODE = false;
 
@@ -67,7 +68,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 	protected boolean available = false;
 	private boolean enable = false;
-	
+
 	private boolean alreadySetDate = false;
 
 	public GPSModuleInput(boolean fake) {
@@ -75,7 +76,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			init();
 	}
 
-	public GPSModuleInput() {
+	public GPSModuleInput(RobotCI robotCI) {
+		this.robotCI = robotCI;
 		init();
 	}
 
@@ -282,14 +284,16 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			System.out
 					.println("[GPS Module] Always locate mode was NOT succefully disabled!");
 		}
-		
+
 		/*
 		 * Enable AIC
 		 */
-		if(enableAIC()){
-			System.out.println("[GPS Module] OK! AIC mode sucessfully activated!");
-		}else{
-			System.out.println("[GPS Module] AIC mode NOT sucessfully activated!");
+		if (enableAIC()) {
+			System.out
+					.println("[GPS Module] OK! AIC mode sucessfully activated!");
+		} else {
+			System.out
+					.println("[GPS Module] AIC mode NOT sucessfully activated!");
 		}
 
 		/*
@@ -354,9 +358,10 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 			if (!available)
 				return new SystemStatusMessage(
-						"[GPSModule] Unable to send GPS data");
+						"[GPSModule] Unable to send GPS data",
+						robotCI.getNetworkAddress());
 
-			return new GPSMessage(getReadings());
+			return new GPSMessage(getReadings(), robotCI.getNetworkAddress());
 		}
 
 		return null;
@@ -449,12 +454,14 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 	}
 
 	public void enableMessagesOnExternalAntenna() throws InterruptedException {
-		// check it here https://github.com/adafruit/Adafruit-GPS-Library/blob/master/Adafruit_GPS.h
+		// check it here
+		// https://github.com/adafruit/Adafruit-GPS-Library/blob/master/Adafruit_GPS.h
 		serialWrite("$PGCMD,33,1*6C\r\n", false);
 	}
 
 	public void disableMessagesOnExternalAntenna() throws InterruptedException {
-		// check it here https://github.com/adafruit/Adafruit-GPS-Library/blob/master/Adafruit_GPS.h
+		// check it here
+		// https://github.com/adafruit/Adafruit-GPS-Library/blob/master/Adafruit_GPS.h
 		serialWrite("$PGCMD,33,0*6D\r\n", false);
 	}
 
@@ -761,17 +768,19 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 							Integer.parseInt(t[0]), Integer.parseInt(t[1]),
 							Integer.parseInt(t[2]), miliseconds);
 					gpsData.setDate(date);
-					
-					if(!alreadySetDate) {
-						DateTimeFormatter f = DateTimeFormat.forPattern("EEE MMM d HH:mm:ss 'UTC' YYYY");
+
+					if (!alreadySetDate) {
+						DateTimeFormatter f = DateTimeFormat
+								.forPattern("EEE MMM d HH:mm:ss 'UTC' YYYY");
 						Runtime.getRuntime()
-						.exec(new String[] {
-								"bash",
-								"-c",
-								"sudo date --set \""+date.toString(f)+"\";" }).waitFor();
+								.exec(new String[] {
+										"bash",
+										"-c",
+										"sudo date --set \"" + date.toString(f)
+												+ "\";" }).waitFor();
 						alreadySetDate = true;
 					}
-					
+
 				} catch (Exception e) {
 					// this part is optional!
 				}

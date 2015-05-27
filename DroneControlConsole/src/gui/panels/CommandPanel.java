@@ -5,11 +5,14 @@ import gui.RobotGUI;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -29,6 +32,7 @@ import network.CommandSender;
 import threads.UpdateThread;
 import commoninterface.CIBehavior;
 import commoninterface.entities.Entity;
+import commoninterface.network.NetworkUtils;
 import commoninterface.network.broadcast.EntitiesBroadcastMessage;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.network.messages.EntitiesMessage;
@@ -36,17 +40,18 @@ import commoninterface.network.messages.LogMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.ClassLoadHelper;
-import java.awt.Font;
 
 public class CommandPanel extends UpdatePanel {
 
 	private static String CONTROLLERS_FOLDER = "controllers";
 
+	private String myHostname = "";
+
 	private UpdateThread thread;
 	private JLabel statusMessage;
 	private BehaviorMessage currentMessage;
 	private JTextArea config;
-	private RobotGUI gui; 
+	private RobotGUI gui;
 	private RobotControlConsole console;
 	private boolean dronePanel = false;
 	private JFrame neuralActivationsWindow;
@@ -59,15 +64,16 @@ public class CommandPanel extends UpdatePanel {
 	 * are specific to the RaspberryController, and this project cannot include
 	 * RaspberryController because of PI4J.
 	 */
-	private String[] hardcodedClasses = new String[]{"CalibrationCIBehavior"};
-	
+	private String[] hardcodedClasses = new String[] { "CalibrationCIBehavior" };
+
 	public CommandPanel(RobotControlConsole console, RobotGUI gui) {
-		
+		updateHostname();
+
 		this.console = console;
-		
+
 		this.gui = gui;
-		
-		if(gui instanceof DroneGUI)
+
+		if (gui instanceof DroneGUI)
 			dronePanel = true;
 		initNeuralActivationsWindow();
 
@@ -196,9 +202,11 @@ public class CommandPanel extends UpdatePanel {
 
 		if (status)
 			currentMessage = new BehaviorMessage(className,
-					translatedArgs.getCompleteArgumentString(), status);
+					translatedArgs.getCompleteArgumentString(), status,
+					myHostname);
 		else
-			currentMessage = new BehaviorMessage(className, "", status);
+			currentMessage = new BehaviorMessage(className, "", status,
+					myHostname);
 
 		notifyAll();
 	}
@@ -210,32 +218,37 @@ public class CommandPanel extends UpdatePanel {
 
 		if (status)
 			m = new BehaviorMessage(className,
-					translatedArgs.getCompleteArgumentString(), status);
+					translatedArgs.getCompleteArgumentString(), status,
+					myHostname);
 		else
-			m = new BehaviorMessage(className, "", status);
+			m = new BehaviorMessage(className, "", status, myHostname);
 
 		deploy(m);
 	}
 
 	private void deployEntities() {
-		DroneGUI droneGUI = (DroneGUI)gui;
+		DroneGUI droneGUI = (DroneGUI) gui;
 		ArrayList<Entity> entities = droneGUI.getMapPanel().getEntities();
-		EntitiesMessage m = new EntitiesMessage(entities);
+		EntitiesMessage m = new EntitiesMessage(entities, myHostname);
 		deploy(m);
-		
+
 		EntitiesBroadcastMessage msg = new EntitiesBroadcastMessage(entities);
-		if(console instanceof DroneControlConsole) {
-			//Messages get lost sometimes!!!
-			for(int j = 0 ; j < 5 ; j++) {
-					(((DroneControlConsole)console).getConsoleBroadcastHandler()).sendMessage(msg.encode()[0]);
-				try {Thread.sleep(100);} catch (InterruptedException e) {}
+		if (console instanceof DroneControlConsole) {
+			// Messages get lost sometimes!!!
+			for (int j = 0; j < 5; j++) {
+				(((DroneControlConsole) console).getConsoleBroadcastHandler())
+						.sendMessage(msg.encode()[0]);
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+				}
 			}
 		}
-		
+
 	}
 
 	private void deployLog(String msg) {
-		LogMessage m = new LogMessage(msg);
+		LogMessage m = new LogMessage(msg, myHostname);
 		deploy(m);
 	}
 
@@ -331,7 +344,7 @@ public class CommandPanel extends UpdatePanel {
 
 					config.setText(result);
 					s.close();
-				} catch(IOException e) {
+				} catch (IOException e) {
 					e.printStackTrace();
 				} finally {
 					if (s != null)
@@ -349,5 +362,9 @@ public class CommandPanel extends UpdatePanel {
 
 	public ArrayList<String> getAvailableControllers() {
 		return availableControllers;
+	}
+
+	public void updateHostname() {
+		myHostname = NetworkUtils.getHostname();
 	}
 }

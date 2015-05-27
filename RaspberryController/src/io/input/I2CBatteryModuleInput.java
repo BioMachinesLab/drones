@@ -3,7 +3,7 @@ package io.input;
 import java.io.IOException;
 
 import com.pi4j.io.i2c.I2CBus;
-
+import commoninterface.RobotCI;
 import commoninterface.dataobjects.BatteryStatus;
 import commoninterface.network.messages.BatteryMessage;
 import commoninterface.network.messages.InformationRequest;
@@ -24,7 +24,7 @@ public class I2CBatteryModuleInput extends I2CInput {
 
 	private final static byte ENABLE_VALUE = (byte) 0xFF;
 	private final static byte DISABLE_VALUE = 0x00;
-	
+
 	public final static int VOLTAGE_MULTIPLIER = 1000;
 	public final static int TEMPERATURE_MULTIPLIER = 100;
 
@@ -35,9 +35,12 @@ public class I2CBatteryModuleInput extends I2CInput {
 	private double[] cellsVoltages;
 	private double batteryTemperature = -1;
 
-	public I2CBatteryModuleInput(I2CBus i2cBus) {
+	private RobotCI robotCI;
+
+	public I2CBatteryModuleInput(I2CBus i2cBus, RobotCI robotCI) {
 		super(i2cBus, ADDR);
 		try {
+			this.robotCI = robotCI;
 			initializeDevice();
 			cellCount = readByte((byte) 0x00);
 
@@ -65,9 +68,11 @@ public class I2CBatteryModuleInput extends I2CInput {
 						InformationRequest.MessageType.BATTERY)) {
 			if (!available) {
 				return new SystemStatusMessage(
-						"[I2CBatteryModuleInput] Unable to send Compass data");
+						"[I2CBatteryModuleInput] Unable to send Compass data",
+						robotCI.getNetworkAddress());
 			}
-			return new BatteryMessage(getReadings());
+			return new BatteryMessage(getReadings(),
+					robotCI.getNetworkAddress());
 		}
 		return null;
 	}

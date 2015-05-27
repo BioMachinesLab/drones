@@ -18,7 +18,7 @@ public class Test {
 			e.printStackTrace();
 		}
 		
-		I2CCompassLSM303Input c = new I2CCompassLSM303Input(i2cBus);
+		I2CCompassLSM303Input c = new I2CCompassLSM303Input(i2cBus,null);
 		
 		if(calibration)
 			c.startCalibration();

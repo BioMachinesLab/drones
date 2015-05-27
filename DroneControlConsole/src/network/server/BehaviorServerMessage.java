@@ -1,13 +1,16 @@
 package network.server;
 
+import commoninterface.network.NetworkUtils;
 import commoninterface.network.messages.BehaviorMessage;
 
 public class BehaviorServerMessage {
 	protected String selectedBehavior;
 	protected boolean selectedStatus = false;
 	protected String args;
+	private String myHostname;
 
 	public BehaviorServerMessage(BehaviorMessage message) {
+		updateHostname();
 		chewData(message);
 	}
 
@@ -40,6 +43,11 @@ public class BehaviorServerMessage {
 	}
 
 	public BehaviorMessage getAsBehaviorMessage() {
-		return new BehaviorMessage(selectedBehavior, args, selectedStatus);
+		return new BehaviorMessage(selectedBehavior, args, selectedStatus,
+				myHostname);
+	}
+
+	private void updateHostname() {
+		myHostname = NetworkUtils.getHostname();
 	}
 }

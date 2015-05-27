@@ -28,7 +28,9 @@ public abstract class ControlConsoleMessageHandler extends MessageHandler {
 			(console.getGUI()).getMessagesPanel().displayData((SystemStatusMessage) message);
 			
 			if(updateDronesSet){
-				((DroneControlConsole) console).getDronesSet().getDrone(message.getSenderIPAddr()).setSystemStatusMessage(((SystemStatusMessage) message).getMessage());
+				System.out.println("sender ip: "+message.getSenderIPAddr());
+				System.out.println("sender hostname: "+message.getSenderHostname());
+				((DroneControlConsole) console).getDronesSet().getDrone(message.getSenderHostname()).setSystemStatusMessage(((SystemStatusMessage) message).getMessage());
 			}
 			
 			return message;
@@ -36,7 +38,7 @@ public abstract class ControlConsoleMessageHandler extends MessageHandler {
 			(console.getGUI()).getCommandPanel().displayData((BehaviorMessage) message);
 			
 			if(updateDronesSet){
-				((DroneControlConsole) console).getDronesSet().getDrone(message.getSenderIPAddr()).setBehaviour(((BehaviorMessage) message));
+				((DroneControlConsole) console).getDronesSet().getDrone(message.getSenderHostname()).setBehaviour(((BehaviorMessage) message));
 			}
 			
 			return message;
@@ -44,7 +46,7 @@ public abstract class ControlConsoleMessageHandler extends MessageHandler {
 			(console.getGUI()).getNeuralActivationsPanel().displayData((NeuralActivationsMessage) message);
 			
 			if(updateDronesSet){
-				((DroneControlConsole) console).getDronesSet().getDrone(message.getSenderIPAddr()).setNeuralActivations(((NeuralActivationsMessage) message));
+				((DroneControlConsole) console).getDronesSet().getDrone(message.getSenderHostname()).setNeuralActivations(((NeuralActivationsMessage) message));
 			}
 			
 			return message;

@@ -6,8 +6,8 @@ public class LogMessage extends Message {
 	private static final long serialVersionUID = 7925900141790370630L;
 	private String log;
 
-	public LogMessage(String log) {
-		super();
+	public LogMessage(String log, String senderHostaname) {
+		super(senderHostaname);
 		this.log = log;
 	}
 	

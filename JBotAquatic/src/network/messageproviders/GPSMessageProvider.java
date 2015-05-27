@@ -30,7 +30,7 @@ public class GPSMessageProvider implements MessageProvider{
 			data.setDate(new LocalDateTime());
 			data.setFix(true);
 			
-			return new GPSMessage(data);
+			return new GPSMessage(data,drone.getNetworkAddress());
 		}
 
 		return null;

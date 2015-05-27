@@ -94,7 +94,7 @@ public class ConnectionHandler extends Thread {
 
 		// controller.processInformationRequest(new
 		// InformationRequest(MessageType.SYSTEM_STATUS), this);
-		sendData(new SystemStatusMessage(robot.getInitMessages()));
+		sendData(new SystemStatusMessage(robot.getInitMessages(),robot.getNetworkAddress()));
 	}
 
 	public synchronized void closeConnection() {

@@ -122,9 +122,12 @@ public class ConsoleBroadcastHandler {
 		switch (split[0]) {
 		case "HEARTBEAT":
 			if (!address.equals(ownAddress)) {
-				long timeElapsed = HeartbeatBroadcastMessage.decode(message);
+				long timeElapsed = Long.parseLong(HeartbeatBroadcastMessage
+						.decode(message)[1]);
 				console.getGUI().getConnectionPanel().newAddress(address);
-				updateDroneData(address, split[0], timeElapsed);
+				updateDroneData(address,
+						HeartbeatBroadcastMessage.decode(message)[2], split[0],
+						timeElapsed);
 			}
 			break;
 		case "GPS":
@@ -135,7 +138,7 @@ public class ConsoleBroadcastHandler {
 					((DroneGUI) console.getGUI()).getMapPanel().displayData(di);
 				}
 				console.getGUI().getConnectionPanel().newAddress(address);
-				updateDroneData(address, split[0], di);
+				updateDroneData(address, di.getName(), split[0], di);
 			}
 			break;
 		case "ENTITIES":
@@ -158,7 +161,8 @@ public class ConsoleBroadcastHandler {
 
 	}
 
-	private void updateDroneData(String address, String msgType, Object obj) {
+	private void updateDroneData(String address, String name, String msgType,
+			Object obj) {
 		if (console instanceof DroneControlConsole) {
 			try {
 				DronesSet dronesSet = ((DroneControlConsole) console)
@@ -166,12 +170,12 @@ public class ConsoleBroadcastHandler {
 				DroneData drone;
 				boolean exists = false;
 
-				if (!dronesSet.existsDrone(address)) {
+				if (!dronesSet.existsDrone(name)) {
 					drone = new DroneData();
 					drone.setIpAddr(InetAddress.getByName(address));
-					drone.setName("<no name>");
+					drone.setName(name);
 				} else {
-					drone = dronesSet.getDrone(address);
+					drone = dronesSet.getDrone(name);
 					exists = true;
 				}
 
@@ -185,7 +189,7 @@ public class ConsoleBroadcastHandler {
 				default:
 					System.out
 							.println("Uncategorized message type to update on drone data, from "
-									+ address);
+									+ name + " at " + address);
 				}
 
 				if (!exists) {

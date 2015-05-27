@@ -12,20 +12,26 @@ public class ThymioVirtualPositionMessageProvider implements MessageProvider {
 	private ThymioCI thymio;
 	private Vector2d unknownPosition;
 	private double unknownOrientation;
-	
+
 	public ThymioVirtualPositionMessageProvider(ThymioCI thymio) {
 		this.thymio = thymio;
 		unknownPosition = new Vector2d(-1, -1);
 		unknownOrientation = 0;
 	}
-	
+
 	@Override
 	public Message getMessage(Message request) {
-		if(request instanceof InformationRequest && ((InformationRequest)request).getMessageTypeQuery().equals(InformationRequest.MessageType.THYMIO_VIRTUAL_POSITION)){
-			if(thymio.getVirtualPosition() != null)
-				return new ThymioVirtualPositionMessage(thymio.getVirtualPosition(), thymio.getVirtualOrientation());
+		if (request instanceof InformationRequest
+				&& ((InformationRequest) request).getMessageTypeQuery().equals(
+						InformationRequest.MessageType.THYMIO_VIRTUAL_POSITION)) {
+			if (thymio.getVirtualPosition() != null)
+				return new ThymioVirtualPositionMessage(
+						thymio.getVirtualPosition(),
+						thymio.getVirtualOrientation(),
+						thymio.getNetworkAddress());
 			else
-				return new ThymioVirtualPositionMessage(unknownPosition, unknownOrientation);
+				return new ThymioVirtualPositionMessage(unknownPosition,
+						unknownOrientation, thymio.getNetworkAddress());
 		}
 		return null;
 	}

@@ -3,6 +3,7 @@ package commoninterface.network;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Enumeration;
 
 public class NetworkUtils {
@@ -71,4 +72,12 @@ public class NetworkUtils {
 		}
 	}
 
+	public static String getHostname() {
+		try {
+			return InetAddress.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			System.err.println(e.getMessage());
+			return null;
+		}
+	}
 }

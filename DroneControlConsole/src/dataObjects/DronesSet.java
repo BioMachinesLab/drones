@@ -4,26 +4,32 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class DronesSet {
-	private HashMap<String, DroneData> dronesSet = new HashMap<>();
+	private HashMap<String, DroneData> dronesSet;
 
+	public DronesSet() {
+		dronesSet = new HashMap<>();
+	}
+	
 	public void addDrone(DroneData drone) {
-		dronesSet.put(drone.getIpAddr().getHostAddress(), drone);
+		dronesSet.put(drone.getName(), drone);
+		System.out.println("[DRONES SET] Added new drone " + drone.getName() + "@"
+				+ drone.getIpAddr().getHostAddress()+" to set");
 	}
 
-	public void removeDrone(String ipAddr) {
-		dronesSet.remove(ipAddr);
+	public void removeDrone(String name) {
+		dronesSet.remove(name);
 	}
 
 	public void removeDrone(DroneData drone) {
-		dronesSet.remove(drone.getIpAddr().getHostAddress(), drone);
+		dronesSet.remove(drone.getName(), drone);
 	}
 
-	public DroneData getDrone(String ipAddr) {
-		return dronesSet.get(ipAddr);
+	public DroneData getDrone(String name) {
+		return dronesSet.get(name);
 	}
 
-	public boolean existsDrone(String ipAddr) {
-		return dronesSet.containsKey(ipAddr);
+	public boolean existsDrone(String name) {
+		return dronesSet.containsKey(name);
 	}
 
 	public ArrayList<DroneData> getDronesSet() {
@@ -31,11 +37,11 @@ public class DronesSet {
 	}
 
 	public ArrayList<DroneData> getDrones(
-			ArrayList<String> dronesIdentifications) {
-		if (dronesIdentifications != null && !dronesIdentifications.isEmpty()) {
+			ArrayList<String> dronesNames) {
+		if (dronesNames != null && !dronesNames.isEmpty()) {
 			ArrayList<DroneData> dronesData = new ArrayList<DroneData>();
 
-			for (String str : dronesIdentifications) {
+			for (String str : dronesNames) {
 				dronesData.add(dronesSet.get(str));
 			}
 

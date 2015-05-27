@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 
 import commoninterface.RobotCI;
@@ -45,8 +46,8 @@ public class ConnectionListener extends Thread {
 			System.out
 					.println("[CONNECTION HANDLER] Waiting for connection requests!");
 			while (true) {
-				Socket socket = serverSocket.accept();
-				createHandler(socket);
+					Socket socket = serverSocket.accept();
+					createHandler(socket);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

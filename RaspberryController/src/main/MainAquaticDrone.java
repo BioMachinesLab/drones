@@ -3,8 +3,6 @@ package main;
 import java.util.HashMap;
 import java.util.Scanner;
 
-import commoninterface.CILogger;
-import commoninterface.CIStdOutLogger;
 import commoninterface.utils.CIArguments;
 import commoninterfaceimpl.RealAquaticDroneCI;
 

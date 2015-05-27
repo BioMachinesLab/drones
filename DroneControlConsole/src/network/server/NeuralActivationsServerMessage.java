@@ -2,6 +2,7 @@ package network.server;
 
 import java.util.ArrayList;
 
+import commoninterface.network.NetworkUtils;
 import commoninterface.network.messages.NeuralActivationsMessage;
 
 public class NeuralActivationsServerMessage {
@@ -9,8 +10,10 @@ public class NeuralActivationsServerMessage {
 	private ArrayList<Double[]> inputsValues;
 	private ArrayList<String> outputsTitles;
 	private ArrayList<Double[]> outputsValues;
+	private String myHostname;
 
 	public NeuralActivationsServerMessage(NeuralActivationsMessage message) {
+		updateHostname();
 		chewData(message);
 	}
 
@@ -43,8 +46,13 @@ public class NeuralActivationsServerMessage {
 		this.outputsTitles = message.getOutputsTitles();
 		this.outputsValues = message.getOutputsValues();
 	}
-	
-	public NeuralActivationsMessage getAsNeuralActivationsMessage(){
-		return new NeuralActivationsMessage(inputsTitles, inputsValues, outputsTitles, outputsValues);
+
+	public NeuralActivationsMessage getAsNeuralActivationsMessage() {
+		return new NeuralActivationsMessage(inputsTitles, inputsValues,
+				outputsTitles, outputsValues, myHostname);
+	}
+
+	private void updateHostname() {
+		myHostname = NetworkUtils.getHostname();
 	}
 }

@@ -7,6 +7,7 @@ import java.util.Scanner;
 
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
+import commoninterface.RobotCI;
 import commoninterface.network.messages.CompassMessage;
 import commoninterface.network.messages.InformationRequest;
 import commoninterface.network.messages.Message;
@@ -38,8 +39,11 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 	private int[] max = { -Integer.MAX_VALUE, -Integer.MAX_VALUE,
 			-Integer.MAX_VALUE };
 
-	public I2CCompassLSM303Input(I2CBus i2cBus) {
+	private RobotCI robotCI;
+	
+	public I2CCompassLSM303Input(I2CBus i2cBus, RobotCI robotCI) {
 		this.i2cBus = i2cBus;
+		this.robotCI = robotCI;
 		configureCompass();
 		readPreviousCalibration();
 	}
@@ -103,9 +107,9 @@ public class I2CCompassLSM303Input extends Thread implements ControllerInput,
 						InformationRequest.MessageType.COMPASS)) {
 			if (!available) {
 				return new SystemStatusMessage(
-						"[I2CompassLSM303] Unable to send Compass data");
+						"[I2CompassLSM303] Unable to send Compass data",robotCI.getNetworkAddress());
 			}
-			return new CompassMessage(getHeadingInDegrees());
+			return new CompassMessage(getHeadingInDegrees(),robotCI.getNetworkAddress());
 		}
 		return null;
 	}
