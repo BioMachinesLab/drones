@@ -7,7 +7,6 @@ import network.server.BehaviorServerMessage;
 import network.server.GPSServerData;
 import network.server.NeuralActivationsServerMessage;
 
-import commoninterface.dataobjects.GPSData;
 import commoninterface.entities.RobotLocation;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.network.messages.NeuralActivationsMessage;
@@ -78,8 +77,8 @@ public class DroneData implements Serializable {
 		return systemStatusMessage;
 	}
 
-	public BehaviorMessage getBehaviour() {
-		return behaviourMessage.getAsBehaviorMessage();
+	public BehaviorServerMessage getBehaviour() {
+		return behaviourMessage;
 	}
 
 	public NeuralActivationsMessage getNeuralActivations() {
@@ -116,13 +115,17 @@ public class DroneData implements Serializable {
 		this.systemStatusMessage = systemStatusMessage;
 	}
 
-	public void setBehaviour(BehaviorMessage behaviourMessage) {
-		this.behaviourMessage = new BehaviorServerMessage(behaviourMessage);
+	public void setBehaviour(BehaviorServerMessage behaviourMessage) {
+		this.behaviourMessage = behaviourMessage;
 	}
 
 	public void setNeuralActivations(NeuralActivationsMessage neuralActivations) {
 		this.neuralActivations = new NeuralActivationsServerMessage(
 				neuralActivations);
+	}
+
+	public void setGPSData(GPSServerData gpsData) {
+		this.gpsData = gpsData;
 	}
 
 	@Override

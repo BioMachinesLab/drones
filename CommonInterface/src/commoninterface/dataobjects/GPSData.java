@@ -4,10 +4,8 @@ import java.io.Serializable;
 
 import org.joda.time.LocalDateTime;
 
-import commoninterface.entities.RobotLocation;
 import commoninterface.network.NetworkUtils;
 import commoninterface.utils.Nmea0183ToDecimalConverter;
-import commoninterface.utils.jcoord.LatLon;
 
 /**
  * Check http://aprs.gids.nl/nmea/ for more informations about the fields

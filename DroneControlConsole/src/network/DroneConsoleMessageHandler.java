@@ -1,8 +1,8 @@
 package network;
 
+import network.server.ServerUtils;
 import gui.DroneGUI;
 import main.DroneControlConsole;
-
 import commoninterface.network.messages.CompassMessage;
 import commoninterface.network.messages.EntityMessage;
 import commoninterface.network.messages.GPSMessage;
@@ -23,7 +23,7 @@ public class DroneConsoleMessageHandler extends ControlConsoleMessageHandler {
 			return null;
 		} else if (message instanceof GPSMessage) {
 			((DroneGUI)console.getGUI()).getGPSPanel().displayData(((GPSMessage) message).getGPSData());
-			((DroneControlConsole) console).getDronesSet().getDrone(message.getSenderIPAddr()).getGPSData().chewData(((GPSMessage) message).getGPSData());
+			((DroneControlConsole) console).getDronesSet().getDrone(message.getSenderIPAddr()).setGPSData(ServerUtils.getAsGGPSServerData(((GPSMessage) message).getGPSData()));
 			
 		} else if (message instanceof CompassMessage) {
 			((DroneGUI)console.getGUI()).getCompassPanel().displayData((CompassMessage) message);

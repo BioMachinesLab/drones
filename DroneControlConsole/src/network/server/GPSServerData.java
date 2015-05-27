@@ -252,27 +252,4 @@ public class GPSServerData implements Serializable {
 	public String getDroneAddress() {
 		return address;
 	}
-
-	public void chewData(GPSData gpsData) {
-		this.latitudeDecimal = gpsData.getLatitudeDecimal();
-		this.longitudeDecimal = gpsData.getLongitudeDecimal();
-		this.latitude = gpsData.getLatitude();
-		this.longitude = gpsData.getLongitude();
-		this.altitude = gpsData.getAltitude();
-
-		this.fix = gpsData.isFix();
-		this.fixType = gpsData.getFixType();
-		this.numberOfSatellitesInView = gpsData.getNumberOfSatellitesInView();
-		this.numberOfSatellitesInUse = gpsData.getNumberOfSatellitesInUse();
-		this.HDOP = gpsData.getHDOP();
-		this.PDOP = gpsData.getPDOP();
-		this.VDOP = gpsData.getVDOP();
-		this.GPSSourceType = gpsData.getGPSSourceType();
-
-		this.groundSpeedKnts = gpsData.getGroundSpeedKnts();
-		this.groundSpeedKmh = gpsData.getGroundSpeedKmh();
-		this.orientation = gpsData.getOrientation();
-
-		this.date = gpsData.getDate().toString();
-	}
 }
