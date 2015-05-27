@@ -1,28 +1,29 @@
 package network.server;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 
 import network.server.messages.DronesInformationRequest;
 import network.server.messages.DronesInformationResponse;
+import network.server.messages.NetworkMessage;
 import network.server.messages.ServerMessage;
 import network.server.messages.ServerStatusResponse;
 
-import commoninterface.network.messages.Message;
+import com.google.gson.Gson;
 
 import dataObjects.DroneData;
 import dataObjects.ServerStatusData;
 
 public class ServerConnectionHandler extends Thread {
-	private final static boolean DEBUG = false;
-
 	protected Socket socket;
-	protected ObjectOutputStream out;
-	protected ObjectInputStream in;
+	protected PrintWriter out;
+	protected BufferedReader in;
 	protected String clientName = null;
 	protected ServerConnectionListener connectionListener;
 
@@ -38,8 +39,9 @@ public class ServerConnectionHandler extends Thread {
 			initConnection();
 
 			while (true) {
-				Object data = (Message) in.readObject();
-				processData(data);
+				NetworkMessage networkMessage = new Gson().fromJson(
+						in.readLine(), NetworkMessage.class);
+				processData(networkMessage);
 			}
 		} catch (IOException e) {
 			System.out.println("[SERVER CONNECTION HANDLER] Client "
@@ -56,63 +58,65 @@ public class ServerConnectionHandler extends Thread {
 		}
 	}
 
-	private void processData(Object data) throws ClassNotFoundException {
-		if (data instanceof ServerMessage) {
-			switch (((ServerMessage) data).getMessageType()) {
-			case DRONES_INFORMATION_REQUEST:
-				DronesInformationResponse responseA = new DronesInformationResponse();
-				ArrayList<DroneData> dronesIdentification = (connectionListener
-						.getConsole().getDronesSet()
-						.getDrones(((DronesInformationRequest) data)
-								.getDroneIdentification()));
-				responseA.setDronesData(dronesIdentification);
-				// send to client (responseA);
-				break;
-
-			case SERVER_INFORMATIONS_REQUEST:
-				ServerStatusData serverStatus = new ServerStatusData();
-				serverStatus.setAvailableBehaviors(connectionListener
-						.getConsole().getGUI().getCommandPanel()
-						.getAvailableBehaviors());
-				serverStatus.setAvailableControllers(connectionListener
-						.getConsole().getGUI().getCommandPanel()
-						.getAvailableControllers());
-				serverStatus.setConnectedClientsQty(connectionListener
-						.getClientQuantity());
-				ServerStatusResponse responseB = new ServerStatusResponse();
-				responseB.setServerStatusData(serverStatus);
-				// send to client (responseB)
-				break;
-			default:
-				System.out.println("Received message with type: "
-						+ ((ServerMessage) data).getMessageType());
-				break;
-			}
-		} else {
-			throw new ClassNotFoundException(
-					"Unable to process the receied object");
+	private void processData(NetworkMessage data) throws ClassNotFoundException {
+		ServerMessage inMessage = data.getMessage();
+		switch (data.getMsgType()) {
+		case DronesInformationRequest:
+			NetworkMessage responseMessageA = new NetworkMessage();
+			DronesInformationResponse dronesInformationResponse = new DronesInformationResponse();
+			ArrayList<DroneData> dronesIdentification = (connectionListener
+					.getConsole().getDronesSet()
+					.getDrones(((DronesInformationRequest) inMessage)
+							.getDroneIdentification()));
+			dronesInformationResponse.setDronesData(dronesIdentification);
+			responseMessageA.setMessage(dronesInformationResponse);
+			sendData(responseMessageA);
+			break;
+		case ServerStatusRequest:
+			NetworkMessage responseMessageB = new NetworkMessage();
+			ServerStatusData serverStatusData = new ServerStatusData();
+			serverStatusData.setAvailableBehaviors(connectionListener
+					.getConsole().getGUI().getCommandPanel()
+					.getAvailableBehaviors());
+			serverStatusData.setAvailableControllers(connectionListener
+					.getConsole().getGUI().getCommandPanel()
+					.getAvailableControllers());
+			serverStatusData.setConnectedClientsQty(connectionListener
+					.getClientQuantity());
+			ServerStatusResponse responseB = new ServerStatusResponse();
+			responseB.setServerStatusData(serverStatusData);
+			responseMessageB.setMessage(responseB);
+			sendData(responseMessageB);
+			break;
+		default:
+			System.out.println("Received message with type: "
+					+ ((ServerMessage) inMessage).getMessageType());
+			break;
 		}
 	}
 
+	public void sendData(NetworkMessage outMessage){
+		String json = new Gson().toJson(outMessage, NetworkMessage.class);
+		out.println(json);
+		System.out.println("[SERVER CONNECTION HANDLER] Sent information of type "+outMessage.getMsgType());
+	}
 	protected void shutdownHandler() {
 		closeConnection();
 	}
 
 	protected void initConnection() throws IOException, ClassNotFoundException {
-		out = new ObjectOutputStream(socket.getOutputStream());
-		in = new ObjectInputStream(socket.getInputStream());
+		out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()),
+				true);
+		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-		out.reset();
-
-		out.writeObject(InetAddress.getLocalHost().getHostName());
+		out.println(InetAddress.getLocalHost().getHostName());
 		out.flush();
 
-		clientName = (String) in.readObject();
+		clientName = (String) in.readLine();
 
 		System.out.println("[SERVER CONNECTION HANDLER] Client "
 				+ socket.getInetAddress().getHostAddress() + " (" + clientName
 				+ ") connected");
-
 	}
 
 	public synchronized void closeConnection() {
@@ -141,20 +145,6 @@ public class ServerConnectionHandler extends Thread {
 			System.out
 					.println("[SERVER CONNECTION HANDLER] Unable to close connection to "
 							+ clientName + "... there is an open connection?");
-		}
-	}
-
-	public synchronized void sendData(Object data) {
-		try {
-			out.reset(); // clear the cache so that we don't send old data
-			out.writeObject(data);
-			out.flush();
-			if (DEBUG)
-				System.out.println("[SERVER CONNECTION HANDLER] Sent Data ("
-						+ data.getClass().getSimpleName() + ")");
-		} catch (IOException e) {
-			System.out
-					.println("[SERVER CONNECTION HANDLER] Unable to send data... there is an open connection?");
 		}
 	}
 

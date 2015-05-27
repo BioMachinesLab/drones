@@ -1,7 +1,5 @@
 package network.server.messages;
 
-import dataObjects.DroneData;
-
 /**
  * Wrapper for the network message, to be serialized with the Gson Library
  * 
@@ -9,7 +7,7 @@ import dataObjects.DroneData;
  */
 public class NetworkMessage {
 	public static enum MSG_TYPE {
-		DronesInformationRequest, DronesInformationResponse, ServerStatusResponse, ServerMessage
+		DronesInformationRequest, DronesInformationResponse, ServerStatusResponse, ServerStatusRequest
 	}
 
 	private MSG_TYPE msgType;
@@ -17,7 +15,7 @@ public class NetworkMessage {
 	private DronesInformationRequest DIReq;
 	private DronesInformationResponse DIResp;
 	private ServerStatusResponse SSResp;
-	private ServerMessage serverMsg;
+	private ServerStatusRequest SSReq;
 
 	public void setMessage(ServerMessage message) {
 		if (message instanceof DronesInformationRequest) {
@@ -30,8 +28,8 @@ public class NetworkMessage {
 			SSResp = (ServerStatusResponse) message;
 			msgType = MSG_TYPE.ServerStatusResponse;
 		} else {
-			serverMsg = message;
-			msgType = MSG_TYPE.ServerMessage;
+			SSReq = (ServerStatusRequest) message;
+			msgType = MSG_TYPE.ServerStatusRequest;
 		}
 	}
 
@@ -43,8 +41,8 @@ public class NetworkMessage {
 			return DIResp;
 		case ServerStatusResponse:
 			return SSResp;
-		case ServerMessage:
-			return serverMsg;
+		case ServerStatusRequest:
+			return SSReq;
 		default:
 			return null;
 		}

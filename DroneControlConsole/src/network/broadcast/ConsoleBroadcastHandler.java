@@ -9,6 +9,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
+import network.server.ServerUtils;
 import main.DroneControlConsole;
 import main.RobotControlConsole;
 import commoninterface.entities.Entity;
@@ -184,7 +185,7 @@ public class ConsoleBroadcastHandler {
 					drone.setTimeSinceLastHeartbeat((long) obj);
 					break;
 				case "GPS":
-					drone.setRobotLocation((RobotLocation) obj);
+					drone.setRobotLocation(ServerUtils.getAsRobotServerLocation((RobotLocation) obj));
 					break;
 				default:
 					System.out

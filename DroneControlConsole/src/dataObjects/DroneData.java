@@ -5,8 +5,8 @@ import java.io.Serializable;
 import network.server.BehaviorServerMessage;
 import network.server.GPSServerData;
 import network.server.NeuralActivationsServerMessage;
+import network.server.RobotServerLocation;
 
-import commoninterface.entities.RobotLocation;
 import commoninterface.network.messages.NeuralActivationsMessage;
 
 public class DroneData implements Serializable {
@@ -20,7 +20,7 @@ public class DroneData implements Serializable {
 	private long timeSinceLastHeartbeat = -1;
 
 	// Telemetry Informations
-	private RobotLocation robotLocation;
+	private RobotServerLocation robotLocation;
 	private double compassOrientation;
 	private GPSServerData gpsData;
 
@@ -59,7 +59,7 @@ public class DroneData implements Serializable {
 		return timeSinceLastHeartbeat;
 	}
 
-	public RobotLocation getRobotLocation() {
+	public RobotServerLocation getRobotLocation() {
 		return robotLocation;
 	}
 
@@ -96,7 +96,7 @@ public class DroneData implements Serializable {
 		this.timeSinceLastHeartbeat = timeSinceLastHeartbeat;
 	}
 
-	public void setRobotLocation(RobotLocation robotLocation) {
+	public void setRobotLocation(RobotServerLocation robotLocation) {
 		this.robotLocation = robotLocation;
 		this.compassOrientation = robotLocation.getOrientation();
 	}

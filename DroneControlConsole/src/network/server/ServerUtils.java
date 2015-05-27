@@ -1,6 +1,8 @@
 package network.server;
 
+import network.server.RobotServerLocation.DroneType;
 import commoninterface.dataobjects.GPSData;
+import commoninterface.entities.RobotLocation;
 import commoninterface.network.NetworkUtils;
 import commoninterface.network.messages.BehaviorMessage;
 
@@ -58,6 +60,25 @@ public class ServerUtils {
 				behaviorServerMessage.getArguments(),
 				behaviorServerMessage.selectedStatus,
 				NetworkUtils.getHostname());
+	}
+
+	public static RobotServerLocation getAsRobotServerLocation(
+			RobotLocation robotLocation) {
+		RobotServerLocation.DroneType droneType = null;
+		switch (robotLocation.getDroneType()) {
+		case DRONE:
+			droneType = DroneType.DRONE;
+			break;
+		case ENEMY:
+			droneType = DroneType.ENEMY;
+			break;
+		default:
+			droneType = DroneType.OTHER;
+			break;
+		}
+		return new RobotServerLocation(robotLocation.getName(), robotLocation
+				.getLatLon().getLat(), robotLocation.getLatLon().getLon(),
+				robotLocation.getOrientation(), droneType);
 	}
 
 }
