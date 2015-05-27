@@ -8,6 +8,7 @@ import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.NeuralActivationsMessage;
 import commoninterface.network.messages.SystemStatusMessage;
+import dataObjects.DroneData;
 
 public abstract class ControlConsoleMessageHandler extends MessageHandler {
 
@@ -29,14 +30,24 @@ public abstract class ControlConsoleMessageHandler extends MessageHandler {
 					(SystemStatusMessage) message);
 
 			if (updateDronesSet) {
-				System.out.println("sender ip: " + message.getSenderIPAddr());
-				System.out.println("sender hostname: "
-						+ message.getSenderHostname());
-				((DroneControlConsole) console)
-						.getDronesSet()
-						.getDrone(message.getSenderHostname())
-						.setSystemStatusMessage(
-								((SystemStatusMessage) message).getMessage());
+				if (((DroneControlConsole) console).getDronesSet().existsDrone(
+						message.getSenderHostname())) {
+					((DroneControlConsole) console)
+							.getDronesSet()
+							.getDrone(message.getSenderHostname())
+							.setSystemStatusMessage(
+									((SystemStatusMessage) message)
+											.getMessage());
+				} else {
+					DroneData droneData = new DroneData(
+							message.getSenderIPAddr(),
+							message.getSenderHostname());
+					droneData
+							.setSystemStatusMessage(((SystemStatusMessage) message)
+									.getMessage());
+					((DroneControlConsole) console).getDronesSet().addDrone(
+							droneData);
+				}
 			}
 
 			return message;
@@ -45,12 +56,24 @@ public abstract class ControlConsoleMessageHandler extends MessageHandler {
 					(BehaviorMessage) message);
 
 			if (updateDronesSet) {
-				((DroneControlConsole) console)
-						.getDronesSet()
-						.getDrone(message.getSenderHostname())
-						.setBehaviour(
-								ServerUtils
-										.getAsBehaviorServerMessage((BehaviorMessage) message));
+				if (((DroneControlConsole) console).getDronesSet().existsDrone(
+						message.getSenderHostname())) {
+					((DroneControlConsole) console)
+							.getDronesSet()
+							.getDrone(message.getSenderHostname())
+							.setBehaviour(
+									ServerUtils
+											.getAsBehaviorServerMessage((BehaviorMessage) message));
+				} else {
+					DroneData droneData = new DroneData(
+							message.getSenderIPAddr(),
+							message.getSenderHostname());
+					droneData
+							.setBehaviour(ServerUtils
+									.getAsBehaviorServerMessage((BehaviorMessage) message));
+					((DroneControlConsole) console).getDronesSet().addDrone(
+							droneData);
+				}
 			}
 
 			return message;
@@ -59,11 +82,22 @@ public abstract class ControlConsoleMessageHandler extends MessageHandler {
 					(NeuralActivationsMessage) message);
 
 			if (updateDronesSet) {
-				((DroneControlConsole) console)
-						.getDronesSet()
-						.getDrone(message.getSenderHostname())
-						.setNeuralActivations(
-								((NeuralActivationsMessage) message));
+				if (((DroneControlConsole) console).getDronesSet().existsDrone(
+						message.getSenderHostname())) {
+					((DroneControlConsole) console)
+							.getDronesSet()
+							.getDrone(message.getSenderHostname())
+							.setNeuralActivations(
+									((NeuralActivationsMessage) message));
+				} else {
+					DroneData droneData = new DroneData(
+							message.getSenderIPAddr(),
+							message.getSenderHostname());
+					droneData
+							.setNeuralActivations(((NeuralActivationsMessage) message));
+					((DroneControlConsole) console).getDronesSet().addDrone(
+							droneData);
+				}
 			}
 
 			return message;
@@ -71,5 +105,4 @@ public abstract class ControlConsoleMessageHandler extends MessageHandler {
 
 		return null;
 	}
-
 }

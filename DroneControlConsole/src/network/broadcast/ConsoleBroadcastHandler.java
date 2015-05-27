@@ -172,7 +172,7 @@ public class ConsoleBroadcastHandler {
 
 				if (!dronesSet.existsDrone(name)) {
 					drone = new DroneData();
-					drone.setIpAddr(InetAddress.getByName(address));
+					drone.setIpAddr(InetAddress.getByName(address).getHostAddress());
 					drone.setName(name);
 				} else {
 					drone = dronesSet.getDrone(name);

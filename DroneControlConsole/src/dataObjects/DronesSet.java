@@ -9,11 +9,11 @@ public class DronesSet {
 	public DronesSet() {
 		dronesSet = new HashMap<>();
 	}
-	
+
 	public void addDrone(DroneData drone) {
 		dronesSet.put(drone.getName(), drone);
-		System.out.println("[DRONES SET] Added new drone " + drone.getName() + "@"
-				+ drone.getIpAddr().getHostAddress()+" to set");
+		System.out.println("[DRONES SET] Added new drone " + drone.getName()
+				+ "@" + drone.getIpAddr() + " to set");
 	}
 
 	public void removeDrone(String name) {
@@ -36,8 +36,7 @@ public class DronesSet {
 		return new ArrayList<DroneData>(dronesSet.values());
 	}
 
-	public ArrayList<DroneData> getDrones(
-			ArrayList<String> dronesNames) {
+	public ArrayList<DroneData> getDrones(ArrayList<String> dronesNames) {
 		if (dronesNames != null && !dronesNames.isEmpty()) {
 			ArrayList<DroneData> dronesData = new ArrayList<DroneData>();
 

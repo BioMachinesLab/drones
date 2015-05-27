@@ -7,10 +7,7 @@ public class SystemStatusMessage extends Message {
 	private String message = null;
 
 	public SystemStatusMessage(String message, String senderHostname) {
-		super(senderHostname);
-
-		if (senderHostname == null)
-			throw new NullPointerException();
+		super(senderHostname);			
 
 		this.message = message;
 	}

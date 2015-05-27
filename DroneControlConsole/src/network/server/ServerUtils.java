@@ -10,8 +10,15 @@ public class ServerUtils {
 
 		gpsServerData.setLatitudeDecimal(gpsData.getLatitudeDecimal());
 		gpsServerData.setLongitudeDecimal(gpsData.getLongitudeDecimal());
-		gpsServerData.setLatitude(gpsData.getLatitude());
-		gpsServerData.setLongitude(gpsData.getLongitude());
+
+		if (gpsData.getLatitude() != null) {
+			gpsServerData.setLatitude(gpsData.getLatitude());
+		}
+
+		if (gpsData.getLongitude() != null) {
+			gpsServerData.setLongitude(gpsData.getLongitude());
+		}
+
 		gpsServerData.setAltitude(gpsData.getAltitude());
 
 		gpsServerData.setFix(gpsData.isFix());
@@ -34,7 +41,7 @@ public class ServerUtils {
 		return gpsServerData;
 	}
 
-	public static  BehaviorServerMessage getAsBehaviorServerMessage(
+	public static BehaviorServerMessage getAsBehaviorServerMessage(
 			BehaviorMessage message) {
 		BehaviorServerMessage behaviorServerMessage = new BehaviorServerMessage();
 

@@ -10,9 +10,9 @@ import commoninterface.network.messages.Message;
 import commoninterface.network.messages.SystemStatusMessage;
 
 public class ConnectionHandler extends Thread {
-	
+
 	private final static boolean DEBUG = false;
-	
+
 	protected Socket socket;
 	protected ObjectOutputStream out;
 	protected ObjectInputStream in;
@@ -44,8 +44,8 @@ public class ConnectionHandler extends Thread {
 									+ clientName + ", so it was discarded....");
 				} catch (ClassCastException e) {
 					System.out
-					.println("[CONNECTION HANDLER] Received class of different type (other than Message) from "
-							+ clientName + ", so it was discarded....");
+							.println("[CONNECTION HANDLER] Received class of different type (other than Message) from "
+									+ clientName + ", so it was discarded....");
 				}
 			}
 
@@ -71,9 +71,10 @@ public class ConnectionHandler extends Thread {
 	}
 
 	protected void processMessage(Message message) {
-		if(DEBUG)
-			System.out.println("[CONNECTION HANDLER] Information Request Message ("
-						+ message.getClass().getSimpleName() + ")");
+		if (DEBUG)
+			System.out
+					.println("[CONNECTION HANDLER] Information Request Message ("
+							+ message.getClass().getSimpleName() + ")");
 		robot.processInformationRequest(message, this);
 	}
 
@@ -94,7 +95,13 @@ public class ConnectionHandler extends Thread {
 
 		// controller.processInformationRequest(new
 		// InformationRequest(MessageType.SYSTEM_STATUS), this);
-		sendData(new SystemStatusMessage(robot.getInitMessages(),robot.getNetworkAddress()));
+		if (robot.getNetworkAddress() != null) {
+			sendData(new SystemStatusMessage(robot.getInitMessages(),
+					robot.getNetworkAddress()));
+		} else {
+			sendData(new SystemStatusMessage(robot.getInitMessages(),
+					"<virtual host>"));
+		}
 	}
 
 	public synchronized void closeConnection() {
@@ -128,12 +135,12 @@ public class ConnectionHandler extends Thread {
 
 	public synchronized void sendData(Object data) {
 		try {
-			out.reset();//clear the cache so that we don't send old data
+			out.reset();// clear the cache so that we don't send old data
 			out.writeObject(data);
 			out.flush();
-			if(DEBUG)
+			if (DEBUG)
 				System.out.println("[CONNECTION HANDLER] Sent Data ("
-					+ data.getClass().getSimpleName() + ")");
+						+ data.getClass().getSimpleName() + ")");
 		} catch (IOException e) {
 			System.out
 					.println("[CONNECTION HANDLER] Unable to send data... there is an open connection?");

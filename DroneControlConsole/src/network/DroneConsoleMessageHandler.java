@@ -7,6 +7,7 @@ import commoninterface.network.messages.CompassMessage;
 import commoninterface.network.messages.EntityMessage;
 import commoninterface.network.messages.GPSMessage;
 import commoninterface.network.messages.Message;
+import dataObjects.DroneData;
 
 public class DroneConsoleMessageHandler extends ControlConsoleMessageHandler {
 	
@@ -23,12 +24,27 @@ public class DroneConsoleMessageHandler extends ControlConsoleMessageHandler {
 			return null;
 		} else if (message instanceof GPSMessage) {
 			((DroneGUI)console.getGUI()).getGPSPanel().displayData(((GPSMessage) message).getGPSData());
-			((DroneControlConsole) console).getDronesSet().getDrone(message.getSenderIPAddr()).setGPSData(ServerUtils.getAsGGPSServerData(((GPSMessage) message).getGPSData()));
+			
+			if(((DroneControlConsole) console).getDronesSet().existsDrone(message.getSenderHostname())){
+				((DroneControlConsole) console).getDronesSet().getDrone(message.getSenderHostname()).setGPSData(ServerUtils.getAsGGPSServerData(((GPSMessage) message).getGPSData()));
+			}else{
+				DroneData droneData = new DroneData(message.getSenderIPAddr(),message.getSenderHostname());
+				droneData.setGPSData(ServerUtils.getAsGGPSServerData(((GPSMessage) message).getGPSData()));
+				
+				((DroneControlConsole) console).getDronesSet().addDrone(droneData);
+			}
 			
 		} else if (message instanceof CompassMessage) {
 			((DroneGUI)console.getGUI()).getCompassPanel().displayData((CompassMessage) message);
-			((DroneControlConsole) console).getDronesSet().getDrone(message.getSenderIPAddr()).setOrientation(((CompassMessage) message).getHeading());
-						
+			
+			if(((DroneControlConsole) console).getDronesSet().existsDrone(message.getSenderHostname())){
+				((DroneControlConsole) console).getDronesSet().getDrone(message.getSenderHostname()).setOrientation(((CompassMessage) message).getHeading());
+			}else{
+				DroneData droneData = new DroneData(message.getSenderIPAddr(),message.getSenderHostname());
+				droneData.setOrientation(((CompassMessage) message).getHeading());
+				
+				((DroneControlConsole) console).getDronesSet().addDrone(droneData);
+			}
 		} else if (message instanceof EntityMessage) {
 			((DroneGUI)console.getGUI()).getMapPanel().displayData((EntityMessage) message);
 			

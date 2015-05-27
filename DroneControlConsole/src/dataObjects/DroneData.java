@@ -1,14 +1,12 @@
 package dataObjects;
 
 import java.io.Serializable;
-import java.net.InetAddress;
 
 import network.server.BehaviorServerMessage;
 import network.server.GPSServerData;
 import network.server.NeuralActivationsServerMessage;
 
 import commoninterface.entities.RobotLocation;
-import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.network.messages.NeuralActivationsMessage;
 
 public class DroneData implements Serializable {
@@ -16,7 +14,7 @@ public class DroneData implements Serializable {
 	 * Variables
 	 */
 	private String name = "";
-	private InetAddress ipAddr;
+	private String ipAddr;
 
 	// Broadcasted informations
 	private long timeSinceLastHeartbeat = -1;
@@ -35,17 +33,13 @@ public class DroneData implements Serializable {
 	 * Methods
 	 */
 	// Constructors
-	public DroneData(InetAddress ipAddr, String name) {
+	public DroneData(String ipAddr, String name) {
 		this.ipAddr = ipAddr;
 		this.name = name;
 	}
 
 	public DroneData(String name) {
 		this(null, name);
-	}
-
-	public DroneData(InetAddress ipAddr) {
-		this(ipAddr, "<no name>");
 	}
 
 	public DroneData() {
@@ -57,7 +51,7 @@ public class DroneData implements Serializable {
 		return name;
 	}
 
-	public InetAddress getIpAddr() {
+	public String getIpAddr() {
 		return ipAddr;
 	}
 
@@ -90,7 +84,7 @@ public class DroneData implements Serializable {
 	}
 
 	// Setters
-	public void setIpAddr(InetAddress ipAddr) {
+	public void setIpAddr(String ipAddr) {
 		this.ipAddr = ipAddr;
 	}
 
