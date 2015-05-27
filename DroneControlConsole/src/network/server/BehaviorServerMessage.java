@@ -1,6 +1,5 @@
 package network.server;
 
-
 public class BehaviorServerMessage {
 	protected String selectedBehavior;
 	protected boolean selectedStatus = false;
@@ -23,8 +22,16 @@ public class BehaviorServerMessage {
 	public String getArguments() {
 		return args;
 	}
-	
+
 	public void setArguments(String args) {
 		this.args = args;
+	}
+
+	public void setSelectedBehavior(String selectedBehavior) {
+		this.selectedBehavior = selectedBehavior;
+	}
+
+	public void setSelectedStatus(boolean selectedStatus) {
+		this.selectedStatus = selectedStatus;
 	}
 }
