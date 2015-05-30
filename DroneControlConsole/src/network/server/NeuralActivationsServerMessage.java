@@ -47,12 +47,11 @@ public class NeuralActivationsServerMessage {
 		this.outputsValues = message.getOutputsValues();
 	}
 
-	public NeuralActivationsMessage getAsNeuralActivationsMessage() {
-		return new NeuralActivationsMessage(inputsTitles, inputsValues,
-				outputsTitles, outputsValues, myHostname);
-	}
-
 	private void updateHostname() {
 		myHostname = NetworkUtils.getHostname();
+	}
+	
+	public String getHostname(){
+		return myHostname;
 	}
 }

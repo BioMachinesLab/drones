@@ -5,6 +5,7 @@ import commoninterface.dataobjects.GPSData;
 import commoninterface.entities.RobotLocation;
 import commoninterface.network.NetworkUtils;
 import commoninterface.network.messages.BehaviorMessage;
+import commoninterface.network.messages.NeuralActivationsMessage;
 
 public class ServerUtils {
 	public static GPSServerData getAsGGPSServerData(GPSData gpsData) {
@@ -81,4 +82,13 @@ public class ServerUtils {
 				robotLocation.getOrientation(), droneType);
 	}
 
+	public static NeuralActivationsMessage getAsNeuralActivationsMessage(
+			NeuralActivationsServerMessage neuralActivationsServerMessage) {
+		return new NeuralActivationsMessage(
+				neuralActivationsServerMessage.getInputsTitles(),
+				neuralActivationsServerMessage.getInputsValues(),
+				neuralActivationsServerMessage.getOutputsTitles(),
+				neuralActivationsServerMessage.getOutputsValues(),
+				neuralActivationsServerMessage.getHostname());
+	}
 }

@@ -75,8 +75,8 @@ public class DroneData implements Serializable {
 		return behaviourMessage;
 	}
 
-	public NeuralActivationsMessage getNeuralActivations() {
-		return neuralActivations.getAsNeuralActivationsMessage();
+	public NeuralActivationsServerMessage getNeuralActivations() {
+		return neuralActivations;
 	}
 
 	public GPSServerData getGPSData() {
