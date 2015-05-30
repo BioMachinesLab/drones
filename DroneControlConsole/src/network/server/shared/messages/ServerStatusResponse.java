@@ -1,6 +1,6 @@
-package network.server.messages;
+package network.server.shared.messages;
 
-import dataObjects.ServerStatusData;
+import network.server.shared.dataObjects.ServerStatusData;
 
 public class ServerStatusResponse extends ServerMessage {
 	private ServerStatusData serverStatusData;

@@ -1,9 +1,6 @@
-package network.server;
+package network.server.shared;
 
 import java.util.ArrayList;
-
-import commoninterface.network.NetworkUtils;
-import commoninterface.network.messages.NeuralActivationsMessage;
 
 public class NeuralActivationsServerMessage {
 	private ArrayList<String> inputsTitles;
@@ -12,16 +9,21 @@ public class NeuralActivationsServerMessage {
 	private ArrayList<Double[]> outputsValues;
 	private String myHostname;
 
-	public NeuralActivationsServerMessage(NeuralActivationsMessage message) {
-		updateHostname();
-		chewData(message);
-	}
-
 	public NeuralActivationsServerMessage() {
 		inputsTitles = null;
 		inputsValues = null;
 		outputsTitles = null;
 		outputsValues = null;
+	}
+
+	public NeuralActivationsServerMessage(ArrayList<String> inputsTitles,
+			ArrayList<Double[]> inputsValues, ArrayList<String> outputsTitles,
+			ArrayList<Double[]> outputsValues, String senderHostname) {
+		this.inputsTitles = inputsTitles;
+		this.inputsValues = inputsValues;
+		this.outputsTitles = outputsTitles;
+		this.outputsValues = outputsValues;
+		this.myHostname=senderHostname;
 	}
 
 	public ArrayList<String> getInputsTitles() {
@@ -40,18 +42,7 @@ public class NeuralActivationsServerMessage {
 		return outputsValues;
 	}
 
-	public void chewData(NeuralActivationsMessage message) {
-		this.inputsTitles = message.getInputsTitles();
-		this.inputsValues = message.getInputsValues();
-		this.outputsTitles = message.getOutputsTitles();
-		this.outputsValues = message.getOutputsValues();
-	}
-
-	private void updateHostname() {
-		myHostname = NetworkUtils.getHostname();
-	}
-	
-	public String getHostname(){
+	public String getHostname() {
 		return myHostname;
 	}
 }

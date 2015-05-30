@@ -1,6 +1,6 @@
-package network.server;
+package network.server.shared;
 
-import dataObjects.DroneData;
+import network.server.shared.dataObjects.DroneData;
 
 public class RobotServerLocation {
 	public static enum DroneType {

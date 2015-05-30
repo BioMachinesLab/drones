@@ -9,9 +9,11 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-import network.server.ServerUtils;
 import main.DroneControlConsole;
 import main.RobotControlConsole;
+import network.server.shared.ServerUtils;
+import network.server.shared.dataObjects.DroneData;
+import network.server.shared.dataObjects.DronesSet;
 import commoninterface.entities.Entity;
 import commoninterface.entities.RobotLocation;
 import commoninterface.network.NetworkUtils;
@@ -19,8 +21,6 @@ import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.EntitiesBroadcastMessage;
 import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
 import commoninterface.network.broadcast.PositionBroadcastMessage;
-import dataObjects.DroneData;
-import dataObjects.DronesSet;
 
 public class ConsoleBroadcastHandler {
 

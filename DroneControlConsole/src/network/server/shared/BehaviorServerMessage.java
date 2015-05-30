@@ -1,4 +1,4 @@
-package network.server;
+package network.server.shared;
 
 public class BehaviorServerMessage {
 	protected String selectedBehavior;

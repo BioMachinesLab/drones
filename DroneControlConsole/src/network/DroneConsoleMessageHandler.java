@@ -1,13 +1,13 @@
 package network;
 
-import network.server.ServerUtils;
 import gui.DroneGUI;
 import main.DroneControlConsole;
+import network.server.shared.ServerUtils;
+import network.server.shared.dataObjects.DroneData;
 import commoninterface.network.messages.CompassMessage;
 import commoninterface.network.messages.EntityMessage;
 import commoninterface.network.messages.GPSMessage;
 import commoninterface.network.messages.Message;
-import dataObjects.DroneData;
 
 public class DroneConsoleMessageHandler extends ControlConsoleMessageHandler {
 	

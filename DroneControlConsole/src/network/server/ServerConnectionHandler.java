@@ -9,16 +9,15 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import network.server.messages.DronesInformationRequest;
-import network.server.messages.DronesInformationResponse;
-import network.server.messages.NetworkMessage;
-import network.server.messages.ServerMessage;
-import network.server.messages.ServerStatusResponse;
+import network.server.shared.dataObjects.DroneData;
+import network.server.shared.dataObjects.ServerStatusData;
+import network.server.shared.messages.DronesInformationRequest;
+import network.server.shared.messages.DronesInformationResponse;
+import network.server.shared.messages.NetworkMessage;
+import network.server.shared.messages.ServerMessage;
+import network.server.shared.messages.ServerStatusResponse;
 
 import com.google.gson.Gson;
-
-import dataObjects.DroneData;
-import dataObjects.ServerStatusData;
 
 public class ServerConnectionHandler extends Thread {
 	protected Socket socket;

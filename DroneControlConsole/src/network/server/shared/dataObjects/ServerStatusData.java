@@ -1,4 +1,4 @@
-package dataObjects;
+package network.server.shared.dataObjects;
 
 import java.util.ArrayList;
 

@@ -1,12 +1,11 @@
-package dataObjects;
+package network.server.shared.dataObjects;
 
 import java.io.Serializable;
 
-import network.server.BehaviorServerMessage;
-import network.server.GPSServerData;
-import network.server.NeuralActivationsServerMessage;
-import network.server.RobotServerLocation;
-
+import network.server.shared.BehaviorServerMessage;
+import network.server.shared.GPSServerData;
+import network.server.shared.NeuralActivationsServerMessage;
+import network.server.shared.RobotServerLocation;
 import commoninterface.network.messages.NeuralActivationsMessage;
 
 public class DroneData implements Serializable {
@@ -113,9 +112,8 @@ public class DroneData implements Serializable {
 		this.behaviourMessage = behaviourMessage;
 	}
 
-	public void setNeuralActivations(NeuralActivationsMessage neuralActivations) {
-		this.neuralActivations = new NeuralActivationsServerMessage(
-				neuralActivations);
+	public void setNeuralActivations(NeuralActivationsServerMessage neuralActivations) {
+		this.neuralActivations = neuralActivations;
 	}
 
 	public void setGPSData(GPSServerData gpsData) {

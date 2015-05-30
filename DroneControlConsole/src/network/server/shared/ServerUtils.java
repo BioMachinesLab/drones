@@ -1,9 +1,11 @@
-package network.server;
+package network.server.shared;
 
-import network.server.RobotServerLocation.DroneType;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+import network.server.shared.RobotServerLocation.DroneType;
 import commoninterface.dataobjects.GPSData;
 import commoninterface.entities.RobotLocation;
-import commoninterface.network.NetworkUtils;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.network.messages.NeuralActivationsMessage;
 
@@ -59,8 +61,7 @@ public class ServerUtils {
 			BehaviorServerMessage behaviorServerMessage) {
 		return new BehaviorMessage(behaviorServerMessage.selectedBehavior,
 				behaviorServerMessage.getArguments(),
-				behaviorServerMessage.selectedStatus,
-				NetworkUtils.getHostname());
+				behaviorServerMessage.selectedStatus, getHostname());
 	}
 
 	public static RobotServerLocation getAsRobotServerLocation(
@@ -90,5 +91,24 @@ public class ServerUtils {
 				neuralActivationsServerMessage.getOutputsTitles(),
 				neuralActivationsServerMessage.getOutputsValues(),
 				neuralActivationsServerMessage.getHostname());
+	}
+
+	public static NeuralActivationsServerMessage getAsNeuralActivationsServerMessage(
+			NeuralActivationsMessage neuralActivationsMessage) {
+		return new NeuralActivationsServerMessage(
+				neuralActivationsMessage.getInputsTitles(),
+				neuralActivationsMessage.getInputsValues(),
+				neuralActivationsMessage.getOutputsTitles(),
+				neuralActivationsMessage.getOutputsValues(),
+				neuralActivationsMessage.getSenderHostname());
+	}
+
+	public static String getHostname() {
+		try {
+			return InetAddress.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			System.err.println(e.getMessage());
+			return null;
+		}
 	}
 }
