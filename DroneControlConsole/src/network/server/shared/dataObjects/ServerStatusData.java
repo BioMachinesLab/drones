@@ -8,6 +8,8 @@ public class ServerStatusData {
 
 	private int connectedClientsQty = 0;
 
+	private String connectedTo = "";
+
 	// Setters
 	public void setAvailableBehaviors(ArrayList<String> availableBehaviors) {
 		this.availableBehaviors = availableBehaviors;
@@ -21,6 +23,10 @@ public class ServerStatusData {
 		this.connectedClientsQty = connectedClientsQty;
 	}
 
+	public void setConnectedTo(String connectedTo) {
+		this.connectedTo = connectedTo;
+	}
+
 	// Getters
 	public ArrayList<String> getAvailableBehaviors() {
 		return availableBehaviors;
@@ -32,5 +38,9 @@ public class ServerStatusData {
 
 	public int getConnectedClientsQty() {
 		return connectedClientsQty;
+	}
+
+	public String getConnectedTo() {
+		return connectedTo;
 	}
 }

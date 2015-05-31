@@ -102,10 +102,18 @@ public class ConnectionPanel extends UpdatePanel {
 
 	public void connectionOK(String address) {
 		currentConnection.setText(address);
+		
+		if(console instanceof DroneControlConsole){
+			((DroneControlConsole) console).getDronesSet().setConnectedTo(address);
+		}
 	}
 
 	public void disconnected() {
 		currentConnection.setText("");
+		
+		if(console instanceof DroneControlConsole){
+			((DroneControlConsole) console).getDronesSet().setConnectedTo("");
+		}
 	}
 
 	public void connectTo() {

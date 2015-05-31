@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 public class DronesSet {
 	private HashMap<String, DroneData> dronesSet;
+	private String connectedTo = "";
 
 	public DronesSet() {
 		dronesSet = new HashMap<>();
@@ -48,5 +49,13 @@ public class DronesSet {
 		} else {
 			return new ArrayList<DroneData>(dronesSet.values());
 		}
+	}
+
+	public void setConnectedTo(String address) {
+		this.connectedTo = address;
+	}
+
+	public String getConnectedToAddress() {
+		return connectedTo;
 	}
 }
