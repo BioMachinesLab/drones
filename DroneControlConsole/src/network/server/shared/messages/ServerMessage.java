@@ -1,4 +1,4 @@
-package network.server.messages;
+package network.server.shared.messages;
 
 public class ServerMessage {
 	public static enum MessageType {

@@ -9,16 +9,17 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import network.server.messages.DronesInformationRequest;
-import network.server.messages.DronesInformationResponse;
-import network.server.messages.NetworkMessage;
-import network.server.messages.ServerMessage;
-import network.server.messages.ServerStatusResponse;
+import main.DroneControlConsole;
+import main.RobotControlConsole;
+import network.server.shared.dataObjects.DroneData;
+import network.server.shared.dataObjects.ServerStatusData;
+import network.server.shared.messages.DronesInformationRequest;
+import network.server.shared.messages.DronesInformationResponse;
+import network.server.shared.messages.NetworkMessage;
+import network.server.shared.messages.ServerMessage;
+import network.server.shared.messages.ServerStatusResponse;
 
 import com.google.gson.Gson;
-
-import dataObjects.DroneData;
-import dataObjects.ServerStatusData;
 
 public class ServerConnectionHandler extends Thread {
 	protected Socket socket;
@@ -75,14 +76,20 @@ public class ServerConnectionHandler extends Thread {
 		case ServerStatusRequest:
 			NetworkMessage responseMessageB = new NetworkMessage();
 			ServerStatusData serverStatusData = new ServerStatusData();
-			serverStatusData.setAvailableBehaviors(connectionListener
-					.getConsole().getGUI().getCommandPanel()
-					.getAvailableBehaviors());
-			serverStatusData.setAvailableControllers(connectionListener
-					.getConsole().getGUI().getCommandPanel()
-					.getAvailableControllers());
+			RobotControlConsole console = connectionListener.getConsole();
+
+			serverStatusData.setAvailableBehaviors(console.getGUI()
+					.getCommandPanel().getAvailableBehaviors());
+			serverStatusData.setAvailableControllers(console.getGUI()
+					.getCommandPanel().getAvailableControllers());
 			serverStatusData.setConnectedClientsQty(connectionListener
 					.getClientQuantity());
+
+			if (console instanceof DroneControlConsole) {
+				serverStatusData.setConnectedTo(((DroneControlConsole) console)
+						.getDronesSet().getConnectedToAddress());
+			}
+
 			ServerStatusResponse responseB = new ServerStatusResponse();
 			responseB.setServerStatusData(serverStatusData);
 			responseMessageB.setMessage(responseB);
@@ -95,11 +102,14 @@ public class ServerConnectionHandler extends Thread {
 		}
 	}
 
-	public void sendData(NetworkMessage outMessage){
+	public void sendData(NetworkMessage outMessage) {
 		String json = new Gson().toJson(outMessage, NetworkMessage.class);
 		out.println(json);
-		System.out.println("[SERVER CONNECTION HANDLER] Sent information of type "+outMessage.getMsgType());
+		System.out
+				.println("[SERVER CONNECTION HANDLER] Sent information of type "
+						+ outMessage.getMsgType());
 	}
+
 	protected void shutdownHandler() {
 		closeConnection();
 	}

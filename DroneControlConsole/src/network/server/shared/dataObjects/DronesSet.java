@@ -1,10 +1,11 @@
-package dataObjects;
+package network.server.shared.dataObjects;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class DronesSet {
 	private HashMap<String, DroneData> dronesSet;
+	private String connectedTo = "";
 
 	public DronesSet() {
 		dronesSet = new HashMap<>();
@@ -21,7 +22,7 @@ public class DronesSet {
 	}
 
 	public void removeDrone(DroneData drone) {
-		dronesSet.remove(drone.getName(), drone);
+		dronesSet.remove(drone.getName());
 	}
 
 	public DroneData getDrone(String name) {
@@ -48,5 +49,13 @@ public class DronesSet {
 		} else {
 			return new ArrayList<DroneData>(dronesSet.values());
 		}
+	}
+
+	public void setConnectedTo(String address) {
+		this.connectedTo = address;
+	}
+
+	public String getConnectedToAddress() {
+		return connectedTo;
 	}
 }

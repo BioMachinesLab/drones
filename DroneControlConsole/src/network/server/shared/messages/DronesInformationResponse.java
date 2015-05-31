@@ -1,8 +1,8 @@
-package network.server.messages;
+package network.server.shared.messages;
 
 import java.util.ArrayList;
 
-import dataObjects.DroneData;
+import network.server.shared.dataObjects.DroneData;
 
 public class DronesInformationResponse extends ServerMessage {
 	public ArrayList<DroneData> dronesData = new ArrayList<DroneData>();

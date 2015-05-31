@@ -1,14 +1,14 @@
 package network;
 
-import network.server.ServerUtils;
 import main.DroneControlConsole;
 import main.RobotControlConsole;
+import network.server.shared.ServerUtils;
+import network.server.shared.dataObjects.DroneData;
 import commoninterface.network.MessageHandler;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.NeuralActivationsMessage;
 import commoninterface.network.messages.SystemStatusMessage;
-import dataObjects.DroneData;
 
 public abstract class ControlConsoleMessageHandler extends MessageHandler {
 
@@ -88,13 +88,15 @@ public abstract class ControlConsoleMessageHandler extends MessageHandler {
 							.getDronesSet()
 							.getDrone(message.getSenderHostname())
 							.setNeuralActivations(
-									((NeuralActivationsMessage) message));
+									ServerUtils
+											.getAsNeuralActivationsServerMessage(((NeuralActivationsMessage) message)));
 				} else {
 					DroneData droneData = new DroneData(
 							message.getSenderIPAddr(),
 							message.getSenderHostname());
 					droneData
-							.setNeuralActivations(((NeuralActivationsMessage) message));
+							.setNeuralActivations(ServerUtils
+									.getAsNeuralActivationsServerMessage(((NeuralActivationsMessage) message)));
 					((DroneControlConsole) console).getDronesSet().addDrone(
 							droneData);
 				}

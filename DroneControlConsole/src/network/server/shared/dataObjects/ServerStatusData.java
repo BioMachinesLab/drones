@@ -1,4 +1,4 @@
-package dataObjects;
+package network.server.shared.dataObjects;
 
 import java.util.ArrayList;
 
@@ -7,6 +7,8 @@ public class ServerStatusData {
 	private ArrayList<String> availableControllers;
 
 	private int connectedClientsQty = 0;
+
+	private String connectedTo = "";
 
 	// Setters
 	public void setAvailableBehaviors(ArrayList<String> availableBehaviors) {
@@ -21,6 +23,10 @@ public class ServerStatusData {
 		this.connectedClientsQty = connectedClientsQty;
 	}
 
+	public void setConnectedTo(String connectedTo) {
+		this.connectedTo = connectedTo;
+	}
+
 	// Getters
 	public ArrayList<String> getAvailableBehaviors() {
 		return availableBehaviors;
@@ -32,5 +38,9 @@ public class ServerStatusData {
 
 	public int getConnectedClientsQty() {
 		return connectedClientsQty;
+	}
+
+	public String getConnectedTo() {
+		return connectedTo;
 	}
 }

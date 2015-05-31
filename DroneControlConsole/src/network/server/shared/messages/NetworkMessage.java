@@ -1,4 +1,4 @@
-package network.server.messages;
+package network.server.shared.messages;
 
 /**
  * Wrapper for the network message, to be serialized with the Gson Library

@@ -5,16 +5,14 @@ import gui.RobotGUI;
 import network.DroneConsoleMessageHandler;
 import network.broadcast.ConsoleBroadcastHandler;
 import network.server.ServerConnectionListener;
+import network.server.shared.dataObjects.DronesSet;
 import threads.BehaviorMessageThread;
 import threads.ConnectionThread;
 import threads.MotorUpdateThread;
 import threads.NetworkActivationsUpdateThread;
 import threads.UpdateThread;
-
 import commoninterface.network.messages.InformationRequest.MessageType;
-
 import dataObjects.ConsoleMotorSpeeds;
-import dataObjects.DronesSet;
 
 public class DroneControlConsole extends RobotControlConsole {
 	

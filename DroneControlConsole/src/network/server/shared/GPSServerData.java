@@ -1,14 +1,15 @@
-package network.server;
+package network.server.shared;
 
 import java.io.Serializable;
-
-import org.joda.time.LocalDateTime;
-
-import commoninterface.dataobjects.GPSData;
-import commoninterface.network.NetworkUtils;
-import commoninterface.utils.Nmea0183ToDecimalConverter;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 
 public class GPSServerData implements Serializable {
+	private static final String ADDRESS_START = "192.168.3";
 	private final static int NUMBER_OF_PARAMETERS = 16;
 	private long PRINT_NUMBER = 0;
 
@@ -41,7 +42,7 @@ public class GPSServerData implements Serializable {
 
 	// General Methods
 	public GPSServerData() {
-		address = NetworkUtils.getAddress();
+		address = getAddress();
 		latitude = null;
 		longitude = null;
 		altitude = 0;
@@ -66,7 +67,7 @@ public class GPSServerData implements Serializable {
 	public int getNumberOfParameters() {
 		return NUMBER_OF_PARAMETERS;
 	}
-	
+
 	// Getters And Setters
 	public String getLatitude() {
 		return latitude;
@@ -79,7 +80,7 @@ public class GPSServerData implements Serializable {
 		double lat = Double.parseDouble(latitude.substring(0,
 				latitude.length() - 1));
 		char latPos = latitude.charAt(latitude.length() - 1);
-		lat = Nmea0183ToDecimalConverter.convertLatitudeToDecimal(lat, latPos);
+		lat = convertLatitudeToDecimal(lat, latPos);
 
 		this.latitudeDecimal = lat;
 	}
@@ -96,7 +97,7 @@ public class GPSServerData implements Serializable {
 				longitude.length() - 1));
 		char lonPos = longitude.charAt(longitude.length() - 1);
 
-		lon = Nmea0183ToDecimalConverter.convertLongitudeToDecimal(lon, lonPos);
+		lon = convertLongitudeToDecimal(lon, lonPos);
 
 		this.longitudeDecimal = lon;
 	}
@@ -251,5 +252,88 @@ public class GPSServerData implements Serializable {
 
 	public String getDroneAddress() {
 		return address;
+	}
+
+	public double convertLatitudeToDecimal(double lat, char latPos) {
+
+		BigDecimal bd = new BigDecimal(lat);
+		bd = bd.movePointLeft(2);
+
+		BigDecimal degrees = getDegrees(lat);
+
+		BigDecimal minutesAndSeconds = getMinutes(lat);
+
+		BigDecimal decimal = degrees.add(minutesAndSeconds).setScale(5,
+				RoundingMode.HALF_EVEN);
+
+		lat = decimal.doubleValue();
+
+		if (lat > 0 && latPos == 'W' || latPos == 'S') {
+			return lat * -1;
+		} else {
+			return lat;
+		}
+	}
+
+	public double convertLongitudeToDecimal(double lon, char lonPos) {
+
+		BigDecimal bd = new BigDecimal(lon);
+		bd = bd.movePointLeft(2);
+
+		BigDecimal degrees = getDegrees(lon);
+
+		BigDecimal minutesAndSeconds = getMinutes(lon);
+
+		BigDecimal decimal = degrees.add(minutesAndSeconds).setScale(5,
+				RoundingMode.HALF_EVEN);
+
+		lon = decimal.doubleValue();
+
+		if (lon > 0 && lonPos == 'W' || lonPos == 'S') {
+			return lon * -1;
+		} else {
+			return lon;
+		}
+	}
+
+	private BigDecimal getDegrees(double d) {
+		BigDecimal bd = new BigDecimal(d);
+		bd = bd.movePointLeft(2);
+
+		return new BigDecimal(bd.intValue());
+	}
+
+	private BigDecimal getMinutes(double d) {
+		BigDecimal bd = new BigDecimal(d);
+		bd = bd.movePointLeft(2);
+
+		BigDecimal minutesBd = bd.subtract(new BigDecimal(bd.intValue()));
+		minutesBd = minutesBd.movePointRight(2);
+
+		BigDecimal minutes = new BigDecimal(
+				(minutesBd.doubleValue() * 100) / 60).movePointLeft(2);
+
+		return minutes;
+	}
+
+	private String getAddress() {
+		try {
+			for (Enumeration<NetworkInterface> en = NetworkInterface
+					.getNetworkInterfaces(); en.hasMoreElements();) {
+				NetworkInterface intf = en.nextElement();
+
+				for (Enumeration<InetAddress> enumIpAddr = intf
+						.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+					String next = enumIpAddr.nextElement().toString()
+							.replace("/", "");
+					if (next.startsWith(ADDRESS_START)) {
+						return next;
+					}
+				}
+			}
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }
