@@ -1,6 +1,7 @@
 package gui.panels.map;
 
 import gui.panels.UpdatePanel;
+
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -21,11 +22,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 import org.openstreetmap.gui.jmapviewer.Layer;
@@ -40,6 +43,7 @@ import org.openstreetmap.gui.jmapviewer.interfaces.TileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.BingAerialTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOsmTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.OsmTileSource;
+
 import threads.UpdateThread;
 import commoninterface.entities.Entity;
 import commoninterface.entities.GeoEntity;
@@ -60,6 +64,7 @@ public class MapPanel extends UpdatePanel {
     private int robotMarkerIndex = 0;
     
     private HashMap<String,LinkedList<MapMarker>> robotPositions = new HashMap<String, LinkedList<MapMarker>>();
+    private HashMap<String,Long> robotPositionsUpdate = new HashMap<String, Long>();
     private UpdateThread thread = null;
     
     private GeoFence geoFence = new GeoFence("geofence");
@@ -75,6 +80,8 @@ public class MapPanel extends UpdatePanel {
     public MapPanel() {
 
         treeMap = new JMapViewerTreeDrone("Zones");
+        
+        new RefreshDrones().start();
         
         setBorder(BorderFactory.createTitledBorder("Map"));
         setLayout(new BorderLayout());
@@ -254,6 +261,7 @@ public class MapPanel extends UpdatePanel {
     	if(robotMarkers == null) {
     		robotMarkers = new LinkedList<MapMarker>();
     		robotPositions.put(name, robotMarkers);
+    		robotPositionsUpdate.put(name, System.currentTimeMillis());
     	}
     	
     	
@@ -285,6 +293,7 @@ public class MapPanel extends UpdatePanel {
 	    	robotMarkers.add(old);
 	    	l.add(old);
 	    	map().addMapMarker(old);
+	    	robotPositionsUpdate.put(name, System.currentTimeMillis());
 	    	
     	}
     	
@@ -341,6 +350,8 @@ public class MapPanel extends UpdatePanel {
 		
 		if(robotMarkers == null || robotMarkers.isEmpty())
 			return true;
+		
+		robotPositionsUpdate.put(name, System.currentTimeMillis());
 		
 		Coordinate c = robotMarkers.peekLast().getCoordinate();
 		
@@ -455,7 +466,36 @@ public class MapPanel extends UpdatePanel {
 		addingObstacle = false;
 	}
 	
-	private void clearObstacles() {
+	private synchronized void clearRobot(String name) {
+		
+		LinkedList<MapMarker> robotMarkers = robotPositions.get(name);
+    	
+    	Iterator<MapMarker> i = map().getMapMarkerList().iterator();
+    	
+    	Layer l = null;
+    	
+    	while(i.hasNext()) {
+    		MapMarker m = i.next();
+    		if(m.getLayer() != null && m.getLayer().getName().equals(name)) {
+    			l = m.getLayer();
+    			break;
+    		}
+    	}
+
+    	if(robotMarkers != null & l != null && !robotMarkers.isEmpty()) {
+    		
+    		i = robotMarkers.iterator();
+    		
+    		while(i.hasNext()) {
+    			MapMarker m = i.next();
+    			treeMap.removeFromLayer(m);
+    			map().removeMapMarker(m);
+    			i.remove();
+    		}
+    	}
+	}
+	
+	private synchronized void clearObstacles() {
 		
 		for(MapMarker m : obstacleMarkers) {
 	    	treeMap.removeFromLayer(m);
@@ -527,6 +567,26 @@ public class MapPanel extends UpdatePanel {
 			}
 			if(e instanceof GeoFence)
 				addGeoFence((GeoFence)e);
+		}
+	}
+	
+	class RefreshDrones extends Thread {
+		
+		long timeToDelete = 1000*5;//5 sec
+		
+		@Override
+		public void run() {
+			while(true) {
+				
+				for(String s : robotPositionsUpdate.keySet()) {
+					if(System.currentTimeMillis() - robotPositionsUpdate.get(s) > timeToDelete)
+						clearRobot(s);
+				}
+				
+				try {
+					Thread.sleep(timeToDelete);
+				} catch (InterruptedException e) {}
+			}
 		}
 	}
 }

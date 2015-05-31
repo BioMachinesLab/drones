@@ -15,7 +15,7 @@ public class SimulationNetwork extends Network {
 	}
 
 	@Override
-	public void send(String senderAddress, String msg) {
+	public synchronized void send(String senderAddress, String msg) {
 		for(Robot r : sim.getRobots()) {
 			if(r instanceof AquaticDroneCI) {
 				AquaticDroneCI aq = (AquaticDroneCI)r;

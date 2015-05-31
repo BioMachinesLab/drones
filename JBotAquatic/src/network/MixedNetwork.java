@@ -76,7 +76,7 @@ public class MixedNetwork extends Network {
 	}
 
 	@Override
-	public void send(String senderAddress, String msg) {
+	public synchronized void send(String senderAddress, String msg) {
 		
 		if(!continueExecution)
 			return;
