@@ -27,6 +27,7 @@ public class DroneData implements Serializable {
 	private String systemStatusMessage = "";
 	private BehaviorServerMessage behaviourMessage;
 	private NeuralActivationsServerMessage neuralActivations;
+	private BatteryStatusServerData batteryStatus;
 
 	/*
 	 * Methods
@@ -82,6 +83,10 @@ public class DroneData implements Serializable {
 		return gpsData;
 	}
 
+	public BatteryStatusServerData getBatteryStatus() {
+		return batteryStatus;
+	}
+
 	// Setters
 	public void setIpAddr(String ipAddr) {
 		this.ipAddr = ipAddr;
@@ -112,7 +117,8 @@ public class DroneData implements Serializable {
 		this.behaviourMessage = behaviourMessage;
 	}
 
-	public void setNeuralActivations(NeuralActivationsServerMessage neuralActivations) {
+	public void setNeuralActivations(
+			NeuralActivationsServerMessage neuralActivations) {
 		this.neuralActivations = neuralActivations;
 	}
 
@@ -134,4 +140,7 @@ public class DroneData implements Serializable {
 		}
 	}
 
+	public void setBatteryStatus(BatteryStatusServerData batteryStatus) {
+		this.batteryStatus = batteryStatus;
+	}
 }

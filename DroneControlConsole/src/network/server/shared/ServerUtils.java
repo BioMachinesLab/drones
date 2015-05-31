@@ -4,6 +4,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import network.server.shared.RobotServerLocation.DroneType;
+import network.server.shared.dataObjects.BatteryStatusServerData;
+
+import commoninterface.dataobjects.BatteryStatus;
 import commoninterface.dataobjects.GPSData;
 import commoninterface.entities.RobotLocation;
 import commoninterface.network.messages.BehaviorMessage;
@@ -110,5 +113,12 @@ public class ServerUtils {
 			System.err.println(e.getMessage());
 			return null;
 		}
+	}
+
+	public static BatteryStatusServerData getAsBatteryStatusServerData(
+			BatteryStatus batteryStatus) {
+		return new BatteryStatusServerData(batteryStatus.getBatteryID(),
+				batteryStatus.getCellsVoltages(),
+				batteryStatus.getBatteryTemperature());
 	}
 }

@@ -4,6 +4,7 @@ import gui.DroneGUI;
 import main.DroneControlConsole;
 import network.server.shared.ServerUtils;
 import network.server.shared.dataObjects.DroneData;
+import commoninterface.network.messages.BatteryMessage;
 import commoninterface.network.messages.CompassMessage;
 import commoninterface.network.messages.EntityMessage;
 import commoninterface.network.messages.GPSMessage;
@@ -50,6 +51,18 @@ public class DroneConsoleMessageHandler extends ControlConsoleMessageHandler {
 			
 			// TODO Entity processing on DroneData
 			//((DroneControlConsole) console).getDronesSet().getDrone(message.getSenderIPAddr()).setOrientation(((CompassMessage) message).getHeading());
+		
+		} else if (message instanceof BatteryMessage) {
+			((DroneGUI)console.getGUI()).getBatteryPanel().displayData((BatteryMessage) message);
+			
+			if(((DroneControlConsole) console).getDronesSet().existsDrone(message.getSenderHostname())){
+				((DroneControlConsole) console).getDronesSet().getDrone(message.getSenderHostname()).setBatteryStatus(ServerUtils.getAsBatteryStatusServerData(((BatteryMessage) message).getBatteryStatus()));
+			}else{
+				DroneData droneData = new DroneData(message.getSenderIPAddr(),message.getSenderHostname());
+				droneData.setBatteryStatus(ServerUtils.getAsBatteryStatusServerData(((BatteryMessage) message).getBatteryStatus()));
+				
+				((DroneControlConsole) console).getDronesSet().addDrone(droneData);
+			}
 			
 		}else {
 			System.out.println("Received non recognized message type: " + message.getClass().toString());
