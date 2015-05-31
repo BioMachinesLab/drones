@@ -22,7 +22,7 @@ public class DronesSet {
 	}
 
 	public void removeDrone(DroneData drone) {
-		dronesSet.remove(drone.getName(), drone);
+		dronesSet.remove(drone.getName());
 	}
 
 	public DroneData getDrone(String name) {
