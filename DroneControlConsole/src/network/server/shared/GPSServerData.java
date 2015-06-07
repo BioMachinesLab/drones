@@ -70,7 +70,7 @@ public class GPSServerData implements Serializable {
 
 	// Getters And Setters
 	public String getLatitude() {
-		return latitude;
+		return Double.toString(latitudeDecimal);
 	}
 
 	public void setLatitude(String latitude) {
@@ -86,7 +86,7 @@ public class GPSServerData implements Serializable {
 	}
 
 	public String getLongitude() {
-		return longitude;
+		return Double.toString(longitudeDecimal);
 	}
 
 	public void setLongitude(String longitude) {
