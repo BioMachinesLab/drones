@@ -7,13 +7,10 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.SecondaryLoop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -31,6 +28,7 @@ import main.DroneControlConsole;
 import main.RobotControlConsole;
 import network.CommandSender;
 import threads.UpdateThread;
+
 import commoninterface.CIBehavior;
 import commoninterface.entities.Entity;
 import commoninterface.network.NetworkUtils;
@@ -43,6 +41,7 @@ import commoninterface.utils.CIArguments;
 import commoninterface.utils.ClassLoadHelper;
 
 public class CommandPanel extends UpdatePanel {
+	private static final long serialVersionUID = 4038133860317693008L;
 
 	private static String CONTROLLERS_FOLDER = "controllers";
 
@@ -64,6 +63,7 @@ public class CommandPanel extends UpdatePanel {
 	public JButton stopAll;
 	public JButton entitiesButton;
 	private JComboBox<String> behaviors;
+	private JComboBox<String> controllers;
 
 	private ArrayList<String> availableBehaviors = new ArrayList<String>();
 	private ArrayList<String> availableControllers = new ArrayList<String>();
@@ -99,7 +99,7 @@ public class CommandPanel extends UpdatePanel {
 		populateBehaviors(behaviors);
 		comboBoxes.add(behaviors, BorderLayout.NORTH);
 
-		JComboBox<String> controllers = new JComboBox<String>();
+		controllers = new JComboBox<String>();
 		controllers.setPreferredSize(new Dimension(20, 20));
 		populateControllers(controllers);
 		comboBoxes.add(controllers, BorderLayout.SOUTH);
@@ -288,6 +288,7 @@ public class CommandPanel extends UpdatePanel {
 
 	private void populateControllers(JComboBox<String> list) {
 		list.addItem("");
+		availableBehaviors.add("");
 
 		File controllersFolder = new File(CONTROLLERS_FOLDER);
 
@@ -298,6 +299,7 @@ public class CommandPanel extends UpdatePanel {
 				availableControllers.add(s);
 			}
 		}
+
 	}
 
 	public BehaviorMessage getCurrentMessage() {
@@ -385,10 +387,19 @@ public class CommandPanel extends UpdatePanel {
 		config.setText(configStr);
 	}
 
-	public void setSeletedJComboBoxElement(String str) {
+	public void setSeletedJComboBoxBehavior(String str) {
 		for (int i = 0; i < behaviors.getItemCount(); i++) {
 			if (behaviors.getItemAt(i).contains(str)) {
 				behaviors.setSelectedIndex(i);
+				break;
+			}
+		}
+	}
+
+	public void setSeletedJComboBoxConfigurationFile(String str) {
+		for (int i = 0; i < controllers.getItemCount(); i++) {
+			if (controllers.getItemAt(i).contains(str)) {
+				controllers.setSelectedIndex(i);
 				break;
 			}
 		}

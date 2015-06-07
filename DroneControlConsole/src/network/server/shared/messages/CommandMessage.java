@@ -2,7 +2,7 @@ package network.server.shared.messages;
 
 public class CommandMessage extends ServerMessage {
 	public static enum Action {
-		START, STOP, DEPLOY, STOPALL, SETLOGSTAMP
+		START, STOP, DEPLOY, STOPALL, SETLOGSTAMP, DEPLOYENTITIES
 	}
 
 	private String[] payload = null;

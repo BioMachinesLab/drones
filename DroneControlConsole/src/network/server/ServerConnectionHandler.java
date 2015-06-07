@@ -112,15 +112,15 @@ public class ServerConnectionHandler extends Thread {
 			switch(cmdMessage.getMessageAction()){
 			case DEPLOY:
 				commandPanel.deploy.doClick();
-				commandPanel.entitiesButton.doClick();
 				break;
 			case SETLOGSTAMP:
 				console.getGUI().getCommandPanel().setLogText(cmdMessage.getPayload()[0]);
 				commandPanel.sendLog.doClick();
 				break;
 			case START:
-				console.getGUI().getCommandPanel().setConfiguration(cmdMessage.getPayload()[1]);
-				commandPanel.setSeletedJComboBoxElement(cmdMessage.getPayload()[0]);
+				commandPanel.setConfiguration(cmdMessage.getPayload()[2]);
+				commandPanel.setSeletedJComboBoxConfigurationFile(cmdMessage.getPayload()[1]);
+				commandPanel.setSeletedJComboBoxBehavior(cmdMessage.getPayload()[0]);
 				commandPanel.start.doClick();
 				break;
 			case STOP:
@@ -128,6 +128,9 @@ public class ServerConnectionHandler extends Thread {
 				break;
 			case STOPALL:
 				commandPanel.stopAll.doClick();
+				break;
+			case DEPLOYENTITIES:
+				commandPanel.entitiesButton.doClick();
 				break;
 			}
 
