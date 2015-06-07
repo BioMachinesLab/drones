@@ -43,7 +43,7 @@ public class ServerConnectionHandler extends Thread {
 
 			while (true) {
 				NetworkMessage networkMessage = new Gson().fromJson(
-						(String)in.readObject(), NetworkMessage.class);
+						(String) in.readObject(), NetworkMessage.class);
 				processData(networkMessage);
 			}
 		} catch (IOException e) {
@@ -63,7 +63,7 @@ public class ServerConnectionHandler extends Thread {
 
 	private void processData(NetworkMessage data) throws ClassNotFoundException {
 		ServerMessage inMessage = data.getMessage();
-		RobotControlConsole console = connectionListener.getConsole();
+		DroneControlConsole console = connectionListener.getConsole();
 		
 		switch (data.getMsgType()) {
 		case DronesInformationRequest:
@@ -102,9 +102,13 @@ public class ServerConnectionHandler extends Thread {
 			MotorsPanel panel = connectionListener.getConsole().getGUI().getMotorsPanel();
 			DronesMotorsSet motorsMessage = ((DronesMotorsSet)inMessage);
 			
-			panel.setSliderValues(motorsMessage.getLeftSpeed(),motorsMessage.getRightSpeed());
-			panel.setMaximumSpeed(motorsMessage.getSpeedLimit());
-			panel.setOffsetValue(motorsMessage.getOffset());
+			String connectedToDroneAddr = console.getDronesSet().getConnectedToAddress();
+			
+			if(connectedToDroneAddr.equals(motorsMessage.getDroneIP()) || connectedToDroneAddr.equals(motorsMessage.getDroneName())){
+				panel.setSliderValues(motorsMessage.getLeftSpeed(),motorsMessage.getRightSpeed());
+				panel.setMaximumSpeed(motorsMessage.getSpeedLimit());
+				panel.setOffsetValue(motorsMessage.getOffset());
+			}
 			break;
 		case CommandMessage:
 			CommandMessage cmdMessage = ((CommandMessage)inMessage);
@@ -118,8 +122,11 @@ public class ServerConnectionHandler extends Thread {
 				commandPanel.sendLog.doClick();
 				break;
 			case START:
-				commandPanel.setConfiguration(cmdMessage.getPayload()[2]);
 				commandPanel.setSeletedJComboBoxConfigurationFile(cmdMessage.getPayload()[1]);
+				if(cmdMessage.getPayload()[1].equals("")){
+					commandPanel.setConfiguration(cmdMessage.getPayload()[2]);
+				}
+				
 				commandPanel.setSeletedJComboBoxBehavior(cmdMessage.getPayload()[0]);
 				commandPanel.start.doClick();
 				break;
@@ -147,7 +154,9 @@ public class ServerConnectionHandler extends Thread {
 		try {
 			out.writeObject(json);
 		} catch (IOException e) {
-			System.err.println("[SERVER CONNECTION HANDLER] Unable to write object to socket... "+e.getMessage());
+			System.err
+					.println("[SERVER CONNECTION HANDLER] Unable to write object to socket... "
+							+ e.getMessage());
 		}
 		System.out
 				.println("[SERVER CONNECTION HANDLER] Sent information of type "
@@ -182,7 +191,7 @@ public class ServerConnectionHandler extends Thread {
 							+ clientName + "... there is an open connection?");
 		}
 	}
-	
+
 	public synchronized void closeConnectionWhitoutRemove() {
 		try {
 			if (socket != null && !socket.isClosed()) {

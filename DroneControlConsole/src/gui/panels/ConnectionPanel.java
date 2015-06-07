@@ -99,7 +99,7 @@ public class ConnectionPanel extends UpdatePanel {
 	private void disconnect() {
 		console.disconnect();
 	}
-
+	
 	public void connectionOK(String address) {
 		currentConnection.setText(address);
 		

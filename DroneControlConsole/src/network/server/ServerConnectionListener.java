@@ -60,6 +60,7 @@ public class ServerConnectionListener implements ServerObservated {
 
 	public synchronized void removeConnection(ServerConnectionHandler conn) {
 		connections.remove(conn);
+		observer.updateStatus();
 	}
 
 	public ArrayList<ServerConnectionHandler> getConnections() {
@@ -132,7 +133,7 @@ public class ServerConnectionListener implements ServerObservated {
 							.println("[SERVER CONNECTION LISTENER] New client at "
 									+ socket.getInetAddress().getHostAddress());
 					createHandler(socket);
-					printConnections();
+					//printConnections();
 				}
 				System.out.println("Offline!");
 				observer.setOfflineServer();

@@ -5,7 +5,8 @@ public class DronesMotorsSet extends ServerMessage {
 	private int right = 0;
 	private int speedLimit = 0;
 	private int offset = 0;
-	private String droneID;
+	private String droneName;
+	private String droneIP;
 
 	public DronesMotorsSet() {
 		super(MessageType.DRONES_MOTORS_SET);
@@ -19,8 +20,12 @@ public class DronesMotorsSet extends ServerMessage {
 		this.right = right;
 	}
 
-	public void setDroneID(String droneID) {
-		this.droneID = droneID;
+	public void setDroneIP(String droneIP) {
+		this.droneIP = droneIP;
+	}
+	
+	public void setDroneName(String droneName) {
+		this.droneName = droneName;
 	}
 
 	public void setSpeedLimit(int speedLimit) {
@@ -47,7 +52,11 @@ public class DronesMotorsSet extends ServerMessage {
 		return offset;
 	}
 
-	public String getDroneID() {
-		return droneID;
+	public String getDroneIP() {
+		return droneIP;
+	}
+	
+	public String getDroneName() {
+		return droneName;
 	}
 }

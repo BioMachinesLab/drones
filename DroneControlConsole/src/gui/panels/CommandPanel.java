@@ -288,8 +288,7 @@ public class CommandPanel extends UpdatePanel {
 
 	private void populateControllers(JComboBox<String> list) {
 		list.addItem("");
-		availableBehaviors.add("");
-
+		
 		File controllersFolder = new File(CONTROLLERS_FOLDER);
 
 		if (controllersFolder.exists() && controllersFolder.isDirectory()) {
