@@ -1,5 +1,7 @@
 package network.server;
 
+import gui.panels.MotorsPanel;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -94,13 +96,12 @@ public class ServerConnectionHandler extends Thread {
 			sendData(responseMessageB);
 			break;
 		case DroneMotorsSet:
-			connectionListener
-					.getConsole()
-					.getGUI()
-					.getMotorsPanel()
-					.setSliderValues(
-							((DronesMotorsSet) inMessage).getLeftSpeed(),
-							((DronesMotorsSet) inMessage).getRightSpeed());
+			MotorsPanel panel = connectionListener.getConsole().getGUI().getMotorsPanel();
+			DronesMotorsSet motorsMessage = ((DronesMotorsSet)inMessage);
+			
+			panel.setSliderValues(motorsMessage.getLeftSpeed(),motorsMessage.getRightSpeed());
+			panel.setMaximumSpeed(motorsMessage.getSpeedLimit());
+			panel.setOffsetValue(motorsMessage.getOffset());
 			break;
 		default:
 			System.out.println("Received message with type: "

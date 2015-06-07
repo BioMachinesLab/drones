@@ -11,9 +11,9 @@ import java.util.ArrayList;
 
 import main.DroneControlConsole;
 import main.RobotControlConsole;
-import network.server.shared.ServerUtils;
 import network.server.shared.dataObjects.DroneData;
 import network.server.shared.dataObjects.DronesSet;
+
 import commoninterface.entities.Entity;
 import commoninterface.entities.RobotLocation;
 import commoninterface.network.NetworkUtils;
@@ -185,7 +185,9 @@ public class ConsoleBroadcastHandler {
 					drone.setTimeSinceLastHeartbeat((long) obj);
 					break;
 				case "GPS":
-					drone.setRobotLocation(ServerUtils.getAsRobotServerLocation((RobotLocation) obj));
+					drone.getGPSData().setLatitudeDecimal(((RobotLocation) obj).getLatLon().getLat());	
+					drone.getGPSData().setLongitudeDecimal(((RobotLocation) obj).getLatLon().getLon());
+					drone.setOrientation(((RobotLocation)obj).getOrientation());
 					break;
 				default:
 					System.out

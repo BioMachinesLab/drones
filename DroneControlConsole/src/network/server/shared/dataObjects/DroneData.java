@@ -5,10 +5,10 @@ import java.io.Serializable;
 import network.server.shared.BehaviorServerMessage;
 import network.server.shared.GPSServerData;
 import network.server.shared.NeuralActivationsServerMessage;
-import network.server.shared.RobotServerLocation;
-import commoninterface.network.messages.NeuralActivationsMessage;
 
 public class DroneData implements Serializable {
+	private static final long serialVersionUID = -5255732989855282894L;
+	
 	/*
 	 * Variables
 	 */
@@ -19,7 +19,6 @@ public class DroneData implements Serializable {
 	private long timeSinceLastHeartbeat = -1;
 
 	// Telemetry Informations
-	private RobotServerLocation robotLocation;
 	private double compassOrientation;
 	private GPSServerData gpsData;
 
@@ -59,10 +58,6 @@ public class DroneData implements Serializable {
 		return timeSinceLastHeartbeat;
 	}
 
-	public RobotServerLocation getRobotLocation() {
-		return robotLocation;
-	}
-
 	public double getCompassOrientation() {
 		return compassOrientation;
 	}
@@ -100,10 +95,15 @@ public class DroneData implements Serializable {
 		this.timeSinceLastHeartbeat = timeSinceLastHeartbeat;
 	}
 
-	public void setRobotLocation(RobotServerLocation robotLocation) {
-		this.robotLocation = robotLocation;
-		this.compassOrientation = robotLocation.getOrientation();
-	}
+//	public void setRobotLocation(RobotServerLocation robotLocation) {
+//		if (gpsData == null) {
+//			gpsData = new GPSServerData();
+//		}
+//
+//		this.gpsData.setLatitudeDecimal(robotLocation.getLatitude());
+//		this.gpsData.setLongitudeDecimal(robotLocation.getLongitude());
+//		this.compassOrientation = robotLocation.getOrientation();
+//	}
 
 	public void setOrientation(double compassOrientation) {
 		this.compassOrientation = compassOrientation;

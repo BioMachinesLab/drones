@@ -29,7 +29,7 @@ public class ServerConnectionListener implements ServerObservated {
 		observer.updateStatus();
 	}
 
-	public void closeConnections() {
+	public synchronized void closeConnections() {
 		if (!connections.isEmpty()) {
 			System.out
 					.println("[SERVER CONNECTION LISTENER] Closing Connections!");
@@ -133,6 +133,7 @@ public class ServerConnectionListener implements ServerObservated {
 					createHandler(socket);
 					printConnections();
 				}
+				System.out.println("Offline!");
 				observer.setOfflineServer();
 			} catch (IOException e) {
 				observer.setOfflineServer();

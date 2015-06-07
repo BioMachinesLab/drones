@@ -3,12 +3,10 @@ package network.server.shared;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import network.server.shared.RobotServerLocation.DroneType;
 import network.server.shared.dataObjects.BatteryStatusServerData;
 
 import commoninterface.dataobjects.BatteryStatus;
 import commoninterface.dataobjects.GPSData;
-import commoninterface.entities.RobotLocation;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.network.messages.NeuralActivationsMessage;
 
@@ -65,25 +63,6 @@ public class ServerUtils {
 		return new BehaviorMessage(behaviorServerMessage.selectedBehavior,
 				behaviorServerMessage.getArguments(),
 				behaviorServerMessage.selectedStatus, getHostname());
-	}
-
-	public static RobotServerLocation getAsRobotServerLocation(
-			RobotLocation robotLocation) {
-		RobotServerLocation.DroneType droneType = null;
-		switch (robotLocation.getDroneType()) {
-		case DRONE:
-			droneType = DroneType.DRONE;
-			break;
-		case ENEMY:
-			droneType = DroneType.ENEMY;
-			break;
-		default:
-			droneType = DroneType.OTHER;
-			break;
-		}
-		return new RobotServerLocation(robotLocation.getName(), robotLocation
-				.getLatLon().getLat(), robotLocation.getLatLon().getLon(),
-				robotLocation.getOrientation(), droneType);
 	}
 
 	public static NeuralActivationsMessage getAsNeuralActivationsMessage(
