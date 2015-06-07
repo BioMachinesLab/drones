@@ -26,6 +26,7 @@ public class ServerConnectionListener implements ServerObservated {
 
 	protected void addConnection(ServerConnectionHandler conn) {
 		connections.add(conn);
+		observer.updateStatus();
 	}
 
 	public void closeConnections() {
@@ -37,6 +38,7 @@ public class ServerConnectionListener implements ServerObservated {
 					conn.closeConnection();
 			}
 		}
+		observer.updateStatus();
 	}
 
 	public void stopServer() {
@@ -127,7 +129,9 @@ public class ServerConnectionListener implements ServerObservated {
 
 				while (enable.get()) {
 					Socket socket = serverSocket.accept();
+					System.out.println("[SERVER CONNECTION LISTENER] New client at "+socket.getInetAddress().getHostAddress());
 					createHandler(socket);
+					printConnections();
 				}
 				observer.setOfflineServer();
 			} catch (IOException e) {
@@ -152,5 +156,14 @@ public class ServerConnectionListener implements ServerObservated {
 			addConnection(conn);
 			conn.start();
 		}
+	}
+	
+	private void printConnections(){
+		System.out.println("[SERVER CONNECTION LISTENER]");
+		System.out.println("###### Connected clients list init");
+		for(ServerConnectionHandler connection : connections){
+			System.out.println(connection.clientName);
+		}
+		System.out.println("###### Connected clients list end");
 	}
 }

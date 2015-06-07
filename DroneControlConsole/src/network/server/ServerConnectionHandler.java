@@ -1,11 +1,8 @@
 package network.server;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.net.InetAddress;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -15,6 +12,7 @@ import network.server.shared.dataObjects.DroneData;
 import network.server.shared.dataObjects.ServerStatusData;
 import network.server.shared.messages.DronesInformationRequest;
 import network.server.shared.messages.DronesInformationResponse;
+import network.server.shared.messages.DronesMotorsSet;
 import network.server.shared.messages.NetworkMessage;
 import network.server.shared.messages.ServerMessage;
 import network.server.shared.messages.ServerStatusResponse;
@@ -23,8 +21,8 @@ import com.google.gson.Gson;
 
 public class ServerConnectionHandler extends Thread {
 	protected Socket socket;
-	protected PrintWriter out;
-	protected BufferedReader in;
+	protected ObjectOutputStream out;
+	protected ObjectInputStream in;
 	protected String clientName = null;
 	protected ServerConnectionListener connectionListener;
 
@@ -41,7 +39,7 @@ public class ServerConnectionHandler extends Thread {
 
 			while (true) {
 				NetworkMessage networkMessage = new Gson().fromJson(
-						in.readLine(), NetworkMessage.class);
+						(String)in.readObject(), NetworkMessage.class);
 				processData(networkMessage);
 			}
 		} catch (IOException e) {
@@ -55,7 +53,7 @@ public class ServerConnectionHandler extends Thread {
 			e.printStackTrace();
 		} finally {
 			// always shutdown the handler when something goes wrong
-			shutdownHandler();
+			closeConnection();
 		}
 	}
 
@@ -95,6 +93,15 @@ public class ServerConnectionHandler extends Thread {
 			responseMessageB.setMessage(responseB);
 			sendData(responseMessageB);
 			break;
+		case DroneMotorsSet:
+			connectionListener
+					.getConsole()
+					.getGUI()
+					.getMotorsPanel()
+					.setSliderValues(
+							((DronesMotorsSet) inMessage).getLeftSpeed(),
+							((DronesMotorsSet) inMessage).getRightSpeed());
+			break;
 		default:
 			System.out.println("Received message with type: "
 					+ ((ServerMessage) inMessage).getMessageType());
@@ -104,25 +111,24 @@ public class ServerConnectionHandler extends Thread {
 
 	public void sendData(NetworkMessage outMessage) {
 		String json = new Gson().toJson(outMessage, NetworkMessage.class);
-		out.println(json);
+		try {
+			out.writeObject(json);
+		} catch (IOException e) {
+			System.err.println("[SERVER CONNECTION HANDLER] Unable to write object to socket... "+e.getMessage());
+		}
 		System.out
 				.println("[SERVER CONNECTION HANDLER] Sent information of type "
 						+ outMessage.getMsgType());
 	}
 
-	protected void shutdownHandler() {
-		closeConnection();
-	}
-
 	protected void initConnection() throws IOException, ClassNotFoundException {
-		out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()),
-				true);
-		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		out = new ObjectOutputStream(socket.getOutputStream());
+		in = new ObjectInputStream(socket.getInputStream());
 
-		out.println(InetAddress.getLocalHost().getHostName());
-		out.flush();
+		// out.println(InetAddress.getLocalHost().getHostName());
+		// out.flush();
 
-		clientName = (String) in.readLine();
+		clientName = (String) in.readObject();
 
 		System.out.println("[SERVER CONNECTION HANDLER] Client "
 				+ socket.getInetAddress().getHostAddress() + " (" + clientName
@@ -134,20 +140,6 @@ public class ServerConnectionHandler extends Thread {
 			if (socket != null && !socket.isClosed()) {
 				socket.close();
 				connectionListener.removeConnection(this);
-				out.close();
-				in.close();
-			}
-		} catch (IOException e) {
-			System.out
-					.println("[SERVER CONNECTION HANDLER] Unable to close connection to "
-							+ clientName + "... there is an open connection?");
-		}
-	}
-
-	public synchronized void closeConnectionWithoutDiscardConnListener() {
-		try {
-			if (socket != null && !socket.isClosed()) {
-				socket.close();
 				out.close();
 				in.close();
 			}

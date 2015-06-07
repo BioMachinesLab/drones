@@ -1,6 +1,4 @@
 package main;
-import java.awt.BorderLayout;
-
 import javax.swing.JFrame;
 
 import simulation.util.Arguments;
