@@ -8,7 +8,7 @@ import network.server.shared.NeuralActivationsServerMessage;
 
 public class DroneData implements Serializable {
 	private static final long serialVersionUID = -5255732989855282894L;
-	
+
 	/*
 	 * Variables
 	 */
@@ -35,6 +35,7 @@ public class DroneData implements Serializable {
 	public DroneData(String ipAddr, String name) {
 		this.ipAddr = ipAddr;
 		this.name = name;
+		gpsData = new GPSServerData();
 	}
 
 	public DroneData(String name) {
@@ -94,17 +95,7 @@ public class DroneData implements Serializable {
 	public void setTimeSinceLastHeartbeat(long timeSinceLastHeartbeat) {
 		this.timeSinceLastHeartbeat = timeSinceLastHeartbeat;
 	}
-
-//	public void setRobotLocation(RobotServerLocation robotLocation) {
-//		if (gpsData == null) {
-//			gpsData = new GPSServerData();
-//		}
-//
-//		this.gpsData.setLatitudeDecimal(robotLocation.getLatitude());
-//		this.gpsData.setLongitudeDecimal(robotLocation.getLongitude());
-//		this.compassOrientation = robotLocation.getOrientation();
-//	}
-
+	
 	public void setOrientation(double compassOrientation) {
 		this.compassOrientation = compassOrientation;
 	}

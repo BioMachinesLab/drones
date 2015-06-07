@@ -140,7 +140,7 @@ public class ServerConnectionHandler extends Thread {
 		try {
 			if (socket != null && !socket.isClosed()) {
 				socket.close();
-				connectionListener.removeConnection(this);
+				//connectionListener.removeConnection(this);
 				out.close();
 				in.close();
 			}
