@@ -53,11 +53,17 @@ public class CommandPanel extends UpdatePanel {
 	private BehaviorMessage currentMessage;
 	private JTextArea config;
 	private JTextField logMessage;
-	private JButton sendLog;
+	public JButton sendLog;
 	private RobotGUI gui;
 	private RobotControlConsole console;
 	private boolean dronePanel = false;
 	private JFrame neuralActivationsWindow;
+	public JButton start;
+	public JButton stop;
+	public JButton deploy;
+	public JButton stopAll;
+	public JButton entitiesButton;
+	private JComboBox<String> behaviors;
 
 	private ArrayList<String> availableBehaviors = new ArrayList<String>();
 	private ArrayList<String> availableControllers = new ArrayList<String>();
@@ -88,7 +94,7 @@ public class CommandPanel extends UpdatePanel {
 
 		JPanel comboBoxes = new JPanel(new BorderLayout());
 
-		JComboBox<String> behaviors = new JComboBox<String>();
+		behaviors = new JComboBox<String>();
 		behaviors.setPreferredSize(new Dimension(20, 20));
 		populateBehaviors(behaviors);
 		comboBoxes.add(behaviors, BorderLayout.NORTH);
@@ -106,10 +112,10 @@ public class CommandPanel extends UpdatePanel {
 
 		topPanel.add(comboBoxes, BorderLayout.NORTH);
 
-		JButton start = new JButton("Start");
-		JButton stop = new JButton("Stop");
-		JButton deploy = new JButton("Deploy");
-		JButton stopAll = new JButton("Stop All");
+		start = new JButton("Start");
+		stop = new JButton("Stop");
+		deploy = new JButton("Deploy");
+		stopAll = new JButton("Stop All");
 
 		start.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -154,7 +160,7 @@ public class CommandPanel extends UpdatePanel {
 
 		if (dronePanel) {
 
-			JButton entitiesButton = new JButton("Deploy Entities");
+			entitiesButton = new JButton("Deploy Entities");
 
 			buttons.add(entitiesButton);
 
@@ -373,10 +379,18 @@ public class CommandPanel extends UpdatePanel {
 
 	public void setLogText(String text) {
 		logMessage.setText(text);
-		sendLog.doClick();
 	}
 
 	public void setConfiguration(String configStr) {
 		config.setText(configStr);
+	}
+
+	public void setSeletedJComboBoxElement(String str) {
+		for (int i = 0; i < behaviors.getItemCount(); i++) {
+			if (behaviors.getItemAt(i).contains(str)) {
+				behaviors.setSelectedIndex(i);
+				break;
+			}
+		}
 	}
 }

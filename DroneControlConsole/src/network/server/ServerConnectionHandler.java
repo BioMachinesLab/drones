@@ -1,5 +1,6 @@
 package network.server;
 
+import gui.panels.CommandPanel;
 import gui.panels.MotorsPanel;
 
 import java.io.IOException;
@@ -107,31 +108,32 @@ public class ServerConnectionHandler extends Thread {
 			break;
 		case CommandMessage:
 			CommandMessage cmdMessage = ((CommandMessage)inMessage);
-			
+			CommandPanel commandPanel =console.getGUI().getCommandPanel();
 			switch(cmdMessage.getMessageAction()){
-			case COMMAND:
-				console.getGUI().getCommandPanel().setConfiguration(cmdMessage.getPayload()[0]);
-				break;
 			case DEPLOY:
-				
+				commandPanel.deploy.doClick();
+				commandPanel.entitiesButton.doClick();
 				break;
 			case SETLOGSTAMP:
 				console.getGUI().getCommandPanel().setLogText(cmdMessage.getPayload()[0]);
+				commandPanel.sendLog.doClick();
 				break;
 			case START:
-				
+				console.getGUI().getCommandPanel().setConfiguration(cmdMessage.getPayload()[1]);
+				commandPanel.setSeletedJComboBoxElement(cmdMessage.getPayload()[0]);
+				commandPanel.start.doClick();
 				break;
 			case STOP:
-				
+				commandPanel.stop.doClick();
 				break;
 			case STOPALL:
-				
+				commandPanel.stopAll.doClick();
 				break;
 			}
-			
+
 			break;
 		default:
-			System.out.println("Received message with type: "
+			System.out.println("Received message with unknown type: "
 					+ ((ServerMessage) inMessage).getMessageType());
 			break;
 		}
@@ -167,7 +169,21 @@ public class ServerConnectionHandler extends Thread {
 		try {
 			if (socket != null && !socket.isClosed()) {
 				socket.close();
-				//connectionListener.removeConnection(this);
+				connectionListener.removeConnection(this);
+				out.close();
+				in.close();
+			}
+		} catch (IOException e) {
+			System.out
+					.println("[SERVER CONNECTION HANDLER] Unable to close connection to "
+							+ clientName + "... there is an open connection?");
+		}
+	}
+	
+	public synchronized void closeConnectionWhitoutRemove() {
+		try {
+			if (socket != null && !socket.isClosed()) {
+				socket.close();
 				out.close();
 				in.close();
 			}

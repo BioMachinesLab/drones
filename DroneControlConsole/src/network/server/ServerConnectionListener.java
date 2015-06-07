@@ -35,10 +35,9 @@ public class ServerConnectionListener implements ServerObservated {
 					.println("[SERVER CONNECTION LISTENER] Closing Connections!");
 			for (ServerConnectionHandler conn : connections) {
 				if (!conn.getSocket().isClosed())
-					conn.closeConnection();
+					conn.closeConnectionWhitoutRemove();
 			}
 		}
-		observer.updateStatus();
 	}
 
 	public void stopServer() {
@@ -141,7 +140,7 @@ public class ServerConnectionListener implements ServerObservated {
 				observer.setOfflineServer();
 				if (!e.getMessage().equals("socket closed")) {
 					observer.setMessage("Error on server");
-					System.err.println(e.getMessage());
+//					System.err.println(e.getMessage());
 				}
 			} finally {
 				try {
