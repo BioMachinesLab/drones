@@ -7,6 +7,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.SecondaryLoop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -51,6 +52,8 @@ public class CommandPanel extends UpdatePanel {
 	private JLabel statusMessage;
 	private BehaviorMessage currentMessage;
 	private JTextArea config;
+	private JTextField logMessage;
+	private JButton sendLog;
 	private RobotGUI gui;
 	private RobotControlConsole console;
 	private boolean dronePanel = false;
@@ -132,8 +135,8 @@ public class CommandPanel extends UpdatePanel {
 			}
 		});
 
-		JTextField logMessage = new JTextField();
-		JButton sendLog = new JButton("Send Log");
+		logMessage = new JTextField();
+		sendLog = new JButton("Send Log");
 
 		sendLog.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -366,5 +369,14 @@ public class CommandPanel extends UpdatePanel {
 
 	public void updateHostname() {
 		myHostname = NetworkUtils.getHostname();
+	}
+
+	public void setLogText(String text) {
+		logMessage.setText(text);
+		sendLog.doClick();
+	}
+
+	public void setConfiguration(String configStr) {
+		config.setText(configStr);
 	}
 }

@@ -12,6 +12,7 @@ import main.DroneControlConsole;
 import main.RobotControlConsole;
 import network.server.shared.dataObjects.DroneData;
 import network.server.shared.dataObjects.ServerStatusData;
+import network.server.shared.messages.CommandMessage;
 import network.server.shared.messages.DronesInformationRequest;
 import network.server.shared.messages.DronesInformationResponse;
 import network.server.shared.messages.DronesMotorsSet;
@@ -61,6 +62,8 @@ public class ServerConnectionHandler extends Thread {
 
 	private void processData(NetworkMessage data) throws ClassNotFoundException {
 		ServerMessage inMessage = data.getMessage();
+		RobotControlConsole console = connectionListener.getConsole();
+		
 		switch (data.getMsgType()) {
 		case DronesInformationRequest:
 			NetworkMessage responseMessageA = new NetworkMessage();
@@ -76,7 +79,6 @@ public class ServerConnectionHandler extends Thread {
 		case ServerStatusRequest:
 			NetworkMessage responseMessageB = new NetworkMessage();
 			ServerStatusData serverStatusData = new ServerStatusData();
-			RobotControlConsole console = connectionListener.getConsole();
 
 			serverStatusData.setAvailableBehaviors(console.getGUI()
 					.getCommandPanel().getAvailableBehaviors());
@@ -102,6 +104,31 @@ public class ServerConnectionHandler extends Thread {
 			panel.setSliderValues(motorsMessage.getLeftSpeed(),motorsMessage.getRightSpeed());
 			panel.setMaximumSpeed(motorsMessage.getSpeedLimit());
 			panel.setOffsetValue(motorsMessage.getOffset());
+			break;
+		case CommandMessage:
+			CommandMessage cmdMessage = ((CommandMessage)inMessage);
+			
+			switch(cmdMessage.getMessageAction()){
+			case COMMAND:
+				console.getGUI().getCommandPanel().setConfiguration(cmdMessage.getPayload()[0]);
+				break;
+			case DEPLOY:
+				
+				break;
+			case SETLOGSTAMP:
+				console.getGUI().getCommandPanel().setLogText(cmdMessage.getPayload()[0]);
+				break;
+			case START:
+				
+				break;
+			case STOP:
+				
+				break;
+			case STOPALL:
+				
+				break;
+			}
+			
 			break;
 		default:
 			System.out.println("Received message with type: "

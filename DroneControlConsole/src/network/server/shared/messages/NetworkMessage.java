@@ -7,7 +7,7 @@ package network.server.shared.messages;
  */
 public class NetworkMessage {
 	public static enum MSG_TYPE {
-		DroneMotorsSet, DronesInformationRequest, DronesInformationResponse, ServerStatusResponse, ServerStatusRequest
+		DroneMotorsSet, DronesInformationRequest, DronesInformationResponse, ServerStatusResponse, ServerStatusRequest, CommandMessage
 	}
 
 	private MSG_TYPE msgType;
@@ -17,6 +17,7 @@ public class NetworkMessage {
 	private ServerStatusResponse SSResp;
 	private ServerStatusRequest SSReq;
 	private DronesMotorsSet DMSet;
+	private CommandMessage CMDMsg;
 
 	public void setMessage(ServerMessage message) throws ClassNotFoundException {
 		if (message instanceof DronesInformationRequest) {
@@ -34,6 +35,9 @@ public class NetworkMessage {
 		} else if (message instanceof DronesMotorsSet) {
 			DMSet = (DronesMotorsSet) message;
 			msgType = MSG_TYPE.DroneMotorsSet;
+		}else if(message instanceof CommandMessage){
+			CMDMsg= (CommandMessage) message;
+			msgType = MSG_TYPE.CommandMessage;
 		} else {
 			throw new ClassNotFoundException();
 		}
@@ -49,6 +53,10 @@ public class NetworkMessage {
 			return SSResp;
 		case ServerStatusRequest:
 			return SSReq;
+		case DroneMotorsSet:
+			return DMSet;
+		case CommandMessage:
+			return CMDMsg;
 		default:
 			return null;
 		}
