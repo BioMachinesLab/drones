@@ -158,9 +158,9 @@ public class ServerConnectionHandler extends Thread {
 					.println("[SERVER CONNECTION HANDLER] Unable to write object to socket... "
 							+ e.getMessage());
 		}
-		System.out
-				.println("[SERVER CONNECTION HANDLER] Sent information of type "
-						+ outMessage.getMsgType());
+//		System.out
+//				.println("[SERVER CONNECTION HANDLER] Sent information of type "
+//						+ outMessage.getMsgType());
 	}
 
 	protected void initConnection() throws IOException, ClassNotFoundException {
