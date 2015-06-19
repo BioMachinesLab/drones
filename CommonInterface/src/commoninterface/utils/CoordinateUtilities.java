@@ -14,6 +14,9 @@ public class CoordinateUtilities implements Serializable {
 	 * @miguelduarte42
 	 */
 	private final static UTMRef REFERENCE_UTM = new LatLon(38.766084, -9.093461).toUTMRef();
+//	private final static UTMRef REFERENCE_UTM = new LatLon(37.736257, -25.656252).toUTMRef(); //azores
+	
+	//37.736257 -25.656252 azores
 	
 	public static Vector2d GPSToCartesian(LatLon coordinate) {
 		

@@ -1,14 +1,12 @@
 package network.broadcast;
 
 import gui.DroneGUI;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-
 import main.DroneControlConsole;
 import main.RobotControlConsole;
 import network.server.shared.ServerUtils;

@@ -29,6 +29,8 @@ public class CoverageEvaluationFunction extends EvaluationFunction{
 	private double steps = 0;
 	private double distance = 10;
 	private double stopPenaltyMult = 0.5;
+	private double foundMult = 1.0;
+	private boolean kill = false;
 	
 	public CoverageEvaluationFunction(Arguments args) {
 		super(args);
@@ -36,6 +38,8 @@ public class CoverageEvaluationFunction extends EvaluationFunction{
 		distance = args.getArgumentAsDoubleOrSetDefault("distance", distance);
 		avoidDistance = args.getArgumentAsDoubleOrSetDefault("avoiddistance", avoidDistance);
 		stopPenaltyMult = args.getArgumentAsDoubleOrSetDefault("stoppenaltymult", stopPenaltyMult);
+		foundMult = args.getArgumentAsDoubleOrSetDefault("foundmult", foundMult);
+		kill = args.getFlagIsTrue("kill");
 	}
 	
 	public void setup(Simulator simulator) {
@@ -61,7 +65,7 @@ public class CoverageEvaluationFunction extends EvaluationFunction{
 		for(PhysicalObject p : sim.getEnvironment().getAllObjects()) {
 			if(p.getType() == PhysicalObjectType.LINE) {
 				Line l = (Line)p;
-				if(l.intersectsWithLineSegment(v, new Vector2d(0,-100)) != null)
+				if(l.intersectsWithLineSegment(v, new Vector2d(0,-Integer.MAX_VALUE)) != null)
 					count++;
 			}
 		}
@@ -92,22 +96,28 @@ public class CoverageEvaluationFunction extends EvaluationFunction{
 				Vector2d p = new Vector2d(px,py);
 				
 				for(Robot r : robots) {
-					if(p.distanceTo(r.getPosition()) < distance && insideLines(r.getPosition(), simulator)) {
-						coverage[y][x] = 1.0;
+					if(r.isEnabled() && insideLines(r.getPosition(), simulator)) {
+						if(p.distanceTo(r.getPosition()) < distance) {
+							coverage[y][x] = 1.0;
+						}
+					} else if(kill) {
+						r.setEnabled(false);
 					}
 				}
 			}
 		}
 		
 		for(Robot r : robots) {
-			AquaticDrone ad = (AquaticDrone)r;
-			double speed = (Math.abs(ad.getLeftMotorSpeed()) + Math.abs(ad.getRightMotorSpeed())) / 2;
-			penalty+=((speed)/robots.size()/steps)*stopPenaltyMult;
+			if(r.isEnabled()) {
+				AquaticDrone ad = (AquaticDrone)r;
+				double speed = (Math.abs(ad.getLeftMotorSpeed()) + Math.abs(ad.getRightMotorSpeed())) / 2;
+				penalty+=((speed)/robots.size()/steps)*stopPenaltyMult;
+			}
 		}
 		
 //		fitness = (v/max - penalty)/robots.size();
 	
-		fitness+= (countAll() / max) / steps;
+		fitness+= ((countAll() / max) / steps / robots.size()) * foundMult;
 //		printGrid();
 	}
 	

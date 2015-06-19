@@ -10,6 +10,9 @@ import commoninterface.entities.Waypoint;
 import commoninterface.utils.CoordinateUtilities;
 import simulation.Simulator;
 import simulation.environment.Environment;
+import simulation.physicalobjects.Line;
+import simulation.physicalobjects.PhysicalObject;
+import simulation.physicalobjects.PhysicalObjectType;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
@@ -20,15 +23,12 @@ public class BoundaryEnvironment extends Environment{
 	protected double distance = 5;
 	@ArgumentsAnnotation(name="random", defaultValue="0.1")
 	protected double rand = 0.5;
-	@ArgumentsAnnotation(name="multi", defaultValue="0")
-	protected int multi = 0;
 	
 	public BoundaryEnvironment(Simulator simulator, Arguments args) {
 		super(simulator, args);
 		
 		distance = args.getArgumentAsDoubleOrSetDefault("distance", distance);
 		rand = args.getArgumentAsDoubleOrSetDefault("random", rand);
-		multi = args.getArgumentAsIntOrSetDefault("multi", multi);
 	}
 
 	@Override
@@ -36,14 +36,6 @@ public class BoundaryEnvironment extends Environment{
 		super.setup(simulator);
 		
 		double dist = distance + distance*rand;
-		
-		for(Robot r : simulator.getRobots()) {
-			double x = (dist*2*simulator.getRandom().nextDouble() - dist)*0.5;
-			double y = (dist*2*simulator.getRandom().nextDouble() - dist)*0.5;
-			r.setPosition(new Vector2d(x, y));
-			r.setOrientation(simulator.getRandom().nextDouble()*Math.PI*2);
-		}
-		
 		
 		GeoFence fence = new GeoFence("fence");
 		
@@ -57,6 +49,21 @@ public class BoundaryEnvironment extends Environment{
 		addNode(fence,0,-1,simulator.getRandom());
 		
 		addLines(fence.getWaypoints(), simulator);
+		
+		for(Robot r : simulator.getRobots()) {
+			
+			for(int i = 0 ; i < 100 ; i++) {
+				double x = (dist*2*simulator.getRandom().nextDouble() - dist)*0.5;
+				double y = (dist*2*simulator.getRandom().nextDouble() - dist)*0.5;
+				
+				if(insideLines(new Vector2d(x,y), simulator)){
+					r.setPosition(new Vector2d(x, y));
+					break;
+				}
+			}
+			
+			r.setOrientation(simulator.getRandom().nextDouble()*Math.PI*2);
+		}
 		
 		for(Robot r : robots) {
 			AquaticDroneCI drone = (AquaticDroneCI)r;
@@ -97,6 +104,19 @@ public class BoundaryEnvironment extends Environment{
 		}
 		
 		fence.addWaypoint(CoordinateUtilities.cartesianToGPS(new commoninterface.mathutils.Vector2d(x, y)));
+	}
+	
+	public boolean insideLines(Vector2d v, Simulator sim) {
+		//http://en.wikipedia.org/wiki/Point_in_polygon
+		int count = 0;
+		for(PhysicalObject p : sim.getEnvironment().getAllObjects()) {
+			if(p.getType() == PhysicalObjectType.LINE) {
+				Line l = (Line)p;
+				if(l.intersectsWithLineSegment(v, new Vector2d(0,-Integer.MAX_VALUE)) != null)
+					count++;
+			}
+		}
+		return count % 2 != 0;
 	}
 
 	@Override

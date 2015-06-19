@@ -57,7 +57,7 @@ import commoninterface.utils.jcoord.LatLon;
 public class MapPanel extends UpdatePanel {
 	
 	private static final long serialVersionUID = 1L;
-	private static int POSITION_HISTORY = 10;
+	private static int POSITION_HISTORY = 1;
 
     private JMapViewerTreeDrone treeMap = null;
     

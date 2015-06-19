@@ -19,15 +19,17 @@ public class InsideBoundaryCISensor extends CISensor{
 	private AquaticDroneCI drone;
 	private ArrayList<Line> lines = new ArrayList<Line>();
 	private double reading = 0;
+	private boolean reverse = false;
 
 	public InsideBoundaryCISensor(int id, RobotCI robot, CIArguments args) {
 		super(id, robot, args);
 		drone = (AquaticDroneCI)robot;
+		reverse = args.getFlagIsTrue("reverse");
 	}
 	
 	@Override
 	public double getSensorReading(int sensorNumber) {
-		return reading;
+		return reverse ? 1 - reading : reading;
 	}
 
 	@Override

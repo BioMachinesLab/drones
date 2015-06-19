@@ -70,7 +70,8 @@ public class ControllerCIBehavior extends CIBehavior {
 	@Override
 	public void cleanUp() {
 		robot.setMotorSpeeds(0, 0);
-		network.reset();
+		if(network != null)
+			network.reset();
 	}
 	
 	public CINeuralNetwork getNeuralNetwork() {

@@ -1,6 +1,7 @@
 package commoninterface.entities;
 
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
@@ -25,10 +26,12 @@ public class SharedDroneLocation extends GeoEntity{
 		return observerAddress;
 	}
 	
-	public static LinkedHashSet<SharedDroneLocation> getSharedDroneLocations(RobotCI robot) {
-		LinkedHashSet<SharedDroneLocation> droneLocations = new LinkedHashSet<SharedDroneLocation>();
+	public static LinkedList<SharedDroneLocation> getSharedDroneLocations(RobotCI robot) {
+		LinkedList<SharedDroneLocation> droneLocations = new LinkedList<SharedDroneLocation>();
 		
-		for(Entity e : robot.getEntities()) {
+		Object[] entities = robot.getEntities().toArray();
+		
+		for(Object e : entities) {
 			if(e instanceof SharedDroneLocation)
 				droneLocations.add((SharedDroneLocation)e);
 		}

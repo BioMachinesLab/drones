@@ -3,11 +3,13 @@ package drone;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import commoninterface.AquaticDroneCI;
+import commoninterface.AquaticDroneCI.DroneType;
 import commoninterface.CIBehavior;
 import commoninterface.RobotCI;
 import commoninterface.controllers.ControllerCIBehavior;
 import commoninterface.entities.Entity;
 import commoninterface.entities.GeoFence;
+import commoninterface.entities.SharedDroneLocation;
 import commoninterface.entities.Waypoint;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CIArguments;
@@ -28,7 +30,7 @@ public class MissionController extends CIBehavior {
 	protected static long BATTERY_LIFE = 10*60*10; //10 min in timesteps
 	protected static double GO_BACK_BATTERY = 0.1;
 	protected static double WAYPOINT_DISTANCE_THRESHOLD = 3; //3 meters
-	protected static double BASE_DISTANCE_THRESHOLD = 10; //3 meters 
+	protected static double BASE_DISTANCE_THRESHOLD = 5; //5 meters 
 	protected static double ALERT_TIMEOUT = 1*60*10; //1 min
 	
 	protected CIArguments args;
@@ -38,6 +40,8 @@ public class MissionController extends CIBehavior {
 	protected double currentBattery = 1.0;
 	protected double lastIntruderTime;
 	protected int currentSubController = 0;
+	
+	protected long stop = 0;
 	
 	protected ArrayList<CIBehavior> subControllers = new ArrayList<CIBehavior>();
 
@@ -55,15 +59,23 @@ public class MissionController extends CIBehavior {
 			CIArguments a = new CIArguments(args.getArgumentAsString(c.toString()));
 			subControllers.add(new ControllerCIBehavior(a, drone));
 		}
+		
 		drone.setActiveWaypoint(null);
+		
+//		this.stop = (long)(Math.random()*4000);
 	}
-
+	
 	@Override
 	public void step(double timestep) {
+		
+		if(timestep < stop)
+			return;
 		
 		int subController = 0;
 		
 		updateEnergy(timestep);
+		
+		boolean skipSubController = false;
 		
 		if(currentBattery < GO_BACK_BATTERY) {
 			currentState = State.RECHARGE;
@@ -74,7 +86,6 @@ public class MissionController extends CIBehavior {
 				if(drone.getActiveWaypoint() == null) {
 					Waypoint wp = chooseWaypointInGeoFence();
 					if(wp != null) {
-						
 						robot.replaceEntity(wp);
 						drone.setActiveWaypoint(wp);
 						
@@ -131,12 +142,14 @@ public class MissionController extends CIBehavior {
 
 					if(distance < BASE_DISTANCE_THRESHOLD) {
 						robot.setMotorSpeeds(0, 0);
+						skipSubController = true;
 					}
 				}
 				break;
 		}
 		
-		chooseSubController(subController,timestep);
+		if(!skipSubController)
+			chooseSubController(subController,timestep);
 	}
 	
 	protected void chooseSubController(int output, double time) {
@@ -154,19 +167,33 @@ public class MissionController extends CIBehavior {
 	
 	protected void updateEnergy(double timestep) {
 		if(currentState != State.RECHARGE) {
-			currentBattery-= 1/BATTERY_LIFE;
+			currentBattery-= 1.0/BATTERY_LIFE;
 		} else {
-			currentBattery+= 1/BATTERY_LIFE;
+			double distance = CoordinateUtilities.distanceInMeters(drone.getActiveWaypoint().getLatLon(),drone.getGPSLatLon());
+			
+			if(distance < BASE_DISTANCE_THRESHOLD)
+				currentBattery+= (1.0/BATTERY_LIFE)*5;
+			else
+				currentBattery-= 1.0/BATTERY_LIFE;	
 		}
+		
 	}
 	
 	protected boolean foundIntruder() {
-		//TODO
+		
+		LinkedList<SharedDroneLocation> locations = SharedDroneLocation.getSharedDroneLocations(drone);
+		
+		for(SharedDroneLocation loc : locations) {
+			if(loc.getDroneType() == DroneType.ENEMY)
+				return true;
+		}
+		
 		return false;
+		
 	}
 	
 	protected void alertNearbyDrones() {
-		//TODO
+		//This is done automatically by the sensor that shares
 	}
 	
 	protected Waypoint chooseWaypointInGeoFence() {
@@ -192,7 +219,7 @@ public class MissionController extends CIBehavior {
 				maxLat = Math.max(maxLat, wpLatLon.getLat());
 				
 				minLon = Math.min(minLon, wpLatLon.getLon());
-				maxLon = Math.max(minLon, wpLatLon.getLon());
+				maxLon = Math.max(maxLon, wpLatLon.getLon());
 			}
 			
 			int tries = 0;
@@ -211,7 +238,7 @@ public class MissionController extends CIBehavior {
 				}
 				
 			} while(!success && ++tries < 100);
-		
+			
 		}
 		return result;
 	}
@@ -235,6 +262,7 @@ public class MissionController extends CIBehavior {
 			if(l.intersectsWithLineSegment(vector, new Vector2d(0,-Integer.MAX_VALUE)) != null)
 				count++;
 		}
+		
 		return count % 2 != 0;
 	}
 	
