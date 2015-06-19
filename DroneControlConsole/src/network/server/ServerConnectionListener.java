@@ -24,8 +24,9 @@ public class ServerConnectionListener implements ServerObservated {
 		this.console = console;
 	}
 
-	protected void addConnection(ServerConnectionHandler conn) {
+	protected synchronized void addConnection(ServerConnectionHandler conn) {
 		connections.add(conn);
+		observer.updateStatus();
 	}
 
 	public void closeConnections() {
@@ -34,7 +35,7 @@ public class ServerConnectionListener implements ServerObservated {
 					.println("[SERVER CONNECTION LISTENER] Closing Connections!");
 			for (ServerConnectionHandler conn : connections) {
 				if (!conn.getSocket().isClosed())
-					conn.closeConnection();
+					conn.closeConnectionWhitoutRemove();
 			}
 		}
 	}
@@ -59,6 +60,7 @@ public class ServerConnectionListener implements ServerObservated {
 
 	public synchronized void removeConnection(ServerConnectionHandler conn) {
 		connections.remove(conn);
+		observer.updateStatus();
 	}
 
 	public ArrayList<ServerConnectionHandler> getConnections() {
@@ -127,14 +129,19 @@ public class ServerConnectionListener implements ServerObservated {
 
 				while (enable.get()) {
 					Socket socket = serverSocket.accept();
+					System.out
+							.println("[SERVER CONNECTION LISTENER] New client at "
+									+ socket.getInetAddress().getHostAddress());
 					createHandler(socket);
+					//printConnections();
 				}
+				System.out.println("Offline!");
 				observer.setOfflineServer();
 			} catch (IOException e) {
 				observer.setOfflineServer();
 				if (!e.getMessage().equals("socket closed")) {
 					observer.setMessage("Error on server");
-					System.err.println(e.getMessage());
+//					System.err.println(e.getMessage());
 				}
 			} finally {
 				try {
@@ -152,5 +159,14 @@ public class ServerConnectionListener implements ServerObservated {
 			addConnection(conn);
 			conn.start();
 		}
+	}
+
+	private void printConnections() {
+		System.out.println("[SERVER CONNECTION LISTENER]");
+		System.out.println("###### Connected clients list init");
+		for (ServerConnectionHandler connection : connections) {
+			System.out.println(connection.clientName);
+		}
+		System.out.println("###### Connected clients list end");
 	}
 }

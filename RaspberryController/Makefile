@@ -17,7 +17,7 @@ clean:
 	rm -rf $(JDEST)
 
 drone:
-	sudo java -cp $(CLASSPATH) main.Main
+	sudo java -cp $(CLASSPATH) main.MainAquaticDrone
 	
 test:
 	sudo java -cp $(CLASSPATH) main.Test

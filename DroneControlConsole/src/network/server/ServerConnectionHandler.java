@@ -1,11 +1,11 @@
 package network.server;
 
-import java.io.BufferedReader;
+import gui.panels.CommandPanel;
+import gui.panels.MotorsPanel;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.net.InetAddress;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -13,8 +13,10 @@ import main.DroneControlConsole;
 import main.RobotControlConsole;
 import network.server.shared.dataObjects.DroneData;
 import network.server.shared.dataObjects.ServerStatusData;
+import network.server.shared.messages.CommandMessage;
 import network.server.shared.messages.DronesInformationRequest;
 import network.server.shared.messages.DronesInformationResponse;
+import network.server.shared.messages.DronesMotorsSet;
 import network.server.shared.messages.NetworkMessage;
 import network.server.shared.messages.ServerMessage;
 import network.server.shared.messages.ServerStatusResponse;
@@ -23,8 +25,8 @@ import com.google.gson.Gson;
 
 public class ServerConnectionHandler extends Thread {
 	protected Socket socket;
-	protected PrintWriter out;
-	protected BufferedReader in;
+	protected ObjectOutputStream out;
+	protected ObjectInputStream in;
 	protected String clientName = null;
 	protected ServerConnectionListener connectionListener;
 
@@ -41,7 +43,7 @@ public class ServerConnectionHandler extends Thread {
 
 			while (true) {
 				NetworkMessage networkMessage = new Gson().fromJson(
-						in.readLine(), NetworkMessage.class);
+						(String) in.readObject(), NetworkMessage.class);
 				processData(networkMessage);
 			}
 		} catch (IOException e) {
@@ -55,12 +57,14 @@ public class ServerConnectionHandler extends Thread {
 			e.printStackTrace();
 		} finally {
 			// always shutdown the handler when something goes wrong
-			shutdownHandler();
+			closeConnection();
 		}
 	}
 
 	private void processData(NetworkMessage data) throws ClassNotFoundException {
 		ServerMessage inMessage = data.getMessage();
+		DroneControlConsole console = connectionListener.getConsole();
+		
 		switch (data.getMsgType()) {
 		case DronesInformationRequest:
 			NetworkMessage responseMessageA = new NetworkMessage();
@@ -76,7 +80,6 @@ public class ServerConnectionHandler extends Thread {
 		case ServerStatusRequest:
 			NetworkMessage responseMessageB = new NetworkMessage();
 			ServerStatusData serverStatusData = new ServerStatusData();
-			RobotControlConsole console = connectionListener.getConsole();
 
 			serverStatusData.setAvailableBehaviors(console.getGUI()
 					.getCommandPanel().getAvailableBehaviors());
@@ -95,8 +98,52 @@ public class ServerConnectionHandler extends Thread {
 			responseMessageB.setMessage(responseB);
 			sendData(responseMessageB);
 			break;
+		case DroneMotorsSet:
+			MotorsPanel panel = connectionListener.getConsole().getGUI().getMotorsPanel();
+			DronesMotorsSet motorsMessage = ((DronesMotorsSet)inMessage);
+			
+			String connectedToDroneAddr = console.getDronesSet().getConnectedToAddress();
+			
+			if(connectedToDroneAddr.equals(motorsMessage.getDroneIP()) || connectedToDroneAddr.equals(motorsMessage.getDroneName())){
+				panel.setSliderValues(motorsMessage.getLeftSpeed(),motorsMessage.getRightSpeed());
+				panel.setMaximumSpeed(motorsMessage.getSpeedLimit());
+				panel.setOffsetValue(motorsMessage.getOffset());
+			}
+			break;
+		case CommandMessage:
+			CommandMessage cmdMessage = ((CommandMessage)inMessage);
+			CommandPanel commandPanel =console.getGUI().getCommandPanel();
+			switch(cmdMessage.getMessageAction()){
+			case DEPLOY:
+				commandPanel.deploy.doClick();
+				break;
+			case SETLOGSTAMP:
+				console.getGUI().getCommandPanel().setLogText(cmdMessage.getPayload()[0]);
+				commandPanel.sendLog.doClick();
+				break;
+			case START:
+				commandPanel.setSeletedJComboBoxConfigurationFile(cmdMessage.getPayload()[1]);
+				if(cmdMessage.getPayload()[1].equals("")){
+					commandPanel.setConfiguration(cmdMessage.getPayload()[2]);
+				}
+				
+				commandPanel.setSeletedJComboBoxBehavior(cmdMessage.getPayload()[0]);
+				commandPanel.start.doClick();
+				break;
+			case STOP:
+				commandPanel.stop.doClick();
+				break;
+			case STOPALL:
+				commandPanel.stopAll.doClick();
+				break;
+			case DEPLOYENTITIES:
+				commandPanel.entitiesButton.doClick();
+				break;
+			}
+
+			break;
 		default:
-			System.out.println("Received message with type: "
+			System.out.println("Received message with unknown type: "
 					+ ((ServerMessage) inMessage).getMessageType());
 			break;
 		}
@@ -104,25 +151,26 @@ public class ServerConnectionHandler extends Thread {
 
 	public void sendData(NetworkMessage outMessage) {
 		String json = new Gson().toJson(outMessage, NetworkMessage.class);
-		out.println(json);
-		System.out
-				.println("[SERVER CONNECTION HANDLER] Sent information of type "
-						+ outMessage.getMsgType());
-	}
-
-	protected void shutdownHandler() {
-		closeConnection();
+		try {
+			out.writeObject(json);
+		} catch (IOException e) {
+			System.err
+					.println("[SERVER CONNECTION HANDLER] Unable to write object to socket... "
+							+ e.getMessage());
+		}
+//		System.out
+//				.println("[SERVER CONNECTION HANDLER] Sent information of type "
+//						+ outMessage.getMsgType());
 	}
 
 	protected void initConnection() throws IOException, ClassNotFoundException {
-		out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()),
-				true);
-		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		out = new ObjectOutputStream(socket.getOutputStream());
+		in = new ObjectInputStream(socket.getInputStream());
 
-		out.println(InetAddress.getLocalHost().getHostName());
-		out.flush();
+		// out.println(InetAddress.getLocalHost().getHostName());
+		// out.flush();
 
-		clientName = (String) in.readLine();
+		clientName = (String) in.readObject();
 
 		System.out.println("[SERVER CONNECTION HANDLER] Client "
 				+ socket.getInetAddress().getHostAddress() + " (" + clientName
@@ -144,7 +192,7 @@ public class ServerConnectionHandler extends Thread {
 		}
 	}
 
-	public synchronized void closeConnectionWithoutDiscardConnListener() {
+	public synchronized void closeConnectionWhitoutRemove() {
 		try {
 			if (socket != null && !socket.isClosed()) {
 				socket.close();

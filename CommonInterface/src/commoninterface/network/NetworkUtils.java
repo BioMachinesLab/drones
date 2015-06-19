@@ -12,10 +12,11 @@ public class NetworkUtils {
 
 	// In order to find our own IP address among all possible NICs,
 	// we should at least know how it starts.
-	private static final String ADDRESS_START = "192.168.3";
+	private static final String ADDRESS_START1 = "192.168.3";
+	private static final String ADDRESS_START2 = "172.17.";
 
+	
 	public static String getAddress() {
-
 		if (ADDRESS == null) {
 			try {
 				for (Enumeration<NetworkInterface> en = NetworkInterface
@@ -26,7 +27,7 @@ public class NetworkUtils {
 							.getInetAddresses(); enumIpAddr.hasMoreElements();) {
 						String next = enumIpAddr.nextElement().toString()
 								.replace("/", "");
-						if (next.startsWith(ADDRESS_START)) {
+						if (next.startsWith(ADDRESS_START1) || next.startsWith(ADDRESS_START2)) {
 							ADDRESS = next;
 							return next;
 						}
@@ -56,7 +57,7 @@ public class NetworkUtils {
 								.hasMoreElements();) {
 							String next = enumIpAddr.nextElement().toString()
 									.replace("/", "");
-							if (next.startsWith(ADDRESS_START)) {
+							if (next.startsWith(ADDRESS_START1) || next.startsWith(ADDRESS_START2)) {
 								ADDRESS = next;
 								return next;
 							}

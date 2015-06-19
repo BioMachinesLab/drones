@@ -101,6 +101,7 @@ public class ServerPanel extends JPanel implements ServerObserver {
 	public synchronized void setOfflineServer() {
 		displayMessageArea.setBackground(Color.RED);
 		displayMessageArea.setText("Offline...");
+		actionButton.setText("Start");
 	}
 
 	public synchronized void setOnlineServer() {
@@ -110,6 +111,7 @@ public class ServerPanel extends JPanel implements ServerObserver {
 			displayMessageArea.setText("Running on "
 					+ InetAddress.getLocalHost().getHostAddress() + ":"
 					+ mobileAppServer.getPort() + " ("+mobileAppServer.getClientQuantity()+" clients)");
+			actionButton.setText("Stop");
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}

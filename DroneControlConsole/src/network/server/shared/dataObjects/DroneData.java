@@ -5,10 +5,10 @@ import java.io.Serializable;
 import network.server.shared.BehaviorServerMessage;
 import network.server.shared.GPSServerData;
 import network.server.shared.NeuralActivationsServerMessage;
-import network.server.shared.RobotServerLocation;
-import commoninterface.network.messages.NeuralActivationsMessage;
 
 public class DroneData implements Serializable {
+	private static final long serialVersionUID = -5255732989855282894L;
+
 	/*
 	 * Variables
 	 */
@@ -19,7 +19,6 @@ public class DroneData implements Serializable {
 	private long timeSinceLastHeartbeat = -1;
 
 	// Telemetry Informations
-	private RobotServerLocation robotLocation;
 	private double compassOrientation;
 	private GPSServerData gpsData;
 
@@ -27,6 +26,7 @@ public class DroneData implements Serializable {
 	private String systemStatusMessage = "";
 	private BehaviorServerMessage behaviourMessage;
 	private NeuralActivationsServerMessage neuralActivations;
+	private BatteryStatusServerData batteryStatus;
 
 	/*
 	 * Methods
@@ -35,6 +35,7 @@ public class DroneData implements Serializable {
 	public DroneData(String ipAddr, String name) {
 		this.ipAddr = ipAddr;
 		this.name = name;
+		gpsData = new GPSServerData();
 	}
 
 	public DroneData(String name) {
@@ -58,10 +59,6 @@ public class DroneData implements Serializable {
 		return timeSinceLastHeartbeat;
 	}
 
-	public RobotServerLocation getRobotLocation() {
-		return robotLocation;
-	}
-
 	public double getCompassOrientation() {
 		return compassOrientation;
 	}
@@ -82,6 +79,10 @@ public class DroneData implements Serializable {
 		return gpsData;
 	}
 
+	public BatteryStatusServerData getBatteryStatus() {
+		return batteryStatus;
+	}
+
 	// Setters
 	public void setIpAddr(String ipAddr) {
 		this.ipAddr = ipAddr;
@@ -94,12 +95,7 @@ public class DroneData implements Serializable {
 	public void setTimeSinceLastHeartbeat(long timeSinceLastHeartbeat) {
 		this.timeSinceLastHeartbeat = timeSinceLastHeartbeat;
 	}
-
-	public void setRobotLocation(RobotServerLocation robotLocation) {
-		this.robotLocation = robotLocation;
-		this.compassOrientation = robotLocation.getOrientation();
-	}
-
+	
 	public void setOrientation(double compassOrientation) {
 		this.compassOrientation = compassOrientation;
 	}
@@ -112,7 +108,8 @@ public class DroneData implements Serializable {
 		this.behaviourMessage = behaviourMessage;
 	}
 
-	public void setNeuralActivations(NeuralActivationsServerMessage neuralActivations) {
+	public void setNeuralActivations(
+			NeuralActivationsServerMessage neuralActivations) {
 		this.neuralActivations = neuralActivations;
 	}
 
@@ -134,4 +131,7 @@ public class DroneData implements Serializable {
 		}
 	}
 
+	public void setBatteryStatus(BatteryStatusServerData batteryStatus) {
+		this.batteryStatus = batteryStatus;
+	}
 }

@@ -109,7 +109,7 @@ public class DroneGUI extends RobotGUI {
 		leftPanel.add(msgPanel, BorderLayout.CENTER);
 
 		// Mobile Application Server
-		serverPanel=new ServerPanel(this);
+		serverPanel = new ServerPanel(this);
 		leftPanel.add(serverPanel, BorderLayout.SOUTH);
 
 		add(leftPanel, BorderLayout.WEST);
@@ -136,4 +136,7 @@ public class DroneGUI extends RobotGUI {
 		return mapPanel;
 	}
 
+	public BatteryPanel getBatteryPanel() {
+		return batteryPanel;
+	}
 }

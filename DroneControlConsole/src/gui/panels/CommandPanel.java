@@ -11,8 +11,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -30,6 +28,7 @@ import main.DroneControlConsole;
 import main.RobotControlConsole;
 import network.CommandSender;
 import threads.UpdateThread;
+
 import commoninterface.CIBehavior;
 import commoninterface.entities.Entity;
 import commoninterface.network.NetworkUtils;
@@ -42,6 +41,7 @@ import commoninterface.utils.CIArguments;
 import commoninterface.utils.ClassLoadHelper;
 
 public class CommandPanel extends UpdatePanel {
+	private static final long serialVersionUID = 4038133860317693008L;
 
 	private static String CONTROLLERS_FOLDER = "controllers";
 
@@ -51,10 +51,19 @@ public class CommandPanel extends UpdatePanel {
 	private JLabel statusMessage;
 	private BehaviorMessage currentMessage;
 	private JTextArea config;
+	private JTextField logMessage;
+	public JButton sendLog;
 	private RobotGUI gui;
 	private RobotControlConsole console;
 	private boolean dronePanel = false;
 	private JFrame neuralActivationsWindow;
+	public JButton start;
+	public JButton stop;
+	public JButton deploy;
+	public JButton stopAll;
+	public JButton entitiesButton;
+	private JComboBox<String> behaviors;
+	private JComboBox<String> controllers;
 
 	private ArrayList<String> availableBehaviors = new ArrayList<String>();
 	private ArrayList<String> availableControllers = new ArrayList<String>();
@@ -85,12 +94,12 @@ public class CommandPanel extends UpdatePanel {
 
 		JPanel comboBoxes = new JPanel(new BorderLayout());
 
-		JComboBox<String> behaviors = new JComboBox<String>();
+		behaviors = new JComboBox<String>();
 		behaviors.setPreferredSize(new Dimension(20, 20));
 		populateBehaviors(behaviors);
 		comboBoxes.add(behaviors, BorderLayout.NORTH);
 
-		JComboBox<String> controllers = new JComboBox<String>();
+		controllers = new JComboBox<String>();
 		controllers.setPreferredSize(new Dimension(20, 20));
 		populateControllers(controllers);
 		comboBoxes.add(controllers, BorderLayout.SOUTH);
@@ -103,10 +112,10 @@ public class CommandPanel extends UpdatePanel {
 
 		topPanel.add(comboBoxes, BorderLayout.NORTH);
 
-		JButton start = new JButton("Start");
-		JButton stop = new JButton("Stop");
-		JButton deploy = new JButton("Deploy");
-		JButton stopAll = new JButton("Stop All");
+		start = new JButton("Start");
+		stop = new JButton("Stop");
+		deploy = new JButton("Deploy");
+		stopAll = new JButton("Stop All");
 
 		start.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -132,8 +141,8 @@ public class CommandPanel extends UpdatePanel {
 			}
 		});
 
-		JTextField logMessage = new JTextField();
-		JButton sendLog = new JButton("Send Log");
+		logMessage = new JTextField();
+		sendLog = new JButton("Send Log");
 
 		sendLog.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -151,7 +160,7 @@ public class CommandPanel extends UpdatePanel {
 
 		if (dronePanel) {
 
-			JButton entitiesButton = new JButton("Deploy Entities");
+			entitiesButton = new JButton("Deploy Entities");
 
 			buttons.add(entitiesButton);
 
@@ -279,7 +288,7 @@ public class CommandPanel extends UpdatePanel {
 
 	private void populateControllers(JComboBox<String> list) {
 		list.addItem("");
-
+		
 		File controllersFolder = new File(CONTROLLERS_FOLDER);
 
 		if (controllersFolder.exists() && controllersFolder.isDirectory()) {
@@ -289,6 +298,7 @@ public class CommandPanel extends UpdatePanel {
 				availableControllers.add(s);
 			}
 		}
+
 	}
 
 	public BehaviorMessage getCurrentMessage() {
@@ -366,5 +376,31 @@ public class CommandPanel extends UpdatePanel {
 
 	public void updateHostname() {
 		myHostname = NetworkUtils.getHostname();
+	}
+
+	public void setLogText(String text) {
+		logMessage.setText(text);
+	}
+
+	public void setConfiguration(String configStr) {
+		config.setText(configStr);
+	}
+
+	public void setSeletedJComboBoxBehavior(String str) {
+		for (int i = 0; i < behaviors.getItemCount(); i++) {
+			if (behaviors.getItemAt(i).contains(str)) {
+				behaviors.setSelectedIndex(i);
+				break;
+			}
+		}
+	}
+
+	public void setSeletedJComboBoxConfigurationFile(String str) {
+		for (int i = 0; i < controllers.getItemCount(); i++) {
+			if (controllers.getItemAt(i).contains(str)) {
+				controllers.setSelectedIndex(i);
+				break;
+			}
+		}
 	}
 }

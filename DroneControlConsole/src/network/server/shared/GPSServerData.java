@@ -9,6 +9,7 @@ import java.net.SocketException;
 import java.util.Enumeration;
 
 public class GPSServerData implements Serializable {
+	private static final long serialVersionUID = -2584775870468977472L;
 	private static final String ADDRESS_START = "192.168.3";
 	private final static int NUMBER_OF_PARAMETERS = 16;
 	private long PRINT_NUMBER = 0;
@@ -70,7 +71,7 @@ public class GPSServerData implements Serializable {
 
 	// Getters And Setters
 	public String getLatitude() {
-		return latitude;
+		return Double.toString(latitudeDecimal);
 	}
 
 	public void setLatitude(String latitude) {
@@ -86,7 +87,7 @@ public class GPSServerData implements Serializable {
 	}
 
 	public String getLongitude() {
-		return longitude;
+		return Double.toString(longitudeDecimal);
 	}
 
 	public void setLongitude(String longitude) {
