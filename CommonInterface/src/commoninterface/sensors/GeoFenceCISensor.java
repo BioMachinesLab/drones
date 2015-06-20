@@ -24,6 +24,7 @@ public class GeoFenceCISensor extends ConeTypeCISensor{
 	public Vector2d[][] cones;
 	private ArrayList<Line> lines = new ArrayList<Line>();
 	private Vector2d robotPosition;
+	private GeoFence fence;
 
 	public GeoFenceCISensor(int id, RobotCI robot, CIArguments args) {
 		super(id, robot, args);
@@ -144,7 +145,8 @@ public class GeoFenceCISensor extends ConeTypeCISensor{
 		
 		if(fence == null) {
 			lines.clear();
-		} else {
+		} else if(fence.getTimestepReceived() != this.fence.getTimestepReceived()){
+			this.fence = fence;
 			LinkedList<Waypoint> waypoints = fence.getWaypoints();
 
 			//force this every 100 seconds just to be on the safe side

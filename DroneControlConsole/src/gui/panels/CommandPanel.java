@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Scanner;
 
 import javax.swing.BorderFactory;
@@ -52,6 +53,7 @@ public class CommandPanel extends UpdatePanel {
 	private BehaviorMessage currentMessage;
 	private JTextArea config;
 	private JTextField logMessage;
+	private JTextField selectedDrones;
 	public JButton sendLog;
 	private RobotGUI gui;
 	private RobotControlConsole console;
@@ -114,6 +116,8 @@ public class CommandPanel extends UpdatePanel {
 
 		start = new JButton("Start");
 		stop = new JButton("Stop");
+		JLabel selectedDronesLabel = new JLabel("Selected drones");
+		selectedDrones = new JTextField();
 		deploy = new JButton("Deploy");
 		stopAll = new JButton("Stop All");
 
@@ -150,9 +154,11 @@ public class CommandPanel extends UpdatePanel {
 			}
 		});
 
-		JPanel buttons = new JPanel(new GridLayout(dronePanel ? 4 : 3, 2));
+		JPanel buttons = new JPanel(new GridLayout(dronePanel ? 5 : 4, 2));
 		buttons.add(start);
 		buttons.add(stop);
+		buttons.add(selectedDrones);
+		buttons.add(selectedDronesLabel);
 		buttons.add(deploy);
 		buttons.add(stopAll);
 		buttons.add(logMessage);
@@ -263,9 +269,47 @@ public class CommandPanel extends UpdatePanel {
 
 	private synchronized void deploy(Message m) {
 		setText("Deploying...");
+		
+		String[] addresses = gui.getConnectionPanel().getCurrentAddresses();
+		ArrayList<String> selectedAddresses = new ArrayList<String>();
+		
+		for(String s : addresses)
+			if(selectedAddress(s)) {
+				selectedAddresses.add(s);
+			}
 
-		new CommandSender(m, gui.getConnectionPanel().getCurrentAddresses(),
-				this).start();
+		new CommandSender(m, selectedAddresses, this).start();
+	}
+	
+	public boolean selectedAddress(String s) {
+		
+		String str = selectedDrones.getText();
+		
+		if(str.trim().isEmpty())
+			return true;
+		
+		if(str.contains("-")) {
+			String[] list = str.split("-");
+			int first = Integer.parseInt(list[0]);
+			int last = Integer.parseInt(list[1]);
+			
+			for(int i = first ; i <= last ; i++) {
+				if(s.endsWith("."+i))
+					return true;
+			}
+			
+		}
+		
+		if(str.contains(",")) {
+			String[] list = str.split(",");
+			
+			for(String sList : list) {
+				if(s.endsWith("."+sList))
+					return true;
+			}
+		}
+		
+		return s.endsWith("."+str);
 	}
 
 	public void setText(String text) {

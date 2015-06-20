@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import commoninterface.network.messages.Message;
 
@@ -13,11 +14,11 @@ public class CommandSender extends Thread{
 	
 	private static int COMMAND_PORT = 10103;
 	
-	private String[] ips;
+	private ArrayList<String> ips;
 	private Message message;
 	private CommandPanel cp;
 	
-	public CommandSender(Message message, String[] ips, CommandPanel bp) {
+	public CommandSender(Message message, ArrayList<String> ips, CommandPanel bp) {
 		this.ips = ips;
 		this.message = message;
 		this.cp = bp;
@@ -26,7 +27,7 @@ public class CommandSender extends Thread{
 	@Override
 	public void run() {
 		
-		SenderThread[] sts = new SenderThread[ips.length];
+		SenderThread[] sts = new SenderThread[ips.size()];
 		int i = 0;
 		for(String ip : ips) {
 			try {
