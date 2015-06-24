@@ -30,6 +30,7 @@ public class CommandSender extends Thread{
 		SenderThread[] sts = new SenderThread[ips.size()];
 		int i = 0;
 		for(String ip : ips) {
+			System.out.println(ip);
 			try {
 				sts[i] = new SenderThread(ip);
 				sts[i].start();
@@ -41,6 +42,8 @@ public class CommandSender extends Thread{
 		int count =  0;
 		
 		for(SenderThread st : sts) {
+			if(st == null)
+				continue;
 			try {
 				st.join();
 				count++;

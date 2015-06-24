@@ -15,7 +15,7 @@ import commoninterface.utils.CIArguments;
 
 public class DroneNeuralNetworkController extends Controller implements FixedLenghtGenomeEvolvableController {
 
-protected CINeuralNetwork neuralNetwork;
+	protected CINeuralNetwork neuralNetwork;
 	
 	@ArgumentsAnnotation(name="printweights", values={"0","1"})
 	protected boolean printWeights = false;
@@ -133,6 +133,16 @@ protected CINeuralNetwork neuralNetwork;
 					nnController.setNNWeights(weights);
 			}
 		}
+	}
+	
+	@Override
+	public int getNumberOfInputs() {
+		return neuralNetwork.getNumberOfInputNeurons();
+	}
+	
+	@Override
+	public int getNumberOfOutputs() {
+		return neuralNetwork.getNumberOfOutputNeurons();
 	}
 
 }

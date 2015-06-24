@@ -8,7 +8,7 @@ import gui.evolution.EvolutionGui;
 public class EMain {
 	public static void main(String[] args) throws Exception {
 		
-		String configName = "boundaries_multi.conf";
+		String configName = "collision_kill_neat.conf";
 		
 		try {
 			args = new String[]{configName};

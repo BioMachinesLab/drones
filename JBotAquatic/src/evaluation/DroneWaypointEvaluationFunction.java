@@ -26,11 +26,13 @@ public class DroneWaypointEvaluationFunction extends EvaluationFunction{
 	@ArgumentsAnnotation(name="kill", defaultValue="0")
 	private boolean kill = false;
 	private double penalty = 0;
+	private double sum = 0;
 
 	public DroneWaypointEvaluationFunction(Arguments args) {
 		super(args);
 		targetDistance = args.getArgumentAsDoubleOrSetDefault("targetdistance", targetDistance);
 		avoidDistance = args.getArgumentAsDoubleOrSetDefault("avoiddistance", avoidDistance);
+		sum = args.getArgumentAsDoubleOrSetDefault("sum", sum);
 		kill = args.getArgumentAsDoubleOrSetDefault("kill", 0) == 1;
 	}
 
@@ -95,7 +97,7 @@ public class DroneWaypointEvaluationFunction extends EvaluationFunction{
 	
 	@Override
 	public double getFitness() {
-		return fitness + bonus + (bonus > 0 ? penalty : 0);
+		return fitness + bonus + (bonus > 0 ? penalty : 0) + sum;
 	}
 	
 	private Waypoint getWaypoint(AquaticDrone drone) {

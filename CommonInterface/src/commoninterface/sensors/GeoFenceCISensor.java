@@ -143,10 +143,12 @@ public class GeoFenceCISensor extends ConeTypeCISensor{
 			}
 		}
 		
+		if(this.fence == null)
+			this.fence = fence;
+		
 		if(fence == null) {
 			lines.clear();
 		} else if(fence.getTimestepReceived() != this.fence.getTimestepReceived()){
-			this.fence = fence;
 			LinkedList<Waypoint> waypoints = fence.getWaypoints();
 
 			//force this every 100 seconds just to be on the safe side

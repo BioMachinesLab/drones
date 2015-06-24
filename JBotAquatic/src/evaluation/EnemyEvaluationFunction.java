@@ -12,8 +12,6 @@ public class EnemyEvaluationFunction extends EvaluationFunction{
 	private double targetDistance = 10;
 	@ArgumentsAnnotation(name="minimumdistance", defaultValue="4")
 	private double minimumDistance = 4;
-	@ArgumentsAnnotation(name="avoiddistance", defaultValue="0")
-	private double avoidDistance = 0;
 	@ArgumentsAnnotation(name="kill", defaultValue="0")
 	private boolean kill = false;
 	private double value = 0;
@@ -36,8 +34,6 @@ public class EnemyEvaluationFunction extends EvaluationFunction{
 			fitness = 0;
 		}
 		
-		boolean killed = false;
-		
 		for(Robot r : simulator.getRobots()) {
 			if(r.getId() != enemy.getId()) {
 				
@@ -46,25 +42,21 @@ public class EnemyEvaluationFunction extends EvaluationFunction{
 				if(r.isInvolvedInCollison()) {
 					if(kill) {
 						simulator.stopSimulation();
-						killed = true;
-					}
-					fitness-=value*2;
+						fitness = 0;
+					} else
+						fitness-=value*2;
 				} else if(dist < targetDistance && dist > minimumDistance) {
 					fitness+=value;
 				} else {
-					fitness-=value;
+//					fitness-=value;
 				}
 			}
-		}
-		
-		if(killed) {
-			fitness-=value*(simulator.getRobots().size()-1)*(simulator.getEnvironment().getSteps()-simulator.getTime());
 		}
 	}
 	
 	@Override
 	public double getFitness() {
-		return fitness;
+		return Math.max(fitness,0);
 	}
 	
 }

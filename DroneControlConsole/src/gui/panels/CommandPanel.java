@@ -75,7 +75,7 @@ public class CommandPanel extends UpdatePanel {
 	 * are specific to the RaspberryController, and this project cannot include
 	 * RaspberryController because of PI4J.
 	 */
-	private String[] hardcodedClasses = new String[] { "CalibrationCIBehavior" };
+	private String[] hardcodedClasses = new String[] { "CalibrationCIBehavior", "ShutdownCIBehavior", "LogDronesCIBehavior" };
 
 	public CommandPanel(RobotControlConsole console, RobotGUI gui) {
 		updateHostname();

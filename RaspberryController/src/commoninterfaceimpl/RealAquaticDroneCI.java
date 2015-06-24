@@ -434,7 +434,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		this.activeWaypoint = wp;	
 	}
 	
-	private void log(String msg) {
+	public void log(String msg) {
 		if(logger != null)
 			logger.logMessage(msg);
 	}

@@ -62,6 +62,7 @@ public class CoverageEvaluationFunction extends EvaluationFunction{
 	public boolean insideLines(Vector2d v, Simulator sim) {
 		//http://en.wikipedia.org/wiki/Point_in_polygon
 		int count = 0;
+		
 		for(PhysicalObject p : sim.getEnvironment().getAllObjects()) {
 			if(p.getType() == PhysicalObjectType.LINE) {
 				Line l = (Line)p;
@@ -74,15 +75,16 @@ public class CoverageEvaluationFunction extends EvaluationFunction{
 
 	@Override
 	public void update(Simulator simulator) {
+		
 		if(!isSetup) {
 			setup(simulator);
 			isSetup = true;
 			steps = simulator.getEnvironment().getSteps();
 		}
 		
-		updateAll();
-		
 		ArrayList<Robot> robots = simulator.getRobots();
+		
+		double sum = 0;
 		
 		for(int y = 0 ; y < coverage.length ; y++) {
 			for(int x = 0 ; x < coverage[y].length ; x++) {
@@ -90,20 +92,16 @@ public class CoverageEvaluationFunction extends EvaluationFunction{
 				if(coverage[y][x] == -1)
 					continue;
 				
-				double px = (x - coverage[y].length/2)*resolution;
-				double py = (y - coverage.length/2)*resolution;
-				
-				Vector2d p = new Vector2d(px,py);
-				
-				for(Robot r : robots) {
-					if(r.isEnabled() && insideLines(r.getPosition(), simulator)) {
-						if(p.distanceTo(r.getPosition()) < distance) {
-							coverage[y][x] = 1.0;
-						}
-					} else if(kill) {
-						r.setEnabled(false);
-					}
+				if(coverage[y][x] > 0) {
+					 if(coverage[y][x] <= 1) {
+						coverage[y][x]-=decrease;
+						if(coverage[y][x] < 0)
+							coverage[y][x] = 0;
+					 }
 				}
+				
+				if(coverage[y][x] > 0)
+					 sum+=coverage[y][x];
 			}
 		}
 		
@@ -112,47 +110,62 @@ public class CoverageEvaluationFunction extends EvaluationFunction{
 				AquaticDrone ad = (AquaticDrone)r;
 				double speed = (Math.abs(ad.getLeftMotorSpeed()) + Math.abs(ad.getRightMotorSpeed())) / 2;
 				penalty+=((speed)/robots.size()/steps)*stopPenaltyMult;
+				
+				if(insideLines(r.getPosition(), simulator)) {
+					
+					double rX = ad.getPosition().getX();
+					double rY = ad.getPosition().getY();
+					
+					double minX = rX - distance;
+					double minY = rY - distance;
+					
+					double maxX = rX + distance;
+					double maxY = rY + distance;
+					
+					int pMinX = (int)((minX/resolution) + coverage.length/2);
+					int pMinY = (int)((minY/resolution) + coverage[0].length/2);
+					
+					double pMaxX = (maxX/resolution) + coverage.length/2;
+					double pMaxY = (maxY/resolution) + coverage[0].length/2;
+				
+					for(int y = pMinY ; y < pMaxY ; y++) {
+						
+						if(y >= coverage.length || y < 0)
+							continue;
+						
+						for(int x = pMinX ; x < pMaxX ; x++) {
+							
+							if(x >= coverage[y].length || x < 0)
+								continue;
+							
+							if(coverage[y][x] == -1)
+								continue;
+					
+//							double px = (x - coverage[y].length/2)*resolution;
+//							double py = (y - coverage.length/2)*resolution;
+							
+//							Vector2d p = new Vector2d(x,y);
+							
+//							if(p.distanceTo(r.getPosition()) < distance) {
+								coverage[y][x] = 1.0;
+//							}
+						}
+					}
+				} else if(kill) {
+					r.setEnabled(false);
+				}
 			}
 		}
 		
 //		fitness = (v/max - penalty)/robots.size();
 	
-		fitness+= ((countAll() / max) / steps / robots.size()) * foundMult;
+		fitness+= ((sum / max) / steps / robots.size()) * foundMult;
 //		printGrid();
 	}
 	
 	@Override
 	public double getFitness() {
 		return fitness - penalty;
-	}
-	
-	private void updateAll() {
-		for(int i = 0 ; i < coverage.length ; i++) {
-			for(int j = 0 ; j < coverage[i].length ; j++) {
-				if(coverage[i][j] > 0) {
-					 if(coverage[i][j] <= 1) {
-						coverage[i][j]-=decrease;
-						if(coverage[i][j] < 0)
-							coverage[i][j] = 0;
-					 }
-				}
-			}
-		}
-	}
-	
-	private double countAll() {
-		
-		double sum = 0;
-		
-		for(int i = 0 ; i < coverage.length ; i++) {
-			for(int j = 0 ; j < coverage[i].length ; j++) {
-				if(coverage[i][j] > 0) {
-					 sum+=coverage[i][j];
-				}
-			}
-		}
-		
-		return sum;
 	}
 	
 	private void printGrid() {
