@@ -23,7 +23,7 @@ public class FileLogger extends Thread implements RobotLogger {
 	private String fileName = "";
 	private RealAquaticDroneCI drone;
 	private String extraLog = "";
-	private DateTimeFormatter fileFormatter = DateTimeFormat.forPattern("dd-MM-YY_HH:mm:ss");
+	private DateTimeFormatter fileFormatter = DateTimeFormat.forPattern("dd-MM-YY_HH-mm-ss");
 	private DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("dd-MM-YY_HH:mm:ss.SS");
 	private DateTimeFormatter hourFormatter = DateTimeFormat.forPattern("HH:mm:ss.SS");
 	
