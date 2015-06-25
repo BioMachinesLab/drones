@@ -40,6 +40,8 @@ import commoninterface.network.broadcast.PositionBroadcastMessage;
 import commoninterface.network.broadcast.SharedDroneBroadcastMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
+import commoninterface.sensors.GeoFenceCISensor;
+import commoninterface.sensors.InsideBoundaryCISensor;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.RobotLogger;
 import commoninterface.utils.jcoord.LatLon;
@@ -94,8 +96,8 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		messageHandler.start();
 		
 		alwaysActiveBehaviors.add(new ChangeWaypointCIBehavior(new CIArguments(""), this));
-		alwaysActiveBehaviors.add(new AvoidDronesInstinct(new CIArguments(""), this));
-		alwaysActiveBehaviors.add(new AvoidObstaclesInstinct(new CIArguments(""), this));
+//		alwaysActiveBehaviors.add(new AvoidDronesInstinct(new CIArguments(""), this));
+//		alwaysActiveBehaviors.add(new AvoidObstaclesInstinct(new CIArguments(""), this));
 
 		setStatus("Running!\n");
 
@@ -109,6 +111,9 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			long lastCycleTime = System.currentTimeMillis();
 			CIBehavior current = activeBehavior;
 			try {
+				
+				for(CISensor s : cisensors)
+					s.update(timestep, entities.toArray());
 				
 				if (current != null) {
 					

@@ -33,7 +33,6 @@ public class CalibrationCIBehavior extends CIBehavior {
 		}
 		
 		if(first) {
-			System.out.println("hey");
 			drone.setMotorSpeeds(1, 1);
 			try {
 				Thread.sleep(500);

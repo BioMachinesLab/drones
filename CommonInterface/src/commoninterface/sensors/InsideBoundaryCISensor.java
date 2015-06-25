@@ -20,6 +20,7 @@ public class InsideBoundaryCISensor extends CISensor{
 	private ArrayList<Line> lines = new ArrayList<Line>();
 	private double reading = 0;
 	private boolean reverse = false;
+	private GeoFence fence;
 
 	public InsideBoundaryCISensor(int id, RobotCI robot, CIArguments args) {
 		super(id, robot, args);
@@ -41,6 +42,7 @@ public class InsideBoundaryCISensor extends CISensor{
 			reading = 0;
 		else
 			reading = insideBoundary() ? 1 : 0;
+		
 	}
 	
 	@Override
@@ -62,6 +64,15 @@ public class InsideBoundaryCISensor extends CISensor{
 		if(fence == null) {
 			lines.clear();
 		} else {
+			
+			if(this.fence != null && fence.getTimestepReceived() == this.fence.getTimestepReceived()) {
+				return;
+			}
+			
+			lines.clear();
+			
+			this.fence = fence;
+			
 			LinkedList<Waypoint> waypoints = fence.getWaypoints();
 			
 			//force this every 100 seconds just to be on the safe side
@@ -98,12 +109,15 @@ public class InsideBoundaryCISensor extends CISensor{
 		//http://en.wikipedia.org/wiki/Point_in_polygon
 		int count = 0;
 		
-		Vector2d dronePosition = CoordinateUtilities.GPSToCartesian(drone.getGPSLatLon());
-		
-		for(Line l : lines) {
-			if(l.intersectsWithLineSegment(dronePosition, new Vector2d(0,-Integer.MAX_VALUE)) != null)
-				count++;
+		if(drone.getGPSLatLon() != null) {
+			Vector2d dronePosition = CoordinateUtilities.GPSToCartesian(drone.getGPSLatLon());
+			
+			for(Line l : lines) {
+				if(l.intersectsWithLineSegment(dronePosition, new Vector2d(0,-Integer.MAX_VALUE)) != null)
+					count++;
+			}
+			return count % 2 != 0;
 		}
-		return count % 2 != 0;
+		return false;
 	}
 }
