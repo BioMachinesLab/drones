@@ -22,6 +22,7 @@ import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CISensor;
 import commoninterface.entities.Entity;
+import commoninterface.entities.RobotLocation;
 import commoninterface.entities.Waypoint;
 import commoninterface.instincts.AvoidDronesInstinct;
 import commoninterface.messageproviders.BehaviorMessageProvider;
@@ -39,6 +40,7 @@ import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
+import commoninterface.utils.RobotKalman;
 import commoninterface.utils.RobotLogger;
 import commoninterface.utils.jcoord.LatLon;
 
@@ -74,6 +76,11 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	private double leftPercentage = 0;
 	private double rightPercentage = 0;
 	
+	private RobotKalman kalman;
+	private LatLon gpsLatLon;
+	private double compassOrientation;
+	private CompassSensor compassSensor;
+	
 	public AquaticDrone(Simulator simulator, Arguments args) {
 		super(simulator, args);
 		this.simulator = simulator;
@@ -101,6 +108,12 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		sensors.add(new CompassSensor(simulator, sensors.size()+1, this, args));
 		actuators.add(new PropellersActuator(simulator, actuators.size()+1, args));
 		log("IP "+getNetworkAddress());
+		
+		if(getId() == 0) {
+			//TODO
+			kalman = new RobotKalman();
+		}
+		
 	}
 	
 	@Override
@@ -113,12 +126,26 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	
 	@Override
 	public void updateSensors(double simulationStep, ArrayList<PhysicalObject> teleported) {
+		
+		updateGPSPosition();
+		updateCompassOrientation();
+		
 		super.updateSensors(simulationStep, teleported);
 		
 		if(activeBehavior != null) {
 			activeBehavior.step(simulationStep);
 		}
 		
+		if(getId() == 0) {
+			//TODO
+			RobotLocation estimatedLocation = kalman.getEstimation(getGPSLatLon(), getCompassOrientationInDegrees());
+			
+			commoninterface.mathutils.Vector2d originalStuff = CoordinateUtilities.GPSToCartesian(getGPSLatLon());
+			commoninterface.mathutils.Vector2d kalmanStuff = CoordinateUtilities.GPSToCartesian(estimatedLocation.getLatLon());
+			
+			System.out.println(simulationStep+" "+getCompassOrientationInDegrees()+" "+simulationStep+" "+estimatedLocation.getOrientation());
+//			System.out.println(originalStuff.x+" "+originalStuff.y+" "+kalmanStuff.x+" "+kalmanStuff.y);
+		}
 	}
 
 	public void setMotorSpeeds(double leftMotorPercentage, double rightMotorPercentage) {
@@ -134,30 +161,12 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 
 	@Override
 	public double getCompassOrientationInDegrees() {
-		CompassSensor compassSensor = (CompassSensor) getSensorByType(CompassSensor.class);
-		double heading = (360-(compassSensor.getSensorReading(0) * 360) + 90) % 360;
-		double error = compassError*simulator.getRandom().nextDouble()*2-compassError;
-		return heading+error;
+		return compassOrientation;
 	}
 
 	@Override
 	public LatLon getGPSLatLon() {
-		
-		LatLon latLon = CoordinateUtilities.cartesianToGPS(getPosition().getX(), getPosition().getY());
-		
-		if(gpsError > 0) {
-			
-			commoninterface.mathutils.Vector2d pos = CoordinateUtilities.GPSToCartesian(latLon);
-			double radius = simulator.getRandom().nextDouble()*gpsError;
-			double angle = simulator.getRandom().nextDouble()*Math.PI*2;
-
-			pos.setX(pos.getX()+radius*Math.cos(angle));
-			pos.setY(pos.getY()+radius*Math.sin(angle));
-			
-			return CoordinateUtilities.cartesianToGPS(pos);
-		}
-		
-		return latLon;
+		return gpsLatLon;
 	}
 	
 	@Override
@@ -397,6 +406,31 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 			entities.remove(e);
 			entities.add(e);
 		}
+	}
+	
+	private void updateGPSPosition() {
+		gpsLatLon = CoordinateUtilities.cartesianToGPS(getPosition().getX(), getPosition().getY());
+		
+		if(gpsError > 0) {
+			
+			commoninterface.mathutils.Vector2d pos = CoordinateUtilities.GPSToCartesian(gpsLatLon);
+			double radius = simulator.getRandom().nextDouble()*gpsError;
+			double angle = simulator.getRandom().nextDouble()*Math.PI*2;
+
+			pos.setX(pos.getX()+radius*Math.cos(angle));
+			pos.setY(pos.getY()+radius*Math.sin(angle));
+			
+			gpsLatLon = CoordinateUtilities.cartesianToGPS(pos);
+		}
+	}
+	
+	private void updateCompassOrientation() {
+		if(compassSensor == null)
+			compassSensor = (CompassSensor) getSensorByType(CompassSensor.class);
+		
+		double heading = (360-(compassSensor.getSensorReading(0) * 360) + 90) % 360;
+		double error = compassError*simulator.getRandom().nextDouble()*2-compassError;
+		compassOrientation = heading+error;
 	}
 	
 }

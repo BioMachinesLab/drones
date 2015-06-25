@@ -2,7 +2,7 @@
 
 ip="192.168.3.";
 user="pi"
-total=8
+total=9
 increment=$(echo "scale=1; 100/$total" |bc)
 
 function log() {
@@ -40,6 +40,8 @@ do
 	log $var 7 $total
 	rsync -ru  ../../Pi4J_Libraries $user@$ip$var:/home/$user
 	log $var 8 $total
+	rsync -ru  ../../RaspberryController/run.sh $user@$ip$var:/home/$user/RaspberryController
+	log $var 9 $total
 	echo
 done
 echo "Done!"

@@ -24,7 +24,7 @@ public class WaterCurrent implements Updatable{
 		if(!configured) {
 			speed = simulator.getRandom().nextDouble()*maxSpeed;
 			angle = simulator.getRandom().nextDouble()*Math.PI*2;
-			increment = new Vector2d(speed*Math.cos(angle),speed*Math.sin(angle));
+			increment = new Vector2d(speed*Math.cos(angle)*simulator.getTimeDelta(),speed*Math.sin(angle)*simulator.getTimeDelta());
 			configured = true;
 		}
 		
