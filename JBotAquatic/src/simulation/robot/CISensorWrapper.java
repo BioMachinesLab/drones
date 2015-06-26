@@ -27,6 +27,12 @@ public class CISensorWrapper extends Sensor{
 		((RobotCI)this.robot).getCISensors().add(cisensor);
 	}
 
+    public CISensor getCisensor() {
+        return cisensor;
+    }
+        
+        
+
 	@Override
 	public double getSensorReading(int sensorNumber) {
 		return cisensor.getSensorReading(sensorNumber);

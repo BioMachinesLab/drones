@@ -26,7 +26,7 @@ public class WaypointFitness extends EvaluationFunction {
 
     private boolean configured = false;
     private double startingDistance = 0;
-    private double targetDistance = 0.5;
+    private double targetDistance = 1.5;
     private Waypoint wp = null;
     private int steps = 0;
     private boolean kill = false;
@@ -58,7 +58,7 @@ public class WaypointFitness extends EvaluationFunction {
 
         if (wp != null) {
             double currentDistance = calculateDistance(wp, drone);
-            if (currentDistance < targetDistance) {
+            if (currentDistance <= targetDistance) {
                 insideWP = true;
                 timeWithin++;
                 
@@ -75,7 +75,7 @@ public class WaypointFitness extends EvaluationFunction {
 
         if (kill && !insideWP && drone.isInvolvedInCollison()) {
             simulator.stopSimulation();
-            fitness = 0;
+            fitness /= 10;
         }
     }
 
