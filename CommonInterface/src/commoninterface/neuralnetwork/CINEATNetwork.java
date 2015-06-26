@@ -20,7 +20,6 @@ import commoninterface.utils.CIArguments;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Vector;
 
 /**
@@ -58,8 +57,6 @@ public class CINEATNetwork extends CINeuralNetwork {
         newNet.updateNetStructure();
         this.network = newNet;
     }
-    
-    
 
     public static NEATNeuralNet deserialize(String ser) {
         String[] split = ser.split(",");
@@ -72,18 +69,18 @@ public class CINEATNetwork extends CINeuralNetwork {
 
     public static NEATNeuralNet deserialize(double[] weights) {
         ArrayList<Gene> genes = new ArrayList<Gene>();
-        for (int i = 0; i < weights.length; i++) {
+        for (int i = 0; i < weights.length; ) {
             double type = weights[i++];
             if (type == NODE) {
-                int id = (int) (double) weights[i++];
+                int id = (int) weights[i++];
                 double sigF = weights[i++];
-                int t = (int) (double) weights[i++];
+                int t = (int) weights[i++];
                 double bias = weights[i++];
                 genes.add(new NEATNodeGene(0, id, sigF, t, bias));
             } else if (type == LINK) {
-                boolean enabled = weights[i++] == 1d;
-                int from = (int) (double) weights[i++];
-                int to = (int) (double) weights[i++];
+                boolean enabled = (weights[i++] == 1d);
+                int from = (int) weights[i++];
+                int to = (int) weights[i++];
                 double weight = weights[i++];
                 genes.add(new NEATLinkGene(0, enabled, from, to, weight));
             }
