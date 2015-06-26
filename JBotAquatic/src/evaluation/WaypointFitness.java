@@ -79,7 +79,7 @@ public class WaypointFitness extends EvaluationFunction {
         }
     }
 
-    static Waypoint getWaypoint(AquaticDrone drone) {
+    public static Waypoint getWaypoint(AquaticDrone drone) {
         ArrayList<Entity> entities = drone.getEntities();
         for (Entity e : entities) {
             if (e instanceof Waypoint) {
@@ -94,7 +94,7 @@ public class WaypointFitness extends EvaluationFunction {
     	return Math.max(fitness,0);
     }
 
-    static double calculateDistance(Waypoint wp, AquaticDrone drone) {
+    public static double calculateDistance(Waypoint wp, AquaticDrone drone) {
         Vector2d pos = CoordinateUtilities.GPSToCartesian(wp.getLatLon());
         Vector2d robotPos = new Vector2d(drone.getPosition().getX(), drone.getPosition().getY());
         return pos.distanceTo(robotPos);
