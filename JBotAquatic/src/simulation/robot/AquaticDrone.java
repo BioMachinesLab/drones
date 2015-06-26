@@ -40,7 +40,7 @@ import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
-import commoninterface.utils.RobotKalman;
+import commoninterface.utils.KalmanGPS;
 import commoninterface.utils.RobotLogger;
 import commoninterface.utils.jcoord.LatLon;
 
@@ -76,7 +76,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	private double leftPercentage = 0;
 	private double rightPercentage = 0;
 	
-	private RobotKalman kalman;
+	private KalmanGPS kalman;
 	private LatLon gpsLatLon;
 	private double compassOrientation;
 	private CompassSensor compassSensor;
@@ -109,11 +109,6 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		actuators.add(new PropellersActuator(simulator, actuators.size()+1, args));
 		log("IP "+getNetworkAddress());
 		
-		if(getId() == 0) {
-			//TODO
-			kalman = new RobotKalman();
-		}
-		
 	}
 	
 	@Override
@@ -136,16 +131,6 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 			activeBehavior.step(simulationStep);
 		}
 		
-		if(getId() == 0) {
-			//TODO
-			RobotLocation estimatedLocation = kalman.getEstimation(getGPSLatLon(), getCompassOrientationInDegrees());
-			
-			commoninterface.mathutils.Vector2d originalStuff = CoordinateUtilities.GPSToCartesian(getGPSLatLon());
-			commoninterface.mathutils.Vector2d kalmanStuff = CoordinateUtilities.GPSToCartesian(estimatedLocation.getLatLon());
-			
-			System.out.println(simulationStep+" "+getCompassOrientationInDegrees()+" "+simulationStep+" "+estimatedLocation.getOrientation());
-//			System.out.println(originalStuff.x+" "+originalStuff.y+" "+kalmanStuff.x+" "+kalmanStuff.y);
-		}
 	}
 
 	public void setMotorSpeeds(double leftMotorPercentage, double rightMotorPercentage) {
