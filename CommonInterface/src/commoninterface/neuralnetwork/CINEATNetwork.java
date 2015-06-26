@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 package commoninterface.neuralnetwork;
+
 import commoninterface.neat.core.NEATChromosome;
 import commoninterface.neat.core.NEATLinkGene;
 import commoninterface.neat.core.NEATNetDescriptor;
@@ -33,10 +34,10 @@ public class CINEATNetwork extends CINeuralNetwork {
 
     public CINEATNetwork(Vector<CINNInput> inputs, Vector<CINNOutput> outputs, CIArguments arguments) {
         create(inputs, outputs);
-        if(arguments.getArgumentIsDefined("weights")) {
-			String net = arguments.getArgumentAsString("weights");
-			network = deserialize(net);
-		}
+        if (arguments.getArgumentIsDefined("weights")) {
+            String net = arguments.getArgumentAsString("weights");
+            network = deserialize(net);
+        }
     }
 
     @Override
@@ -57,32 +58,35 @@ public class CINEATNetwork extends CINeuralNetwork {
         newNet.updateNetStructure();
         this.network = newNet;
     }
+    
+    
 
     public static NEATNeuralNet deserialize(String ser) {
         String[] split = ser.split(",");
-        ArrayList<Double> stuff = new ArrayList<Double>();
-        for (String s : split) {
-            stuff.add(Double.parseDouble(s));
+        double[] stuff = new double[split.length];
+        for (int i = 0 ; i < stuff.length ; i++) {
+            stuff[i] = Double.parseDouble(split[i]);
         }
+        return deserialize(stuff);
+    }
 
+    public static NEATNeuralNet deserialize(double[] weights) {
         ArrayList<Gene> genes = new ArrayList<Gene>();
-        Iterator<Double> iter = stuff.iterator();
-        while (iter.hasNext()) {
-            double type = iter.next();
+        for (int i = 0; i < weights.length; i++) {
+            double type = weights[i++];
             if (type == NODE) {
-                int id = (int) (double) iter.next();
-                double sigF = iter.next();
-                int t = (int) (double) iter.next();
-                double bias = iter.next();
+                int id = (int) (double) weights[i++];
+                double sigF = weights[i++];
+                int t = (int) (double) weights[i++];
+                double bias = weights[i++];
                 genes.add(new NEATNodeGene(0, id, sigF, t, bias));
             } else if (type == LINK) {
-                boolean enabled = iter.next() == 1d;
-                int from = (int) (double) iter.next();
-                int to = (int) (double) iter.next();
-                double weight = iter.next();
+                boolean enabled = weights[i++] == 1d;
+                int from = (int) (double) weights[i++];
+                int to = (int) (double) weights[i++];
+                double weight = weights[i++];
                 genes.add(new NEATLinkGene(0, enabled, from, to, weight));
             }
-
         }
         Gene[] geneArray = new Gene[genes.size()];
         genes.toArray(geneArray);
@@ -94,14 +98,9 @@ public class CINEATNetwork extends CINeuralNetwork {
         network.updateNetStructure();
         return network;
     }
-    
+
     @Override
     public void setWeights(double[] weights) {
-    	StringBuilder builder = new StringBuilder();
-		for(double d : weights) {
-			builder.append(d);
-			builder.append(',');
-		}
-		this.network = deserialize(builder.toString());
+        this.network = deserialize(weights);
     }
 }
