@@ -8,12 +8,12 @@ import simulation.robot.Robot;
 import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
 
-public class EmptyEnvironment extends Environment {
+public class OpenEnvironment extends Environment {
 
     @ArgumentsAnnotation(name = "distance", defaultValue = "0")
     private double distance = 0;
 
-    public EmptyEnvironment(Simulator simulator, Arguments args) {
+    public OpenEnvironment(Simulator simulator, Arguments args) {
         super(simulator, args);
         distance = args.getArgumentAsDoubleOrSetDefault("distance", distance);
     }
