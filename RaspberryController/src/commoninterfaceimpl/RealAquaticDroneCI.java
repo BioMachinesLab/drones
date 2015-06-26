@@ -42,7 +42,8 @@ import commoninterface.network.broadcast.SharedDroneBroadcastMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
 import commoninterface.utils.CIArguments;
-import commoninterface.utils.KalmanGPS;
+import commoninterface.utils.CoordinateUtilities;
+import commoninterface.utils.RobotKalman;
 import commoninterface.utils.RobotLogger;
 import commoninterface.utils.jcoord.LatLon;
 
@@ -84,8 +85,9 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	private double currentGPSOrientation = 0;
 	private LatLon currentLatLon = null;
 	
-	private KalmanGPS kalmanFilterGPS;
-	private KalmanGPS kalmanFilterCompass;
+	private RobotKalman kalmanFilterGPS;
+	private RobotKalman kalmanFilterCompass;
+	private LatLon origin = CoordinateUtilities.cartesianToGPS(0,0);
 
 	@Override
 	public void begin(HashMap<String,CIArguments> args) {
@@ -403,7 +405,15 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			currentLatLon = measuredLatLon;
 		}
 		
-		currentOrientation = measuredCompass;
+		if(kalmanFilterCompass != null) {
+			
+			if(measuredCompass != -1) {
+				RobotLocation rl = kalmanFilterGPS.getEstimation(origin, measuredCompass);
+				currentLatLon = rl.getLatLon();
+			}
+		} else {
+			currentOrientation = measuredCompass;
+		}
 	}
 	
 	private LatLon updateGPS() {
@@ -506,8 +516,10 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		if(args.getFlagIsTrue("avoidobstaclesinstinct"))
 			alwaysActiveBehaviors.add(new AvoidObstaclesInstinct(new CIArguments(""), this));
 		
-		if(args.getFlagIsTrue("kalmanfilter"))
-			kalmanFilterGPS = new KalmanGPS();
+		if(args.getFlagIsTrue("kalmanfilter")) {
+			kalmanFilterGPS = new RobotKalman();
+			kalmanFilterCompass = new RobotKalman();
+		}
 				
 	}
 	

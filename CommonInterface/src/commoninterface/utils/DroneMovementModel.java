@@ -22,7 +22,7 @@ public class DroneMovementModel {
 	private double frictionConstant = 0.21;//0.05
 	private double accelarationConstant = 0.20;//0.1
 	
-	private KalmanGPS kalman = new KalmanGPS();
+	private RobotKalman kalman = new RobotKalman();
 	
 	public DroneMovementModel(Vector2d pos, double orientation) {
 		this.pos = new Vector2d(pos);

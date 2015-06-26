@@ -11,7 +11,7 @@ import commoninterface.entities.RobotLocation;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.jcoord.LatLon;
 
-public class KalmanGPS {
+public class RobotKalman {
 
 	private JKalman kalman;
 	private Matrix s; // state [x, y]
@@ -110,6 +110,78 @@ public class KalmanGPS {
 	}
 	
 	/*
+	public static void main(String[] args) throws Exception {
+		File f = new File("logs/values_18-5-2015_14-5-33.7.log");
+		
+		RobotKalman k = new RobotKalman();
+		
+		Scanner s = new Scanner(f);
+		
+		double prevLat = 0;
+		double prevLon = 0;
+		
+		double cummulativeO1 = 0;
+		double cummulativeO2 = 0;
+		
+		double prevO1 = 0;
+		double prevO2 = 0;
+		
+		double acum1 = 0;
+		double acum2 = 0;
+		
+		while(s.hasNextLine()) {
+			
+			String line = s.nextLine();
+			
+			if(line.startsWith("[") || line.startsWith("#") || line.trim().isEmpty())
+				continue;
+			
+			String[] split = line.split("\t");
+			
+			double lat = Double.parseDouble(split[1]);
+			double lon = Double.parseDouble(split[2]);
+			double orientation = Double.parseDouble(split[4]);
+			double speedL = Double.parseDouble(split[7]);
+			double speedR = Double.parseDouble(split[8]);
+			
+			LatLon latLon = new LatLon(lat,lon);
+			Vector2d vec = CoordinateUtilities.GPSToCartesian(latLon);
+			
+			RobotLocation rl = k.getEstimation(latLon, orientation);
+			
+			prevLat = lat;
+			prevLon = lon;
+			
+			Vector2d original = CoordinateUtilities.GPSToCartesian(CoordinateUtilities.cartesianToGPS(0,0));
+			Vector2d kal = CoordinateUtilities.GPSToCartesian(rl.getLatLon());
+			
+			double rlOrientation = rl.getOrientation();
+			
+			cummulativeO1+=(prevO1-orientation);
+			cummulativeO2+=(prevO2-rlOrientation);
+			
+			if(orientation < 50 && prevO1 > 310)
+				acum1+=360;
+			
+			if(orientation > 310 && prevO1 < 50)
+				acum1-=360;
+			
+			if(rlOrientation < 50 && prevO2 > 310)
+				acum2+=360;
+			
+			if(rlOrientation > 310 && prevO2 < 50)
+				acum2-=360;
+			
+			prevO1 = orientation;
+			prevO2 = rlOrientation;
+			
+			System.out.println(orientation+acum2+" "+(rlOrientation+acum2));
+		}
+		
+		s.close();
+	} 
+	
+	
 	public static void main(String[] args) throws Exception {
 		
 		File f = new File("logs/values_18-5-2015_14-5-33.7.log");

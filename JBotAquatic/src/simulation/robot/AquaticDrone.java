@@ -40,7 +40,7 @@ import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
-import commoninterface.utils.KalmanGPS;
+import commoninterface.utils.RobotKalman;
 import commoninterface.utils.RobotLogger;
 import commoninterface.utils.jcoord.LatLon;
 
@@ -76,7 +76,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	private double leftPercentage = 0;
 	private double rightPercentage = 0;
 	
-	private KalmanGPS kalman;
+	private RobotKalman kalman;
 	private LatLon gpsLatLon;
 	private double compassOrientation;
 	private CompassSensor compassSensor;
