@@ -76,10 +76,15 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	private double leftPercentage = 0;
 	private double rightPercentage = 0;
 	
-	private RobotKalman kalman;
+	private RobotKalman kalmanFilterGPS;
+	private RobotKalman kalmanFilterCompass;
+	
 	private LatLon gpsLatLon;
+	private LatLon prevMeasuredLatLon;
 	private double compassOrientation;
 	private CompassSensor compassSensor;
+	private LatLon origin = CoordinateUtilities.cartesianToGPS(0,0);
+	private boolean badGPS = false;
 	
 	public AquaticDrone(Simulator simulator, Arguments args) {
 		super(simulator, args);
@@ -105,6 +110,13 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		if(args.getArgumentAsIntOrSetDefault("avoiddrones", 1) == 1)
 			alwaysActiveBehaviors.add(new AvoidDronesInstinct(new CIArguments(""), this));
 		
+		if(args.getArgumentAsIntOrSetDefault("kalman", 0) == 1) {
+			kalmanFilterGPS = new RobotKalman();
+			kalmanFilterCompass = new RobotKalman();
+		}
+		
+		badGPS = args.getFlagIsTrue("badgps");
+		
 		sensors.add(new CompassSensor(simulator, sensors.size()+1, this, args));
 		actuators.add(new PropellersActuator(simulator, actuators.size()+1, args));
 		log("IP "+getNetworkAddress());
@@ -122,8 +134,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	@Override
 	public void updateSensors(double simulationStep, ArrayList<PhysicalObject> teleported) {
 		
-		updateGPSPosition();
-		updateCompassOrientation();
+		updatePhysicalSensors();
 		
 		super.updateSensors(simulationStep, teleported);
 		
@@ -393,8 +404,12 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		}
 	}
 	
-	private void updateGPSPosition() {
-		gpsLatLon = CoordinateUtilities.cartesianToGPS(getPosition().getX(), getPosition().getY());
+	private LatLon updateGPSPosition() {
+		if(badGPS && simulator.getTime() % 10 != 0 && prevMeasuredLatLon != null) {
+			return prevMeasuredLatLon;
+		}
+		
+		LatLon gpsLatLon = CoordinateUtilities.cartesianToGPS(getPosition().getX(), getPosition().getY());
 		
 		if(gpsError > 0) {
 			
@@ -407,15 +422,46 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 			
 			gpsLatLon = CoordinateUtilities.cartesianToGPS(pos);
 		}
+		
+		return gpsLatLon;
 	}
 	
-	private void updateCompassOrientation() {
+	private double updateCompassOrientation() {
 		if(compassSensor == null)
 			compassSensor = (CompassSensor) getSensorByType(CompassSensor.class);
 		
 		double heading = (360-(compassSensor.getSensorReading(0) * 360) + 90) % 360;
 		double error = compassError*simulator.getRandom().nextDouble()*2-compassError;
-		compassOrientation = heading+error;
+		return heading+error;
+	}
+	
+	private void updatePhysicalSensors() {
+		
+		LatLon measuredLatLon = updateGPSPosition();
+		double measuredCompass = updateCompassOrientation();
+		
+		if(kalmanFilterGPS != null) {
+			if(measuredLatLon != null) {
+				if(prevMeasuredLatLon == null || prevMeasuredLatLon.getLat() != measuredLatLon.getLat() || prevMeasuredLatLon.getLon() != measuredLatLon.getLon()) {
+					RobotLocation rl = kalmanFilterGPS.getEstimation(measuredLatLon, compassOrientation);
+					gpsLatLon = rl.getLatLon();
+				}
+			}
+		} else {
+			gpsLatLon = measuredLatLon;
+		}
+		
+		prevMeasuredLatLon = measuredLatLon;
+		
+		if(kalmanFilterCompass != null) {
+			
+			if(measuredCompass != -1) {
+				RobotLocation rl = kalmanFilterCompass.getEstimation(origin, measuredCompass);
+				compassOrientation = rl.getOrientation();
+			}
+		} else {
+			compassOrientation = measuredCompass;
+		}
 	}
 	
 }

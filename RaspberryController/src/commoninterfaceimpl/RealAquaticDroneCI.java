@@ -84,6 +84,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	private double currentOrientation = 0;
 	private double currentGPSOrientation = 0;
 	private LatLon currentLatLon = null;
+	private LatLon prevMeasuredLatLon = null;
 	
 	private RobotKalman kalmanFilterGPS;
 	private RobotKalman kalmanFilterCompass;
@@ -388,16 +389,14 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	
 	private void updateSensors() {
 		
-		LatLon prevLatLon = getGPSLatLon();
-		
 		LatLon measuredLatLon = updateGPS();
 		double measuredCompass = updateCompass();
 		
 		if(kalmanFilterGPS != null) {
 			if(measuredLatLon != null) {
-				if(prevLatLon == null || prevLatLon.getLat() != measuredLatLon.getLat() || prevLatLon.getLon() != measuredLatLon.getLon()) {
+				if(prevMeasuredLatLon == null || prevMeasuredLatLon.getLat() != measuredLatLon.getLat() || prevMeasuredLatLon.getLon() != measuredLatLon.getLon()) {
 					RobotLocation rl = kalmanFilterGPS.getEstimation(measuredLatLon, currentOrientation);
-					prevLatLon = measuredLatLon;
+					prevMeasuredLatLon = measuredLatLon;
 					currentLatLon = rl.getLatLon();
 				}
 			}
@@ -408,8 +407,8 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		if(kalmanFilterCompass != null) {
 			
 			if(measuredCompass != -1) {
-				RobotLocation rl = kalmanFilterGPS.getEstimation(origin, measuredCompass);
-				currentLatLon = rl.getLatLon();
+				RobotLocation rl = kalmanFilterCompass.getEstimation(origin, measuredCompass);
+				currentOrientation = rl.getOrientation();
 			}
 		} else {
 			currentOrientation = measuredCompass;
