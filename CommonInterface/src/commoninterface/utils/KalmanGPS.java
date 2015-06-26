@@ -11,7 +11,7 @@ import commoninterface.entities.RobotLocation;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.jcoord.LatLon;
 
-public class RobotKalman {
+public class KalmanGPS {
 
 	private JKalman kalman;
 	private Matrix s; // state [x, y]
@@ -109,7 +109,8 @@ public class RobotKalman {
 		return  degrees;
 	}
 	
-public static void main(String[] args) throws Exception {
+	/*
+	public static void main(String[] args) throws Exception {
 		
 		File f = new File("logs/values_18-5-2015_14-5-33.7.log");
 		
@@ -129,55 +130,89 @@ public static void main(String[] args) throws Exception {
 		double acum1 = 0;
 		double acum2 = 0;
 		
+		DroneMovementModel model = null;
+		
+		boolean first = true;
+		
+		int times = 0;
+		
 		while(s.hasNextLine()) {
 			
 			String line = s.nextLine();
 			
-//			System.out.println(line);
-			
 			if(line.startsWith("[") || line.startsWith("#") || line.trim().isEmpty())
 				continue;
+			
+			times++;
 			
 			String[] split = line.split("\t");
 			
 			double lat = Double.parseDouble(split[1]);
 			double lon = Double.parseDouble(split[2]);
 			double orientation = Double.parseDouble(split[4]);
+			double speedL = Double.parseDouble(split[7]);
+			double speedR = Double.parseDouble(split[8]);
 			
-			if(prevLat == lat && prevLon == lon)
+			LatLon latLon = new LatLon(lat,lon);
+			Vector2d vec = CoordinateUtilities.GPSToCartesian(latLon);
+			
+			RobotLocation rl = k.getEstimation(latLon, orientation);
+			
+			if(prevLat == lat && prevLon == lon) {
+			
+//				if(model != null) {
+//					model.correctOrientation(orientation);
+//					model.move(speedL, speedR);
+//					Vector2d kp = model.getKalmanPosition();
+//					double ko = model.getKalmanOrientation();
+//					
+//					Vector2d simVec = CoordinateUtilities.GPSToCartesian(model.getSimulatedGPSPosition());
+//					System.out.println(vec.x+" "+vec.y+" "+kp.x+" "+kp.y+" "+ko+" "+vec.x+" "+vec.y);
+//				}
+				
 				continue;
+			}
+			
+//			if(first) {
+//				model = new DroneMovementModel(CoordinateUtilities.GPSToCartesian(new LatLon(lat,lon)), orientation);
+//				first = false;
+//			} 
+//			model.correctPosition(CoordinateUtilities.GPSToCartesian(new LatLon(lat,lon)));
+//			model.correctOrientation(orientation);
+//			model.move(speedL, speedR);
+//			Vector2d kp = model.getKalmanPosition();
+//			double ko = model.getKalmanOrientation();
+//			Vector2d simVec = CoordinateUtilities.GPSToCartesian(model.getSimulatedGPSPosition());
+//			System.out.println(vec.x+" "+vec.y+" "+kp.x+" "+kp.y+" "+ko+" "+vec.x+" "+vec.y);
+			
 			
 //			System.out.println(split[0]+" "+split[7]+" "+split[8]);
 			
 			prevLat = lat;
 			prevLon = lon;
 			
-			LatLon latLon = new LatLon(lat,lon);
-			
-			RobotLocation rl = k.getEstimation(latLon, orientation);
-			
 			Vector2d original = CoordinateUtilities.GPSToCartesian(latLon);
 			Vector2d kal = CoordinateUtilities.GPSToCartesian(rl.getLatLon());
 			
-			double rlOrientation = rl.getOrientation();
-			
-			cummulativeO1+=(prevO1-orientation);
-			cummulativeO2+=(prevO2-rlOrientation);
-			
-			if(orientation < 50 && prevO1 > 310)
-				acum1+=360;
-			
-			if(orientation > 310 && prevO1 < 50)
-				acum1-=360;
-			
-			if(rlOrientation < 50 && prevO2 > 310)
-				acum2+=360;
-			
-			if(rlOrientation > 310 && prevO2 < 50)
-				acum2-=360;
-			
-			prevO1 = orientation;
-			prevO2 = rlOrientation;
+//			double rlOrientation = rl.getOrientation();
+//			
+//			cummulativeO1+=(prevO1-orientation);
+//			cummulativeO2+=(prevO2-rlOrientation);
+//			
+//			if(orientation < 50 && prevO1 > 310)
+//				acum1+=360;
+//			
+//			if(orientation > 310 && prevO1 < 50)
+//				acum1-=360;
+//			
+//			if(rlOrientation < 50 && prevO2 > 310)
+//				acum2+=360;
+//			
+//			if(rlOrientation > 310 && prevO2 < 50)
+//				acum2-=360;
+//			
+//			prevO1 = orientation;
+//			prevO2 = rlOrientation;
 			
 //			System.out.println(orientation+acum2+" "+(rlOrientation+acum2));
 			System.out.println(original.getX()+" "+original.getY()+" "+kal.getX()+" "+kal.getY());
@@ -207,6 +242,6 @@ public static void main(String[] args) throws Exception {
 		
 		s.close();
 		
-	}
+	}*/
 	
 }

@@ -19,6 +19,7 @@ import commoninterface.CISensor;
 import commoninterface.LedState;
 import commoninterface.dataobjects.GPSData;
 import commoninterface.entities.Entity;
+import commoninterface.entities.RobotLocation;
 import commoninterface.entities.Waypoint;
 import commoninterface.instincts.AvoidDronesInstinct;
 import commoninterface.instincts.AvoidObstaclesInstinct;
@@ -40,9 +41,8 @@ import commoninterface.network.broadcast.PositionBroadcastMessage;
 import commoninterface.network.broadcast.SharedDroneBroadcastMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
-import commoninterface.sensors.GeoFenceCISensor;
-import commoninterface.sensors.InsideBoundaryCISensor;
 import commoninterface.utils.CIArguments;
+import commoninterface.utils.KalmanGPS;
 import commoninterface.utils.RobotLogger;
 import commoninterface.utils.jcoord.LatLon;
 
@@ -79,6 +79,13 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	private ArrayList<CIBehavior> alwaysActiveBehaviors = new ArrayList<CIBehavior>(); 
 	
 	private RobotLogger logger;
+	
+	private double currentOrientation = 0;
+	private double currentGPSOrientation = 0;
+	private LatLon currentLatLon = null;
+	
+	private KalmanGPS kalmanFilterGPS;
+	private KalmanGPS kalmanFilterCompass;
 
 	@Override
 	public void begin(HashMap<String,CIArguments> args) {
@@ -95,25 +102,20 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		messageHandler = new ControllerMessageHandler(this);
 		messageHandler.start();
 		
-		alwaysActiveBehaviors.add(new ChangeWaypointCIBehavior(new CIArguments(""), this));
-//		alwaysActiveBehaviors.add(new AvoidDronesInstinct(new CIArguments(""), this));
-//		alwaysActiveBehaviors.add(new AvoidObstaclesInstinct(new CIArguments(""), this));
-
 		setStatus("Running!\n");
-
+		
 		log(initMessages);
 	}
 
 	@Override
 	public void run() {
 		while (run) {
-
+			
+			updateSensors();
+			
 			long lastCycleTime = System.currentTimeMillis();
 			CIBehavior current = activeBehavior;
 			try {
-				
-				for(CISensor s : cisensors)
-					s.update(timestep, entities.toArray());
 				
 				if (current != null) {
 					
@@ -369,42 +371,68 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	@Override
 	public double getCompassOrientationInDegrees() {
+		return currentOrientation;
+	}
+
+	@Override
+	public LatLon getGPSLatLon() {
+		return currentLatLon;
+	}
+
+	@Override
+	public double getGPSOrientationInDegrees() {
+		return currentGPSOrientation;
+	}
+	
+	private void updateSensors() {
+		
+		LatLon prevLatLon = getGPSLatLon();
+		
+		LatLon measuredLatLon = updateGPS();
+		double measuredCompass = updateCompass();
+		
+		if(kalmanFilterGPS != null) {
+			if(measuredLatLon != null) {
+				if(prevLatLon == null || prevLatLon.getLat() != measuredLatLon.getLat() || prevLatLon.getLon() != measuredLatLon.getLon()) {
+					RobotLocation rl = kalmanFilterGPS.getEstimation(measuredLatLon, currentOrientation);
+					prevLatLon = measuredLatLon;
+					currentLatLon = rl.getLatLon();
+				}
+			}
+		} else {
+			currentLatLon = measuredLatLon;
+		}
+		
+		currentOrientation = measuredCompass;
+	}
+	
+	private LatLon updateGPS() {
+		try {
+			
+			GPSData gpsData = ioManager.getGpsModule().getReadings();
+			
+			currentGPSOrientation = gpsData.getOrientation();
+			
+			if (gpsData.getLatitudeDecimal() == 0
+					|| gpsData.getLongitudeDecimal() == 0)
+				return null;
+			else
+				return new LatLon(gpsData.getLatitudeDecimal(),gpsData.getLongitudeDecimal());
+		} catch (Exception e) {
+			currentOrientation = -1;
+			return null;
+		}
+	}
+	
+	private double updateCompass() {
 		try {
 			double orientation = ioManager.getCompassModule()
 					.getHeadingInDegrees();
 			return (orientation % 360.0);
 		} catch (Exception e) {
+			return -1;
 		}
 
-		return -1;
-	}
-
-	@Override
-	public LatLon getGPSLatLon() {
-		try {
-			GPSData gpsData = ioManager.getGpsModule().getReadings();
-
-			if (gpsData.getLatitudeDecimal() == 0
-					|| gpsData.getLongitudeDecimal() == 0)
-				return null;
-
-			return new LatLon(gpsData.getLatitudeDecimal(),
-					gpsData.getLongitudeDecimal());
-		} catch (Exception e) {
-		}
-
-		return null;
-	}
-
-	@Override
-	public double getGPSOrientationInDegrees() {
-		try {
-			GPSData gpsData = ioManager.getGpsModule().getReadings();
-			return gpsData.getOrientation();
-		} catch (Exception e) {
-		}
-
-		return -1;
 	}
 
 	@Override
@@ -468,6 +496,19 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		
 		if(args.getArgumentIsDefined("compassoffset") && ioManager.getCompassModule() != null)
 			ioManager.getCompassModule().setOffset(args.getArgumentAsInt("compassoffset"));
+		
+		if(args.getFlagIsTrue("changewaypointinstinct"))
+			alwaysActiveBehaviors.add(new ChangeWaypointCIBehavior(new CIArguments(""), this));
+		
+		if(args.getFlagIsTrue("avoiddronesinstinct"))
+			alwaysActiveBehaviors.add(new AvoidDronesInstinct(new CIArguments(""), this));
+		
+		if(args.getFlagIsTrue("avoidobstaclesinstinct"))
+			alwaysActiveBehaviors.add(new AvoidObstaclesInstinct(new CIArguments(""), this));
+		
+		if(args.getFlagIsTrue("kalmanfilter"))
+			kalmanFilterGPS = new KalmanGPS();
+				
 	}
 	
 	@Override

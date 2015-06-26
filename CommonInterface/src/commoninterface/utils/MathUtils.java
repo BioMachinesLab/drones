@@ -37,4 +37,14 @@ public class MathUtils {
 			return new Vector2d((x1 + ua*(x2 - x1)),(y1 + ua*(y2 - y1)));
 		return null;
 	}
+	
+	public static double modPI2(double angle) {
+		while (angle < -Math.PI)
+			angle += 2.0 * Math.PI;
+
+		while (angle > Math.PI)
+			angle -= 2.0 * Math.PI;
+
+		return angle;
+	}
 }
