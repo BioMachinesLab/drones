@@ -5,9 +5,6 @@
  */
 package evaluation;
 
-import commoninterface.entities.Waypoint;
-import commoninterface.mathutils.Vector2d;
-import commoninterface.utils.CoordinateUtilities;
 import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
 
 
@@ -23,7 +20,7 @@ import simulation.util.Arguments;
 public class AggregateFitness extends EvaluationFunction {
 
     private double meanDistance = 0;
-    private boolean kill = false;
+    private boolean kill = true;
     private int steps = 0;
 
     public AggregateFitness(Arguments args) {
@@ -40,7 +37,7 @@ public class AggregateFitness extends EvaluationFunction {
             centreMass.add(r.getPosition());
         }
         centreMass.x /= simulator.getRobots().size();
-        centreMass.y = simulator.getRobots().size();
+        centreMass.y /= simulator.getRobots().size();
         
         double currentDistance = 0;
         for (Robot r : simulator.getRobots()) {

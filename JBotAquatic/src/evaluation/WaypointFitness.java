@@ -5,13 +5,10 @@
  */
 package evaluation;
 
-import commoninterface.entities.Entity;
 import commoninterface.entities.Waypoint;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CoordinateUtilities;
 import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
-
-import java.util.ArrayList;
 
 import simulation.Simulator;
 import simulation.robot.AquaticDrone;
@@ -23,75 +20,45 @@ import simulation.util.Arguments;
  */
 public class WaypointFitness extends EvaluationFunction {
 
-
     private boolean configured = false;
     private double startingDistance = 0;
     private double targetDistance = 1.5;
-    private Waypoint wp = null;
     private int steps = 0;
-    private boolean kill = false;
-    private int timeWithin = 0;
-    private int timeStopped = 0;
-    
+    private boolean kill = true;
+    private double usedEnergy = 0;
+
     public WaypointFitness(Arguments args) {
-    	super(args);
-    	targetDistance = args.getArgumentAsDouble("targetdistance");
+        super(args);
+        targetDistance = args.getArgumentAsDouble("targetdistance");
         kill = args.getFlagIsTrue("kill");
-	}
-    
+    }
+
     @Override
     public void update(Simulator simulator) {
         AquaticDrone drone = (AquaticDrone) simulator.getRobots().get(0);
-        boolean insideWP = false;
-
+        Waypoint wp = drone.getActiveWaypoint();
         if (!configured) {
             steps = simulator.getEnvironment().getSteps();
-            ArrayList<Waypoint> waypoints = Waypoint.getWaypoints(drone);
-
-            if (!waypoints.isEmpty()) {
-                wp = getWaypoint(drone);
-                startingDistance = calculateDistance(wp, drone);
-            }
-
-            configured = true;
+            startingDistance = calculateDistance(wp, drone);
         }
+        configured = true;
 
-        if (wp != null) {
-            double currentDistance = calculateDistance(wp, drone);
-            if (currentDistance <= targetDistance) {
-                insideWP = true;
-                timeWithin++;
-                
-                if(drone.getLeftWheelSpeed() == 0 && drone.getRightWheelSpeed() == 0) {
-                	timeStopped++;
-                }
-                
-            } else {
-                insideWP = false;
-            }
-            fitness = (float) ((startingDistance - currentDistance) / startingDistance) + ((double)timeWithin / steps) +  ( (double)timeStopped / steps);
-            
-        }
+        Vector2d wpPos = CoordinateUtilities.GPSToCartesian(wp.getLatLon());
+        double distance = wpPos.distanceTo(new Vector2d(drone.getPosition().x, drone.getPosition().y));
+        double energy = (Math.abs(drone.getLeftMotorSpeed()) + Math.abs(drone.getRightMotorSpeed())) / 2;
 
-        if (kill && !insideWP && drone.isInvolvedInCollison()) {
+        usedEnergy += (distance <= targetDistance ? energy : 1);
+        fitness = (startingDistance - distance) / startingDistance + 1 - (usedEnergy / steps);
+
+        if (kill && drone.isInvolvedInCollison()) {
             simulator.stopSimulation();
             fitness /= 10;
         }
     }
 
-    public static Waypoint getWaypoint(AquaticDrone drone) {
-        ArrayList<Entity> entities = drone.getEntities();
-        for (Entity e : entities) {
-            if (e instanceof Waypoint) {
-                return (Waypoint) e;
-            }
-        }
-        return null;
-    }
-    
     @Override
     public double getFitness() {
-    	return Math.max(fitness,0);
+        return fitness + 10;
     }
 
     public static double calculateDistance(Waypoint wp, AquaticDrone drone) {

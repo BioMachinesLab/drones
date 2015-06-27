@@ -19,7 +19,7 @@ import simulation.util.Arguments;
  */
 public class DispersionFitness extends EvaluationFunction {
 
-    private boolean kill = false;
+    private boolean kill = true;
     private double meanDistance = 0;
     private int steps = 0;
     private double margin = 0;

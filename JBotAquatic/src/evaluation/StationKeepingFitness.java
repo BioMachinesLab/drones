@@ -23,7 +23,8 @@ public class StationKeepingFitness extends EvaluationFunction {
 
     @ArgumentsAnnotation(name="alloweddistance", defaultValue="1.5")
     private double allowedDistance = 1.5;
-
+    private boolean kill = true;
+    
     private final double maxDistance = 10;
     private double usedEnergy = 0;
     private double totalDistance = 0;
@@ -32,6 +33,7 @@ public class StationKeepingFitness extends EvaluationFunction {
     public StationKeepingFitness(Arguments args) {
         super(args);
     	allowedDistance = args.getArgumentAsDouble("alloweddistance");
+        kill = args.getArgumentAsDoubleOrSetDefault("kill", 0) == 1;
     }
     
     @Override
@@ -54,7 +56,18 @@ public class StationKeepingFitness extends EvaluationFunction {
         fitness = (maxDistance - Math.min(maxDistance, totalDistance / steps)) / maxDistance;
         if(totalDistance / steps <= allowedDistance) {
             fitness += (1 - usedEnergy / steps);
-        }        
+        }
+        
+        if(kill) {
+            for(Robot r : simulator.getRobots()) {
+                if(r.isInvolvedInCollison()) {
+                    simulator.stopSimulation();
+                    fitness /= 10;
+                    break;
+                }
+            }
+        }
+        
     }
     
     @Override

@@ -7,7 +7,6 @@ import simulation.physicalobjects.LightPole;
 import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
-import simulation.util.ArgumentsAnnotation;
 import commoninterface.entities.Waypoint;
 import commoninterface.utils.CoordinateUtilities;
 
