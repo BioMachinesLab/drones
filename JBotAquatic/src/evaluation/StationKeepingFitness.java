@@ -33,7 +33,7 @@ public class StationKeepingFitness extends EvaluationFunction {
     public StationKeepingFitness(Arguments args) {
         super(args);
     	allowedDistance = args.getArgumentAsDouble("alloweddistance");
-        kill = args.getArgumentAsDoubleOrSetDefault("kill", 0) == 1;
+        kill = args.getFlagIsTrue("kill");
     }
     
     @Override

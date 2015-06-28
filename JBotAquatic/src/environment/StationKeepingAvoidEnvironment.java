@@ -28,38 +28,32 @@ public class StationKeepingAvoidEnvironment extends Environment {
         simulator.getRandom().nextDouble();
         this.setup = true;
 
-        for (Robot r : simulator.getRobots()) {
-            AquaticDrone drone = (AquaticDrone) r;
-            double dist = (distance) * simulator.getRandom().nextDouble();
-            double angle = simulator.getRandom().nextDouble() * Math.PI * 2;
-            double x = Math.cos(angle) * (dist > 0 ? dist : width / 2 / 3);
-            double y = Math.sin(angle) * (dist > 0 ? dist : width / 2 / 3);
-            drone.setPosition(x, y);
-            drone.setOrientation(simulator.getRandom().nextDouble() * Math.PI * 2);
-
-            Waypoint wp = new Waypoint("wp." + drone.getName(), CoordinateUtilities.cartesianToGPS(x, y));
-            drone.getEntities().add(wp);
-            drone.setActiveWaypoint(wp);
-            LightPole lp = new LightPole(simulator, "wp." + drone.getName(), x, y, 1.5);
-            addObject(lp);
-        }
-
+        AquaticDrone drone = (AquaticDrone) simulator.getRobots().get(0);
+        double x = 0, y = 0;
+        drone.setPosition(x, y);
+        drone.setOrientation(simulator.getRandom().nextDouble() * Math.PI * 2);
+        Waypoint wp = new Waypoint("wp." + drone.getName(), CoordinateUtilities.cartesianToGPS(x, y));
+        drone.getEntities().add(wp);
+        drone.setActiveWaypoint(wp);
+        LightPole lp = new LightPole(simulator, "wp." + drone.getName(), x, y, 1.5);
+        addObject(lp);
+        
+        double angle = simulator.getRandom().nextDouble() * Math.PI * 2;
         ArrayList<Waypoint> wps = new ArrayList<Waypoint>();
-        double d = distance * 0.8;
-        wps.add(new Waypoint("wpb", CoordinateUtilities.cartesianToGPS(d * -0.5,d * 0.8666)));
-        wps.add(new Waypoint("wpc", CoordinateUtilities.cartesianToGPS(d * -0.5,d * -0.8666)));
-        wps.add(new Waypoint("wpa", CoordinateUtilities.cartesianToGPS(d, 0)));
-        wps.add(new Waypoint("wpa", CoordinateUtilities.cartesianToGPS(-0.5 * d, 0)));
+        wps.add(new Waypoint("wpb", CoordinateUtilities.cartesianToGPS(distance * Math.cos(angle),distance * Math.sin(angle))));
+        double angle2 = angle + (simulator.getRandom().nextDouble() - 0.5) * (Math.PI / 4) - Math.PI;
+        wps.add(new Waypoint("wpc", CoordinateUtilities.cartesianToGPS(distance * Math.cos(angle2),distance * Math.sin(angle2))));
+        double angle3 = angle + (simulator.getRandom().nextDouble() - 0.5) * (Math.PI / 4);
+        wps.add(new Waypoint("wpd", CoordinateUtilities.cartesianToGPS(distance * Math.cos(angle3),distance * Math.sin(angle3))));
 
-        AquaticDrone drone = new AquaticDrone(simulator, new Arguments("diameter=4,gpserror=1.0,commrange=40,avoiddrones=0"));
-        drone.setDroneType(DroneType.ENEMY);
-        drone.setPosition(d, 0);
-        drone.setOrientation(Math.PI / 1.2);
-        GoToWayPointController controller = new GoToWayPointController(simulator, drone, new Arguments(""));
-        drone.setController(controller);
-        drone.getEntities().addAll(wps);
-        addRobot(drone);
-        drone.setActiveWaypoint(wps.get(0));
+        AquaticDrone other = new AquaticDrone(simulator, new Arguments("diameter=1,gpserror=1.0,commrange=40,avoiddrones=0"));
+        other.setDroneType(DroneType.DRONE);
+        other.setPosition(distance * Math.cos(angle2), distance * Math.sin(angle2));
+        GoToWayPointController controller = new GoToWayPointController(simulator, other, new Arguments(""));
+        other.setController(controller);
+        other.getEntities().addAll(wps);
+        addRobot(other);
+        other.setActiveWaypoint(wps.get(0));
     }
 
     @Override
