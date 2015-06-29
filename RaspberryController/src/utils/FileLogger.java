@@ -3,13 +3,17 @@ package utils;
 import io.input.ControllerInput;
 import io.input.GPSModuleInput;
 import io.output.ControllerOutput;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
+
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+
 import commoninterface.controllers.ControllerCIBehavior;
 import commoninterface.dataobjects.GPSData;
 import commoninterface.neuralnetwork.CINeuralNetwork;
@@ -19,6 +23,7 @@ import commoninterfaceimpl.RealAquaticDroneCI;
 public class FileLogger extends Thread implements RobotLogger {
 	
 	private final static long SLEEP_TIME = 100;
+	private final static long TOTAL_LOGS = 6000;//10min
 	
 	private String fileName = "";
 	private RealAquaticDroneCI drone;
@@ -26,10 +31,17 @@ public class FileLogger extends Thread implements RobotLogger {
 	private DateTimeFormatter fileFormatter = DateTimeFormat.forPattern("dd-MM-YY_HH-mm-ss");
 	private DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("dd-MM-YY_HH:mm:ss.SS");
 	private DateTimeFormatter hourFormatter = DateTimeFormat.forPattern("HH:mm:ss.SS");
+	private int logs = 0;
+	
 	
 	public FileLogger(RealAquaticDroneCI drone) {
 		this.drone = drone;
+	}
+	
+	public BufferedWriter setupWriter() throws IOException {
 		fileName = new LocalDateTime().toString(fileFormatter);
+		FileWriter fw = new FileWriter(new File("logs/values_"+fileName+".log"));
+		return new BufferedWriter(fw);
 	}
 	
 	@Override
@@ -39,10 +51,18 @@ public class FileLogger extends Thread implements RobotLogger {
 		
 		try {
 		
-			FileWriter fw = new FileWriter(new File("logs/values_"+fileName+".log"));
-			bw = new BufferedWriter(fw);
+			bw = setupWriter();
 			
 			while(true) {
+				
+				logs++;
+				
+				if(logs > TOTAL_LOGS) {
+					bw.close();
+					bw = setupWriter();
+					logs = 0;
+				}
+				
 				try {
 					
 					if(!extraLog.isEmpty()) {
