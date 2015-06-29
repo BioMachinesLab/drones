@@ -394,6 +394,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		
 		if(kalmanFilterGPS != null) {
 			if(measuredLatLon != null) {
+				//timestep < 100 so that the filtered position converges to the real position 
 				if(timestep < 100 || prevMeasuredLatLon == null || prevMeasuredLatLon.getLat() != measuredLatLon.getLat() || prevMeasuredLatLon.getLon() != measuredLatLon.getLon()) {
 					RobotLocation rl = kalmanFilterGPS.getEstimation(measuredLatLon, currentOrientation);
 					prevMeasuredLatLon = measuredLatLon;
