@@ -17,6 +17,7 @@ public class ShutdownCIBehavior extends CIBehavior {
 	@Override
 	public void step(double time) {
 		drone.shutdown();
+		System.exit(0);
 	}
 	
 }

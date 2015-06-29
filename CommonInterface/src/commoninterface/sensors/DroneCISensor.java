@@ -21,5 +21,5 @@ public class DroneCISensor extends ConeTypeCISensor{
 		}
 		return false;
 	}
-
+	
 }
