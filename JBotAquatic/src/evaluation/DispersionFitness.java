@@ -19,7 +19,7 @@ import simulation.util.Arguments;
  */
 public class DispersionFitness extends EvaluationFunction {
 
-    private boolean kill = false;
+    private boolean kill = true;
     private double meanDistance = 0;
     private int steps = 0;
     private double margin = 0;
@@ -53,7 +53,7 @@ public class DispersionFitness extends EvaluationFunction {
             distanceDelta += Math.abs(minDist - targetDistance);
         }
         distanceDelta /= simulator.getRobots().size();
-        meanDistance += (1000 - distanceDelta);
+        meanDistance += (simulator.getEnvironment().getWidth() - distanceDelta);
         fitness = meanDistance / steps;
 
         for (Robot r : simulator.getRobots()) {
@@ -67,6 +67,6 @@ public class DispersionFitness extends EvaluationFunction {
 
     @Override
     public double getFitness() {
-        return fitness;
+        return Math.max(0, fitness);
     }
 }

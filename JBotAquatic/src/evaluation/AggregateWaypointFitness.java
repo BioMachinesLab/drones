@@ -26,8 +26,7 @@ public class AggregateWaypointFitness extends EvaluationFunction {
     private double startingDistance = 0;
     private double meanDistance = 0;
     private Waypoint wp = null;
-    private boolean kill = false;
-    //private double timeStopped = 0;
+    private boolean kill = true;
     private int steps = 0;
 
     public AggregateWaypointFitness(Arguments args) {
@@ -39,7 +38,6 @@ public class AggregateWaypointFitness extends EvaluationFunction {
     public void update(Simulator simulator) {
         steps++;
         if (!configured) {
-            //steps = simulator.getEnvironment().getSteps();
             wp = ((AquaticDrone) simulator.getRobots().get(0)).getActiveWaypoint();
             for (Robot r : simulator.getRobots()) {
                 startingDistance += calculateDistance(wp, r);
@@ -52,17 +50,12 @@ public class AggregateWaypointFitness extends EvaluationFunction {
         for (Robot r : simulator.getRobots()) {
             AquaticDrone drone = (AquaticDrone) r;
             currentDistance += calculateDistance(wp, drone);
-            /*if (drone.getLeftWheelSpeed() == 0 && drone.getRightWheelSpeed() == 0) {
-                timeStopped++;
-            }*/
         }
         currentDistance /= simulator.getRobots().size();
 
         meanDistance += (startingDistance - currentDistance) / startingDistance;
         fitness = meanDistance / steps;
                 
-        //fitness = ((startingDistance - currentDistance) / startingDistance) /*+ ((double) timeStopped / simulator.getRobots().size() / steps) / 2*/;
-
         for (Robot r : simulator.getRobots()) {
             if (kill && r.isInvolvedInCollison()) {
                 simulator.stopSimulation();
