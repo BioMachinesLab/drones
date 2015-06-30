@@ -29,7 +29,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -51,6 +50,7 @@ import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOsmTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.OsmTileSource;
 
 import threads.UpdateThread;
+
 import commoninterface.entities.Entity;
 import commoninterface.entities.GeoEntity;
 import commoninterface.entities.GeoFence;
@@ -139,12 +139,14 @@ public class MapPanel extends UpdatePanel {
         helpButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(null, "<html>W - Waypoints <br><br>"
-						+ "G - GeoFence <br><br>"
-						+ "O - Obstacles <br><br>"
-						+ "Ctrl+OBJECT_KEY - Clear Objects <br><br>"
-						+ "F - Fit Markers  <br><br>"
-						+ "Ctrl+E - Cancelar opção</html>");
+				JOptionPane.showMessageDialog(null, "<html><strong>W</strong>:  Add Waypoints <br><br>"
+						+ "<strong>G</strong>: Add GeoFence <br><br>"
+						+ "<strong>O</strong>: Add Obstacles <br><br>"
+						+ "<strong>Ctrl+OBJECT_KEY</strong>: Clear Objects <br><br>"
+						+ "<strong>F</strong>: Fit Markers  <br><br>"
+						+ "<strong>+</strong>: Zoom In  <br><br>"
+						+ "<strong>-</strong>: Zoom Out  <br><br>"
+						+ "<strong>Ctrl+E</strong>: Clear All Objects</html>");
 			}
 		});
         panelTop.add(helpButton);
