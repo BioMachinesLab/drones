@@ -227,7 +227,10 @@ public class CommandPanel extends UpdatePanel {
 		calibrateButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				statusMessage("CalibrationCIBehavior", true);
+				int result = JOptionPane.showConfirmDialog(null, "Start calibation ?");
+				
+				if(result == 0)
+					statusMessage("CalibrationCIBehavior", true);
 			}
 		});
 
