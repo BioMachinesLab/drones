@@ -1,5 +1,6 @@
 package gui.panels.map;
 
+import gui.DroneGUI;
 import gui.panels.UpdatePanel;
 
 import java.awt.BasicStroke;
@@ -23,11 +24,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
@@ -51,13 +57,16 @@ import commoninterface.entities.GeoFence;
 import commoninterface.entities.ObstacleLocation;
 import commoninterface.entities.RobotLocation;
 import commoninterface.entities.Waypoint;
+import commoninterface.mathutils.Vector2d;
 import commoninterface.network.messages.EntityMessage;
+import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
 
 public class MapPanel extends UpdatePanel {
 	
 	private static final long serialVersionUID = 1L;
 	private static int POSITION_HISTORY = 1;
+	public enum MapStatus { WAYPOINT, GEOFENCE, OBSTACLE }
 
     private JMapViewerTreeDrone treeMap = null;
     
@@ -74,31 +83,32 @@ public class MapPanel extends UpdatePanel {
     private LinkedList<MapMarker> obstacleMarkers = new LinkedList<MapMarker>();
     
     private Layer geoFenceLayer;
-    private boolean editingGeoFence = false;
-    private boolean addingObstacle = false;
-
+	private DroneGUI droneGUI;
+	private MapStatus status;
+	
+	private JLabel mapStatusResultLabel;
+	
+	public MapPanel(DroneGUI droneGUI) {
+		this();
+		this.droneGUI = droneGUI;
+	}
+	
     public MapPanel() {
-
-        treeMap = new JMapViewerTreeDrone("Zones");
+		treeMap = new JMapViewerTreeDrone("Zones");
         
         new RefreshDrones().start();
         
         setBorder(BorderFactory.createTitledBorder("Map"));
         setLayout(new BorderLayout());
         JPanel panelTop = new JPanel(new GridLayout(2,3));
-        JPanel helpPanel = new JPanel();
 
         add(panelTop, BorderLayout.NORTH);
-        add(helpPanel, BorderLayout.SOUTH);
-        JLabel helpLabel = new JLabel("Left mouse: move // Double left click or mouse wheel: zoom // Right click: add markers");
-        helpPanel.add(helpLabel);
-        JButton fitMarkersButton = new JButton("Fit Markers");
-        fitMarkersButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                map().setDisplayToFitMapMarkers();
-            }
-        });
+        
+        JPanel mapStatusPanel = new JPanel(new GridLayout(1, 2));
+        JLabel mapSatursLabel = new JLabel("Active Mode: ");
+        mapStatusResultLabel = new JLabel("NONE");
+        mapStatusPanel.add(mapSatursLabel);
+        mapStatusPanel.add(mapStatusResultLabel);
         
         try {
         
@@ -125,50 +135,26 @@ public class MapPanel extends UpdatePanel {
         	e.printStackTrace();
         }
         
-        JButton geoFenceButton = new JButton(" Add GeoFence ");
-        geoFenceButton.addActionListener(new ActionListener() {
+        JButton helpButton = new JButton("Help");
+        helpButton.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(!editingGeoFence) {
-					editingGeoFence = true;
-					clearGeoFence();
-					geoFenceButton.setText("Finish GeoFence");
-				} else {
-					editingGeoFence = false;
-					geoFenceButton.setText(" Add GeoFence ");
-				}
+				JOptionPane.showMessageDialog(null, "<html>W - Waypoints <br><br>"
+						+ "G - GeoFence <br><br>"
+						+ "O - Obstacles <br><br>"
+						+ "Ctrl+OBJECT_KEY - Clear Objects <br><br>"
+						+ "F - Fit Markers  <br><br>"
+						+ "Ctrl+E - Cancelar opção</html>");
 			}
 		});
+        panelTop.add(helpButton);
         
-        JButton clearWaypointsButton = new JButton("Clear Waypoints");
-        clearWaypointsButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				clearWaypoints();
-			}
-		});
-        
-        JButton addObstacleButton = new JButton("Add Obstacle");
-        addObstacleButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				addingObstacle = true;
-			}
-		});
-        
-        JButton clearObstaclesButton = new JButton("Clear Obstacles");
-        clearObstaclesButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				clearObstacles();
-			}
-		});
-        
-        panelTop.add(clearWaypointsButton);
-        panelTop.add(clearObstaclesButton);
-        panelTop.add(fitMarkersButton);
-        panelTop.add(geoFenceButton);
-        panelTop.add(addObstacleButton);        
+        panelTop.add(mapStatusPanel);
         
         add(treeMap, BorderLayout.CENTER);
         
         geoFenceLayer = treeMap.addLayer("_GeoFence");
+        initActions();
         
         //Lisbon
         map().setDisplayPosition(new Coordinate(38.7166700,-9.1333300), 13);
@@ -177,13 +163,38 @@ public class MapPanel extends UpdatePanel {
             @Override
             public void mouseClicked(MouseEvent e) {
             	
-               if(e.getButton() == MouseEvent.BUTTON3) {
-            	   if(addingObstacle)
+               if(e.getButton() == MouseEvent.BUTTON1) {
+            	   if (status == null){
+            		   
+            		   Coordinate clickCoord = map().getPosition(e.getPoint());
+            		   Vector2d clickPosition = CoordinateUtilities.GPSToCartesian(new LatLon(clickCoord.getLat(), clickCoord.getLon()));
+            		   
+            		   for (MapMarker marker : map().getMapMarkerList()) {
+            			   MapMarkerDrone robotMarker = (MapMarkerDrone)marker;
+            			   Vector2d robotPosition = CoordinateUtilities.GPSToCartesian(new LatLon(robotMarker.getLat(), robotMarker.getLon()));
+            			   
+            			   if(robotPosition.distanceTo(clickPosition) < 5){
+            				   robotMarker.setSelected(true);
+            				   
+            				   if(droneGUI != null){
+            					   droneGUI.getCommandPanel().getSelectedDronesTextField().setText(robotMarker.getName());
+            				   }
+            				   
+            				   break;
+            			   }else{
+            				   robotMarker.setSelected(false);
+            				   droneGUI.getCommandPanel().getSelectedDronesTextField().setText("");;
+            			   }
+            		   }
+            		   
+            		   
+            	   }else if(status.equals(MapStatus.OBSTACLE)){
             		   addObstacle(map().getPosition(e.getPoint()));
-            	   else if(editingGeoFence)
+            	   }else if(status.equals(MapStatus.GEOFENCE)){
             		   addToGeoFence(map().getPosition(e.getPoint()));
-            	   else
+            	   }else{
             		   addWaypoint(map().getPosition(e.getPoint()));
+            	   }
                 }
             }
         });
@@ -200,7 +211,106 @@ public class MapPanel extends UpdatePanel {
                 }
             }
         });
+        
     }
+    
+    protected void initActions() {
+    	this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke('+'), "+");
+		this.getActionMap().put("+", new AbstractAction(){  
+			protected static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent evt) {  
+				map().zoomIn();
+			}
+		});
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke('-'), "-");
+		this.getActionMap().put("-", new AbstractAction(){  
+			protected static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent evt) {  
+				map().zoomOut();
+			}
+		});
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("control E"), "control E");
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("meta E"), "control E");
+		this.getActionMap().put("control E", new AbstractAction(){   
+			protected static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent evt) {  
+				clearWaypoints();
+				clearGeoFence();
+				clearObstacles();
+			}
+		});
+    	this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("control C"), "control C");
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("meta C"), "control C");
+		this.getActionMap().put("control C", new AbstractAction(){  
+			protected static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent evt) {  
+				clearStatus();
+			}
+		});
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("F"), "F");
+		this.getActionMap().put("F", new AbstractAction(){  
+			protected static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent evt) {  
+				map().setDisplayToFitMapMarkers();
+			}
+		});
+    	this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("W"), "W");
+		this.getActionMap().put("W", new AbstractAction(){  
+			protected static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent evt) {
+				status = MapStatus.WAYPOINT;
+				mapStatusResultLabel.setText(status.toString());
+			}
+		});
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("control W"), "control W");
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("meta W"), "control W");
+		this.getActionMap().put("control W", new AbstractAction(){  
+			protected static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent evt) {  
+				clearWaypoints();
+				clearStatus();
+			}
+		});
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("G"), "G");
+		this.getActionMap().put("G", new AbstractAction(){  
+			protected static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent evt) {  
+				status = MapStatus.GEOFENCE;
+				mapStatusResultLabel.setText(status.toString());
+			}
+		});
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("control G"), "control G");
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("meta G"), "control G");
+		this.getActionMap().put("control G", new AbstractAction(){  
+			protected static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent evt) {  
+				clearGeoFence();
+				clearStatus();
+			}
+		});
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("O"), "O");
+		this.getActionMap().put("O", new AbstractAction(){  
+			protected static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent evt) {  
+				status = MapStatus.OBSTACLE;
+				mapStatusResultLabel.setText(status.toString());
+			}
+		});
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("control O"), "control O");
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("meta O"), "control O");
+		this.getActionMap().put("control O", new AbstractAction(){  
+			protected static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent evt) {  
+				clearObstacles();
+				clearStatus();
+			}
+		});
+	}
+    
+    private void clearStatus() {
+		status = null;
+		mapStatusResultLabel.setText("NONE");
+	}
     
     private JMapViewer map(){
         return treeMap.getViewer();
@@ -236,6 +346,7 @@ public class MapPanel extends UpdatePanel {
     	synchronized(this) {
     		Waypoint waypoint = new Waypoint(markerName, new LatLon(c.getLat(),c.getLon()));
     		waypoints.add(waypoint);
+    		updateCommandPanel();
 //    		notifyAll();
     	}
     }
@@ -279,15 +390,19 @@ public class MapPanel extends UpdatePanel {
     		l = treeMap.addLayer(name);
     	}
     	
-    	if(!robotMarkers.isEmpty()) {
+    	boolean markerSelected = false;
     	
-	    	Style styleOld = new Style(Color.black, Color.LIGHT_GRAY, new BasicStroke(1), new Font("Dialog", Font.PLAIN, 0));
+    	if(!robotMarkers.isEmpty()) {
+
+    		Style styleOld = new Style(Color.black, Color.LIGHT_GRAY, new BasicStroke(1), new Font("Dialog", Font.PLAIN, 0));
 	    	
 	    	//remove last value from previous iteration
 	    	MapMarker last = robotMarkers.pollLast();
 	    	treeMap.removeFromLayer(last);
 	    	map().removeMapMarker(last);
-	    	
+	    	if(((MapMarkerDrone)last).isSelected())
+	    		markerSelected = true;
+
 	    	//add that same one with a different style
 	    	MapMarker old = new MapMarkerDot(l,""+robotMarkerIndex++,last.getCoordinate(), styleOld);
 	    	robotMarkers.add(old);
@@ -311,6 +426,7 @@ public class MapPanel extends UpdatePanel {
     	}
     	
     	MapMarker m = new MapMarkerDrone(l, name , c(lat,lon), styleNew, orientation);
+    	((MapMarkerDrone)m).setSelected(markerSelected);
     	l.add(m);
     	map().addMapMarker(m);
     	robotMarkers.add(m);
@@ -399,6 +515,7 @@ public class MapPanel extends UpdatePanel {
 		MapPolygonImpl po = new MapPolygonImpl(coords);
 		geoFenceLayer.add(po);
 		map().addMapPolygon(po);
+		updateCommandPanel();
 	}
 	
 	private synchronized void addGeoFence(GeoFence geo) {
@@ -418,6 +535,7 @@ public class MapPanel extends UpdatePanel {
 		MapPolygonImpl po = new MapPolygonImpl(coords);
 		geoFenceLayer.add(po);
 		map().addMapPolygon(po);
+		updateCommandPanel();
 	}
 
 	
@@ -461,9 +579,8 @@ public class MapPanel extends UpdatePanel {
     	synchronized(this) {
     		ObstacleLocation ol = new ObstacleLocation(markerName, new LatLon(c.getLat(),c.getLon()));
     		obstacles.add(ol);
+    		updateCommandPanel();
     	}
-		
-		addingObstacle = false;
 	}
 	
 	private synchronized void clearRobot(String name) {
@@ -495,6 +612,11 @@ public class MapPanel extends UpdatePanel {
     	}
 	}
 	
+	private void updateCommandPanel(){
+		if(droneGUI != null)
+			droneGUI.getCommandPanel().updateMapInfo(getEntities());
+	}
+	
 	private synchronized void clearObstacles() {
 		
 		for(MapMarker m : obstacleMarkers) {
@@ -504,6 +626,7 @@ public class MapPanel extends UpdatePanel {
     	
     	obstacles.clear();
     	obstacleMarkers.clear();
+    	updateCommandPanel();
 	}
 	
 	private synchronized void clearGeoFence() {
@@ -525,6 +648,7 @@ public class MapPanel extends UpdatePanel {
 			geoFence.clear();
 		}
 		map().removeAllMapPolygons();
+		updateCommandPanel();
 	}
 	
 	private void clearWaypoints() {
@@ -536,6 +660,8 @@ public class MapPanel extends UpdatePanel {
     	
     	waypoints.clear();
     	waypointMarkers.clear();
+    	
+    	updateCommandPanel();
 	}
 	
 	public void clearHistory() {
@@ -568,6 +694,8 @@ public class MapPanel extends UpdatePanel {
 			if(e instanceof GeoFence)
 				addGeoFence((GeoFence)e);
 		}
+		
+		updateCommandPanel();
 	}
 	
 	class RefreshDrones extends Thread {

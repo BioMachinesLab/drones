@@ -1,15 +1,19 @@
 package gui.panels;
 
 import gui.IPRequestToUserModal;
+import gui.utils.SortedListModel;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.Vector;
 
+import javax.swing.AbstractListModel;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -30,7 +34,7 @@ public class ConnectionPanel extends UpdatePanel {
 	private static final long TIME_THRESHOLD = 10 * 1000;
 
 	private JList<String> list;
-	private DefaultListModel<String> listModel = new DefaultListModel<String>();
+	private SortedListModel listModel = new SortedListModel();
 	private HashMap<String, Long> lastUpdate = new HashMap<String, Long>();
 	private JLabel currentConnection;
 	private RobotControlConsole console;
@@ -41,7 +45,7 @@ public class ConnectionPanel extends UpdatePanel {
 
 		setLayout(new GridLayout(1, 2));
 		setBorder(BorderFactory.createTitledBorder("Connection"));
-
+		
 		list = new JList<String>(listModel);
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		list.setLayoutOrientation(JList.VERTICAL);
@@ -139,6 +143,7 @@ public class ConnectionPanel extends UpdatePanel {
 		if (!listModel.contains(address)) {
 			listModel.addElement(address);
 		}
+		
 		lastUpdate.put(address, System.currentTimeMillis());
 	}
 
@@ -182,5 +187,4 @@ public class ConnectionPanel extends UpdatePanel {
 	public long getSleepTime() {
 		return SLEEP_TIME;
 	}
-
 }
