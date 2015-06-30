@@ -143,9 +143,10 @@ public class MapPanel extends UpdatePanel {
 						+ "<strong>G</strong>: Add GeoFence <br><br>"
 						+ "<strong>O</strong>: Add Obstacles <br><br>"
 						+ "<strong>Ctrl+OBJECT_KEY</strong>: Clear Objects <br><br>"
-						+ "<strong>F</strong>: Fit Markers  <br><br>"
-						+ "<strong>+</strong>: Zoom In  <br><br>"
-						+ "<strong>-</strong>: Zoom Out  <br><br>"
+						+ "<strong>F</strong>: Fit Markers <br><br>"
+						+ "<strong>+</strong>: Zoom In <br><br>"
+						+ "<strong>-</strong>: Zoom Out <br><br>"
+						+ "<strong>Ctrl+C</strong>: Cancel Option <br><br>"
 						+ "<strong>Ctrl+E</strong>: Clear All Objects</html>");
 			}
 		});
