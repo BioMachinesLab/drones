@@ -79,16 +79,16 @@ public class DroneGUI extends RobotGUI {
 		GPSCompassBatteriesPanel.add(gpsPanel, BorderLayout.NORTH);
 
 		// Compass and batteries
-//		JPanel compassAndBatteriesPanel = new JPanel(new GridLayout(1, 2));
+		JPanel compassAndBatteriesPanel = new JPanel(new GridLayout(1, 2));
 		compassPanel = new CompassPanel();
 //		batteryPanel = new BatteryPanel();
 
-//		compassAndBatteriesPanel.add(compassPanel);
+		compassAndBatteriesPanel.add(compassPanel);
 //		compassAndBatteriesPanel.add(batteryPanel);
-//		GPSCompassBatteriesPanel.add(compassAndBatteriesPanel,
-//				BorderLayout.CENTER);
+		GPSCompassBatteriesPanel.add(compassAndBatteriesPanel,
+				BorderLayout.CENTER);
 
-		rightPanel.add(compassPanel, BorderLayout.CENTER);
+		rightPanel.add(GPSCompassBatteriesPanel, BorderLayout.CENTER);
 
 		add(rightPanel, BorderLayout.EAST);
 

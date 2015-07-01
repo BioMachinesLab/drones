@@ -173,20 +173,22 @@ public class MapPanel extends UpdatePanel {
             		   Vector2d clickPosition = CoordinateUtilities.GPSToCartesian(new LatLon(clickCoord.getLat(), clickCoord.getLon()));
             		   
             		   for (MapMarker marker : map().getMapMarkerList()) {
-            			   MapMarkerDrone robotMarker = (MapMarkerDrone)marker;
-            			   Vector2d robotPosition = CoordinateUtilities.GPSToCartesian(new LatLon(robotMarker.getLat(), robotMarker.getLon()));
-            			   
-            			   if(robotPosition.distanceTo(clickPosition) < 5){
-            				   robotMarker.setSelected(true);
-            				   
-            				   if(droneGUI != null){
-            					   droneGUI.getCommandPanel().getSelectedDronesTextField().setText(robotMarker.getName());
-            				   }
-            				   
-            				   break;
-            			   }else{
-            				   robotMarker.setSelected(false);
-            				   droneGUI.getCommandPanel().getSelectedDronesTextField().setText("");;
+            			   if(marker instanceof MapMarkerDrone){
+            				   MapMarkerDrone robotMarker = (MapMarkerDrone)marker;
+                			   Vector2d robotPosition = CoordinateUtilities.GPSToCartesian(new LatLon(robotMarker.getLat(), robotMarker.getLon()));
+                			   
+                			   if(robotPosition.distanceTo(clickPosition) < 5){
+                				   robotMarker.setSelected(true);
+                				   
+                				   if(droneGUI != null){
+                					   droneGUI.getCommandPanel().getSelectedDronesTextField().setText(robotMarker.getName());
+                				   }
+                				   
+                				   break;
+                			   }else{
+                				   robotMarker.setSelected(false);
+                				   droneGUI.getCommandPanel().getSelectedDronesTextField().setText("");;
+                			   }   
             			   }
             		   }
             		   
