@@ -29,8 +29,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
-import org.openstreetmap.gui.jmapviewer.interfaces.MapMarker;
-
 import main.DroneControlConsole;
 import main.RobotControlConsole;
 import threads.UpdateThread;
@@ -50,6 +48,8 @@ public class ConnectionPanel extends UpdatePanel {
 	
 	private JLabel connectionCountLabel;
 	private int numberOfConnections = 0;
+	
+	private boolean droneConnected = false;
 
 	public ConnectionPanel(RobotControlConsole console) {
 
@@ -83,7 +83,7 @@ public class ConnectionPanel extends UpdatePanel {
 		});
 		
 		JScrollPane listScroller = new JScrollPane(list);
-		listScroller.setPreferredSize(new Dimension(120, 80));
+		listScroller.setPreferredSize(new Dimension(120, 180));
 		add(listScroller);
 
 		try {
@@ -97,9 +97,13 @@ public class ConnectionPanel extends UpdatePanel {
 		pingThread.start();
 		
 		JButton connect = new JButton("Connect");
-
+		JButton disconnect = new JButton("Disconnect");
+		
 		connect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				if(droneConnected)
+					disconnect.doClick();
+				
 				int index = list.getSelectedIndex();
 
 				if (index != -1) {
@@ -107,8 +111,6 @@ public class ConnectionPanel extends UpdatePanel {
 				}
 			}
 		});
-
-		JButton disconnect = new JButton("Disconnect");
 
 		disconnect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -247,6 +249,10 @@ public class ConnectionPanel extends UpdatePanel {
 		}
 	}
 
+	public void setDroneConnected(boolean droneConnected) {
+		this.droneConnected = droneConnected;
+	}
+	
 	@Override
 	public void registerThread(UpdateThread t) {
 	}
@@ -277,7 +283,8 @@ public class ConnectionPanel extends UpdatePanel {
 							else
 								droneIP.setStatus(DroneStatus.NOT_RUNNING);
 						} catch (IOException e) {
-							System.err.println(e.getMessage());
+//							System.err.println(droneIP.getIp() + ": " + e.getMessage());
+							droneIP.setStatus(DroneStatus.NOT_RUNNING);
 						}
 					}
 				}

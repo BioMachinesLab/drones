@@ -31,7 +31,6 @@ public abstract class RobotControlConsole {
 	protected MotorConnection motorConnection;
 
 	protected ArrayList<UpdateThread> updateThreads = new ArrayList<UpdateThread>();
-	private boolean connected = false;
 
 	public void setupGamepad() {
 		try {
@@ -44,9 +43,6 @@ public abstract class RobotControlConsole {
 
 	public synchronized void connect(String address) {
 		try {
-			if (connected)
-				disconnect();
-
 			gui.getMessagesPanel().clear();
 
 			informationConnection = new InformationConnection(this,
@@ -62,7 +58,7 @@ public abstract class RobotControlConsole {
 
 			createUpdateThreads();
 
-			connected = true;
+			gui.getConnectionPanel().setDroneConnected(true);
 			gui.getConnectionPanel().connectionOK(address);
 		} catch (Exception | Error e) {
 			e.printStackTrace();
@@ -98,7 +94,7 @@ public abstract class RobotControlConsole {
 		if(gui instanceof DroneGUI)
 			((DroneGUI) gui).getGPSPanel().clearPanelInformation();
 		
-		connected = false;
+		gui.getConnectionPanel().setDroneConnected(false);
 	}
 
 	public void processMessage(Message message) {
