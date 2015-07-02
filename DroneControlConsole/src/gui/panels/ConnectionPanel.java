@@ -225,7 +225,9 @@ public class ConnectionPanel extends UpdatePanel {
 		String[] ips = new String[listModel.getSize()];
 		int i = 0;
 		for (Object o : listModel.toArray()) {
-			ips[i++] = (String) o;
+			DroneIP ip = (DroneIP) o;
+			if(ip.getStatus() == DroneStatus.RUNNING)
+				ips[i++] = ip.getIp();
 		}
 		return ips;
 	}
