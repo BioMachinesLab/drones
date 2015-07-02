@@ -33,7 +33,6 @@ public class MapMarkerDrone extends MapMarkerDot {
             Composite oldComposite = g2.getComposite();
             g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
             
-            System.out.println(selected);
             if(selected)
             	g2.setPaint(Color.BLACK);
             else
@@ -88,7 +87,7 @@ public class MapMarkerDrone extends MapMarkerDot {
             }
             g.setColor(Color.WHITE);
             g.setFont(getFont());
-            g.drawString(getName(), position.x+MapMarkerDot.DOT_RADIUS+2, position.y+MapMarkerDot.DOT_RADIUS);
+            g.drawString(getName().split("\\.")[3], position.x+MapMarkerDot.DOT_RADIUS+2, position.y+MapMarkerDot.DOT_RADIUS);
         }
     }
 

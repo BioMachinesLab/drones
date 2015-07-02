@@ -6,36 +6,44 @@ import java.util.Vector;
 
 import javax.swing.DefaultListModel;
 
-public class SortedListModel extends DefaultListModel<String> {
+public class SortedListModel extends DefaultListModel<DroneIP> {
 	private static final long serialVersionUID = 4810992893657248672L;
 
-	private Vector<String> model = new Vector<String>();
+	private Vector<DroneIP> model = new Vector<DroneIP>();
 
 	public int getSize() {
 		return model.size();
 	}
 
 	@Override
-	public String getElementAt(int index) {
+	public DroneIP getElementAt(int index) {
 		return model.get(index);
 	}
 
-	public void addElement(String element) {
+	public void addElement(DroneIP element) {
 		int index = model.size();
 		model.add(element);
 		Collections.sort(model, new SortIpList());
 		fireIntervalAdded(this, index, index);
 	}
 
-	public String remove(int index) {
-		String rv = model.get(index);
+	public DroneIP remove(int index) {
+		DroneIP rv = model.get(index);
 		model.remove(index);
 		fireIntervalRemoved(this, index, index);
 		return rv;
 	}
 
-	public boolean contains(String element) {
+	public boolean contains(DroneIP element) {
 		return model.contains(element);
+	}
+	
+	public DroneIP getDroneWithIP(String address){
+		for (DroneIP droneIP : model) {
+			if(droneIP.getIp().equals(address))
+				return droneIP;
+		}
+		return null;
 	}
 
 	public Object[] toArray() {
@@ -48,15 +56,15 @@ public class SortedListModel extends DefaultListModel<String> {
 		return model.isEmpty();
 	}
 
-	public String get(int index) {
+	public DroneIP get(int index) {
 		return model.get(index);
 	}
 
-	class SortIpList implements Comparator<String> {
+	class SortIpList implements Comparator<DroneIP> {
 		@Override
-		public int compare(String o1, String o2) {
-			Long value1 = ipToInt(o1);
-			Long value2 = ipToInt(o2);
+		public int compare(DroneIP o1, DroneIP o2) {
+			Long value1 = ipToInt(o1.getIp());
+			Long value2 = ipToInt(o2.getIp());
 			
 			return value1.compareTo(value2);
 		}

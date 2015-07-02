@@ -85,8 +85,7 @@ public class DroneGUI extends RobotGUI {
 
 		compassAndBatteriesPanel.add(compassPanel);
 //		compassAndBatteriesPanel.add(batteryPanel);
-		GPSCompassBatteriesPanel.add(compassAndBatteriesPanel,
-				BorderLayout.CENTER);
+		GPSCompassBatteriesPanel.add(compassAndBatteriesPanel, BorderLayout.CENTER);
 
 		rightPanel.add(GPSCompassBatteriesPanel, BorderLayout.CENTER);
 

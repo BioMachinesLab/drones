@@ -8,6 +8,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -32,6 +34,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
 import org.openstreetmap.gui.jmapviewer.Coordinate;
@@ -81,12 +84,17 @@ public class MapPanel extends UpdatePanel {
     private LinkedList<MapMarker> waypointMarkers = new LinkedList<MapMarker>();
     private LinkedList<ObstacleLocation> obstacles = new LinkedList<ObstacleLocation>();
     private LinkedList<MapMarker> obstacleMarkers = new LinkedList<MapMarker>();
+    private LinkedList<MapMarkerDrone> selectedMarkerDrones = new LinkedList<MapMarkerDrone>();
     
     private Layer geoFenceLayer;
 	private DroneGUI droneGUI;
 	private MapStatus status;
 	
 	private JLabel mapStatusResultLabel;
+	private JButton helpButton;
+	
+	private Point dragBoxStart;
+	private Point dragBoxEnd;
 	
 	public MapPanel(DroneGUI droneGUI) {
 		this();
@@ -135,7 +143,7 @@ public class MapPanel extends UpdatePanel {
         	e.printStackTrace();
         }
         
-        JButton helpButton = new JButton("Help");
+        helpButton = new JButton("Help");
         helpButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -165,34 +173,22 @@ public class MapPanel extends UpdatePanel {
         map().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-            	
                if(e.getButton() == MouseEvent.BUTTON1) {
             	   if (status == null){
+            		   cleanSelectedMarkersList();
             		   
             		   Coordinate clickCoord = map().getPosition(e.getPoint());
             		   Vector2d clickPosition = CoordinateUtilities.GPSToCartesian(new LatLon(clickCoord.getLat(), clickCoord.getLon()));
             		   
-            		   for (MapMarker marker : map().getMapMarkerList()) {
-            			   if(marker instanceof MapMarkerDrone){
-            				   MapMarkerDrone robotMarker = (MapMarkerDrone)marker;
-                			   Vector2d robotPosition = CoordinateUtilities.GPSToCartesian(new LatLon(robotMarker.getLat(), robotMarker.getLon()));
-                			   
-                			   if(robotPosition.distanceTo(clickPosition) < 5){
-                				   robotMarker.setSelected(true);
-                				   
-                				   if(droneGUI != null){
-                					   droneGUI.getCommandPanel().getSelectedDronesTextField().setText(robotMarker.getName());
-                				   }
-                				   
-                				   break;
-                			   }else{
-                				   robotMarker.setSelected(false);
-                				   droneGUI.getCommandPanel().getSelectedDronesTextField().setText("");;
-                			   }   
-            			   }
-            		   }
+            		   MapMarkerDrone closestMarker = getClosestMarker(clickPosition);
+            		   JTextField selectedTextField = droneGUI.getCommandPanel().getSelectedDronesTextField();
             		   
+            		   if(droneGUI != null && closestMarker != null)
+            			   selectDroneMarker(selectedTextField, closestMarker);
+            		   else
+            			   selectedTextField.setText("");
             		   
+            		   repaint();
             	   }else if(status.equals(MapStatus.OBSTACLE)){
             		   addObstacle(map().getPosition(e.getPoint()));
             	   }else if(status.equals(MapStatus.GEOFENCE)){
@@ -202,8 +198,57 @@ public class MapPanel extends UpdatePanel {
             	   }
                 }
             }
-        });
+            
+            @Override
+            public void mouseReleased(MouseEvent e) {
+            	if(status == null && e.getButton() == MouseEvent.BUTTON1){
+            		cleanSelectedMarkersList();
+            		
+            		if(dragBoxStart != null && dragBoxEnd != null){
+            			Coordinate mapStartPosition = map().getPosition(dragBoxStart);
+                		Vector2d start = CoordinateUtilities.GPSToCartesian(new LatLon(mapStartPosition.getLat(), mapStartPosition.getLon()));
+                		Coordinate mapEndPosition = map().getPosition(dragBoxEnd);
+                		Vector2d end = CoordinateUtilities.GPSToCartesian(new LatLon(mapEndPosition.getLat(), mapEndPosition.getLon()));
+                		
+                		ArrayList<MapMarkerDrone> selectedMarkers = getMarkersBetween(start, end);
+                		JTextField selectedTextField = droneGUI.getCommandPanel().getSelectedDronesTextField();
+                		
+                		if(selectedMarkers.isEmpty())
+                			selectedTextField.setText("");
+                		else{
+                			for (MapMarkerDrone m : selectedMarkers) 
+        						selectDroneMarker(selectedTextField, m);
+                		}
+                		
+                		repaint();
+                		dragBoxStart = null;
+                		dragBoxEnd = null;
+            		}
+            		
+            	}
+            }
 
+			private void selectDroneMarker(JTextField selectedTextField, MapMarkerDrone m) {
+				m.setSelected(true);
+				selectedMarkerDrones.add(m);
+				String id = m.getName().split("\\.")[3];
+				String rsl = selectedTextField.getText();
+				
+				if(rsl.isEmpty())
+					selectedTextField.setText(id);
+				else
+					selectedTextField.setText(rsl + ", " + id);
+			}
+
+			private void cleanSelectedMarkersList() {
+				for (MapMarkerDrone selectedDrone : selectedMarkerDrones) 
+					selectedDrone.setSelected(false);
+				
+				selectedMarkerDrones.clear();
+			}
+            
+        });
+        
         map().addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
@@ -215,8 +260,36 @@ public class MapPanel extends UpdatePanel {
                     map().setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                 }
             }
+
+            public void mouseDragged(MouseEvent e) {
+            	if(status == null && e.getButton() == MouseEvent.BUTTON1) {
+            		
+            		if(dragBoxStart == null)
+            			dragBoxStart = e.getPoint();
+            		else
+            			dragBoxEnd = e.getPoint();
+            		
+            		repaint();
+            	}
+            };  
         });
         
+    }
+    
+    @Override
+    public void paint(Graphics g) {
+    	super.paint(g);
+    	Graphics2D g2d = (Graphics2D) g.create();
+    	
+    	if(dragBoxStart != null && dragBoxEnd != null){
+    		g2d.setColor(Color.WHITE);
+    		g2d.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{9}, 0));
+    		
+    		int width = Math.abs(dragBoxEnd.x - dragBoxStart.x);
+    		int height = Math.abs(dragBoxEnd.y - dragBoxStart.y);
+    		
+    		g2d.drawRect(dragBoxStart.x, dragBoxStart.y, width, height);
+    	}
     }
     
     protected void initActions() {
@@ -257,6 +330,13 @@ public class MapPanel extends UpdatePanel {
 			protected static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent evt) {  
 				map().setDisplayToFitMapMarkers();
+			}
+		});
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("H"), "H");
+		this.getActionMap().put("H", new AbstractAction(){  
+			protected static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent evt) {  
+				helpButton.doClick();
 			}
 		});
     	this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("W"), "W");
@@ -311,6 +391,42 @@ public class MapPanel extends UpdatePanel {
 			}
 		});
 	}
+    
+    private MapMarkerDrone getClosestMarker(Vector2d clickPosition){
+    	MapMarkerDrone closestMarker = null;
+    	double closestDistance = 5;
+    	
+    	for (MapMarker marker : map().getMapMarkerList()) {
+    		if(marker instanceof MapMarkerDrone){
+    			MapMarkerDrone markerDrone = (MapMarkerDrone)marker;
+    			Vector2d robotPosition = CoordinateUtilities.GPSToCartesian(new LatLon(markerDrone.getLat(), markerDrone.getLon()));
+    			double dist = robotPosition.distanceTo(clickPosition);
+    			
+    			if(dist < closestDistance){
+    				closestMarker = markerDrone;
+    				closestDistance = dist;
+    			}
+    		}
+    	}
+    	
+    	return closestMarker;
+    }
+    
+    private ArrayList<MapMarkerDrone> getMarkersBetween(Vector2d start, Vector2d end){
+    	ArrayList<MapMarkerDrone> mrks = new ArrayList<MapMarkerDrone>();
+    	
+    	for (MapMarker m : map().getMapMarkerList()) {
+    		if(m instanceof MapMarkerDrone){
+    			MapMarkerDrone mD = (MapMarkerDrone)m;
+    			Vector2d dP = CoordinateUtilities.GPSToCartesian(new LatLon(mD.getLat(), mD.getLon()));
+    			
+    			if(dP.x > start.x && dP.x < end.x && dP.y > start.y && dP.y < end.y)
+    				mrks.add(mD);
+    		}
+    	}
+    	
+    	return mrks;
+    }
     
     private void clearStatus() {
 		status = null;
