@@ -211,13 +211,15 @@ public class MapPanel extends UpdatePanel {
                 		Vector2d end = CoordinateUtilities.GPSToCartesian(new LatLon(mapEndPosition.getLat(), mapEndPosition.getLon()));
                 		
                 		ArrayList<MapMarkerDrone> selectedMarkers = getMarkersBetween(start, end);
-                		JTextField selectedTextField = droneGUI.getCommandPanel().getSelectedDronesTextField();
-                		
-                		if(selectedMarkers.isEmpty())
-                			selectedTextField.setText("");
-                		else{
-                			for (MapMarkerDrone m : selectedMarkers) 
-        						selectDroneMarker(selectedTextField, m);
+                		if(droneGUI != null) {
+	                		JTextField selectedTextField = droneGUI.getCommandPanel().getSelectedDronesTextField();
+	                		
+	                		if(selectedMarkers.isEmpty())
+	                			selectedTextField.setText("");
+	                		else{
+	                			for (MapMarkerDrone m : selectedMarkers) 
+	        						selectDroneMarker(selectedTextField, m);
+	                		}
                 		}
                 		
                 		repaint();

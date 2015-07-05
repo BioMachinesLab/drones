@@ -52,6 +52,7 @@ public class FileLogger extends Thread implements RobotLogger {
 		try {
 		
 			bw = setupWriter();
+			logMessage("IP "+drone.getNetworkAddress());
 			
 			while(true) {
 				
@@ -60,6 +61,7 @@ public class FileLogger extends Thread implements RobotLogger {
 				if(logs > TOTAL_LOGS) {
 					bw.close();
 					bw = setupWriter();
+					logMessage("IP "+drone.getNetworkAddress());
 					logs = 0;
 				}
 				
@@ -70,9 +72,12 @@ public class FileLogger extends Thread implements RobotLogger {
 						extraLog = "";
 					}
 					
-					bw.write(getLogString());
+					String l = getLogString();
+
+					bw.write(l);
 					bw.flush();
 				} catch(Exception e) {
+					e.printStackTrace();
 					//ignore :)
 				}
 				Thread.sleep(SLEEP_TIME);
@@ -99,14 +104,19 @@ public class FileLogger extends Thread implements RobotLogger {
 		
 		String result = new LocalDateTime().toString(hourFormatter)+"\t";
 		
-		result+=drone.getGPSLatLon().getLat()+"\t"+drone.getGPSLatLon().getLon()+"\t"+drone.getGPSOrientationInDegrees()+"\t"+drone.getCompassOrientationInDegrees();
+		if(drone.getGPSLatLon() != null) {
+			result+=drone.getGPSLatLon().getLat()+"\t"+drone.getGPSLatLon().getLon()+"\t"+drone.getGPSOrientationInDegrees()+"\t";
+		} else {
+			result+="0\t0\t0\t";
+		}
+		result+=drone.getCompassOrientationInDegrees()+"\t";
 		
 		for(ControllerInput i : inputs) {
 			if(i instanceof GPSModuleInput) {
 				GPSModuleInput ig = (GPSModuleInput)i;
 				GPSData data = ig.getReadings();
 				
-				result+="\t"+data.getGroundSpeedKmh()+"\t"+data.getDate().toString(dateFormatter)+"\t";
+				result+=data.getGroundSpeedKmh()+"\t"+data.getDate().toString(dateFormatter)+"\t";
 				break;
 			}
 		}

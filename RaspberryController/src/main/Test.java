@@ -1,38 +1,37 @@
 package main;
 
-import io.input.I2CCompassLSM303Input;
-import com.pi4j.io.i2c.I2CBus;
-import com.pi4j.io.i2c.I2CFactory;
+import java.util.HashMap;
+import java.util.Scanner;
+import behaviors.TestMotorsCIBehavior;
+import commoninterface.utils.CIArguments;
+import commoninterfaceimpl.RealAquaticDroneCI;
 
 public class Test {
 	
 	public static void main(String[] args) throws InterruptedException {
 		
-		I2CBus i2cBus = null;
-		
-		boolean calibration = false;
+		RealAquaticDroneCI drone = new RealAquaticDroneCI();
 		
 		try {
-			i2cBus = I2CFactory.getInstance(I2CBus.BUS_1);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 		
-		I2CCompassLSM303Input c = new I2CCompassLSM303Input(i2cBus,null);
-		
-		if(calibration)
-			c.startCalibration();
-		
-		c.start();
-		
-		if(calibration) {
-			for(int i = 0 ; i < 20 ; i++) {
-				System.out.println("Sleeping... "+i);
-				Thread.sleep(1000);
-			}
+			HashMap<String,CIArguments> arg = CIArguments.parseArgs(new String[]{"config/drone.conf"});
 			
-			c.endCalibration();
-		}
+			drone.begin(arg);
+			drone.start();
+			
+			drone.startBehavior(new TestMotorsCIBehavior(new CIArguments(""),drone));
+		
+			Scanner s = new Scanner(System.in);
+			while(s.hasNextLine()) {
+				String line = s.nextLine();
+				if(line.equals("q")) {
+					drone.shutdown();
+					s.close();
+					System.exit(0);
+				}
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}	
 	}
-	
 }
