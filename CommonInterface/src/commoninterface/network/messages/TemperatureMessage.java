@@ -4,14 +4,14 @@ import commoninterface.network.messages.Message;
 
 public class TemperatureMessage extends Message {
 	private static final long serialVersionUID = 7925900141790370630L;
-	private double temperature;
+	private double[] temperature;
 
-	public TemperatureMessage(double temperature, String senderHostname) {
+	public TemperatureMessage(double[] temperature, String senderHostname) {
 		super(senderHostname);
 		this.temperature = temperature;
 	}
 
-	public double getTemperature() {
+	public double[] getTemperature() {
 		return temperature;
 	}
 

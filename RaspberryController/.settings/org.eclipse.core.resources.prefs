@@ -1,3 +1,4 @@
 eclipse.preferences.version=1
 encoding//src/io/input/I2CCompassModuleInput.java=UTF-8
 encoding//src/io/input/I2CTemperatureModuleInput.java=UTF-8
+encoding//src/io/input/OneWireTemperatureModuleInput.java=UTF-8
