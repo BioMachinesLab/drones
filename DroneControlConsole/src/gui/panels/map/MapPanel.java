@@ -35,6 +35,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
@@ -53,7 +54,6 @@ import org.openstreetmap.gui.jmapviewer.tilesources.BingAerialTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOsmTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.OsmTileSource;
 
-import sun.nio.cs.ext.MacArabic;
 import threads.UpdateThread;
 import commoninterface.entities.Entity;
 import commoninterface.entities.GeoEntity;
@@ -86,7 +86,7 @@ public class MapPanel extends UpdatePanel {
     private LinkedList<MapMarker> waypointMarkers = new LinkedList<MapMarker>();
     private LinkedList<ObstacleLocation> obstacles = new LinkedList<ObstacleLocation>();
     private LinkedList<MapMarker> obstacleMarkers = new LinkedList<MapMarker>();
-    private LinkedList<MapMarkerDrone> selectedMarkerDrones = new LinkedList<MapMarkerDrone>();
+    private LinkedList<String> selectedMarkerDrones = new LinkedList<String>();
     
     private Layer geoFenceLayer;
 	private DroneGUI droneGUI;
@@ -212,7 +212,7 @@ public class MapPanel extends UpdatePanel {
             		   Vector2d clickPosition = CoordinateUtilities.GPSToCartesian(new LatLon(clickCoord.getLat(), clickCoord.getLon()));
             		   
             		   MapMarkerDrone closestMarker = getClosestMarker(clickPosition);
-            		   JTextField selectedTextField = droneGUI.getCommandPanel().getSelectedDronesTextField();
+            		   JTextArea selectedTextField = droneGUI.getCommandPanel().getSelectedDronesTextField();
             		   
             		   if(droneGUI != null && closestMarker != null)
             			   selectDroneMarker(selectedTextField, closestMarker);
@@ -246,7 +246,7 @@ public class MapPanel extends UpdatePanel {
                 		
                 		ArrayList<MapMarkerDrone> selectedMarkers = getMarkersBetween(min, max);
                 		if(droneGUI != null) {
-	                		JTextField selectedTextField = droneGUI.getCommandPanel().getSelectedDronesTextField();
+	                		JTextArea selectedTextField = droneGUI.getCommandPanel().getSelectedDronesTextField();
 	                		
 	                		if(selectedMarkers.isEmpty())
 	                			selectedTextField.setText("");
@@ -256,31 +256,35 @@ public class MapPanel extends UpdatePanel {
 	                		}
                 		}
                 		
-                		repaint();
                 		dragBoxStart = null;
                 		dragBoxEnd = null;
+                		repaint();
             		}
             		
             	}
             }
 
-			private void selectDroneMarker(JTextField selectedTextField, MapMarkerDrone m) {
+			private void selectDroneMarker(JTextArea selectedTextField, MapMarkerDrone m) {
 				m.setSelected(true);
-				selectedMarkerDrones.add(m);
-				String id = m.getName().split("\\.")[3];
+				selectedMarkerDrones.add(m.getName());
+				String[] split = m.getName().split("\\.");
+				String id = split[split.length - 1];
 				String rsl = selectedTextField.getText();
 				
 				if(rsl.isEmpty())
 					selectedTextField.setText(id);
 				else
-					selectedTextField.setText(rsl + ", " + id);
+					selectedTextField.setText(rsl + "," + id);
 			}
 
 			private void cleanSelectedMarkersList() {
-				for (MapMarkerDrone selectedDrone : selectedMarkerDrones) 
-					selectedDrone.setSelected(false);
+				for (String selectedDroneIP : selectedMarkerDrones) {
+					MapMarkerDrone marker = (MapMarkerDrone)robotPositions.get(selectedDroneIP).peek();
+					marker.setSelected(false);
+				}
 				
 				selectedMarkerDrones.clear();
+				repaint();
 			}
             
         });
@@ -299,11 +303,10 @@ public class MapPanel extends UpdatePanel {
 
             public void mouseDragged(MouseEvent e) {
             	if(status.equals(MapStatus.NONE) && e.getButton() == MouseEvent.BUTTON1) {
-            		
             		if(dragBoxStart == null)
-            			dragBoxStart = new Point(e.getPoint().x, e.getPoint().y + MAP_TOP_OFFSET);
+            			dragBoxStart = new Point(e.getPoint().x, e.getPoint().y);
             		else
-            			dragBoxEnd = new Point(e.getPoint().x, e.getPoint().y + MAP_TOP_OFFSET);
+            			dragBoxEnd = new Point(e.getPoint().x, e.getPoint().y);
             		
             		repaint();
             	}
@@ -322,9 +325,9 @@ public class MapPanel extends UpdatePanel {
     		g2d.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{9}, 0));
     		
     		int width = Math.abs(dragBoxEnd.x - dragBoxStart.x);
-    		int height = Math.abs(dragBoxEnd.y - dragBoxStart.y);
+    		int height = Math.abs((dragBoxEnd.y + MAP_TOP_OFFSET) - (dragBoxStart.y + MAP_TOP_OFFSET));
     		
-    		g2d.drawRect(Math.min(dragBoxStart.x, dragBoxEnd.x), Math.min(dragBoxStart.y, dragBoxEnd.y), width, height);
+    		g2d.drawRect(Math.min(dragBoxStart.x, dragBoxEnd.x), Math.min((dragBoxStart.y + MAP_TOP_OFFSET), (dragBoxEnd.y + MAP_TOP_OFFSET)), width, height);
     	}
     }
     
@@ -460,7 +463,7 @@ public class MapPanel extends UpdatePanel {
     				mrks.add(mD);
     		}
     	}
-    	
+
     	return mrks;
     }
     
