@@ -2,6 +2,7 @@ package utils;
 
 import io.input.ControllerInput;
 import io.input.GPSModuleInput;
+import io.input.OneWireTemperatureModuleInput;
 import io.output.ControllerOutput;
 
 import java.io.BufferedWriter;
@@ -13,6 +14,8 @@ import java.util.List;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+
+import com.sun.javafx.binding.StringFormatter;
 
 import commoninterface.controllers.ControllerCIBehavior;
 import commoninterface.dataobjects.GPSData;
@@ -117,7 +120,13 @@ public class FileLogger extends Thread implements RobotLogger {
 				GPSData data = ig.getReadings();
 				
 				result+=data.getGroundSpeedKmh()+"\t"+data.getDate().toString(dateFormatter)+"\t";
-				break;
+			}
+			
+			if(i instanceof OneWireTemperatureModuleInput){
+				OneWireTemperatureModuleInput ig = (OneWireTemperatureModuleInput)i;
+				double[] data = ig.getReadings();
+								
+				result+=String.format("%.3f\t%.3f", data[0], data[1]);
 			}
 		}
 		

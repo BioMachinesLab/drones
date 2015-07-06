@@ -77,7 +77,7 @@ public class OneWireTemperatureModuleInput extends Thread implements
 	}
 
 	@Override
-	public Object getReadings() {
+	public double[] getReadings() {
 		return temperatures;
 	}
 
