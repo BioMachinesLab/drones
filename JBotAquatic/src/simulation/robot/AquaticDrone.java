@@ -46,7 +46,7 @@ import commoninterface.utils.jcoord.LatLon;
 
 public class AquaticDrone extends DifferentialDriveRobot implements AquaticDroneCI{
 
-	private double frictionConstant = 0.21;//0.05
+	private double frictionConstant = 0.13;//REX 0.21//OLD 0.05
 	private double accelarationConstant = 0.20;//0.1
 	private Vector2d velocity = new Vector2d();
 	private Simulator simulator;
@@ -262,7 +262,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	
 	@Override
 	public String getNetworkAddress() {
-		return getId()+":"+getId()+":"+getId()+":"+getId();
+		return getId()+"."+getId()+"."+getId()+"."+(getId()+100);
 	}
 	
 	@Override
