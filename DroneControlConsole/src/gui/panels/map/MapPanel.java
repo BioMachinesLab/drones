@@ -7,6 +7,7 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -69,7 +70,8 @@ public class MapPanel extends UpdatePanel {
 	
 	private static final long serialVersionUID = 1L;
 	private static int POSITION_HISTORY = 1;
-	public enum MapStatus { WAYPOINT, GEOFENCE, OBSTACLE }
+	private static final int MAP_TOP_OFFSET = 75;
+	public enum MapStatus { NONE, WAYPOINT, GEOFENCE, OBSTACLE }
 
     private JMapViewerTreeDrone treeMap = null;
     
@@ -88,9 +90,9 @@ public class MapPanel extends UpdatePanel {
     
     private Layer geoFenceLayer;
 	private DroneGUI droneGUI;
-	private MapStatus status;
+	private MapStatus status = MapStatus.NONE;
 	
-	private JLabel mapStatusResultLabel;
+	private JComboBox<MapStatus> mapStatusComboBox;
 	private JButton helpButton;
 	
 	private Point dragBoxStart;
@@ -108,15 +110,11 @@ public class MapPanel extends UpdatePanel {
         
         setBorder(BorderFactory.createTitledBorder("Map"));
         setLayout(new BorderLayout());
-        JPanel panelTop = new JPanel(new GridLayout(2,3));
+        JPanel panelTop = new JPanel(new BorderLayout());
 
         add(panelTop, BorderLayout.NORTH);
         
-        JPanel mapStatusPanel = new JPanel(new GridLayout(1, 2));
-        JLabel mapSatursLabel = new JLabel("Active Mode: ");
-        mapStatusResultLabel = new JLabel("NONE");
-        mapStatusPanel.add(mapSatursLabel);
-        mapStatusPanel.add(mapStatusResultLabel);
+        JPanel panelTopInformation = new JPanel(new GridLayout(2,3));
         
         try {
         
@@ -131,7 +129,7 @@ public class MapPanel extends UpdatePanel {
 	        
 	        map().setTileSource(tileSourceSelector.getItemAt(0));
 	        
-	        panelTop.add(tileSourceSelector);
+	        panelTopInformation.add(tileSourceSelector);
 	        
 	        try {
 	        	map().setTileLoader(new OsmFileCacheTileLoader(map()));
@@ -158,9 +156,42 @@ public class MapPanel extends UpdatePanel {
 						+ "<strong>Ctrl+E</strong>: Clear All Objects</html>");
 			}
 		});
-        panelTop.add(helpButton);
+        panelTopInformation.add(helpButton);
         
-        panelTop.add(mapStatusPanel);
+        JLabel mapStatusLabel = new JLabel("Active Mode: ");
+        panelTopInformation.add(mapStatusLabel);
+        
+        mapStatusComboBox = new JComboBox<MapStatus>(MapStatus.values());
+        mapStatusComboBox.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if(e.getStateChange() == ItemEvent.SELECTED)
+					status = (MapStatus) e.getItem();
+			}
+		});
+        
+        mapStatusComboBox.setPreferredSize(new Dimension(200, 10));
+        panelTopInformation.add(mapStatusComboBox);
+        
+        panelTop.add(panelTopInformation);
+        
+		JButton hidePanelButton = new JButton(">>");
+		hidePanelButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JButton pressedButton = (JButton) e.getSource();
+
+				if(pressedButton.getText().equals(">>")){
+					pressedButton.setText("<<");
+					droneGUI.hideRightPanel();
+				}else{
+					pressedButton.setText(">>");
+					droneGUI.showRightPanel();
+				}
+			}
+		});
+		hidePanelButton.setPreferredSize(new Dimension(30, 30));
+		panelTop.add(hidePanelButton, BorderLayout.EAST);
         
         add(treeMap, BorderLayout.CENTER);
         
@@ -174,7 +205,7 @@ public class MapPanel extends UpdatePanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                if(e.getButton() == MouseEvent.BUTTON1) {
-            	   if (status == null){
+            	   if (status.equals(MapStatus.NONE)){
             		   cleanSelectedMarkersList();
             		   
             		   Coordinate clickCoord = map().getPosition(e.getPoint());
@@ -201,7 +232,7 @@ public class MapPanel extends UpdatePanel {
             
             @Override
             public void mouseReleased(MouseEvent e) {
-            	if(status == null && e.getButton() == MouseEvent.BUTTON1){
+            	if(status.equals(MapStatus.NONE) && e.getButton() == MouseEvent.BUTTON1){
             		cleanSelectedMarkersList();
             		
             		if(dragBoxStart != null && dragBoxEnd != null){
@@ -262,12 +293,12 @@ public class MapPanel extends UpdatePanel {
             }
 
             public void mouseDragged(MouseEvent e) {
-            	if(status == null && e.getButton() == MouseEvent.BUTTON1) {
+            	if(status.equals(MapStatus.NONE) && e.getButton() == MouseEvent.BUTTON1) {
             		
             		if(dragBoxStart == null)
-            			dragBoxStart = e.getPoint();
+            			dragBoxStart = new Point(e.getPoint().x, e.getPoint().y + MAP_TOP_OFFSET);
             		else
-            			dragBoxEnd = e.getPoint();
+            			dragBoxEnd = new Point(e.getPoint().x, e.getPoint().y + MAP_TOP_OFFSET);
             		
             		repaint();
             	}
@@ -288,7 +319,7 @@ public class MapPanel extends UpdatePanel {
     		int width = Math.abs(dragBoxEnd.x - dragBoxStart.x);
     		int height = Math.abs(dragBoxEnd.y - dragBoxStart.y);
     		
-    		g2d.drawRect(dragBoxStart.x, dragBoxStart.y, width, height);
+    		g2d.drawRect(Math.min(dragBoxStart.x, dragBoxEnd.x), Math.min(dragBoxStart.y, dragBoxEnd.y), width, height);
     	}
     }
     
@@ -344,7 +375,7 @@ public class MapPanel extends UpdatePanel {
 			protected static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent evt) {
 				status = MapStatus.WAYPOINT;
-				mapStatusResultLabel.setText(status.toString());
+				mapStatusComboBox.setSelectedItem(status);
 			}
 		});
 		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("control W"), "control W");
@@ -361,7 +392,7 @@ public class MapPanel extends UpdatePanel {
 			protected static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent evt) {  
 				status = MapStatus.GEOFENCE;
-				mapStatusResultLabel.setText(status.toString());
+				mapStatusComboBox.setSelectedItem(status);
 			}
 		});
 		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("control G"), "control G");
@@ -378,7 +409,7 @@ public class MapPanel extends UpdatePanel {
 			protected static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent evt) {  
 				status = MapStatus.OBSTACLE;
-				mapStatusResultLabel.setText(status.toString());
+				mapStatusComboBox.setSelectedItem(status);
 			}
 		});
 		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("control O"), "control O");
@@ -429,8 +460,8 @@ public class MapPanel extends UpdatePanel {
     }
     
     private void clearStatus() {
-		status = null;
-		mapStatusResultLabel.setText("NONE");
+		status = MapStatus.NONE;
+		mapStatusComboBox.setSelectedItem(status);
 	}
     
     private JMapViewer map(){

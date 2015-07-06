@@ -8,9 +8,15 @@ import gui.panels.SystemInfoPanel;
 import gui.panels.map.MapPanel;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javafx.scene.layout.Border;
 
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
@@ -28,6 +34,8 @@ public class DroneGUI extends RobotGUI {
 	private MapPanel mapPanel;
 	private ServerPanel serverPanel;
 
+	private JPanel rightPanel;
+	
 	public DroneGUI(DroneControlConsole console) {
 		this.console = console;
 
@@ -67,8 +75,11 @@ public class DroneGUI extends RobotGUI {
 	}
 
 	private void createInfoPanel() {
-		JPanel rightPanel = new JPanel(new BorderLayout());
+		rightPanel = new JPanel(new BorderLayout());
 
+		JPanel hidePanel = new JPanel(new BorderLayout());
+		hidePanel.setPreferredSize(new Dimension(30, this.getHeight()));
+				
 		// Motors
 		rightPanel.add(motorsPanel, BorderLayout.NORTH);
 
@@ -119,6 +130,14 @@ public class DroneGUI extends RobotGUI {
 		add(sysInfoPanel, BorderLayout.SOUTH);
 	}
 
+	public void hideRightPanel(){
+		rightPanel.setVisible(false);
+	}
+	
+	public void showRightPanel(){
+		rightPanel.setVisible(true);
+	}
+	
 	public GPSPanel getGPSPanel() {
 		return gpsPanel;
 	}

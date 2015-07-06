@@ -29,12 +29,19 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+
 import main.DroneControlConsole;
 import main.RobotControlConsole;
 import threads.UpdateThread;
 
 public class ConnectionPanel extends UpdatePanel {
 	private static final long serialVersionUID = -4874186493593218098L;
+	private static final String START_COMMAND = "killall screen run.sh; cd RaspberryController; screen -d -m -S controller ./run.sh;";
+	private static final String STOP_COMMAND = "screen -S controller -p 0 -X stuff \"q$(printf \\\\r)\"";
 
 	private static final long SLEEP_TIME = 10 * 1000;
 	private static final long TIME_THRESHOLD = 10 * 1000;
@@ -50,6 +57,7 @@ public class ConnectionPanel extends UpdatePanel {
 	private int numberOfConnections = 0;
 	
 	private boolean droneConnected = false;
+	private JSch jsch = new JSch();
 
 	public ConnectionPanel(RobotControlConsole console) {
 
@@ -118,32 +126,63 @@ public class ConnectionPanel extends UpdatePanel {
 			}
 		});
 
-		JButton connectTo = new JButton("Connect To");
+//		JButton connectTo = new JButton("Connect To");
+//		connectTo.addActionListener(new ActionListener() {
+//
+//			@Override
+//			public void actionPerformed(ActionEvent arg0) {
+//				connectTo();
+//			}
+//		});
 
-		connectTo.addActionListener(new ActionListener() {
+		JButton startController = new JButton("Start Controller");
+		startController.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int index = list.getSelectedIndex();
 
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				connectTo();
+				if (index != -1) {
+					try {
+						executeSSHCommand(listModel.get(index).getIp(), START_COMMAND);
+					} catch (JSchException e1) {
+						e1.printStackTrace();
+					}
+				}
 			}
 		});
+		
+		JButton stopController = new JButton("Stop Controller");
+		stopController.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int index = list.getSelectedIndex();
 
+				if (index != -1) {
+					try {
+						executeSSHCommand(listModel.get(index).getIp(), STOP_COMMAND);
+					} catch (JSchException e1) {
+						e1.printStackTrace();
+					}
+				}
+			}
+		});
+		
 		currentConnection = new JLabel("");
 		currentConnection.setHorizontalAlignment(JLabel.CENTER);
 
 		connectionCountLabel = new JLabel(CONNECTIONS_STRING + numberOfConnections);
 		connectionCountLabel.setHorizontalAlignment(0);
 		
-		JPanel buttonsPanel = new JPanel(new GridLayout(5, 1));
+		JPanel buttonsPanel = new JPanel(new GridLayout(6, 1));
 		buttonsPanel.add(connect);
 		buttonsPanel.add(disconnect);
-		buttonsPanel.add(connectTo);
+		buttonsPanel.add(startController);
+		buttonsPanel.add(stopController);
+//		buttonsPanel.add(connectTo);
 		buttonsPanel.add(connectionCountLabel);
 		buttonsPanel.add(currentConnection);
 
 		add(buttonsPanel);
 	}
-
+	
 	private void importIpsFromFile() throws FileNotFoundException {
 		Scanner scanner = new Scanner(new File("drones_ips.txt"));
 		
@@ -153,6 +192,31 @@ public class ConnectionPanel extends UpdatePanel {
 		}
 		
 		scanner.close();
+	}
+	
+	private void executeSSHCommand(String hostIP, String command) throws JSchException {
+		Session session = jsch.getSession("pi", hostIP, 22);
+		session.setPassword("raspberry");
+		session.setConfig("StrictHostKeyChecking", "no");
+		session.connect();
+		
+		ChannelExec channelExec = (ChannelExec)session.openChannel("exec");
+		channelExec.setCommand(command);
+		channelExec.connect();
+		
+		int exitStatus = channelExec.getExitStatus();
+		channelExec.disconnect();
+		session.disconnect();
+
+		if (exitStatus < 0) {
+		    System.out.println("Done, but exit status not set!");
+		} else if (exitStatus > 0) {
+		    System.out.println("Done, but with error!");
+		} else {
+		    System.out.println("Done!");
+		}
+		
+		session.disconnect();
 	}
 
 	private void connect(String address) {
