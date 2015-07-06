@@ -36,7 +36,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		Serializable {
 	private static final long serialVersionUID = -5443358826645386873L;
 
-	private final static String FILE_NAME = FileLogger.LOGS_FOLDER+"GPSLog_";
+	private final static String FILE_NAME = FileLogger.LOGS_FOLDER + "GPSLog_";
 	private boolean localLog = false;
 	private PrintWriter localLogPrintWriterOut;
 	private RobotCI robotCI;
@@ -198,6 +198,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 	@SuppressWarnings("unused")
 	private void setupGPSReceiver() throws NotActiveException,
 			InterruptedException, IllegalArgumentException {
+		
 		if (ECHO_DELAY < 100 || ECHO_DELAY > 10000) {
 			throw new IllegalArgumentException(
 					"[GPS Module] Echo frequency must be in [100,10000] interval!");
@@ -208,6 +209,10 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 					"[GPS Module] Fix update frequency must be in [200,10000] interval!");
 		}
 
+		performWarmStart();
+		print("[GPS Module] Warm Start performed!",false);
+		
+		
 		createSerial(DEFAULT_BAUD_RATE);
 		Thread.sleep(1000);
 
@@ -230,9 +235,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			serial.flush();
 			serial.close();
 		} catch (IOException e) {
-			System.err
-					.println("[GPS Module] Error Flushing and/or closing serial stream ("
-							+ e.getMessage() + ")");
+			print("[GPS Module] Error Flushing and/or closing serial stream ("
+					+ e.getMessage() + ")", true);
 		}
 
 		Thread.sleep(1000);
@@ -247,11 +251,11 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		checksum = nmeaUtils.calculateNMEAChecksum(command);
 		command += checksum;
 		if (sendCommandAndCheckAnswer(command, "$PMTK001,220,3*30")) {
-			System.out
-					.println("[GPS Module] OK! Update echo frequency was succefully changed!");
+			print("[GPS Module] OK! Update echo frequency was succefully changed!",
+					false);
 		} else {
-			System.out
-					.println("[GPS Module] Update echo frequency was NOT succefully changed!");
+			print("[GPS Module] Update echo frequency was NOT succefully changed!",
+					false);
 		}
 
 		/*
@@ -261,44 +265,42 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		checksum = nmeaUtils.calculateNMEAChecksum(command);
 		command += checksum;
 		if (sendCommandAndCheckAnswer(command, "$PMTK001,300,3*33")) {
-			System.out
-					.println("[GPS Module] OK! Update fix frequency was succefully changed!");
+			print("[GPS Module] OK! Update fix frequency was succefully changed!",
+					false);
 		} else {
-			System.out
-					.println("[GPS Module] Update fix frequency was NOT succefully changed!");
+			print("[GPS Module] Update fix frequency was NOT succefully changed!",
+					false);
 		}
 
 		/*
 		 * Set navigation speed threshold to 0
 		 */
 		if (sendCommandAndCheckAnswer("$PMTK397,0*23", "$PMTK001,397,3*3D")) {
-			System.out
-					.println("[GPS Module] OK! Navigation speed threshold was succefully changed!");
+			print("[GPS Module] OK! Navigation speed threshold was succefully changed!",
+					false);
 		} else {
-			System.out
-					.println("[GPS Module] Navigation speed threshold was NOT succefully changed!");
+			print("[GPS Module] Navigation speed threshold was NOT succefully changed!",
+					false);
 		}
 
 		/*
 		 * Disable always locate mode
 		 */
 		if (disableAlwaysLocateStandby()) {
-			System.out
-					.println("[GPS Module] OK! Always locate mode was succefully disabled!");
+			print("[GPS Module] OK! Always locate mode was succefully disabled!",
+					false);
 		} else {
-			System.out
-					.println("[GPS Module] Always locate mode was NOT succefully disabled!");
+			print("[GPS Module] Always locate mode was NOT succefully disabled!",
+					false);
 		}
 
 		/*
 		 * Enable AIC
 		 */
 		if (enableAIC()) {
-			System.out
-					.println("[GPS Module] OK! AIC mode sucessfully activated!");
+			print("[GPS Module] OK! AIC mode sucessfully activated!", false);
 		} else {
-			System.out
-					.println("[GPS Module] AIC mode NOT sucessfully activated!");
+			print("[GPS Module] AIC mode NOT sucessfully activated!", false);
 		}
 
 		/*
@@ -307,11 +309,9 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		if (ENABLE_SBAS) {
 			boolean success = enableSBAS();
 			if (success)
-				System.out
-						.println("[GPS Module] OK! SBAS was succefully enabled!");
+				print("[GPS Module] OK! SBAS was succefully enabled!", false);
 			else
-				System.out
-						.println("[GPS Module] SBAS was NOT succefully enabled!");
+				print("[GPS Module] SBAS was NOT succefully enabled!", false);
 		}
 
 		ackResponses.clear();
@@ -436,6 +436,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 	public boolean disableSBAS() throws InterruptedException {
 		// serial.write("$PMTK513,0*29\r\n"); // DT Command. Which is the
+		// difference??
 		return sendCommandAndCheckAnswer("$PMTK313,0*2F", "$PMTK001,313,3*31");
 	}
 
@@ -456,6 +457,33 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			return true;
 		}
 
+	}
+
+	/* Hot Restart: Use all available data in the NV Store. */
+	public void performHotStart() throws InterruptedException {
+		serialWrite("PMTK101*32\r\n", false);
+	}
+
+	/* Warm Restart: Don't use Ephemeris at re-start. */
+	public void performWarmStart() throws InterruptedException {
+		serialWrite("PMTK102*31\r\n", false);
+	}
+
+	/*
+	 * Cold Restart: Don't use Time, Position, Almanacs and Ephemeris data at
+	 * re-start.
+	 */
+	public void performColdStart() throws InterruptedException {
+		serialWrite("PMTK103*30\r\n", false);
+	}
+
+	/*
+	 * Full Cold Restart: It’s essentially a Cold Restart, but additionally
+	 * clear system/user configurations at re-start. That is, reset the receiver
+	 * to the factory status.
+	 */
+	public void performFullColdStart() throws InterruptedException {
+		serialWrite("PMTK104*37\r\n", false);
 	}
 
 	public void enableMessagesOnExternalAntenna() throws InterruptedException {
@@ -485,7 +513,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				dir.mkdir();
 				System.out.println("[GPSModuleInput] Created Logs Folder");
 			}
-			
+
 			localLogPrintWriterOut = new PrintWriter(FILE_NAME
 					+ sdf.format(cal.getTime()) + ".log");
 			localLog = true;
