@@ -15,7 +15,7 @@ public class DroneMapController extends JMapController implements MouseListener,
     private static final int MOUSE_BUTTONS_MASK = MouseEvent.BUTTON3_DOWN_MASK | MouseEvent.BUTTON1_DOWN_MASK
     | MouseEvent.BUTTON2_DOWN_MASK;
 
-    private static final int MAC_MOUSE_BUTTON1_MASK = MouseEvent.CTRL_DOWN_MASK | MouseEvent.BUTTON1_DOWN_MASK;
+    private static final int MAC_MOUSE_BUTTON3_MASK = MouseEvent.CTRL_DOWN_MASK | MouseEvent.BUTTON3_DOWN_MASK;
     
     public DroneMapController(JMapViewer map) {
         super(map);
@@ -27,8 +27,8 @@ public class DroneMapController extends JMapController implements MouseListener,
 
     private boolean movementEnabled = true;
 
-    private int movementMouseButton = MouseEvent.BUTTON1;
-    private int movementMouseButtonMask = MouseEvent.BUTTON1_DOWN_MASK;
+    private int movementMouseButton = MouseEvent.BUTTON3;
+    private int movementMouseButtonMask = MouseEvent.BUTTON3_DOWN_MASK;
 
     private boolean wheelZoomEnabled = true;
     private boolean doubleClickZoomEnabled = true;
@@ -49,29 +49,29 @@ public class DroneMapController extends JMapController implements MouseListener,
     }
 
     public void mouseClicked(MouseEvent e) {
-        if (doubleClickZoomEnabled && e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1) {
+        if (doubleClickZoomEnabled && e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON3) {
             map.zoomIn(e.getPoint());
         }
     }
 
     public void mousePressed(MouseEvent e) {
-        if (e.getButton() == movementMouseButton || isPlatformOsx() && e.getModifiersEx() == MAC_MOUSE_BUTTON1_MASK) {
+        if (e.getButton() == movementMouseButton || isPlatformOsx() && e.getModifiersEx() == MAC_MOUSE_BUTTON3_MASK) {
             lastDragPoint = null;
             isMoving = true;
         }
     }
 
     public void mouseReleased(MouseEvent e) {
-        if (e.getButton() == movementMouseButton || isPlatformOsx() && e.getButton() == MouseEvent.BUTTON1) {
+        if (e.getButton() == movementMouseButton || isPlatformOsx() && e.getButton() == MouseEvent.BUTTON3) {
             lastDragPoint = null;
             isMoving = false;
         }
     }
 
     public void mouseWheelMoved(MouseWheelEvent e) {
-        if (wheelZoomEnabled) {
-            map.setZoom(map.getZoom() + e.getWheelRotation(), e.getPoint());
-        }
+//        if (wheelZoomEnabled) {
+//            map.setZoom(map.getZoom() + e.getWheelRotation(), e.getPoint());
+//        }
     }
 
     public boolean isMovementEnabled() {

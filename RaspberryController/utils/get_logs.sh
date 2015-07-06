@@ -1,2 +1,13 @@
-#! /bin/sh
-rsync -ru --delete pi@192.168.3.$1:/home/pi/RaspberryController/logs .
+#!/bin/bash
+ip="192.168.3.";
+user="pi"
+
+mkdir logs
+
+for var in "$@"
+do	
+	mkdir logs/$var
+	rsync -ru pi@$ip$var:/home/pi/RaspberryController/logs/* logs/$var
+	echo $ip$var
+done
+echo "Done!"

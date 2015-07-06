@@ -10,16 +10,20 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Scanner;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -29,9 +33,11 @@ import main.DroneControlConsole;
 import main.RobotControlConsole;
 import network.CommandSender;
 import threads.UpdateThread;
-
 import commoninterface.CIBehavior;
 import commoninterface.entities.Entity;
+import commoninterface.entities.GeoFence;
+import commoninterface.entities.ObstacleLocation;
+import commoninterface.entities.Waypoint;
 import commoninterface.network.NetworkUtils;
 import commoninterface.network.broadcast.EntitiesBroadcastMessage;
 import commoninterface.network.messages.BehaviorMessage;
@@ -70,6 +76,12 @@ public class CommandPanel extends UpdatePanel {
 	private ArrayList<String> availableBehaviors = new ArrayList<String>();
 	private ArrayList<String> availableControllers = new ArrayList<String>();
 
+	private JPanel presetsPanel = new JPanel();
+	private HashMap<String, String> presetsConfig = new HashMap<String, String>();
+	private JCheckBox autoDeployCheckBox;
+	
+	private ArrayList<Entity> mapEntities = new ArrayList<Entity>();
+	
 	/*
 	 * author: @miguelduarte42 This has to be this way because some behaviors
 	 * are specific to the RaspberryController, and this project cannot include
@@ -94,6 +106,8 @@ public class CommandPanel extends UpdatePanel {
 
 		JPanel topPanel = new JPanel(new BorderLayout());
 
+		JPanel controllersPanel = new JPanel(new BorderLayout());
+		
 		JPanel comboBoxes = new JPanel(new BorderLayout());
 
 		behaviors = new JComboBox<String>();
@@ -112,7 +126,10 @@ public class CommandPanel extends UpdatePanel {
 			}
 		});
 
-		topPanel.add(comboBoxes, BorderLayout.NORTH);
+		controllersPanel.add(presetsPanel, BorderLayout.NORTH);
+		controllersPanel.add(comboBoxes, BorderLayout.SOUTH);
+		
+		topPanel.add(controllersPanel, BorderLayout.NORTH);
 
 		start = new JButton("Start");
 		stop = new JButton("Stop");
@@ -175,6 +192,14 @@ public class CommandPanel extends UpdatePanel {
 					deployEntities();
 				}
 			});
+			
+			JPanel autoDeployPanel = new JPanel(new GridLayout(1,2));
+			JLabel autoDeployLabel = new JLabel("Auto Deploy");
+			autoDeployCheckBox = new JCheckBox();
+			
+			autoDeployPanel.add(autoDeployLabel);
+			autoDeployPanel.add(autoDeployCheckBox);
+			buttons.add(autoDeployPanel);
 		}
 
 		topPanel.add(buttons, BorderLayout.SOUTH);
@@ -188,6 +213,8 @@ public class CommandPanel extends UpdatePanel {
 		statusMessage = new JLabel("");
 		statusMessage.setPreferredSize(new Dimension(10, 20));
 
+		JPanel bigButtonsPanel = new JPanel(new GridLayout(2, 1));
+		
 		JButton plotButton = new JButton("Plot Neural Activations");
 		plotButton.addActionListener(new ActionListener() {
 			@Override
@@ -195,9 +222,23 @@ public class CommandPanel extends UpdatePanel {
 				neuralActivationsWindow.setVisible(true);
 			}
 		});
+		
+		JButton calibrateButton = new JButton("Calibrate");
+		calibrateButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int result = JOptionPane.showConfirmDialog(null, "Start calibation ?");
+				
+				if(result == 0)
+					statusMessage("CalibrationCIBehavior", true);
+			}
+		});
 
+		bigButtonsPanel.add(calibrateButton);
+		bigButtonsPanel.add(plotButton);
+		
 		add(topPanel, BorderLayout.NORTH);
-		add(plotButton);
+		add(bigButtonsPanel);
 		add(statusMessage, BorderLayout.SOUTH);
 	}
 
@@ -240,14 +281,26 @@ public class CommandPanel extends UpdatePanel {
 
 		deploy(m);
 	}
+	
+	private void deployPreset(String arguments){
+		CIArguments translatedArgs = new CIArguments(arguments.replaceAll("\\s+", ""), true);
+		String type = translatedArgs.getArgumentAsString("type");
+		
+		if(type != null){
+			BehaviorMessage m = new BehaviorMessage(type,translatedArgs.getCompleteArgumentString(), true, myHostname);
+			deploy(m);
+		}else
+			JOptionPane.showMessageDialog(null, "Contoller type no defined on preset configuration file!");
+		
+	}
 
 	private void deployEntities() {
 		DroneGUI droneGUI = (DroneGUI) gui;
-		ArrayList<Entity> entities = droneGUI.getMapPanel().getEntities();
-		EntitiesMessage m = new EntitiesMessage(entities, myHostname);
+//		ArrayList<Entity> entities = droneGUI.getMapPanel().getEntities();
+		EntitiesMessage m = new EntitiesMessage(mapEntities, myHostname);
 		deploy(m);
 
-		EntitiesBroadcastMessage msg = new EntitiesBroadcastMessage(entities);
+		EntitiesBroadcastMessage msg = new EntitiesBroadcastMessage(mapEntities);
 		if (console instanceof DroneControlConsole) {
 			// Messages get lost sometimes!!!
 			for (int j = 0; j < 5; j++) {
@@ -337,12 +390,47 @@ public class CommandPanel extends UpdatePanel {
 
 		if (controllersFolder.exists() && controllersFolder.isDirectory()) {
 			for (String s : controllersFolder.list()) {
-				if (s.endsWith(".conf"))
-					list.addItem(s);
+				if (s.endsWith(".conf")){
+					if(s.startsWith("preset")){
+						String buttonName = s.split("\\.")[0].split("_")[1];
+						JButton b = new JButton(buttonName);
+						
+						b.addActionListener(new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent e) {
+								JButton b = (JButton) e.getSource();
+								String arguments = presetsConfig.get(b.getText());
+								deployPreset(arguments);
+							}
+						});
+						
+						presetsPanel.add(b);
+						
+						try {
+							String config = readConfigurationFile(new File(CONTROLLERS_FOLDER + "/" + s));
+							presetsConfig.put(buttonName, config);
+						} catch (FileNotFoundException e) {
+							e.printStackTrace();
+						}
+					}else{
+						list.addItem(s);
+					}
+				}
 				availableControllers.add(s);
 			}
 		}
 
+	}
+
+	private String readConfigurationFile(File file) throws FileNotFoundException {
+		String result = "";
+		Scanner scanner = new Scanner(file);
+		
+		while(scanner.hasNext())
+			result += scanner.nextLine() + "\n";
+
+		scanner.close();
+		return result;
 	}
 
 	public BehaviorMessage getCurrentMessage() {
@@ -410,12 +498,25 @@ public class CommandPanel extends UpdatePanel {
 		}
 	}
 
+	public JTextField getSelectedDronesTextField() {
+		return selectedDrones;
+	}
+	
 	public ArrayList<String> getAvailableBehaviors() {
 		return availableBehaviors;
 	}
 
 	public ArrayList<String> getAvailableControllers() {
 		return availableControllers;
+	}
+	
+	public void updateMapInfo(ArrayList<Entity> updatedEntities){
+		mapEntities.clear();
+		mapEntities.addAll(updatedEntities);
+		
+		if(autoDeployCheckBox.isSelected())
+			deployEntities();
+		
 	}
 
 	public void updateHostname() {
@@ -447,4 +548,5 @@ public class CommandPanel extends UpdatePanel {
 			}
 		}
 	}
+	
 }

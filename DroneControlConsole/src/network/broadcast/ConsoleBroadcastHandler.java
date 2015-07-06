@@ -1,12 +1,14 @@
 package network.broadcast;
 
 import gui.DroneGUI;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+
 import main.DroneControlConsole;
 import main.RobotControlConsole;
 import network.server.shared.dataObjects.DroneData;
@@ -124,9 +126,9 @@ public class ConsoleBroadcastHandler {
 				long timeElapsed = Long.parseLong(HeartbeatBroadcastMessage
 						.decode(message)[1]);
 				console.getGUI().getConnectionPanel().newAddress(address);
-				updateDroneData(address,
-						HeartbeatBroadcastMessage.decode(message)[2], split[0],
-						timeElapsed);
+//				updateDroneData(address,
+//						HeartbeatBroadcastMessage.decode(message)[2], split[0],
+//						timeElapsed);
 			}
 			break;
 		case "GPS":
@@ -137,7 +139,7 @@ public class ConsoleBroadcastHandler {
 					((DroneGUI) console.getGUI()).getMapPanel().displayData(di);
 				}
 				console.getGUI().getConnectionPanel().newAddress(address);
-				updateDroneData(address, di.getName(), split[0], di);
+//				updateDroneData(address, di.getName(), split[0], di);
 			}
 			break;
 		case "ENTITIES":

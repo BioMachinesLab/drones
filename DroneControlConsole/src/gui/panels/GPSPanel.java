@@ -217,6 +217,20 @@ public class GPSPanel extends UpdatePanel {
 		notifyAll();
 	}
 
+	public void clearPanelInformation(){
+		labelHasFix.setBackground(Color.RED);
+		labelHasFix.setText(" No Fix");
+		textFieldLatitude.setText("");
+		textFieldLongitude.setText("");
+		textFieldVelKmh.setText("");
+		textFieldTime.setText("");
+		textFieldSatelittesView.setText("");
+		textFieldSatelittesUsed.setText("");
+		textFieldHDOP.setText("");
+		textFieldPDOP.setText("");
+		textFieldVDOP.setText("");
+	}
+	
 	public void registerThread(UpdateThread t) {
 		this.thread = t;
 	}

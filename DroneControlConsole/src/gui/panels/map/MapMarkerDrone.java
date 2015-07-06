@@ -16,6 +16,7 @@ import org.openstreetmap.gui.jmapviewer.Style;
 public class MapMarkerDrone extends MapMarkerDot {
 	
 	private double orientation;
+	private boolean selected;
 	
 	public MapMarkerDrone(Layer l, String s, Coordinate c, Style st, double orientation) {
 		super(l,s,c, st);
@@ -31,11 +32,16 @@ public class MapMarkerDrone extends MapMarkerDot {
             Graphics2D g2 = (Graphics2D) g;
             Composite oldComposite = g2.getComposite();
             g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
-            g2.setPaint(getBackColor());
+            
+            if(selected)
+            	g2.setPaint(Color.BLACK);
+            else
+            	g2.setPaint(getBackColor());
+            
             g.fillOval(position.x - size_h, position.y - size_h, size, size);
             g2.setComposite(oldComposite);
         }
-        g.setColor(getColor());
+        
         g.drawOval(position.x - size_h, position.y - size_h, size, size);
 
         if(getLayer()==null||getLayer().isVisibleTexts()) {
@@ -81,8 +87,16 @@ public class MapMarkerDrone extends MapMarkerDot {
             }
             g.setColor(Color.WHITE);
             g.setFont(getFont());
-            g.drawString(getName(), position.x+MapMarkerDot.DOT_RADIUS+2, position.y+MapMarkerDot.DOT_RADIUS);
+            g.drawString(getName().split("\\.")[3], position.x+MapMarkerDot.DOT_RADIUS+2, position.y+MapMarkerDot.DOT_RADIUS);
         }
     }
 
+	public boolean isSelected(){
+		return selected;
+	}
+	
+	public void setSelected(boolean selected) {
+		this.selected = selected;
+	}
+	
 }

@@ -147,6 +147,7 @@ public class LogVisualizer extends JFrame {
 	
 	private void incrementPlay() {
 		
+		
 		if(currentStep + 1 > allData.size()){
 			playThread.pause();
 			return;
@@ -242,7 +243,6 @@ public class LogVisualizer extends JFrame {
 						d.entities.addAll(currentEntities);
 						
 						d.file = file;
-						
 						data.add(d);
 					
 					}catch(Exception e){
@@ -377,6 +377,7 @@ public class LogVisualizer extends JFrame {
 					incrementPlay();
 					
 					long time = (long)(compareTimeWithNextStep()*multiplier);
+					
 					
 					if(time > 1000)
 						time = 1000;

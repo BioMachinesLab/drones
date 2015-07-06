@@ -1,6 +1,7 @@
 package main;
 
 import gamepad.GamePad;
+import gui.DroneGUI;
 import gui.RobotGUI;
 
 import java.net.InetAddress;
@@ -30,7 +31,6 @@ public abstract class RobotControlConsole {
 	protected MotorConnection motorConnection;
 
 	protected ArrayList<UpdateThread> updateThreads = new ArrayList<UpdateThread>();
-	private boolean connected = false;
 
 	public void setupGamepad() {
 		try {
@@ -43,9 +43,6 @@ public abstract class RobotControlConsole {
 
 	public synchronized void connect(String address) {
 		try {
-			if (connected)
-				disconnect();
-
 			gui.getMessagesPanel().clear();
 
 			informationConnection = new InformationConnection(this,
@@ -61,7 +58,7 @@ public abstract class RobotControlConsole {
 
 			createUpdateThreads();
 
-			connected = true;
+			gui.getConnectionPanel().setDroneConnected(true);
 			gui.getConnectionPanel().connectionOK(address);
 		} catch (Exception | Error e) {
 			e.printStackTrace();
@@ -93,7 +90,11 @@ public abstract class RobotControlConsole {
 		}
 
 		gui.getConnectionPanel().disconnected();
-		connected = false;
+		
+		if(gui instanceof DroneGUI)
+			((DroneGUI) gui).getGPSPanel().clearPanelInformation();
+		
+		gui.getConnectionPanel().setDroneConnected(false);
 	}
 
 	public void processMessage(Message message) {

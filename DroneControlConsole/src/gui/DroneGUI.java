@@ -62,7 +62,7 @@ public class DroneGUI extends RobotGUI {
 	}
 
 	private void createMapPanel() {
-		mapPanel = new MapPanel();
+		mapPanel = new MapPanel(this);
 		add(mapPanel, BorderLayout.CENTER);
 	}
 
@@ -81,12 +81,11 @@ public class DroneGUI extends RobotGUI {
 		// Compass and batteries
 		JPanel compassAndBatteriesPanel = new JPanel(new GridLayout(1, 2));
 		compassPanel = new CompassPanel();
-		batteryPanel = new BatteryPanel();
+//		batteryPanel = new BatteryPanel();
 
 		compassAndBatteriesPanel.add(compassPanel);
-		compassAndBatteriesPanel.add(batteryPanel);
-		GPSCompassBatteriesPanel.add(compassAndBatteriesPanel,
-				BorderLayout.CENTER);
+//		compassAndBatteriesPanel.add(batteryPanel);
+		GPSCompassBatteriesPanel.add(compassAndBatteriesPanel, BorderLayout.CENTER);
 
 		rightPanel.add(GPSCompassBatteriesPanel, BorderLayout.CENTER);
 
@@ -103,14 +102,14 @@ public class DroneGUI extends RobotGUI {
 
 		// Behaviors
 		leftTopPanel.add(commandPanel);
-		leftPanel.add(leftTopPanel, BorderLayout.NORTH);
+		leftPanel.add(leftTopPanel/*, BorderLayout.NORTH*/);
 
 		// Messages
-		leftPanel.add(msgPanel, BorderLayout.CENTER);
+//		leftPanel.add(msgPanel, BorderLayout.CENTER);
 
 		// Mobile Application Server
-		serverPanel = new ServerPanel(this);
-		leftPanel.add(serverPanel, BorderLayout.SOUTH);
+//		serverPanel = new ServerPanel(this);
+//		leftPanel.add(serverPanel, BorderLayout.SOUTH);
 
 		add(leftPanel, BorderLayout.WEST);
 	}

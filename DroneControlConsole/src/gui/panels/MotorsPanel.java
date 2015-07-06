@@ -9,8 +9,11 @@ import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.Hashtable;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -19,6 +22,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JSlider;
+import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
@@ -62,7 +66,7 @@ public class MotorsPanel extends UpdatePanel {
 		setLayout(new BorderLayout());
 
 		setPreferredSize(new Dimension(380, 270));
-
+		
 		leftSlider = new JSlider(-100, 100);
 		rightSlider = new JSlider(-100, 100);
 
@@ -107,8 +111,45 @@ public class MotorsPanel extends UpdatePanel {
 		soutPanel.add(resetOffset);
 
 		add(soutPanel, BorderLayout.SOUTH);
+		
+		initActions();
 	}
 
+	protected void initActions() {
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("UP"), "UP");
+		this.getActionMap().put("UP", new AbstractAction(){  
+			protected static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent evt) {  
+				leftSlider.setValue(100);
+				rightSlider.setValue(100);
+			}
+		});
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("DOWN"), "DOWN");
+		this.getActionMap().put("DOWN", new AbstractAction(){  
+			protected static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent evt) {  
+				leftSlider.setValue(0);
+				rightSlider.setValue(0);
+			}
+		});
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("LEFT"), "LEFT");
+		this.getActionMap().put("LEFT", new AbstractAction(){  
+			protected static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent evt) {  
+				leftSlider.setValue(0);
+				rightSlider.setValue(100);
+			}
+		});
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("RIGHT"), "RIGHT");
+		this.getActionMap().put("RIGHT", new AbstractAction(){  
+			protected static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent evt) {  
+				leftSlider.setValue(100);
+				rightSlider.setValue(0);
+			}
+		});
+	}
+	
 	private JPanel buildAdjustmentPanel() {
 		JPanel panel = new JPanel(new BorderLayout());
 

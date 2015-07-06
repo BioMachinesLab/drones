@@ -2,8 +2,7 @@ package network;
 
 import gui.DroneGUI;
 import main.DroneControlConsole;
-import network.server.shared.ServerUtils;
-import network.server.shared.dataObjects.DroneData;
+
 import commoninterface.network.messages.BatteryMessage;
 import commoninterface.network.messages.CompassMessage;
 import commoninterface.network.messages.EntityMessage;
@@ -26,26 +25,26 @@ public class DroneConsoleMessageHandler extends ControlConsoleMessageHandler {
 		} else if (message instanceof GPSMessage) {
 			((DroneGUI)console.getGUI()).getGPSPanel().displayData(((GPSMessage) message).getGPSData());
 			
-			if(((DroneControlConsole) console).getDronesSet().existsDrone(message.getSenderHostname())){
-				((DroneControlConsole) console).getDronesSet().getDrone(message.getSenderHostname()).setGPSData(ServerUtils.getAsGGPSServerData(((GPSMessage) message).getGPSData()));
-			}else{
-				DroneData droneData = new DroneData(message.getSenderIPAddr(),message.getSenderHostname());
-				droneData.setGPSData(ServerUtils.getAsGGPSServerData(((GPSMessage) message).getGPSData()));
-				
-				((DroneControlConsole) console).getDronesSet().addDrone(droneData);
-			}
+//			if(((DroneControlConsole) console).getDronesSet().existsDrone(message.getSenderHostname())){
+//				((DroneControlConsole) console).getDronesSet().getDrone(message.getSenderHostname()).setGPSData(ServerUtils.getAsGGPSServerData(((GPSMessage) message).getGPSData()));
+//			}else{
+//				DroneData droneData = new DroneData(message.getSenderIPAddr(),message.getSenderHostname());
+//				droneData.setGPSData(ServerUtils.getAsGGPSServerData(((GPSMessage) message).getGPSData()));
+//				
+//				((DroneControlConsole) console).getDronesSet().addDrone(droneData);
+//			}
 			
 		} else if (message instanceof CompassMessage) {
 			((DroneGUI)console.getGUI()).getCompassPanel().displayData((CompassMessage) message);
 			
-			if(((DroneControlConsole) console).getDronesSet().existsDrone(message.getSenderHostname())){
-				((DroneControlConsole) console).getDronesSet().getDrone(message.getSenderHostname()).setOrientation(((CompassMessage) message).getHeading());
-			}else{
-				DroneData droneData = new DroneData(message.getSenderIPAddr(),message.getSenderHostname());
-				droneData.setOrientation(((CompassMessage) message).getHeading());
-				
-				((DroneControlConsole) console).getDronesSet().addDrone(droneData);
-			}
+//			if(((DroneControlConsole) console).getDronesSet().existsDrone(message.getSenderHostname())){
+//				((DroneControlConsole) console).getDronesSet().getDrone(message.getSenderHostname()).setOrientation(((CompassMessage) message).getHeading());
+//			}else{
+//				DroneData droneData = new DroneData(message.getSenderIPAddr(),message.getSenderHostname());
+//				droneData.setOrientation(((CompassMessage) message).getHeading());
+//				
+//				((DroneControlConsole) console).getDronesSet().addDrone(droneData);
+//			}
 		} else if (message instanceof EntityMessage) {
 			((DroneGUI)console.getGUI()).getMapPanel().displayData((EntityMessage) message);
 			
@@ -55,14 +54,7 @@ public class DroneConsoleMessageHandler extends ControlConsoleMessageHandler {
 		} else if (message instanceof BatteryMessage) {
 			((DroneGUI)console.getGUI()).getBatteryPanel().displayData((BatteryMessage) message);
 			
-			if(((DroneControlConsole) console).getDronesSet().existsDrone(message.getSenderHostname())){
-				((DroneControlConsole) console).getDronesSet().getDrone(message.getSenderHostname()).setBatteryStatus(ServerUtils.getAsBatteryStatusServerData(((BatteryMessage) message).getBatteryStatus()));
-			}else{
-				DroneData droneData = new DroneData(message.getSenderIPAddr(),message.getSenderHostname());
-				droneData.setBatteryStatus(ServerUtils.getAsBatteryStatusServerData(((BatteryMessage) message).getBatteryStatus()));
-				
-				((DroneControlConsole) console).getDronesSet().addDrone(droneData);
-			}
+			//	
 			
 		}else {
 			System.out.println("Received non recognized message type: " + message.getClass().toString());
