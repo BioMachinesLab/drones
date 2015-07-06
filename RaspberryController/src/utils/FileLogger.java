@@ -2,6 +2,7 @@ package utils;
 
 import io.input.ControllerInput;
 import io.input.GPSModuleInput;
+import io.input.OneWireTemperatureModuleInput;
 import io.output.ControllerOutput;
 
 import java.io.BufferedWriter;
@@ -13,6 +14,8 @@ import java.util.List;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+
+import com.sun.javafx.binding.StringFormatter;
 
 import commoninterface.controllers.ControllerCIBehavior;
 import commoninterface.dataobjects.GPSData;
@@ -52,6 +55,7 @@ public class FileLogger extends Thread implements RobotLogger {
 		try {
 		
 			bw = setupWriter();
+			logMessage("IP "+drone.getNetworkAddress());
 			
 			while(true) {
 				
@@ -60,6 +64,7 @@ public class FileLogger extends Thread implements RobotLogger {
 				if(logs > TOTAL_LOGS) {
 					bw.close();
 					bw = setupWriter();
+					logMessage("IP "+drone.getNetworkAddress());
 					logs = 0;
 				}
 				
@@ -70,9 +75,12 @@ public class FileLogger extends Thread implements RobotLogger {
 						extraLog = "";
 					}
 					
-					bw.write(getLogString());
+					String l = getLogString();
+
+					bw.write(l);
 					bw.flush();
 				} catch(Exception e) {
+					e.printStackTrace();
 					//ignore :)
 				}
 				Thread.sleep(SLEEP_TIME);
@@ -99,15 +107,26 @@ public class FileLogger extends Thread implements RobotLogger {
 		
 		String result = new LocalDateTime().toString(hourFormatter)+"\t";
 		
-		result+=drone.getGPSLatLon().getLat()+"\t"+drone.getGPSLatLon().getLon()+"\t"+drone.getGPSOrientationInDegrees()+"\t"+drone.getCompassOrientationInDegrees();
+		if(drone.getGPSLatLon() != null) {
+			result+=drone.getGPSLatLon().getLat()+"\t"+drone.getGPSLatLon().getLon()+"\t"+drone.getGPSOrientationInDegrees()+"\t";
+		} else {
+			result+="0\t0\t0\t";
+		}
+		result+=drone.getCompassOrientationInDegrees()+"\t";
 		
 		for(ControllerInput i : inputs) {
 			if(i instanceof GPSModuleInput) {
 				GPSModuleInput ig = (GPSModuleInput)i;
 				GPSData data = ig.getReadings();
 				
-				result+="\t"+data.getGroundSpeedKmh()+"\t"+data.getDate().toString(dateFormatter)+"\t";
-				break;
+				result+=data.getGroundSpeedKmh()+"\t"+data.getDate().toString(dateFormatter)+"\t";
+			}
+			
+			if(i instanceof OneWireTemperatureModuleInput){
+				OneWireTemperatureModuleInput ig = (OneWireTemperatureModuleInput)i;
+				double[] data = ig.getReadings();
+								
+				result+=String.format("%.3f\t%.3f", data[0], data[1]);
 			}
 		}
 		

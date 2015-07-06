@@ -6,12 +6,14 @@ import io.input.FileGPSModuleInput;
 import io.input.GPSModuleInput;
 import io.input.I2CBatteryModuleInput;
 import io.input.I2CCompassLSM303Input;
+import io.input.OneWireTemperatureModuleInput;
 import io.output.ControllerOutput;
 import io.output.DebugLedsOutput;
-import io.output.ReversableESCManagerOutputV2;
-import io.output.ServoOutput;
+import io.output.ReversableESCManagerOutput;
+
 import java.io.IOException;
 import java.util.ArrayList;
+
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.i2c.I2CBus;
@@ -30,9 +32,10 @@ public class IOManager {
 	private GPSModuleInput gpsModule;
 	private I2CCompassLSM303Input compassModule;
 	private I2CBatteryModuleInput batteryManager;
+	private OneWireTemperatureModuleInput temperatureModule;
 
 	// Outputs
-	private ReversableESCManagerOutputV2 escManager;
+	private ReversableESCManagerOutput escManager;
 	private DebugLedsOutput debugLeds;
 	// private BuzzerOutput buzzer;
 
@@ -90,27 +93,43 @@ public class IOManager {
 	}
 
 	private void initInputs(CIArguments args) {
-		if (args.getFlagIsTrue("compass") && args.getFlagIsTrue("i2c")) {
-			// Compass Module Init
-			compassModule = new I2CCompassLSM303Input(i2cBus, drone);
-			initMessages += "[INIT] I2CCompassLSM303Input: "
-					+ (compassModule.isAvailable() ? "ok" : "not ok!") + "\n";
+		if (args.getFlagIsTrue("i2c")) {
+			if (args.getFlagIsTrue("compass")) {
+				// Compass Module Init
+				compassModule = new I2CCompassLSM303Input(i2cBus, drone);
+				initMessages += "[INIT] I2CCompassLSM303Input: "
+						+ (compassModule.isAvailable() ? "ok" : "not ok!")
+						+ "\n";
 
-			if (compassModule.isAvailable()) {
-				compassModule.start();
-				inputs.add(compassModule);
+				if (compassModule.isAvailable()) {
+					compassModule.start();
+					inputs.add(compassModule);
+				}
+
 			}
 
+			if (args.getFlagIsTrue("battery")) {
+				// Battery Module Init
+				batteryManager = new I2CBatteryModuleInput(i2cBus, drone);
+				initMessages += "[INIT] BatteryManager: "
+						+ (batteryManager.isAvailable() ? "ok" : "not ok!")
+						+ "\n";
+				if (batteryManager.isAvailable()) {
+					batteryManager.start();
+					inputs.add(batteryManager);
+				}
+			}
 		}
-
-		if (args.getFlagIsTrue("battery") && args.getFlagIsTrue("i2c")) {
-			// Battery Module Init
-			batteryManager = new I2CBatteryModuleInput(i2cBus, drone);
-			initMessages += "[INIT] BatteryManager: "
-					+ (batteryManager.isAvailable() ? "ok" : "not ok!") + "\n";
-			if (batteryManager.isAvailable()) {
-				batteryManager.start();
-				inputs.add(batteryManager);
+		
+		if(args.getFlagIsTrue("temperature")){
+			temperatureModule = new OneWireTemperatureModuleInput(drone);
+			initMessages += "[INIT] OneWireTemperature: "
+					+ (temperatureModule.isAvailable() ? "ok" : "not ok!")
+					+ "\n";
+			
+			if(temperatureModule.isAvailable()){
+				temperatureModule.start();
+				inputs.add(temperatureModule);
 			}
 		}
 
@@ -161,12 +180,11 @@ public class IOManager {
 	}
 
 	private void initOutputs(CIArguments args) {
-		if (args.getFlagIsTrue("esc") && args.getFlagIsTrue("gpio")) {
+		if (args.getFlagIsTrue("esc")) {
 			try {
 				// ESC Output Init
-				escManager = new ReversableESCManagerOutputV2(motorSpeeds,
+				escManager = new ReversableESCManagerOutput(motorSpeeds,
 						gpioController);
-
 				initMessages += "[INIT] ESCManager: "
 						+ (escManager.isAvailable() ? "ok" : "not ok!") + "\n";
 
@@ -174,69 +192,52 @@ public class IOManager {
 					escManager.start();
 					outputs.add(escManager);
 				}
-
 			} catch (Exception e) {
 				initMessages += "[INIT] ESCManager: not ok! (" + e.getMessage()
 						+ ")\n";
 			}
 		}
 
-		if (args.getFlagIsTrue("servos") && args.getFlagIsTrue("gpio")) {
-			try {
-				// ESC Output Init
-				escManager = new ServoOutput(motorSpeeds, gpioController);
+		if (args.getFlagIsTrue("gpio")) {
+			if (args.getFlagIsTrue("leds")) {
+				try {
+					// Debug Leds Init
+					debugLeds = new DebugLedsOutput(gpioController);
+					initMessages += "[INIT] DebugLEDs: "
+							+ (debugLeds.isAvailable() ? "ok" : "not ok!")
+							+ "\n";
 
-				initMessages += "[INIT] ServoManager: "
-						+ (escManager.isAvailable() ? "ok" : "not ok!") + "\n";
-
-				if (escManager.isAvailable()) {
-					escManager.start();
-					outputs.add(escManager);
+					if (debugLeds.isAvailable()) {
+						debugLeds.start();
+						outputs.add(debugLeds);
+						debugLeds.addBlinkLed(0);
+					}
+				} catch (Exception e) {
+					initMessages += "[INIT] DebugLEDs: not ok! ("
+							+ e.getMessage() + ")\n";
 				}
-
-			} catch (Exception e) {
-				initMessages += "[INIT] ServoManager: not ok! ("
-						+ e.getMessage() + ")\n";
 			}
+
+			// if (enabledIO.contains("buzzer")) {
+			// try {
+			// // Buzzer Init
+			// buzzer = new BuzzerOutput();
+			// initMessages += "[INIT] Buzzer: "
+			// + (buzzer.isAvailable() ? "ok" : "not ok!") + "\n";
+			// if (buzzer.isAvailable()) {
+			// buzzer.start();
+			// outputs.add(buzzer);
+			//
+			// buzzer.setValue(BuzzerMode.DOUBLE_BEEP);
+			//
+			// System.out.print(".");
+			// }
+			// } catch (Exception e) {
+			// initMessages += "[INIT] Buzzer: not ok! (" + e.getMessage()
+			// + ")\n";
+			// }
+			// }
 		}
-
-		if (args.getFlagIsTrue("leds") && args.getFlagIsTrue("gpio")) {
-			try {
-				// Debug Leds Init
-				debugLeds = new DebugLedsOutput(gpioController);
-				initMessages += "[INIT] DebugLEDs: "
-						+ (debugLeds.isAvailable() ? "ok" : "not ok!") + "\n";
-				if (debugLeds.isAvailable()) {
-					debugLeds.start();
-					outputs.add(debugLeds);
-
-					debugLeds.addBlinkLed(0);
-				}
-			} catch (Exception e) {
-				initMessages += "[INIT] DebugLEDs: not ok! (" + e.getMessage()
-						+ ")\n";
-			}
-		}
-
-		// if (enabledIO.contains("buzzer")) {
-		// try {
-		// // Buzzer Init
-		// buzzer = new BuzzerOutput();
-		// initMessages += "[INIT] Buzzer: "
-		// + (buzzer.isAvailable() ? "ok" : "not ok!") + "\n";
-		// if (buzzer.isAvailable()) {
-		// buzzer.start();
-		// outputs.add(buzzer);
-		//
-		// buzzer.setValue(BuzzerMode.DOUBLE_BEEP);
-		//
-		// System.out.print(".");
-		// }
-		// } catch (Exception e) {
-		// initMessages += "[INIT] Buzzer: not ok! (" + e.getMessage()
-		// + ")\n";
-		// }
-		// }
 	}
 
 	public void shutdown() {

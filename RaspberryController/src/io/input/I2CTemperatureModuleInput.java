@@ -1,10 +1,7 @@
 package io.input;
 
-import java.io.IOException;
-
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
-
 import commoninterface.RobotCI;
 import commoninterface.network.messages.InformationRequest;
 import commoninterface.network.messages.Message;
@@ -55,10 +52,10 @@ public class I2CTemperatureModuleInput extends Thread implements
 						InformationRequest.MessageType.TEMPERATURE)) {
 			if (!available) {
 				return new SystemStatusMessage(
-						"[CompassModule] Unable to send Temperature data",
+						"[I2CTemperatureModuleInput] Unable to send Temperature data",
 						robotCI.getNetworkAddress());
 			}
-			return new TemperatureMessage(temperature,
+			return new TemperatureMessage(new double[]{temperature},
 					robotCI.getNetworkAddress());
 		}
 		return null;
@@ -134,7 +131,7 @@ public class I2CTemperatureModuleInput extends Thread implements
 			}
 
 		} catch (InterruptedException e) {
-			System.out.println("[Compass] Terminated!");
+			System.out.println("[I2CTemperatureModuleInput] Terminated!");
 		}
 	}
 }
