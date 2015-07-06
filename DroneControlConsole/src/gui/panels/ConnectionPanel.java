@@ -215,6 +215,12 @@ public class ConnectionPanel extends UpdatePanel {
 			droneIP.setStatus(DroneStatus.RUNNING);
 			numberOfConnections++;
 			list.repaint();
+		} else if(droneIP == null) {
+			listModel.addElement(new DroneIP(address));
+			droneIP = listModel.getDroneWithIP(address);
+			droneIP.setStatus(DroneStatus.RUNNING);
+			numberOfConnections++;
+			list.repaint();
 		}
 		
 		lastUpdate.put(address, System.currentTimeMillis());

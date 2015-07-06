@@ -87,7 +87,8 @@ public class MapMarkerDrone extends MapMarkerDot {
             }
             g.setColor(Color.WHITE);
             g.setFont(getFont());
-            g.drawString(getName().split("\\.")[3], position.x+MapMarkerDot.DOT_RADIUS+2, position.y+MapMarkerDot.DOT_RADIUS);
+            String[] split = getName().split("\\.");
+            g.drawString(split[split.length-1], position.x+MapMarkerDot.DOT_RADIUS+2, position.y+MapMarkerDot.DOT_RADIUS);
         }
     }
 
