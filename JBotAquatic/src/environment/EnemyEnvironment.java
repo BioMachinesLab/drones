@@ -20,7 +20,7 @@ public class EnemyEnvironment extends BoundaryEnvironment{
 		simulator.getRandom().nextDouble();
 		this.setup = true;
 		
-		double dist = distance + distance*rand;
+		double dist = wallsDistance + wallsDistance*rand;
 		
 		for(Robot r : simulator.getRobots()) {
 			double x = dist*2*simulator.getRandom().nextDouble() - dist;
