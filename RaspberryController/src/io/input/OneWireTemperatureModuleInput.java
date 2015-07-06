@@ -21,7 +21,7 @@ public class OneWireTemperatureModuleInput extends Thread implements
 	private static final String PATH = "/sys/bus/w1/devices";
 	private static final String FILE = "/w1_slave";
 
-	private static final String SENSOR_NAME_START = "10-";
+	private static final String SENSOR_NAME_START = "28-";
 
 	private ArrayList<String> devices;
 
@@ -40,10 +40,12 @@ public class OneWireTemperatureModuleInput extends Thread implements
 		File folder = new File(PATH);
 		File[] listOfFiles = folder.listFiles();
 
-		for (File file : listOfFiles) {
-			if (file.isDirectory()
-					&& file.getName().startsWith(SENSOR_NAME_START)) {
-				devices.add(file.getAbsolutePath() + FILE);
+		if (listOfFiles.length > 0) {
+			for (File file : listOfFiles) {
+				if (file.isDirectory()
+						&& file.getName().startsWith(SENSOR_NAME_START)) {
+					devices.add(file.getAbsolutePath() + FILE);
+				}
 			}
 		}
 
@@ -88,11 +90,13 @@ public class OneWireTemperatureModuleInput extends Thread implements
 			try {
 				temps[0] = SystemInfo.getCpuTemperature();
 			} catch (IOException | InterruptedException e) {
-				System.err.println("[OneWireTemperatureModuleInput] Unable to fetch system temperature "+e.getMessage());
+				System.err
+						.println("[OneWireTemperatureModuleInput] Unable to fetch system temperature "
+								+ e.getMessage());
 			}
 
-			for (int i = 0;i<devices.size();i++) {
-				temps[i+1]=getSensorTemperature(devices.get(i));
+			for (int i = 0; i < devices.size(); i++) {
+				temps[i + 1] = getSensorTemperature(devices.get(i));
 			}
 
 			return temps;

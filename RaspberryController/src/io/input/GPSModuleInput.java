@@ -1,5 +1,6 @@
 package io.input;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.NotActiveException;
@@ -15,6 +16,8 @@ import java.util.List;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+
+import utils.FileLogger;
 
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialDataEvent;
@@ -33,7 +36,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		Serializable {
 	private static final long serialVersionUID = -5443358826645386873L;
 
-	private final static String FILE_NAME = "/home/pi/RaspberryController/logs/GPSLog_";
+	private final static String FILE_NAME = FileLogger.LOGS_FOLDER+"GPSLog_";
 	private boolean localLog = false;
 	private PrintWriter localLogPrintWriterOut;
 	private RobotCI robotCI;
@@ -167,7 +170,9 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 	public void closeSerial() {
 		try {
-			serial.close();
+			if (!serial.isClosed()) {
+				serial.close();
+			}
 		} catch (IOException | IllegalStateException e) {
 			System.err.println("[GPS Module] Error Closing Serial Stream ("
 					+ e.getMessage() + ")");
@@ -475,6 +480,12 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			cal.getTime();
 			SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy_HH-mm-ss");
 
+			File dir = new File(FileLogger.LOGS_FOLDER);
+			if (!dir.exists()) {
+				dir.mkdir();
+				System.out.println("[GPSModuleInput] Created Logs Folder");
+			}
+			
 			localLogPrintWriterOut = new PrintWriter(FILE_NAME
 					+ sdf.format(cal.getTime()) + ".log");
 			localLog = true;
