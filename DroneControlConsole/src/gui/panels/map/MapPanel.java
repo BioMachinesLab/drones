@@ -53,8 +53,8 @@ import org.openstreetmap.gui.jmapviewer.tilesources.BingAerialTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOsmTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.OsmTileSource;
 
+import sun.nio.cs.ext.MacArabic;
 import threads.UpdateThread;
-
 import commoninterface.entities.Entity;
 import commoninterface.entities.GeoEntity;
 import commoninterface.entities.GeoFence;
@@ -241,7 +241,10 @@ public class MapPanel extends UpdatePanel {
                 		Coordinate mapEndPosition = map().getPosition(dragBoxEnd);
                 		Vector2d end = CoordinateUtilities.GPSToCartesian(new LatLon(mapEndPosition.getLat(), mapEndPosition.getLon()));
                 		
-                		ArrayList<MapMarkerDrone> selectedMarkers = getMarkersBetween(start, end);
+                		Vector2d min = new Vector2d(Math.min(start.x, end.x),Math.min(start.y, end.y));
+                		Vector2d max = new Vector2d(Math.max(start.x, end.x),Math.max(start.y, end.y));
+                		
+                		ArrayList<MapMarkerDrone> selectedMarkers = getMarkersBetween(min, max);
                 		if(droneGUI != null) {
 	                		JTextField selectedTextField = droneGUI.getCommandPanel().getSelectedDronesTextField();
 	                		
