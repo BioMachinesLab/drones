@@ -2,44 +2,65 @@ package io.output;
 
 import java.io.IOException;
 
+import com.pi4j.io.gpio.GpioController;
+import com.pi4j.io.gpio.GpioPinDigitalOutput;
+import com.pi4j.io.gpio.Pin;
+import com.pi4j.io.gpio.PinState;
+import com.pi4j.io.gpio.RaspiPin;
+
 import commoninterface.dataobjects.MotorSpeeds;
 import commoninterface.network.messages.MotorMessage;
 import commoninterface.utils.MathUtils;
 
 public class ReversableESCManagerOutput extends Thread implements
 		ControllerOutput {
-	
+
 	private final static boolean DEBUG = false;
 
-	private final static int LEFT_ESC = 0;
-	private final static int RIGHT_ESC = 1;
+	private final static Pin SWITCH_PIN = RaspiPin.GPIO_13;
+	private final static int LEFT_ESC = 1;
+	private final static int RIGHT_ESC = 2;
 
-	private final static int CENTRAL_VALUE = 150;
-	private final static int MIN_VALUE = 60;
-	private final static int MAX_VALUE = 240;
-	
-	private final static int MIN_FW_VALUE = 165;
-	private final static int MIN_BW_VALUE = 135;
+	private final static int CENTRAL_VALUE_LEFT = 150;
+	private final static int CENTRAL_VALUE_RIGHT = 150;
+	private final static int MIN_VALUE = 132;
+	private final static int MAX_VALUE = 190;
 
-	private int lValue = CENTRAL_VALUE;
-	private int rValue = CENTRAL_VALUE;
+	private final static int MIN_FW_VALUE = 155;
+	private final static int MIN_BW_VALUE = 145;
+
+	private int lValue = CENTRAL_VALUE_LEFT;
+	private int rValue = CENTRAL_VALUE_RIGHT;
 	
+	private int prevLValue = CENTRAL_VALUE_LEFT;
+	private int prevRValue = CENTRAL_VALUE_RIGHT;
+	
+	private double lReceivedValue = 0;
+	private double rReceivedValue = 0;
+
 	private MotorSpeeds speeds;
+	private GpioPinDigitalOutput escSwitch;
 
 	private boolean available = false;
 
-	public ReversableESCManagerOutput(MotorSpeeds speeds) {
+	public ReversableESCManagerOutput(MotorSpeeds speeds, GpioController gpioController) {
 		this.speeds = speeds;
+
+		escSwitch = gpioController.provisionDigitalOutputPin(SWITCH_PIN, PinState.LOW);
+
 		try {
-			setRawValues(CENTRAL_VALUE, CENTRAL_VALUE);
+			setRawValues(CENTRAL_VALUE_LEFT, CENTRAL_VALUE_RIGHT);
+			writeValueToESC();
 			Thread.sleep(1000);
-			
+			escSwitch.high();
+			Thread.sleep(10);
+
 			available = true;
 		} catch (InterruptedException e) {
 			System.err.println(e.getMessage());
 		}
 	}
-
+	
 	@Override
 	public int getNumberOfOutputs() {
 		return 2;
@@ -47,42 +68,40 @@ public class ReversableESCManagerOutput extends Thread implements
 
 	@Override
 	public void setValue(int index, double value) {
-
+		
 		if (!available)
 			return;
-
-		switch (index) {
-		case 0:
-			if (value == 0.5 || value == -1) {
-				lValue = CENTRAL_VALUE;
-			} else {
-				if(value > 0.5) {
-					lValue = (int)(MathUtils.map(value, 0.5, 1, MIN_FW_VALUE, MAX_VALUE));
-				} else if(value < 0.5) {
-					lValue = (int)(MathUtils.map(value, 0, 0.5, MIN_VALUE, MIN_BW_VALUE));
-				}
+		
+		int finalVal = index == 0 ? CENTRAL_VALUE_LEFT : CENTRAL_VALUE_RIGHT;
+		
+		if (value != 0) {
+			if (value > 0) {
+				finalVal = (int) (MathUtils.map(value, 0, 1, MIN_FW_VALUE,
+						MAX_VALUE));
+			} else if (value < 0) {
+				finalVal = (int) (MathUtils.map(value, -1, 0, MIN_VALUE,
+						MIN_BW_VALUE));
 			}
-			break;
-		case 1:
-			if (value == 0.5 || value == -1) {
-				rValue = CENTRAL_VALUE;
-			} else {
-				if(value > 0.5) {
-					rValue = (int)(MathUtils.map(value, 0.5, 1, MIN_FW_VALUE, MAX_VALUE));
-				} else if(value < 0.5) {
-					rValue = (int)(MathUtils.map(value, 0, 0.5, MIN_VALUE, MIN_BW_VALUE));
-				}
-			}
-			break;
-		default:
-			throw new IllegalArgumentException();
+		}
+		
+		if(index == 0) {
+			lValue = finalVal;
+			lReceivedValue = value;
+		} else {
+			rValue = finalVal;
+			rReceivedValue = value;
 		}
 	}
 
 	private void writeValueToESC() {
 		// long time = System.currentTimeMillis();
 		try {
+			
 			try {
+				
+				preventStuckMotors();
+				
+				//set the real speed
 				Runtime.getRuntime()
 						.exec(new String[] {
 								"bash",
@@ -91,21 +110,63 @@ public class ReversableESCManagerOutput extends Thread implements
 										+ " > /dev/servoblaster; echo "
 										+ RIGHT_ESC + "=" + rValue
 										+ " > /dev/servoblaster;" }).waitFor();
+				
+				prevLValue = lValue;
+				prevRValue = rValue;
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			if(DEBUG)
-				System.out.println("[ESCManager] Wrote to motor L: " + lValue+ " R:" + rValue);
+			if (DEBUG)
+				System.out.println("[ESCManager] Wrote to motor L: " + lValue
+						+ " R:" + rValue);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		// System.out.println("Time to update motor "
 		// + (System.currentTimeMillis() - time));
 	}
+	
+	private void preventStuckMotors() {
+		int addVal = 5;
+		
+		try {
+			
+			String str = "";
+	
+			if(prevLValue == CENTRAL_VALUE_LEFT && lValue-MIN_FW_VALUE <= addVal && lValue-MIN_FW_VALUE >= 0) {
+				str+= "echo " + LEFT_ESC + "=" + 175
+						+ " > /dev/servoblaster;";
+				
+			}
+			if(prevRValue == CENTRAL_VALUE_RIGHT && rValue-MIN_FW_VALUE <= addVal && rValue-MIN_FW_VALUE >= 0) {
+				str+= "echo " + RIGHT_ESC + "=" + 175
+						+ " > /dev/servoblaster;";
+			}
+			
+			if(!str.isEmpty()) {
+				Runtime.getRuntime()
+				.exec(new String[] {
+						"bash",
+						"-c",
+						str}).waitFor();
+				Thread.sleep(100);
+			}
+		
+		} catch(Exception e){}
+	}
 
-	private void disableMotors() {
-		setRawValues(CENTRAL_VALUE, CENTRAL_VALUE);
+	public void disableMotors() {
+		escSwitch.low();
+		setRawValues(CENTRAL_VALUE_LEFT, CENTRAL_VALUE_RIGHT);
 		writeValueToESC();
+		available=false;
+	}
+	
+	private void enableMotors(){
+		setRawValues(CENTRAL_VALUE_LEFT, CENTRAL_VALUE_RIGHT);
+		writeValueToESC();
+		escSwitch.high();
+		available=true;
 	}
 
 	@Override
@@ -120,13 +181,13 @@ public class ReversableESCManagerOutput extends Thread implements
 	}
 
 	private void writeValuesToESC(MotorMessage m) {
-		if (m.getLeftMotor() == -1 || m.getRightMotor() == -1) {
-			disableMotors();
-		} else {
-			setValue(0, m.getLeftMotor());
-			setValue(1, m.getRightMotor());
-			writeValueToESC();
+		if (!available){
+			enableMotors();
 		}
+		
+		setValue(0, m.getLeftMotor());
+		setValue(1, m.getRightMotor());
+		writeValueToESC();
 	}
 
 	private void setRawValues(int left, int right) {
@@ -138,12 +199,12 @@ public class ReversableESCManagerOutput extends Thread implements
 	public boolean isAvailable() {
 		return available;
 	}
-	
+
 	@Override
 	public double getValue(int index) {
-		if(index == 0) {
-			return lValue;
+		if (index == 0) {
+			return lReceivedValue;
 		}
-		return rValue;
+		return rReceivedValue;
 	}
 }

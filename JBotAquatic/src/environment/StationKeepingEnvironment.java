@@ -25,7 +25,7 @@ public class StationKeepingEnvironment extends Environment {
         Waypoint wp = new Waypoint("wp." + drone.getName(), CoordinateUtilities.cartesianToGPS(x, y));
         drone.getEntities().add(wp);
         drone.setActiveWaypoint(wp);
-        LightPole lp = new LightPole(simulator, "wp." + drone.getName(), x, y, 1.5);
+        LightPole lp = new LightPole(simulator, "wp." + drone.getName(), x, y, 5);
         addObject(lp);
     }
     
