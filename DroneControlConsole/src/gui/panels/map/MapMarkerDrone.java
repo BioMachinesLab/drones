@@ -80,6 +80,7 @@ public class MapMarkerDrone extends MapMarkerDot {
 	}
 	
 	public void paintText(Graphics g, Point position) {
+		
         if(getName()!=null && g!=null && position!=null){
             if(getFont()==null){
                 Font f = getDefaultFont();
