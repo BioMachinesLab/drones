@@ -235,6 +235,9 @@ public class CommandPanel extends UpdatePanel {
 				
 				if(result == 0)
 					statusMessage("CalibrationCIBehavior", true);
+				else if(result == 2){
+					//TODO: revert to old calibration
+				}
 			}
 		});
 
