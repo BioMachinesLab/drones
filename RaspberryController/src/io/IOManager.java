@@ -1,5 +1,6 @@
 package io;
 
+import io.input.BatteryAlarmInput;
 import io.input.ControllerInput;
 import io.input.FakeGPSModuleInput;
 import io.input.FileGPSModuleInput;
@@ -33,6 +34,7 @@ public class IOManager {
 	private I2CCompassLSM303Input compassModule;
 	private I2CBatteryModuleInput batteryManager;
 	private OneWireTemperatureModuleInput temperatureModule;
+	private BatteryAlarmInput batteryAlarmInput;
 
 	// Outputs
 	private ReversableESCManagerOutput escManager;
@@ -93,6 +95,7 @@ public class IOManager {
 	}
 
 	private void initInputs(CIArguments args) {
+		// I2C Inputs
 		if (args.getFlagIsTrue("i2c")) {
 			if (args.getFlagIsTrue("compass")) {
 				// Compass Module Init
@@ -108,7 +111,7 @@ public class IOManager {
 
 			}
 
-			if (args.getFlagIsTrue("battery")) {
+			if (args.getFlagIsTrue("battMngr")) {
 				// Battery Module Init
 				batteryManager = new I2CBatteryModuleInput(i2cBus, drone);
 				initMessages += "[INIT] BatteryManager: "
@@ -120,19 +123,37 @@ public class IOManager {
 				}
 			}
 		}
-		
-		if(args.getFlagIsTrue("temperature")){
+
+		// GPIO Inputs
+		if (args.getFlagIsTrue("gpio")) {
+			if (args.getFlagIsTrue("battAlarm")) {
+				// Battery Alarm Module Init
+				batteryAlarmInput = new BatteryAlarmInput(gpioController, drone);
+				initMessages += "[INIT] BatteryAlarmInput: "
+						+ (batteryAlarmInput.isAvailable() ? "ok" : "not ok!")
+						+ "\n";
+
+				if (batteryAlarmInput.isAvailable()) {
+					batteryAlarmInput.start();
+					inputs.add(batteryAlarmInput);
+				}
+			}
+		}
+
+		// Misc Inputs
+		if (args.getFlagIsTrue("temperature")) {
 			temperatureModule = new OneWireTemperatureModuleInput(drone);
 			initMessages += "[INIT] OneWireTemperature: "
 					+ (temperatureModule.isAvailable() ? "ok" : "not ok!")
 					+ "\n";
-			
-			if(temperatureModule.isAvailable()){
+
+			if (temperatureModule.isAvailable()) {
 				temperatureModule.start();
 				inputs.add(temperatureModule);
 			}
 		}
 
+		// GPS Inputs
 		if (args.getFlagIsTrue("gps")) {
 			try {
 				// GPS Module Init
