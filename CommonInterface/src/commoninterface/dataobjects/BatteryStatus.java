@@ -4,10 +4,12 @@ public class BatteryStatus {
 	private int batteryID;
 	private double[] cellsVoltages;
 	private double batteryTemperature;
+	private boolean alarmActive;
 
 	public BatteryStatus() {
 		batteryTemperature = -1;
 		batteryID = -1;
+		alarmActive=false;
 	}
 
 	public BatteryStatus(int batteryID, double[] cellsVoltages,
@@ -37,6 +39,10 @@ public class BatteryStatus {
 	public double[] getCellsVoltages() {
 		return cellsVoltages;
 	}
+	
+	public boolean isAlarmActive(){
+		return alarmActive;
+	}
 
 	// Setters
 	public void setBatteryID(int batteryID) {
@@ -49,5 +55,9 @@ public class BatteryStatus {
 
 	public void setCellsVoltage(double[] cellsVoltage) {
 		this.cellsVoltages = cellsVoltage;
+	}
+	
+	public void setAlarmActive(boolean alarmActive) {
+		this.alarmActive = alarmActive;
 	}
 }
