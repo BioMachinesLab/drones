@@ -362,10 +362,8 @@ public class ConnectionPanel extends UpdatePanel {
 							if(InetAddress.getByName(droneIP.getIp()).isReachable(pingTimeout)){
 								droneIP.setStatus(DroneStatus.DETECTED);
 								list.repaint();
-							}else{
+							}else
 								droneIP.setStatus(DroneStatus.NOT_RUNNING);
-								System.out.println("timeout " + droneIP.getIp());
-							}
 						} catch (IOException e) {
 //							System.err.println(droneIP.getIp() + ": " + e.getMessage());
 							droneIP.setStatus(DroneStatus.NOT_RUNNING);
