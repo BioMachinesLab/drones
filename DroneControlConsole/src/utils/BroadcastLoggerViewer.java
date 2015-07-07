@@ -17,7 +17,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-public class BroadcastLogger extends JFrame {
+public class BroadcastLoggerViewer extends JFrame {
 
 	private static String FOLDER = "broadcast_logs";
 	private DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("dd-MM-YY_HH-mm-ss");
@@ -27,7 +27,7 @@ public class BroadcastLogger extends JFrame {
 	
 	private JLabel label = new JLabel();
 	
-	public BroadcastLogger() {
+	public BroadcastLoggerViewer() {
 		
 		super("Broadcast Message Logger");
 		
@@ -115,7 +115,7 @@ public class BroadcastLogger extends JFrame {
 	}
 	
 	public static void main(String[] args) {
-		new BroadcastLogger();
+		new BroadcastLoggerViewer();
 	}
 	
 }

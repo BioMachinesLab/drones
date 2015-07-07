@@ -338,6 +338,10 @@ public class ConnectionPanel extends UpdatePanel {
 		return SLEEP_TIME;
 	}
 	
+	public SortedListModel getListModel() {
+		return listModel;
+	}
+	
 	class PingThread extends Thread {
 		
 		private long timeBetweenPings = 1000*10; //10 sec

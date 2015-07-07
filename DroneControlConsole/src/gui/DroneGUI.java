@@ -3,6 +3,7 @@ package gui;
 import gui.panels.BatteryPanel;
 import gui.panels.CompassPanel;
 import gui.panels.GPSPanel;
+import gui.panels.LogsPanel;
 import gui.panels.ServerPanel;
 import gui.panels.SystemInfoPanel;
 import gui.panels.map.MapPanel;
@@ -33,6 +34,7 @@ public class DroneGUI extends RobotGUI {
 	private BatteryPanel batteryPanel;
 	private MapPanel mapPanel;
 	private ServerPanel serverPanel;
+	private LogsPanel logsPanel;
 
 	private JPanel rightPanel;
 	
@@ -113,7 +115,7 @@ public class DroneGUI extends RobotGUI {
 
 		// Behaviors
 		leftTopPanel.add(commandPanel);
-		leftPanel.add(leftTopPanel/*, BorderLayout.NORTH*/);
+		leftPanel.add(leftTopPanel, BorderLayout.NORTH);
 
 		// Messages
 //		leftPanel.add(msgPanel, BorderLayout.CENTER);
@@ -122,6 +124,9 @@ public class DroneGUI extends RobotGUI {
 //		serverPanel = new ServerPanel(this);
 //		leftPanel.add(serverPanel, BorderLayout.SOUTH);
 
+		logsPanel = new LogsPanel(this);
+		leftPanel.add(logsPanel, BorderLayout.CENTER);
+		
 		add(leftPanel, BorderLayout.WEST);
 	}
 
@@ -156,5 +161,9 @@ public class DroneGUI extends RobotGUI {
 
 	public BatteryPanel getBatteryPanel() {
 		return batteryPanel;
+	}
+	
+	public LogsPanel getLogsPanel() {
+		return logsPanel;
 	}
 }
