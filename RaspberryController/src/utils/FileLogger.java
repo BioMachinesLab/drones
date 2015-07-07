@@ -15,8 +15,6 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import com.sun.javafx.binding.StringFormatter;
-
 import commoninterface.controllers.ControllerCIBehavior;
 import commoninterface.dataobjects.GPSData;
 import commoninterface.neuralnetwork.CINeuralNetwork;
@@ -26,7 +24,9 @@ import commoninterfaceimpl.RealAquaticDroneCI;
 public class FileLogger extends Thread implements RobotLogger {
 	
 	private final static long SLEEP_TIME = 100;
-	private final static long TOTAL_LOGS = 6000;//10min
+	private final static long TOTAL_LOGS = 6000;	//10min
+	public final static String LOGS_FOLDER="/home/pi/RaspberryController/logs/";
+	
 	
 	private String fileName = "";
 	private RealAquaticDroneCI drone;
@@ -43,7 +43,15 @@ public class FileLogger extends Thread implements RobotLogger {
 	
 	public BufferedWriter setupWriter() throws IOException {
 		fileName = new LocalDateTime().toString(fileFormatter);
-		FileWriter fw = new FileWriter(new File("logs/values_"+fileName+".log"));
+
+		File dir = new File(LOGS_FOLDER);
+		if (!dir.exists()) {
+			dir.mkdir();
+			System.out.println("[FileLogger] Created Logs Folder");
+		}
+
+		FileWriter fw = new FileWriter(new File(LOGS_FOLDER + "values_"
+				+ fileName + ".log"));
 		return new BufferedWriter(fw);
 	}
 	
@@ -125,8 +133,8 @@ public class FileLogger extends Thread implements RobotLogger {
 			if(i instanceof OneWireTemperatureModuleInput){
 				OneWireTemperatureModuleInput ig = (OneWireTemperatureModuleInput)i;
 				double[] data = ig.getReadings();
-								
-				result+=String.format("%.3f\t%.3f", data[0], data[1]);
+
+				result+=String.format("%.3f\t%.3f\t",data[0],data[1]);
 			}
 		}
 		

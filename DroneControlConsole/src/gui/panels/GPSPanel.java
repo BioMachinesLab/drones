@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -15,12 +14,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
-import javax.swing.border.LineBorder;
 
 import org.joda.time.LocalDateTime;
 
-import commoninterface.dataobjects.GPSData;
 import threads.UpdateThread;
+
+import commoninterface.dataobjects.GPSData;
 
 public class GPSPanel extends UpdatePanel {
 	private static final long serialVersionUID = 6535539451990270799L;

@@ -4,20 +4,15 @@ import gui.panels.BatteryPanel;
 import gui.panels.CompassPanel;
 import gui.panels.GPSPanel;
 import gui.panels.LogsPanel;
-import gui.panels.ServerPanel;
 import gui.panels.SystemInfoPanel;
+import gui.panels.TemperaturePanel;
 import gui.panels.map.MapPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javafx.scene.layout.Border;
 
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
@@ -33,11 +28,11 @@ public class DroneGUI extends RobotGUI {
 	private CompassPanel compassPanel;
 	private BatteryPanel batteryPanel;
 	private MapPanel mapPanel;
-	private ServerPanel serverPanel;
+	private TemperaturePanel temperaturePanel;
 	private LogsPanel logsPanel;
 
 	private JPanel rightPanel;
-	
+
 	public DroneGUI(DroneControlConsole console) {
 		this.console = console;
 
@@ -46,7 +41,7 @@ public class DroneGUI extends RobotGUI {
 		} catch (ClassNotFoundException | InstantiationException
 				| IllegalAccessException | UnsupportedLookAndFeelException e) {
 			System.err
-					.println("Not able to set LookAndFeel for the current OS");
+			.println("Not able to set LookAndFeel for the current OS");
 		}
 
 		enableOSXFullscreen(this);
@@ -81,7 +76,7 @@ public class DroneGUI extends RobotGUI {
 
 		JPanel hidePanel = new JPanel(new BorderLayout());
 		hidePanel.setPreferredSize(new Dimension(30, this.getHeight()));
-				
+
 		// Motors
 		rightPanel.add(motorsPanel, BorderLayout.NORTH);
 
@@ -94,10 +89,12 @@ public class DroneGUI extends RobotGUI {
 		// Compass and batteries
 		JPanel compassAndBatteriesPanel = new JPanel(new GridLayout(1, 2));
 		compassPanel = new CompassPanel();
-//		batteryPanel = new BatteryPanel();
+		temperaturePanel = new TemperaturePanel();
+		//		batteryPanel = new BatteryPanel();
 
 		compassAndBatteriesPanel.add(compassPanel);
-//		compassAndBatteriesPanel.add(batteryPanel);
+		//		compassAndBatteriesPanel.add(batteryPanel);
+		compassAndBatteriesPanel.add(temperaturePanel);
 		GPSCompassBatteriesPanel.add(compassAndBatteriesPanel, BorderLayout.CENTER);
 
 		rightPanel.add(GPSCompassBatteriesPanel, BorderLayout.CENTER);
@@ -118,31 +115,26 @@ public class DroneGUI extends RobotGUI {
 		leftPanel.add(leftTopPanel, BorderLayout.NORTH);
 
 		// Messages
-//		leftPanel.add(msgPanel, BorderLayout.CENTER);
+		//leftPanel.add(msgPanel, BorderLayout.CENTER);
 
 		// Mobile Application Server
-//		serverPanel = new ServerPanel(this);
-//		leftPanel.add(serverPanel, BorderLayout.SOUTH);
+		//serverPanel = new ServerPanel(this);
+		//leftPanel.add(serverPanel, BorderLayout.SOUTH);
 
 		logsPanel = new LogsPanel(this);
 		leftPanel.add(logsPanel, BorderLayout.CENTER);
-		
-		add(leftPanel, BorderLayout.WEST);
-	}
 
-	private void createSysInfoPanel() {
-		sysInfoPanel = new SystemInfoPanel(this);
-		add(sysInfoPanel, BorderLayout.SOUTH);
+		add(leftPanel, BorderLayout.WEST);
 	}
 
 	public void hideRightPanel(){
 		rightPanel.setVisible(false);
 	}
-	
+
 	public void showRightPanel(){
 		rightPanel.setVisible(true);
 	}
-	
+
 	public GPSPanel getGPSPanel() {
 		return gpsPanel;
 	}
@@ -162,7 +154,11 @@ public class DroneGUI extends RobotGUI {
 	public BatteryPanel getBatteryPanel() {
 		return batteryPanel;
 	}
-	
+
+	public TemperaturePanel getTemperaturesPanel() {
+		return temperaturePanel;
+	}
+
 	public LogsPanel getLogsPanel() {
 		return logsPanel;
 	}
