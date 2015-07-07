@@ -76,6 +76,9 @@ public class ConnectionPanel extends UpdatePanel {
 			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 				Component c = super.getListCellRendererComponent(list, value, index, isSelected,cellHasFocus);
 				
+				if(isSelected)
+					c.setBackground(Color.LIGHT_GRAY);
+				
 				if(value instanceof DroneIP){
 					DroneIP droneIP = (DroneIP)value;
 					if(droneIP.getStatus() == DroneStatus.RUNNING)
@@ -111,6 +114,12 @@ public class ConnectionPanel extends UpdatePanel {
 			public void actionPerformed(ActionEvent e) {
 				if(droneConnected)
 					disconnect.doClick();
+				
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
 				
 				int index = list.getSelectedIndex();
 
@@ -208,12 +217,8 @@ public class ConnectionPanel extends UpdatePanel {
 		channelExec.disconnect();
 		session.disconnect();
 
-		if (exitStatus < 0) {
-		    System.out.println("Done, but exit status not set!");
-		} else if (exitStatus > 0) {
+		if (exitStatus > 0) {
 		    System.out.println("Done, but with error!");
-		} else {
-		    System.out.println("Done!");
 		}
 		
 		session.disconnect();
@@ -336,6 +341,10 @@ public class ConnectionPanel extends UpdatePanel {
 	@Override
 	public long getSleepTime() {
 		return SLEEP_TIME;
+	}
+	
+	public SortedListModel getListModel() {
+		return listModel;
 	}
 	
 	class PingThread extends Thread {

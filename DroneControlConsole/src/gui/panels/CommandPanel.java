@@ -134,6 +134,7 @@ public class CommandPanel extends UpdatePanel {
 		start = new JButton("Start");
 		stop = new JButton("Stop");
 		JLabel selectedDronesLabel = new JLabel("Selected drones");
+		selectedDronesLabel.setHorizontalAlignment(JLabel.HORIZONTAL);
 		selectedDrones = new JTextArea(1,5);
 		selectedDrones.setLineWrap(true);
 		JScrollPane selectDronesScroll = new JScrollPane(selectedDrones);
