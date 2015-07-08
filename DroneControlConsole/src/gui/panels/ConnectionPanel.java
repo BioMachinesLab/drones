@@ -49,7 +49,7 @@ public class ConnectionPanel extends UpdatePanel {
 	
 	private static final long SLEEP_TIME = 10 * 1000;
 	private static final long TIME_THRESHOLD = 10 * 1000;
-	private static final String CONNECTIONS_STRING = "Nº Connections: ";
+	private static final String CONNECTIONS_STRING = "N Connections: ";
 
 	private JList<DroneIP> list;
 	private SortedListModel listModel = new SortedListModel();
@@ -218,9 +218,11 @@ public class ConnectionPanel extends UpdatePanel {
 	private void importIpsFromFile() throws FileNotFoundException {
 		Scanner scanner = new Scanner(new File("drones_ips.txt"));
 		
-		while (scanner.hasNext()){
+		while (scanner.hasNext()) {
 			String ip = scanner.nextLine();
-			listModel.addElement(new DroneIP(ip));
+			if (!ip.contains("#")) {
+				listModel.addElement(new DroneIP(ip));
+			}
 		}
 		
 		scanner.close();
