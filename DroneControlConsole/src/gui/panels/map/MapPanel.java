@@ -17,7 +17,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -55,6 +54,7 @@ import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOsmTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.OsmTileSource;
 
 import threads.UpdateThread;
+
 import commoninterface.entities.Entity;
 import commoninterface.entities.GeoEntity;
 import commoninterface.entities.GeoFence;
@@ -95,6 +95,8 @@ public class MapPanel extends UpdatePanel {
 
 	private JComboBox<MapStatus> mapStatusComboBox;
 	private JButton helpButton;
+	
+	private HashMap<Integer, LinkedList<String>> groupsMap = new HashMap<Integer, LinkedList<String>>();
 
 	private Point dragBoxStart;
 	private Point dragBoxEnd;
@@ -107,6 +109,9 @@ public class MapPanel extends UpdatePanel {
 	public MapPanel() {
 		treeMap = new JMapViewerTreeDrone("Zones");
 
+		for (int i = 1; i < 4; i++) 
+			groupsMap.put(i, new LinkedList<String>());
+		
 		new RefreshDrones().start();
 
 		setBorder(BorderFactory.createTitledBorder("Map"));
@@ -268,30 +273,6 @@ public class MapPanel extends UpdatePanel {
 
 				}
 			}
-
-			private void selectDroneMarker(JTextArea selectedTextField, MapMarkerDrone m) {
-				m.setSelected(true);
-				selectedMarkerDrones.add(m.getName());
-				String[] split = m.getName().split("\\.");
-				String id = split[split.length - 1];
-				String rsl = selectedTextField.getText();
-
-				if(rsl.isEmpty())
-					selectedTextField.setText(id);
-				else
-					selectedTextField.setText(rsl + "," + id);
-			}
-
-			private void cleanSelectedMarkersList() {
-				for (String selectedDroneIP : selectedMarkerDrones) {
-					MapMarkerDrone marker = (MapMarkerDrone)robotPositions.get(selectedDroneIP).peek();
-					marker.setSelected(false);
-				}
-
-				selectedMarkerDrones.clear();
-				repaint();
-			}
-
 		});
 
 		map().addMouseMotionListener(new MouseAdapter() {
@@ -320,6 +301,29 @@ public class MapPanel extends UpdatePanel {
 
 	}
 
+	private void selectDroneMarker(JTextArea selectedTextField, MapMarkerDrone m) {
+		m.setSelected(true);
+		selectedMarkerDrones.add(m.getName());
+		String[] split = m.getName().split("\\.");
+		String id = split[split.length - 1];
+		String rsl = selectedTextField.getText();
+
+		if(rsl.isEmpty())
+			selectedTextField.setText(id);
+		else
+			selectedTextField.setText(rsl + "," + id);
+	}
+
+	private synchronized void cleanSelectedMarkersList() {
+		for (String selectedDroneIP : selectedMarkerDrones) {
+			MapMarkerDrone marker = (MapMarkerDrone)robotPositions.get(selectedDroneIP).peek();
+			marker.setSelected(false);
+		}
+
+		selectedMarkerDrones.clear();
+		repaint();
+	}
+	
 	@Override
 	public void paint(Graphics g) {
 		super.paint(g);
@@ -376,13 +380,6 @@ public class MapPanel extends UpdatePanel {
 				map().setDisplayToFitMapMarkers();
 			}
 		});
-		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("H"), "H");
-		this.getActionMap().put("H", new AbstractAction(){  
-			protected static final long serialVersionUID = 1L;
-			public void actionPerformed(ActionEvent evt) {  
-				helpButton.doClick();
-			}
-		});
 		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("W"), "W");
 		this.getActionMap().put("W", new AbstractAction(){  
 			protected static final long serialVersionUID = 1L;
@@ -434,8 +431,76 @@ public class MapPanel extends UpdatePanel {
 				clearStatus();
 			}
 		});
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("1"), "1");
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("1"), "1");
+		this.getActionMap().put("1", new AbstractAction(){  
+			protected static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent evt) {  
+				selectDronesFromGroup(1);
+			}
+		});
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("control 1"), "control 1");
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("meta 1"), "control 1");
+		this.getActionMap().put("control 1", new AbstractAction(){  
+			protected static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent evt) {  
+				saveDronesGroup(1);
+			}
+		});
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("2"), "2");
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("2"), "2");
+		this.getActionMap().put("2", new AbstractAction(){  
+			protected static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent evt) {  
+				selectDronesFromGroup(2);
+			}
+		});
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("control 2"), "control 2");
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("meta 2"), "control 2");
+		this.getActionMap().put("control 2", new AbstractAction(){  
+			protected static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent evt) {  
+				saveDronesGroup(2);
+			}
+		});
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("3"), "3");
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("3"), "3");
+		this.getActionMap().put("3", new AbstractAction(){  
+			protected static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent evt) {
+				selectDronesFromGroup(3);
+			}
+		});
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("control 3"), "control 3");
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("meta 3"), "control 3");
+		this.getActionMap().put("control 3", new AbstractAction(){  
+			protected static final long serialVersionUID = 1L;
+			public void actionPerformed(ActionEvent evt) {  
+				saveDronesGroup(3);
+			}
+		});
 	}
 
+	private void saveDronesGroup(int id) {
+		LinkedList<String> group = groupsMap.get(id);
+		group.addAll(selectedMarkerDrones);
+		groupsMap.put(id, group);
+	}
+	
+	private synchronized void selectDronesFromGroup(int id) {
+		cleanSelectedMarkersList();
+		JTextArea selectedTextField = droneGUI.getCommandPanel().getSelectedDronesTextField();
+		selectedTextField.setText("");
+		
+		LinkedList<String> group = groupsMap.get(id);
+		
+		
+		for (String droneIP : group) {
+			MapMarkerDrone m = (MapMarkerDrone)robotPositions.get(droneIP).peek();
+			selectDroneMarker(selectedTextField, m);
+		}
+	}
+	
 	private MapMarkerDrone getClosestMarker(Vector2d clickPosition){
 		MapMarkerDrone closestMarker = null;
 		double closestDistance = 5;

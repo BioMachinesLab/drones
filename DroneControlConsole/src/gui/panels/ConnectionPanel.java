@@ -358,10 +358,9 @@ public class ConnectionPanel extends UpdatePanel {
 		return listModel;
 	}
 
-	class PingThread extends Thread {
-
-		private long timeBetweenPings = 1000 * 10; // 10 sec
-		private int pingTimeout = 1000;
+	class PingThread extends Thread {		
+		private long timeBetweenPings = 1000*10; //10 sec
+		private int pingTimeout = 2500;
 
 		@Override
 		public void run() {
@@ -370,10 +369,10 @@ public class ConnectionPanel extends UpdatePanel {
 					DroneIP droneIP = listModel.get(i);
 					if (droneIP.getStatus() != DroneStatus.RUNNING) {
 						try {
-							if (InetAddress.getByName(droneIP.getIp())
-									.isReachable(pingTimeout))
+							if(InetAddress.getByName(droneIP.getIp()).isReachable(pingTimeout)){
 								droneIP.setStatus(DroneStatus.DETECTED);
-							else
+								list.repaint();
+							}else
 								droneIP.setStatus(DroneStatus.NOT_RUNNING);
 						} catch (IOException e) {
 							// System.err.println(droneIP.getIp() + ": " +

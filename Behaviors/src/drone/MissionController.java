@@ -257,12 +257,13 @@ public class MissionController extends CIBehavior {
 		int count = 0;
 		
 		Vector2d vector = CoordinateUtilities.GPSToCartesian(latLon);
-		
-		for(Line l : getGeoFenceLines()) {
-			if(l.intersectsWithLineSegment(vector, new Vector2d(0,-Integer.MAX_VALUE)) != null)
+
+		for (Line l : getGeoFenceLines()) {
+			if (l.intersectsWithLineSegment(vector, new Vector2d(0,
+					-Integer.MAX_VALUE)) != null)
 				count++;
 		}
-		
+
 		return count % 2 != 0;
 	}
 	
