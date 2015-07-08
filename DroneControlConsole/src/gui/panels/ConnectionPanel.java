@@ -7,13 +7,16 @@ import gui.utils.SortedListModel;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -29,20 +32,21 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
+import main.DroneControlConsole;
+import main.RobotControlConsole;
+import threads.UpdateThread;
+
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
-import main.DroneControlConsole;
-import main.RobotControlConsole;
-import threads.UpdateThread;
-
 public class ConnectionPanel extends UpdatePanel {
 	private static final long serialVersionUID = -4874186493593218098L;
 	private static final String START_COMMAND = "killall screen run.sh; cd RaspberryController; screen -d -m -S controller ./run.sh;";
 	private static final String STOP_COMMAND = "screen -S controller -p 0 -X stuff \"q$(printf \\\\r)\"";
-
+	private static final String DRONE_HOME_FOLDER = "/home/pi/";
+	
 	private static final long SLEEP_TIME = 10 * 1000;
 	private static final long TIME_THRESHOLD = 10 * 1000;
 	private static final String CONNECTIONS_STRING = "Nº Connections: ";
@@ -53,6 +57,7 @@ public class ConnectionPanel extends UpdatePanel {
 	private JLabel currentConnection;
 	private RobotControlConsole console;
 	
+	private JButton disconnect;
 	private JLabel connectionCountLabel;
 	private int numberOfConnections = 0;
 	
@@ -70,6 +75,27 @@ public class ConnectionPanel extends UpdatePanel {
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		list.setLayoutOrientation(JList.VERTICAL);
 		list.setVisibleRowCount(-1);
+		
+		list.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					if(droneConnected){
+						disconnect.doClick();
+					
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e1) { }
+					}
+					
+					int index = list.getSelectedIndex();
+
+					if (index != -1) {
+						connect(listModel.get(index).getIp());
+					}
+				}
+			}
+		});
 		
 		list.setCellRenderer(new DefaultListCellRenderer(){
 			@Override
@@ -94,7 +120,6 @@ public class ConnectionPanel extends UpdatePanel {
 		});
 		
 		JScrollPane listScroller = new JScrollPane(list);
-		listScroller.setPreferredSize(new Dimension(120, 180));
 		add(listScroller);
 
 		try {
@@ -108,17 +133,14 @@ public class ConnectionPanel extends UpdatePanel {
 		pingThread.start();
 		
 		JButton connect = new JButton("Connect");
-		JButton disconnect = new JButton("Disconnect");
-		
 		connect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(droneConnected)
+				if(droneConnected){
 					disconnect.doClick();
 				
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e1) {
-					e1.printStackTrace();
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e1) { }
 				}
 				
 				int index = list.getSelectedIndex();
@@ -129,6 +151,7 @@ public class ConnectionPanel extends UpdatePanel {
 			}
 		});
 
+		disconnect = new JButton("Disconnect");
 		disconnect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				disconnect();
@@ -173,14 +196,14 @@ public class ConnectionPanel extends UpdatePanel {
 				}
 			}
 		});
-		
+				
 		currentConnection = new JLabel("");
 		currentConnection.setHorizontalAlignment(JLabel.CENTER);
 
 		connectionCountLabel = new JLabel(CONNECTIONS_STRING + numberOfConnections);
 		connectionCountLabel.setHorizontalAlignment(0);
 		
-		JPanel buttonsPanel = new JPanel(new GridLayout(6, 1));
+		JPanel buttonsPanel = new JPanel(new GridLayout(7, 1));
 		buttonsPanel.add(connect);
 		buttonsPanel.add(disconnect);
 		buttonsPanel.add(startController);
@@ -326,6 +349,36 @@ public class ConnectionPanel extends UpdatePanel {
 		}
 	}
 
+	private void executeShellCommand(String[] pCommand, boolean showOutput){
+		try {
+			Runtime run = Runtime.getRuntime();
+			Process pr = run.exec(pCommand);
+			pr.waitFor();
+			
+			if(showOutput){
+				BufferedReader stdInput = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+
+				BufferedReader stdError = new BufferedReader(new InputStreamReader(pr.getErrorStream()));
+
+				// read the output from the command
+				System.out.println("Here is the standard output of the command:");
+				String s = null;
+				while ((s = stdInput.readLine()) != null)
+					System.out.println(s);
+
+				System.out.println("\n");
+				// read any errors from the attempted command
+				System.out.println("Here is the standard error of the command (if any):");
+				while ((s = stdError.readLine()) != null)
+					System.out.println(s);
+			}
+			
+		} catch (IOException | InterruptedException e) {
+			System.out.println("Something went wrong when executing command in the commnad line");
+			e.printStackTrace();
+		}
+	}
+	
 	public void setDroneConnected(boolean droneConnected) {
 		this.droneConnected = droneConnected;
 	}

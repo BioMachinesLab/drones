@@ -2,6 +2,7 @@ package gui.panels.map;
 
 import gui.DroneGUI;
 import gui.panels.UpdatePanel;
+import gui.utils.SortedListModel;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -54,7 +55,6 @@ import org.openstreetmap.gui.jmapviewer.tilesources.MapQuestOsmTileSource;
 import org.openstreetmap.gui.jmapviewer.tilesources.OsmTileSource;
 
 import threads.UpdateThread;
-
 import commoninterface.entities.Entity;
 import commoninterface.entities.GeoEntity;
 import commoninterface.entities.GeoFence;
@@ -241,9 +241,12 @@ public class MapPanel extends UpdatePanel {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				if(status.equals(MapStatus.NONE) && e.getButton() == MouseEvent.BUTTON1){
+					JTextArea selectedTextField = droneGUI.getCommandPanel().getSelectedDronesTextField();
 					
-					if(e.getModifiersEx() != SHIFT_IDENTIFIER)
+					if(e.getModifiersEx() != SHIFT_IDENTIFIER){
 						cleanSelectedMarkersList();
+						selectedTextField.setText("");
+					}
 
 					if(dragBoxStart != null && dragBoxEnd != null){
 						Coordinate mapStartPosition = map().getPosition(dragBoxStart);
@@ -256,13 +259,10 @@ public class MapPanel extends UpdatePanel {
 
 						ArrayList<MapMarkerDrone> selectedMarkers = getMarkersBetween(min, max);
 						if(droneGUI != null) {
-							JTextArea selectedTextField = droneGUI.getCommandPanel().getSelectedDronesTextField();
-
-							if(selectedMarkers.isEmpty())
-								selectedTextField.setText("");
-							else{
-								for (MapMarkerDrone m : selectedMarkers) 
-									selectDroneMarker(selectedTextField, m);
+							if(!selectedMarkers.isEmpty()) {
+								for (MapMarkerDrone m : selectedMarkers) {
+										selectDroneMarker(selectedTextField, m);
+								}
 							}
 						}
 
@@ -306,12 +306,27 @@ public class MapPanel extends UpdatePanel {
 		selectedMarkerDrones.add(m.getName());
 		String[] split = m.getName().split("\\.");
 		String id = split[split.length - 1];
+		
+		if(Integer.valueOf(id) > 99){
+			SortedListModel listModel = droneGUI.getConnectionPanel().getListModel();
+			
+			for (int i = 0; i < listModel.getSize(); i++) {
+				String[] tmp = listModel.get(i).getIp().split("\\.");
+				String newID = tmp[tmp.length-1];
+				
+				if(Integer.valueOf(newID) > 99)
+					id = newID;
+			}
+		}
+		
 		String rsl = selectedTextField.getText();
-
-		if(rsl.isEmpty())
-			selectedTextField.setText(id);
-		else
-			selectedTextField.setText(rsl + "," + id);
+		if(!selectedTextField.getText().contains(id)){
+			if(rsl.isEmpty())
+				selectedTextField.setText(id);
+			else
+				selectedTextField.setText(rsl + "," + id);
+		}
+		
 	}
 
 	private synchronized void cleanSelectedMarkersList() {
@@ -494,13 +509,32 @@ public class MapPanel extends UpdatePanel {
 		
 		LinkedList<String> group = groupsMap.get(id);
 		
-		
 		for (String droneIP : group) {
 			MapMarkerDrone m = (MapMarkerDrone)robotPositions.get(droneIP).peek();
-			selectDroneMarker(selectedTextField, m);
+			if(isDroneConnected(m.getName()) || isVirtualDrone(m.getName()))
+				selectDroneMarker(selectedTextField, m);
 		}
 	}
 	
+	private boolean isDroneConnected(String ip) {
+		SortedListModel listModel = droneGUI.getConnectionPanel().getListModel();
+		
+		for (int i = 0; i < listModel.getSize(); i++) {
+			if(listModel.get(i).getIp().equals(ip))
+				return true;
+		}
+		
+		return false;
+	}
+
+	private boolean isVirtualDrone(String ip) {
+		String[] split = ip.split("\\.");
+		if(Integer.valueOf(split[split.length-1]) > 99)
+			return true;
+		else
+			return false;
+	}
+
 	private MapMarkerDrone getClosestMarker(Vector2d clickPosition){
 		MapMarkerDrone closestMarker = null;
 		double closestDistance = 5;
