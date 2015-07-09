@@ -30,15 +30,16 @@ public class FileLogger extends Thread implements RobotLogger {
 	
 	private String fileName = "";
 	private RealAquaticDroneCI drone;
-	private String extraLog = "";
 	private DateTimeFormatter fileFormatter = DateTimeFormat.forPattern("dd-MM-YY_HH-mm-ss");
 	private DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("dd-MM-YY_HH:mm:ss.SS");
 	private DateTimeFormatter hourFormatter = DateTimeFormat.forPattern("HH:mm:ss.SS");
+	
 	private int logs = 0;
-	
-	
+	private String ipAddr;
+
 	public FileLogger(RealAquaticDroneCI drone) {
 		this.drone = drone;
+		ipAddr = drone.getNetworkAddress();
 	}
 	
 	public BufferedWriter setupWriter() throws IOException {
@@ -57,59 +58,48 @@ public class FileLogger extends Thread implements RobotLogger {
 	
 	@Override
 	public void run() {
-		
 		BufferedWriter bw = null;
 		
 		try {
-		
 			bw = setupWriter();
-			logMessage("IP "+drone.getNetworkAddress());
 			
 			while(true) {
-				
 				logs++;
 				
 				if(logs > TOTAL_LOGS) {
 					bw.close();
 					bw = setupWriter();
-					logMessage("IP "+drone.getNetworkAddress());
 					logs = 0;
 				}
 				
-				try {
-					
-					if(!extraLog.isEmpty()) {
-						bw.write(extraLog);
-						extraLog = "";
-					}
-					
-					String l = getLogString();
-
-					bw.write(l);
+				try {					
+					String logLine = getLogString();
+					bw.write(logLine);
 					bw.flush();
 				} catch(Exception e) {
 					e.printStackTrace();
-					//ignore :)
+					// ignore :)
 				}
+				
 				Thread.sleep(SLEEP_TIME);
 			}
-			
-		} catch(InterruptedException e) {
-			//this will happen when the program exits
-		} catch(Exception e) {
+
+		} catch (InterruptedException e) {
+			// this will happen when the program exits
+		} catch (Exception e) {
 			e.printStackTrace();
-		} finally { 
+		} finally {
 			try {
-			if(bw != null)
-				bw.close();
-			}catch(Exception e) {
+				if (bw != null)
+					bw.close();
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
 	
 	private String getLogString() {
-		
+		// TODO -> Convert to use the LogCodex
 		List<ControllerInput> inputs = drone.getIOManager().getInputs();
 		List<ControllerOutput> outputs = drone.getIOManager().getOutputs();
 		
@@ -170,15 +160,5 @@ public class FileLogger extends Thread implements RobotLogger {
 	@Override
 	public void stopLogging() {
 		interrupt();
-	}
-
-	@Override
-	public void logMessage(String string) {
-		this.extraLog+= "#"+string+"\n";
-	}
-
-	@Override
-	public void logError(String string) {
-		this.extraLog+="ERROR: "+string;
 	}
 }

@@ -1,10 +1,9 @@
-package commoninterface.utils;
+package commoninterface.utils.logger;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
 
-import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -17,28 +16,19 @@ import commoninterface.utils.jcoord.LatLon;
 
 public class LogCodex {
 	public enum LogType {
-		LOGDATA("FULL"), IP("IP"), ENTITIES("ENTITIES");
-
-		private String str;
-
-		private LogType(String str) {
-			this.str = str;
-		}
-
-		public String getValue() {
-			return str;
-		}
+		LOGDATA, ENTITIES, ERROR;
 	}
-	
+
 	// Delimiters and Log Separators
 	public static final String MAIN_SEPARATOR = "\t";
 	public static final String ARRAY_SEPARATOR = ";";
 	public static final String LINE_SEPARATOR = "\n";
-	public static final String LOG_TYPE="LT=";
+	public static final String COMMENT_CHAR = "#";
+	public static final String LOG_TYPE = "LT=";
 
-	public static final String COMMENT_SEP = "CM=";
-	public static final String COMMENT_DELIMITATOR = "\"";
-	public static final String COMMENT_ESCAPE = "\\" + COMMENT_DELIMITATOR;
+	public static final String SENTENCE_SEP = "SN=";
+	public static final String SENTENCE_DELIMITATOR = "\"";
+	public static final String SENTENCE_ESCAPE = "\\" + SENTENCE_DELIMITATOR;
 
 	// Drone information Separators
 	public static final String LAT_LON_SEP = "LL=";
@@ -66,16 +56,18 @@ public class LogCodex {
 
 		switch (type) {
 		case LOGDATA:
-			data += LOG_TYPE + LogType.LOGDATA.getValue() + MAIN_SEPARATOR;
+			data += LOG_TYPE + LogType.LOGDATA + MAIN_SEPARATOR;
 			data += encodeLogData((LogData) object);
 			break;
+			
 		case ENTITIES:
-			data += LOG_TYPE + LogType.ENTITIES.getValue() + MAIN_SEPARATOR;
+			data += LOG_TYPE + LogType.ENTITIES + MAIN_SEPARATOR;
 			data += encodeEntities((ArrayList<Entity>) object);
 			break;
-		case IP:
-			data += LOG_TYPE + LogType.IP.getValue() + MAIN_SEPARATOR;
-			data += IP_ADDR_SEP + object;
+
+		case ERROR:
+			data += LOG_TYPE + LogType.ERROR + MAIN_SEPARATOR;
+			data += SENTENCE_SEP + escapeComment((String) object);
 			break;
 		}
 
@@ -83,16 +75,110 @@ public class LogCodex {
 		return data;
 	}
 
-	public static LogData decodeLog(String logLine) {
-		LogData logData = new LogData();
-
+	public static DecodedLogData decodeLog(String logLine) {		
 		String[] infoBlocks = logLine.split(MAIN_SEPARATOR);
+		DecodedLogData decodedLogData = null;
 
+		if (infoBlocks[0].substring(0, 3).equals(LOG_TYPE)) {
+			LogType logType = LogType.valueOf(infoBlocks[0].substring(3, infoBlocks[0].length()));
+
+			switch (logType) {
+			case ENTITIES:
+				// TODO
+				break;
+
+			case LOGDATA:
+				String[] blocks = new String[infoBlocks.length - 1];
+
+				for (int i = 0; i < blocks.length; i++) {
+					blocks[i] = infoBlocks[i + 1];
+				}
+
+				LogData logData = decodeLogData(blocks);
+				decodedLogData = new DecodedLogData(LogType.LOGDATA, logData);
+				break;
+			case ERROR:
+				if(infoBlocks[1].substring(0, 3).equals(SENTENCE_SEP)){
+					String decodedSentence = unescapeComment(infoBlocks[1].substring(3, infoBlocks[1].length()));
+					decodedLogData=new DecodedLogData(LogType.ERROR, decodedSentence);
+				}
+				break;
+			}
+			
+			
+			return decodedLogData;
+		}else{
+			return null;
+		}
+	}
+	
+	// Decoders
+	private void decodeEntities(String line, ArrayList<Entity> entities) {
+		Scanner s = new Scanner(line);
+		s.next();// ignore first token
+
+		String event = s.next();
+
+		if (event.equals("added")) {
+
+			String className = s.next();
+
+			String name = s.next();
+
+			if (className.equals(GeoFence.class.getSimpleName())) {
+
+				GeoFence fence = new GeoFence(name);
+
+				int number = s.nextInt();
+
+				for (int i = 0; i < number; i++) {
+					double lat = s.nextDouble();
+					double lon = s.nextDouble();
+					fence.addWaypoint(new LatLon(lat, lon));
+				}
+				entities.add(fence);
+			} else if (className.equals(Waypoint.class.getSimpleName())) {
+
+				double lat = s.nextDouble();
+				double lon = s.nextDouble();
+				Waypoint wp = new Waypoint(name, new LatLon(lat, lon));
+				entities.remove(wp);
+				entities.add(wp);
+
+			} else if (className.equals(ObstacleLocation.class.getSimpleName())) {
+
+				double lat = s.nextDouble();
+				double lon = s.nextDouble();
+
+				double radius = s.nextDouble();
+				entities.add(new ObstacleLocation(name, new LatLon(lat, lon),
+						radius));
+			}
+
+		} else if (event.equals("removed")) {
+
+			String name = s.next();
+
+			Iterator<Entity> i = entities.iterator();
+			while (i.hasNext()) {
+				if (i.next().getName().equals(name)) {
+					i.remove();
+					break;
+				}
+			}
+		}
+
+		s.close();
+	}
+
+	private static LogData decodeLogData(String[] infoBlocks){
+		LogData logData = new LogData();
+		
 		for (int i = 0; i < infoBlocks.length; i++) {
 			String information = infoBlocks[i].substring(3, infoBlocks[i].length());
 
 			switch (infoBlocks[i].substring(0, 3)) {
-			case COMMENT_SEP:
+			case SENTENCE_SEP:
 				logData.comment = unescapeComment(information);
 				break;
 
@@ -158,8 +244,7 @@ public class LogCodex {
 				logData.inputNeuronStates = new double[neuralInputs.length];
 
 				for (int j = 0; j < neuralInputs.length; j++) {
-					logData.inputNeuronStates[j] = Double
-							.parseDouble(neuralInputs[j]);
+					logData.inputNeuronStates[j] = Double.parseDouble(neuralInputs[j]);
 				}
 				break;
 
@@ -168,13 +253,8 @@ public class LogCodex {
 				logData.outputNeuronStates = new double[neuralOutputs.length];
 
 				for (int j = 0; j < neuralOutputs.length; j++) {
-					logData.outputNeuronStates[j] = Double
-							.parseDouble(neuralOutputs[j]);
+					logData.outputNeuronStates[j] = Double.parseDouble(neuralOutputs[j]);
 				}
-				break;
-
-			case ENTITY_SEP:
-				// TODO
 				break;
 
 			default:
@@ -182,83 +262,23 @@ public class LogCodex {
 				break;
 			}
 		}
-
+		
 		return logData;
 	}
 	
-
-	// Decoders
-	private void decodeEntities(String line, ArrayList<Entity> entities) {
-		Scanner s = new Scanner(line);
-		s.next();// ignore first token
-
-		String event = s.next();
-
-		if (event.equals("added")) {
-
-			String className = s.next();
-
-			String name = s.next();
-
-			if (className.equals(GeoFence.class.getSimpleName())) {
-
-				GeoFence fence = new GeoFence(name);
-
-				int number = s.nextInt();
-
-				for (int i = 0; i < number; i++) {
-					double lat = s.nextDouble();
-					double lon = s.nextDouble();
-					fence.addWaypoint(new LatLon(lat, lon));
-				}
-				entities.add(fence);
-			} else if (className.equals(Waypoint.class.getSimpleName())) {
-
-				double lat = s.nextDouble();
-				double lon = s.nextDouble();
-				Waypoint wp = new Waypoint(name, new LatLon(lat, lon));
-				entities.remove(wp);
-				entities.add(wp);
-
-			} else if (className.equals(ObstacleLocation.class.getSimpleName())) {
-
-				double lat = s.nextDouble();
-				double lon = s.nextDouble();
-
-				double radius = s.nextDouble();
-				entities.add(new ObstacleLocation(name, new LatLon(lat, lon),
-						radius));
-			}
-
-		} else if (event.equals("removed")) {
-
-			String name = s.next();
-
-			Iterator<Entity> i = entities.iterator();
-			while (i.hasNext()) {
-				if (i.next().getName().equals(name)) {
-					i.remove();
-					break;
-				}
-			}
-		}
-
-		s.close();
-	}
-
 	// Coders
 	private static String escapeComment(String str) {
-		if (str.contains(COMMENT_DELIMITATOR)) {
-			str=str.replace(COMMENT_DELIMITATOR, COMMENT_ESCAPE);
+		if (str.contains(SENTENCE_DELIMITATOR)) {
+			str=str.replace(SENTENCE_DELIMITATOR, SENTENCE_ESCAPE);
 		}
 		
-		return COMMENT_DELIMITATOR+str+COMMENT_DELIMITATOR;
+		return SENTENCE_DELIMITATOR+str+SENTENCE_DELIMITATOR;
 	}
 	
 	private static String unescapeComment(String str) {
 		if (str != null && str.length() > 0) {
-			if (str.contains(COMMENT_ESCAPE)) {
-				str = str.replace(COMMENT_ESCAPE, COMMENT_DELIMITATOR);
+			if (str.contains(SENTENCE_ESCAPE)) {
+				str = str.replace(SENTENCE_ESCAPE, SENTENCE_DELIMITATOR);
 			}
 
 			if (str.length() <= 2) {
@@ -331,7 +351,7 @@ public class LogCodex {
 			data += MAIN_SEPARATOR;
 		}
 				
-		data += (logData.comment != null) ? COMMENT_SEP + escapeComment(logData.comment) : "";
+		data += (logData.comment != null) ? SENTENCE_SEP + escapeComment(logData.comment) : "";
 		
 		return data;
 	}
@@ -344,36 +364,22 @@ public class LogCodex {
 		return data;
 	}
 	
-	// Data
-	public static class LogData implements Comparable<LogData> {
-		public String file = null;
-		public int timestep = -1;
-		public String comment = null;
-		public AquaticDroneCI.DroneType droneType = null;
+	// Data Classes
+	public static class DecodedLogData {
+		LogType payloadType;
+		Object payload;
 
-		// System informations
-		public String systemTime = null;
-		public String ip = null;
-
-		// Inputs/ Telemetry
-		public LatLon latLon = null;
-		public double GPSorientation = -1;
-		public double GPSspeed = -1;
-		public DateTime GPSdate = null;
-		public double compassOrientation = -1;
-		public double[] temperatures = null;
-
-		// Outputs
-		public double[] motorSpeeds = null;
-
-		// Controller
-		public ArrayList<Entity> entities = null;
-		public double[] inputNeuronStates = null;
-		public double[] outputNeuronStates = null;
-
-		@Override
-		public int compareTo(LogData o) {
-			return GPSdate.compareTo(o.GPSdate);
+		public DecodedLogData(LogType payloadType, Object payload) {
+			this.payload = payload;
+			this.payloadType = payloadType;
+		}
+		
+		public Object getPayload() {
+			return payload;
+		}
+		
+		public LogType payloadType() {
+			return payloadType;
 		}
 	}
 }

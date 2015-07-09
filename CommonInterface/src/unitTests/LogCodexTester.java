@@ -1,19 +1,22 @@
-package testclasses;
+package unitTests;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.joda.time.DateTime;
 import org.junit.Test;
 
 import commoninterface.AquaticDroneCI;
-import commoninterface.utils.LogCodex;
-import commoninterface.utils.LogCodex.LogType;
 import commoninterface.utils.jcoord.LatLon;
+import commoninterface.utils.logger.LogCodex;
+import commoninterface.utils.logger.LogCodex.LogType;
+import commoninterface.utils.logger.LogData;
 
 public class LogCodexTester {
 	// Constants to be used
 	private final int TIMESTEP = 10;
-	private final String COMMENT = "Tes\"te";
+	private final String SENTENCE = "This is a tes\"t";
 	private final AquaticDroneCI.DroneType DRONE_TYPE = AquaticDroneCI.DroneType.DRONE;
 
 	private final String SYS_TIME = Integer.toString(9999);
@@ -33,7 +36,7 @@ public class LogCodexTester {
 
 	// Expected Results
 	private final String expectedLogDataString = 
-			  LogCodex.LOG_TYPE+ LogCodex.LogType.LOGDATA.getValue()
+			  LogCodex.LOG_TYPE + LogCodex.LogType.LOGDATA
 			+ LogCodex.MAIN_SEPARATOR + LogCodex.IP_ADDR_SEP + IP_ADDR
 			+ LogCodex.MAIN_SEPARATOR + LogCodex.TIMESTEP_SEP + TIMESTEP
 			+ LogCodex.MAIN_SEPARATOR + LogCodex.DRONE_TYPE_SEP + DRONE_TYPE
@@ -51,22 +54,23 @@ public class LogCodexTester {
 				+ INPUT_NN[0] + LogCodex.ARRAY_SEPARATOR + INPUT_NN[1] + LogCodex.ARRAY_SEPARATOR + INPUT_NN[2] + LogCodex.ARRAY_SEPARATOR + INPUT_NN[3]
 			+ LogCodex.MAIN_SEPARATOR + LogCodex.NEURAL_NET_OUT_SEP 
 				+ OUTPUT_NN[0] + LogCodex.ARRAY_SEPARATOR + OUTPUT_NN[1] + LogCodex.ARRAY_SEPARATOR + OUTPUT_NN[2] + LogCodex.ARRAY_SEPARATOR + OUTPUT_NN[3]
-			+ LogCodex.MAIN_SEPARATOR + LogCodex.COMMENT_SEP
-				+ LogCodex.COMMENT_DELIMITATOR + COMMENT.replace(LogCodex.COMMENT_DELIMITATOR, LogCodex.COMMENT_ESCAPE) + LogCodex.COMMENT_DELIMITATOR 
+			+ LogCodex.MAIN_SEPARATOR + LogCodex.SENTENCE_SEP
+				+ LogCodex.SENTENCE_DELIMITATOR + SENTENCE.replace(LogCodex.SENTENCE_DELIMITATOR, LogCodex.SENTENCE_ESCAPE) + LogCodex.SENTENCE_DELIMITATOR 
 			+ LogCodex.LINE_SEPARATOR;
 
-	private final String expectedIpString = 
-			  LogCodex.LOG_TYPE+ LogCodex.LogType.IP.getValue()
-			+ LogCodex.MAIN_SEPARATOR + LogCodex.IP_ADDR_SEP + IP_ADDR 
+	private final String expectedErrorLogString = 
+				LogCodex.LOG_TYPE + LogCodex.LogType.ERROR 
+			+ LogCodex.MAIN_SEPARATOR + LogCodex.SENTENCE_SEP
+			+ LogCodex.SENTENCE_DELIMITATOR + SENTENCE.replace(LogCodex.SENTENCE_DELIMITATOR, LogCodex.SENTENCE_ESCAPE) + LogCodex.SENTENCE_DELIMITATOR 
 			+ LogCodex.LINE_SEPARATOR;
-
+	
 	@Test
 	public void TestCodex() {
-		LogCodex.LogData codedData = new LogCodex.LogData();
+		LogData codedData = new LogData();
 
 		// Set data
 		codedData.timestep = TIMESTEP;
-		codedData.comment = COMMENT;
+		codedData.comment = SENTENCE;
 		codedData.droneType = DRONE_TYPE;
 
 		codedData.systemTime = SYS_TIME;
@@ -86,18 +90,34 @@ public class LogCodexTester {
 		codedData.outputNeuronStates = OUTPUT_NN;
 
 		// Test coding
-		String str1 = LogCodex.encodeLog(LogType.LOGDATA, codedData);
-		assertEquals(expectedLogDataString, str1);
-
-		String str2 = LogCodex.encodeLog(LogType.IP, IP_ADDR);
-		assertEquals(expectedIpString, str2);
+		String logStr = LogCodex.encodeLog(LogType.LOGDATA, codedData);
+		assertEquals(expectedLogDataString, logStr);
+		
+		String errStr = LogCodex.encodeLog(LogType.ERROR, SENTENCE);
+		assertEquals(expectedErrorLogString, errStr);
 
 		// Decode
-		// LoggerCodex.LogData fullDecodedData = LoggerCodex.decodeLog(str1);
-		// assertEquals(codedData, fullDecodedData);
-		//
-		// LoggerCodex.LogData ipDecoded = LoggerCodex.decodeLog(str2);
-		// assertEquals(expected, ipDecoded);
+		LogCodex.DecodedLogData logDataDecoded = LogCodex.decodeLog(logStr);
+		LogData fullDecodedLogData = ((LogData) logDataDecoded.getPayload());
+		assertEquals(LogType.LOGDATA, logDataDecoded.payloadType());
+		assertEquals(TIMESTEP, fullDecodedLogData.timestep);
+		assertEquals(SENTENCE, fullDecodedLogData.comment);
+		assertEquals(DRONE_TYPE, fullDecodedLogData.droneType);
+		assertEquals(SYS_TIME, fullDecodedLogData.systemTime);
+		assertEquals(IP_ADDR, fullDecodedLogData.ip);
+		assertEquals(LATLON, fullDecodedLogData.latLon);
+		assertTrue(GPS_ORIENT == fullDecodedLogData.GPSorientation);
+		assertTrue(GND_SPEED == fullDecodedLogData.GPSspeed);
+		assertEquals(GPS_DATE, fullDecodedLogData.GPSdate);
+		assertTrue(COMP_ORIENT == fullDecodedLogData.compassOrientation);
+		assertArrayEquals(TEMPS, fullDecodedLogData.temperatures, 0);
+		assertArrayEquals(MOT_SPEEDS, fullDecodedLogData.motorSpeeds, 0);
+		assertArrayEquals(INPUT_NN, fullDecodedLogData.inputNeuronStates, 0);
+		assertArrayEquals(OUTPUT_NN, fullDecodedLogData.outputNeuronStates, 0);
 
+		LogCodex.DecodedLogData errMsgDecoded = LogCodex.decodeLog(errStr);
+		String fullDecodedErrMsg = ((String) errMsgDecoded.getPayload());
+		assertEquals(LogType.ERROR, errMsgDecoded.payloadType());
+		assertEquals(SENTENCE, fullDecodedErrMsg);
 	}
 }
