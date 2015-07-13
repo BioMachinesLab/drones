@@ -69,7 +69,9 @@ public class DroneControlConsole extends RobotControlConsole {
 				.getCommandPanel()));
 		updateThreads.add(new NetworkActivationsUpdateThread(this, gui
 				.getNeuralActivationsPanel(), MessageType.NEURAL_ACTIVATIONS));
-
+		updateThreads.add(new UpdateThread(this, ((DroneGUI)gui).getTemperaturesPanel(),
+				MessageType.TEMPERATURE));
+		
 		for (UpdateThread t : updateThreads)
 			t.start();
 

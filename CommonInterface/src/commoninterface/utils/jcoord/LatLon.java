@@ -360,4 +360,13 @@ public class LatLon implements Serializable {
   public double getLon() {
     return lng;
   }
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof LatLon) {
+			return ((LatLon) obj).lat == lat && ((LatLon) obj).lng == lng;
+		} else {
+			return false;
+		}
+	}
 }

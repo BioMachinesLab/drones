@@ -1,6 +1,7 @@
 package network.broadcast;
 
 import gui.DroneGUI;
+import gui.panels.LogsPanel;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -13,7 +14,6 @@ import main.DroneControlConsole;
 import main.RobotControlConsole;
 import network.server.shared.dataObjects.DroneData;
 import network.server.shared.dataObjects.DronesSet;
-
 import commoninterface.entities.Entity;
 import commoninterface.entities.RobotLocation;
 import commoninterface.network.NetworkUtils;
@@ -162,8 +162,7 @@ public class ConsoleBroadcastHandler {
 
 	}
 
-	private void updateDroneData(String address, String name, String msgType,
-			Object obj) {
+	private void updateDroneData(String address, String name, String msgType, Object obj) {
 		if (console instanceof DroneControlConsole) {
 			try {
 				DronesSet dronesSet = ((DroneControlConsole) console)
@@ -238,6 +237,13 @@ public class ConsoleBroadcastHandler {
 					// if(!packet.getAddress().getHostAddress().equals(ownAddress))
 					messageReceived(packet.getAddress().getHostAddress(),
 							message);
+					
+					if(console.getGUI() instanceof DroneGUI){
+						LogsPanel logsPanel = ((DroneGUI)console.getGUI()).getLogsPanel();
+						
+						if(logsPanel.getLoggerCheckBox().isSelected())
+							logsPanel.getBroadcastLogger().log(message);
+					}
 				}
 
 			} catch (Exception e) {

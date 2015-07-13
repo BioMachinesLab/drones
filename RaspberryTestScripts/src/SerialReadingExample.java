@@ -1,9 +1,14 @@
 import java.io.IOException;
 
+import com.pi4j.io.serial.Baud;
+import com.pi4j.io.serial.DataBits;
+import com.pi4j.io.serial.FlowControl;
+import com.pi4j.io.serial.Parity;
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialDataEvent;
 import com.pi4j.io.serial.SerialDataEventListener;
 import com.pi4j.io.serial.SerialFactory;
+import com.pi4j.io.serial.StopBits;
 
 /**
  * This example code demonstrates how to perform serial communications using the
@@ -12,8 +17,6 @@ import com.pi4j.io.serial.SerialFactory;
  * @author Robert Savage
  */
 public class SerialReadingExample {
-	private static boolean printed = false;
-
 	public static void main(String args[]) throws InterruptedException {
 
 		// !! ATTENTION !!
@@ -27,7 +30,7 @@ public class SerialReadingExample {
 
 		System.out
 				.println("<--Pi4J--> Serial Communication Example ... started.");
-		System.out.println(" ... connect using settings: 9600, N, 8, 1.");
+		System.out.println(" ... connect using settings: 38400, 8, N, 1.");
 		System.out
 				.println(" ... data received on serial port should be displayed below.");
 
@@ -36,26 +39,27 @@ public class SerialReadingExample {
 
 		// create and register the serial data listener
 		serial.addListener(new SerialDataEventListener() {
-
 			@Override
 			public void dataReceived(SerialDataEvent event) {
 				try {
-					// print out the data received to the console
-					if (!printed) {
-						System.out.print(event.getAsciiString());
-						printed = true;
-					}
+					System.out.print("[ASCII DATA] " + event.getAsciiString());
 				} catch (IOException e) {
-					System.err
-							.println("Error while reading the serial stream as ASCII String ("
-									+ e.getMessage() + ")");
+					e.printStackTrace();
 				}
 			}
 		});
 
 		try {
 			// open the default serial port provided on the GPIO header
-			serial.open(Serial.DEFAULT_COM_PORT, 9600);
+			serial.open(Serial.DEFAULT_COM_PORT, Baud._9600, DataBits._8,
+					Parity.NONE, StopBits._1, FlowControl.NONE);
+
+			// continuous loop to keep the program running until the user
+			// terminates the program
+			while (true) {
+				// wait 1 second before continuing
+				Thread.sleep(1000);
+			}
 
 		} catch (IOException ex) {
 			System.out

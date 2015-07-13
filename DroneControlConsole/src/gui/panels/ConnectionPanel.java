@@ -7,13 +7,16 @@ import gui.utils.SortedListModel;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -25,27 +28,29 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+
+import main.DroneControlConsole;
+import main.RobotControlConsole;
+import threads.UpdateThread;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
-import main.DroneControlConsole;
-import main.RobotControlConsole;
-import threads.UpdateThread;
-
 public class ConnectionPanel extends UpdatePanel {
 	private static final long serialVersionUID = -4874186493593218098L;
 	private static final String START_COMMAND = "killall screen run.sh; cd RaspberryController; screen -d -m -S controller ./run.sh;";
 	private static final String STOP_COMMAND = "screen -S controller -p 0 -X stuff \"q$(printf \\\\r)\"";
-
+	private static final String DRONE_HOME_FOLDER = "/home/pi/";
+	
 	private static final long SLEEP_TIME = 10 * 1000;
 	private static final long TIME_THRESHOLD = 10 * 1000;
-	private static final String CONNECTIONS_STRING = "Nº Connections: ";
+	private static final String CONNECTIONS_STRING = "N Connections: ";
 
 	private JList<DroneIP> list;
 	private SortedListModel listModel = new SortedListModel();
@@ -53,6 +58,7 @@ public class ConnectionPanel extends UpdatePanel {
 	private JLabel currentConnection;
 	private RobotControlConsole console;
 	
+	private JButton disconnect;
 	private JLabel connectionCountLabel;
 	private int numberOfConnections = 0;
 	
@@ -71,10 +77,34 @@ public class ConnectionPanel extends UpdatePanel {
 		list.setLayoutOrientation(JList.VERTICAL);
 		list.setVisibleRowCount(-1);
 		
+		list.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					if(droneConnected){
+						disconnect.doClick();
+					
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e1) { }
+					}
+					
+					int index = list.getSelectedIndex();
+
+					if (index != -1) {
+						connect(listModel.get(index).getIp());
+					}
+				}
+			}
+		});
+		
 		list.setCellRenderer(new DefaultListCellRenderer(){
 			@Override
 			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 				Component c = super.getListCellRendererComponent(list, value, index, isSelected,cellHasFocus);
+				
+				if(isSelected)
+					c.setBackground(Color.LIGHT_GRAY);
 				
 				if(value instanceof DroneIP){
 					DroneIP droneIP = (DroneIP)value;
@@ -91,7 +121,6 @@ public class ConnectionPanel extends UpdatePanel {
 		});
 		
 		JScrollPane listScroller = new JScrollPane(list);
-		listScroller.setPreferredSize(new Dimension(120, 180));
 		add(listScroller);
 
 		try {
@@ -105,12 +134,15 @@ public class ConnectionPanel extends UpdatePanel {
 		pingThread.start();
 		
 		JButton connect = new JButton("Connect");
-		JButton disconnect = new JButton("Disconnect");
-		
 		connect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(droneConnected)
+				if(droneConnected){
 					disconnect.doClick();
+				
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e1) { }
+				}
 				
 				int index = list.getSelectedIndex();
 
@@ -120,6 +152,7 @@ public class ConnectionPanel extends UpdatePanel {
 			}
 		});
 
+		disconnect = new JButton("Disconnect");
 		disconnect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				disconnect();
@@ -165,17 +198,47 @@ public class ConnectionPanel extends UpdatePanel {
 			}
 		});
 		
+		JButton uploadCodeButton = new JButton("Upload Code");
+		uploadCodeButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int index = list.getSelectedIndex();
+
+				if (index != -1) {
+					DroneIP droneIP = listModel.get(index);
+					
+					switch (droneIP.getStatus()) {
+					case RUNNING:
+						JOptionPane.showMessageDialog(null, "Disconnect from drone " + droneIP.getIp() + " before upload new code");
+						break;
+					case DETECTED:
+						uploadCode(droneIP.getIp(), false);
+						break;
+					case NOT_RUNNING:
+						JOptionPane.showMessageDialog(null, "Couldn't reach drone " + droneIP.getIp());
+						break;
+					default:
+						System.err.println("Unknown status: " + droneIP.getStatus());
+						break;
+					}
+					
+				}
+				
+			}
+		});
+		
 		currentConnection = new JLabel("");
 		currentConnection.setHorizontalAlignment(JLabel.CENTER);
 
 		connectionCountLabel = new JLabel(CONNECTIONS_STRING + numberOfConnections);
 		connectionCountLabel.setHorizontalAlignment(0);
 		
-		JPanel buttonsPanel = new JPanel(new GridLayout(6, 1));
+		JPanel buttonsPanel = new JPanel(new GridLayout(7, 1));
 		buttonsPanel.add(connect);
 		buttonsPanel.add(disconnect);
 		buttonsPanel.add(startController);
 		buttonsPanel.add(stopController);
+		buttonsPanel.add(uploadCodeButton);
 //		buttonsPanel.add(connectTo);
 		buttonsPanel.add(connectionCountLabel);
 		buttonsPanel.add(currentConnection);
@@ -186,9 +249,11 @@ public class ConnectionPanel extends UpdatePanel {
 	private void importIpsFromFile() throws FileNotFoundException {
 		Scanner scanner = new Scanner(new File("drones_ips.txt"));
 		
-		while (scanner.hasNext()){
+		while (scanner.hasNext()) {
 			String ip = scanner.nextLine();
-			listModel.addElement(new DroneIP(ip));
+			if (!ip.contains("#")) {
+				listModel.addElement(new DroneIP(ip));
+			}
 		}
 		
 		scanner.close();
@@ -208,17 +273,52 @@ public class ConnectionPanel extends UpdatePanel {
 		channelExec.disconnect();
 		session.disconnect();
 
-		if (exitStatus < 0) {
-		    System.out.println("Done, but exit status not set!");
-		} else if (exitStatus > 0) {
+		if (exitStatus > 0) {
 		    System.out.println("Done, but with error!");
-		} else {
-		    System.out.println("Done!");
 		}
 		
 		session.disconnect();
 	}
 
+	private void uploadCode(String ip, boolean showOutput) {
+		File f = new File("../RaspberryController/utils");
+		
+		String[] split = ip.split("\\.");
+		
+		String[] cmd =  {
+		        "/bin/sh",
+		        "-c",
+		        "cd " + f.getAbsolutePath() + " && ./upload.sh " + split[split.length-1]};
+		
+		try {
+			ProcessBuilder pb = new ProcessBuilder(cmd);
+			Process p = pb.start();
+			p.waitFor();
+			
+			if(showOutput)
+				showConsoleCommandOutput(p);
+		} catch (IOException | InterruptedException e) { }
+		
+	}
+	
+	private void showConsoleCommandOutput(Process p) throws IOException{
+		BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+		BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+
+		// read the output from the command
+		System.out.println("Here is the standard output of the command:");
+		String s = null;
+		while ((s = stdInput.readLine()) != null)
+			System.out.println(s);
+
+		System.out.println("\n");
+		// read any errors from the attempted command
+		System.out.println("Here is the standard error of the command (if any):");
+		while ((s = stdError.readLine()) != null)
+			System.out.println(s);
+	}
+	
 	private void connect(String address) {
 		console.connect(address);
 	}
@@ -321,6 +421,36 @@ public class ConnectionPanel extends UpdatePanel {
 		}
 	}
 
+	private void executeShellCommand(String[] pCommand, boolean showOutput){
+		try {
+			Runtime run = Runtime.getRuntime();
+			Process pr = run.exec(pCommand);
+			pr.waitFor();
+			
+			if(showOutput){
+				BufferedReader stdInput = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+
+				BufferedReader stdError = new BufferedReader(new InputStreamReader(pr.getErrorStream()));
+
+				// read the output from the command
+				System.out.println("Here is the standard output of the command:");
+				String s = null;
+				while ((s = stdInput.readLine()) != null)
+					System.out.println(s);
+
+				System.out.println("\n");
+				// read any errors from the attempted command
+				System.out.println("Here is the standard error of the command (if any):");
+				while ((s = stdError.readLine()) != null)
+					System.out.println(s);
+			}
+			
+		} catch (IOException | InterruptedException e) {
+			System.out.println("Something went wrong when executing command in the commnad line");
+			e.printStackTrace();
+		}
+	}
+	
 	public void setDroneConnected(boolean droneConnected) {
 		this.droneConnected = droneConnected;
 	}
@@ -338,10 +468,14 @@ public class ConnectionPanel extends UpdatePanel {
 		return SLEEP_TIME;
 	}
 	
+	public SortedListModel getListModel() {
+		return listModel;
+	}
+	
 	class PingThread extends Thread {
 		
 		private long timeBetweenPings = 1000*10; //10 sec
-		private int pingTimeout = 1000;
+		private int pingTimeout = 2500;
 		
 		@Override
 		public void run() {
@@ -350,9 +484,10 @@ public class ConnectionPanel extends UpdatePanel {
 					DroneIP droneIP = listModel.get(i);
 					if(droneIP.getStatus() != DroneStatus.RUNNING){
 						try {
-							if(InetAddress.getByName(droneIP.getIp()).isReachable(pingTimeout))
+							if(InetAddress.getByName(droneIP.getIp()).isReachable(pingTimeout)){
 								droneIP.setStatus(DroneStatus.DETECTED);
-							else
+								list.repaint();
+							}else
 								droneIP.setStatus(DroneStatus.NOT_RUNNING);
 						} catch (IOException e) {
 //							System.err.println(droneIP.getIp() + ": " + e.getMessage());

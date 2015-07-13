@@ -59,7 +59,7 @@ public class CommandPanel extends UpdatePanel {
 	private BehaviorMessage currentMessage;
 	private JTextArea config;
 	private JTextField logMessage;
-	private JTextField selectedDrones;
+	private JTextArea selectedDrones;
 	public JButton sendLog;
 	private RobotGUI gui;
 	private RobotControlConsole console;
@@ -134,7 +134,10 @@ public class CommandPanel extends UpdatePanel {
 		start = new JButton("Start");
 		stop = new JButton("Stop");
 		JLabel selectedDronesLabel = new JLabel("Selected drones");
-		selectedDrones = new JTextField();
+		selectedDronesLabel.setHorizontalAlignment(JLabel.HORIZONTAL);
+		selectedDrones = new JTextArea(1,5);
+		selectedDrones.setLineWrap(true);
+		JScrollPane selectDronesScroll = new JScrollPane(selectedDrones);
 		deploy = new JButton("Deploy");
 		stopAll = new JButton("Stop All");
 
@@ -174,7 +177,7 @@ public class CommandPanel extends UpdatePanel {
 		JPanel buttons = new JPanel(new GridLayout(dronePanel ? 5 : 4, 2));
 		buttons.add(start);
 		buttons.add(stop);
-		buttons.add(selectedDrones);
+		buttons.add(selectDronesScroll);
 		buttons.add(selectedDronesLabel);
 		buttons.add(deploy);
 		buttons.add(stopAll);
@@ -232,6 +235,9 @@ public class CommandPanel extends UpdatePanel {
 				
 				if(result == 0)
 					statusMessage("CalibrationCIBehavior", true);
+				else if(result == 2){
+					//TODO: revert to old calibration
+				}
 			}
 		});
 
@@ -499,7 +505,7 @@ public class CommandPanel extends UpdatePanel {
 		}
 	}
 
-	public JTextField getSelectedDronesTextField() {
+	public JTextArea getSelectedDronesTextField() {
 		return selectedDrones;
 	}
 	

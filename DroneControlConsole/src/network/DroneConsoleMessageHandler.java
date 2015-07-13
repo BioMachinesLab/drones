@@ -2,12 +2,12 @@ package network;
 
 import gui.DroneGUI;
 import main.DroneControlConsole;
-
 import commoninterface.network.messages.BatteryMessage;
 import commoninterface.network.messages.CompassMessage;
 import commoninterface.network.messages.EntityMessage;
 import commoninterface.network.messages.GPSMessage;
 import commoninterface.network.messages.Message;
+import commoninterface.network.messages.TemperatureMessage;
 
 public class DroneConsoleMessageHandler extends ControlConsoleMessageHandler {
 	
@@ -53,9 +53,8 @@ public class DroneConsoleMessageHandler extends ControlConsoleMessageHandler {
 		
 		} else if (message instanceof BatteryMessage) {
 			((DroneGUI)console.getGUI()).getBatteryPanel().displayData((BatteryMessage) message);
-			
-			//	
-			
+		} else if (message instanceof TemperatureMessage) {
+			((DroneGUI)console.getGUI()).getTemperaturesPanel().displayData((TemperatureMessage) message);
 		}else {
 			System.out.println("Received non recognized message type: " + message.getClass().toString());
 		}

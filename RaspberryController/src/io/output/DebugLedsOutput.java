@@ -8,7 +8,7 @@ import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
 
 public class DebugLedsOutput extends Thread implements ControllerOutput {
-	private static final Pin[] LED_PINS = { RaspiPin.GPIO_05, RaspiPin.GPIO_06 };
+	private static final Pin[] LED_PINS = { RaspiPin.GPIO_05 };
 
 	private static final int BLINK_DURATION = 250;
 
@@ -46,7 +46,7 @@ public class DebugLedsOutput extends Thread implements ControllerOutput {
 		// ledsOutputPins[index].blink(BLINK_DURATION);
 		if (index < 0 || index > (LED_PINS.length - 1)) {
 			throw new ArrayIndexOutOfBoundsException(
-					"[Debug Leds] Invalid led index");
+					"[Debug Leds] Invalid LED index");
 		} else {
 			ledsOutputPins[index].blink(BLINK_DURATION, PinState.LOW);
 		}
@@ -55,7 +55,7 @@ public class DebugLedsOutput extends Thread implements ControllerOutput {
 	public void removeBlinkLed(int index) {
 		if (index < 0 || index > (LED_PINS.length - 1)) {
 			throw new ArrayIndexOutOfBoundsException(
-					"[Debug Leds] Invalid led index");
+					"[Debug Leds] Invalid LED index");
 		} else {
 			ledsOutputPins[index].low();
 		}

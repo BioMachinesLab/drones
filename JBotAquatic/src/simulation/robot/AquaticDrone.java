@@ -503,6 +503,5 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		} else {
 			compassOrientation = measuredCompass;
 		}
-	}
-	
+	}	
 }
