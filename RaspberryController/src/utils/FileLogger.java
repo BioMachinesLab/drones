@@ -162,4 +162,15 @@ public class FileLogger extends Thread implements RobotLogger {
 		interrupt();
 	}
 
+	@Override
+	public void logMessage(String string) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void logError(String string) {
+		// TODO Auto-generated method stub
+		
+	}
 }
