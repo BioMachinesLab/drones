@@ -212,7 +212,7 @@ public class ConnectionPanel extends UpdatePanel {
 						JOptionPane.showMessageDialog(null, "Disconnect from drone " + droneIP.getIp() + " before upload new code");
 						break;
 					case DETECTED:
-						uploadCode(droneIP.getIp(), true);
+						uploadCode(droneIP.getIp(), false);
 						break;
 					case NOT_RUNNING:
 						JOptionPane.showMessageDialog(null, "Couldn't reach drone " + droneIP.getIp());
