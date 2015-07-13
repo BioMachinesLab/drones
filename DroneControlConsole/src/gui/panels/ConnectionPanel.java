@@ -28,6 +28,7 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
@@ -196,7 +197,36 @@ public class ConnectionPanel extends UpdatePanel {
 				}
 			}
 		});
+		
+		JButton uploadCodeButton = new JButton("Upload Code");
+		uploadCodeButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int index = list.getSelectedIndex();
+
+				if (index != -1) {
+					DroneIP droneIP = listModel.get(index);
+					
+					switch (droneIP.getStatus()) {
+					case RUNNING:
+						JOptionPane.showMessageDialog(null, "Disconnect from drone " + droneIP.getIp() + " before upload new code");
+						break;
+					case DETECTED:
+						uploadCode(droneIP.getIp(), false);
+						break;
+					case NOT_RUNNING:
+						JOptionPane.showMessageDialog(null, "Couldn't reach drone " + droneIP.getIp());
+						break;
+					default:
+						System.err.println("Unknown status: " + droneIP.getStatus());
+						break;
+					}
+					
+				}
 				
+			}
+		});
+		
 		currentConnection = new JLabel("");
 		currentConnection.setHorizontalAlignment(JLabel.CENTER);
 
@@ -208,6 +238,7 @@ public class ConnectionPanel extends UpdatePanel {
 		buttonsPanel.add(disconnect);
 		buttonsPanel.add(startController);
 		buttonsPanel.add(stopController);
+		buttonsPanel.add(uploadCodeButton);
 //		buttonsPanel.add(connectTo);
 		buttonsPanel.add(connectionCountLabel);
 		buttonsPanel.add(currentConnection);
@@ -249,6 +280,45 @@ public class ConnectionPanel extends UpdatePanel {
 		session.disconnect();
 	}
 
+	private void uploadCode(String ip, boolean showOutput) {
+		File f = new File("../RaspberryController/utils");
+		
+		String[] split = ip.split("\\.");
+		
+		String[] cmd =  {
+		        "/bin/sh",
+		        "-c",
+		        "cd " + f.getAbsolutePath() + " && ./upload.sh " + split[split.length-1]};
+		
+		try {
+			ProcessBuilder pb = new ProcessBuilder(cmd);
+			Process p = pb.start();
+			p.waitFor();
+			
+			if(showOutput)
+				showConsoleCommandOutput(p);
+		} catch (IOException | InterruptedException e) { }
+		
+	}
+	
+	private void showConsoleCommandOutput(Process p) throws IOException{
+		BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+		BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+
+		// read the output from the command
+		System.out.println("Here is the standard output of the command:");
+		String s = null;
+		while ((s = stdInput.readLine()) != null)
+			System.out.println(s);
+
+		System.out.println("\n");
+		// read any errors from the attempted command
+		System.out.println("Here is the standard error of the command (if any):");
+		while ((s = stdError.readLine()) != null)
+			System.out.println(s);
+	}
+	
 	private void connect(String address) {
 		console.connect(address);
 	}
