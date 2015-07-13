@@ -265,6 +265,9 @@ public class LogVisualizer extends JFrame {
 			
 			System.out.println(step);
 			
+			if(ip.isEmpty())
+				ip = "192.168.3.1";
+			
 			if(!ip.isEmpty()) {
 				
 				for(LogData d : data)
@@ -313,11 +316,11 @@ public class LogVisualizer extends JFrame {
 				
 			} else if(className.equals(ObstacleLocation.class.getSimpleName())) {
 				
-				double lat = s.nextDouble();
-				double lon = s.nextDouble();
+//				double lat = s.nextDouble();
+//				double lon = s.nextDouble();
 				
-				double radius = s.nextDouble();
-				entities.add(new ObstacleLocation(name, new LatLon(lat,lon),radius));
+//				double radius = s.nextDouble();
+//				entities.add(new ObstacleLocation(name, new LatLon(lat,lon),radius));
 			}
 			
 		} else if(event.equals("removed")) {

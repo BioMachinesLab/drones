@@ -540,5 +540,10 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			entities.add(e);
 		}
 	}
+	
+	@Override
+	public void setRudder(double heading, double speed) {
+		System.out.println("UNIMPLEMENTED!");
+	}
 
 }

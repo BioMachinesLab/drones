@@ -52,4 +52,6 @@ public interface AquaticDroneCI extends RobotCI{
 	
 	public void setDroneType(DroneType droneType);
 	
+	public void setRudder(double heading, double speed);
+	
 }

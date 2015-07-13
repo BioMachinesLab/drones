@@ -14,6 +14,7 @@ import simpletestbehaviors.ChangeWaypointCIBehavior;
 import simulation.Simulator;
 import simulation.physicalobjects.PhysicalObject;
 import simulation.robot.actuator.PropellersActuator;
+import simulation.robot.actuator.RudderActuator;
 import simulation.robot.actuators.Actuator;
 import simulation.robot.sensors.CompassSensor;
 import simulation.util.Arguments;
@@ -46,13 +47,11 @@ import commoninterface.utils.jcoord.LatLon;
 
 public class AquaticDrone extends DifferentialDriveRobot implements AquaticDroneCI{
 
-	private double frictionConstant = 0.13;//REX 0.21//OLD 0.05
-	private double accelarationConstant = 0.20;//0.1
-	private Vector2d velocity = new Vector2d();
 	private Simulator simulator;
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
 	private ArrayList<CISensor> cisensors = new ArrayList<CISensor>();
 	private PropellersActuator propellers;
+	private RudderActuator rudderActuator;
 	private SimulatedBroadcastHandler broadcastHandler;
 	private Waypoint activeWaypoint;
 	
@@ -86,6 +85,8 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	private LatLon origin = CoordinateUtilities.cartesianToGPS(0,0);
 	private boolean badGPS = false;
 	
+	private boolean rudder = false;
+	
 	public AquaticDrone(Simulator simulator, Arguments args) {
 		super(simulator, args);
 		this.simulator = simulator;
@@ -118,7 +119,16 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		badGPS = args.getFlagIsTrue("badgps");
 		
 		sensors.add(new CompassSensor(simulator, sensors.size()+1, this, args));
-		actuators.add(new PropellersActuator(simulator, actuators.size()+1, args));
+		
+		rudder = args.getFlagIsTrue("rudder");
+		
+		if(rudder) {
+			rudderActuator = new RudderActuator(simulator, actuators.size()+1, args); 
+			actuators.add(rudderActuator);
+		} else {
+			propellers = new PropellersActuator(simulator, actuators.size()+1, args);
+			actuators.add(propellers);
+		}
 		log("IP "+getNetworkAddress());
 		
 	}
@@ -142,17 +152,6 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 			activeBehavior.step(simulationStep);
 		}
 		
-	}
-
-	public void setMotorSpeeds(double leftMotorPercentage, double rightMotorPercentage) {
-		if(propellers == null)
-			propellers = (PropellersActuator) getActuatorByType(PropellersActuator.class);
-		
-		leftPercentage = leftMotorPercentage;
-		rightPercentage = rightMotorPercentage;
-		
-		propellers.setLeftPercentage(leftMotorPercentage);
-		propellers.setRightPercentage(rightMotorPercentage);
 	}
 
 	@Override
@@ -196,27 +195,44 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		setLedState(robotState);
 	}
 	
-	private double motorModel(double d) {
-		return 0.0048*Math.exp(2.4912*Math.abs(d*2)) - 0.0048;
+	public void setMotorSpeeds(double leftMotorPercentage, double rightMotorPercentage) {
+		
+		leftPercentage = leftMotorPercentage;
+		rightPercentage = rightMotorPercentage;
+		
+		if(rudder) {
+			rudderActuator.setSpeed((leftMotorPercentage+rightMotorPercentage)/2);
+		}else {
+			propellers.setLeftPercentage(leftMotorPercentage);
+			propellers.setRightPercentage(rightMotorPercentage);
+		}
 	}
 	
+	public void setRudder(double heading, double speed) {
+		rudderActuator.setHeading(heading);
+		rudderActuator.setSpeed(speed);
+	}
+	
+	/*
 	@Override
 	public void updateActuators(Double time, double timeDelta) {
 		
 		for(CIBehavior b : alwaysActiveBehaviors)
 			b.step(time);
-
+		
 		if(stopTimestep > 0) {
 			rightWheelSpeed = 0;
 			leftWheelSpeed = 0;
 			stopTimestep--;
 		}
 		
-		double lw = Math.signum(rightWheelSpeed-leftWheelSpeed);
+		double lw = Math.signum(rightWheelSpeed - leftWheelSpeed);
 		
+//		orientation = MathUtils.modPI2(orientation + motorModel(rightWheelSpeed-leftWheelSpeed)*lw);
 		orientation = MathUtils.modPI2(orientation + motorModel(rightWheelSpeed-leftWheelSpeed)*lw);
 		
 		double accelDirection = (rightWheelSpeed+leftWheelSpeed) < 0 ? -1 : 1;
+		
 		double lengthOfAcc = accelarationConstant * (leftWheelSpeed + rightWheelSpeed);
 		
 		//Backwards motion should be slower. This value here is just an
@@ -237,6 +253,31 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		
 		for (Actuator actuator : actuators) {
 			actuator.apply(this);
+		}
+		
+		broadcastHandler.update(time);
+	}*/
+	
+	
+	@Override
+	public void updateActuators(Double time, double timeDelta) {
+		
+		for(CIBehavior b : alwaysActiveBehaviors)
+			b.step(time);
+		
+		 if(!rudder) {
+			propellers.move(this,leftWheelSpeed,rightWheelSpeed,timeDelta);
+		}
+		
+		for (Actuator actuator : actuators) {
+			actuator.apply(this);
+			//rudder updates the robot position here
+		}
+		
+		if(stopTimestep > 0) {
+			rightWheelSpeed = 0;
+			leftWheelSpeed = 0;
+			stopTimestep--;
 		}
 		
 		broadcastHandler.update(time);
