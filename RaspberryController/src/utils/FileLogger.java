@@ -165,6 +165,7 @@ public class FileLogger extends Thread implements RobotLogger {
 	@Override
 	public void logMessage(String string) {
 		// TODO Auto-generated method stub
+		//TODO VASCOOOOO I NEED THIS!
 		
 	}
 
