@@ -25,8 +25,13 @@ import simulation.physicalobjects.PhysicalObject;
 import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
+import commoninterface.controllers.Figure8CIBehavior;
+import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
+import commoninterface.utils.logger.LogCodex;
+import commoninterface.utils.logger.LogCodex.DecodedLogData;
+import commoninterface.utils.logger.LogData;
 
 public class PositionPlot extends Thread{
 	
@@ -34,7 +39,7 @@ public class PositionPlot extends Thread{
 	private JFrameViewer frame;
 	private ArrayList<String> lines = new ArrayList<String>();
 	private boolean pause = false;
-	private boolean useFile = false;
+	private boolean useFile = true;
 	
 	public PositionPlot(String file, JFrameViewer frame) {
 		this.file = file;
@@ -143,15 +148,15 @@ public class PositionPlot extends Thread{
 			return;
 		}
 		
-		Vector2d start = new Vector2d(-10,-40);
+		Vector2d start = new Vector2d(0,0);
 		
 		HashMap<String, Arguments> hash = new HashMap<String, Arguments>();
-		hash.put("--environment", new Arguments("classname=EmptyEnvironment,width=100,height=100",true));
+		hash.put("--environment", new Arguments("classname=EmptyEnvironment,width=20,height=20",true));
 		
 		ArrayList<Robot> robots = new ArrayList<Robot>();
 		
 		Simulator sim = new Simulator(new Random(1), hash);
-		AquaticDrone drone = new AquaticDrone(sim, new Arguments("commrange=10"));
+		AquaticDrone drone = new AquaticDrone(sim, new Arguments("commrange=10,rudder=1"));
 		drone.setPosition(start);
 		robots.add(drone);
 		
@@ -166,12 +171,13 @@ public class PositionPlot extends Thread{
 		
 		Environment env = sim.getEnvironment();
 		
-		String line = lines.get(0);
-		String[] split = line.split("\t");
-		double lat = Double.parseDouble(split[1]);
-		double lon = Double.parseDouble(split[2]);
+		DecodedLogData dld = LogCodex.decodeLog(lines.get(0));
+		LogData l = (LogData)dld.getPayload();
 		
-		double originalOrientation = Double.parseDouble(split[4]); 
+		double lat = l.latLon.getLat();
+		double lon = l.latLon.getLon();
+		
+		double originalOrientation = l.GPSorientation + 50;//l.compassOrientation; 
 		double orientation = 360 - (originalOrientation - 90);
 		
 		drone.setOrientation(Math.toRadians(orientation));
@@ -182,7 +188,12 @@ public class PositionPlot extends Thread{
 		
 		double mm = 50000000; double mM = -5000000;
 		
+		drone.startBehavior(new Figure8CIBehavior(new CIArguments(""), drone));
+		
 		for(int i = 0 ; i < lines.size() ; i++) {
+			
+			dld = LogCodex.decodeLog(lines.get(i));
+			l = (LogData)dld.getPayload();
 			
 			if(pause) {
 				i--;
@@ -194,23 +205,20 @@ public class PositionPlot extends Thread{
 				continue;
 			}
 			
-			orientation = 360 - (Double.parseDouble(split[4]) - 90);
+			orientation = 360 - l.compassOrientation - 90;
 //			drone.setOrientation(Math.toRadians(orientation));
 			
-			line = lines.get(i);
-			split = line.split("\t");
-			
-			double left = Double.parseDouble(split[7]);
-			double right = Double.parseDouble(split[8]);
+			double left = l.motorSpeeds[0];
+			double right = l.motorSpeeds[1];
 			
 //			System.out.println(left+" "+right);
 			
-			lat = Double.parseDouble(split[1]);
-			lon = Double.parseDouble(split[2]);
+			lat = l.latLon.getLat();
+			lon = l.latLon.getLon();
 			
 			latLon = new LatLon(lat,lon);
 			
-			drone.setMotorSpeeds(left, right);
+//			drone.setMotorSpeeds(left, right);
 			
 			sim.performOneSimulationStep((double)i);
 			renderer.drawFrame();
@@ -245,7 +253,7 @@ public class PositionPlot extends Thread{
 	}
 	
 	public static void main(String[] args) {
-		String file = "vals.log";
+		String file = "logs/figure8.log";
 		
 		new JFrameViewer(file);
 	}

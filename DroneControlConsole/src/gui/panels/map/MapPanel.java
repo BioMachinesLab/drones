@@ -709,15 +709,17 @@ public class MapPanel extends UpdatePanel {
 	public void displayData(RobotLocation di) {
 
 		LatLon latLon = di.getLatLon();
-
-		double lat = latLon.getLat();
-		double lon = latLon.getLon();
-
-		if(lat == 0 && lon == 0)
-			return;
-
-		if(usefulRobotCoordinate(di.getName(), c(lat,lon))) {
-			updateRobotPosition(di);
+		
+		if(latLon != null) {
+			double lat = latLon.getLat();
+			double lon = latLon.getLon();
+	
+			if(lat == 0 && lon == 0)
+				return;
+	
+			if(usefulRobotCoordinate(di.getName(), c(lat,lon))) {
+				updateRobotPosition(di);
+			}
 		}
 	}
 

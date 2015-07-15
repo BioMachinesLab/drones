@@ -53,10 +53,11 @@ public class LogVisualizer extends JFrame {
 	private JLabel currentStepLabel;
 	private DateTimeFormatter hourFormatter = DateTimeFormat
 			.forPattern("HH:mm:ss.SS");
+	private DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("dd-MM-YY_HH:mm:ss.SS");
 	private String IPforEntities = "1";
 	private int lastIncrementStep = 0;
 
-	private boolean parserVersion = false;
+	private boolean parserVersion = true;
 
 	public static void main(String[] args) {
 		new LogVisualizer();
@@ -234,7 +235,7 @@ public class LogVisualizer extends JFrame {
 				while (s.hasNext()) {
 					String l = s.nextLine();
 
-					if (!l.startsWith(LogCodex.COMMENT_CHAR)) {
+					if (!l.startsWith(LogCodex.COMMENT_CHAR) && !l.isEmpty()) {
 						LogCodex.DecodedLogData decodedData = LogCodex
 								.decodeLog(l);
 
@@ -244,7 +245,8 @@ public class LogVisualizer extends JFrame {
 							break;
 
 						case LOGDATA:
-							result.add((LogData) decodedData.getPayload());
+							LogData d = convert((commoninterface.utils.logger.LogData)decodedData.getPayload());
+							result.add(d);
 							break;
 						}
 					}
@@ -517,6 +519,27 @@ public class LogVisualizer extends JFrame {
 			return multiplier;
 		}
 	}
+	
+	public LogData convert(commoninterface.utils.logger.LogData data) {
+		LogData log = new LogData();
+		log.time = data.systemTime;
+		log.date = DateTime.parse(data.systemTime,dateFormatter);
+		log.file = data.file;
+		log.compassOrientation = data.compassOrientation;
+		log.ip = data.ip;
+		log.cpuTemp = data.temperatures[0];
+		log.waterTemp = data.temperatures[1];
+		System.out.println(log.waterTemp);
+		log.timestep = data.timestep;
+		log.latLon = data.latLon;
+		log.GPSorientation = data.GPSorientation;
+		log.GPSspeed = data.GPSspeed;
+		log.leftSpeed = data.motorSpeeds[0];
+		log.rightSpeed = data.motorSpeeds[1];
+		log.lastComment = data.comment;
+		log.droneType = data.droneType;
+		return log;
+	}
 
 	public class LogData implements Comparable<LogData> {
 		String time;
@@ -529,6 +552,8 @@ public class LogVisualizer extends JFrame {
 		double GPSspeed;
 		double leftSpeed;
 		double rightSpeed;
+		double cpuTemp;
+		double waterTemp;
 		DateTime date;
 		String lastComment;
 		AquaticDroneCI.DroneType droneType;

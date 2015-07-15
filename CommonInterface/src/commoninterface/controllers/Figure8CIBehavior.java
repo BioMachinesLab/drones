@@ -9,7 +9,7 @@ public class Figure8CIBehavior extends CIBehavior {
 	
 	private AquaticDroneCI drone;
 	private double steps = 80;
-	private boolean left = true;
+	private boolean left = false;
 	
 	public Figure8CIBehavior(CIArguments args, RobotCI drone) {
 		super(args,drone);
@@ -21,7 +21,6 @@ public class Figure8CIBehavior extends CIBehavior {
 		
 		if(time % steps == 0) {
 			left = !left;
-			System.out.println(left);
 		}
 		
 		if(left)

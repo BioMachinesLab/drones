@@ -113,6 +113,8 @@ public class FileLogger extends Thread implements RobotLogger {
 			data.GPSorientation = drone.getGPSOrientationInDegrees();
 		}
 		
+		data.compassOrientation = drone.getCompassOrientationInDegrees();
+		
 		List<ControllerInput> inputs = drone.getIOManager().getInputs();
 		
 		for(ControllerInput i : inputs) {

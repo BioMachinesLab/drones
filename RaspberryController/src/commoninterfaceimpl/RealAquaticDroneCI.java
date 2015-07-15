@@ -69,6 +69,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	private double timestep = 0;
 	private double leftSpeed = 0;
 	private double rightSpeed = 0;
+	private double behaviorTimestep = 0;
 	
 	private CIBehavior activeBehavior = null;
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
@@ -89,6 +90,9 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	private RobotKalman kalmanFilterGPS;
 	private RobotKalman kalmanFilterCompass;
 	private LatLon origin = CoordinateUtilities.cartesianToGPS(0,0);
+	
+	private double rudderHeading = 0;
+	private double rudderSpeed = 0;
 
 	@Override
 	public void begin(HashMap<String,CIArguments> args) {
@@ -122,7 +126,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 				
 				if (current != null) {
 					
-					current.step(timestep);
+					current.step(behaviorTimestep++);
 					
 					for(CIBehavior b : alwaysActiveBehaviors)
 						b.step(timestep);
@@ -284,6 +288,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	public void startBehavior(CIBehavior b) {
 		stopActiveBehavior();
 		activeBehavior = b;
+		behaviorTimestep = 0;
 		activeBehavior.start();
 		log("Starting CIBehavior "+b.getClass().getSimpleName());
 	}
@@ -544,6 +549,9 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	@Override
 	public void setRudder(double heading, double speed) {
 		
+		this.rudderHeading = heading;
+		this.rudderSpeed = speed;
+		
 		double angleInDegrees = getTurningAngleFromHeading(heading)*-1;
 		double motorDifference = 0;
 		double forwardComponent = 0;
@@ -621,6 +629,14 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	
 	private double getTurningAngleFromHeading(double heading) {
 		return 9*heading;
+	}
+	
+	public double getRudderHeading() {
+		return rudderHeading;
+	}
+	
+	public double getRudderSpeed() {
+		return rudderSpeed;
 	}
 
 }

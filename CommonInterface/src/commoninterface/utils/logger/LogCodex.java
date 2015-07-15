@@ -75,10 +75,10 @@ public class LogCodex {
 		return data;
 	}
 
-	public static DecodedLogData decodeLog(String logLine) {		
+	public static DecodedLogData decodeLog(String logLine) {
+		
 		String[] infoBlocks = logLine.split(MAIN_SEPARATOR);
 		DecodedLogData decodedLogData = null;
-
 		if (infoBlocks[0].substring(0, 3).equals(LOG_TYPE)) {
 			LogType logType = LogType.valueOf(infoBlocks[0].substring(3, infoBlocks[0].length()));
 
@@ -272,7 +272,7 @@ public class LogCodex {
 			str=str.replace(SENTENCE_DELIMITATOR, SENTENCE_ESCAPE);
 		}
 		
-		return SENTENCE_DELIMITATOR+str+SENTENCE_DELIMITATOR;
+		return SENTENCE_DELIMITATOR+COMMENT_CHAR+str+SENTENCE_DELIMITATOR;
 	}
 	
 	private static String unescapeComment(String str) {
