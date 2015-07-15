@@ -198,7 +198,7 @@ public class LogCodex {
 				break;
 
 			case GPS_TIME_SEP:
-				logData.GPSdate = dateTimeFormatter.parseDateTime(information);
+				logData.GPSdate = information;
 				break;
 
 			case SYS_TIME_SEP:
@@ -305,7 +305,7 @@ public class LogCodex {
 		
 		data += (logData.GPSorientation!=-1)?GPS_ORIENT_SEP + logData.GPSorientation + MAIN_SEPARATOR:"";
 		data += (logData.GPSspeed>=0)?GPS_SPD + logData.GPSspeed + MAIN_SEPARATOR:"";
-		data += (logData.GPSdate!=null)?GPS_TIME_SEP + logData.GPSdate.toString(dateTimeFormatter) + MAIN_SEPARATOR:"";
+		data += (logData.GPSdate!=null)?GPS_TIME_SEP + logData.GPSdate + MAIN_SEPARATOR:"";
 		data += (logData.compassOrientation>=0)?COMP_ORIENT_SEP + logData.compassOrientation + MAIN_SEPARATOR:"";
 
 		if (logData.temperatures != null && logData.temperatures.length > 0) {

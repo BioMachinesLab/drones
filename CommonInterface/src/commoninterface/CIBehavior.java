@@ -1,6 +1,7 @@
 package commoninterface;
 
 import commoninterface.utils.CIArguments;
+import commoninterface.utils.Factory;
 
 /**
  * @author alc
@@ -56,5 +57,13 @@ public abstract class CIBehavior {
 	 */
 	public void cleanUp() {
 		
+	}
+	
+	public static CIBehavior getController(CIArguments args, RobotCI robot) {
+
+		if (!args.getArgumentIsDefined("classname"))
+			throw new RuntimeException("CIBehavior 'name' not defined: "+args.toString());
+		
+		return (CIBehavior)Factory.getInstance(args.getArgumentAsString("classname"),args,robot);
 	}
 }

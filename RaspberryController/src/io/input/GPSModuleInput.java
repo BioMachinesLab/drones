@@ -97,10 +97,12 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			enable = true;
 		} catch (NotActiveException | IllegalArgumentException
 				| InterruptedException e) {
+			e.printStackTrace();
 			System.err.println("[GPS Module] Error initializing GPSModule! ("
 					+ e.getMessage() + ")");
 			closeSerial();
 		} catch (Error | Exception e) {
+			e.printStackTrace();
 			System.err.println("[GPS Module] Error initializing GPSModule! ("
 					+ e.getMessage() + ")");
 		}
@@ -209,12 +211,12 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 					"[GPS Module] Fix update frequency must be in [200,10000] interval!");
 		}
 
-		performWarmStart();
-		print("[GPS Module] Warm Start performed!",false);
-		
 		
 		createSerial(DEFAULT_BAUD_RATE);
 		Thread.sleep(1000);
+		
+		performWarmStart();
+		print("[GPS Module] Warm Start performed!",false);
 
 		/*
 		 * Change Baud Rate
@@ -478,7 +480,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 	}
 
 	/*
-	 * Full Cold Restart: It’s essentially a Cold Restart, but additionally
+	 * Full Cold Restart: Itï¿½s essentially a Cold Restart, but additionally
 	 * clear system/user configurations at re-start. That is, reset the receiver
 	 * to the factory status.
 	 */

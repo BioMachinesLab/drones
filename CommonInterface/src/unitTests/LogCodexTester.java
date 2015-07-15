@@ -80,7 +80,7 @@ public class LogCodexTester {
 		codedData.GPSorientation = GPS_ORIENT;
 		codedData.GPSspeed = GND_SPEED;
 
-		codedData.GPSdate = GPS_DATE;
+//		codedData.GPSdate = GPS_DATE;//TODO this is a string
 		codedData.compassOrientation = COMP_ORIENT;
 		codedData.temperatures = TEMPS;
 

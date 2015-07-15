@@ -498,7 +498,9 @@ public class ConnectionPanel extends UpdatePanel {
 				
 				try {
 					Thread.sleep(timeBetweenPings);
-				} catch (InterruptedException e) {}
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		

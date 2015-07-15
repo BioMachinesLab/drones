@@ -15,10 +15,14 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import commoninterface.AquaticDroneCI;
 import commoninterface.controllers.ControllerCIBehavior;
 import commoninterface.dataobjects.GPSData;
 import commoninterface.neuralnetwork.CINeuralNetwork;
 import commoninterface.utils.RobotLogger;
+import commoninterface.utils.logger.LogCodex;
+import commoninterface.utils.logger.LogData;
+import commoninterface.utils.logger.LogCodex.LogType;
 import commoninterfaceimpl.RealAquaticDroneCI;
 
 public class FileLogger extends Thread implements RobotLogger {
@@ -32,10 +36,12 @@ public class FileLogger extends Thread implements RobotLogger {
 	private RealAquaticDroneCI drone;
 	private DateTimeFormatter fileFormatter = DateTimeFormat.forPattern("dd-MM-YY_HH-mm-ss");
 	private DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("dd-MM-YY_HH:mm:ss.SS");
-	private DateTimeFormatter hourFormatter = DateTimeFormat.forPattern("HH:mm:ss.SS");
+//	private DateTimeFormatter hourFormatter = DateTimeFormat.forPattern("HH:mm:ss.SS");
 	
 	private int logs = 0;
 	private String ipAddr;
+	
+	private String comment = null;
 
 	public FileLogger(RealAquaticDroneCI drone) {
 		this.drone = drone;
@@ -73,7 +79,7 @@ public class FileLogger extends Thread implements RobotLogger {
 				}
 				
 				try {					
-					String logLine = getLogString();
+					String logLine = LogCodex.encodeLog(LogType.LOGDATA, getLogData());
 					bw.write(logLine);
 					bw.flush();
 				} catch(Exception e) {
@@ -98,42 +104,32 @@ public class FileLogger extends Thread implements RobotLogger {
 		}
 	}
 	
-	private String getLogString() {
-		// TODO -> Convert to use the LogCodex
-		List<ControllerInput> inputs = drone.getIOManager().getInputs();
-		List<ControllerOutput> outputs = drone.getIOManager().getOutputs();
+	private LogData getLogData() {
 		
-		String result = new LocalDateTime().toString(hourFormatter)+"\t";
+		LogData data = new LogData();
 		
 		if(drone.getGPSLatLon() != null) {
-			result+=drone.getGPSLatLon().getLat()+"\t"+drone.getGPSLatLon().getLon()+"\t"+drone.getGPSOrientationInDegrees()+"\t";
-		} else {
-			result+="0\t0\t0\t";
+			data.latLon = drone.getGPSLatLon();
+			data.GPSorientation = drone.getGPSOrientationInDegrees();
 		}
-		result+=drone.getCompassOrientationInDegrees()+"\t";
+		
+		List<ControllerInput> inputs = drone.getIOManager().getInputs();
 		
 		for(ControllerInput i : inputs) {
 			if(i instanceof GPSModuleInput) {
 				GPSModuleInput ig = (GPSModuleInput)i;
-				GPSData data = ig.getReadings();
-				
-				result+=data.getGroundSpeedKmh()+"\t"+data.getDate().toString(dateFormatter)+"\t";
+				GPSData gpsData = ig.getReadings();
+				data.GPSspeed = gpsData.getGroundSpeedKmh();
+				data.GPSdate = gpsData.getDate().toString(dateFormatter);
 			}
 			
 			if(i instanceof OneWireTemperatureModuleInput){
 				OneWireTemperatureModuleInput ig = (OneWireTemperatureModuleInput)i;
-				double[] data = ig.getReadings();
-
-				result+=String.format("%.3f\t%.3f\t",data[0],data[1]);
+				data.temperatures = ig.getReadings();
 			}
 		}
 		
-		for(ControllerOutput o : outputs) {
-			for(int i = 0 ; i < o.getNumberOfOutputs() ; i++)
-				result+=o.getValue(i)+"\t";
-		}
-		
-		result+=drone.getDroneType()+"\t";
+		data.motorSpeeds = new double[]{drone.getLeftMotorSpeed(), drone.getRightMotorSpeed()};
 		
 		if(drone.getActiveBehavior() instanceof ControllerCIBehavior) {
 			ControllerCIBehavior controller = (ControllerCIBehavior)drone.getActiveBehavior();
@@ -142,19 +138,22 @@ public class FileLogger extends Thread implements RobotLogger {
 			
 			if(network != null) {
 				
-				result+="network\t";
-				
 				double[] in = network.getInputNeuronStates();
 				double[] out = network.getOutputNeuronStates();
 				
-				for(double d : in)
-					result+=d+"\t";
-				for(double d : out)
-					result+=d+"\t";
+				data.inputNeuronStates = in;
+				data.outputNeuronStates = out;
 			}
-			
 		}
-		return result+"\n";
+		
+		data.ip = ipAddr;
+		data.systemTime = new LocalDateTime().toString(dateFormatter);
+		data.droneType = drone.getDroneType();
+		data.comment = this.comment;
+		this.comment = null;
+		data.file = fileName;
+
+		return data;
 	}
 
 	@Override
@@ -164,9 +163,7 @@ public class FileLogger extends Thread implements RobotLogger {
 
 	@Override
 	public void logMessage(String string) {
-		// TODO Auto-generated method stub
-		//TODO VASCOOOOO I NEED THIS!
-		
+		this.comment = string;
 	}
 
 	@Override

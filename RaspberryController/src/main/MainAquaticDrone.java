@@ -23,13 +23,16 @@ public class MainAquaticDrone {
 			while(s.hasNextLine()) {
 				String line = s.nextLine();
 				if(line.equals("q")) {
-					drone.shutdown();
+					try {
+						drone.shutdown();
+					} catch(Exception e) {e.printStackTrace();};
 					s.close();
 					System.exit(0);
 				}
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
+			System.exit(0);
 		}	
 	}
 

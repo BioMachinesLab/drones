@@ -31,7 +31,7 @@ public class RudderCINNOutput extends CINNOutput {
 
 	@Override
 	public void apply() {
-		((AquaticDroneCI)robot).setRudder(heading, speed);
+		((AquaticDroneCI)robot).setRudder(heading*2-1, speed);
 	}
 
 }

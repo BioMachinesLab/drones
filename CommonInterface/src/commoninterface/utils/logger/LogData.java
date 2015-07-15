@@ -22,7 +22,7 @@ public class LogData implements Comparable<LogData> {
 	public LatLon latLon = null;
 	public double GPSorientation = -1;
 	public double GPSspeed = -1;
-	public DateTime GPSdate = null;
+	public String GPSdate = null;
 	public double compassOrientation = -1;
 	public double[] temperatures = null;
 

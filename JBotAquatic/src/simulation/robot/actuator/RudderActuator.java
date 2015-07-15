@@ -24,7 +24,7 @@ public class RudderActuator extends Actuator {
 	}
 
 	public void setHeading(double value) {
-		this.heading = value*2-1;
+		this.heading = value;
 	}
 
 	public void setSpeed(double percentage) {
@@ -59,6 +59,8 @@ public class RudderActuator extends Actuator {
 			if(Math.abs(heading) <= 0.1)
 				heading = 0;
 			
+			angleInDegrees = getTurningAngleFromHeading(heading)*-1;
+			
 			motorDifference = getMotorDifferenceFromTurningAngle(Math.abs(angleInDegrees));
 			
 			forwardComponent = 1.0 - motorDifference;
@@ -69,11 +71,9 @@ public class RudderActuator extends Actuator {
 			
 			turningSpeed = getTurningSpeedFromDifferenceOneStoppedMotor(turningComponent);
 			forwardSpeed = getForwardSpeedInMs(forwardComponent);
-			
 			angleInDegrees = getTurningAngleFromTurningSpeed(turningSpeed)*Math.signum(angleInDegrees);
 			
 		} else {
-			
 			motorDifference = getMotorDifferenceFromAngleOneFullMotor(Math.abs(angleInDegrees));
 			turningSpeed = getTurningSpeedFromMotorDifferenceOneMotorFull(motorDifference) * translateSpeedReduction(speed);
 		}
@@ -121,15 +121,15 @@ public class RudderActuator extends Actuator {
 	}
 	
 	private double getMotorDifferenceFromAngleOneFullMotor(double angle) {
-		return 0.0068 * Math.pow(angle,2) - 0.1614*angle + 0.9097;
+		return -0.0068 * Math.pow(angle,2) + 0.1614*angle+ 0.0903;
 	}
 	
-	private double getTurningAngleFromDifferenceOneMotorFull(double speedDifference) {
-		return -10.564 * speedDifference + 8.523;
+	public double getTurningAngleFromDifferenceOneMotorFull(double speedDifference) {
+		return 10.564 * speedDifference - 2.0412;
 	}
 	
-	private double getTurningSpeedFromMotorDifferenceOneMotorFull(double difference) {
-		return (28.958 * difference + 110.92) / 100.0;
+	public double getTurningSpeedFromMotorDifferenceOneMotorFull(double difference) {
+		return (-28.958*difference + 139.88) / 100.0;
 	}
 	
 	private double getMotorDifferenceFromTurningAngle(double angle) {
