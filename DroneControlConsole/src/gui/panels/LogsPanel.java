@@ -45,8 +45,6 @@ public class LogsPanel extends JPanel {
 		incidentLogger = new IncidentLogger();
 		broadcastLogger = new BroadcastLogger();
 		
-		incidentLogger.open();
-		
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
 				try {

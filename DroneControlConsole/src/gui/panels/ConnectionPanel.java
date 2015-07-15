@@ -212,7 +212,7 @@ public class ConnectionPanel extends UpdatePanel {
 						JOptionPane.showMessageDialog(null, "Disconnect from drone " + droneIP.getIp() + " before upload new code");
 						break;
 					case DETECTED:
-						uploadCode(droneIP.getIp(), false);
+						uploadCode(droneIP.getIp(), true);
 						break;
 					case NOT_RUNNING:
 						JOptionPane.showMessageDialog(null, "Couldn't reach drone " + droneIP.getIp());
@@ -303,20 +303,35 @@ public class ConnectionPanel extends UpdatePanel {
 	
 	private void showConsoleCommandOutput(Process p) throws IOException{
 		BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
-
 		BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 
+		String standard = "";
+		String errors = "";
+		
 		// read the output from the command
-		System.out.println("Here is the standard output of the command:");
 		String s = null;
 		while ((s = stdInput.readLine()) != null)
-			System.out.println(s);
-
-		System.out.println("\n");
+			standard+=s + "<p>";
+		
 		// read any errors from the attempted command
-		System.out.println("Here is the standard error of the command (if any):");
 		while ((s = stdError.readLine()) != null)
-			System.out.println(s);
+			errors+=s + "<p>";
+		
+		
+		String result = "<html>";
+		
+		if(!standard.isEmpty()){
+			result += "<b>Output:</b><p>" + standard;
+			result += "<p>";
+		}
+		
+		if(!errors.isEmpty())
+			result += "<b>Errors:</b><p>" + errors;
+		
+		result += "</html>";
+		
+//		JOptionPane.showMessageDialog(null, result);
+		JOptionPane.showMessageDialog(null, result, "Upload Console Output", JOptionPane.INFORMATION_MESSAGE);
 	}
 	
 	private void connect(String address) {

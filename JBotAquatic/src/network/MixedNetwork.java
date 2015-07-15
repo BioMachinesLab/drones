@@ -1,34 +1,20 @@
 package network;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
 
 import simulation.Network;
 import simulation.Simulator;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
+
 import commoninterface.AquaticDroneCI;
-import commoninterface.CIBehavior;
-import commoninterface.RobotCI;
-import commoninterface.entities.Entity;
-import commoninterface.entities.GeoFence;
-import commoninterface.entities.Waypoint;
 import commoninterface.network.CommandConnectionListener;
-import commoninterface.network.ConnectionHandler;
 import commoninterface.network.ConnectionListener;
 import commoninterface.network.MotorConnectionListener;
 import commoninterface.network.NetworkUtils;
-import commoninterface.network.messages.BehaviorMessage;
-import commoninterface.network.messages.EntitiesMessage;
-import commoninterface.network.messages.Message;
-import commoninterface.utils.CIArguments;
-import commoninterface.utils.ClassLoadHelper;
 
 public class MixedNetwork extends Network {
 	
@@ -45,10 +31,14 @@ public class MixedNetwork extends Network {
 	private MotorConnectionListener motorListener;
 	private GatewayRobot gatewayRobot;
 	
+	private String broadcastAddress = "";
+	
 	public MixedNetwork(Arguments args, Simulator sim) {
 		super(args, sim);
 		
 		port = args.getArgumentAsIntOrSetDefault("port", port);
+
+		broadcastAddress = NetworkUtils.getBroadcastAddress(NetworkUtils.getAddress());
 		
 		if(mixedNetwork != null) {
 			mixedNetwork.shutdown();
@@ -188,7 +178,7 @@ public class MixedNetwork extends Network {
 			try {
 				byte[] sendData = message.getBytes();
 				DatagramPacket sendPacket = new DatagramPacket(sendData,
-						sendData.length, InetAddress.getByName("255.255.255.255"),
+						sendData.length, InetAddress.getByName(broadcastAddress),
 						SEND_PORT);
 				socket.send(sendPacket);
 			} catch (IOException e) {

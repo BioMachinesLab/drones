@@ -73,6 +73,17 @@ public class NetworkUtils {
 		}
 	}
 
+	public static String getBroadcastAddress(String address) {
+		String broadcastAddress = "";
+		
+		String[] split = address.split("\\.");
+		
+		for (int i = 0; i < split.length-1; i++)
+			broadcastAddress += split[i] + ".";
+		
+		return broadcastAddress + "255";
+	}
+	
 	public static String getHostname() {
 		try {
 			return InetAddress.getLocalHost().getHostName();

@@ -38,6 +38,10 @@ public class IncidentLogger {
 	}
 
 	public void log(String msg) {
+		if(bw == null){
+			open();
+		}
+		
 		if(bw != null) {
 			try {
 				String txt = DateTime.now().toString(hourFormatter)+" "+msg;

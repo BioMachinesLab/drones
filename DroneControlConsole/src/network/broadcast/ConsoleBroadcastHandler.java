@@ -32,7 +32,8 @@ public class ConsoleBroadcastHandler {
 	private BroadcastReceiver receiver;
 	private RobotControlConsole console;
 	private String ownAddress;
-
+	private String broadcastAddress;
+	
 	// TODO this has to be true for the mixed experiments to work
 	private boolean retransmit = false;
 
@@ -67,6 +68,7 @@ public class ConsoleBroadcastHandler {
 						.getAddress());
 				ownAddress = ownInetAddress.getHostAddress();
 				System.out.println("SENDER " + ownInetAddress);
+				broadcastAddress = NetworkUtils.getBroadcastAddress(ownAddress);
 				socket = new DatagramSocket(PORT + 1, ownInetAddress);
 				socket.setBroadcast(true);
 
@@ -85,7 +87,7 @@ public class ConsoleBroadcastHandler {
 				byte[] sendData = message.getBytes();
 				DatagramPacket sendPacket = new DatagramPacket(sendData,
 						sendData.length,
-						InetAddress.getByName("255.255.255.255"), PORT);
+						InetAddress.getByName(broadcastAddress), PORT);
 				socket.send(sendPacket);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -101,7 +103,7 @@ public class ConsoleBroadcastHandler {
 				byte[] sendData = message.getBytes();
 				DatagramPacket sendPacket = new DatagramPacket(sendData,
 						sendData.length,
-						InetAddress.getByName("255.255.255.255"),
+						InetAddress.getByName(broadcastAddress),
 						RETRANSMIT_PORT);
 				retransmitSocket.send(sendPacket);
 			} catch (IOException e) {
