@@ -529,7 +529,6 @@ public class LogVisualizer extends JFrame {
 		log.ip = data.ip;
 		log.cpuTemp = data.temperatures[0];
 		log.waterTemp = data.temperatures[1];
-		System.out.println(log.waterTemp);
 		log.timestep = data.timestep;
 		log.latLon = data.latLon;
 		log.GPSorientation = data.GPSorientation;
