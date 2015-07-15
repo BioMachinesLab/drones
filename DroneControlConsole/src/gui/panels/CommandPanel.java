@@ -5,6 +5,7 @@ import gui.RobotGUI;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -396,10 +397,27 @@ public class CommandPanel extends UpdatePanel {
 		File controllersFolder = new File(CONTROLLERS_FOLDER);
 
 		if (controllersFolder.exists() && controllersFolder.isDirectory()) {
+			
+			int numberOfPreset = 0;
 			for (String s : controllersFolder.list()) {
 				if (s.endsWith(".conf")){
 					if(s.startsWith("preset")){
-						String buttonName = s.split("\\.")[0].split("_")[1];
+						numberOfPreset ++;
+					}
+				}
+			}
+			
+			if(numberOfPreset > 2){
+				int rows = (int)Math.ceil(numberOfPreset/2.0);
+				
+				presetsPanel.setLayout(new GridLayout(rows,2));
+			}else
+				presetsPanel.setLayout(new GridLayout(1, 2));
+			
+			for (String s : controllersFolder.list()) {
+				if (s.endsWith(".conf")){
+					if(s.startsWith("preset")){
+						String buttonName = s.split("\\.")[0].replace("preset_", "");
 						JButton b = new JButton(buttonName);
 						
 						b.addActionListener(new ActionListener() {
