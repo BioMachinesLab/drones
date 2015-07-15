@@ -22,15 +22,23 @@ public class OpenEnvironment extends Environment {
     public void setup(Simulator simulator) {
         super.setup(simulator);
         for (Robot r : simulator.getRobots()) {
-            AquaticDrone drone = (AquaticDrone) r;
-            double dist = (distance) * simulator.getRandom().nextDouble();
-            double angle = simulator.getRandom().nextDouble() * Math.PI * 2;
-            double x = Math.cos(angle) * dist;
-            double y = Math.sin(angle) * dist;
-            drone.setPosition(x, y);
-            drone.setOrientation(simulator.getRandom().nextDouble() * Math.PI * 2);
+            
+        	do{
+        		positionDrone((AquaticDrone) r, simulator);
+        		simulator.updatePositions(0);
+        	}while(r.isInvolvedInCollison());
+        	
         }
         this.setup = true;
+    }
+    
+    protected void positionDrone(AquaticDrone drone, Simulator simulator) {
+        double dist = (distance) * simulator.getRandom().nextDouble();
+        double angle = simulator.getRandom().nextDouble() * Math.PI * 2;
+        double x = Math.cos(angle) * dist;
+        double y = Math.sin(angle) * dist;
+        drone.setPosition(x, y);
+        drone.setOrientation(simulator.getRandom().nextDouble() * Math.PI * 2);
     }
 
     @Override

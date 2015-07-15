@@ -13,6 +13,7 @@ import simulation.environment.Environment;
 import simulation.physicalobjects.Line;
 import simulation.physicalobjects.PhysicalObject;
 import simulation.physicalobjects.PhysicalObjectType;
+import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
@@ -61,18 +62,33 @@ public class BoundaryEnvironment extends Environment {
     }
     
     protected void placeRobots(Simulator simulator) {
-                for (Robot r : simulator.getRobots()) {
-            for (int i = 0; i < 100; i++) {
-                double x = (dronesDistance * 2 * simulator.getRandom().nextDouble() - dronesDistance) * 0.5;
-                double y = (dronesDistance * 2 * simulator.getRandom().nextDouble() - dronesDistance) * 0.5;
-
-                if (insideLines(new Vector2d(x, y), simulator)) {
-                    r.setPosition(new Vector2d(x, y));
-                    break;
-                }
-            }
-            r.setOrientation(simulator.getRandom().nextDouble() * Math.PI * 2);
+    	for (Robot r : simulator.getRobots()) {
+            positionRobot(r, simulator);
         }
+    }
+    
+    protected void positionRobot(Robot robot, Simulator simulator) {
+    	
+    	boolean insideLines = false;
+    	boolean collision = false;
+    	
+    	do{
+	        double x = (dronesDistance * 2 * simulator.getRandom().nextDouble() - dronesDistance) * 0.5;
+	        double y = (dronesDistance * 2 * simulator.getRandom().nextDouble() - dronesDistance) * 0.5;
+	        
+	        insideLines = insideLines(new Vector2d(x, y), simulator);
+	        
+	        if(insideLines) {
+		        robot.setPosition(new Vector2d(x, y));
+		        robot.setPosition(x, y);
+		        simulator.updatePositions(0);
+		        
+		        collision = robot.isInvolvedInCollison();
+		        
+		        if(!collision)
+		        	robot.setOrientation(simulator.getRandom().nextDouble() * Math.PI * 2);
+	        }
+    	} while(!insideLines || collision);
     }
 
     protected void addLines(LinkedList<Waypoint> waypoints, Simulator simulator) {
