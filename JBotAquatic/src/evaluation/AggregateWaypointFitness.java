@@ -26,12 +26,13 @@ public class AggregateWaypointFitness extends EvaluationFunction {
     private double startingDistance = 0;
     private double meanDistance = 0;
     private Waypoint wp = null;
-    private boolean kill = true;
+    private final double safetyDistance;
     private int steps = 0;
+    private double minDistanceOthers = Double.POSITIVE_INFINITY;
 
     public AggregateWaypointFitness(Arguments args) {
         super(args);
-        kill = args.getFlagIsTrue("kill");
+        safetyDistance = args.getArgumentAsDouble("safetydistance");
     }
 
     @Override
@@ -50,19 +51,18 @@ public class AggregateWaypointFitness extends EvaluationFunction {
         for (Robot r : simulator.getRobots()) {
             AquaticDrone drone = (AquaticDrone) r;
             currentDistance += calculateDistance(wp, drone);
-        }
-        currentDistance /= simulator.getRobots().size();
-
-        meanDistance += (startingDistance - currentDistance) / startingDistance;
-        fitness = meanDistance / steps;
-                
-        for (Robot r : simulator.getRobots()) {
-            if (kill && r.isInvolvedInCollison()) {
-                simulator.stopSimulation();
-                fitness /= 10;
-                break;
+            for(Robot r2 : simulator.getRobots()) {
+                if(r != r2) {
+                    double d = r.getPosition().distanceTo(r2.getPosition()) - r.getRadius() - r2.getRadius();
+                    minDistanceOthers = Math.min(d, minDistanceOthers);
+                }
             }
         }
+        currentDistance /= simulator.getRobots().size();
+        
+        meanDistance += (startingDistance - currentDistance) / startingDistance;
+        double safetyFactor = Math.min(safetyDistance, minDistanceOthers) / safetyDistance;        
+        fitness = (meanDistance / steps) * safetyFactor;
     }
 
     @Override
