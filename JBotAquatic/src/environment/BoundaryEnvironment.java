@@ -18,14 +18,12 @@ import simulation.robot.Robot;
 import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
 
-public class BoundaryEnvironment extends Environment {
+public class BoundaryEnvironment extends OpenEnvironment {
 
     @ArgumentsAnnotation(name = "wallsdistance", defaultValue = "5")
     protected double wallsDistance = 5;
     @ArgumentsAnnotation(name = "random", defaultValue = "0.5")
     protected double rand = 0.5;
-    @ArgumentsAnnotation(name = "dronesdistance", defaultValue = "5")
-    protected double dronesDistance = 5;
     
     protected GeoFence fence;
 
@@ -33,13 +31,10 @@ public class BoundaryEnvironment extends Environment {
         super(simulator, args);
         rand = args.getArgumentAsDoubleOrSetDefault("random", rand);
         wallsDistance = args.getArgumentAsDoubleOrSetDefault("wallsdistance", wallsDistance);
-        dronesDistance = args.getArgumentAsDoubleOrSetDefault("dronesdistance", dronesDistance);
     }
 
     @Override
     public void setup(Simulator simulator) {
-        super.setup(simulator);
-
         fence = new GeoFence("fence");
 
         addNode(fence, -1, -1, simulator.getRandom());
@@ -52,8 +47,8 @@ public class BoundaryEnvironment extends Environment {
         addNode(fence, 0, -1, simulator.getRandom());
 
         addLines(fence.getWaypoints(), simulator);
-
-        placeRobots(simulator);
+        
+        super.setup(simulator);
 
         for (Robot r : robots) {
             AquaticDroneCI drone = (AquaticDroneCI) r;
@@ -61,34 +56,14 @@ public class BoundaryEnvironment extends Environment {
         }
     }
     
-    protected void placeRobots(Simulator simulator) {
-    	for (Robot r : simulator.getRobots()) {
-            positionRobot(r, simulator);
-        }
-    }
-    
-    protected void positionRobot(Robot robot, Simulator simulator) {
+    @Override
+    protected boolean safe(Robot r, Simulator simulator) {
+    	boolean superSafe =  super.safe(r, simulator);
     	
-    	boolean insideLines = false;
-    	boolean collision = false;
+    	if(!superSafe)
+    		return superSafe;
     	
-    	do{
-	        double x = (dronesDistance * 2 * simulator.getRandom().nextDouble() - dronesDistance) * 0.5;
-	        double y = (dronesDistance * 2 * simulator.getRandom().nextDouble() - dronesDistance) * 0.5;
-	        
-	        insideLines = insideLines(new Vector2d(x, y), simulator);
-	        
-	        if(insideLines) {
-		        robot.setPosition(new Vector2d(x, y));
-		        robot.setPosition(x, y);
-		        simulator.updatePositions(0);
-		        
-		        collision = robot.isInvolvedInCollison();
-		        
-		        if(!collision)
-		        	robot.setOrientation(simulator.getRandom().nextDouble() * Math.PI * 2);
-	        }
-    	} while(!insideLines || collision);
+        return insideLines(new Vector2d(r.getPosition().x, r.getPosition().y), simulator);
     }
 
     protected void addLines(LinkedList<Waypoint> waypoints, Simulator simulator) {

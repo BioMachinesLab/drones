@@ -17,18 +17,12 @@ public class AvoidEnvironment extends BoundaryEnvironment {
         super(simulator, args);
         otherRobots = args.getArgumentAsIntOrSetDefault("otherrobots", otherRobots);
     }
-
+    
     @Override
-    protected void placeRobots(Simulator simulator) {
-        // Evolved drone
-        AquaticDrone drone = (AquaticDrone) simulator.getRobots().get(0);
-        double a = simulator.getRandom().nextDouble() * Math.PI * 2;
-        double x = (dronesDistance / 2) * simulator.getRandom().nextDouble() * Math.cos(a);
-        double y = (dronesDistance / 2) * simulator.getRandom().nextDouble() * Math.sin(a);
-        drone.setPosition(x, y);
-        drone.setOrientation(simulator.getRandom().nextDouble() * Math.PI * 2);
-
-        // Other attackers
+    public void setup(Simulator simulator) {
+    	super.setup(simulator);
+    	
+    	 // Other attackers
         for (int i = 0; i < otherRobots; i++) {
             ArrayList<Vector2d> wpPos = new ArrayList<Vector2d>();
             for (int j = 0; j < 4; j++) {
@@ -49,4 +43,5 @@ public class AvoidEnvironment extends BoundaryEnvironment {
             other.setActiveWaypoint(wps.get(1));
         }
     }
+
 }
