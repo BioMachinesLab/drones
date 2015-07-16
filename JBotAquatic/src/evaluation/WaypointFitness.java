@@ -9,7 +9,6 @@ import commoninterface.entities.Waypoint;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CoordinateUtilities;
 import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
-
 import simulation.Simulator;
 import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
@@ -70,7 +69,7 @@ public class WaypointFitness extends EvaluationFunction {
 
     @Override
     public double getFitness() {
-        return fitness + 10;
+        return Math.max(0,fitness + 10);
     }
 
     public static double calculateDistance(Waypoint wp, AquaticDrone drone) {

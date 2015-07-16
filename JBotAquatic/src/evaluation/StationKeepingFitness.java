@@ -72,7 +72,7 @@ public class StationKeepingFitness extends EvaluationFunction {
     
     @Override
     public double getFitness() {
-    	return fitness;
+    	return Math.max(0,fitness);
     }    
     
 }
