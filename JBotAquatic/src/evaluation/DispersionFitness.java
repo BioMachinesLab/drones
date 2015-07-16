@@ -19,17 +19,19 @@ import simulation.util.Arguments;
  */
 public class DispersionFitness extends EvaluationFunction {
 
-    private boolean kill = true;
+    private boolean kill = false;
     private double meanDistance = 0;
-    private int steps = 0;
     private double margin = 0;
     private boolean config = false;
     private double targetDistance = 0;
+    private final double safetyDistance;
+    private double minDistanceOthers = Double.POSITIVE_INFINITY;
     
     public DispersionFitness(Arguments args) {
         super(args);
         kill = args.getFlagIsTrue("kill");
         margin = args.getArgumentAsDouble("margin");
+        safetyDistance = args.getArgumentAsDouble("safetydistance");
     }
 
     @Override
@@ -41,7 +43,8 @@ public class DispersionFitness extends EvaluationFunction {
             targetDistance = r - margin;
             config = true;
         }
-        steps++;
+        
+        // MEAN DISTANCE TO CLOSEST ROBOT
         double distanceDelta = 0;
         for (Robot r : simulator.getRobots()) {
             double minDist = Double.POSITIVE_INFINITY;
@@ -54,15 +57,21 @@ public class DispersionFitness extends EvaluationFunction {
         }
         distanceDelta /= simulator.getRobots().size();
         meanDistance += (simulator.getEnvironment().getWidth() - distanceDelta);
-        fitness = meanDistance / steps;
+        fitness = meanDistance / simulator.getTime();
 
-        for (Robot r : simulator.getRobots()) {
-            if (kill && r.isInvolvedInCollison()) {
+        // COLLISIONS
+        for(int i = 0 ; i < simulator.getRobots().size() ; i++) {
+            for(int j = i + 1 ; j < simulator.getRobots().size() ; j++) {
+                Robot ri = simulator.getRobots().get(i);
+                Robot rj = simulator.getRobots().get(j);
+                minDistanceOthers = Math.min(minDistanceOthers, ri.getPosition().distanceTo(rj.getPosition()) - ri.getRadius() - rj.getRadius());
+            }
+            if(kill && simulator.getRobots().get(i).isInvolvedInCollison()){
                 simulator.stopSimulation();
-                fitness /= 10;
-                break;
             }
         }
+        double safetyFactor = Math.min(safetyDistance, minDistanceOthers) / safetyDistance;        
+        fitness *= safetyFactor;
     }
 
     @Override

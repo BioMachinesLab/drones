@@ -27,17 +27,17 @@ public class AggregateWaypointFitness extends EvaluationFunction {
     private double meanDistance = 0;
     private Waypoint wp = null;
     private final double safetyDistance;
-    private int steps = 0;
     private double minDistanceOthers = Double.POSITIVE_INFINITY;
+    private boolean kill = false;
 
     public AggregateWaypointFitness(Arguments args) {
         super(args);
         safetyDistance = args.getArgumentAsDouble("safetydistance");
+        kill = args.getFlagIsTrue("kill");
     }
 
     @Override
     public void update(Simulator simulator) {
-        steps++;
         if (!configured) {
             wp = ((AquaticDrone) simulator.getRobots().get(0)).getActiveWaypoint();
             for (Robot r : simulator.getRobots()) {
@@ -47,22 +47,29 @@ public class AggregateWaypointFitness extends EvaluationFunction {
             configured = true;
         }
 
+        // MEAN DISTANCE TO WAYPOINT
         double currentDistance = 0;
         for (Robot r : simulator.getRobots()) {
             AquaticDrone drone = (AquaticDrone) r;
             currentDistance += calculateDistance(wp, drone);
-            for(Robot r2 : simulator.getRobots()) {
-                if(r != r2) {
-                    double d = r.getPosition().distanceTo(r2.getPosition()) - r.getRadius() - r2.getRadius();
-                    minDistanceOthers = Math.min(d, minDistanceOthers);
-                }
-            }
         }
         currentDistance /= simulator.getRobots().size();
-        
         meanDistance += (startingDistance - currentDistance) / startingDistance;
+        fitness = meanDistance / simulator.getTime();
+        
+        // COLLISIONS
+        for(int i = 0 ; i < simulator.getRobots().size() ; i++) {
+            for(int j = i + 1 ; j < simulator.getRobots().size() ; j++) {
+                Robot ri = simulator.getRobots().get(i);
+                Robot rj = simulator.getRobots().get(j);
+                minDistanceOthers = Math.min(minDistanceOthers, ri.getPosition().distanceTo(rj.getPosition()) - ri.getRadius() - rj.getRadius());
+            }
+            if(kill && simulator.getRobots().get(i).isInvolvedInCollison()){
+                simulator.stopSimulation();
+            }
+        }
         double safetyFactor = Math.min(safetyDistance, minDistanceOthers) / safetyDistance;        
-        fitness = (meanDistance / steps) * safetyFactor;
+        fitness *= safetyFactor;
     }
 
     @Override
