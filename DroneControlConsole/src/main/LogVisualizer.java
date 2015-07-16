@@ -527,8 +527,10 @@ public class LogVisualizer extends JFrame {
 		log.file = data.file;
 		log.compassOrientation = data.compassOrientation;
 		log.ip = data.ip;
-		log.cpuTemp = data.temperatures[0];
-		log.waterTemp = data.temperatures[1];
+		if(data.temperatures != null) {
+			log.cpuTemp = data.temperatures[0];
+			log.waterTemp = data.temperatures[1];
+		}
 		log.timestep = data.timestep;
 		log.latLon = data.latLon;
 		log.GPSorientation = data.GPSorientation;
@@ -537,6 +539,19 @@ public class LogVisualizer extends JFrame {
 		log.rightSpeed = data.motorSpeeds[1];
 		log.lastComment = data.comment;
 		log.droneType = data.droneType;
+		log.inputs = data.inputNeuronStates;
+		
+		if(log.inputs != null) {
+			System.out.print("i ");
+			for(int i = 0 ; i < log.inputs.length ; i++)
+				System.out.print(log.inputs[i]+" ");
+			System.out.print("o ");
+			log.outputs = data.outputNeuronStates;
+			for(int i = 0 ; i < log.outputs.length ; i++)
+				System.out.print(log.outputs[i]+" ");
+			System.out.println();
+		}
+		
 		return log;
 	}
 
@@ -553,6 +568,8 @@ public class LogVisualizer extends JFrame {
 		double rightSpeed;
 		double cpuTemp;
 		double waterTemp;
+		double[] outputs;
+		double[] inputs;
 		DateTime date;
 		String lastComment;
 		AquaticDroneCI.DroneType droneType;

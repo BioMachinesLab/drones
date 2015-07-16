@@ -21,8 +21,8 @@ public class AvoidEnvironment extends BoundaryEnvironment {
     @Override
     public void setup(Simulator simulator) {
     	super.setup(simulator);
-    	
-    	 // Other attackers
+
+    	// Other attackers
         for (int i = 0; i < otherRobots; i++) {
             ArrayList<Vector2d> wpPos = new ArrayList<Vector2d>();
             for (int j = 0; j < 4; j++) {

@@ -8,11 +8,9 @@ public class RudderCINNOutput extends CINNOutput {
 
 	private double heading;
 	private double speed;
-	private double deadZone = 0.10;
 	
 	public RudderCINNOutput(RobotCI robot, CIArguments args) {
 		super(robot,args);
-		deadZone = args.getArgumentAsDoubleOrSetDefault("deadzone", deadZone);
 	}
 	
 	@Override

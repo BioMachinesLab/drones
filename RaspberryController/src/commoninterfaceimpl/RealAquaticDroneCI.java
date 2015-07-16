@@ -604,6 +604,11 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			rw*=speed;
 		}
 		
+		if(speed < 0.01) {
+			lw = 0;
+			rw = 0;
+		}
+		
 		setMotorSpeeds(lw, rw);
 	}
 	
