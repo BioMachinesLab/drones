@@ -503,5 +503,13 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		} else {
 			compassOrientation = measuredCompass;
 		}
-	}	
+	}
+	
+	@Override
+	public double getMotorSpeedsInPercentage() {
+		if(rudder)
+			return rudderActuator.getSpeed();
+		else
+			return (leftPercentage+rightPercentage) / 2.0;
+	}
 }

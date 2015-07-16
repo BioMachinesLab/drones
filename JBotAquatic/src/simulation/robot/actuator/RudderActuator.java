@@ -82,6 +82,11 @@ public class RudderActuator extends Actuator {
 		double x = drone.getPosition().getX();
 		double y = drone.getPosition().getY();
 		double o = drone.getOrientation();
+
+		if(speed < 0.01) {
+			turningSpeed = 0;
+			forwardSpeed = 0;
+		}
 		
 		turningSpeed = turningSpeed* (1 + random.nextGaussian() * NOISESTDEV);
 		forwardSpeed = forwardSpeed* (1 + random.nextGaussian() * NOISESTDEV);
@@ -89,7 +94,7 @@ public class RudderActuator extends Actuator {
 		x = x + (turningSpeed + forwardSpeed) * timeDelta * Math.cos(o);
 		y = y + (turningSpeed + forwardSpeed) * timeDelta * Math.sin(o);
 		
-		if(desiredSpeed > 0) {
+		if(desiredSpeed >= 0.01) {
 			double newOrientation = drone.getOrientation() + Math.toRadians(angleInDegrees);
 			drone.setOrientation(newOrientation);
 		}
@@ -143,6 +148,14 @@ public class RudderActuator extends Actuator {
 	
 	private double getTurningAngleFromHeading(double heading) {
 		return 9*heading;
+	}
+	
+	public double getSpeed() {
+		return speed;
+	}
+	
+	public double getHeading() {
+		return heading;
 	}
 	
 }

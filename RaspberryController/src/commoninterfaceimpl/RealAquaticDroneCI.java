@@ -638,5 +638,10 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	public double getRudderSpeed() {
 		return rudderSpeed;
 	}
+	
+	@Override
+	public double getMotorSpeedsInPercentage() {
+		return (getLeftMotorSpeed()+getRightMotorSpeed())/2.0;
+	}
 
 }
