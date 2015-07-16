@@ -58,12 +58,8 @@ public class BoundaryEnvironment extends OpenEnvironment {
     
     @Override
     protected boolean safe(Robot r, Simulator simulator) {
-    	boolean superSafe =  super.safe(r, simulator);
-    	
-    	if(!superSafe)
-    		return superSafe;
-    	
-        return insideLines(new Vector2d(r.getPosition().x, r.getPosition().y), simulator);
+    	return super.safe(r, simulator) &&
+                insideLines(new Vector2d(r.getPosition().x, r.getPosition().y), simulator);
     }
 
     protected void addLines(LinkedList<Waypoint> waypoints, Simulator simulator) {

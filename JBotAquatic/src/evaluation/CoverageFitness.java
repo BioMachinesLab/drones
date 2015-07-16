@@ -17,19 +17,23 @@ public class CoverageFitness extends EvaluationFunction {
     private double[][] coverage;
     private double resolution = 1;
     private double width = 5, height = 5;
-    private final double decrease = 1.0 / (10 * 100);//1000 steps to go from 1.0 to 0.0
+    private final double decrease = 0.001;//1000 steps to go from 1.0 to 0.0
+    private double accum = 0;
 
     private double v = 0;
     private double max = 0;
     private double steps = 0;
     private double distance = 10;
     private boolean kill = false;
+    private final double safetyDistance;
+    private double minDistanceOthers = Double.POSITIVE_INFINITY;    
 
     public CoverageFitness(Arguments args) {
         super(args);
         resolution = args.getArgumentAsDoubleOrSetDefault("resolution", resolution);
         distance = args.getArgumentAsDoubleOrSetDefault("distance", distance);
         kill = args.getFlagIsTrue("kill");
+        safetyDistance = args.getArgumentAsDouble("safetydistance");
     }
 
     public void setup(Simulator simulator) {
@@ -143,7 +147,22 @@ public class CoverageFitness extends EvaluationFunction {
             }
         }
 
-        fitness += ((sum / max) / steps / robots.size());
+        accum += ((sum / max) / steps / robots.size());
+        fitness = accum;
+        
+        // COLLISIONS
+        for(int i = 0 ; i < simulator.getRobots().size() ; i++) {
+            for(int j = i + 1 ; j < simulator.getRobots().size() ; j++) {
+                Robot ri = simulator.getRobots().get(i);
+                Robot rj = simulator.getRobots().get(j);
+                minDistanceOthers = Math.min(minDistanceOthers, ri.getPosition().distanceTo(rj.getPosition()) - ri.getRadius() - rj.getRadius());
+            }
+            if(kill && simulator.getRobots().get(i).isInvolvedInCollison()){
+                simulator.stopSimulation();
+            }
+        }
+        double safetyFactor = Math.min(safetyDistance, minDistanceOthers) / safetyDistance;        
+        fitness *= safetyFactor;
     }
 
     @Override
