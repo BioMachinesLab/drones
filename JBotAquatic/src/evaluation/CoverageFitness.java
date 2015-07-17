@@ -1,6 +1,7 @@
 package evaluation;
 
 import java.util.ArrayList;
+
 import mathutils.Vector2d;
 import simulation.Simulator;
 import simulation.physicalobjects.Line;
@@ -164,6 +165,25 @@ public class CoverageFitness extends EvaluationFunction {
         double safetyFactor = Math.min(safetyDistance, minDistanceOthers) / safetyDistance;        
         fitness *= safetyFactor;
     }
+    
+    private void printGrid() {
+		System.out.println();
+		System.out.println();
+		for(int y = coverage.length-1 ; y >= 0 ; y--) {
+			for(int x = 0 ; x < coverage[y].length ; x++) {
+				if(coverage[y][x] == -1) {
+					System.out.print(" ");
+				} else if(coverage[y][x] == 0) {
+					System.out.print("_");
+				} else if(coverage[y][x] == 1) {
+					System.out.print("#");
+				} else {
+					System.out.print("<");
+				}
+			}
+			System.out.println();
+		}
+	}
 
     @Override
     public double getFitness() {

@@ -335,7 +335,7 @@ public class CommandPanel extends UpdatePanel {
 		ArrayList<String> selectedAddresses = new ArrayList<String>();
 		
 		for(String s : addresses)
-			if(selectedAddress(s)) {
+			if(s != null && selectedAddress(s)) {
 				selectedAddresses.add(s);
 			}
 

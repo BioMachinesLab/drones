@@ -37,6 +37,7 @@ public class CommandSender extends Thread{
 			} catch(Exception e) {
 				e.printStackTrace();
 			}
+			i++;
 		}
 		
 		int count =  0;

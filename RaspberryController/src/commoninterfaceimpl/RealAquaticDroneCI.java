@@ -561,7 +561,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		double lw = 0;
 		double rw = 0;
 		
-		if(Math.abs(heading) >= 0.9 || Math.abs(heading) < 0.1) {
+		if(Math.abs(heading) >= 0.9/* || Math.abs(heading) < 0.1*/) {
 			
 			if(Math.abs(heading) >= 0.9)
 				heading = 1.0*Math.signum(heading);

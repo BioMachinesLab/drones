@@ -24,6 +24,7 @@ public class BoundaryEnvironment extends OpenEnvironment {
     protected double wallsDistance = 5;
     @ArgumentsAnnotation(name = "random", defaultValue = "0.5")
     protected double rand = 0.5;
+    protected boolean placeOutside = false;
     
     protected GeoFence fence;
 
@@ -31,6 +32,7 @@ public class BoundaryEnvironment extends OpenEnvironment {
         super(simulator, args);
         rand = args.getArgumentAsDoubleOrSetDefault("random", rand);
         wallsDistance = args.getArgumentAsDoubleOrSetDefault("wallsdistance", wallsDistance);
+        placeOutside = args.getFlagIsTrue("placeoutside");
     }
 
     @Override
@@ -59,7 +61,7 @@ public class BoundaryEnvironment extends OpenEnvironment {
     @Override
     protected boolean safe(Robot r, Simulator simulator) {
     	return super.safe(r, simulator) &&
-                insideLines(new Vector2d(r.getPosition().x, r.getPosition().y), simulator);
+                (placeOutside || insideLines(new Vector2d(r.getPosition().x, r.getPosition().y), simulator));
     }
 
     protected void addLines(LinkedList<Waypoint> waypoints, Simulator simulator) {

@@ -52,7 +52,7 @@ public class RudderActuator extends Actuator {
 		else if(speed < prevSpeed - maxIncrementDown)
 			speed  = prevSpeed - maxIncrementDown;
 		
-		if(Math.abs(heading) >= 0.9 || Math.abs(heading) < 0.1) {
+		if(Math.abs(heading) >= 0.9/* || Math.abs(heading) < 0.1*/) {
 			
 			if(Math.abs(heading) >= 0.9)
 				heading = 1.0*Math.signum(heading);
