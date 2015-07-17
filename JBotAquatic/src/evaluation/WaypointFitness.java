@@ -22,10 +22,9 @@ public class WaypointFitness extends EvaluationFunction {
 
     private boolean configured = false;
     private double startingDistance = 0;
-    private double targetDistance = 1.5;
-    private int steps = 0;
+    private double targetDistance = 2;
     private boolean kill = true;
-    private double usedEnergy = 0;
+    private double energyBonus = 0;
     private final double safetyDistance;
     private double minDistanceOthers = Double.POSITIVE_INFINITY;
 
@@ -41,7 +40,6 @@ public class WaypointFitness extends EvaluationFunction {
         AquaticDrone drone = (AquaticDrone) simulator.getRobots().get(0);
         Waypoint wp = drone.getActiveWaypoint();
         if (!configured) {
-            steps = simulator.getEnvironment().getSteps();
             startingDistance = calculateDistance(wp, drone);
         }
         configured = true;
@@ -49,17 +47,17 @@ public class WaypointFitness extends EvaluationFunction {
         // DISTANCE TO WAYPOINT + ENERGY USED TO STAY IN WP
         Vector2d wpPos = CoordinateUtilities.GPSToCartesian(wp.getLatLon());
         double distance = wpPos.distanceTo(new Vector2d(drone.getPosition().x, drone.getPosition().y));
-        double energy = drone.getMotorSpeedsInPercentage();
-
-        usedEnergy += (distance <= targetDistance ? energy : 1);
-        fitness = (startingDistance - distance) / startingDistance + 1 - (usedEnergy / steps);
+        if(distance <= targetDistance) {
+            energyBonus += 1 - drone.getMotorSpeedsInPercentage();
+        }
+        fitness = (startingDistance - distance) / startingDistance + energyBonus / simulator.getTime();
 
         // COLLISIONS
         if (kill && drone.isInvolvedInCollison()) {
             simulator.stopSimulation();
         }
         for (int i = 1; i < simulator.getRobots().size(); i++) {
-            Robot r = simulator.getRobots().get(1);
+            Robot r = simulator.getRobots().get(i);
             double d = drone.getPosition().distanceTo(r.getPosition()) - drone.getRadius() - r.getRadius();
             minDistanceOthers = Math.min(d, minDistanceOthers);
         }
@@ -69,7 +67,7 @@ public class WaypointFitness extends EvaluationFunction {
 
     @Override
     public double getFitness() {
-        return Math.max(0,fitness + 10);
+        return 10 + fitness;
     }
 
     public static double calculateDistance(Waypoint wp, AquaticDrone drone) {

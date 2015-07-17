@@ -11,7 +11,6 @@ import commoninterface.utils.CoordinateUtilities;
 import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
 import simulation.Simulator;
 import simulation.robot.AquaticDrone;
-import simulation.robot.Robot;
 import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
 
@@ -21,58 +20,35 @@ import simulation.util.ArgumentsAnnotation;
  */
 public class StationKeepingFitness extends EvaluationFunction {
 
-    @ArgumentsAnnotation(name="alloweddistance", defaultValue="1.5")
-    private double allowedDistance = 1.5;
-    private boolean kill = true;
-    
+    @ArgumentsAnnotation(name = "alloweddistance", defaultValue = "2")
+    private double allowedDistance = 2;
+
     private final double maxDistance = 10;
-    private double usedEnergy = 0;
+    private double energyBonus = 0;
     private double totalDistance = 0;
-    private int steps = 0;
 
     public StationKeepingFitness(Arguments args) {
         super(args);
-    	allowedDistance = args.getArgumentAsDouble("alloweddistance");
-        kill = args.getFlagIsTrue("kill");
+        allowedDistance = args.getArgumentAsDouble("alloweddistance");
     }
-    
+
     @Override
     public void update(Simulator simulator) {
-        steps++;
-        double distance = 0;
-        double energy = 0;
-        for(Robot r : simulator.getRobots()) {
-            AquaticDrone drone = (AquaticDrone) r;
-            Waypoint wp = drone.getActiveWaypoint();
-            Vector2d wpPos = CoordinateUtilities.GPSToCartesian(wp.getLatLon());
-            double d = wpPos.distanceTo(new Vector2d(drone.getPosition().x, drone.getPosition().y));
-            distance += d;
-            energy += (Math.abs(drone.getLeftMotorSpeed()) + Math.abs(drone.getRightMotorSpeed())) / 2;
+        AquaticDrone drone = (AquaticDrone) simulator.getRobots().get(0);
+        Waypoint wp = drone.getActiveWaypoint();
+        Vector2d wpPos = CoordinateUtilities.GPSToCartesian(wp.getLatLon());
+        double distance = wpPos.distanceTo(new Vector2d(drone.getPosition().x, drone.getPosition().y));
+        
+        if(distance <= allowedDistance) {
+            energyBonus += 1 - drone.getMotorSpeedsInPercentage();
         }
-        
-        usedEnergy += energy / simulator.getRobots().size();
-        totalDistance += distance / simulator.getRobots().size();
-        
-        fitness = (maxDistance - Math.min(maxDistance, totalDistance / steps)) / maxDistance;
-        if(totalDistance / steps <= allowedDistance) {
-            fitness += (1 - usedEnergy / steps);
-        }
-        
-        if(kill) {
-            for(Robot r : simulator.getRobots()) {
-                if(r.isInvolvedInCollison()) {
-                    simulator.stopSimulation();
-                    fitness /= 10;
-                    break;
-                }
-            }
-        }
-        
+        totalDistance += distance;
+
+        fitness = (maxDistance - Math.min(maxDistance, totalDistance)) / maxDistance / simulator.getTime() + energyBonus / simulator.getTime();
     }
-    
+
     @Override
     public double getFitness() {
-    	return Math.max(0,fitness);
-    }    
-    
+        return 10 + fitness;
+    }
 }
