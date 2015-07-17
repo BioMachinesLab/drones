@@ -51,5 +51,4 @@ public class StationKeepingFitness extends EvaluationFunction {
     public double getFitness() {
         return 10 + fitness;
     }
-
 }

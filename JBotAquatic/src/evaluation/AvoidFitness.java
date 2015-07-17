@@ -67,7 +67,7 @@ public class AvoidFitness extends EvaluationFunction {
 
     @Override
     public double getFitness() {
-        return fitness;
+        return Math.max(0,fitness);
     }
 
 }
