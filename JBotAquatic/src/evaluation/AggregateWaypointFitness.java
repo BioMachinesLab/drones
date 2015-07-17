@@ -8,7 +8,6 @@ package evaluation;
 import commoninterface.entities.Waypoint;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CoordinateUtilities;
-import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
 
 
 import simulation.Simulator;
@@ -20,20 +19,15 @@ import simulation.util.Arguments;
  *
  * @author jorge
  */
-public class AggregateWaypointFitness extends EvaluationFunction {
+public class AggregateWaypointFitness extends AvoidCollisionsFunction {
 
     private boolean configured = false;
     private double startingDistance = 0;
     private double meanDistance = 0;
     private Waypoint wp = null;
-    private final double safetyDistance;
-    private double minDistanceOthers = Double.POSITIVE_INFINITY;
-    private boolean kill = false;
 
     public AggregateWaypointFitness(Arguments args) {
         super(args);
-        safetyDistance = args.getArgumentAsDouble("safetydistance");
-        kill = args.getFlagIsTrue("kill");
     }
 
     @Override
@@ -57,19 +51,7 @@ public class AggregateWaypointFitness extends EvaluationFunction {
         meanDistance += (startingDistance - currentDistance) / startingDistance;
         fitness = meanDistance / simulator.getTime();
         
-        // COLLISIONS
-        for(int i = 0 ; i < simulator.getRobots().size() ; i++) {
-            for(int j = i + 1 ; j < simulator.getRobots().size() ; j++) {
-                Robot ri = simulator.getRobots().get(i);
-                Robot rj = simulator.getRobots().get(j);
-                minDistanceOthers = Math.min(minDistanceOthers, ri.getPosition().distanceTo(rj.getPosition()) - ri.getRadius() - rj.getRadius());
-            }
-            if(kill && simulator.getRobots().get(i).isInvolvedInCollison()){
-                simulator.stopSimulation();
-            }
-        }
-        double safetyFactor = Math.min(safetyDistance, minDistanceOthers) / safetyDistance;        
-        fitness *= safetyFactor;
+        super.update(simulator);
     }
 
     @Override

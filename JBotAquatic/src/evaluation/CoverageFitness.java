@@ -9,9 +9,8 @@ import simulation.physicalobjects.PhysicalObjectType;
 import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
-import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
 
-public class CoverageFitness extends EvaluationFunction {
+public class CoverageFitness extends AvoidCollisionsFunction {
 
     private boolean isSetup = false;
     private double[][] coverage;
@@ -23,17 +22,12 @@ public class CoverageFitness extends EvaluationFunction {
     private double v = 0;
     private double max = 0;
     private double steps = 0;
-    private double distance = 10;
-    private boolean kill = false;
-    private final double safetyDistance;
-    private double minDistanceOthers = Double.POSITIVE_INFINITY;    
+    private double distance = 10;  
 
     public CoverageFitness(Arguments args) {
         super(args);
         resolution = args.getArgumentAsDoubleOrSetDefault("resolution", resolution);
         distance = args.getArgumentAsDoubleOrSetDefault("distance", distance);
-        kill = args.getFlagIsTrue("kill");
-        safetyDistance = args.getArgumentAsDouble("safetydistance");
     }
 
     public void setup(Simulator simulator) {
@@ -141,7 +135,7 @@ public class CoverageFitness extends EvaluationFunction {
                             coverage[y][x] = 1.0;
                         }
                     }
-                } else if (kill || ad.isInvolvedInCollison()) {
+                } else if (ad.isInvolvedInCollison()) {
                     r.setEnabled(false);
                 }
             }
@@ -149,24 +143,12 @@ public class CoverageFitness extends EvaluationFunction {
 
         accum += ((sum / max) / steps / robots.size());
         fitness = accum;
-        
-        // COLLISIONS
-        for(int i = 0 ; i < simulator.getRobots().size() ; i++) {
-            for(int j = i + 1 ; j < simulator.getRobots().size() ; j++) {
-                Robot ri = simulator.getRobots().get(i);
-                Robot rj = simulator.getRobots().get(j);
-                minDistanceOthers = Math.min(minDistanceOthers, ri.getPosition().distanceTo(rj.getPosition()) - ri.getRadius() - rj.getRadius());
-            }
-            if(kill && simulator.getRobots().get(i).isInvolvedInCollison()){
-                simulator.stopSimulation();
-            }
-        }
-        double safetyFactor = Math.min(safetyDistance, minDistanceOthers) / safetyDistance;        
-        fitness *= safetyFactor;
+
+        super.update(simulator);
     }
 
     @Override
     public double getFitness() {
-        return fitness;
+        return 10 + fitness;
     }
 }

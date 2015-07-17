@@ -3,9 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package evaluation;
+package evaluation.deprecated;
 
 import commoninterface.sensors.DroneCISensor;
+import evaluation.AvoidCollisionsFunction;
 import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
 import mathutils.Vector2d;
 
@@ -21,18 +22,15 @@ import simulation.util.Arguments;
  *
  * @author jorge
  */
-public class DispersionFitnessBoundary extends EvaluationFunction {
+public class DispersionFitnessBoundary extends AvoidCollisionsFunction {
 
-    private boolean kill = true;
     private double meanDistance = 0;
-    private int steps = 0;
     private double margin = 0;
     private boolean config = false;
     private double targetDistance = 0;
 
     public DispersionFitnessBoundary(Arguments args) {
         super(args);
-        kill = args.getFlagIsTrue("kill");
         margin = args.getArgumentAsDouble("margin");
     }
 
@@ -45,7 +43,8 @@ public class DispersionFitnessBoundary extends EvaluationFunction {
             targetDistance = r - margin;
             config = true;
         }
-        steps++;
+        
+        // MEAN DISTANCE TO CLOSEST ROBOT
         double distanceDelta = 0;
         for (Robot r : simulator.getRobots()) {
             double minDist = Double.POSITIVE_INFINITY;
@@ -57,30 +56,12 @@ public class DispersionFitnessBoundary extends EvaluationFunction {
             distanceDelta += Math.abs(minDist - targetDistance);
         }
         distanceDelta /= simulator.getRobots().size();
-        meanDistance += (simulator.getEnvironment().getWidth() - distanceDelta);
-        fitness = meanDistance / steps;
+        meanDistance += (simulator.getEnvironment().getWidth() - distanceDelta) / simulator.getEnvironment().getWidth();
+        fitness = meanDistance / simulator.getTime();
+        
+        // TODO: STAY INSIDE BOUNDARIES
 
-        for (Robot r : simulator.getRobots()) {
-            if (kill && (r.isInvolvedInCollison() || r.isInvolvedInCollisonWall() || !insideLines(r.getPosition(), simulator))) {
-                simulator.stopSimulation();
-                fitness /= 10;
-                break;
-            }
-        }
-    }
-
-    public boolean insideLines(Vector2d v, Simulator sim) {
-        //http://en.wikipedia.org/wiki/Point_in_polygon
-        int count = 0;
-        for (PhysicalObject p : sim.getEnvironment().getAllObjects()) {
-            if (p.getType() == PhysicalObjectType.LINE) {
-                Line l = (Line) p;
-                if (l.intersectsWithLineSegment(v, new Vector2d(0, -1000)) != null) {
-                    count++;
-                }
-            }
-        }
-        return count % 2 != 0;
+        super.update(simulator);
     }
 
     @Override
