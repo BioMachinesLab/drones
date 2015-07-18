@@ -130,4 +130,8 @@ public abstract class RobotControlConsole {
 			}
 		});
 	}
+	
+	public void log(String s) {
+		System.err.println("Logger not implemented!");
+	}
 }

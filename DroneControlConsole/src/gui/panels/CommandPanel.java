@@ -2,7 +2,6 @@ package gui.panels;
 
 import gui.DroneGUI;
 import gui.RobotGUI;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -17,7 +16,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.Scanner;
-
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -43,7 +41,6 @@ import commoninterface.network.NetworkUtils;
 import commoninterface.network.broadcast.EntitiesBroadcastMessage;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.network.messages.EntitiesMessage;
-import commoninterface.network.messages.LogMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.ClassLoadHelper;
@@ -53,6 +50,8 @@ import commoninterface.utils.jcoord.LatLon;
 
 public class CommandPanel extends UpdatePanel {
 	private static final long serialVersionUID = 4038133860317693008L;
+	
+	private static double SAFETY_DISTANCE = 2;
 
 	private static String CONTROLLERS_FOLDER = "controllers";
 
@@ -64,6 +63,7 @@ public class CommandPanel extends UpdatePanel {
 	private JTextArea config;
 	private JTextField logMessage;
 	private JTextArea selectedDrones;
+	private JTextArea autoDeployArea;
 	public JButton sendLog;
 	private RobotGUI gui;
 	private RobotControlConsole console;
@@ -132,6 +132,10 @@ public class CommandPanel extends UpdatePanel {
 		selectedDrones = new JTextArea(2,30);
 		selectedDrones.setLineWrap(true);
 		JScrollPane selectDronesScroll = new JScrollPane(selectedDrones);
+		
+		autoDeployArea = new JTextArea(2,30);
+		autoDeployArea.setLineWrap(true);
+		JScrollPane autoDeployAreaScroll = new JScrollPane(autoDeployArea);
 		
 		presetsPanel.setBorder(BorderFactory.createTitledBorder("Controllers"));
 		
@@ -232,7 +236,11 @@ public class CommandPanel extends UpdatePanel {
 		
 		add(topPanel, BorderLayout.NORTH);
 		add(actionsPanel, BorderLayout.CENTER);
-		add(statusMessage, BorderLayout.SOUTH);
+		
+		JPanel deploy = new JPanel();
+		deploy.setBorder(BorderFactory.createTitledBorder("Drone Deploy Area"));
+		deploy.add(autoDeployAreaScroll);
+		add(deploy, BorderLayout.SOUTH);
 	}
 
 	private void initNeuralActivationsWindow() {
@@ -281,7 +289,6 @@ public class CommandPanel extends UpdatePanel {
 		
 		if(type != null){
 			BehaviorMessage m = new BehaviorMessage(type,translatedArgs.getCompleteArgumentString(), true, myHostname);
-			System.out.println(m);
 			deploy(m);
 		}else
 			JOptionPane.showMessageDialog(null, "Contoller type not defined on preset configuration file!");
@@ -332,7 +339,10 @@ public class CommandPanel extends UpdatePanel {
 	private synchronized void deploy(Message m, boolean dynamicIds) {
 		setText("Deploying...");
 		
-		new CommandSender(m, getSelectedAddresses(), this, dynamicIds).start();
+		ArrayList<String> addresses = getSelectedAddresses();
+		
+		console.log("Deploying "+m+";ADDRESSES;"+addresses.toString().replace(", ", ";").replace("[", "").replace("]", ""));
+		new CommandSender(m, addresses, this, dynamicIds).start();
 	}
 	
 	public boolean isSelectedAddress(String s) {
@@ -574,9 +584,19 @@ public class CommandPanel extends UpdatePanel {
 			return;
 		}
 		
-		GeoFence fence = null;
+		ArrayList<String> selectedAddresses = getSelectedAddresses();
+	
+		int robots = selectedAddresses.size();
 		
-		int randomSeed = (int)(Math.random()*1000.0);//TODO
+		if(robots == 0) {
+			JOptionPane.showMessageDialog(null, "No robots selected!");
+			return;
+		}
+		
+		GeoFence fence = null;
+		ArrayList<Waypoint> chosenWPs = new ArrayList<Waypoint>();
+		
+		int randomSeed = (int)(Math.random()*1000.0);
 		
 		for(Entity e : mapEntities) {
 			if(e instanceof GeoFence) {
@@ -585,8 +605,55 @@ public class CommandPanel extends UpdatePanel {
 			}
 		}
 		
+		DroneGUI droneGUI = (DroneGUI)gui;
+		
+		if(!autoDeployArea.getText().isEmpty()) {
+			
+			fence = new GeoFence("geofence");
+			Scanner s = new Scanner(autoDeployArea.getText());
+			s.useDelimiter(";");
+			
+			LinkedList<LatLon> fenceLatLon = new LinkedList<LatLon>();
+			
+			while(s.hasNext()) {
+				String token = s.next();
+				if(token.equals("SEED")) {
+					token = s.next();
+					randomSeed = Integer.parseInt(token);
+				}
+				if(token.equals("FENCE")) {
+					token = s.next();
+					((DroneGUI)gui).getMapPanel().clearGeoFence();
+				}
+				
+				if(token.equals("FENCEWP")) {
+					String lat = s.next();
+					String lon = s.next();
+					
+					LatLon latLon = new LatLon(Double.parseDouble(lat), Double.parseDouble(lon));
+					
+					fenceLatLon.add(latLon);
+					fence.addWaypoint(latLon);
+				}
+				
+				if(token.equals("WP")) {
+					String lat = s.next();
+					String lon = s.next();
+					
+					LatLon latLon = new LatLon(Double.parseDouble(lat), Double.parseDouble(lon));
+					chosenWPs.add(new Waypoint("wp"+chosenWPs.size(), latLon));
+				}
+				
+			}
+			s.close();
+			
+			if(!fenceLatLon.isEmpty()) {
+				droneGUI.getMapPanel().addGeoFence(fence);
+			}
+		}
+		
 		if(fence != null) {
-			DroneGUI droneGUI = (DroneGUI)gui;
+			
 			droneGUI.getMapPanel().clearWaypoints();
 			
 			LinkedList<Waypoint> wps = fence.getWaypoints();
@@ -622,18 +689,7 @@ public class CommandPanel extends UpdatePanel {
 				Waypoint wb = fenceWPs.get(0);
 				lines.add(getLine(wa,wb));
 				
-				ArrayList<String> selectedAddresses = getSelectedAddresses();
-				
-				int robots = selectedAddresses.size();
-				
-				if(robots == 0) {
-					JOptionPane.showMessageDialog(null, "No robots selected!");
-					return;
-				}
-				
 				Random r = new Random(randomSeed);
-				
-				ArrayList<Waypoint> chosenWPs = new ArrayList<Waypoint>();
 				
 				for(int i = 0 ; i < robots ; i++) {
 					
@@ -653,13 +709,30 @@ public class CommandPanel extends UpdatePanel {
 						
 					} while(!safePosition(pos, chosenWPs, lines));
 					
-					Waypoint w = new Waypoint("wp"+i, CoordinateUtilities.cartesianToGPS(pos));
+					if(i >= chosenWPs.size()) {
+						Waypoint w = new Waypoint("wp"+i, CoordinateUtilities.cartesianToGPS(pos));
+						chosenWPs.add(w);
+					}
 					
-					chosenWPs.add(w);
 				}
 				
 				for(Waypoint w : chosenWPs)
 					droneGUI.getMapPanel().addWaypoint(w);
+				
+				String str = "GEOFENCE AUTO DISPERSE;";
+				
+				str+="SEED;"+randomSeed+";FENCE;";
+				
+				for(Waypoint w : fence.getWaypoints()) {
+					str+="FENCEWP;"+w.getLatLon().getLat()+";"+w.getLatLon().getLon()+";";
+				}
+				
+				for(Waypoint w : chosenWPs) {
+					str+="WP;"+w.getLatLon().getLat()+";"+w.getLatLon().getLon()+";";
+				}
+				
+				console.log(str);
+				autoDeployArea.setText(str);
 				
 				deployEntities(true);
 				deployPreset(presetsConfig.get("waypoint"));
@@ -669,7 +742,6 @@ public class CommandPanel extends UpdatePanel {
 			JOptionPane.showMessageDialog(null, "Please define a GeoFence first!");
 			return;
 		}
-		
 	}
 	
 	private Line getLine(Waypoint wa, Waypoint wb) {
@@ -680,12 +752,10 @@ public class CommandPanel extends UpdatePanel {
 	
 	private boolean safePosition(Vector2d v, ArrayList<Waypoint> wps, ArrayList<Line> lines) {
 		
-		double safetyDistance = 2;
-		
 		if(insideBoundary(v, lines)) {
 		
 			for(Waypoint wp : wps) {
-				if(CoordinateUtilities.GPSToCartesian(wp.getLatLon()).distanceTo(v) < safetyDistance)
+				if(CoordinateUtilities.GPSToCartesian(wp.getLatLon()).distanceTo(v) < SAFETY_DISTANCE)
 					return false;
 			}
 			

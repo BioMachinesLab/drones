@@ -13,16 +13,12 @@ public class IncidentLogger {
 
 	private static final String INCIDENTS_FOLDER = "incidents_logs";
 
-	private DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("dd-MM-YY_HH-mm-ss");
+	private DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("dd-MM-YY");
 	private DateTimeFormatter hourFormatter = DateTimeFormat.forPattern("HH:mm:ss.SS");
 
 	private BufferedWriter bw = null;
 
-	public IncidentLogger() {
-
-	}
-
-	public void open(){
+	public synchronized void open(){
 		String fileName = DateTime.now().toString(dateFormatter)+".txt";
 
 		try {
@@ -31,30 +27,33 @@ public class IncidentLogger {
 			if(!folder.exists())
 				folder.mkdir();
 
-			bw = new BufferedWriter(new FileWriter(new File(INCIDENTS_FOLDER+"/"+fileName)));
+			bw = new BufferedWriter(new FileWriter(new File(INCIDENTS_FOLDER+"/"+fileName),true));
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public void log(String msg) {
+	public synchronized void log(String msg) {
 		if(bw == null){
 			open();
 		}
 		
 		if(bw != null) {
 			try {
-				String txt = DateTime.now().toString(hourFormatter)+" "+msg;
+				String txt = "# "+DateTime.now().toString(hourFormatter)+" "+msg;
 				bw.append(txt+"\n");
+				bw.flush();
+				close();
 			} catch(IOException e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
-	public void close() throws IOException{
+	public synchronized void close() throws IOException{
 		if(bw != null) {
 			bw.close();
+			bw = null;
 		}
 	}
 }

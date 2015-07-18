@@ -789,7 +789,7 @@ public class MapPanel extends UpdatePanel {
 		updateCommandPanel();
 	}
 
-	private synchronized void addGeoFence(GeoFence geo) {
+	public synchronized void addGeoFence(GeoFence geo) {
 		ArrayList<Coordinate> coords = new ArrayList<Coordinate>();
 
 		for(Waypoint wp : geo.getWaypoints()) {
@@ -900,7 +900,7 @@ public class MapPanel extends UpdatePanel {
 		updateCommandPanel();
 	}
 
-	private synchronized void clearGeoFence() {
+	public synchronized void clearGeoFence() {
 
 		LinkedList<MapMarker> list = new LinkedList<MapMarker>();
 

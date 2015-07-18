@@ -36,4 +36,12 @@ public class EntitiesMessage extends Message {
 	public Message getCopy() {
 		return new EntitiesMessage(entities, getSenderHostname());
 	}
+	
+	@Override
+	public String toString() {
+		String s = this.getClass().getSimpleName()+";";
+		for(Entity e : entities)
+			s+=e.toString()+";";
+		return s;
+	}
 }

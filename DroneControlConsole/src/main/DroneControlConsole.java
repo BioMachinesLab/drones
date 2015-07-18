@@ -113,4 +113,9 @@ public class DroneControlConsole extends RobotControlConsole {
 			}
 		});
 	}
+	
+	@Override
+	public void log(String s) {
+		((DroneGUI)gui).getLogsPanel().getIncidentLogger().log(s);
+	}
 }

@@ -57,4 +57,12 @@ public class GeoFence extends Entity {
 		return "entity added "+getClass().getSimpleName()+" "+getName()+" "+getWaypoints().size()+" "+str;
 	}
 	
+	@Override
+	public String toString() {
+		String s = this.getClass().getSimpleName()+";";
+		for(Waypoint w : getWaypoints())
+			s+= "FENCEWP;"+w.getLatLon().getLat()+";"+w.getLatLon().getLon()+";";
+		return s;
+	}
+	
 }

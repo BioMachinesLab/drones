@@ -36,4 +36,10 @@ public class BehaviorMessage extends Message {
 	public Message getCopy() {
 		return new BehaviorMessage(selectedBehavior, args, selectedStatus, getSenderHostname());
 	}
+	
+	@Override
+	public String toString() {
+		String s = this.getClass().getSimpleName()+";"+selectedBehavior+";"+selectedStatus+";"+args;
+		return s;
+	}
 }
