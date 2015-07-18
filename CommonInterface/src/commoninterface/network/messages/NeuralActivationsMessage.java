@@ -36,5 +36,10 @@ public class NeuralActivationsMessage extends Message {
 	public ArrayList<Double[]> getOutputsValues() {
 		return outputsValues;
 	}
+	
+	@Override
+	public Message getCopy() {
+		return new NeuralActivationsMessage(inputsTitles, inputsValues, outputsTitles, outputsValues, senderHostname);
+	}
 
 }

@@ -15,5 +15,10 @@ public class CameraCaptureMessage extends Message {
 	public byte[] getFrameBytes() {
 		return frameBytes;
 	}
+	
+	@Override
+	public Message getCopy() {
+		return new CameraCaptureMessage(frameBytes, getSenderHostname());
+	}
 
 }

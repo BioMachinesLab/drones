@@ -31,4 +31,9 @@ public class BehaviorMessage extends Message {
 	public void setArguments(String args) {
 		this.args = args;
 	}
+	
+	@Override
+	public Message getCopy() {
+		return new BehaviorMessage(selectedBehavior, args, selectedStatus, getSenderHostname());
+	}
 }

@@ -22,5 +22,10 @@ public class ThymioVirtualPositionMessage extends Message {
 	public double getVirtualOrientation() {
 		return virtualOrientation;
 	}
+	
+	@Override
+	public Message getCopy() {
+		return new ThymioVirtualPositionMessage(virtualThymioPosition, virtualOrientation, senderHostname);
+	}
 
 }

@@ -15,4 +15,9 @@ public class SystemStatusMessage extends Message {
 	public String getMessage() {
 		return message;
 	}
+	
+	@Override
+	public Message getCopy() {
+		return new SystemStatusMessage(message, message);
+	}
 }

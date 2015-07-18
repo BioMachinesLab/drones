@@ -15,4 +15,9 @@ public class BatteryMessage extends Message {
 	public BatteryStatus getBatteryStatus() {
 		return batteryStatus;
 	}
+	
+	@Override
+	public Message getCopy() {
+		return new BatteryMessage(batteryStatus, getSenderHostname());
+	}
 }

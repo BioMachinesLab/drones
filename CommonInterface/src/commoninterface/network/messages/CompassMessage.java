@@ -14,4 +14,9 @@ public class CompassMessage extends Message {
 	public int getHeading() {
 		return heading;
 	}
+	
+	@Override
+	public Message getCopy() {
+		return new CompassMessage(heading, senderHostname);
+	}
 }

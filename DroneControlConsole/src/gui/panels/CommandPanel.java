@@ -5,7 +5,6 @@ import gui.RobotGUI;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -16,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Random;
 import java.util.Scanner;
 
 import javax.swing.BorderFactory;
@@ -37,8 +37,8 @@ import threads.UpdateThread;
 import commoninterface.CIBehavior;
 import commoninterface.entities.Entity;
 import commoninterface.entities.GeoFence;
-import commoninterface.entities.ObstacleLocation;
 import commoninterface.entities.Waypoint;
+import commoninterface.mathutils.Vector2d;
 import commoninterface.network.NetworkUtils;
 import commoninterface.network.broadcast.EntitiesBroadcastMessage;
 import commoninterface.network.messages.BehaviorMessage;
@@ -47,6 +47,9 @@ import commoninterface.network.messages.LogMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.ClassLoadHelper;
+import commoninterface.utils.CoordinateUtilities;
+import commoninterface.utils.Line;
+import commoninterface.utils.jcoord.LatLon;
 
 public class CommandPanel extends UpdatePanel {
 	private static final long serialVersionUID = 4038133860317693008L;
@@ -66,8 +69,6 @@ public class CommandPanel extends UpdatePanel {
 	private RobotControlConsole console;
 	private boolean dronePanel = false;
 	private JFrame neuralActivationsWindow;
-	public JButton start;
-	public JButton stop;
 	public JButton deploy;
 	public JButton stopAll;
 	public JButton entitiesButton;
@@ -99,6 +100,7 @@ public class CommandPanel extends UpdatePanel {
 
 		if (gui instanceof DroneGUI)
 			dronePanel = true;
+		
 		initNeuralActivationsWindow();
 
 		setBorder(BorderFactory.createTitledBorder("Commands"));
@@ -106,9 +108,7 @@ public class CommandPanel extends UpdatePanel {
 		setLayout(new BorderLayout());
 
 		JPanel topPanel = new JPanel(new BorderLayout());
-
 		JPanel controllersPanel = new JPanel(new BorderLayout());
-		
 		JPanel comboBoxes = new JPanel(new BorderLayout());
 
 		behaviors = new JComboBox<String>();
@@ -126,33 +126,28 @@ public class CommandPanel extends UpdatePanel {
 				loadController((String) controllers.getSelectedItem());
 			}
 		});
-
-		controllersPanel.add(presetsPanel, BorderLayout.NORTH);
-		controllersPanel.add(comboBoxes, BorderLayout.SOUTH);
 		
-		topPanel.add(controllersPanel, BorderLayout.NORTH);
-
-		start = new JButton("Start");
-		stop = new JButton("Stop");
 		JLabel selectedDronesLabel = new JLabel("Selected drones");
 		selectedDronesLabel.setHorizontalAlignment(JLabel.HORIZONTAL);
-		selectedDrones = new JTextArea(1,5);
+		selectedDrones = new JTextArea(2,30);
 		selectedDrones.setLineWrap(true);
 		JScrollPane selectDronesScroll = new JScrollPane(selectedDrones);
+		
+		presetsPanel.setBorder(BorderFactory.createTitledBorder("Controllers"));
+		
+		controllersPanel.add(presetsPanel, BorderLayout.SOUTH);
+//		controllersPanel.add(comboBoxes, BorderLayout.SOUTH);
+		topPanel.add(controllersPanel, BorderLayout.NORTH);
+		
+		JPanel selectedPanel = new JPanel();
+		selectedPanel.add(selectDronesScroll);
+		
+		selectedPanel.setBorder(BorderFactory.createTitledBorder("Selection"));
+		
+		controllersPanel.add(selectedPanel, BorderLayout.NORTH);
+
 		deploy = new JButton("Deploy");
 		stopAll = new JButton("Stop All");
-
-		start.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				statusMessage((String) behaviors.getSelectedItem(), true);
-			}
-		});
-
-		stop.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				statusMessage((String) behaviors.getSelectedItem(), false);
-			}
-		});
 
 		deploy.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -166,30 +161,20 @@ public class CommandPanel extends UpdatePanel {
 			}
 		});
 
-		logMessage = new JTextField();
-		sendLog = new JButton("Send Log");
+		config = new JTextArea(7, 8);
+		config.setFont(new Font("Monospaced", Font.PLAIN, 11));
+		JScrollPane scroll = new JScrollPane(config);
 
-		sendLog.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				deployLog(logMessage.getText().trim());
-			}
-		});
+		statusMessage = new JLabel("");
+		statusMessage.setPreferredSize(new Dimension(10, 20));
 
-		JPanel buttons = new JPanel(new GridLayout(dronePanel ? 5 : 4, 2));
-		buttons.add(start);
-		buttons.add(stop);
-		buttons.add(selectDronesScroll);
-		buttons.add(selectedDronesLabel);
-		buttons.add(deploy);
-		buttons.add(stopAll);
-		buttons.add(logMessage);
-		buttons.add(sendLog);
-
+		JPanel actionsPanel = new JPanel(new GridLayout(2, 2));
+		
 		if (dronePanel) {
 
 			entitiesButton = new JButton("Deploy Entities");
 
-			buttons.add(entitiesButton);
+			actionsPanel.add(entitiesButton);
 
 			entitiesButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -203,21 +188,18 @@ public class CommandPanel extends UpdatePanel {
 			
 			autoDeployPanel.add(autoDeployLabel);
 			autoDeployPanel.add(autoDeployCheckBox);
-			buttons.add(autoDeployPanel);
+//			buttons.add(autoDeployPanel);
 		}
-
-		topPanel.add(buttons, BorderLayout.SOUTH);
-
-		config = new JTextArea(7, 8);
-		config.setFont(new Font("Monospaced", Font.PLAIN, 11));
-		JScrollPane scroll = new JScrollPane(config);
-
-		topPanel.add(scroll, BorderLayout.CENTER);
-
-		statusMessage = new JLabel("");
-		statusMessage.setPreferredSize(new Dimension(10, 20));
-
-		JPanel bigButtonsPanel = new JPanel(new GridLayout(2, 1));
+		
+		actionsPanel.add(stopAll);
+		
+		JButton placeDronesButton = new JButton("Place Drones Randomly");
+		placeDronesButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				placeDronesRandomly();
+			}
+		});
+		
 		
 		JButton plotButton = new JButton("Plot Neural Activations");
 		plotButton.addActionListener(new ActionListener() {
@@ -231,22 +213,25 @@ public class CommandPanel extends UpdatePanel {
 		calibrateButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Object[] options = { "Yes" ,"No" , "Cancel"};
-				int result = JOptionPane.showOptionDialog(null, "Start calibation ?", "Calibration", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+				Object[] options = { "Yes" ,"No"};
+				int result = JOptionPane.showOptionDialog(null, "Start calibration ?", "Calibration", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
 				
-				if(result == 0)
+				if(result == 0) {
 					statusMessage("CalibrationCIBehavior", true);
-				else if(result == 2){
+				}else if(result == 1){
 					//TODO: revert to old calibration
 				}
 			}
 		});
 
-		bigButtonsPanel.add(calibrateButton);
-		bigButtonsPanel.add(plotButton);
+		actionsPanel.add(placeDronesButton);
+		actionsPanel.add(calibrateButton);
+//		actionsPanel.add(plotButton);
+		
+		actionsPanel.setBorder(BorderFactory.createTitledBorder("Actions"));
 		
 		add(topPanel, BorderLayout.NORTH);
-		add(bigButtonsPanel);
+		add(actionsPanel, BorderLayout.CENTER);
 		add(statusMessage, BorderLayout.SOUTH);
 	}
 
@@ -260,7 +245,7 @@ public class CommandPanel extends UpdatePanel {
 
 	private synchronized void statusMessage(String className, boolean status) {
 		setText("");
-
+		
 		CIArguments translatedArgs = new CIArguments(config.getText()
 				.replaceAll("\\s+", ""), true);
 
@@ -296,18 +281,21 @@ public class CommandPanel extends UpdatePanel {
 		
 		if(type != null){
 			BehaviorMessage m = new BehaviorMessage(type,translatedArgs.getCompleteArgumentString(), true, myHostname);
+			System.out.println(m);
 			deploy(m);
 		}else
-			JOptionPane.showMessageDialog(null, "Contoller type no defined on preset configuration file!");
+			JOptionPane.showMessageDialog(null, "Contoller type not defined on preset configuration file!");
 		
 	}
-
 	private void deployEntities() {
-		DroneGUI droneGUI = (DroneGUI) gui;
-//		ArrayList<Entity> entities = droneGUI.getMapPanel().getEntities();
-		EntitiesMessage m = new EntitiesMessage(mapEntities, myHostname);
-		deploy(m);
+		deployEntities(false);
+	}
 
+	private void deployEntities(boolean dynamicActiveId) {
+		EntitiesMessage m = new EntitiesMessage(mapEntities, myHostname);
+		deploy(m,dynamicActiveId);
+
+		//This part is for other DroneControlConsoles to receive the updated entities
 		EntitiesBroadcastMessage msg = new EntitiesBroadcastMessage(mapEntities);
 		if (console instanceof DroneControlConsole) {
 			// Messages get lost sometimes!!!
@@ -320,29 +308,34 @@ public class CommandPanel extends UpdatePanel {
 				}
 			}
 		}
-
 	}
+	
+	private ArrayList<String> getSelectedAddresses() {
 
-	private void deployLog(String msg) {
-		LogMessage m = new LogMessage(msg, myHostname);
-		deploy(m);
+		String[] addresses = gui.getConnectionPanel().getCurrentAddresses();
+		
+		ArrayList<String> selectedAddresses = new ArrayList<String>();
+		
+		for(String s : addresses) {
+			if(s != null && isSelectedAddress(s)) {
+				selectedAddresses.add(s);
+			}
+		}
+		
+		return selectedAddresses;
 	}
 
 	private synchronized void deploy(Message m) {
-		setText("Deploying...");
-		
-		String[] addresses = gui.getConnectionPanel().getCurrentAddresses();
-		ArrayList<String> selectedAddresses = new ArrayList<String>();
-		
-		for(String s : addresses)
-			if(s != null && selectedAddress(s)) {
-				selectedAddresses.add(s);
-			}
-
-		new CommandSender(m, selectedAddresses, this).start();
+		deploy(m, false);
 	}
 	
-	public boolean selectedAddress(String s) {
+	private synchronized void deploy(Message m, boolean dynamicIds) {
+		setText("Deploying...");
+		
+		new CommandSender(m, getSelectedAddresses(), this, dynamicIds).start();
+	}
+	
+	public boolean isSelectedAddress(String s) {
 		
 		String str = selectedDrones.getText();
 		
@@ -402,7 +395,7 @@ public class CommandPanel extends UpdatePanel {
 			for (String s : controllersFolder.list()) {
 				if (s.endsWith(".conf")){
 					if(s.startsWith("preset")){
-						numberOfPreset ++;
+						numberOfPreset++;
 					}
 				}
 			}
@@ -574,4 +567,141 @@ public class CommandPanel extends UpdatePanel {
 		}
 	}
 	
+	public void placeDronesRandomly() {
+		
+		if(presetsConfig.get("waypoint") == null) {
+			JOptionPane.showMessageDialog(null, "There is no default Waypoint controller defined! Create a file called \"preset_waypoint.conf\" in the \"controllers\" folder.");
+			return;
+		}
+		
+		GeoFence fence = null;
+		
+		int randomSeed = (int)(Math.random()*1000.0);//TODO
+		
+		for(Entity e : mapEntities) {
+			if(e instanceof GeoFence) {
+				fence = (GeoFence)e;
+				break;
+			}
+		}
+		
+		if(fence != null) {
+			DroneGUI droneGUI = (DroneGUI)gui;
+			droneGUI.getMapPanel().clearWaypoints();
+			
+			LinkedList<Waypoint> wps = fence.getWaypoints();
+			
+			if(wps.size() < 4) {
+				JOptionPane.showMessageDialog(null, "GeoFence should have at least 4 points!");
+				return;
+			} else {
+			
+				Vector2d min = new Vector2d(Double.MAX_VALUE, Double.MAX_VALUE);
+				Vector2d max = new Vector2d(-Double.MAX_VALUE, -Double.MAX_VALUE);
+				
+				for(Waypoint w : wps) {
+					LatLon l = w.getLatLon();
+					Vector2d coord = CoordinateUtilities.GPSToCartesian(l);
+					
+					min.x = Math.min(coord.x,min.x);
+					min.y = Math.min(coord.y,min.y);
+					
+					max.x = Math.max(coord.x,max.x);
+					max.y = Math.max(coord.y,max.y);
+				}
+				
+				ArrayList<Line> lines = new ArrayList<Line>();
+				LinkedList<Waypoint> fenceWPs = fence.getWaypoints();
+				for(int i = 1 ; i < fenceWPs.size() ; i++) {
+					Waypoint wa = fenceWPs.get(i-1);
+					Waypoint wb = fenceWPs.get(i);
+					lines.add(getLine(wa,wb));
+				}
+				//loop around
+				Waypoint wa = fenceWPs.get(fenceWPs.size()-1);
+				Waypoint wb = fenceWPs.get(0);
+				lines.add(getLine(wa,wb));
+				
+				ArrayList<String> selectedAddresses = getSelectedAddresses();
+				
+				int robots = selectedAddresses.size();
+				
+				if(robots == 0) {
+					JOptionPane.showMessageDialog(null, "No robots selected!");
+					return;
+				}
+				
+				Random r = new Random(randomSeed);
+				
+				ArrayList<Waypoint> chosenWPs = new ArrayList<Waypoint>();
+				
+				for(int i = 0 ; i < robots ; i++) {
+					
+					Vector2d pos = null;
+					
+					int tries = 0;
+					
+					do {
+						double x = min.x + r.nextDouble()*(max.x-min.x);
+						double y = min.y + r.nextDouble()*(max.y-min.y);
+						pos = new Vector2d(x,y);
+						
+						if(tries++ > 100) {
+							JOptionPane.showMessageDialog(null, "Can't place the waypoints inside the GeoFence!");
+							return;
+						}
+						
+					} while(!safePosition(pos, chosenWPs, lines));
+					
+					Waypoint w = new Waypoint("wp"+i, CoordinateUtilities.cartesianToGPS(pos));
+					
+					chosenWPs.add(w);
+				}
+				
+				for(Waypoint w : chosenWPs)
+					droneGUI.getMapPanel().addWaypoint(w);
+				
+				deployEntities(true);
+				deployPreset(presetsConfig.get("waypoint"));
+				
+			}
+		} else {
+			JOptionPane.showMessageDialog(null, "Please define a GeoFence first!");
+			return;
+		}
+		
+	}
+	
+	private Line getLine(Waypoint wa, Waypoint wb) {
+		Vector2d va = CoordinateUtilities.GPSToCartesian(wa.getLatLon());
+		Vector2d vb = CoordinateUtilities.GPSToCartesian(wb.getLatLon());
+		return new Line(va.getX(), va.getY(), vb.getX(), vb.getY());
+	}
+	
+	private boolean safePosition(Vector2d v, ArrayList<Waypoint> wps, ArrayList<Line> lines) {
+		
+		double safetyDistance = 2;
+		
+		if(insideBoundary(v, lines)) {
+		
+			for(Waypoint wp : wps) {
+				if(CoordinateUtilities.GPSToCartesian(wp.getLatLon()).distanceTo(v) < safetyDistance)
+					return false;
+			}
+			
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean insideBoundary(Vector2d wp, ArrayList<Line> lines) {
+		//http://en.wikipedia.org/wiki/Point_in_polygon
+		int count = 0;
+		
+		for(Line l : lines) {
+			if(l.intersectsWithLineSegment(wp, new Vector2d(0,-Integer.MAX_VALUE)) != null)
+				count++;
+		}
+		return count % 2 != 0;
+	}
 }

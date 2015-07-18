@@ -20,10 +20,10 @@ import commoninterface.network.NetworkUtils;
  *
  */
 public abstract class Message implements Serializable {
-	private static final long serialVersionUID = 5764062121947005678L;
-	private String senderIPAddr;
-	private LocalDateTime timestamp;
-	private String senderHostname;
+	protected static final long serialVersionUID = 5764062121947005678L;
+	protected String senderIPAddr;
+	protected LocalDateTime timestamp;
+	protected String senderHostname;
 
 	private String[] cabledIntefaces = { "Atheros AR8151" };
 	private String[] wirelessIntefaces = { "Atheros AR9002WB-1NG" };
@@ -97,4 +97,6 @@ public abstract class Message implements Serializable {
 	public String getSenderHostname() {
 		return senderHostname;
 	}
+	
+	public abstract Message getCopy();
 }

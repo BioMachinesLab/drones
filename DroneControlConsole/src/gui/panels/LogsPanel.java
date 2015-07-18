@@ -98,7 +98,7 @@ public class LogsPanel extends JPanel {
 		add(getLogsButton, BorderLayout.SOUTH);
 		
 		JPanel logsTextAreaPanel = new JPanel(new BorderLayout());
-		logsTextArea = new JTextArea(7,4);
+		logsTextArea = new JTextArea(7,2);
 		logsTextArea.setFont(new Font("Monospaced", Font.PLAIN, 11));
 		logsTextArea.addKeyListener(new KeyAdapter() {
 			@Override
@@ -112,7 +112,7 @@ public class LogsPanel extends JPanel {
 		JScrollPane scroll = new JScrollPane(logsTextArea);
 		logsTextAreaPanel.add(scroll);
 		
-		textAreaButton = new JButton("Enter");
+		textAreaButton = new JButton("Save Log");
 		textAreaButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {

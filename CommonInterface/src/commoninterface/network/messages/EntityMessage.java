@@ -16,5 +16,10 @@ public class EntityMessage extends Message {
 	public Entity getEntity() {
 		return entity;
 	}
+	
+	@Override
+	public Message getCopy() {
+		return new EntityMessage(entity, senderHostname);
+	}
 
 }

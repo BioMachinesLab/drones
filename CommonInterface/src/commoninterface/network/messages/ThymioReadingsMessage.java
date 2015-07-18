@@ -17,5 +17,10 @@ public class ThymioReadingsMessage extends Message {
 	public List<Short> getReadings() {
 		return readings;
 	}
+	
+	@Override
+	public Message getCopy() {
+		return new ThymioReadingsMessage(readings, senderHostname);
+	}
 
 }

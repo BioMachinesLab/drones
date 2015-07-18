@@ -25,6 +25,7 @@ public class EntitiesMessageProvider implements MessageProvider{
 	public Message getMessage(Message m) {
 		
 		if(m instanceof EntitiesMessage) {
+			
 			EntitiesMessage wm = (EntitiesMessage)m;
 			ArrayList<Entity> entities = wm.getEntities();
 			
@@ -59,7 +60,7 @@ public class EntitiesMessageProvider implements MessageProvider{
 				ArrayList<Waypoint> wps = Waypoint.getWaypoints(robot);
 				
 				if(!wps.isEmpty())
-					((AquaticDroneCI) robot).setActiveWaypoint(wps.get(0));
+					((AquaticDroneCI) robot).setActiveWaypoint(wps.get(wm.getActiveId()));
 			}
 			return m;
 		}

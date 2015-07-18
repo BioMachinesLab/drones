@@ -8,6 +8,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import commoninterface.network.messages.EntitiesMessage;
 import commoninterface.network.messages.Message;
 
 public class CommandSender extends Thread{
@@ -17,11 +18,13 @@ public class CommandSender extends Thread{
 	private ArrayList<String> ips;
 	private Message message;
 	private CommandPanel cp;
+	private boolean dynamicActiveId = false;
 	
-	public CommandSender(Message message, ArrayList<String> ips, CommandPanel bp) {
+	public CommandSender(Message message, ArrayList<String> ips, CommandPanel bp, boolean dynamicActiveId) {
 		this.ips = ips;
 		this.message = message;
 		this.cp = bp;
+		this.dynamicActiveId = dynamicActiveId;
 	}
 	
 	@Override
@@ -32,7 +35,7 @@ public class CommandSender extends Thread{
 		for(String ip : ips) {
 			System.out.println(ip);
 			try {
-				sts[i] = new SenderThread(ip);
+				sts[i] = new SenderThread(ip,i);
 				sts[i].start();
 			} catch(Exception e) {
 				e.printStackTrace();
@@ -60,9 +63,15 @@ public class CommandSender extends Thread{
 	class SenderThread extends Thread {
 		
 		private Socket socket;
+		private Message myMessage;
 		
-		public SenderThread(String ip) throws IOException{
+		public SenderThread(String ip, int number) throws IOException{
 			socket = new Socket(ip, COMMAND_PORT);
+			myMessage = message.getCopy();
+			
+			if(dynamicActiveId && myMessage instanceof EntitiesMessage) {
+				((EntitiesMessage)myMessage).setActiveId(number);
+			}
 		} 
 		
 		@Override
@@ -71,7 +80,7 @@ public class CommandSender extends Thread{
 				ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
 				ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 				
-				out.writeObject(message);
+				out.writeObject(myMessage);
 				out.reset();
 				out.flush();
 				Object o = in.readObject();

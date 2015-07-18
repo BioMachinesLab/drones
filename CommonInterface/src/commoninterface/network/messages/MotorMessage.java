@@ -22,4 +22,9 @@ public class MotorMessage extends Message {
 	public double getRightMotor() {
 		return rightMotor;
 	}
+	
+	@Override
+	public Message getCopy() {
+		return new MotorMessage(leftMotor, rightMotor, senderHostname);
+	}
 }

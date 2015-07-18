@@ -15,4 +15,9 @@ public class GPSMessage extends Message {
 	public GPSData getGPSData() {
 		return gpsData;
 	}
+	
+	@Override
+	public Message getCopy() {
+		return new GPSMessage(gpsData, senderHostname);
+	}
 }

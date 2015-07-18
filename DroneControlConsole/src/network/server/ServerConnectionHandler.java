@@ -121,18 +121,18 @@ public class ServerConnectionHandler extends Thread {
 				console.getGUI().getCommandPanel().setLogText(cmdMessage.getPayload()[0]);
 				commandPanel.sendLog.doClick();
 				break;
-			case START:
-				commandPanel.setSeletedJComboBoxConfigurationFile(cmdMessage.getPayload()[1]);
-				if(cmdMessage.getPayload()[1].equals("")){
-					commandPanel.setConfiguration(cmdMessage.getPayload()[2]);
-				}
-				
-				commandPanel.setSeletedJComboBoxBehavior(cmdMessage.getPayload()[0]);
-				commandPanel.start.doClick();
-				break;
-			case STOP:
-				commandPanel.stop.doClick();
-				break;
+//			case START:
+//				commandPanel.setSeletedJComboBoxConfigurationFile(cmdMessage.getPayload()[1]);
+//				if(cmdMessage.getPayload()[1].equals("")){
+//					commandPanel.setConfiguration(cmdMessage.getPayload()[2]);
+//				}
+//				
+//				commandPanel.setSeletedJComboBoxBehavior(cmdMessage.getPayload()[0]);
+//				commandPanel.start.doClick();
+//				break;
+//			case STOP:
+//				commandPanel.stop.doClick();
+//				break;
 			case STOPALL:
 				commandPanel.stopAll.doClick();
 				break;

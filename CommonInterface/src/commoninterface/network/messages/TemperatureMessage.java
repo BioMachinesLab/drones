@@ -14,5 +14,10 @@ public class TemperatureMessage extends Message {
 	public double[] getTemperature() {
 		return temperature;
 	}
+	
+	@Override
+	public Message getCopy() {
+		return new TemperatureMessage(temperature, senderHostname);
+	}
 
 }

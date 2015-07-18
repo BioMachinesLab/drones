@@ -503,6 +503,7 @@ public class MapPanel extends UpdatePanel {
 	}
 	
 	private synchronized void selectDronesFromGroup(int id) {
+		/*//THIS WAS CAUSING PROBLEMS WHEN TYPING NUMBERS IN THE TEXT FIELDS!
 		cleanSelectedMarkersList();
 		JTextArea selectedTextField = droneGUI.getCommandPanel().getSelectedDronesTextField();
 		selectedTextField.setText("");
@@ -513,7 +514,7 @@ public class MapPanel extends UpdatePanel {
 			MapMarkerDrone m = (MapMarkerDrone)robotPositions.get(droneIP).peek();
 			if(isDroneConnected(m.getName()) || isVirtualDrone(m.getName()))
 				selectDroneMarker(selectedTextField, m);
-		}
+		}*/
 	}
 	
 	private boolean isDroneConnected(String ip) {
@@ -582,6 +583,10 @@ public class MapPanel extends UpdatePanel {
 
 	public static Coordinate c(double lat, double lon){
 		return new Coordinate(lat, lon);
+	}
+	
+	public synchronized void addWaypoint(Waypoint wp) {
+		addWaypoint(c(wp.getLatLon().getLat(),wp.getLatLon().getLon()));
 	}
 
 	public synchronized void addWaypoint(Coordinate c) {
@@ -917,7 +922,7 @@ public class MapPanel extends UpdatePanel {
 		updateCommandPanel();
 	}
 
-	private void clearWaypoints() {
+	public void clearWaypoints() {
 
 		for(MapMarker m : waypointMarkers) {
 			treeMap.removeFromLayer(m);

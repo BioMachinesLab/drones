@@ -19,5 +19,10 @@ public class InformationRequest extends Message {
 	public MessageType getMessageTypeQuery() {
 		return type;
 	}
+	
+	@Override
+	public Message getCopy() {
+		return new InformationRequest(type, senderHostname);
+	}
 
 }
