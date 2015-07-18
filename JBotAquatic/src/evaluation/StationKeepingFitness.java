@@ -20,16 +20,16 @@ import simulation.util.ArgumentsAnnotation;
  */
 public class StationKeepingFitness extends EvaluationFunction {
 
-    @ArgumentsAnnotation(name = "alloweddistance", defaultValue = "2")
-    private double allowedDistance = 2;
-
-    private final double maxDistance = 10;
+    @ArgumentsAnnotation(name = "alloweddistance", defaultValue = "2.5")
+    private double allowedDistance = 2.5;
+    private final double maxDistance;
     private double energyBonus = 0;
     private double totalDistance = 0;
 
     public StationKeepingFitness(Arguments args) {
         super(args);
         allowedDistance = args.getArgumentAsDouble("alloweddistance");
+        maxDistance = allowedDistance * 5;
     }
 
     @Override
@@ -44,11 +44,12 @@ public class StationKeepingFitness extends EvaluationFunction {
         }
         totalDistance += distance;
 
-        fitness = (maxDistance - Math.min(maxDistance, totalDistance)) / maxDistance / simulator.getTime() + energyBonus / simulator.getTime();
+        fitness = (maxDistance - totalDistance / simulator.getTime()) / maxDistance * (energyBonus / simulator.getTime());
     }
 
     @Override
     public double getFitness() {
-        return 10 + fitness;
+        return Math.max(0, 10 + fitness);
     }
+
 }

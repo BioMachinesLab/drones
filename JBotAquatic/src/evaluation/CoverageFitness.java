@@ -22,7 +22,6 @@ public class CoverageFitness extends AvoidCollisionsFunction {
 
     private double v = 0;
     private double max = 0;
-    private double steps = 0;
     private double distance = 10;  
 
     public CoverageFitness(Arguments args) {
@@ -65,11 +64,9 @@ public class CoverageFitness extends AvoidCollisionsFunction {
 
     @Override
     public void update(Simulator simulator) {
-
         if (!isSetup) {
             setup(simulator);
             isSetup = true;
-            steps = simulator.getEnvironment().getSteps();
         }
 
         ArrayList<Robot> robots = simulator.getRobots();
@@ -142,7 +139,7 @@ public class CoverageFitness extends AvoidCollisionsFunction {
             }
         }
 
-        accum += ((sum / max) / steps / robots.size());
+        accum += ((sum / max) / simulator.getTime() / robots.size());
         fitness = accum;
 
         super.update(simulator);
