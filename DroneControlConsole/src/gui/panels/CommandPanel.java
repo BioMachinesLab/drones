@@ -317,6 +317,19 @@ public class CommandPanel extends UpdatePanel {
 		}
 	}
 	
+	private synchronized void deploy(Message m) {
+		deploy(m, false);
+	}
+	
+	private synchronized void deploy(Message m, boolean dynamicIds) {
+		setText("Deploying...");
+		
+		ArrayList<String> addresses = getSelectedAddresses();
+		
+		console.log("Deploying "+m+";ADDRESSES;"+addresses.toString().replace(", ", ";").replace("[", "").replace("]", ""));
+		new CommandSender(m, addresses, this, dynamicIds).start();
+	}
+	
 	private ArrayList<String> getSelectedAddresses() {
 
 		String[] addresses = gui.getConnectionPanel().getCurrentAddresses();
@@ -330,19 +343,6 @@ public class CommandPanel extends UpdatePanel {
 		}
 		
 		return selectedAddresses;
-	}
-
-	private synchronized void deploy(Message m) {
-		deploy(m, false);
-	}
-	
-	private synchronized void deploy(Message m, boolean dynamicIds) {
-		setText("Deploying...");
-		
-		ArrayList<String> addresses = getSelectedAddresses();
-		
-		console.log("Deploying "+m+";ADDRESSES;"+addresses.toString().replace(", ", ";").replace("[", "").replace("]", ""));
-		new CommandSender(m, addresses, this, dynamicIds).start();
 	}
 	
 	public boolean isSelectedAddress(String s) {
