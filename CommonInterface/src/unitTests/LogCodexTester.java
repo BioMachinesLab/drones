@@ -9,12 +9,12 @@ import org.junit.Test;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.AquaticDroneCI.DroneType;
-import commoninterface.entities.GeoEntity;
 import commoninterface.entities.GeoFence;
 import commoninterface.entities.ObstacleLocation;
 import commoninterface.entities.RobotLocation;
 import commoninterface.entities.Waypoint;
 import commoninterface.utils.jcoord.LatLon;
+import commoninterface.utils.logger.DecodedLog;
 import commoninterface.utils.logger.LogCodex;
 import commoninterface.utils.logger.LogCodex.LogType;
 import commoninterface.utils.logger.LogData;
@@ -138,7 +138,7 @@ public class LogCodexTester {
 		System.out.println(robotStr);
 
 		// Decode
-		LogCodex.DecodedLog logDataDecoded = LogCodex.decodeLog(logStr);
+		DecodedLog logDataDecoded = LogCodex.decodeLog(logStr);
 		LogData fullDecodedLogData = ((LogData) logDataDecoded.getPayload());
 		assertEquals(LogType.LOGDATA, logDataDecoded.payloadType());
 		assertEquals(TIMESTEP, fullDecodedLogData.timestep);
@@ -156,12 +156,12 @@ public class LogCodexTester {
 		assertArrayEquals(INPUT_NN, fullDecodedLogData.inputNeuronStates, 0);
 		assertArrayEquals(OUTPUT_NN, fullDecodedLogData.outputNeuronStates, 0);
 
-		LogCodex.DecodedLog errMsgDecoded = LogCodex.decodeLog(errStr);
+		DecodedLog errMsgDecoded = LogCodex.decodeLog(errStr);
 		String fullDecodedErrMsg = ((String) errMsgDecoded.getPayload());
 		assertEquals(LogType.ERROR, errMsgDecoded.payloadType());
 		assertEquals(SENTENCE, fullDecodedErrMsg);
 		
-		LogCodex.DecodedLog messageMsgDecoded = LogCodex.decodeLog(messageStr);
+		DecodedLog messageMsgDecoded = LogCodex.decodeLog(messageStr);
 		String fullDecodedMessageMsg = ((String) messageMsgDecoded.getPayload());
 		assertEquals(LogType.MESSAGE, messageMsgDecoded.payloadType());
 		assertEquals(SENTENCE, fullDecodedMessageMsg);

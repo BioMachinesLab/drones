@@ -33,9 +33,15 @@ public class BehaviorMessageProvider implements MessageProvider {
 					if (classes == null || classes.isEmpty()) {
 						return null;
 					}
-
-					Class<CIBehavior> chosenClass = (Class<CIBehavior>) classes
-							.get(0);
+					
+					Class<CIBehavior> chosenClass = null;
+					
+					for(Object b : classes) {
+						Class<CIBehavior> ci = (Class<CIBehavior>) b;
+						if(ci.getCanonicalName().endsWith(bm.getSelectedBehavior()))
+							chosenClass = ci;
+					}
+					
 					Constructor<CIBehavior> constructor = chosenClass
 							.getConstructor(new Class[] { CIArguments.class,
 									RobotCI.class });

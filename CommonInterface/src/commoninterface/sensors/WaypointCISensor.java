@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
+import commoninterface.controllers.StationKeepingCIBehavior;
 import commoninterface.entities.Entity;
 import commoninterface.entities.Waypoint;
 import commoninterface.utils.CIArguments;
@@ -35,7 +36,6 @@ public class WaypointCISensor extends CISensor{
 		LatLon robotLatLon = drone.getGPSLatLon();
 		
 		Waypoint wp = drone.getActiveWaypoint();
-		
 		if(wp != null) {
 				
 			LatLon latLon = wp.getLatLon();
@@ -61,6 +61,7 @@ public class WaypointCISensor extends CISensor{
 			readings[0] = 0.5;
 			readings[1] = 1;
 		}
+		
 	}
 	
 	public double getRange() {

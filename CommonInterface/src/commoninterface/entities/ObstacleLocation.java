@@ -5,6 +5,7 @@ import java.util.LinkedHashSet;
 
 import commoninterface.RobotCI;
 import commoninterface.utils.jcoord.LatLon;
+import commoninterface.utils.logger.EntityManipulation;
 import commoninterface.utils.logger.LogCodex;
 import commoninterface.utils.logger.LogCodex.LogType;
 
@@ -40,8 +41,8 @@ public class ObstacleLocation extends GeoEntity{
 		entities.add(this);
 		
 		return LogCodex.encodeLog(LogType.ENTITIES,
-				new LogCodex.EntityManipulation(
-						LogCodex.EntityManipulation.Operation.ADD, entities,
+				new EntityManipulation(
+						EntityManipulation.Operation.ADD, entities,
 						this.getClass().getSimpleName()));
 	}
 	

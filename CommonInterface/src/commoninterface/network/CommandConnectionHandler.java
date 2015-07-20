@@ -13,7 +13,7 @@ import commoninterface.network.messages.Message;
 
 public class CommandConnectionHandler extends ConnectionHandler {
 	
-	private final static boolean DEBUG = false;
+	private final static boolean DEBUG = true;
 	
 	public CommandConnectionHandler(Socket socket, RobotCI drone, ConnectionListener connectionListener) {
 		super(socket, drone, connectionListener);

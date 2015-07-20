@@ -1,18 +1,11 @@
 package commoninterface.utils.logger;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Scanner;
-
-import javax.activity.InvalidActivityException;
-
 import commoninterface.AquaticDroneCI;
 import commoninterface.entities.Entity;
 import commoninterface.entities.GeoEntity;
-import commoninterface.entities.GeoFence;
 import commoninterface.entities.ObstacleLocation;
 import commoninterface.entities.RobotLocation;
-import commoninterface.entities.Waypoint;
 import commoninterface.utils.jcoord.LatLon;
 
 public class LogCodex {
@@ -87,6 +80,12 @@ public class LogCodex {
 	public static DecodedLog decodeLog(String logLine, Object... objs) {
 		String[] infoBlocks = logLine.split(MAIN_SEPARATOR);
 		DecodedLog decodedLog = null;
+		
+		if(logLine.startsWith("[") || logLine.startsWith("\"")) {
+			System.out.println("Ignoring this line:" +logLine);
+			return null;
+		}
+		
 		if (infoBlocks[0].substring(0, 3).equals(LOG_TYPE)) {
 			LogType logType = LogType.valueOf(infoBlocks[0].substring(3, infoBlocks[0].length()));
 
@@ -295,7 +294,7 @@ public class LogCodex {
 	// Coders
 	private static String escapeComment(String str) {
 		if (str.contains(SENTENCE_DELIMITATOR)) {
-			str=str.replace(SENTENCE_DELIMITATOR, SENTENCE_ESCAPE);
+			str=str.replaceAll(SENTENCE_DELIMITATOR, SENTENCE_ESCAPE);
 		}
 		
 		return SENTENCE_DELIMITATOR + str + SENTENCE_DELIMITATOR;
@@ -421,50 +420,4 @@ public class LogCodex {
 		return data;
 	}
 	
-	// Data Classes
-	public static class DecodedLog {
-		LogType payloadType;
-		Object payload;
-
-		public DecodedLog(LogType payloadType, Object payload) {
-			this.payload = payload;
-			this.payloadType = payloadType;
-		}
-		
-		public Object getPayload() {
-			return payload;
-		}
-		
-		public LogType payloadType() {
-			return payloadType;
-		}
-	}
-	
-	public static class EntityManipulation {
-		public enum Operation {
-			ADD, REMOVE
-		}
-
-		ArrayList<Entity> entities;
-		Operation op;
-		String entitiesClass;
-
-		public EntityManipulation(Operation op, ArrayList<Entity> entities,String entitiesClass) {
-			this.entities = entities;
-			this.op = op;
-			this.entitiesClass=entitiesClass;
-		}
-		
-		public ArrayList<Entity> getEntities() {
-			return entities;
-		}
-		
-		public Operation operation(){
-			return op;
-		}
-		
-		public String getEntitiesClass(){
-			return entitiesClass;
-		}
-	}
 }

@@ -1,5 +1,7 @@
 package commoninterface.controllers;
 
+import java.util.ArrayList;
+
 import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
 import commoninterface.entities.Waypoint;
@@ -23,6 +25,16 @@ public class StationKeepingCIBehavior extends ControllerCIBehavior {
 	public void step(double timestep) {
 		((AquaticDroneCI)robot).setActiveWaypoint(wp);
 		super.step(timestep);
+	}
+	
+	@Override
+	public void cleanUp() {
+		ArrayList<Waypoint> wps = Waypoint.getWaypoints(robot);
+		
+		if(wps.isEmpty())
+			((AquaticDroneCI)robot).setActiveWaypoint(null);
+		else
+			((AquaticDroneCI)robot).setActiveWaypoint(wps.get(0));
 	}
 	
 }

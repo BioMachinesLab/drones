@@ -13,8 +13,9 @@ import commoninterface.entities.Waypoint;
 import commoninterface.network.messages.EntitiesMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
+import commoninterface.utils.logger.EntityManipulation;
+import commoninterface.utils.logger.EntityManipulation.Operation;
 import commoninterface.utils.logger.LogCodex;
-import commoninterface.utils.logger.LogCodex.EntityManipulation.Operation;
 import commoninterface.utils.logger.LogCodex.LogType;
 
 public class EntitiesMessageProvider implements MessageProvider{
@@ -40,6 +41,7 @@ public class EntitiesMessageProvider implements MessageProvider{
 				ArrayList<Entity> entitiesToRemove = new ArrayList<Entity>();
 				while(i.hasNext()) {
 					Entity e = i.next();
+					System.out.println("REMOVING "+e.getClass().getSimpleName());
 					if(e instanceof GeoFence || e instanceof Waypoint || e instanceof ObstacleLocation) {
 						entitiesToRemove.add(e);
 						i.remove();
@@ -47,7 +49,7 @@ public class EntitiesMessageProvider implements MessageProvider{
 				}
 				
 				if (!entitiesToRemove.isEmpty()) {
-					LogCodex.EntityManipulation msg = new LogCodex.EntityManipulation(
+					EntityManipulation msg = new EntityManipulation(
 							Operation.REMOVE, entitiesToRemove, GeoEntity.class.getSimpleName());
 					log(LogCodex.encodeLog(LogType.ENTITIES, msg));
 				}
@@ -56,6 +58,7 @@ public class EntitiesMessageProvider implements MessageProvider{
 			}
 			
 			for(Entity e : entities) {
+				System.out.println("ADDED "+e.getClass().getSimpleName());
 				if(e instanceof GeoEntity) {
 					GeoEntity ge = (GeoEntity)e;
 					log(ge.getLogMessage());
@@ -68,8 +71,10 @@ public class EntitiesMessageProvider implements MessageProvider{
 			if(robot instanceof AquaticDroneCI) {
 				ArrayList<Waypoint> wps = Waypoint.getWaypoints(robot);
 				
-				if(!wps.isEmpty())
+				if(!wps.isEmpty()) {
 					((AquaticDroneCI) robot).setActiveWaypoint(wps.get(wm.getActiveId()));
+					System.out.println("Active waypoint is "+wm.getActiveId());
+				}
 			}
 			return m;
 		}

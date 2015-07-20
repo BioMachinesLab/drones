@@ -161,7 +161,7 @@ public class CommandPanel extends UpdatePanel {
 
 		stopAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				deployBehavior((String) behaviors.getSelectedItem(), false);
+				deployBehavior("ControllerCIBehavior", false);
 			}
 		});
 

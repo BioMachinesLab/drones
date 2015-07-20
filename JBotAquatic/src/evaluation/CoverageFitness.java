@@ -23,6 +23,7 @@ public class CoverageFitness extends AvoidCollisionsFunction {
     private double v = 0;
     private double max = 0;
     private double distance = 10;  
+    private double steps = 0;
 
     public CoverageFitness(Arguments args) {
         super(args);
@@ -34,6 +35,7 @@ public class CoverageFitness extends AvoidCollisionsFunction {
         width = simulator.getEnvironment().getWidth();
         height = simulator.getEnvironment().getHeight();
         coverage = new double[(int) (height / resolution)][(int) (width / resolution)];
+        steps = simulator.getEnvironment().getSteps();
         for (int y = 0; y < coverage.length; y++) {
             for (int x = 0; x < coverage[y].length; x++) {
                 double coordX = (x - coverage[y].length / 2) * resolution;
@@ -139,9 +141,9 @@ public class CoverageFitness extends AvoidCollisionsFunction {
             }
         }
 
-        accum += ((sum / max) / simulator.getTime() / robots.size());
+        accum += ((sum / max) / steps / robots.size() * 10);
         fitness = accum;
-
+        
         super.update(simulator);
     }
     

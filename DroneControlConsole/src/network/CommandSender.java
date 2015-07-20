@@ -57,6 +57,7 @@ public class CommandSender extends Thread{
 			}
 		}
 		
+		System.out.println("Deployed!");
 		cp.setText("Deployed!");
 	}
 	
@@ -64,9 +65,11 @@ public class CommandSender extends Thread{
 		
 		private Socket socket;
 		private Message myMessage;
+		private String ip;
 		
 		public SenderThread(String ip, int number) throws IOException{
 			socket = new Socket(ip, COMMAND_PORT);
+			this.ip = ip;
 			myMessage = message.getCopy();
 			
 			if(dynamicActiveId && myMessage instanceof EntitiesMessage) {
@@ -94,6 +97,7 @@ public class CommandSender extends Thread{
 				socket.close();
 				
 			} catch(Exception e ) {
+				System.out.println("PROBLEM IN IP "+ip);
 				e.printStackTrace();
 			} finally {
 				try {

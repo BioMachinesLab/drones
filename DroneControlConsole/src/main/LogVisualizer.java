@@ -44,6 +44,7 @@ import commoninterface.entities.ObstacleLocation;
 import commoninterface.entities.RobotLocation;
 import commoninterface.entities.Waypoint;
 import commoninterface.utils.jcoord.LatLon;
+import commoninterface.utils.logger.DecodedLog;
 import commoninterface.utils.logger.LogCodex;
 
 public class LogVisualizer extends JFrame {
@@ -60,7 +61,7 @@ public class LogVisualizer extends JFrame {
 	private DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("dd-MM-YY_HH:mm:ss.SS");
 	private String IPforEntities = "1";
 	private int lastIncrementStep = 0;
-	private JTextArea messageArea;
+	private JTextArea messageArea = new JTextArea();
 
 	private boolean parserVersion = true;
 
@@ -76,6 +77,10 @@ public class LogVisualizer extends JFrame {
 
 			allData = readFile();
 			Collections.sort(allData);
+			
+			for(LogData d : allData) {
+				System.out.println(d.waterTemp+" "+d.GPSspeed+" "+d.cpuTemp);
+			}
 
 			playThread = new PlayThread();
 			playThread.start();
@@ -189,12 +194,15 @@ public class LogVisualizer extends JFrame {
 
 			map.displayData(new RobotLocation(d.ip, d.latLon,
 					d.compassOrientation, d.droneType));
+			
+			if(i == step -1)
+				messageArea.setText("WATER TEMP: "+d.waterTemp+"\tCPU TEMP: "+d.cpuTemp);
 
 			if (d.entities != null && d.ip.equals(IPforEntities)) {
 				map.replaceEntities(d.entities);
 			}
 		}
-
+		
 		updateCurrentStepLabel();
 
 	}
@@ -213,6 +221,8 @@ public class LogVisualizer extends JFrame {
 
 			map.displayData(new RobotLocation(d.ip, d.latLon,
 					d.compassOrientation, d.droneType));
+			
+			messageArea.setText("WATER TEMP: "+d.waterTemp+"\tCPU TEMP: "+d.cpuTemp);
 
 			if (d.entities != null && d.ip.equals(IPforEntities)) {
 				map.replaceEntities(d.entities);
@@ -251,7 +261,10 @@ public class LogVisualizer extends JFrame {
 					String l = s.nextLine();
 
 					if (!l.startsWith(LogCodex.COMMENT_CHAR) && !l.isEmpty()) {
-						LogCodex.DecodedLog decodedData = LogCodex.decodeLog(l);
+						DecodedLog decodedData = LogCodex.decodeLog(l);
+						
+						if(decodedData == null)
+							continue;
 
 						switch (decodedData.payloadType()) {
 						case ENTITIES:
@@ -566,17 +579,7 @@ public class LogVisualizer extends JFrame {
 		log.lastComment = data.comment;
 		log.droneType = data.droneType;
 		log.inputs = data.inputNeuronStates;
-		
-		if(log.inputs != null) {
-			System.out.print("i ");
-			for(int i = 0 ; i < log.inputs.length ; i++)
-				System.out.print(log.inputs[i]+" ");
-			System.out.print("o ");
-			log.outputs = data.outputNeuronStates;
-			for(int i = 0 ; i < log.outputs.length ; i++)
-				System.out.print(log.outputs[i]+" ");
-			System.out.println();
-		}
+		log.outputs = data.outputNeuronStates;
 		
 		return log;
 	}
