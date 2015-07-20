@@ -3,32 +3,31 @@ package utils;
 import io.input.ControllerInput;
 import io.input.GPSModuleInput;
 import io.input.OneWireTemperatureModuleInput;
-import io.output.ControllerOutput;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import commoninterface.AquaticDroneCI;
 import commoninterface.controllers.ControllerCIBehavior;
 import commoninterface.dataobjects.GPSData;
 import commoninterface.neuralnetwork.CINeuralNetwork;
 import commoninterface.utils.RobotLogger;
 import commoninterface.utils.logger.LogCodex;
-import commoninterface.utils.logger.LogData;
 import commoninterface.utils.logger.LogCodex.LogType;
+import commoninterface.utils.logger.LogData;
 import commoninterfaceimpl.RealAquaticDroneCI;
 
 public class FileLogger extends Thread implements RobotLogger {
 	
 	private final static long SLEEP_TIME = 100;
-	private final static long TOTAL_LOGS = 6000;	//10min
+	private final static long TOTAL_LOGS = 3000;	//5min
 	public final static String LOGS_FOLDER="/home/pi/RaspberryController/logs/";
 	
 	
@@ -40,12 +39,15 @@ public class FileLogger extends Thread implements RobotLogger {
 	
 	private int logs = 0;
 	private String ipAddr;
-	
-	private String comment = null;
+	private ArrayList<String> toLog;
+
+	// Unused for now
+	// private String comment = null;
 
 	public FileLogger(RealAquaticDroneCI drone) {
 		this.drone = drone;
 		ipAddr = drone.getNetworkAddress();
+		toLog=new ArrayList<String>();
 	}
 	
 	public BufferedWriter setupWriter() throws IOException {
@@ -82,6 +84,17 @@ public class FileLogger extends Thread implements RobotLogger {
 					String logLine = LogCodex.encodeLog(LogType.LOGDATA, getLogData());
 					bw.write(logLine);
 					bw.flush();
+					
+					synchronized (toLog) {
+						if (!toLog.isEmpty()) {
+							for (String str : toLog) {
+								bw.write(str);
+								bw.flush();
+							}
+							toLog.clear();
+						}
+					}
+					
 				} catch(Exception e) {
 					e.printStackTrace();
 					// ignore :)
@@ -92,6 +105,7 @@ public class FileLogger extends Thread implements RobotLogger {
 
 		} catch (InterruptedException e) {
 			// this will happen when the program exits
+			System.err.println("Exiting Logger? "+e.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -151,8 +165,10 @@ public class FileLogger extends Thread implements RobotLogger {
 		data.ip = ipAddr;
 		data.systemTime = new LocalDateTime().toString(dateFormatter);
 		data.droneType = drone.getDroneType();
-		data.comment = this.comment;
-		this.comment = null;
+
+		// data.comment = this.comment;
+		// this.comment = null;
+		
 		data.file = fileName;
 
 		return data;
@@ -165,12 +181,17 @@ public class FileLogger extends Thread implements RobotLogger {
 
 	@Override
 	public void logMessage(String string) {
-		this.comment = string;
+		synchronized (toLog) {
+			toLog.add(string);
+		}
 	}
 
 	@Override
 	public void logError(String string) {
-		// TODO Auto-generated method stub
+		String str = LogCodex.encodeLog(LogType.ERROR, string);
 		
+		synchronized (toLog) {
+			toLog.add(str);
+		}
 	}
 }

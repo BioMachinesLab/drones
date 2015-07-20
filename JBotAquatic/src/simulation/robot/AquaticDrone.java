@@ -44,6 +44,8 @@ import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.RobotKalman;
 import commoninterface.utils.RobotLogger;
 import commoninterface.utils.jcoord.LatLon;
+import commoninterface.utils.logger.LogCodex;
+import commoninterface.utils.logger.LogCodex.LogType;
 
 public class AquaticDrone extends DifferentialDriveRobot implements AquaticDroneCI{
 
@@ -129,8 +131,8 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 			propellers = new PropellersActuator(simulator, actuators.size()+1, args);
 			actuators.add(propellers);
 		}
-		log("IP "+getNetworkAddress());
 		
+		log(LogCodex.encodeLog(LogType.MESSAGE, "IP " + getNetworkAddress()));
 	}
 	
 	@Override
@@ -393,14 +395,20 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		stopActiveBehavior();
 		activeBehavior = b;
 		activeBehavior.start();
-		log("Starting CIBehavior "+b.getClass().getSimpleName());
+		
+		String str = "Starting CIBehavior " + b.getClass().getSimpleName();
+		log(LogCodex.encodeLog(LogType.MESSAGE, str));
 	}
 
 	@Override
 	public void stopActiveBehavior() {
 		if (activeBehavior != null) {
 			activeBehavior.cleanUp();
-			log("Stopping CIBehavior "+activeBehavior.getClass().getSimpleName());
+			
+			String str = "Stopping CIBehavior "
+					+ activeBehavior.getClass().getSimpleName();
+			log(LogCodex.encodeLog(LogType.MESSAGE, str));
+			
 			activeBehavior = null;
 			setMotorSpeeds(0, 0);
 		}

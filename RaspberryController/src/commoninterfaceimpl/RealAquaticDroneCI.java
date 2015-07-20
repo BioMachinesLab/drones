@@ -46,6 +46,8 @@ import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.RobotKalman;
 import commoninterface.utils.RobotLogger;
 import commoninterface.utils.jcoord.LatLon;
+import commoninterface.utils.logger.LogCodex;
+import commoninterface.utils.logger.LogCodex.LogType;
 
 public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
@@ -110,8 +112,8 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		messageHandler.start();
 		
 		setStatus("Running!\n");
-		
-		log(initMessages);
+
+		log(LogCodex.encodeLog(LogType.MESSAGE, initMessages));
 	}
 
 	@Override
@@ -168,8 +170,8 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	
 	@Override
 	public void shutdown() {
-		log("# Shutting down Controller...");
-		
+		log(LogCodex.encodeLog(LogType.MESSAGE, "Shutting down Controller..."));
+
 		run = false;
 
 		if (logger != null)
@@ -236,8 +238,8 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 			initMessages += "[INIT] MotorConnectionListener: ok\n";
 			
-			log("IP "+getNetworkAddress());
-
+			log(LogCodex
+					.encodeLog(LogType.MESSAGE, "IP " + getNetworkAddress()));
 		} catch (IOException e) {
 			initMessages += "[INIT] Unable to start Network Connection Listeners! ("
 					+ e.getMessage() + ")\n";
@@ -290,14 +292,20 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		activeBehavior = b;
 		behaviorTimestep = 0;
 		activeBehavior.start();
-		log("Starting CIBehavior "+b.getClass().getSimpleName());
+		
+		String str= "Starting CIBehavior "+b.getClass().getSimpleName();
+		log(LogCodex.encodeLog(LogType.MESSAGE, str));
 	}
 
 	@Override
 	public void stopActiveBehavior() {
 		if (activeBehavior != null) {
 			activeBehavior.cleanUp();
-			log("Stopping CIBehavior "+activeBehavior.getClass().getSimpleName());
+			
+			String str = "Stopping CIBehavior "
+					+ activeBehavior.getClass().getSimpleName();
+			log(LogCodex.encodeLog(LogType.MESSAGE, str));
+			
 			activeBehavior = null;
 			ioManager.setMotorSpeeds(leftSpeed, rightSpeed);
 		}

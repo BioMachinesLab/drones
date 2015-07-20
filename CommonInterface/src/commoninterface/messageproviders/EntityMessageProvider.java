@@ -1,6 +1,7 @@
 package commoninterface.messageproviders;
 
 import java.util.ArrayList;
+
 import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
 import commoninterface.entities.Entity;
@@ -9,6 +10,8 @@ import commoninterface.entities.Waypoint;
 import commoninterface.network.messages.EntityMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
+import commoninterface.utils.logger.LogCodex;
+import commoninterface.utils.logger.LogCodex.LogType;
 
 public class EntityMessageProvider implements MessageProvider{
 	
@@ -25,16 +28,19 @@ public class EntityMessageProvider implements MessageProvider{
 			EntityMessage wm = (EntityMessage)m;
 			Entity e = wm.getEntity();
 			
-			if(robot.getEntities().contains(e)) {
-				log("entity removed "+e.getName());
+			if(robot.getEntities().contains(e)) {				
+				ArrayList<Entity> entities = new ArrayList<Entity>();
+				entities.add(e);
+				log(new LogCodex.EntityManipulation(LogCodex.EntityManipulation.Operation.REMOVE, entities,	null));
 			}
 			
 			robot.replaceEntity(e);
 			
 			if(e instanceof GeoEntity) {
 				GeoEntity ge = (GeoEntity)e;
-				String str = ge.getLatLon().getLat()+" "+ge.getLatLon().getLon();
-				log("entity added "+e.getClass().getSimpleName()+" "+e.getName()+" "+str);
+				ArrayList<Entity> entities = new ArrayList<Entity>();
+				entities.add(ge);
+				log(new LogCodex.EntityManipulation(LogCodex.EntityManipulation.Operation.ADD, entities, e.getClass().getSimpleName()));
 			}
 			
 			if(e instanceof Waypoint && robot instanceof AquaticDroneCI) {
@@ -49,8 +55,10 @@ public class EntityMessageProvider implements MessageProvider{
 		return null;
 	}
 	
-	private void log(String msg) {
-		if(robot.getLogger() != null)
-			robot.getLogger().logMessage(msg);
+	private void log(LogCodex.EntityManipulation msg) {
+		if(robot.getLogger() != null){
+			String str = LogCodex.encodeLog(LogType.ENTITIES, msg);
+			robot.getLogger().logMessage(str);
+		}
 	}
 }

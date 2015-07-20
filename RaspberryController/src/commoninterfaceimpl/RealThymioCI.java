@@ -36,6 +36,8 @@ import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.RobotLogger;
+import commoninterface.utils.logger.LogCodex;
+import commoninterface.utils.logger.LogCodex.LogType;
 
 public class RealThymioCI extends Thread  implements ThymioCI {
 
@@ -85,7 +87,7 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 
 		setStatus("Running!\n");
 
-		logger.logMessage(initMessages);
+		logger.logMessage(LogCodex.encodeLog(LogType.MESSAGE, initMessages));
 	}
 
 	@Override
@@ -137,7 +139,7 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 	
 	@Override
 	public void shutdown() {
-		logger.logMessage("# Shutting down Controller...");
+		logger.logMessage(LogCodex.encodeLog(LogType.MESSAGE, "Shutting down Controller..."));
 
 		if (logger != null)
 			logger.stopLogging();

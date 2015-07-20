@@ -5,6 +5,8 @@ import commoninterface.network.messages.LogMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
 import commoninterface.utils.RobotLogger;
+import commoninterface.utils.logger.LogCodex;
+import commoninterface.utils.logger.LogCodex.LogType;
 
 public class LogMessageProvider implements MessageProvider{
 	
@@ -23,7 +25,7 @@ public class LogMessageProvider implements MessageProvider{
 			RobotLogger logger = robot.getLogger();
 			
 			if(logger != null)
-				logger.logMessage(lm.getLog());
+				logger.logMessage(LogCodex.encodeLog(LogType.MESSAGE, lm.getLog()));
 			
 			return m;
 		}

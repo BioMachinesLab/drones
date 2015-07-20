@@ -4,19 +4,20 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
 
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+import javax.activity.InvalidActivityException;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.entities.Entity;
+import commoninterface.entities.GeoEntity;
 import commoninterface.entities.GeoFence;
 import commoninterface.entities.ObstacleLocation;
+import commoninterface.entities.RobotLocation;
 import commoninterface.entities.Waypoint;
 import commoninterface.utils.jcoord.LatLon;
 
 public class LogCodex {
 	public enum LogType {
-		LOGDATA, ENTITIES, ERROR;
+		LOGDATA, ENTITIES, ERROR, MESSAGE;
 	}
 
 	// Delimiters and Log Separators
@@ -30,7 +31,7 @@ public class LogCodex {
 	public static final String SENTENCE_DELIMITATOR = "\"";
 	public static final String SENTENCE_ESCAPE = "\\" + SENTENCE_DELIMITATOR;
 
-	// Drone information Separators
+	// Drone informations Separators
 	public static final String LAT_LON_SEP = "LL=";
 	public static final String GPS_ORIENT_SEP = "GO=";
 	public static final String GPS_SPD = "GS=";
@@ -42,14 +43,17 @@ public class LogCodex {
 	public static final String DRONE_TYPE_SEP = "DT=";
 
 	// Control Informations Separators
-	public static final String ENTITY_SEP = "#entity";
 	public static final String IP_ADDR_SEP = "IP=";
 	public static final String TIMESTEP_SEP = "TS=";
 	public static final String NEURAL_NET_IN_SEP = "NI=";
 	public static final String NEURAL_NET_OUT_SEP = "NO=";
 
-	public static final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("dd-MM-yyyy_HH:mm:ss.SS");
-
+	// Entities Informations Separators
+	public static final String ENTITY_CLASS_SEP = "ET=";
+	public static final String ENTITY_INFORMATION_BEGIN = "{";
+	public static final String ENTITY_INFORMATION_END = "}";
+	public static final String ENTITY_OP_SEP = "EO=";
+	
 	// Main methods
 	public static String encodeLog(LogType type, Object object) {
 		String data = "";
@@ -62,11 +66,16 @@ public class LogCodex {
 			
 		case ENTITIES:
 			data += LOG_TYPE + LogType.ENTITIES + MAIN_SEPARATOR;
-			data += encodeEntities((ArrayList<Entity>) object);
+			data += encodeEntities((EntityManipulation) object);
 			break;
 
 		case ERROR:
 			data += LOG_TYPE + LogType.ERROR + MAIN_SEPARATOR;
+			data += SENTENCE_SEP + escapeComment((String) object);
+			break;
+			
+		case MESSAGE:
+			data += LOG_TYPE + LogType.MESSAGE + MAIN_SEPARATOR;
 			data += SENTENCE_SEP + escapeComment((String) object);
 			break;
 		}
@@ -75,100 +84,117 @@ public class LogCodex {
 		return data;
 	}
 
-	public static DecodedLogData decodeLog(String logLine) {
-		
+	public static DecodedLog decodeLog(String logLine, Object... objs) {
 		String[] infoBlocks = logLine.split(MAIN_SEPARATOR);
-		DecodedLogData decodedLogData = null;
+		DecodedLog decodedLog = null;
 		if (infoBlocks[0].substring(0, 3).equals(LOG_TYPE)) {
 			LogType logType = LogType.valueOf(infoBlocks[0].substring(3, infoBlocks[0].length()));
 
 			switch (logType) {
 			case ENTITIES:
-				// TODO
+				if (objs != null && objs.length == 1) {
+					String[] blocks1 = new String[infoBlocks.length - 1];
+
+					for (int i = 0; i < blocks1.length; i++) {
+						blocks1[i] = infoBlocks[i + 1];
+					}
+
+					ArrayList<Entity> entities = (ArrayList<Entity>) objs[0];
+					decodeEntities(blocks1, entities);
+					decodedLog = new DecodedLog(LogType.ENTITIES, entities);
+				}
 				break;
 
 			case LOGDATA:
-				String[] blocks = new String[infoBlocks.length - 1];
+				String[] blocks2 = new String[infoBlocks.length - 1];
 
-				for (int i = 0; i < blocks.length; i++) {
-					blocks[i] = infoBlocks[i + 1];
+				for (int i = 0; i < blocks2.length; i++) {
+					blocks2[i] = infoBlocks[i + 1];
 				}
 
-				LogData logData = decodeLogData(blocks);
-				decodedLogData = new DecodedLogData(LogType.LOGDATA, logData);
+				LogData logData = decodeLogData(blocks2);
+				decodedLog = new DecodedLog(LogType.LOGDATA, logData);
 				break;
 			case ERROR:
 				if(infoBlocks[1].substring(0, 3).equals(SENTENCE_SEP)){
 					String decodedSentence = unescapeComment(infoBlocks[1].substring(3, infoBlocks[1].length()));
-					decodedLogData=new DecodedLogData(LogType.ERROR, decodedSentence);
+					decodedLog=new DecodedLog(LogType.ERROR, decodedSentence);
+				}
+				break;
+			case MESSAGE:
+				if(infoBlocks[1].substring(0, 3).equals(SENTENCE_SEP)){
+					String decodedSentence = unescapeComment(infoBlocks[1].substring(3, infoBlocks[1].length()));
+					decodedLog=new DecodedLog(LogType.MESSAGE, decodedSentence);
 				}
 				break;
 			}
 			
 			
-			return decodedLogData;
+			return decodedLog;
 		}else{
 			return null;
 		}
 	}
 	
 	// Decoders
-	private void decodeEntities(String line, ArrayList<Entity> entities) {
-		Scanner s = new Scanner(line);
-		s.next();// ignore first token
-
-		String event = s.next();
-
-		if (event.equals("added")) {
-
-			String className = s.next();
-
-			String name = s.next();
-
-			if (className.equals(GeoFence.class.getSimpleName())) {
-
-				GeoFence fence = new GeoFence(name);
-
-				int number = s.nextInt();
-
-				for (int i = 0; i < number; i++) {
-					double lat = s.nextDouble();
-					double lon = s.nextDouble();
-					fence.addWaypoint(new LatLon(lat, lon));
-				}
-				entities.add(fence);
-			} else if (className.equals(Waypoint.class.getSimpleName())) {
-
-				double lat = s.nextDouble();
-				double lon = s.nextDouble();
-				Waypoint wp = new Waypoint(name, new LatLon(lat, lon));
-				entities.remove(wp);
-				entities.add(wp);
-
-			} else if (className.equals(ObstacleLocation.class.getSimpleName())) {
-
-				double lat = s.nextDouble();
-				double lon = s.nextDouble();
-
-				double radius = s.nextDouble();
-				entities.add(new ObstacleLocation(name, new LatLon(lat, lon),
-						radius));
-			}
-
-		} else if (event.equals("removed")) {
-
-			String name = s.next();
-
-			Iterator<Entity> i = entities.iterator();
-			while (i.hasNext()) {
-				if (i.next().getName().equals(name)) {
-					i.remove();
-					break;
-				}
-			}
-		}
-
-		s.close();
+	// TODO -> finish decodeEntities implementation
+	private static void decodeEntities(String[] blocks, ArrayList<Entity> entities) {
+		// TODO!
+//		Scanner s = new Scanner(line);
+//		s.next();// ignore first token
+//
+//		String event = s.next();
+//
+//		if (event.equals("added")) {
+//
+//			String className = s.next();
+//
+//			String name = s.next();
+//
+//			if (className.equals(GeoFence.class.getSimpleName())) {
+//
+//				GeoFence fence = new GeoFence(name);
+//
+//				int number = s.nextInt();
+//
+//				for (int i = 0; i < number; i++) {
+//					double lat = s.nextDouble();
+//					double lon = s.nextDouble();
+//					fence.addWaypoint(new LatLon(lat, lon));
+//				}
+//				entities.add(fence);
+//			} else if (className.equals(Waypoint.class.getSimpleName())) {
+//
+//				double lat = s.nextDouble();
+//				double lon = s.nextDouble();
+//				Waypoint wp = new Waypoint(name, new LatLon(lat, lon));
+//				entities.remove(wp);
+//				entities.add(wp);
+//
+//			} else if (className.equals(ObstacleLocation.class.getSimpleName())) {
+//
+//				double lat = s.nextDouble();
+//				double lon = s.nextDouble();
+//
+//				double radius = s.nextDouble();
+//				entities.add(new ObstacleLocation(name, new LatLon(lat, lon),
+//						radius));
+//			}
+//
+//		} else if (event.equals("removed")) {
+//
+//			String name = s.next();
+//
+//			Iterator<Entity> i = entities.iterator();
+//			while (i.hasNext()) {
+//				if (i.next().getName().equals(name)) {
+//					i.remove();
+//					break;
+//				}
+//			}
+//		}
+//
+//		s.close();
 	}
 
 	private static LogData decodeLogData(String[] infoBlocks){
@@ -272,7 +298,7 @@ public class LogCodex {
 			str=str.replace(SENTENCE_DELIMITATOR, SENTENCE_ESCAPE);
 		}
 		
-		return SENTENCE_DELIMITATOR+COMMENT_CHAR+str+SENTENCE_DELIMITATOR;
+		return SENTENCE_DELIMITATOR + str + SENTENCE_DELIMITATOR;
 	}
 	
 	private static String unescapeComment(String str) {
@@ -303,10 +329,10 @@ public class LogCodex {
 			data += logData.latLon.getLon() + MAIN_SEPARATOR;
 		}
 		
-		data += (logData.GPSorientation!=-1)?GPS_ORIENT_SEP + logData.GPSorientation + MAIN_SEPARATOR:"";
-		data += (logData.GPSspeed>=0)?GPS_SPD + logData.GPSspeed + MAIN_SEPARATOR:"";
-		data += (logData.GPSdate!=null)?GPS_TIME_SEP + logData.GPSdate + MAIN_SEPARATOR:"";
-		data += (logData.compassOrientation>=0)?COMP_ORIENT_SEP + logData.compassOrientation + MAIN_SEPARATOR:"";
+		data += (logData.GPSorientation != -1) ? GPS_ORIENT_SEP	+ logData.GPSorientation + MAIN_SEPARATOR : "";
+		data += (logData.GPSspeed >= 0) ? GPS_SPD + logData.GPSspeed + MAIN_SEPARATOR : "";
+		data += (logData.GPSdate != null) ? GPS_TIME_SEP + logData.GPSdate + MAIN_SEPARATOR : "";
+		data += (logData.compassOrientation >= 0) ? COMP_ORIENT_SEP	+ logData.compassOrientation + MAIN_SEPARATOR : "";
 
 		if (logData.temperatures != null && logData.temperatures.length > 0) {
 			data += TEMP_SEP;
@@ -356,20 +382,51 @@ public class LogCodex {
 		return data;
 	}
 
-	private static String encodeEntities(ArrayList<Entity> entities) {
+	private static String encodeEntities(EntityManipulation entities) {
 		String data = "";
 
-		// TODO
+		if(entities!=null && !entities.getEntities().isEmpty()){
+			String className = entities.getEntitiesClass();
+			
+			data += ENTITY_OP_SEP + entities.operation() + MAIN_SEPARATOR;
+			data += ENTITY_CLASS_SEP + className + MAIN_SEPARATOR;
+
+			ArrayList<Entity> ent = entities.getEntities();
+			for (int i = 0; i < ent.size(); i++) {
+				data += ENTITY_INFORMATION_BEGIN + ent.get(i).getName()	+ ARRAY_SEPARATOR;
+				
+				if(ent.get(i) instanceof GeoEntity ){
+					data += ((GeoEntity)ent.get(i)).getLatLon().getLat() + ARRAY_SEPARATOR;
+					data += ((GeoEntity)ent.get(i)).getLatLon().getLon();
+					
+					if (ent.get(i) instanceof ObstacleLocation) {
+						data += ARRAY_SEPARATOR + ((ObstacleLocation) ent.get(i)).getRadius();
+						
+					} else if (ent.get(i) instanceof RobotLocation) {
+						data += ARRAY_SEPARATOR + ((RobotLocation) ent.get(i)).getOrientation();
+						data += ARRAY_SEPARATOR	+ ((RobotLocation) ent.get(i)).getDroneType();
+					}
+
+					data += ENTITY_INFORMATION_END;
+				}
+				
+				if (i != ent.size() - 1) {
+					data += ARRAY_SEPARATOR;
+				}
+			}
+		}else{
+			System.out.println("Type not found... "+entities.getEntitiesClass());
+		}
 		
 		return data;
 	}
 	
 	// Data Classes
-	public static class DecodedLogData {
+	public static class DecodedLog {
 		LogType payloadType;
 		Object payload;
 
-		public DecodedLogData(LogType payloadType, Object payload) {
+		public DecodedLog(LogType payloadType, Object payload) {
 			this.payload = payload;
 			this.payloadType = payloadType;
 		}
@@ -380,6 +437,34 @@ public class LogCodex {
 		
 		public LogType payloadType() {
 			return payloadType;
+		}
+	}
+	
+	public static class EntityManipulation {
+		public enum Operation {
+			ADD, REMOVE
+		}
+
+		ArrayList<Entity> entities;
+		Operation op;
+		String entitiesClass;
+
+		public EntityManipulation(Operation op, ArrayList<Entity> entities,String entitiesClass) {
+			this.entities = entities;
+			this.op = op;
+			this.entitiesClass=entitiesClass;
+		}
+		
+		public ArrayList<Entity> getEntities() {
+			return entities;
+		}
+		
+		public Operation operation(){
+			return op;
+		}
+		
+		public String getEntitiesClass(){
+			return entitiesClass;
 		}
 	}
 }

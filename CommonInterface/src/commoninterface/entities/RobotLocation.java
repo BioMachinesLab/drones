@@ -1,10 +1,13 @@
 package commoninterface.entities;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
 import commoninterface.utils.jcoord.LatLon;
+import commoninterface.utils.logger.LogCodex;
+import commoninterface.utils.logger.LogCodex.LogType;
 
 public class RobotLocation extends GeoEntity{
 	
@@ -36,4 +39,13 @@ public class RobotLocation extends GeoEntity{
 		return droneLocations;
 	}
 	
+	public String getLogMessage() {
+		ArrayList<Entity> entities = new ArrayList<Entity>();
+		entities.add(this);
+		
+		return LogCodex.encodeLog(LogType.ENTITIES,
+				new LogCodex.EntityManipulation(
+						LogCodex.EntityManipulation.Operation.ADD, entities,
+						this.getClass().getSimpleName()));
+	}
 }

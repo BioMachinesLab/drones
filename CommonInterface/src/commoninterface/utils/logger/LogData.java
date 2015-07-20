@@ -1,11 +1,6 @@
 package commoninterface.utils.logger;
 
-import java.util.ArrayList;
-
-import org.joda.time.DateTime;
-
 import commoninterface.AquaticDroneCI;
-import commoninterface.entities.Entity;
 import commoninterface.utils.jcoord.LatLon;
 
 public class LogData implements Comparable<LogData> {

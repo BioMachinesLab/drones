@@ -1,8 +1,12 @@
 package commoninterface.entities;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+
 import commoninterface.RobotCI;
 import commoninterface.utils.jcoord.LatLon;
+import commoninterface.utils.logger.LogCodex;
+import commoninterface.utils.logger.LogCodex.LogType;
 
 public class ObstacleLocation extends GeoEntity{
 	
@@ -29,6 +33,16 @@ public class ObstacleLocation extends GeoEntity{
 		}
 		
 		return obstacleLocations;
+	}
+	
+	public String getLogMessage() {
+		ArrayList<Entity> entities = new ArrayList<Entity>();
+		entities.add(this);
+		
+		return LogCodex.encodeLog(LogType.ENTITIES,
+				new LogCodex.EntityManipulation(
+						LogCodex.EntityManipulation.Operation.ADD, entities,
+						this.getClass().getSimpleName()));
 	}
 	
 }

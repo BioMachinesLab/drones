@@ -8,6 +8,12 @@ import org.joda.time.DateTime;
 import org.junit.Test;
 
 import commoninterface.AquaticDroneCI;
+import commoninterface.AquaticDroneCI.DroneType;
+import commoninterface.entities.GeoEntity;
+import commoninterface.entities.GeoFence;
+import commoninterface.entities.ObstacleLocation;
+import commoninterface.entities.RobotLocation;
+import commoninterface.entities.Waypoint;
 import commoninterface.utils.jcoord.LatLon;
 import commoninterface.utils.logger.LogCodex;
 import commoninterface.utils.logger.LogCodex.LogType;
@@ -25,7 +31,7 @@ public class LogCodexTester {
 	private final LatLon LATLON = new LatLon(38.749368, -9.153260);
 	private final double GPS_ORIENT = 234.2131;
 	private final double GND_SPEED = 1.1121313;
-	private final DateTime GPS_DATE = new DateTime(2015, 07, 8, 20, 00, 50);
+	private final String GPS_DATE = new DateTime(2015, 07, 8, 20, 00, 50).toString();
 	private final double COMP_ORIENT = 351.00021;
 	private final double[] TEMPS = new double[] { 40.131341, 21.2123 };
 
@@ -33,6 +39,22 @@ public class LogCodexTester {
 
 	private final double[] INPUT_NN = new double[] { 1.12, 2.12, 3.13, 4.1241 };
 	private final double[] OUTPUT_NN = new double[] { 5.12, 6.12, 7.13, 8.1241 };
+	
+	// Entities Constants
+	private final String WP_NAME = "WP";
+	private final Waypoint WAYPOINT = new Waypoint(WP_NAME, LATLON);
+
+	private final String GEOFENC_NAME = "GEOFENCE";
+	private final GeoFence GEOFENCE = new GeoFence(GEOFENC_NAME);
+
+	private final String OBST_NAME = "OBSTACLE";
+	private final double OBST_RADIUS = 10.1102;
+	private final ObstacleLocation OBSTACLE = new ObstacleLocation(OBST_NAME, LATLON, OBST_RADIUS);
+	
+	private final String ROBOT_LOC_NAME = "ROBOT_LOCATION";
+	private final double ROBOT_ORIENT = 139.221;
+	private final DroneType ROBOT_TYPE = DroneType.DRONE;
+	private final RobotLocation ROBOT_LOC = new RobotLocation(ROBOT_LOC_NAME, LATLON, ROBOT_ORIENT, ROBOT_TYPE);
 
 	// Expected Results
 	private final String expectedLogDataString = 
@@ -44,7 +66,7 @@ public class LogCodexTester {
 			+ LogCodex.MAIN_SEPARATOR + LogCodex.LAT_LON_SEP + LATLON.getLat() + LogCodex.ARRAY_SEPARATOR + LATLON.getLon() 
 			+ LogCodex.MAIN_SEPARATOR + LogCodex.GPS_ORIENT_SEP + GPS_ORIENT
 			+ LogCodex.MAIN_SEPARATOR + LogCodex.GPS_SPD + GND_SPEED
-			+ LogCodex.MAIN_SEPARATOR + LogCodex.GPS_TIME_SEP	+ GPS_DATE.toString(LogCodex.dateTimeFormatter)
+			+ LogCodex.MAIN_SEPARATOR + LogCodex.GPS_TIME_SEP + GPS_DATE
 			+ LogCodex.MAIN_SEPARATOR + LogCodex.COMP_ORIENT_SEP + COMP_ORIENT
 			+ LogCodex.MAIN_SEPARATOR + LogCodex.TEMP_SEP 
 				+ TEMPS[0] + LogCodex.ARRAY_SEPARATOR + TEMPS[1]
@@ -64,6 +86,12 @@ public class LogCodexTester {
 			+ LogCodex.SENTENCE_DELIMITATOR + SENTENCE.replace(LogCodex.SENTENCE_DELIMITATOR, LogCodex.SENTENCE_ESCAPE) + LogCodex.SENTENCE_DELIMITATOR 
 			+ LogCodex.LINE_SEPARATOR;
 	
+	private final String expectedMessageLogString = 
+			LogCodex.LOG_TYPE + LogCodex.LogType.MESSAGE 
+		+ LogCodex.MAIN_SEPARATOR + LogCodex.SENTENCE_SEP
+		+ LogCodex.SENTENCE_DELIMITATOR + SENTENCE.replace(LogCodex.SENTENCE_DELIMITATOR, LogCodex.SENTENCE_ESCAPE) + LogCodex.SENTENCE_DELIMITATOR 
+		+ LogCodex.LINE_SEPARATOR;
+	
 	@Test
 	public void TestCodex() {
 		LogData codedData = new LogData();
@@ -80,7 +108,7 @@ public class LogCodexTester {
 		codedData.GPSorientation = GPS_ORIENT;
 		codedData.GPSspeed = GND_SPEED;
 
-//		codedData.GPSdate = GPS_DATE;//TODO this is a string
+		codedData.GPSdate = GPS_DATE;
 		codedData.compassOrientation = COMP_ORIENT;
 		codedData.temperatures = TEMPS;
 
@@ -95,9 +123,22 @@ public class LogCodexTester {
 		
 		String errStr = LogCodex.encodeLog(LogType.ERROR, SENTENCE);
 		assertEquals(expectedErrorLogString, errStr);
+		
+		String messageStr = LogCodex.encodeLog(LogType.MESSAGE, SENTENCE);
+		assertEquals(expectedMessageLogString, messageStr);
+		
+		//TODO -> finish tests for geofences (need to create the object) and asserts for all
+		String wpStr = WAYPOINT.getLogMessage();
+		System.out.println(wpStr);
+		
+		String obstacleStr = OBSTACLE.getLogMessage();
+		System.out.println(obstacleStr);
+		
+		String robotStr = ROBOT_LOC.getLogMessage();
+		System.out.println(robotStr);
 
 		// Decode
-		LogCodex.DecodedLogData logDataDecoded = LogCodex.decodeLog(logStr);
+		LogCodex.DecodedLog logDataDecoded = LogCodex.decodeLog(logStr);
 		LogData fullDecodedLogData = ((LogData) logDataDecoded.getPayload());
 		assertEquals(LogType.LOGDATA, logDataDecoded.payloadType());
 		assertEquals(TIMESTEP, fullDecodedLogData.timestep);
@@ -115,9 +156,14 @@ public class LogCodexTester {
 		assertArrayEquals(INPUT_NN, fullDecodedLogData.inputNeuronStates, 0);
 		assertArrayEquals(OUTPUT_NN, fullDecodedLogData.outputNeuronStates, 0);
 
-		LogCodex.DecodedLogData errMsgDecoded = LogCodex.decodeLog(errStr);
+		LogCodex.DecodedLog errMsgDecoded = LogCodex.decodeLog(errStr);
 		String fullDecodedErrMsg = ((String) errMsgDecoded.getPayload());
 		assertEquals(LogType.ERROR, errMsgDecoded.payloadType());
 		assertEquals(SENTENCE, fullDecodedErrMsg);
+		
+		LogCodex.DecodedLog messageMsgDecoded = LogCodex.decodeLog(messageStr);
+		String fullDecodedMessageMsg = ((String) messageMsgDecoded.getPayload());
+		assertEquals(LogType.MESSAGE, messageMsgDecoded.payloadType());
+		assertEquals(SENTENCE, fullDecodedMessageMsg);
 	}
 }

@@ -30,7 +30,7 @@ import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
 import commoninterface.utils.logger.LogCodex;
-import commoninterface.utils.logger.LogCodex.DecodedLogData;
+import commoninterface.utils.logger.LogCodex.DecodedLog;
 import commoninterface.utils.logger.LogData;
 
 public class PositionPlot extends Thread{
@@ -171,7 +171,7 @@ public class PositionPlot extends Thread{
 		
 		Environment env = sim.getEnvironment();
 		
-		DecodedLogData dld = LogCodex.decodeLog(lines.get(0));
+		DecodedLog dld = LogCodex.decodeLog(lines.get(0));
 		LogData l = (LogData)dld.getPayload();
 		
 		double lat = l.latLon.getLat();

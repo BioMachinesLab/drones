@@ -3,6 +3,7 @@ package main;
 import gui.panels.map.MapPanel;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
@@ -23,7 +24,10 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ChangeEvent;
@@ -56,6 +60,7 @@ public class LogVisualizer extends JFrame {
 	private DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("dd-MM-YY_HH:mm:ss.SS");
 	private String IPforEntities = "1";
 	private int lastIncrementStep = 0;
+	private JTextArea messageArea;
 
 	private boolean parserVersion = true;
 
@@ -135,14 +140,24 @@ public class LogVisualizer extends JFrame {
 		buttonsPanel.add(slower);
 		buttonsPanel.add(playButton);
 		buttonsPanel.add(faster);
+		
+		messageArea = new JTextArea();
+		messageArea.setEditable(false);
+		JScrollPane scrollPane = new JScrollPane(messageArea);
+		//scrollPane.setBounds(10,60,780,500);
+		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		
+		JPanel southPanel = new JPanel(new GridLayout(2, 1));
+		southPanel.add(buttonsPanel);
+		southPanel.add(scrollPane);
 
 		controlsPanel.add(currentStepLabel, BorderLayout.NORTH);
 		controlsPanel.add(slider, BorderLayout.CENTER);
-		controlsPanel.add(buttonsPanel, BorderLayout.SOUTH);
+		controlsPanel.add(southPanel, BorderLayout.SOUTH);
 
 		add(controlsPanel, BorderLayout.SOUTH);
 
-		setSize(800, 800);
+		setSize(800, 700);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -236,17 +251,28 @@ public class LogVisualizer extends JFrame {
 					String l = s.nextLine();
 
 					if (!l.startsWith(LogCodex.COMMENT_CHAR) && !l.isEmpty()) {
-						LogCodex.DecodedLogData decodedData = LogCodex
-								.decodeLog(l);
+						LogCodex.DecodedLog decodedData = LogCodex.decodeLog(l);
 
 						switch (decodedData.payloadType()) {
 						case ENTITIES:
-							// TODO
+							currentEntities = (ArrayList<Entity>) LogCodex
+									.decodeLog(l, currentEntities).getPayload();
 							break;
 
 						case LOGDATA:
-							LogData d = convert((commoninterface.utils.logger.LogData)decodedData.getPayload());
+							LogData d = convert((commoninterface.utils.logger.LogData) decodedData.getPayload());
+							d.entities = currentEntities;
 							result.add(d);
+							break;
+							
+						case ERROR:
+							messageArea.setForeground(Color.RED);
+							messageArea.setText((String) decodedData.getPayload());
+							break;
+
+						case MESSAGE:
+							messageArea.setForeground(Color.BLACK);
+							messageArea.setText((String) decodedData.getPayload());
 							break;
 						}
 					}

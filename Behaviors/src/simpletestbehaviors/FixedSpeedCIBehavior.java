@@ -3,6 +3,8 @@ package simpletestbehaviors;
 import commoninterface.CIBehavior;
 import commoninterface.RobotCI;
 import commoninterface.utils.CIArguments;
+import commoninterface.utils.logger.LogCodex;
+import commoninterface.utils.logger.LogCodex.LogType;
 
 public class FixedSpeedCIBehavior extends CIBehavior{
 	
@@ -13,8 +15,10 @@ public class FixedSpeedCIBehavior extends CIBehavior{
 		super(args, robot);
 		l = args.getArgumentAsDouble("left");
 		r = args.getArgumentAsDouble("right");
-		if(robot.getLogger() != null)
-			robot.getLogger().logMessage("left:"+l+" right:"+r);
+		if (robot.getLogger() != null) {
+			robot.getLogger().logMessage(
+					LogCodex.encodeLog(LogType.MESSAGE, "left:" + l + " right:" + r));
+		}
 	}
 
 	@Override
