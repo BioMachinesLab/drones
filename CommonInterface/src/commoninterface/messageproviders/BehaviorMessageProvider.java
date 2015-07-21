@@ -23,7 +23,7 @@ public class BehaviorMessageProvider implements MessageProvider {
 
 		if (m instanceof BehaviorMessage) {
 			BehaviorMessage bm = (BehaviorMessage) m;
-
+			
 			if (bm.getSelectedStatus()) {
 				try {
 

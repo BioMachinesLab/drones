@@ -37,7 +37,7 @@ public class GatewayRobot implements RobotCI {
 			Robot r = sim.getRobots().get(i);
 			if(r instanceof RobotCI) {
 				RobotCI robot = (RobotCI)r;
-				robot.processInformationRequest(request, i == chosenIndex ? conn : null);
+				robot.processInformationRequest(request, i == chosenIndex  ? conn : null);
 			}
 		}
 	}

@@ -2,8 +2,10 @@ package gui.panels;
 
 import gui.DroneGUI;
 import gui.RobotGUI;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -16,6 +18,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.Scanner;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -51,8 +54,6 @@ import commoninterface.utils.jcoord.LatLon;
 public class CommandPanel extends UpdatePanel {
 	private static final long serialVersionUID = 4038133860317693008L;
 	
-	private static double SAFETY_DISTANCE = 2;
-
 	private static String CONTROLLERS_FOLDER = "controllers";
 
 	private String myHostname = "";
@@ -237,9 +238,10 @@ public class CommandPanel extends UpdatePanel {
 		add(topPanel, BorderLayout.NORTH);
 		add(actionsPanel, BorderLayout.CENTER);
 		
-		JPanel deploy = new JPanel();
+		JPanel deploy = new JPanel(new BorderLayout());
 		deploy.setBorder(BorderFactory.createTitledBorder("Drone Deploy Area"));
-		deploy.add(autoDeployAreaScroll);
+		deploy.add(autoDeployAreaScroll, BorderLayout.CENTER);
+		deploy.add(statusMessage, BorderLayout.SOUTH);
 		add(deploy, BorderLayout.SOUTH);
 	}
 
@@ -584,9 +586,16 @@ public class CommandPanel extends UpdatePanel {
 			return;
 		}
 		
+		int randomSeed = (int)(Math.random()*1000.0);
+		double safetyDistance = 3;
+		DroneGUI droneGUI = (DroneGUI)gui;
+		Random r = new Random(randomSeed);
+		
 		ArrayList<String> selectedAddresses = getSelectedAddresses();
 	
 		int robots = selectedAddresses.size();
+		//TODO
+		robots = 10;
 		
 		if(robots == 0) {
 			JOptionPane.showMessageDialog(null, "No robots selected!");
@@ -594,9 +603,8 @@ public class CommandPanel extends UpdatePanel {
 		}
 		
 		GeoFence fence = null;
-		ArrayList<Waypoint> chosenWPs = new ArrayList<Waypoint>();
 		
-		int randomSeed = (int)(Math.random()*1000.0);
+		ArrayList<Waypoint> chosenWPs = new ArrayList<Waypoint>();
 		
 		for(Entity e : mapEntities) {
 			if(e instanceof GeoFence) {
@@ -605,50 +613,44 @@ public class CommandPanel extends UpdatePanel {
 			}
 		}
 		
-		DroneGUI droneGUI = (DroneGUI)gui;
+		double width = 100;
+		double height = 100;
 		
 		if(!autoDeployArea.getText().isEmpty()) {
 			
-			fence = new GeoFence("geofence");
 			Scanner s = new Scanner(autoDeployArea.getText());
 			s.useDelimiter(";");
 			
-			LinkedList<LatLon> fenceLatLon = new LinkedList<LatLon>();
+			try {
 			
-			while(s.hasNext()) {
-				String token = s.next();
-				if(token.equals("SEED")) {
-					token = s.next();
-					randomSeed = Integer.parseInt(token);
-				}
-				if(token.equals("FENCE")) {
-					token = s.next();
-					((DroneGUI)gui).getMapPanel().clearGeoFence();
+				while(s.hasNext()) {
+					String token = s.next();
+					if(token.equals("SEED")) {
+						token = s.next();
+						randomSeed = Integer.parseInt(token);
+						r = new Random(randomSeed);
+					}
+					if(token.equals("WIDTH")) {
+						token = s.next();
+						width = Double.parseDouble(token);
+					}
+					if(token.equals("HEIGHT")) {
+						token = s.next();
+						height = Double.parseDouble(token);
+					}
+					if(token.equals("SAFETY")) {
+						token = s.next();
+						safetyDistance = Double.parseDouble(token);
+					}
+					
 				}
 				
-				if(token.equals("FENCEWP")) {
-					String lat = s.next();
-					String lon = s.next();
-					
-					LatLon latLon = new LatLon(Double.parseDouble(lat), Double.parseDouble(lon));
-					
-					fenceLatLon.add(latLon);
-					fence.addWaypoint(latLon);
-				}
-				
-				if(token.equals("WP")) {
-					String lat = s.next();
-					String lon = s.next();
-					
-					LatLon latLon = new LatLon(Double.parseDouble(lat), Double.parseDouble(lon));
-					chosenWPs.add(new Waypoint("wp"+chosenWPs.size(), latLon));
-				}
-				
-			}
-			s.close();
+				s.close();
 			
-			if(!fenceLatLon.isEmpty()) {
-				droneGUI.getMapPanel().addGeoFence(fence);
+			} catch(Exception e) {
+				s.close();
+				JOptionPane.showMessageDialog(null, e.getMessage());
+				return;
 			}
 		}
 		
@@ -658,86 +660,98 @@ public class CommandPanel extends UpdatePanel {
 			
 			LinkedList<Waypoint> wps = fence.getWaypoints();
 			
-			if(wps.size() < 4) {
-				JOptionPane.showMessageDialog(null, "GeoFence should have at least 4 points!");
+			if(wps.size() == 1) {
+				
+				Vector2d center = CoordinateUtilities.GPSToCartesian(wps.get(0).getLatLon());
+				
+				LatLon tl = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x-width/2,center.y+height/2));
+				LatLon tr = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x+width/2,center.y+height/2));
+				LatLon bl = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x-width/2,center.y-height/2));
+				LatLon br = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x+width/2,center.y-height/2));
+				
+				fence = new GeoFence("geofence");
+				fence.addWaypoint(tl);
+				fence.addWaypoint(tr);
+				fence.addWaypoint(br);
+				fence.addWaypoint(bl);
+				
+				wps = fence.getWaypoints();
+				
+				droneGUI.getMapPanel().clearGeoFence();
+				droneGUI.getMapPanel().addGeoFence(fence);
+				
+			} else if(wps.size() > 4) {
+				JOptionPane.showMessageDialog(null, "The GeoFence should have a maximum of 4 points!");
 				return;
-			} else {
+			}
 			
-				Vector2d min = new Vector2d(Double.MAX_VALUE, Double.MAX_VALUE);
-				Vector2d max = new Vector2d(-Double.MAX_VALUE, -Double.MAX_VALUE);
-				
-				for(Waypoint w : wps) {
-					LatLon l = w.getLatLon();
-					Vector2d coord = CoordinateUtilities.GPSToCartesian(l);
-					
-					min.x = Math.min(coord.x,min.x);
-					min.y = Math.min(coord.y,min.y);
-					
-					max.x = Math.max(coord.x,max.x);
-					max.y = Math.max(coord.y,max.y);
-				}
-				
-				ArrayList<Line> lines = new ArrayList<Line>();
-				LinkedList<Waypoint> fenceWPs = fence.getWaypoints();
-				for(int i = 1 ; i < fenceWPs.size() ; i++) {
-					Waypoint wa = fenceWPs.get(i-1);
-					Waypoint wb = fenceWPs.get(i);
-					lines.add(getLine(wa,wb));
-				}
-				//loop around
-				Waypoint wa = fenceWPs.get(fenceWPs.size()-1);
-				Waypoint wb = fenceWPs.get(0);
+			Vector2d min = new Vector2d(Double.MAX_VALUE, Double.MAX_VALUE);
+			Vector2d max = new Vector2d(-Double.MAX_VALUE, -Double.MAX_VALUE);
+			
+			for(Waypoint wp : fence.getWaypoints()) {
+				Vector2d v = CoordinateUtilities.GPSToCartesian(wp.getLatLon());
+				min.x = Math.min(min.x, v.x);
+				min.y = Math.min(min.y, v.y);
+				max.x = Math.max(max.x, v.x);
+				max.y = Math.max(max.y, v.y);
+			}
+			
+			ArrayList<Line> lines = new ArrayList<Line>();
+			LinkedList<Waypoint> fenceWPs = fence.getWaypoints();
+			for(int i = 1 ; i < fenceWPs.size() ; i++) {
+				Waypoint wa = fenceWPs.get(i-1);
+				Waypoint wb = fenceWPs.get(i);
 				lines.add(getLine(wa,wb));
+			}
+			//loop around
+			Waypoint wa = fenceWPs.get(fenceWPs.size()-1);
+			Waypoint wb = fenceWPs.get(0);
+			lines.add(getLine(wa,wb));
+			
+			for(int i = 0 ; i < robots ; i++) {
 				
-				Random r = new Random(randomSeed);
+				Vector2d pos = null;
 				
-				for(int i = 0 ; i < robots ; i++) {
+				int tries = 0;
+				
+				do {
+					double x = min.x + r.nextDouble()*(max.x-min.x);
+					double y = min.y + r.nextDouble()*(max.y-min.y);
+					pos = new Vector2d(x,y);
 					
-					Vector2d pos = null;
-					
-					int tries = 0;
-					
-					do {
-						double x = min.x + r.nextDouble()*(max.x-min.x);
-						double y = min.y + r.nextDouble()*(max.y-min.y);
-						pos = new Vector2d(x,y);
-						
-						if(tries++ > 100) {
-							JOptionPane.showMessageDialog(null, "Can't place the waypoints inside the GeoFence!");
-							return;
-						}
-						
-					} while(!safePosition(pos, chosenWPs, lines));
-					
-					if(i >= chosenWPs.size()) {
-						Waypoint w = new Waypoint("wp"+i, CoordinateUtilities.cartesianToGPS(pos));
-						chosenWPs.add(w);
+					if(tries++ > 100) {
+						JOptionPane.showMessageDialog(null, "Can't place the waypoints inside the GeoFence!");
+						return;
 					}
 					
+				} while(!safePosition(pos, chosenWPs, lines, safetyDistance));
+				
+				if(i >= chosenWPs.size()) {
+					Waypoint w = new Waypoint("wp"+i, CoordinateUtilities.cartesianToGPS(pos));
+					chosenWPs.add(w);
 				}
-				
-				for(Waypoint w : chosenWPs)
-					droneGUI.getMapPanel().addWaypoint(w);
-				
-				String str = "GEOFENCE AUTO DISPERSE;";
-				
-				str+="SEED;"+randomSeed+";FENCE;";
-				
-				for(Waypoint w : fence.getWaypoints()) {
-					str+="FENCEWP;"+w.getLatLon().getLat()+";"+w.getLatLon().getLon()+";";
-				}
-				
-				for(Waypoint w : chosenWPs) {
-					str+="WP;"+w.getLatLon().getLat()+";"+w.getLatLon().getLon()+";";
-				}
-				
-				console.log(str);
-				autoDeployArea.setText(str);
-				
-				deployEntities(true);
-				deployPreset(presetsConfig.get("waypoint"));
 				
 			}
+			
+			for(Waypoint w : chosenWPs)
+				droneGUI.getMapPanel().addWaypoint(w);
+			
+			System.out.println(wps.size());
+			
+			String str = "GEOFENCE AUTO DISPERSE;";
+			
+			str+="SEED;"+randomSeed;
+			
+			str+=";WIDTH;"+width;
+			str+=";HEIGHT;"+height;
+			str+=";SAFETY;"+safetyDistance;
+			
+			console.log(str);
+			autoDeployArea.setText(str);
+			
+			deployEntities(true);
+			deployPreset(presetsConfig.get("waypoint"));
+			
 		} else {
 			JOptionPane.showMessageDialog(null, "Please define a GeoFence first!");
 			return;
@@ -750,12 +764,12 @@ public class CommandPanel extends UpdatePanel {
 		return new Line(va.getX(), va.getY(), vb.getX(), vb.getY());
 	}
 	
-	private boolean safePosition(Vector2d v, ArrayList<Waypoint> wps, ArrayList<Line> lines) {
+	private boolean safePosition(Vector2d v, ArrayList<Waypoint> wps, ArrayList<Line> lines, double safetyDistance) {
 		
 		if(insideBoundary(v, lines)) {
 		
 			for(Waypoint wp : wps) {
-				if(CoordinateUtilities.GPSToCartesian(wp.getLatLon()).distanceTo(v) < SAFETY_DISTANCE)
+				if(CoordinateUtilities.GPSToCartesian(wp.getLatLon()).distanceTo(v) < safetyDistance)
 					return false;
 			}
 			

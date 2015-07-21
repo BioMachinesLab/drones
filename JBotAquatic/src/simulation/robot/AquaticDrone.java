@@ -46,6 +46,7 @@ import commoninterface.utils.RobotLogger;
 import commoninterface.utils.jcoord.LatLon;
 import commoninterface.utils.logger.LogCodex;
 import commoninterface.utils.logger.LogCodex.LogType;
+import controllers.DummyController;
 
 public class AquaticDrone extends DifferentialDriveRobot implements AquaticDroneCI{
 
@@ -108,7 +109,8 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		if(commRange == 0)
 			throw new RuntimeException("[AquaticDrone] CommRange is at 0!");
 		
-		alwaysActiveBehaviors.add(new ChangeWaypointCIBehavior(new CIArguments(""), this));
+		if(args.getArgumentAsIntOrSetDefault("changewaypoint", 1) == 1)
+			alwaysActiveBehaviors.add(new ChangeWaypointCIBehavior(new CIArguments(""), this));
 		
 		if(args.getArgumentAsIntOrSetDefault("avoiddrones", 1) == 1)
 			alwaysActiveBehaviors.add(new AvoidDronesInstinct(new CIArguments(""), this));
@@ -152,6 +154,8 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		
 		if(activeBehavior != null) {
 			activeBehavior.step(simulationStep);
+		} else if(getController() instanceof DummyController){
+			setMotorSpeeds(0, 0);
 		}
 		
 	}
@@ -198,7 +202,6 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	}
 	
 	public void setMotorSpeeds(double leftMotorPercentage, double rightMotorPercentage) {
-		
 		leftPercentage = leftMotorPercentage;
 		rightPercentage = rightMotorPercentage;
 		
@@ -264,8 +267,9 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	@Override
 	public void updateActuators(Double time, double timeDelta) {
 		
-		for(CIBehavior b : alwaysActiveBehaviors)
+		for(CIBehavior b : alwaysActiveBehaviors) {
 			b.step(time);
+		}
 		
 		 if(!rudder) {
 			propellers.move(this,leftWheelSpeed,rightWheelSpeed,timeDelta);
@@ -325,6 +329,9 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	@Override
 	public void setActiveWaypoint(Waypoint wp) {
 		this.activeWaypoint = wp;
+		//TODO REMOVE THIS DEBUG LINE!!
+		System.out.println("DEBUG DEBUG DEBUG AQUATICDRONE");
+		this.activeWaypoint = Waypoint.getWaypoints(this).get(getId());
 	}
 	
 	@Override
@@ -410,8 +417,8 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 			log(LogCodex.encodeLog(LogType.MESSAGE, str));
 			
 			activeBehavior = null;
-			setMotorSpeeds(0, 0);
 		}
+		setMotorSpeeds(0, 0);
 	}
 	
 	@Override

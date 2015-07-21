@@ -36,7 +36,7 @@ public class ConsoleBroadcastHandler {
 	private String broadcastAddress;
 	
 	// TODO this has to be true for the mixed experiments to work
-	private boolean retransmit = false;
+	private boolean retransmit = true;
 
 	public ConsoleBroadcastHandler(RobotControlConsole console) {
 		this.console = console;
