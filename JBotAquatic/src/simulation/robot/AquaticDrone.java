@@ -330,8 +330,8 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	public void setActiveWaypoint(Waypoint wp) {
 		this.activeWaypoint = wp;
 		//TODO REMOVE THIS DEBUG LINE!!
-		System.out.println("DEBUG DEBUG DEBUG AQUATICDRONE");
-		this.activeWaypoint = Waypoint.getWaypoints(this).get(getId());
+//		System.out.println("DEBUG DEBUG DEBUG AQUATICDRONE");
+//		this.activeWaypoint = Waypoint.getWaypoints(this).get(getId());
 	}
 	
 	@Override
