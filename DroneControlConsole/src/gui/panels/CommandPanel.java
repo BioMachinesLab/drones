@@ -586,8 +586,9 @@ public class CommandPanel extends UpdatePanel {
 			return;
 		}
 		
-		int randomSeed = (int)(Math.random()*1000.0);
-		double safetyDistance = 3;
+		int randomSeed = 1111;
+		double safetyDistance = 15;
+		
 		DroneGUI droneGUI = (DroneGUI)gui;
 		Random r = new Random(randomSeed);
 		
@@ -595,7 +596,8 @@ public class CommandPanel extends UpdatePanel {
 	
 		int robots = selectedAddresses.size();
 		//TODO
-		robots = 10;
+//		System.out.println("DEBUG DEBUG DEBUG COMMANDPANEL");
+//		robots = 10;
 		
 		if(robots == 0) {
 			JOptionPane.showMessageDialog(null, "No robots selected!");
@@ -613,8 +615,8 @@ public class CommandPanel extends UpdatePanel {
 			}
 		}
 		
-		double width = 100;
-		double height = 100;
+		double width = 63;
+		double height = 63;
 		
 		if(!autoDeployArea.getText().isEmpty()) {
 			
@@ -630,13 +632,10 @@ public class CommandPanel extends UpdatePanel {
 						randomSeed = Integer.parseInt(token);
 						r = new Random(randomSeed);
 					}
-					if(token.equals("WIDTH")) {
+					if(token.equals("SIZE")) {
 						token = s.next();
 						width = Double.parseDouble(token);
-					}
-					if(token.equals("HEIGHT")) {
-						token = s.next();
-						height = Double.parseDouble(token);
+						height = width;
 					}
 					if(token.equals("SAFETY")) {
 						token = s.next();
@@ -660,30 +659,49 @@ public class CommandPanel extends UpdatePanel {
 			
 			LinkedList<Waypoint> wps = fence.getWaypoints();
 			
-			if(wps.size() == 1) {
+			Vector2d center = null;
+			
+			if(wps.size() >= 4) {
 				
-				Vector2d center = CoordinateUtilities.GPSToCartesian(wps.get(0).getLatLon());
+				center = new Vector2d();
 				
-				LatLon tl = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x-width/2,center.y+height/2));
-				LatLon tr = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x+width/2,center.y+height/2));
-				LatLon bl = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x-width/2,center.y-height/2));
-				LatLon br = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x+width/2,center.y-height/2));
+				Vector2d corner = CoordinateUtilities.GPSToCartesian(wps.getFirst().getLatLon());
+				center.x = corner.x;
+				center.y = corner.y;
 				
-				fence = new GeoFence("geofence");
-				fence.addWaypoint(tl);
-				fence.addWaypoint(tr);
-				fence.addWaypoint(br);
-				fence.addWaypoint(bl);
+				for(int i = 1 ; i < wps.size() ; i++) {
+					corner = CoordinateUtilities.GPSToCartesian(wps.get(i).getLatLon());
+					center.x+=corner.x;
+					center.y+=corner.y;
+				}
+				center.x/=wps.size();
+				center.y/=wps.size();
 				
-				wps = fence.getWaypoints();
-				
-				droneGUI.getMapPanel().clearGeoFence();
-				droneGUI.getMapPanel().addGeoFence(fence);
-				
-			} else if(wps.size() > 4) {
-				JOptionPane.showMessageDialog(null, "The GeoFence should have a maximum of 4 points!");
-				return;
 			}
+			
+			if(center == null && wps.size() != 1) {
+				JOptionPane.showMessageDialog(null, "Incorrect number of GeoFence corners!");
+			}
+				
+			
+			if(center == null)
+				center = CoordinateUtilities.GPSToCartesian(wps.get(0).getLatLon());
+			
+			LatLon tl = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x-width/2,center.y+height/2));
+			LatLon tr = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x+width/2,center.y+height/2));
+			LatLon bl = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x-width/2,center.y-height/2));
+			LatLon br = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x+width/2,center.y-height/2));
+			
+			fence = new GeoFence("geofence");
+			fence.addWaypoint(tl);
+			fence.addWaypoint(tr);
+			fence.addWaypoint(br);
+			fence.addWaypoint(bl);
+			
+			wps = fence.getWaypoints();
+			
+			droneGUI.getMapPanel().clearGeoFence();
+			droneGUI.getMapPanel().addGeoFence(fence);
 			
 			Vector2d min = new Vector2d(Double.MAX_VALUE, Double.MAX_VALUE);
 			Vector2d max = new Vector2d(-Double.MAX_VALUE, -Double.MAX_VALUE);
@@ -738,13 +756,12 @@ public class CommandPanel extends UpdatePanel {
 			
 			System.out.println(wps.size());
 			
-			String str = "GEOFENCE AUTO DISPERSE;";
+			String str = "GEOFENCE;";
 			
 			str+="SEED;"+randomSeed;
 			
-			str+=";WIDTH;"+width;
-			str+=";HEIGHT;"+height;
-			str+=";SAFETY;"+safetyDistance;
+			str+=";SIZE;"+(int)width;
+			str+=";SAFETY;"+(int)safetyDistance;
 			
 			console.log(str);
 			autoDeployArea.setText(str);
