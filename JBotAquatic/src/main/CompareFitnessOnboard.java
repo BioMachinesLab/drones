@@ -1,25 +1,32 @@
 package main;
 
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
+
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+
 import mathutils.Vector2d;
+
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+
 import simulation.Simulator;
 import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
 import commoninterface.entities.RobotLocation;
+import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.logger.DecodedLog;
 import commoninterface.utils.logger.LogCodex;
@@ -91,24 +98,24 @@ public class CompareFitnessOnboard extends Thread{
 		for(String experiment : experiments) {
 			
 			for(int controller = 0 ; controller < controllers ; controller++) {
-				
-				
 				for(int sample = 1 ; sample <= samples ; sample++) {
+					
+					Setup real = new Setup();
+					Setup sim = new Setup();
 					
 					ArrayList<LogData> data = getData(experiment, controller, robots, sample);
 				
 					try {
-						JBotEvolver jbot2 = new JBotEvolver(new String[]{"compare/config/aggregate.conf"});
-						hash = jbot2.getArguments();
+						JBotEvolver jbot = new JBotEvolver(new String[]{"compare/config/aggregate.conf"});
+						hash = jbot.getArguments();
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
 					
-					hash.put("--environment", new Arguments("classname=EmptyEnvironment,width=320,height=320,steps="+(int)maxSteps,true));
+					hash.put("--environment", new Arguments("classname=EmptyEnvironment,width=150,height=150,steps="+(int)maxSteps,true));
 					
-					Simulator sim = new Simulator(new Random(1), hash);
-					
-					ArrayList<Robot> robots = new ArrayList<Robot>();
+					real.sim = new Simulator(new Random(1), hash);
+					sim.sim = new Simulator(new Random(1), hash);
 					
 					HashMap<Integer,Integer> robotList = new HashMap<Integer,Integer>();
 					for(LogData d : data) {
@@ -117,31 +124,31 @@ public class CompareFitnessOnboard extends Thread{
 						robotList.put(id, 0);
 					}
 					
-					for(int i = 0 ; i < robotList.keySet().size() ; i++) {
-						AquaticDrone drone = new AquaticDrone(sim, hash.get("--robots"));
-						drone.setPosition(start.x,start.y);
-						robots.add(drone);
-						robotList.put((Integer)robotList.keySet().toArray()[i], robots.size()-1);
-						System.out.println(robotList.keySet().toArray()[i]+" = "+(robots.size()-1));
-					}
+					real.setupDrones(robotList,hash.get("--robots"),start);
+					sim.setupDrones(robotList,hash.get("--robots"),start);
 					
-					if(robots.size() != this.robots) {
-						System.err.println("NUMBER OF ROBOTS DIFFERENT! "+robots.size()+" != "+this.robots);
-//						System.exit(0);
+					if(this.robots != real.robots.size()) {
+						System.err.println("NUMBER OF ROBOTS DIFFERENT! "+this.robots+" != "+this.robots);
+						System.exit(0);
 					}
 					
 					boolean gui = true;
 					
-					TwoDRenderer renderer = new TwoDRenderer(new Arguments("bigrobots=1,drawframes=1"));
+					real.renderer = new TwoDRenderer(new Arguments("bigrobots=1,drawframes=5"));
+					sim.renderer = new TwoDRenderer(new Arguments("bigrobots=1,drawframes=5"));
 					
 					if(gui) {
-						renderer.setSimulator(sim);
-						renderer.drawFrame();
-						frame.setRenderer(renderer);
+						real.renderer.setSimulator(real.sim);
+						sim.renderer.setSimulator(sim.sim);
+						real.renderer.drawFrame();
+						sim.renderer.drawFrame();
+						frame.setRenderer1(real.renderer);
+						frame.setRenderer2(sim.renderer);
 						frame.validate();
 					}
 					
-					sim.addRobots(robots);
+					real.sim.addRobots(real.robots);
+					sim.sim.addRobots(sim.robots);
 					
 					RobotLocation firstRL = getRobotLocation(data.get(0));
 					commoninterface.mathutils.Vector2d firstPos = CoordinateUtilities.GPSToCartesian(firstRL.getLatLon());
@@ -155,34 +162,61 @@ public class CompareFitnessOnboard extends Thread{
 							if(logId == id) {
 								int position = robotList.get(id);
 								commoninterface.mathutils.Vector2d pos = CoordinateUtilities.GPSToCartesian(rl.getLatLon());
-								robots.get(position).setPosition(pos.x+start.x-firstPos.x, pos.y+start.y-firstPos.y);
-								robots.get(position).setOrientation(Math.toRadians(rl.getOrientation()));
+								real.robots.get(position).setPosition(pos.x+start.x-firstPos.x, pos.y+start.y-firstPos.y);
+								sim.robots.get(position).setPosition(pos.x+start.x-firstPos.x, pos.y+start.y-firstPos.y);
+								
+								double orientation = 360 - (rl.getOrientation() - 90);
+								
+								real.robots.get(position).setOrientation(Math.toRadians(orientation));
+								sim.robots.get(position).setOrientation(Math.toRadians(orientation));
 								break;
 							}
 							
 						}
 					}
 					
-					AggregateFitness ff = new AggregateFitness(new Arguments("classname=evaluation.AggregateFitness,dontuse=1"));
-					sim.addCallback(ff);
+					AggregateFitness ff_real = new AggregateFitness(new Arguments("classname=evaluation.AggregateFitness,dontuse=1"));
+					AggregateFitness ff_sim = new AggregateFitness(new Arguments("classname=evaluation.AggregateFitness,dontuse=1"));
+					
+					real.sim.addCallback(ff_real);
+					sim.sim.addCallback(ff_sim);
 					
 					String dateStr = data.get(0).systemTime;
 					DateTime stepTime = DateTime.parse(dateStr,formatter);
 					DateTime currentTime;
 					int step = 0;
-
-					//REAL ROBOT
+					
+					String f = "compare/controllers/preset_"+experiment+controller+".conf";
+					
+					try {
+						Scanner s = new Scanner(new File(f));
+						f="";
+						while(s.hasNextLine()) {
+							f+=s.nextLine()+"\n";
+						}
+						s.close();
+					} catch (FileNotFoundException e) {
+						e.printStackTrace();
+					}
+					BehaviorMessage bm = new BehaviorMessage("ControllerCIBehavior", f.replaceAll("\\s+", ""), true, "dude");
+					
+					for(Robot r : sim.robots) {
+						AquaticDrone drone = (AquaticDrone)r;
+						drone.processInformationRequest(bm, null);
+					}
+					
 					for(LogData d : data) {
 						
 						RobotLocation rl = getRobotLocation(d);
 							
 						currentTime = DateTime.parse(d.systemTime,formatter);
-						System.out.println(step+" "+currentTime+" "+stepTime);
 						
 						while(Math.abs(stepTime.getMillis()-currentTime.getMillis()) > 100) {
 							stepTime = stepTime.plus(100);
 							step++;
-							sim.performOneSimulationStep((double)step);
+//							System.out.println(step);
+							real.sim.performOneSimulationStep((double)step);
+							sim.sim.performOneSimulationStep((double)step);
 						}
 						
 						commoninterface.mathutils.Vector2d pos = CoordinateUtilities.GPSToCartesian(rl.getLatLon());
@@ -190,55 +224,28 @@ public class CompareFitnessOnboard extends Thread{
 						int id = Integer.parseInt(rl.getName());
 						int position = robotList.get(id);
 						
-						robots.get(position).setPosition(pos.x+start.x-firstPos.x, pos.y+start.y-firstPos.y);
-						robots.get(position).setOrientation(Math.toRadians(rl.getOrientation()));
+//						if(position == 5) {
+//							System.out.println(step+" "+((AquaticDrone)real.robots.get(5)).getCompassOrientationInDegrees()+" "+d.motorSpeeds[0]*100+" "+d.motorSpeeds[1]*100);
+//						}
+						
+						real.robots.get(position).setPosition(pos.x+start.x-firstPos.x, pos.y+start.y-firstPos.y);
+						double orientation = 360 - (rl.getOrientation() - 90);
+						real.robots.get(position).setOrientation(Math.toRadians(orientation));
 						
 						if(gui) {
-							renderer.drawFrame();
-							renderer.repaint();
+							sim.renderer.drawFrame();
+							real.renderer.drawFrame();
+							sim.renderer.repaint();
+							real.renderer.repaint();
 						}
 						
 					}
 					
-					System.out.println("Fitness: "+ff.getFitness());
-				
+					System.out.println("Fitness: "+ff_real.getFitness()+" "+ff_sim.getFitness());
+					System.exit(0);
 				}
-				
 			}
-			
 		}
-		
-			
-//			sim.addCallback(new WaterCurrent(new Arguments("maxspeed=0.1,fixedspeed=1,angle=-45")));
-//			
-//			String f = "compare/controllers/"+FILE+".conf";
-//			
-//			try {
-//				Scanner s = new Scanner(new File(f));
-//				f="";
-//				while(s.hasNextLine()) {
-//					f+=s.nextLine()+"\n";
-//				}
-//				s.close();
-//			} catch (FileNotFoundException e) {
-//				e.printStackTrace();
-//			}
-//			
-//			BehaviorMessage bm = new BehaviorMessage("ControllerCIBehavior", f.replaceAll("\\s+", ""), true, "dude");
-//			
-//			for(Robot r : robots) {
-//				AquaticDrone drone = (AquaticDrone)r;
-//				drone.processInformationRequest(bm, null);
-//			}
-//			
-//			for(int i = 0 ; i < maxSteps ; i++) {
-//				sim.performOneSimulationStep((double)i);
-//				renderer.drawFrame();
-//				renderer.repaint();
-//			}
-//			
-		
-		
 		
 	}
 	
@@ -252,14 +259,32 @@ public class CompareFitnessOnboard extends Thread{
 	
 }
 
+class Setup {
+	
+	Renderer renderer;
+	Simulator sim;
+	ArrayList<Robot> robots = new ArrayList<Robot>();
+	
+	public void setupDrones(HashMap<Integer,Integer> robotList, Arguments args, Vector2d start) {
+		for(int i = 0 ; i < robotList.keySet().size() ; i++) {
+			AquaticDrone drone = new AquaticDrone(sim, args);
+			drone.setPosition(start.x,start.y);
+			robots.add(drone);
+			robotList.put((Integer)robotList.keySet().toArray()[i], robots.size()-1);
+		}
+	}
+	
+}
+
 class JFrameViewerFitnessOnboard extends JFrame{
 	
-	private Renderer renderer;
+	private Renderer renderer1;
+	private Renderer renderer2;
 	private CompareFitnessOnboard plot;
 	
 	public JFrameViewerFitnessOnboard() {
 		super("Position Plot");
-		setLayout(new BorderLayout());
+		setLayout(new GridLayout(1,2));
 		
 		final JFrameViewerFitnessOnboard t = this;
 		
@@ -286,7 +311,7 @@ class JFrameViewerFitnessOnboard extends JFrame{
 		south.add(button);
 		south.add(pause);
 		
-		add(south, BorderLayout.SOUTH);
+//		add(south, BorderLayout.SOUTH);
 		
 		setSize(1000, 1000);
 		setLocationRelativeTo(null);
@@ -295,11 +320,18 @@ class JFrameViewerFitnessOnboard extends JFrame{
 		button.doClick();
 	}
 	
-	public void setRenderer(Renderer renderer) {
-		if(this.renderer != null)
-			remove(this.renderer);
-		add(renderer,BorderLayout.CENTER);
-		this.renderer = renderer;
+	public void setRenderer1(Renderer renderer) {
+		if(this.renderer1 != null)
+			remove(this.renderer1);
+		add(renderer);
+		this.renderer1 = renderer;
+	}
+	
+	public void setRenderer2(Renderer renderer) {
+		if(this.renderer2 != null)
+			remove(this.renderer2);
+		add(renderer);
+		this.renderer2 = renderer;
 	}
 	
 }
