@@ -12,12 +12,18 @@ public class RudderActuator extends Actuator {
 
 	public static final float NOISESTDEV = 0.05f;
 
+	private static final double NEW_ANGLE = 1;//.3;
+
+	private static final double ANGLE_DECAY =0;//.9 ;
+
 	protected double heading = 0;
 	protected double speed = 0;
 	protected Random random;
 	private double timeDelta = 0.1;
 	private double prevSpeed = 0;
-	
+
+	private double angle;
+
 	public RudderActuator(Simulator simulator, int id, Arguments arguments) {
 		super(simulator, id, arguments);
 		this.random = simulator.getRandom();
@@ -31,131 +37,145 @@ public class RudderActuator extends Actuator {
 	public void setSpeed(double percentage) {
 		this.speed = percentage;
 	}
-	
+
 	@Override
 	public void apply(Robot drone) {
-		
-		double angleInDegrees = getTurningAngleFromHeading(heading)*-1;
+
+		double angleInDegrees = Math.max(-9, Math.min(9, angle
+				+ (getTurningAngleFromHeading(heading) * -1) * NEW_ANGLE));
 		double motorDifference = 0;
 		double forwardComponent = 0;
 		double turningComponent = 0;
 		double turningSpeed = 0;
 		double forwardSpeed = 0;
-		
-		double maxIncrementUp = 1.0 / (1.0 * 10.0); //1 second to accel to full speed
-		double maxIncrementDown = 1.0 / (5.0 * 10.0); //5 seconds to stop
-		
+
+		double maxIncrementUp = 1.0 / (1.0 * 10.0); // 1 second to accel to full
+													// speed
+		double maxIncrementDown = 1.0 / (5.0 * 10.0); // 5 seconds to stop
+
 		double desiredSpeed = speed;
-		
-		if(speed > prevSpeed + maxIncrementUp)
+
+		if (speed > prevSpeed + maxIncrementUp)
 			speed = prevSpeed + maxIncrementUp;
-		else if(speed < prevSpeed - maxIncrementDown)
-			speed  = prevSpeed - maxIncrementDown;
-		
-		if(Math.abs(heading) >= 0.9/* || Math.abs(heading) < 0.1*/) {
-			
-			if(Math.abs(heading) >= 0.9)
-				heading = 1.0*Math.signum(heading);
-			
-			if(Math.abs(heading) <= 0.1)
+		else if (speed < prevSpeed - maxIncrementDown)
+			speed = prevSpeed - maxIncrementDown;
+		if (Math.abs(heading) >= 0.9/* || Math.abs(heading) < 0.1 */) {
+
+			if (Math.abs(heading) >= 0.9)
+				heading = 1.0 * Math.signum(heading);
+
+			if (Math.abs(heading) <= 0.1)
 				heading = 0;
-			
-			angleInDegrees = getTurningAngleFromHeading(heading)*-1;
-			
-			motorDifference = getMotorDifferenceFromTurningAngle(Math.abs(angleInDegrees));
-			
+
+			angleInDegrees = Math.max(-9, Math.min(9, angle 
+					+ (getTurningAngleFromHeading(heading) * -1) * NEW_ANGLE));
+			motorDifference = getMotorDifferenceFromTurningAngle(Math
+					.abs(angleInDegrees));
+
 			forwardComponent = 1.0 - motorDifference;
 			turningComponent = 1.0 - forwardComponent;
-			
-			turningComponent*=speed;
-			forwardComponent*=speed;
-			
+
+			turningComponent *= speed;
+			forwardComponent *= speed;
+
 			turningSpeed = getTurningSpeedFromDifferenceOneStoppedMotor(turningComponent);
 			forwardSpeed = getForwardSpeedInMs(forwardComponent);
-			angleInDegrees = getTurningAngleFromTurningSpeed(turningSpeed)*Math.signum(angleInDegrees);
-			
+			angleInDegrees = Math.max(-9, Math.min(9, angle
+					+
+					getTurningAngleFromTurningSpeed(turningSpeed)
+					* Math.signum(angleInDegrees) *NEW_ANGLE));
+
 		} else {
-			motorDifference = getMotorDifferenceFromAngleOneFullMotor(Math.abs(angleInDegrees));
-			turningSpeed = getTurningSpeedFromMotorDifferenceOneMotorFull(motorDifference) * translateSpeedReduction(speed);
+			motorDifference = getMotorDifferenceFromAngleOneFullMotor(Math
+					.abs(angleInDegrees));
+			turningSpeed = getTurningSpeedFromMotorDifferenceOneMotorFull(motorDifference)
+					* translateSpeedReduction(speed);
 		}
-		
+
+		// turningSpeed*=.5;
+
 		double x = drone.getPosition().getX();
 		double y = drone.getPosition().getY();
 		double o = drone.getOrientation();
 
-		if(speed < 0.01) {
+		if (speed < 0.01) {
 			turningSpeed = 0;
 			forwardSpeed = 0;
 		}
-		
-		turningSpeed = turningSpeed* (1 + random.nextGaussian() * NOISESTDEV);
-		forwardSpeed = forwardSpeed* (1 + random.nextGaussian() * NOISESTDEV);
-		
+
+		turningSpeed = turningSpeed * (1 + random.nextGaussian() * NOISESTDEV);
+		forwardSpeed = forwardSpeed * (1 + random.nextGaussian() * NOISESTDEV);
+
 		x = x + (turningSpeed + forwardSpeed) * timeDelta * Math.cos(o);
 		y = y + (turningSpeed + forwardSpeed) * timeDelta * Math.sin(o);
-		
-		if(desiredSpeed >= 0.01) {
-			double newOrientation = drone.getOrientation() + Math.toRadians(angleInDegrees);
+
+		if (desiredSpeed >= 0.01) {
+			double newOrientation = drone.getOrientation()
+					+ Math.toRadians(angleInDegrees);
 			drone.setOrientation(newOrientation);
 		}
-		
-		drone.setPosition(new Vector2d(x,y));
-		
+
+		drone.setPosition(new Vector2d(x, y));
+
 		prevSpeed = speed;
+		angle = angleInDegrees*ANGLE_DECAY;
 	}
 
 	@Override
 	public String toString() {
-		return "RudderActuator [heading=" + heading + ", speed="
-				+ speed + "]";
+		return "RudderActuator [heading=" + heading + ", speed=" + speed + "]";
 	}
-	
+
 	private double translateSpeedReduction(double speed) {
-		return 0.7*speed + 0.3;
+		return 0.7 * speed + 0.3;
 	}
-	
+
 	private double getForwardSpeedInMs(double percentage) {
-		return 153.99*Math.pow(percentage,0.3663) / 100.0;
+		return 153.99 * Math.pow(percentage, 0.3663) / 100.0;
 	}
-	
-	private double getTurningSpeedFromDifferenceOneStoppedMotor(double speedDifference) {
-		
-		if(speedDifference == 0)
+
+	private double getTurningSpeedFromDifferenceOneStoppedMotor(
+			double speedDifference) {
+
+		if (speedDifference == 0)
 			return 0;
-		
-		return (-35.322*Math.pow(speedDifference,2) + 133.59*speedDifference + 18.964) / 100.0;
+
+		return (-35.322 * Math.pow(speedDifference, 2) + 133.59
+				* speedDifference + 18.964) / 100.0;
 	}
-	
+
 	private double getMotorDifferenceFromAngleOneFullMotor(double angle) {
-		return -0.0068 * Math.pow(angle,2) + 0.1614*angle+ 0.0903;
+		return -0.0068 * Math.pow(angle, 2) + 0.1614 * angle + 0.0903;
 	}
-	
-	public double getTurningAngleFromDifferenceOneMotorFull(double speedDifference) {
+
+	public double getTurningAngleFromDifferenceOneMotorFull(
+			double speedDifference) {
 		return 10.564 * speedDifference - 2.0412;
 	}
-	
-	public double getTurningSpeedFromMotorDifferenceOneMotorFull(double difference) {
-		return (-28.958*difference + 139.88) / 100.0;
+
+	public double getTurningSpeedFromMotorDifferenceOneMotorFull(
+			double difference) {
+		return (-28.958 * difference + 139.88) / 100.0;
 	}
-	
+
 	private double getMotorDifferenceFromTurningAngle(double angle) {
-		return Math.min(0.0098*Math.pow(angle,2) + 0.0244*angle,1);
+		return Math.min(0.0098 * Math.pow(angle, 2) + 0.0244 * angle, 1);
 	}
-	
+
 	private double getTurningAngleFromTurningSpeed(double turningSpeed) {
 		return 7.6401 * turningSpeed;
 	}
-	
+
 	private double getTurningAngleFromHeading(double heading) {
-		return 9*heading;
+		return 9 * heading;
 	}
-	
+
 	public double getSpeed() {
 		return speed;
 	}
-	
+
 	public double getHeading() {
 		return heading;
 	}
-	
+
 }
