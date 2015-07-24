@@ -6,8 +6,11 @@
 package evaluation;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 import simulation.Simulator;
+import simulation.physicalobjects.LightPole;
+import simulation.physicalobjects.PhysicalObject;
 import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
@@ -29,15 +32,15 @@ public class AggregateFitness extends AvoidCollisionsFunction {
     @Override
     public void update(Simulator simulator) {
         if (!configured) {
-            startingDistance = calculateDistCM(simulator.getRobots());
+            startingDistance = calculateDistCM(simulator.getRobots(),simulator);
             configured = true;
         }
 
         // MEAN DISTANCE TO CENTRE OF MASS
-        double currDistance = calculateDistCM(simulator.getRobots());
+        double currDistance = calculateDistCM(simulator.getRobots(),simulator);
         meanDistance += (startingDistance - currDistance) / startingDistance;
         fitness = meanDistance / simulator.getTime();
-
+//        System.out.println(simulator.getTime()+" MEAN "+meanDistance+" FITNESS "+fitness+" STARTING "+startingDistance+" CURRENT "+currDistance+" ROBOTS "+simulator.getRobots().size());
         super.update(simulator);
     }
 
@@ -46,19 +49,29 @@ public class AggregateFitness extends AvoidCollisionsFunction {
         return 10 + fitness;
     }
 
-    private double calculateDistCM(Collection<Robot> robots) {
+    private double calculateDistCM(Collection<Robot> robots, Simulator sim) {
         mathutils.Vector2d centreMass = new mathutils.Vector2d();
         for (Robot r : robots) {
             centreMass.add(r.getPosition());
         }
         centreMass.x = centreMass.x / robots.size();
         centreMass.y = centreMass.y / robots.size();
-
+        
+        Iterator<PhysicalObject> i = sim.getEnvironment().getAllObjects().iterator();
+        
+        while(i.hasNext()) {
+        	if(i.next() instanceof LightPole)
+        		i.remove();
+        }
+        
+        sim.getEnvironment().addStaticObject(new LightPole(sim, "lp", centreMass.x, centreMass.y, 1));
+        
         double currentDistance = 0;
         for (Robot r : robots) {
             AquaticDrone drone = (AquaticDrone) r;
             currentDistance += drone.getPosition().distanceTo(centreMass);
         }
+        
         return currentDistance / robots.size();
     }
 }

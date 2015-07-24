@@ -26,7 +26,7 @@ public class BroadcastLogPlayback extends JFrame {
 	protected int PORT = 8988;
 	protected int SEND_PORT = 8888;
 	private DateTimeFormatter hourFormatter = DateTimeFormat.forPattern("HH:mm:ss.SS");
-	private String file = "broadcast_logs/25-05-15_15-12-11.log";
+	private String file = "broadcast_logs/expo22july.log";
 	
 	private JSlider slider;
 	private int currentStep = 0;
@@ -47,6 +47,9 @@ public class BroadcastLogPlayback extends JFrame {
 		System.out.println("Lines: "+nData);
 		
 		readData();
+		
+		//TODO debug
+		fetchData();
 		
 		playThread = new PlayThread();
 		playThread.start();
@@ -112,6 +115,28 @@ public class BroadcastLogPlayback extends JFrame {
 		setVisible(true);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
+	}
+	
+	private void fetchData() {
+		
+		DateTime start = DateTime.parse("12:14:59.00", hourFormatter);
+		DateTime end = DateTime.parse("12:17:59.00", hourFormatter);
+		
+		System.out.println();
+		
+		for(String s : data) {
+			
+			String[] split = s.split(" ");
+			DateTime d = DateTime.parse(split[0], hourFormatter);
+			
+			if(d.isAfter(start) && d.isBefore(end) && s.contains("GPS"))
+				System.out.println(s);
+			
+			if(d.isAfter(end)) {
+				System.exit(0);
+			}
+			
+		}
 	}
 	
 	private int countLines() {
@@ -180,11 +205,20 @@ public class BroadcastLogPlayback extends JFrame {
 	
 	public void readData() {
 		
+		System.out.println("Reading data...");
+		
 		try {
 			
 			Scanner s = new Scanner(new File(file));
 			
 			for(int i = 0 ; i < data.length ; i++) {
+				
+				if(i % 1000 == 0) {
+					System.out.print(".");
+				}
+				if(i % 100000 == 0 && i > 100)
+					System.out.println();
+				
 				data[i] = s.nextLine();
 			}
 			

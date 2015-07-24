@@ -19,15 +19,21 @@ public class AvoidCollisionsFunction extends EvaluationFunction {
     private final double safetyDistance;
     private double minDistanceOthers = Double.POSITIVE_INFINITY;
     private boolean kill = false;
+    private boolean dontUse = false;
 
     public AvoidCollisionsFunction(Arguments args) {
         super(args);
         safetyDistance = args.getArgumentAsDouble("safetydistance");
         kill = args.getFlagIsTrue("kill");
+        dontUse = args.getFlagIsTrue("dontuse");
     }
 
     @Override
     public void update(Simulator simulator) {
+    	
+    	if(dontUse)
+    		return;
+    	
         for (int i = 0; i < simulator.getRobots().size(); i++) {
             for (int j = i + 1; j < simulator.getRobots().size(); j++) {
                 Robot ri = simulator.getRobots().get(i);

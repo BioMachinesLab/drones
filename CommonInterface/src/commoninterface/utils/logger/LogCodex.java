@@ -82,7 +82,7 @@ public class LogCodex {
 		DecodedLog decodedLog = null;
 		
 		if(logLine.startsWith("[") || logLine.startsWith("\"")) {
-			System.out.println("Ignoring this line:" +logLine);
+//			System.out.println("Ignoring this line:" +logLine);
 			return null;
 		}
 		
@@ -197,95 +197,103 @@ public class LogCodex {
 	}
 
 	private static LogData decodeLogData(String[] infoBlocks){
+
 		LogData logData = new LogData();
 		
-		for (int i = 0; i < infoBlocks.length; i++) {
-			String information = infoBlocks[i].substring(3, infoBlocks[i].length());
-
-			switch (infoBlocks[i].substring(0, 3)) {
-			case SENTENCE_SEP:
-				logData.comment = unescapeComment(information);
-				break;
-
-			case LAT_LON_SEP:
-				String[] latLon = information.split(ARRAY_SEPARATOR);
-				double lat = Double.parseDouble(latLon[0]);
-				double lng = Double.parseDouble(latLon[1]);
-				logData.latLon = new LatLon(lat, lng);
-				break;
-
-			case GPS_ORIENT_SEP:
-				logData.GPSorientation = Double.parseDouble(information);
-				break;
-
-			case GPS_SPD:
-				logData.GPSspeed = Double.parseDouble(information);
-				break;
-
-			case GPS_TIME_SEP:
-				logData.GPSdate = information;
-				break;
-
-			case SYS_TIME_SEP:
-				logData.systemTime = information;
-				break;
-
-			case COMP_ORIENT_SEP:
-				logData.compassOrientation = Double.parseDouble(information);
-				break;
-
-			case TEMP_SEP:
-				String[] temps = information.split(ARRAY_SEPARATOR);
-				logData.temperatures = new double[temps.length];
-
-				for (int j = 0; j < temps.length; j++) {
-					logData.temperatures[j] = Double.parseDouble(temps[j]);
+		try {
+		
+			for (int i = 0; i < infoBlocks.length; i++) {
+				String information = infoBlocks[i].substring(3, infoBlocks[i].length());
+	
+				switch (infoBlocks[i].substring(0, 3)) {
+				case SENTENCE_SEP:
+					logData.comment = unescapeComment(information);
+					break;
+	
+				case LAT_LON_SEP:
+					String[] latLon = information.split(ARRAY_SEPARATOR);
+					double lat = Double.parseDouble(latLon[0]);
+					double lng = Double.parseDouble(latLon[1]);
+					logData.latLon = new LatLon(lat, lng);
+					break;
+	
+				case GPS_ORIENT_SEP:
+					logData.GPSorientation = Double.parseDouble(information);
+					break;
+	
+				case GPS_SPD:
+					logData.GPSspeed = Double.parseDouble(information);
+					break;
+	
+				case GPS_TIME_SEP:
+					logData.GPSdate = information;
+					break;
+	
+				case SYS_TIME_SEP:
+					logData.systemTime = information;
+					break;
+	
+				case COMP_ORIENT_SEP:
+					logData.compassOrientation = Double.parseDouble(information);
+					break;
+	
+				case TEMP_SEP:
+					String[] temps = information.split(ARRAY_SEPARATOR);
+					logData.temperatures = new double[temps.length];
+	
+					for (int j = 0; j < temps.length; j++) {
+						logData.temperatures[j] = Double.parseDouble(temps[j]);
+					}
+					break;
+	
+				case MOTORS_SPDS_SEP:
+					String[] speeds = information.split(ARRAY_SEPARATOR);
+					logData.motorSpeeds = new double[speeds.length];
+	
+					for (int j = 0; j < speeds.length; j++) {
+						logData.motorSpeeds[j] = Double.parseDouble(speeds[j]);
+					}
+					break;
+	
+				case DRONE_TYPE_SEP:
+					logData.droneType = AquaticDroneCI.DroneType.valueOf(information);
+					break;
+	
+				case IP_ADDR_SEP:
+					logData.ip = information;
+					break;
+	
+				case TIMESTEP_SEP:
+					logData.timestep = Integer.parseInt(information);
+					break;
+	
+				case NEURAL_NET_IN_SEP:
+					String[] neuralInputs = information.split(ARRAY_SEPARATOR);
+					logData.inputNeuronStates = new double[neuralInputs.length];
+	
+					for (int j = 0; j < neuralInputs.length; j++) {
+						logData.inputNeuronStates[j] = Double.parseDouble(neuralInputs[j]);
+					}
+					break;
+	
+				case NEURAL_NET_OUT_SEP:
+					String[] neuralOutputs = information.split(ARRAY_SEPARATOR);
+					logData.outputNeuronStates = new double[neuralOutputs.length];
+	
+					for (int j = 0; j < neuralOutputs.length; j++) {
+						logData.outputNeuronStates[j] = Double.parseDouble(neuralOutputs[j]);
+					}
+					break;
+	
+				default:
+					System.err.println("[LoggerCodex] Awkward tag appeared.... " + infoBlocks[i]);
+					return null;
 				}
-				break;
-
-			case MOTORS_SPDS_SEP:
-				String[] speeds = information.split(ARRAY_SEPARATOR);
-				logData.motorSpeeds = new double[speeds.length];
-
-				for (int j = 0; j < speeds.length; j++) {
-					logData.motorSpeeds[j] = Double.parseDouble(speeds[j]);
-				}
-				break;
-
-			case DRONE_TYPE_SEP:
-				logData.droneType = AquaticDroneCI.DroneType.valueOf(information);
-				break;
-
-			case IP_ADDR_SEP:
-				logData.ip = information;
-				break;
-
-			case TIMESTEP_SEP:
-				logData.timestep = Integer.parseInt(information);
-				break;
-
-			case NEURAL_NET_IN_SEP:
-				String[] neuralInputs = information.split(ARRAY_SEPARATOR);
-				logData.inputNeuronStates = new double[neuralInputs.length];
-
-				for (int j = 0; j < neuralInputs.length; j++) {
-					logData.inputNeuronStates[j] = Double.parseDouble(neuralInputs[j]);
-				}
-				break;
-
-			case NEURAL_NET_OUT_SEP:
-				String[] neuralOutputs = information.split(ARRAY_SEPARATOR);
-				logData.outputNeuronStates = new double[neuralOutputs.length];
-
-				for (int j = 0; j < neuralOutputs.length; j++) {
-					logData.outputNeuronStates[j] = Double.parseDouble(neuralOutputs[j]);
-				}
-				break;
-
-			default:
-				System.err.println("[LoggerCodex] Awkward tag appeared.... " + infoBlocks[i]);
-				break;
 			}
+		
+		}catch(Exception e) {
+			System.err.println("Problem decoding. "+e.getMessage());
+			return null;
 		}
 		
 		return logData;

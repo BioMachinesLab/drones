@@ -32,7 +32,7 @@ public class PositionBroadcastMessage extends BroadcastMessage {
 		return null;
 	}
 	
-	public static RobotLocation decode(String address, String message) {
+	public static RobotLocation decode(String message) {
 		String[] split = message.split(MESSAGE_SEPARATOR);
 		
 		if(split.length == 6) {

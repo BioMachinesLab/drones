@@ -38,7 +38,7 @@ public abstract class BroadcastHandler {
 				break;
 			case PositionBroadcastMessage.IDENTIFIER:
 				
-				RobotLocation dl = PositionBroadcastMessage.decode(address, message);
+				RobotLocation dl = PositionBroadcastMessage.decode(message);
 				dl.setTimestepReceived((long)(robot.getTimeSinceStart() * 10));
 				
 				robot.replaceEntity(dl);

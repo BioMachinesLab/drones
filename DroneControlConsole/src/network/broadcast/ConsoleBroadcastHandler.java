@@ -136,7 +136,7 @@ public class ConsoleBroadcastHandler {
 			break;
 		case "GPS":
 			RobotLocation di = PositionBroadcastMessage
-					.decode(address, message);
+					.decode(message);
 			if (di != null) {
 				if (console.getGUI() instanceof DroneGUI) {
 					((DroneGUI) console.getGUI()).getMapPanel().displayData(di);

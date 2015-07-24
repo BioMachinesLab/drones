@@ -28,7 +28,6 @@ public class ControllerCIBehavior extends CIBehavior {
 		outputsNames = new ArrayList<String>();
 		inputs = new ArrayList<Double[]>();
 		outputs = new ArrayList<Double[]>();
-		
 		initSensors(new CIArguments(args.getArgumentAsString("sensors")));
 		network = CINeuralNetwork.getNeuralNetwork(robot, new CIArguments(args.getArgumentAsString("network")));
 	}
@@ -99,6 +98,7 @@ public class ControllerCIBehavior extends CIBehavior {
 
 		inputs.add(convertDoubleArray(network.getInputNeuronStates()));
 		outputs.add(convertDoubleArray(network.getOutputNeuronStates()));
+		
 	}
 	
 	/**

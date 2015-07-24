@@ -33,7 +33,7 @@ public class SimulatedBroadcastHandler extends BroadcastHandler {
 		switch(identifier) {
 			case PositionBroadcastMessage.IDENTIFIER:
 				
-				RobotLocation dl = PositionBroadcastMessage.decode(address, message);
+				RobotLocation dl = PositionBroadcastMessage.decode(message);
 				
 				if(robot.getNetworkAddress().equals(dl.getName()))
 					break;

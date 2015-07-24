@@ -10,8 +10,11 @@ import simulation.util.Arguments;
 
 public class SimulationNetwork extends Network {
 	
+	private double error = 0.0;
+	
 	public SimulationNetwork(Arguments args, Simulator sim) {
 		super(args, sim);
+		error = args.getArgumentAsDoubleOrSetDefault("error", error);
 	}
 
 	@Override
@@ -19,10 +22,15 @@ public class SimulationNetwork extends Network {
 		for(Robot r : sim.getRobots()) {
 			if(r instanceof AquaticDroneCI) {
 				AquaticDroneCI aq = (AquaticDroneCI)r;
-				aq.getBroadcastHandler().messageReceived(senderAddress, msg);
+				
+				if(sim.getRandom().nextDouble() >= error)
+					aq.getBroadcastHandler().messageReceived(senderAddress, msg);
+				
 			}else if(r instanceof ThymioCI){
 				ThymioCI thymio = (ThymioCI)r;
-				thymio.getBroadcastHandler().messageReceived(senderAddress, msg);
+				
+				if(sim.getRandom().nextDouble() >= error)
+					thymio.getBroadcastHandler().messageReceived(senderAddress, msg);
 			}
 		}
 	}

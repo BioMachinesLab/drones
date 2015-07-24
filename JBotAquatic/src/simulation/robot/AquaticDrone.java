@@ -64,6 +64,9 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	@ArgumentsAnnotation(name="compasserror", defaultValue = "0.0")
 	private double compassError = 0;
 	
+	@ArgumentsAnnotation(name="compassoffset", defaultValue = "0.0")
+	private double compassOffset = 0;
+	
 	@ArgumentsAnnotation(name="commrange", defaultValue = "0.0")
 	private double commRange = 0.0;
 	
@@ -90,6 +93,9 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	
 	private boolean rudder = false;
 	
+	private double headingOffset = 0;
+	private double speedOffset = 0;
+	
 	public AquaticDrone(Simulator simulator, Arguments args) {
 		super(simulator, args);
 		this.simulator = simulator;
@@ -103,8 +109,16 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		broadcastHandler = new SimulatedBroadcastHandler(this, broadcastMessages);
 		
 		gpsError = args.getArgumentAsDoubleOrSetDefault("gpserror", gpsError);
+		
 		compassError = args.getArgumentAsDoubleOrSetDefault("compasserror", compassError);
+		compassOffset = args.getArgumentAsDoubleOrSetDefault("compassoffset", compassOffset);
 		commRange = args.getArgumentAsDoubleOrSetDefault("commrange", commRange);
+		
+		if(compassOffset > 0) {
+			double error = simulator.getRandom().nextDouble();
+			error = error*2 - 1;
+			compassOffset = compassOffset*error;
+		}
 		
 		if(commRange == 0)
 			throw new RuntimeException("[AquaticDrone] CommRange is at 0!");
@@ -118,6 +132,20 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		if(args.getArgumentAsIntOrSetDefault("kalman", 0) == 1) {
 			kalmanFilterGPS = new RobotKalman();
 			kalmanFilterCompass = new RobotKalman();
+		}
+		
+		headingOffset = args.getArgumentAsDoubleOrSetDefault("headingoffset",headingOffset);
+
+		if(headingOffset > 0) {
+			double error = simulator.getRandom().nextDouble()*2-1;
+			headingOffset*=error;
+		}
+		
+		speedOffset = args.getArgumentAsDoubleOrSetDefault("speedoffset",speedOffset);
+
+		if(speedOffset > 0) {
+			double error = simulator.getRandom().nextDouble()*2-1;
+			speedOffset*=error;
 		}
 		
 		badGPS = args.getFlagIsTrue("badgps");
@@ -206,7 +234,9 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		rightPercentage = rightMotorPercentage;
 		
 		if(rudder) {
-			rudderActuator.setSpeed((leftMotorPercentage+rightMotorPercentage)/2);
+			
+			double speed = (leftMotorPercentage+rightMotorPercentage)/2;
+			rudderActuator.setSpeed(speed);
 		}else {
 			propellers.setLeftPercentage(leftMotorPercentage);
 			propellers.setRightPercentage(rightMotorPercentage);
@@ -214,8 +244,21 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	}
 	
 	public void setRudder(double heading, double speed) {
-		rudderActuator.setHeading(heading);
-		rudderActuator.setSpeed(speed);
+		
+		double h = heading+headingOffset;
+		h = Math.max(-1, h);
+		h = Math.min(1,h);
+		
+		double s = speed;
+		
+		if(speed > 0) {
+			s = speed*(1.0-speedOffset);
+			s = Math.max(-1,s);
+			s = Math.min(1,s);
+		}
+		
+		rudderActuator.setHeading(h);
+		rudderActuator.setSpeed(s);
 	}
 	
 	/*
@@ -469,12 +512,20 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		
 		if(gpsError > 0) {
 			
+//			if(simulator.getTime()-lastGPSerrorStep > 200) {
+//				lastGPSerrorStep = (int)((double)simulator.getTime());
+//				radius = simulator.getRandom().nextDouble()*gpsError;
+//				angle = simulator.getRandom().nextDouble()*Math.PI*2;
+//			}
+			
 			commoninterface.mathutils.Vector2d pos = CoordinateUtilities.GPSToCartesian(gpsLatLon);
 			double radius = simulator.getRandom().nextDouble()*gpsError;
 			double angle = simulator.getRandom().nextDouble()*Math.PI*2;
-
-			pos.setX(pos.getX()+radius*Math.cos(angle));
-			pos.setY(pos.getY()+radius*Math.sin(angle));
+			
+			if(radius > 0) {
+				pos.setX(pos.getX()+radius*Math.cos(angle));
+				pos.setY(pos.getY()+radius*Math.sin(angle));
+			}
 			
 			gpsLatLon = CoordinateUtilities.cartesianToGPS(pos);
 		}
@@ -488,6 +539,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		
 		double heading = (360-(compassSensor.getSensorReading(0) * 360) + 90) % 360;
 		double error = compassError*simulator.getRandom().nextDouble()*2-compassError;
+		error+=compassOffset;
 		return heading+error;
 	}
 	

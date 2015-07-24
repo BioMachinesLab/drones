@@ -75,6 +75,9 @@ public class CommandPanel extends UpdatePanel {
 	public JButton entitiesButton;
 	private JComboBox<String> behaviors;
 	private JComboBox<String> controllers;
+	
+	private JTextField gpsCoordinate = new JTextField(10);
+	private JButton gpsButton = new JButton("Set waypoint");
 
 	private ArrayList<String> availableBehaviors = new ArrayList<String>();
 	private ArrayList<String> availableControllers = new ArrayList<String>();
@@ -241,7 +244,33 @@ public class CommandPanel extends UpdatePanel {
 		JPanel deploy = new JPanel(new BorderLayout());
 		deploy.setBorder(BorderFactory.createTitledBorder("Drone Deploy Area"));
 		deploy.add(autoDeployAreaScroll, BorderLayout.CENTER);
-		deploy.add(statusMessage, BorderLayout.SOUTH);
+		
+		gpsButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				Scanner s = new Scanner(gpsCoordinate.getText());
+				
+				double lat = s.nextDouble();
+				double lon = s.nextDouble();
+				
+				Waypoint wp = new Waypoint("wp",new LatLon(lat, lon));
+				
+				((DroneGUI)gui).getMapPanel().clearWaypoints();
+				((DroneGUI)gui).getMapPanel().addWaypoint(wp);
+				
+				s.close();
+				
+			}
+		});
+		
+		JPanel waypointPanel = new JPanel();
+		waypointPanel.add(gpsCoordinate);
+		waypointPanel.add(gpsButton);
+		
+		deploy.add(autoDeployAreaScroll, BorderLayout.CENTER);
+		deploy.add(statusMessage, BorderLayout.SOUTH);		
+		deploy.add(waypointPanel,BorderLayout.NORTH);
+		
 		add(deploy, BorderLayout.SOUTH);
 	}
 
@@ -691,6 +720,9 @@ public class CommandPanel extends UpdatePanel {
 			LatLon tr = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x+width/2,center.y+height/2));
 			LatLon bl = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x-width/2,center.y-height/2));
 			LatLon br = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x+width/2,center.y-height/2));
+			
+			System.out.println(tl.getLat()+" "+tl.getLon());
+			System.out.println(br.getLat()+" "+br.getLon());
 			
 			fence = new GeoFence("geofence");
 			fence.addWaypoint(tl);

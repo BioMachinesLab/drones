@@ -1,9 +1,16 @@
 package commoninterface.utils.logger;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import commoninterface.AquaticDroneCI;
 import commoninterface.utils.jcoord.LatLon;
 
 public class LogData implements Comparable<LogData> {
+	
+	static DateTimeFormatter formatter = DateTimeFormat.forPattern("dd-MM-YY_HH:mm:ss.SS");
+	
 	public String file = null;
 	public int timestep = -1;
 	public String comment = null;
@@ -30,7 +37,7 @@ public class LogData implements Comparable<LogData> {
 
 	@Override
 	public int compareTo(LogData o) {
-		return GPSdate.compareTo(o.GPSdate);
+		return DateTime.parse(systemTime,formatter).compareTo(DateTime.parse(o.systemTime,formatter));
 	}
 
 	@Override
