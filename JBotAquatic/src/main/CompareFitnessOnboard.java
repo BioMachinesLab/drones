@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -22,9 +23,12 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import simulation.Simulator;
+import simulation.physicalobjects.LightPole;
+import simulation.physicalobjects.PhysicalObject;
 import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
+import updatables.WaterCurrent;
 import commoninterface.entities.RobotLocation;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.utils.CoordinateUtilities;
@@ -205,6 +209,8 @@ public class CompareFitnessOnboard extends Thread{
 						drone.processInformationRequest(bm, null);
 					}
 					
+					sim.sim.addCallback(new WaterCurrent(new Arguments("maxspeed=0.1,fixedspeed=1,angle=-45")));
+					
 					for(LogData d : data) {
 						
 						RobotLocation rl = getRobotLocation(d);
@@ -217,6 +223,33 @@ public class CompareFitnessOnboard extends Thread{
 //							System.out.println(step);
 							real.sim.performOneSimulationStep((double)step);
 							sim.sim.performOneSimulationStep((double)step);
+							
+							for(int i = 0 ; i < sim.sim.getRobots().size() ; i++) {
+								Vector2d v = new Vector2d(real.sim.getRobots().get(i).getPosition().x,real.sim.getRobots().get(i).getPosition().y);
+								real.sim.getEnvironment().addStaticObject(new LightPole(real.sim, "lp", v.x, v.y, 0.2));
+								
+								v = new Vector2d(sim.sim.getRobots().get(i).getPosition().x,sim.sim.getRobots().get(i).getPosition().y);
+								sim.sim.getEnvironment().addStaticObject(new LightPole(sim.sim, "lp", v.x, v.y, 0.2));
+							}
+							
+							if(step % 100 == 0) {
+								
+								Iterator<PhysicalObject> it = real.sim.getEnvironment().getAllObjects().iterator();
+						        while(it.hasNext()) {
+						        	if(it.next() instanceof LightPole)
+						        		it.remove();
+						        }
+						        it = sim.sim.getEnvironment().getAllObjects().iterator();
+						        while(it.hasNext()) {
+						        	if(it.next() instanceof LightPole)
+						        		it.remove();
+						        }
+								
+								for(int i = 0 ; i < sim.sim.getRobots().size() ; i++) {
+//									sim.sim.getRobots().get(i).setPosition(real.sim.getRobots().get(i).getPosition());
+//									sim.sim.getRobots().get(i).setOrientation(real.sim.getRobots().get(i).getOrientation());
+								}
+							}
 						}
 						
 						commoninterface.mathutils.Vector2d pos = CoordinateUtilities.GPSToCartesian(rl.getLatLon());
@@ -224,13 +257,15 @@ public class CompareFitnessOnboard extends Thread{
 						int id = Integer.parseInt(rl.getName());
 						int position = robotList.get(id);
 						
-//						if(position == 5) {
-//							System.out.println(step+" "+((AquaticDrone)real.robots.get(5)).getCompassOrientationInDegrees()+" "+d.motorSpeeds[0]*100+" "+d.motorSpeeds[1]*100);
-//						}
-						
 						real.robots.get(position).setPosition(pos.x+start.x-firstPos.x, pos.y+start.y-firstPos.y);
 						double orientation = 360 - (rl.getOrientation() - 90);
 						real.robots.get(position).setOrientation(Math.toRadians(orientation));
+						
+						if(d.outputNeuronStates != null) {
+//							double heading = d.outputNeuronStates[0]*2-1;
+//							double speed = d.outputNeuronStates[1];
+//							((AquaticDrone)sim.sim.getRobots().get(position)).setRudder(heading, speed);
+						}
 						
 						if(gui) {
 							sim.renderer.drawFrame();
