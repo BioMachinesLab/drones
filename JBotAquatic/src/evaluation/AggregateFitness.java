@@ -57,14 +57,14 @@ public class AggregateFitness extends AvoidCollisionsFunction {
         centreMass.x = centreMass.x / robots.size();
         centreMass.y = centreMass.y / robots.size();
         
-        Iterator<PhysicalObject> i = sim.getEnvironment().getAllObjects().iterator();
+//        Iterator<PhysicalObject> i = sim.getEnvironment().getAllObjects().iterator();
+//        
+//        while(i.hasNext()) {
+//        	if(i.next() instanceof LightPole)
+//        		i.remove();
+//        }
         
-        while(i.hasNext()) {
-        	if(i.next() instanceof LightPole)
-        		i.remove();
-        }
-        
-        sim.getEnvironment().addStaticObject(new LightPole(sim, "lp", centreMass.x, centreMass.y, 1));
+//        sim.getEnvironment().addStaticObject(new LightPole(sim, "lp", centreMass.x, centreMass.y, 1));
         
         double currentDistance = 0;
         for (Robot r : robots) {
