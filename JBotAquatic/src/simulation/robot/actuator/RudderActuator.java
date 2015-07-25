@@ -148,11 +148,13 @@ public class RudderActuator extends Actuator {
 		y = y + (turningSpeed + forwardSpeed) * timeDelta * Math.sin(o);
 
 		if (desiredSpeed >= 0.01) {
-			double newOrientation = a + Math.toRadians(angleInDegrees*1.5);
+			double newOrientation = a + Math.toRadians(angleInDegrees);
 			
 			if(oldDynamics) {
 				drone.setOrientation(newOrientation);
 			} else {
+				
+				newOrientation = a + Math.toRadians(angleInDegrees*1.5);
 
 				double diff = newOrientation - a;
 				
