@@ -44,10 +44,10 @@ public class CompareFitnessOnboard extends Thread{
 	
 	static double maxSteps = 1800;
 	
-	String[] experiments = new String[]{"test","aggregate","dispersion"};
+	String[] experiments = new String[]{"aggregate","dispersion"};
 	int samples = 3;
 	int controllers = 3;
-	int robots = 1;
+	int robots = 8;
 
 	static DateTimeFormatter formatter = DateTimeFormat.forPattern("dd-MM-YY_HH:mm:ss.SS");
 	private JFrameViewerFitnessOnboard frame;
@@ -226,7 +226,7 @@ public class CompareFitnessOnboard extends Thread{
 					Graph graph = new Graph();
 					JFrame frame = new JFrame();
 					frame.add(graph);
-					graph.setShowLast(300);
+					graph.setShowLast(1800);
 					frame.setSize(1800,800);
 					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 					frame.setLocationRelativeTo(null);
@@ -236,14 +236,11 @@ public class CompareFitnessOnboard extends Thread{
 					graph.addLegend("real");
 					
 					Double[] headingD = new Double[1800];
-					Double[] realO = new Double[300];
-					Double[] simO = new Double[300];
+					Double[] realO = new Double[1800];
+					Double[] simO = new Double[1800];
 					int index = 0;
 					
 					for(LogData d : data) {
-						
-//						if(step > 186)
-//							break;
 						
 						RobotLocation rl = getRobotLocation(d);
 							
@@ -304,10 +301,9 @@ public class CompareFitnessOnboard extends Thread{
 						if(d.outputNeuronStates != null) {
 							double heading = d.outputNeuronStates[0]*2-1;
 							double speed = d.outputNeuronStates[1];
-							//TODO
 							((AquaticDrone)sim.sim.getRobots().get(position)).setRudder(heading, speed);
+							
 							double h = (heading+1)/2;
-//							headingD[index] = h*300;
 							
 							if(((AquaticDrone)sim.sim.getRobots().get(position)).getId() == chosen) {
 //								((AquaticDrone)sim.sim.getRobots().get(position)).setRudder(heading, speed);
