@@ -27,13 +27,13 @@ public class AggregateFitness extends AvoidCollisionsFunction {
 
     public AggregateFitness(Arguments args) {
         super(args);
+        startingDistance = args.getArgumentAsDoubleOrSetDefault("startingdistance", startingDistance);
     }
 
     @Override
     public void update(Simulator simulator) {
-        if (!configured) {
+        if (startingDistance == 0) {
             startingDistance = calculateDistCM(simulator.getRobots(),simulator);
-            configured = true;
         }
 
         // MEAN DISTANCE TO CENTRE OF MASS

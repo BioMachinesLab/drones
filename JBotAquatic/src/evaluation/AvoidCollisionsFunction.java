@@ -30,7 +30,6 @@ public class AvoidCollisionsFunction extends EvaluationFunction {
 
     @Override
     public void update(Simulator simulator) {
-    	
     	if(dontUse)
     		return;
     	

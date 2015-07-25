@@ -1,6 +1,5 @@
 package main;
 
-import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,14 +28,17 @@ import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
 import updatables.WaterCurrent;
+
 import commoninterface.entities.RobotLocation;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.logger.DecodedLog;
 import commoninterface.utils.logger.LogCodex;
 import commoninterface.utils.logger.LogData;
-import evaluation.AggregateFitness;
+
+import evaluation.DispersionFitness;
 import evolutionaryrobotics.JBotEvolver;
+import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
 import gui.renderer.Renderer;
 import gui.renderer.TwoDRenderer;
 
@@ -44,7 +46,7 @@ public class CompareFitnessOnboard extends Thread{
 	
 	static double maxSteps = 1800;
 	
-	String[] experiments = new String[]{"aggregate"};
+	String[] experiments = new String[]{"dispersion","aggregate"};
 	int samples = 3;
 	int controllers = 3;
 	int robots = 8;
@@ -99,6 +101,19 @@ public class CompareFitnessOnboard extends Thread{
 		
 		HashMap<String, Arguments> hash = new HashMap<String, Arguments>();
 		
+//		AggregateFitness ff_real = new AggregateFitness(new Arguments("classname=evaluation.AggregateFitness,dontuse=1"));
+//		AggregateFitness ff_sim = new AggregateFitness(new Arguments("classname=evaluation.AggregateFitness,dontuse=1"));
+		
+		EvaluationFunction ff_real = new DispersionFitness(new Arguments("classname=evaluation.DispersionFitness,dontuse=1,margin=2.5,range=25"));
+		EvaluationFunction ff_sim = new DispersionFitness(new Arguments("classname=evaluation.DispersionFitness,dontuse=1,margin=2.5,range=25"));
+		
+		try {
+			JBotEvolver jbot = new JBotEvolver(new String[]{"compare/config/dispersion.conf"});
+			hash = jbot.getArguments();
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		
 		for(String experiment : experiments) {
 			
 			for(int controller = 0 ; controller < controllers ; controller++) {
@@ -109,13 +124,6 @@ public class CompareFitnessOnboard extends Thread{
 					
 					ArrayList<LogData> data = getData(experiment, controller, robots, sample);
 				
-					try {
-						JBotEvolver jbot = new JBotEvolver(new String[]{"compare/config/aggregate.conf"});
-						hash = jbot.getArguments();
-					} catch (Exception e1) {
-						e1.printStackTrace();
-					}
-					
 					hash.put("--environment", new Arguments("classname=EmptyEnvironment,width=150,height=150,steps="+(int)maxSteps,true));
 					
 					real.sim = new Simulator(new Random(1), hash);
@@ -178,9 +186,6 @@ public class CompareFitnessOnboard extends Thread{
 							
 						}
 					}
-					
-					AggregateFitness ff_real = new AggregateFitness(new Arguments("classname=evaluation.AggregateFitness,dontuse=1"));
-					AggregateFitness ff_sim = new AggregateFitness(new Arguments("classname=evaluation.AggregateFitness,dontuse=1"));
 					
 					real.sim.addCallback(ff_real);
 					sim.sim.addCallback(ff_sim);

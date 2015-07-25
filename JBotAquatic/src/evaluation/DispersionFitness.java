@@ -22,19 +22,23 @@ public class DispersionFitness extends AvoidCollisionsFunction {
     private double margin = 0;
     private boolean config = false;
     private double targetDistance = 0;
+    private double range = 0;
     
     public DispersionFitness(Arguments args) {
         super(args);
         margin = args.getArgumentAsDouble("margin");
+        range = args.getArgumentAsDoubleOrSetDefault("range", range);
     }
 
     @Override
     public void update(Simulator simulator) {
         if (!config) {
-            CISensorWrapper wr = (CISensorWrapper)simulator.getRobots().get(0).getSensorByType(CISensorWrapper.class);
-            DroneCISensor dcs = (DroneCISensor) wr.getCisensor();
-            double r = dcs.getRange();
-            targetDistance = r - margin;
+        	if(range == 0) {
+	            CISensorWrapper wr = (CISensorWrapper)simulator.getRobots().get(0).getSensorByType(CISensorWrapper.class);
+	            DroneCISensor dcs = (DroneCISensor) wr.getCisensor();
+	            range = dcs.getRange();
+        	}
+            targetDistance = range - margin;
             config = true;
         }
         

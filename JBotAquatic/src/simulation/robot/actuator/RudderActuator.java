@@ -10,11 +10,11 @@ import simulation.util.Arguments;
 
 public class RudderActuator extends Actuator {
 
-	public static final float NOISESTDEV = 0.05f;
+	public float NOISESTDEV = 0.05f;
 
-	private static final double NEW_ANGLE = 1;//.3;
+	private double NEW_ANGLE = .1; //DEFAULT=1
 
-	private static final double ANGLE_DECAY =0;//.9 ;
+	private double ANGLE_DECAY = .9; //DEFAULT=0
 
 	protected double heading = 0;
 	protected double speed = 0;
@@ -23,11 +23,16 @@ public class RudderActuator extends Actuator {
 	private double prevSpeed = 0;
 
 	private double angle;
-
+	
 	public RudderActuator(Simulator simulator, int id, Arguments arguments) {
 		super(simulator, id, arguments);
 		this.random = simulator.getRandom();
 		timeDelta = simulator.getTimeDelta();
+		boolean oldDynamics = arguments.getFlagIsTrue("olddynamics");
+		if(oldDynamics) {
+			NEW_ANGLE = 1;
+			ANGLE_DECAY = 0;
+		}
 	}
 
 	public void setHeading(double value) {
@@ -40,9 +45,26 @@ public class RudderActuator extends Actuator {
 
 	@Override
 	public void apply(Robot drone) {
-
-		double angleInDegrees = Math.max(-9, Math.min(9, angle
-				+ (getTurningAngleFromHeading(heading) * -1) * NEW_ANGLE));
+		
+//		if(drone.getId()==0 && heading != 0)
+//			System.out.println(heading);
+		
+//		double angleInDegrees = getTurningAngleFromHeading(heading)*-1;
+		double angleInDegrees = Math.max(-9, Math.min(9, angle + (getTurningAngleFromHeading(heading) * -1) * NEW_ANGLE));
+		
+//		if(angle < 0 && angleInDegrees > angle) {
+//			angleInDegrees = Math.max(-9, Math.min(9, angle + (getTurningAngleFromHeading(heading) * -1) * NEW_ANGLE));
+//		} else if(angle > 0 && angleInDegrees < angle) {
+//			angleInDegrees = Math.max(-9, Math.min(9, angle + (getTurningAngleFromHeading(heading) * -1) * NEW_ANGLE));
+//		}
+		
+		// 
+//		if(drone.getId()==0 && heading != 0) {
+//			System.out.println(getTurningAngleFromHeading(heading)*-1);
+//			System.out.println(angleInDegrees);
+//			System.out.println();
+//		}
+		
 		double motorDifference = 0;
 		double forwardComponent = 0;
 		double turningComponent = 0;
