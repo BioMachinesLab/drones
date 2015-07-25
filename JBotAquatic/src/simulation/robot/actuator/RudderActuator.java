@@ -12,31 +12,47 @@ public class RudderActuator extends Actuator {
 
 	public float NOISESTDEV = 0.05f;
 
-	private double NEW_ANGLE = .1; //DEFAULT=1
+	private double NEW_ANGLE = 1; //DEFAULT=1
 
-	private double ANGLE_DECAY = .9; //DEFAULT=0
+	private double ANGLE_DECAY = 0; //DEFAULT=0
 
 	protected double heading = 0;
 	protected double speed = 0;
 	protected Random random;
 	private double timeDelta = 0.1;
 	private double prevSpeed = 0;
+	
+	private int indexDelay = 0;
+	private double[] delay;
 
 	private double angle;
+	
+	private double a = 0;
+	private double inertia = 0;
+	private boolean oldDynamics = false;
 	
 	public RudderActuator(Simulator simulator, int id, Arguments arguments) {
 		super(simulator, id, arguments);
 		this.random = simulator.getRandom();
 		timeDelta = simulator.getTimeDelta();
-		boolean oldDynamics = arguments.getFlagIsTrue("olddynamics");
-		if(oldDynamics) {
-			NEW_ANGLE = 1;
-			ANGLE_DECAY = 0;
+		
+		oldDynamics = arguments.getFlagIsTrue("olddynamics");
+		
+		int delay = arguments.getArgumentAsIntOrSetDefault("delay", 5);
+		
+		if(delay == 0) {
+			 this.delay = new double[1];
+		} else {
+			this.delay = new double[delay];
 		}
 	}
 
 	public void setHeading(double value) {
-		this.heading = value;
+		delay[indexDelay] = value;
+		indexDelay++;
+		indexDelay%=delay.length;
+		this.heading = delay[indexDelay];
+		
 	}
 
 	public void setSpeed(double percentage) {
@@ -132,9 +148,40 @@ public class RudderActuator extends Actuator {
 		y = y + (turningSpeed + forwardSpeed) * timeDelta * Math.sin(o);
 
 		if (desiredSpeed >= 0.01) {
-			double newOrientation = drone.getOrientation()
-					+ Math.toRadians(angleInDegrees);
-			drone.setOrientation(newOrientation);
+			double newOrientation = a + Math.toRadians(angleInDegrees*1.5);
+			
+			if(oldDynamics) {
+				drone.setOrientation(newOrientation);
+			} else {
+
+				double diff = newOrientation - a;
+				
+				if(a == 0)
+					a = drone.getOrientation();
+				
+				// 1.0 7
+				
+				double change = diff*1.0;
+				double maxChange = Math.toRadians(7);
+				
+				if(change > maxChange)
+					change = maxChange;
+				if(change < -maxChange)
+					change = -maxChange;
+				
+				double inertiaDiff = heading-inertia;
+				inertia+= inertiaDiff*0.35; //0.35
+				
+				inertiaDiff = (heading-inertia);
+				
+				a+=change*(1-Math.abs(inertiaDiff));
+				
+				drone.setOrientation(a);
+				
+				if(drone.getId() == 4)
+					System.out.println(heading);
+			}
+			
 		}
 
 		drone.setPosition(new Vector2d(x, y));

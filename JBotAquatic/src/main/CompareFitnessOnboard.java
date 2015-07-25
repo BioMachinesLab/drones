@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -23,7 +22,6 @@ import org.joda.time.format.DateTimeFormatter;
 
 import simulation.Simulator;
 import simulation.physicalobjects.LightPole;
-import simulation.physicalobjects.PhysicalObject;
 import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
@@ -36,20 +34,20 @@ import commoninterface.utils.logger.DecodedLog;
 import commoninterface.utils.logger.LogCodex;
 import commoninterface.utils.logger.LogData;
 
-import evaluation.DispersionFitness;
+import evaluation.AggregateFitness;
 import evolutionaryrobotics.JBotEvolver;
-import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
 import gui.renderer.Renderer;
 import gui.renderer.TwoDRenderer;
+import gui.util.Graph;
 
 public class CompareFitnessOnboard extends Thread{
 	
 	static double maxSteps = 1800;
 	
-	String[] experiments = new String[]{"dispersion","aggregate"};
+	String[] experiments = new String[]{"test","aggregate","dispersion"};
 	int samples = 3;
 	int controllers = 3;
-	int robots = 8;
+	int robots = 1;
 
 	static DateTimeFormatter formatter = DateTimeFormat.forPattern("dd-MM-YY_HH:mm:ss.SS");
 	private JFrameViewerFitnessOnboard frame;
@@ -70,9 +68,16 @@ public class CompareFitnessOnboard extends Thread{
 			while(sBcast.hasNextLine()) {
 				String line = sBcast.nextLine();
 				DecodedLog decodedData = LogCodex.decodeLog(line);
+				
+				if(decodedData == null)
+					continue;
+				
 				Object o = decodedData.getPayload();
 				
 				if(o == null)
+					continue;
+				
+				if(o instanceof String)
 					continue;
 				
 				LogData d = (LogData)o;
@@ -101,11 +106,11 @@ public class CompareFitnessOnboard extends Thread{
 		
 		HashMap<String, Arguments> hash = new HashMap<String, Arguments>();
 		
-//		AggregateFitness ff_real = new AggregateFitness(new Arguments("classname=evaluation.AggregateFitness,dontuse=1"));
-//		AggregateFitness ff_sim = new AggregateFitness(new Arguments("classname=evaluation.AggregateFitness,dontuse=1"));
+		AggregateFitness ff_real = new AggregateFitness(new Arguments("classname=evaluation.AggregateFitness,dontuse=1,startingdistance=50"));
+		AggregateFitness ff_sim = new AggregateFitness(new Arguments("classname=evaluation.AggregateFitness,dontuse=1,startingdistance=50"));
 		
-		EvaluationFunction ff_real = new DispersionFitness(new Arguments("classname=evaluation.DispersionFitness,dontuse=1,margin=2.5,range=25"));
-		EvaluationFunction ff_sim = new DispersionFitness(new Arguments("classname=evaluation.DispersionFitness,dontuse=1,margin=2.5,range=25"));
+//		EvaluationFunction ff_real = new DispersionFitness(new Arguments("classname=evaluation.DispersionFitness,dontuse=1,margin=2.5,range=25"));
+//		EvaluationFunction ff_sim = new DispersionFitness(new Arguments("classname=evaluation.DispersionFitness,dontuse=1,margin=2.5,range=25"));
 		
 		try {
 			JBotEvolver jbot = new JBotEvolver(new String[]{"compare/config/dispersion.conf"});
@@ -117,7 +122,7 @@ public class CompareFitnessOnboard extends Thread{
 		for(String experiment : experiments) {
 			
 			for(int controller = 0 ; controller < controllers ; controller++) {
-				for(int sample = 1 ; sample <= samples ; sample++) {
+				for(int sample = 1 ; sample <= samples ; /*sample++*/) {
 					
 					Setup real = new Setup();
 					Setup sim = new Setup();
@@ -127,7 +132,7 @@ public class CompareFitnessOnboard extends Thread{
 					hash.put("--environment", new Arguments("classname=EmptyEnvironment,width=150,height=150,steps="+(int)maxSteps,true));
 					
 					real.sim = new Simulator(new Random(1), hash);
-					sim.sim = new Simulator(new Random(1), hash);
+					sim.sim = new Simulator(new Random(3222), hash);
 					
 					HashMap<Integer,Integer> robotList = new HashMap<Integer,Integer>();
 					for(LogData d : data) {
@@ -197,26 +202,48 @@ public class CompareFitnessOnboard extends Thread{
 					
 					String f = "compare/controllers/preset_"+experiment+controller+".conf";
 					
-					try {
-						Scanner s = new Scanner(new File(f));
-						f="";
-						while(s.hasNextLine()) {
-							f+=s.nextLine()+"\n";
-						}
-						s.close();
-					} catch (FileNotFoundException e) {
-						e.printStackTrace();
-					}
-					BehaviorMessage bm = new BehaviorMessage("ControllerCIBehavior", f.replaceAll("\\s+", ""), true, "dude");
-					
-					for(Robot r : sim.robots) {
-						AquaticDrone drone = (AquaticDrone)r;
-						drone.processInformationRequest(bm, null);
-					}
+//					try {
+//						Scanner s = new Scanner(new File(f));
+//						f="";
+//						while(s.hasNextLine()) {
+//							f+=s.nextLine()+"\n";
+//						}
+//						s.close();
+//						
+//						BehaviorMessage bm = new BehaviorMessage("ControllerCIBehavior", f.replaceAll("\\s+", ""), true, "dude");
+//						
+//						for(Robot r : sim.robots) {
+//							AquaticDrone drone = (AquaticDrone)r;
+//							drone.processInformationRequest(bm, null);
+//						}
+//						
+//					} catch (FileNotFoundException e) {
+//						e.printStackTrace();
+//					}
 					
 					sim.sim.addCallback(new WaterCurrent(new Arguments("maxspeed=0.1,fixedspeed=1,angle=-45")));
 					
+					Graph graph = new Graph();
+					JFrame frame = new JFrame();
+					frame.add(graph);
+					graph.setShowLast(300);
+					frame.setSize(1800,800);
+					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+					frame.setLocationRelativeTo(null);
+					frame.setVisible(true);
+					
+					graph.addLegend("sim");
+					graph.addLegend("real");
+					
+					Double[] headingD = new Double[1800];
+					Double[] realO = new Double[300];
+					Double[] simO = new Double[300];
+					int index = 0;
+					
 					for(LogData d : data) {
+						
+//						if(step > 186)
+//							break;
 						
 						RobotLocation rl = getRobotLocation(d);
 							
@@ -230,31 +257,37 @@ public class CompareFitnessOnboard extends Thread{
 							sim.sim.performOneSimulationStep((double)step);
 							
 							for(int i = 0 ; i < sim.sim.getRobots().size() ; i++) {
-								Vector2d v = new Vector2d(real.sim.getRobots().get(i).getPosition().x,real.sim.getRobots().get(i).getPosition().y);
-								real.sim.getEnvironment().addStaticObject(new LightPole(real.sim, "lp", v.x, v.y, 0.2));
-								
-								v = new Vector2d(sim.sim.getRobots().get(i).getPosition().x,sim.sim.getRobots().get(i).getPosition().y);
-								sim.sim.getEnvironment().addStaticObject(new LightPole(sim.sim, "lp", v.x, v.y, 0.2));
+//								Vector2d v = new Vector2d(real.sim.getRobots().get(i).getPosition().x,real.sim.getRobots().get(i).getPosition().y);
+//								real.sim.getEnvironment().addStaticObject(new LightPole(real.sim, "lp", v.x, v.y, 0.2));
+//								
+//								v = new Vector2d(sim.sim.getRobots().get(i).getPosition().x,sim.sim.getRobots().get(i).getPosition().y);
+//								sim.sim.getEnvironment().addStaticObject(new LightPole(sim.sim, "lp", v.x, v.y, 0.2));
 							}
 							
 							if(step % 100 == 0) {
 								
-								Iterator<PhysicalObject> it = real.sim.getEnvironment().getAllObjects().iterator();
-						        while(it.hasNext()) {
-						        	if(it.next() instanceof LightPole)
-						        		it.remove();
-						        }
-						        it = sim.sim.getEnvironment().getAllObjects().iterator();
-						        while(it.hasNext()) {
-						        	if(it.next() instanceof LightPole)
-						        		it.remove();
-						        }
+//								Iterator<PhysicalObject> it = real.sim.getEnvironment().getAllObjects().iterator();
+//						        while(it.hasNext()) {
+//						        	if(it.next() instanceof LightPole)
+//						        		it.remove();
+//						        }
+//						        it = sim.sim.getEnvironment().getAllObjects().iterator();
+//						        while(it.hasNext()) {
+//						        	if(it.next() instanceof LightPole)
+//						        		it.remove();
+//						        }
 								
 								for(int i = 0 ; i < sim.sim.getRobots().size() ; i++) {
 //									sim.sim.getRobots().get(i).setPosition(real.sim.getRobots().get(i).getPosition());
 //									sim.sim.getRobots().get(i).setOrientation(real.sim.getRobots().get(i).getOrientation());
 								}
 							}
+							
+//							try {
+//								Thread.sleep(10);
+//							} catch (InterruptedException e) {
+//								e.printStackTrace();
+//							}
 						}
 						
 						commoninterface.mathutils.Vector2d pos = CoordinateUtilities.GPSToCartesian(rl.getLatLon());
@@ -266,10 +299,32 @@ public class CompareFitnessOnboard extends Thread{
 						double orientation = 360 - (rl.getOrientation() - 90);
 						real.robots.get(position).setOrientation(Math.toRadians(orientation));
 						
+						int chosen = 0;
+						
 						if(d.outputNeuronStates != null) {
-//							double heading = d.outputNeuronStates[0]*2-1;
-//							double speed = d.outputNeuronStates[1];
-//							((AquaticDrone)sim.sim.getRobots().get(position)).setRudder(heading, speed);
+							double heading = d.outputNeuronStates[0]*2-1;
+							double speed = d.outputNeuronStates[1];
+							//TODO
+							((AquaticDrone)sim.sim.getRobots().get(position)).setRudder(heading, speed);
+							double h = (heading+1)/2;
+//							headingD[index] = h*300;
+							
+							if(((AquaticDrone)sim.sim.getRobots().get(position)).getId() == chosen) {
+//								((AquaticDrone)sim.sim.getRobots().get(position)).setRudder(heading, speed);
+								simO[index] = ((AquaticDrone)sim.sim.getRobots().get(position)).getCompassOrientationInDegrees();
+								realO[index++] = rl.getOrientation();
+								System.out.println(step+" "+speed+" "+heading+" "+((AquaticDrone)sim.sim.getRobots().get(position)).getCompassOrientationInDegrees());
+							}
+////							System.out.println(h*300+" "+rl.getOrientation()+" "+((AquaticDrone)sim.sim.getRobots().get(position)).getCompassOrientationInDegrees());
+						} else {
+							//TODO DEBUG
+//							sim.sim.getRobots().get(position).setPosition(real.sim.getRobots().get(position).getPosition());
+//							sim.sim.getRobots().get(position).setOrientation(real.sim.getRobots().get(position).getOrientation());
+							
+//							if(((AquaticDrone)sim.sim.getRobots().get(position)).getId() == chosen) {
+//								simO[index] = ((AquaticDrone)sim.sim.getRobots().get(position)).getCompassOrientationInDegrees();
+//								realO[index++] = rl.getOrientation();
+//							}
 						}
 						
 						if(gui) {
@@ -281,8 +336,26 @@ public class CompareFitnessOnboard extends Thread{
 						
 					}
 					
+//					graph.addDataList(headingD);
+					
+//					double error = 0;
+//					for(int i = 0 ; i < simO.length ;i++) {
+//						if(simO[i] != null)
+//							error+=Math.abs(simO[i]-realO[i]);
+//					}
+					
+					graph.addDataList(simO);
+					graph.addDataList(realO);
+					
+//					System.out.println(error);
+					
 					System.out.println("Fitness: "+ff_real.getFitness()+" "+ff_sim.getFitness());
-					System.exit(0);
+					
+					try {
+						Thread.sleep(300000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}
@@ -353,7 +426,7 @@ class JFrameViewerFitnessOnboard extends JFrame{
 		
 //		add(south, BorderLayout.SOUTH);
 		
-		setSize(1000, 1000);
+		setSize(400, 400);
 		setLocationRelativeTo(null);
 		setVisible(true);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
