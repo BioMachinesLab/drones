@@ -178,8 +178,6 @@ public class RudderActuator extends Actuator {
 				
 				drone.setOrientation(a);
 				
-				if(drone.getId() == 4)
-					System.out.println(heading);
 			}
 			
 		}

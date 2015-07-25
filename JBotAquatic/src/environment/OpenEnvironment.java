@@ -56,10 +56,9 @@ public class OpenEnvironment extends Environment {
     }
     
     protected void positionDrone(AquaticDrone drone, Simulator simulator) {
-        double dist = (distance) * simulator.getRandom().nextDouble();
-        double angle = simulator.getRandom().nextDouble() * Math.PI * 2;
-        double x = Math.cos(angle) * dist;
-        double y = Math.sin(angle) * dist;
+    	
+    	double x = distance*2*simulator.getRandom().nextDouble() - distance;
+    	double y = distance*2*simulator.getRandom().nextDouble() - distance;
         drone.setPosition(x, y);
         drone.setOrientation(simulator.getRandom().nextDouble() * Math.PI * 2);
     }
