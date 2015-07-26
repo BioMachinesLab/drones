@@ -51,7 +51,8 @@ public class ClusterFitness extends AvoidCollisionsFunction {
 
         boolean merged = false;
         // stop when the clusters cannot be merged anymore
-        do {
+        while(!merged) {
+            merged = false;
             // find two existing clusters to merge
             for (int i = 0; i < clusters.size() && !merged; i++) {
                 for (int j = i + 1; j < clusters.size() && !merged; j++) {
@@ -72,7 +73,7 @@ public class ClusterFitness extends AvoidCollisionsFunction {
                     }
                 }
             }
-        } while (merged);
+        }
         return clusters.size();
     }
 }
