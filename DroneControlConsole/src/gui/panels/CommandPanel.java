@@ -31,6 +31,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import main.DroneControlConsole;
 import main.RobotControlConsole;
 import network.CommandSender;
@@ -65,6 +69,7 @@ public class CommandPanel extends UpdatePanel {
 	private JTextField logMessage;
 	private JTextArea selectedDrones;
 	private JTextArea autoDeployArea;
+	private JLabel timerLabel;
 	public JButton sendLog;
 	private RobotGUI gui;
 	private RobotControlConsole console;
@@ -87,6 +92,10 @@ public class CommandPanel extends UpdatePanel {
 	private JCheckBox autoDeployCheckBox;
 	
 	private ArrayList<Entity> mapEntities = new ArrayList<Entity>();
+	
+	private Timer timer;
+	
+	private JLabel currentExperiment;
 	
 	/*
 	 * author: @miguelduarte42 This has to be this way because some behaviors
@@ -267,11 +276,23 @@ public class CommandPanel extends UpdatePanel {
 		waypointPanel.add(gpsCoordinate);
 		waypointPanel.add(gpsButton);
 		
+		JPanel south = new JPanel(new GridLayout(1,3));
+		south.add(statusMessage);
+		
+		timerLabel = new JLabel("");
+		south.add(timerLabel);
+		
+		currentExperiment = new JLabel();
+		south.add(currentExperiment);
+		
 		deploy.add(autoDeployAreaScroll, BorderLayout.CENTER);
-		deploy.add(statusMessage, BorderLayout.SOUTH);		
+		deploy.add(south, BorderLayout.SOUTH);		
 		deploy.add(waypointPanel,BorderLayout.NORTH);
 		
 		add(deploy, BorderLayout.SOUTH);
+		
+		timer = new Timer();
+		timer.start();
 	}
 
 	private void initNeuralActivationsWindow() {
@@ -304,14 +325,31 @@ public class CommandPanel extends UpdatePanel {
 				.replaceAll("\\s+", ""), true);
 		BehaviorMessage m;
 
-		if (status)
+		String description = getExperimentDescription();
+		translatedArgs.setArgument("description", description);
+		
+		if (status) {
 			m = new BehaviorMessage(className,
 					translatedArgs.getCompleteArgumentString(), status,
 					myHostname);
-		else
+			sendBroacastMessage("STARTING "+description);
+		} else {
 			m = new BehaviorMessage(className, "", status, myHostname);
+			sendBroacastMessage("STOPPING "+description);
+		}
 
 		deploy(m);
+		if(status)
+			timer.startTimer();
+		else
+			timer.stopTimer();
+	}
+	
+	private String getExperimentDescription() {
+		DateTime now = new DateTime();
+		String description = now.toString(DateTimeFormat.forPattern("HH-mm-ss"));
+		currentExperiment.setText(description);
+		return description;
 	}
 	
 	private void deployPreset(String arguments){
@@ -319,8 +357,14 @@ public class CommandPanel extends UpdatePanel {
 		String type = translatedArgs.getArgumentAsString("type");
 		
 		if(type != null){
+			
+			String description = getExperimentDescription();
+			translatedArgs.setArgument("description", description);
+			sendBroacastMessage("STARTING "+description);
+			
 			BehaviorMessage m = new BehaviorMessage(type,translatedArgs.getCompleteArgumentString(), true, myHostname);
 			deploy(m);
+			timer.startTimer();
 		}else
 			JOptionPane.showMessageDialog(null, "Contoller type not defined on preset configuration file!");
 		
@@ -328,24 +372,28 @@ public class CommandPanel extends UpdatePanel {
 	private void deployEntities() {
 		deployEntities(false);
 	}
-
-	private void deployEntities(boolean dynamicActiveId) {
-		EntitiesMessage m = new EntitiesMessage(mapEntities, myHostname);
-		deploy(m,dynamicActiveId);
-
-		//This part is for other DroneControlConsoles to receive the updated entities
-		EntitiesBroadcastMessage msg = new EntitiesBroadcastMessage(mapEntities);
+	
+	private void sendBroacastMessage(String msg) {
 		if (console instanceof DroneControlConsole) {
 			// Messages get lost sometimes!!!
 			for (int j = 0; j < 5; j++) {
 				(((DroneControlConsole) console).getConsoleBroadcastHandler())
-						.sendMessage(msg.encode()[0]);
+						.sendMessage(msg);
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
 				}
 			}
 		}
+	}
+	
+	private void deployEntities(boolean dynamicActiveId) {
+		EntitiesMessage m = new EntitiesMessage(mapEntities, myHostname);
+		deploy(m,dynamicActiveId);
+
+		//This part is for other DroneControlConsoles to receive the updated entities
+		EntitiesBroadcastMessage msg = new EntitiesBroadcastMessage(mapEntities);
+		sendBroacastMessage(msg.encode()[0]);
 	}
 	
 	private synchronized void deploy(Message m) {
@@ -616,6 +664,8 @@ public class CommandPanel extends UpdatePanel {
 		}
 		
 		int randomSeed = 1111;
+		
+		double maxDistance = 40;
 		double safetyDistance = 15;
 		
 		DroneGUI droneGUI = (DroneGUI)gui;
@@ -774,7 +824,7 @@ public class CommandPanel extends UpdatePanel {
 						return;
 					}
 					
-				} while(!safePosition(pos, chosenWPs, lines, safetyDistance));
+				} while(!safePosition(pos, chosenWPs, lines, safetyDistance, maxDistance));
 				
 				if(i >= chosenWPs.size()) {
 					Waypoint w = new Waypoint("wp"+i, CoordinateUtilities.cartesianToGPS(pos));
@@ -785,8 +835,6 @@ public class CommandPanel extends UpdatePanel {
 			
 			for(Waypoint w : chosenWPs)
 				droneGUI.getMapPanel().addWaypoint(w);
-			
-			System.out.println(wps.size());
 			
 			String str = "GEOFENCE;";
 			
@@ -813,16 +861,22 @@ public class CommandPanel extends UpdatePanel {
 		return new Line(va.getX(), va.getY(), vb.getX(), vb.getY());
 	}
 	
-	private boolean safePosition(Vector2d v, ArrayList<Waypoint> wps, ArrayList<Line> lines, double safetyDistance) {
+	private boolean safePosition(Vector2d v, ArrayList<Waypoint> wps, ArrayList<Line> lines, double safetyDistance, double maxDistance) {
 		
 		if(insideBoundary(v, lines)) {
+			
+			double min = Double.MAX_VALUE;
 		
 			for(Waypoint wp : wps) {
-				if(CoordinateUtilities.GPSToCartesian(wp.getLatLon()).distanceTo(v) < safetyDistance)
+				
+				double distance = CoordinateUtilities.GPSToCartesian(wp.getLatLon()).distanceTo(v);
+				
+				min = Math.min(distance,min);
+				
+				if(distance < safetyDistance)
 					return false;
 			}
-			
-			return true;
+			return min < maxDistance || wps.isEmpty();
 		}
 		return false;
 	}
@@ -836,5 +890,43 @@ public class CommandPanel extends UpdatePanel {
 				count++;
 		}
 		return count % 2 != 0;
+	}
+	
+	class Timer extends Thread {
+		
+		DateTime startTime = null;
+		boolean enabled = false;
+		
+		public void startTimer() {
+			startTime = new DateTime();
+			enabled = true;
+		}
+		
+		public void stopTimer() {
+			startTime = null;
+			enabled = false;
+		}
+		
+		@Override
+		public void run() {
+			while(true) {
+				
+				DateTime temp = startTime;
+				
+				if(enabled && temp != null) {
+					long elapsed = new DateTime().getMillis()-startTime.getMillis();
+					timerLabel.setText("Time Elapsed: "+(elapsed/1000));
+				} else {
+					timerLabel.setText("Time Elapsed: ");
+				}
+				
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
 	}
 }

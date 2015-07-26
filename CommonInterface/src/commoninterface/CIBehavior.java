@@ -66,4 +66,9 @@ public abstract class CIBehavior {
 		
 		return (CIBehavior)Factory.getInstance(args.getArgumentAsString("classname"),args,robot);
 	}
+	
+	@Override
+	public String toString() {
+		return this.getClass().getSimpleName();
+	}
 }

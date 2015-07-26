@@ -12,12 +12,14 @@ public class OpenEnvironment extends Environment {
 
     @ArgumentsAnnotation(name = "distance", defaultValue = "0")
     private double distance = 0;
+    private double maxDistance = 0;
     private double safetyDistance = 0;
 
     public OpenEnvironment(Simulator simulator, Arguments args) {
         super(simulator, args);
         distance = args.getArgumentAsDoubleOrSetDefault("distance", distance);
         safetyDistance = args.getArgumentAsDoubleOrSetDefault("safetydistance", safetyDistance);
+        maxDistance = args.getArgumentAsDoubleOrSetDefault("maxdistance", maxDistance);
     }
 
     @Override
@@ -40,16 +42,28 @@ public class OpenEnvironment extends Environment {
     		return false;
     	
     	if(safetyDistance > 0) {
+    		
+    		double min = Double.MAX_VALUE;
+    		
     		for(Robot robot : robots) {
     			
     			if(robot.getId() == r.getId()) {
     				//all robots with a lower ID are at safe distances, so we can exit
+    				
+    				if(maxDistance > 0)
+    	    			return min < maxDistance || robot.getId() == 0;
+    				
     				return true;
     			}
     			
-   				if(robot.getPosition().distanceTo(r.getPosition()) < safetyDistance)
+    			double distance = robot.getPosition().distanceTo(r.getPosition());
+    			
+   				if(distance < safetyDistance)
    					return false;
+   				
+   				min = Math.min(distance,min);
     		}
+    		
     	}
     	
     	return true;

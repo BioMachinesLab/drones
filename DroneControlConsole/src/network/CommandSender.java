@@ -57,7 +57,6 @@ public class CommandSender extends Thread{
 			}
 		}
 		
-		System.out.println("Deployed!");
 		cp.setText("Deployed!");
 	}
 	
