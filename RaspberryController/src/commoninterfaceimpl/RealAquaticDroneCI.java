@@ -293,7 +293,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		behaviorTimestep = 0;
 		activeBehavior.start();
 		
-		String str= "Starting CIBehavior "+b.getClass().getSimpleName();
+		String str= "Starting CIBehavior "+activeWaypoint.toString();
 		log(LogCodex.encodeLog(LogType.MESSAGE, str));
 	}
 
@@ -303,7 +303,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			activeBehavior.cleanUp();
 			
 			String str = "Stopping CIBehavior "
-					+ activeBehavior.getClass().getSimpleName();
+					+ activeBehavior.toString();
 			log(LogCodex.encodeLog(LogType.MESSAGE, str));
 			
 			activeBehavior = null;
