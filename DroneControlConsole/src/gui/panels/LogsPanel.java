@@ -37,7 +37,7 @@ public class LogsPanel extends JPanel {
 	
 	private IncidentLogger incidentLogger;
 	private BroadcastLogger broadcastLogger;
-
+	
 	public LogsPanel(DroneGUI droneGui) {
 		setBorder(BorderFactory.createTitledBorder("Logs"));
 		setLayout(new BorderLayout());

@@ -15,8 +15,13 @@ public class BroadcastLogger {
 
 	private DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("dd-MM-YY_HH-mm-ss");
 	private DateTimeFormatter hourFormatter = DateTimeFormat.forPattern("HH:mm:ss.SS");
+	
+	private String experiment = "";
+	private String experimentName = "";
 
 	private BufferedWriter bw = null;
+	
+	private File folderExperiments;
 	
 	public BroadcastLogger() {
 		
@@ -27,9 +32,13 @@ public class BroadcastLogger {
 
 		try {
 			File folder = new File(BROADCAST_LOGS_FOLDER);
+			folderExperiments = new File(BROADCAST_LOGS_FOLDER+"/experiments");
 
 			if(!folder.exists())
 				folder.mkdir();
+			
+			if(!folderExperiments.exists())
+				folderExperiments.mkdir();
 
 			bw = new BufferedWriter(new FileWriter(new File(BROADCAST_LOGS_FOLDER+"/"+fileName)));
 		} catch(IOException e) {
@@ -40,11 +49,44 @@ public class BroadcastLogger {
 	public void log(String msg) {
 		if(bw != null) {
 			try {
-				String txt = DateTime.now().toString(hourFormatter)+" "+msg;
+				String time = DateTime.now().toString(hourFormatter);
+				String txt = time+" "+msg;
 				bw.append(txt+"\n");
+				
+				handleExperiment(time,msg);
+				
 			} catch(IOException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	private void handleExperiment(String time, String msg) throws IOException {
+		
+		if(msg.startsWith("STARTING")) {
+			String[] split = msg.split(" ");
+			experimentName = split[1];
+			experiment = "";
+		}
+		
+		if(msg.startsWith("STOPPING") || msg.startsWith("STARTING")) {
+			if(!experiment.isEmpty()) {
+				String name = experimentName;
+				String content = experiment;
+				experimentName = "";
+				experiment = "";
+				
+				File f = new File(folderExperiments.getPath()+"/"+name+".txt");
+				BufferedWriter b = new BufferedWriter(new FileWriter(f));
+				
+				b.write(content);
+				b.flush();
+				b.close();
+			}
+		
+		}else {
+			if(!experimentName.isEmpty())
+				experiment+=time+" "+msg+"\n";
 		}
 	}
 
@@ -52,6 +94,7 @@ public class BroadcastLogger {
 		if(bw != null) {
 			bw.close();
 		}
+		handleExperiment("","STOPPING exp");
 	}
 
 }

@@ -19,6 +19,8 @@ import java.util.LinkedList;
 import java.util.Random;
 import java.util.Scanner;
 
+import javafx.scene.layout.Border;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -276,8 +278,9 @@ public class CommandPanel extends UpdatePanel {
 		waypointPanel.add(gpsCoordinate);
 		waypointPanel.add(gpsButton);
 		
-		JPanel south = new JPanel(new GridLayout(1,3));
+		JPanel south = new JPanel(new GridLayout(2,2));
 		south.add(statusMessage);
+		south.add(new JLabel());
 		
 		timerLabel = new JLabel("");
 		south.add(timerLabel);
@@ -325,17 +328,19 @@ public class CommandPanel extends UpdatePanel {
 				.replaceAll("\\s+", ""), true);
 		BehaviorMessage m;
 
-		String description = getExperimentDescription();
-		translatedArgs.setArgument("description", description);
-		
 		if (status) {
+			
+			String description = getExperimentDescription(className);
+			translatedArgs.setArgument("description", description);
+			
 			m = new BehaviorMessage(className,
 					translatedArgs.getCompleteArgumentString(), status,
 					myHostname);
 			sendBroacastMessage("STARTING "+description);
 		} else {
 			m = new BehaviorMessage(className, "", status, myHostname);
-			sendBroacastMessage("STOPPING "+description);
+			if(!currentExperiment.getText().isEmpty())
+				sendBroacastMessage("STOPPING "+currentExperiment.getText());
 		}
 
 		deploy(m);
@@ -345,20 +350,21 @@ public class CommandPanel extends UpdatePanel {
 			timer.stopTimer();
 	}
 	
-	private String getExperimentDescription() {
+	private String getExperimentDescription(String name) {
 		DateTime now = new DateTime();
-		String description = now.toString(DateTimeFormat.forPattern("HH-mm-ss"));
+		String description = now.toString(DateTimeFormat.forPattern("HH-mm-ss"))+"-"+name;
 		currentExperiment.setText(description);
 		return description;
 	}
 	
-	private void deployPreset(String arguments){
+	private void deployPreset(String presetName, String arguments){
 		CIArguments translatedArgs = new CIArguments(arguments.replaceAll("\\s+", ""), true);
 		String type = translatedArgs.getArgumentAsString("type");
 		
 		if(type != null){
 			
-			String description = getExperimentDescription();
+			String description = getExperimentDescription(presetName);
+			System.out.println(presetName+" "+description);
 			translatedArgs.setArgument("description", description);
 			sendBroacastMessage("STARTING "+description);
 			
@@ -507,7 +513,7 @@ public class CommandPanel extends UpdatePanel {
 							public void actionPerformed(ActionEvent e) {
 								JButton b = (JButton) e.getSource();
 								String arguments = presetsConfig.get(b.getText());
-								deployPreset(arguments);
+								deployPreset(b.getText(),arguments);
 							}
 						});
 						
@@ -847,7 +853,7 @@ public class CommandPanel extends UpdatePanel {
 			autoDeployArea.setText(str);
 			
 			deployEntities(true);
-			deployPreset(presetsConfig.get("waypoint"));
+			deployPreset("waypoint",presetsConfig.get("waypoint"));
 			
 		} else {
 			JOptionPane.showMessageDialog(null, "Please define a GeoFence first!");
