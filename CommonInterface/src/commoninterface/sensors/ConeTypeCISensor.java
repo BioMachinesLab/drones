@@ -17,6 +17,7 @@ public abstract class ConeTypeCISensor extends CISensor {
 	protected double range = 1;
 	protected int numberSensors = 1;
 	protected double openingAngle = Math.toRadians(90);
+	protected double sensorShift = 0;
 	protected GeometricCalculator geoCalc = new GeometricCalculator();
 
 	protected AquaticDroneCI drone;
@@ -24,6 +25,7 @@ public abstract class ConeTypeCISensor extends CISensor {
 	public ConeTypeCISensor(int id, RobotCI robot, CIArguments args) {
 		super(id, robot, args);
 		range = args.getArgumentAsDoubleOrSetDefault("range", range);
+		sensorShift = Math.toRadians(args.getArgumentAsDoubleOrSetDefault("sensorshift", sensorShift));
 		numberSensors = args.getArgumentAsIntOrSetDefault("numbersensors",
 				numberSensors);
 		openingAngle = Math.toRadians(args.getArgumentAsIntOrSetDefault(
@@ -90,9 +92,10 @@ public abstract class ConeTypeCISensor extends CISensor {
 	
 	public void setupPositions(int numberSensors) {
 		double delta = 2 * Math.PI / numberSensors;
-		double angle = 0;
+		double angle = sensorShift;
 		for (int i = 0; i < numberSensors; i++) {
 			angles[i] = angle;
+			System.out.println(angles[i]);
 			angle += delta;
 		}
 	}

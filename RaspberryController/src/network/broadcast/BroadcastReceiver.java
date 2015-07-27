@@ -12,6 +12,7 @@ public class BroadcastReceiver extends Thread{
 	private DatagramSocket socket;
 	private String ownAddress;
 	private BroadcastHandler bh;
+	private static boolean DEBUG = false;
 
 	public BroadcastReceiver(BroadcastHandler bh, String ownAddress, int port) {
 		this.ownAddress = ownAddress;
@@ -34,6 +35,10 @@ public class BroadcastReceiver extends Thread{
 				socket.receive(packet);
 
 				String message = new String(packet.getData()).trim();
+				
+				if(DEBUG)
+					System.out.println("Receiving "+message);
+				
 				if(!packet.getAddress().getHostAddress().equals(ownAddress)) {
 					bh.messageReceived(packet.getAddress().getHostAddress(), message);
 				}
