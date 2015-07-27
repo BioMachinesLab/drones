@@ -20,6 +20,7 @@ import simulation.util.Arguments;
 public class ClusterFitness extends AvoidCollisionsFunction {
 
     private double clusterDistance = 5;
+    private int totalClusters = 0;
 
     public ClusterFitness(Arguments args) {
         super(args);
@@ -30,7 +31,9 @@ public class ClusterFitness extends AvoidCollisionsFunction {
     public void update(Simulator simulator) {
         int numClusters = numberOfClusters(simulator.getRobots());
         int numRobots = simulator.getRobots().size();
-        fitness = (numRobots - numClusters) / (double) (numRobots - 1);
+
+        totalClusters += numClusters;
+        fitness = (numRobots - totalClusters / simulator.getTime()) / (double) (numRobots - 1);
         super.update(simulator);
     }
 
