@@ -18,6 +18,8 @@ public class BestControllersWeights {
 	static int TOP = 3;
 	
 	public static void main(String[] args) {
+		
+		/*
 //		38.76651701230279 -9.09377930059924
 //		38.76611189994927 -9.093260791440684
 		
@@ -47,9 +49,9 @@ public class BestControllersWeights {
 //		System.out.println(CoordinateUtilities.cartesianToGPS(v));
 		
 		System.exit(0);
-		
+		*/
 //		String folder = args[0];
-		String folder = "bigdisk/july2015/rudder_3m_100gen/";
+		String folder = "experiments/rudder_test/";
 		
 		File f = new File(folder);
 		

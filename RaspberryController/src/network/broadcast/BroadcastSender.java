@@ -9,6 +9,8 @@ import commoninterface.network.NetworkUtils;
 
 public class BroadcastSender {
 
+	private static boolean DEBUG = false;
+	
 	private DatagramSocket socket;
 	private int port;
 
@@ -28,6 +30,8 @@ public class BroadcastSender {
 
 	public void sendMessage(String message) {
 		try {
+			if(DEBUG)
+				System.out.println("Broadcasting "+message);
 			byte[] sendData = message.getBytes();
 			DatagramPacket sendPacket = new DatagramPacket(sendData,
 					sendData.length, InetAddress.getByName(broacastAddress),
