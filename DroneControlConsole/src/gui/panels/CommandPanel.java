@@ -777,8 +777,20 @@ public class CommandPanel extends UpdatePanel {
 			LatLon bl = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x-width/2,center.y-height/2));
 			LatLon br = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x+width/2,center.y-height/2));
 			
-			System.out.println(tl.getLat()+" "+tl.getLon());
-			System.out.println(br.getLat()+" "+br.getLon());
+			Vector2d tlv = CoordinateUtilities.GPSToCartesian(tl);
+			Vector2d brv = CoordinateUtilities.GPSToCartesian(br);
+			
+			tlv.x-=15;
+			tlv.y+=15;
+			
+			brv.x+=15;
+			brv.y-=15;
+			
+			System.out.println(CoordinateUtilities.cartesianToGPS(tlv));
+			System.out.println(CoordinateUtilities.cartesianToGPS(brv));
+			
+//			System.out.println(tl.getLat()+" "+tl.getLon());
+//			System.out.println(br.getLat()+" "+br.getLon());
 			
 			fence = new GeoFence("geofence");
 			fence.addWaypoint(tl);

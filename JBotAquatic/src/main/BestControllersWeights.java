@@ -19,24 +19,24 @@ public class BestControllersWeights {
 	
 	public static void main(String[] args) {
 		
-		/*
+		
 //		38.76651701230279 -9.09377930059924
 //		38.76611189994927 -9.093260791440684
 		
-		Vector2d tl = CoordinateUtilities.GPSToCartesian(new LatLon(38.76651701230279, -9.09377930059924));
-		Vector2d br = CoordinateUtilities.GPSToCartesian(new LatLon(38.76611189994927, -9.093260791440684));
-		
-		tl.x-=15;
-		tl.y+=15;
-		br.x+=15;
-		br.y-=15;
-		
-		System.out.println(CoordinateUtilities.cartesianToGPS(tl));
-		System.out.println(CoordinateUtilities.cartesianToGPS(br));
+//		Vector2d tl = CoordinateUtilities.GPSToCartesian(new LatLon(38.76651701230279, -9.09377930059924));
+//		Vector2d br = CoordinateUtilities.GPSToCartesian(new LatLon(38.76611189994927, -9.093260791440684));
+//		
+//		tl.x-=15;
+//		tl.y+=15;
+//		br.x+=15;
+//		br.y-=15;
+//		
+//		System.out.println(CoordinateUtilities.cartesianToGPS(tl));
+//		System.out.println(CoordinateUtilities.cartesianToGPS(br));
 		
 		
 //		Vector2d v = CoordinateUtilities.GPSToCartesian(new LatLon(38.76627186639363,-9.092696140693068));
-//		v.x+=5;
+//		v.x-=15;
 //		v.y+=40;
 //		System.out.println(CoordinateUtilities.cartesianToGPS(v));
 //		v.y-=40;
@@ -47,9 +47,9 @@ public class BestControllersWeights {
 //		System.out.println(CoordinateUtilities.cartesianToGPS(v));
 //		v.x+=40;
 //		System.out.println(CoordinateUtilities.cartesianToGPS(v));
+//		
+//		System.exit(0);
 		
-		System.exit(0);
-		*/
 //		String folder = args[0];
 		String folder = "experiments/rudder_test/";
 		

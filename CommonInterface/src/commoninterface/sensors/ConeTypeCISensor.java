@@ -95,7 +95,6 @@ public abstract class ConeTypeCISensor extends CISensor {
 		double angle = sensorShift;
 		for (int i = 0; i < numberSensors; i++) {
 			angles[i] = angle;
-			System.out.println(angles[i]);
 			angle += delta;
 		}
 	}

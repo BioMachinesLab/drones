@@ -293,7 +293,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		behaviorTimestep = 0;
 		activeBehavior.start();
 		
-		String str= "Starting CIBehavior "+activeWaypoint.toString();
+		String str= "Starting CIBehavior "+activeBehavior.toString();
 		log(LogCodex.encodeLog(LogType.MESSAGE, str));
 	}
 

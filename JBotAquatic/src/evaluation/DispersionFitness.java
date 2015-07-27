@@ -39,6 +39,9 @@ public class DispersionFitness extends AvoidCollisionsFunction {
         	if(startingDistance == 0)
         		startingDistance = simulator.getEnvironment().getWidth();
         	
+        	//TODO
+        	range=40;
+        	
         	if(range == 0) {
 	            CISensorWrapper wr = (CISensorWrapper)simulator.getRobots().get(0).getSensorByType(CISensorWrapper.class);
 	            DroneCISensor dcs = (DroneCISensor) wr.getCisensor();

@@ -24,6 +24,8 @@ public class AggregateFitness extends AvoidCollisionsFunction {
     private boolean configured = false;
     private double meanDistance = 0;
     private double startingDistance = 0;
+    private double time = 0;
+    private double avg = 0;
 
     public AggregateFitness(Arguments args) {
         super(args);
@@ -38,14 +40,18 @@ public class AggregateFitness extends AvoidCollisionsFunction {
 
         // MEAN DISTANCE TO CENTRE OF MASS
         double currDistance = calculateDistCM(simulator.getRobots(),simulator);
+        avg+=currDistance;
         meanDistance += (startingDistance - currDistance) / startingDistance;
         fitness = meanDistance / simulator.getTime();
+        time = simulator.getTime();
 //        System.out.println(simulator.getTime()+" MEAN "+meanDistance+" FITNESS "+fitness+" STARTING "+startingDistance+" CURRENT "+currDistance+" ROBOTS "+simulator.getRobots().size());
         super.update(simulator);
     }
 
     @Override
     public double getFitness() {
+    	
+    	System.out.println((10+fitness)+" "+avg/time);
         return 10 + fitness;
     }
 

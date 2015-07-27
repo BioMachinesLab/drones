@@ -44,7 +44,7 @@ public class CompareFitnessField extends Thread{
 	
 	static double maxSteps = 1800;
 	
-	String experiment = "aggregate";
+	String experiment = "dispersion";
 	int sample = 1;
 	int controller = 0;
 	int robots = 8;
@@ -53,7 +53,7 @@ public class CompareFitnessField extends Thread{
 	private JFrameViewerFitnessField frame;
 	private boolean pause = false;
 	
-	private String[] ignoreNames = new String[]{"7"};
+	private String[] ignoreNames = new String[]{"6","8"};
 	
 	public CompareFitnessField(JFrameViewerFitnessField frame) {
 		this.frame = frame;
@@ -77,9 +77,14 @@ public class CompareFitnessField extends Thread{
 
 					RobotLocation rl = PositionBroadcastMessage.decode(msg);
 					
+					if(rl == null)
+						continue;
+					
 					boolean ignore = false;
 					
-					for(String ig : ignoreNames) {
+					for(String ig : ignoreNames) { 
+						if(rl == null)
+							continue;
 						if(rl.getName().endsWith("."+ig)) {
 							ignore = true;
 						}
@@ -140,7 +145,7 @@ public class CompareFitnessField extends Thread{
 		hash.put("--environment", new Arguments("classname=EmptyEnvironment,width=150,height=150,steps="+(int)maxSteps,true));
 		
 		real.sim = new Simulator(new Random(1), hash);
-		sim.sim = new Simulator(new Random(1), hash);
+		sim.sim = new Simulator(new Random(1113), hash);
 		
 		HashMap<Integer,Integer> robotList = new HashMap<Integer,Integer>();
 		
@@ -243,6 +248,12 @@ public class CompareFitnessField extends Thread{
 				step++;
 				real.sim.performOneSimulationStep((double)step);
 				sim.sim.performOneSimulationStep((double)step);
+				
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 				
 			}
 			
