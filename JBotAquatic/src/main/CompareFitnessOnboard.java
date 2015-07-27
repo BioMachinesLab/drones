@@ -368,23 +368,6 @@ public class CompareFitnessOnboard extends Thread{
 	
 }
 
-class Setup {
-	
-	Renderer renderer;
-	Simulator sim;
-	ArrayList<Robot> robots = new ArrayList<Robot>();
-	
-	public void setupDrones(HashMap<Integer,Integer> robotList, Arguments args, Vector2d start) {
-		for(int i = 0 ; i < robotList.keySet().size() ; i++) {
-			AquaticDrone drone = new AquaticDrone(sim, args);
-			drone.setPosition(start.x,start.y);
-			robots.add(drone);
-			robotList.put((Integer)robotList.keySet().toArray()[i], robots.size()-1);
-		}
-	}
-	
-}
-
 class JFrameViewerFitnessOnboard extends JFrame{
 	
 	private Renderer renderer1;

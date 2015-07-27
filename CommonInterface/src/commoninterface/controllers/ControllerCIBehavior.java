@@ -1,6 +1,7 @@
 package commoninterface.controllers;
 
 import java.util.ArrayList;
+
 import commoninterface.CIBehavior;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
@@ -16,6 +17,7 @@ public class ControllerCIBehavior extends CIBehavior {
 	private ArrayList<Double[]> inputs;
 	private ArrayList<Double[]> outputs;
 	private CIArguments args;
+	private String description = "";
 	
 	public ControllerCIBehavior(CIArguments args, RobotCI robot) {
 		super(args, robot);
@@ -30,6 +32,11 @@ public class ControllerCIBehavior extends CIBehavior {
 		outputs = new ArrayList<Double[]>();
 		initSensors(new CIArguments(args.getArgumentAsString("sensors")));
 		network = CINeuralNetwork.getNeuralNetwork(robot, new CIArguments(args.getArgumentAsString("network")));
+		
+		if(args.getArgumentAsString("description") != null) {
+			description+=" "+args.getArgumentAsString("description");
+		}
+		
 	}
 	
 	protected void initSensors(CIArguments args) {
@@ -134,6 +141,11 @@ public class ControllerCIBehavior extends CIBehavior {
 			convertedArray[i] = array[i];
 		
 		return convertedArray;
+	}
+	
+	@Override
+	public String toString() {
+		return super.toString() + description;
 	}
 	
 }

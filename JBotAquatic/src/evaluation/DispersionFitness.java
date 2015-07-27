@@ -23,16 +23,22 @@ public class DispersionFitness extends AvoidCollisionsFunction {
     private boolean config = false;
     private double targetDistance = 0;
     private double range = 0;
+    private double startingDistance = 0;
     
     public DispersionFitness(Arguments args) {
         super(args);
         margin = args.getArgumentAsDouble("margin");
         range = args.getArgumentAsDoubleOrSetDefault("range", range);
+        startingDistance = args.getArgumentAsDoubleOrSetDefault("startingdistance", startingDistance);
     }
 
     @Override
     public void update(Simulator simulator) {
         if (!config) {
+        	
+        	if(startingDistance == 0)
+        		startingDistance = simulator.getEnvironment().getWidth();
+        	
         	if(range == 0) {
 	            CISensorWrapper wr = (CISensorWrapper)simulator.getRobots().get(0).getSensorByType(CISensorWrapper.class);
 	            DroneCISensor dcs = (DroneCISensor) wr.getCisensor();
@@ -54,8 +60,8 @@ public class DispersionFitness extends AvoidCollisionsFunction {
             distanceDelta += Math.abs(minDist - targetDistance);
         }
         distanceDelta /= simulator.getRobots().size();
-
-        meanDistance += (simulator.getEnvironment().getWidth() - distanceDelta) / simulator.getEnvironment().getWidth();
+        
+        meanDistance += (startingDistance - distanceDelta) / startingDistance;
         
         fitness = meanDistance / Math.max(simulator.getTime(),1);
 
