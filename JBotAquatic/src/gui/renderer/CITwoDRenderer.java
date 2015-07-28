@@ -37,6 +37,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 	private int coneSensorId;
 	private String coneClass = "";
 	private Color[] lineColors = new Color[]{Color.RED,Color.BLUE,Color.GREEN};
+	private int colorIndex = 0;
 	
 	public CITwoDRenderer(Arguments args) {
 		super(args);
@@ -52,12 +53,13 @@ public class CITwoDRenderer extends TwoDRenderer {
 		RobotCI robotci = (RobotCI) robot;
 		int circleDiameter = bigRobots ? (int)Math.max(10,Math.round(ENTITY_DIAMETER * scale)) : (int) Math.round(ENTITY_DIAMETER * scale);
 		
+		if(robot.getId() == 0)
+			colorIndex = 0;
+		
 		if(robot.getId() == droneID){
 			
 			//to prevent ConcurrentModificationExceptions
 			Object[] entities = (Object[])robotci.getEntities().toArray();
-			
-			int colorIndex = robot.getId();
 			
 			for(Object o: entities) {
 				Entity entity = (Entity)o;
@@ -83,6 +85,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 					graphics.fillOval(x, y, circleDiameter, circleDiameter);
 				} else if(entity instanceof GeoFence) {
 					drawGeoFence((GeoFence)entity,lineColors[colorIndex%lineColors.length]);
+					colorIndex++;
 				}
 			}
 		}
