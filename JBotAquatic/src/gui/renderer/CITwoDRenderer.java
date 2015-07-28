@@ -5,9 +5,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RadialGradientPaint;
 import java.awt.geom.Point2D;
-import java.util.Iterator;
 import java.util.LinkedList;
-
 import net.jafama.FastMath;
 import simulation.physicalobjects.Line;
 import simulation.robot.Robot;
@@ -84,6 +82,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 					int y = (int) (transformY(e.getY()) - circleDiameter / 2);
 					graphics.fillOval(x, y, circleDiameter, circleDiameter);
 				} else if(entity instanceof GeoFence) {
+					System.out.println(colorIndex);
 					drawGeoFence((GeoFence)entity,lineColors[colorIndex%lineColors.length]);
 					colorIndex++;
 				}
@@ -102,6 +101,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 			Vector2d vb = CoordinateUtilities.GPSToCartesian(wb.getLatLon());
 			
 			Line l = new Line(simulator,"line"+i,va.getX(),va.getY(),vb.getX(),vb.getY());
+			l.setColor(c);
 			drawLine(l);
 		}
 		
