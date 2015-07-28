@@ -20,7 +20,7 @@ import simulation.util.Arguments;
 public class ClusterFitnessWeighted extends AvoidCollisionsFunction {
 
     private double clusterDistance = 5;
-    private int totalClusters = 0;
+    private double totalClusters = 0;
     private double totalNorm = 0;
 
     public ClusterFitnessWeighted(Arguments args) {

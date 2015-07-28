@@ -73,6 +73,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	private ArrayList<MessageProvider> messageProviders;
 	private ArrayList<CIBehavior> alwaysActiveBehaviors = new ArrayList<CIBehavior>();
 	private CIBehavior activeBehavior;
+	private double activeBehaviorStep = 0;
 	
 	private DroneType droneType = DroneType.DRONE;
 	
@@ -181,7 +182,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		super.updateSensors(simulationStep, teleported);
 		
 		if(activeBehavior != null) {
-			activeBehavior.step(simulationStep);
+			activeBehavior.step(activeBehaviorStep++);
 		} else if(getController() instanceof DummyController){
 			setMotorSpeeds(0, 0);
 		}
@@ -446,6 +447,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		stopActiveBehavior();
 		activeBehavior = b;
 		activeBehavior.start();
+		activeBehaviorStep = 0;
 		
 		String str = "Starting CIBehavior " + b.getClass().getSimpleName();
 		log(LogCodex.encodeLog(LogType.MESSAGE, str));

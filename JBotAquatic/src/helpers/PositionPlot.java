@@ -1,4 +1,4 @@
-package main;
+package helpers;
 
 import gui.renderer.Renderer;
 import gui.renderer.TwoDRenderer;

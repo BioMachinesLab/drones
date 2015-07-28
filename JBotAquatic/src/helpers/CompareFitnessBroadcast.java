@@ -1,4 +1,4 @@
-package main;
+package helpers;
 
 import evaluation.AggregateFitness;
 import evolutionaryrobotics.JBotEvolver;
