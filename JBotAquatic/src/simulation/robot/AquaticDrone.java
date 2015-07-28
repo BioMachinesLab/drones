@@ -96,6 +96,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	
 	private double headingOffset = 0;
 	private double speedOffset = 0;
+	private boolean configuredSensors = false;;
 	
 	public AquaticDrone(Simulator simulator, Arguments args) {
 		super(simulator, args);
@@ -151,8 +152,6 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		
 		badGPS = args.getFlagIsTrue("badgps");
 		
-		sensors.add(new CompassSensor(simulator, sensors.size()+1, this, args));
-		
 		rudder = args.getFlagIsTrue("rudder");
 		
 		if(rudder) {
@@ -176,6 +175,11 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	
 	@Override
 	public void updateSensors(double simulationStep, ArrayList<PhysicalObject> teleported) {
+		
+		if(!configuredSensors) {
+			sensors.add(new CompassSensor(simulator, sensors.size()+1, this, new Arguments("")));
+			configuredSensors = true;
+		}
 		
 		updatePhysicalSensors();
 		
