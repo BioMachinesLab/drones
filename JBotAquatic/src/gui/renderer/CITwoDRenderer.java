@@ -57,7 +57,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 			//to prevent ConcurrentModificationExceptions
 			Object[] entities = (Object[])robotci.getEntities().toArray();
 			
-			int colorIndex = 0;
+			int colorIndex = robot.getId();
 			
 			for(Object o: entities) {
 				Entity entity = (Entity)o;
@@ -83,7 +83,6 @@ public class CITwoDRenderer extends TwoDRenderer {
 					graphics.fillOval(x, y, circleDiameter, circleDiameter);
 				} else if(entity instanceof GeoFence) {
 					drawGeoFence((GeoFence)entity,lineColors[colorIndex%lineColors.length]);
-					colorIndex++;
 				}
 			}
 		}
