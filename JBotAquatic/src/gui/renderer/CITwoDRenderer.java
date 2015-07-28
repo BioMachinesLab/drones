@@ -54,7 +54,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 		if(robot.getId() == 0)
 			colorIndex = 0;
 		
-		if(robot.getId() == droneID){
+//		if(robot.getId() == droneID){
 			
 			//to prevent ConcurrentModificationExceptions
 			Object[] entities = (Object[])robotci.getEntities().toArray();
@@ -82,12 +82,11 @@ public class CITwoDRenderer extends TwoDRenderer {
 					int y = (int) (transformY(e.getY()) - circleDiameter / 2);
 					graphics.fillOval(x, y, circleDiameter, circleDiameter);
 				} else if(entity instanceof GeoFence) {
-					System.out.println(colorIndex);
 					drawGeoFence((GeoFence)entity,lineColors[colorIndex%lineColors.length]);
 					colorIndex++;
 				}
 			}
-		}
+//		}
 	}
 	
 	protected void drawGeoFence(GeoFence geo, Color c) {
