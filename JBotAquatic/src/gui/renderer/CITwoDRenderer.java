@@ -36,6 +36,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 	private boolean seeSensors;
 	private int coneSensorId;
 	private String coneClass = "";
+	private Color[] lineColors = new Color[]{Color.RED,Color.BLUE,Color.GREEN};
 	
 	public CITwoDRenderer(Arguments args) {
 		super(args);
@@ -55,6 +56,8 @@ public class CITwoDRenderer extends TwoDRenderer {
 			
 			//to prevent ConcurrentModificationExceptions
 			Object[] entities = (Object[])robotci.getEntities().toArray();
+			
+			int colorIndex = 0;
 			
 			for(Object o: entities) {
 				Entity entity = (Entity)o;
@@ -79,13 +82,14 @@ public class CITwoDRenderer extends TwoDRenderer {
 					int y = (int) (transformY(e.getY()) - circleDiameter / 2);
 					graphics.fillOval(x, y, circleDiameter, circleDiameter);
 				} else if(entity instanceof GeoFence) {
-					drawGeoFence((GeoFence)entity);					
+					drawGeoFence((GeoFence)entity,lineColors[colorIndex%lineColors.length]);
+					colorIndex++;
 				}
 			}
 		}
 	}
 	
-	protected void drawGeoFence(GeoFence geo) {
+	protected void drawGeoFence(GeoFence geo, Color c) {
 		LinkedList<Waypoint> waypoints = geo.getWaypoints();
 		
 		for(int i = 1 ; i < waypoints.size() ; i++) {
@@ -105,6 +109,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 		Vector2d vb = CoordinateUtilities.GPSToCartesian(wb.getLatLon());
 		
 		Line l = new Line(simulator,"line0",va.getX(),va.getY(),vb.getX(),vb.getY());
+		l.setColor(c);
 		drawLine(l);
 	}
 	
