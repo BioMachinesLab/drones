@@ -700,6 +700,8 @@ public class CommandPanel extends UpdatePanel {
 			}
 		}
 		
+		int special = 0;
+		
 		double width = 63;
 		double height = 63;
 		
@@ -725,6 +727,9 @@ public class CommandPanel extends UpdatePanel {
 					if(token.equals("SAFETY")) {
 						token = s.next();
 						safetyDistance = Double.parseDouble(token);
+					}
+					if(token.equals("SPECIAL")) {
+						special = Integer.parseInt(s.next());
 					}
 					
 				}
@@ -772,31 +777,41 @@ public class CommandPanel extends UpdatePanel {
 			if(center == null)
 				center = CoordinateUtilities.GPSToCartesian(wps.get(0).getLatLon());
 			
-			LatLon tl = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x-width/2,center.y+height/2));
-			LatLon tr = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x+width/2,center.y+height/2));
-			LatLon bl = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x-width/2,center.y-height/2));
-			LatLon br = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x+width/2,center.y-height/2));
+			if(special == 0) {
 			
-			Vector2d tlv = CoordinateUtilities.GPSToCartesian(tl);
-			Vector2d brv = CoordinateUtilities.GPSToCartesian(br);
+				LatLon tl = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x-width/2,center.y+height/2));
+				LatLon tr = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x+width/2,center.y+height/2));
+				LatLon bl = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x-width/2,center.y-height/2));
+				LatLon br = CoordinateUtilities.cartesianToGPS(new Vector2d(center.x+width/2,center.y-height/2));
+				
+				Vector2d tlv = CoordinateUtilities.GPSToCartesian(tl);
+				Vector2d brv = CoordinateUtilities.GPSToCartesian(br);
+				
+				tlv.x-=15;
+				tlv.y+=15;
+				
+				brv.x+=15;
+				brv.y-=15;
+				
+				System.out.println(CoordinateUtilities.cartesianToGPS(tlv));
+				System.out.println(CoordinateUtilities.cartesianToGPS(brv));
+				
+	//			System.out.println(tl.getLat()+" "+tl.getLon());
+	//			System.out.println(br.getLat()+" "+br.getLon());
+				
+				fence = new GeoFence("geofence");
+				fence.addWaypoint(tl);
+				fence.addWaypoint(tr);
+				fence.addWaypoint(br);
+				fence.addWaypoint(bl);
 			
-			tlv.x-=15;
-			tlv.y+=15;
-			
-			brv.x+=15;
-			brv.y-=15;
-			
-			System.out.println(CoordinateUtilities.cartesianToGPS(tlv));
-			System.out.println(CoordinateUtilities.cartesianToGPS(brv));
-			
-//			System.out.println(tl.getLat()+" "+tl.getLon());
-//			System.out.println(br.getLat()+" "+br.getLon());
-			
-			fence = new GeoFence("geofence");
-			fence.addWaypoint(tl);
-			fence.addWaypoint(tr);
-			fence.addWaypoint(br);
-			fence.addWaypoint(bl);
+			} else {
+				if(special ==1) {
+					//TODO
+				} else if(special == 2) {
+					//TODO
+				}
+			}
 			
 			wps = fence.getWaypoints();
 			

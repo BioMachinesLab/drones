@@ -577,6 +577,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			if(Math.abs(heading) <= 0.1)
 				heading = 0;
 			
+			angleInDegrees = getTurningAngleFromHeading(heading)*-1;
 			motorDifference = getMotorDifferenceFromTurningAngle(Math.abs(angleInDegrees));
 			
 			forwardComponent = 1.0 - motorDifference;

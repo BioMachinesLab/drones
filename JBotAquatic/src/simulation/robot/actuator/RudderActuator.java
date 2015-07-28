@@ -152,6 +152,7 @@ public class RudderActuator extends Actuator {
 			
 			if(oldDynamics) {
 				drone.setOrientation(newOrientation);
+				a = newOrientation;
 			} else {
 				
 				newOrientation = a + Math.toRadians(angleInDegrees*1.5);

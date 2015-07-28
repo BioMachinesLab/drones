@@ -1,5 +1,7 @@
 package commoninterface.utils.logger;
 
+import java.io.Serializable;
+
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -7,7 +9,7 @@ import org.joda.time.format.DateTimeFormatter;
 import commoninterface.AquaticDroneCI;
 import commoninterface.utils.jcoord.LatLon;
 
-public class LogData implements Comparable<LogData> {
+public class LogData implements Comparable<LogData>,Serializable {
 	
 	static DateTimeFormatter formatter = DateTimeFormat.forPattern("dd-MM-YY_HH:mm:ss.SS");
 	
@@ -37,7 +39,7 @@ public class LogData implements Comparable<LogData> {
 
 	@Override
 	public int compareTo(LogData o) {
-		return DateTime.parse(systemTime,formatter).compareTo(DateTime.parse(o.systemTime,formatter));
+		return DateTime.parse(GPSdate,formatter).compareTo(DateTime.parse(o.GPSdate,formatter));
 	}
 
 	@Override

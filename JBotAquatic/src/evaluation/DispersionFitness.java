@@ -60,9 +60,14 @@ public class DispersionFitness extends AvoidCollisionsFunction {
                     minDist = Math.min(minDist, r.getPosition().distanceTo(r2.getPosition()));
                 }
             }
+//            System.out.println(r.getId()+" "+minDist);
             distanceDelta += Math.abs(minDist - targetDistance);
         }
+        
         distanceDelta /= simulator.getRobots().size();
+        
+//        System.out.println(simulator.getTime()+"  "+distanceDelta);
+//        System.out.println();
         
         meanDistance += (startingDistance - distanceDelta) / startingDistance;
         

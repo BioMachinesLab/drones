@@ -77,6 +77,7 @@ public class CompositeController extends CIBehavior {
 					drone.setActiveWaypoint(Waypoint.getWaypoints(drone).get(1));
 					startTime = timestep;
 					configured = true;
+					elapsedTime = timestep - startTime;
 				} 
 				
 				if(elapsedTime > time[State.GO_TO_AREA.ordinal()]) {
@@ -92,6 +93,7 @@ public class CompositeController extends CIBehavior {
 				if(!configured) {
 					startTime = timestep;
 					configured = true;
+					elapsedTime = timestep - startTime;
 				}
 				
 				
@@ -107,6 +109,7 @@ public class CompositeController extends CIBehavior {
 				if(!configured) {
 					startTime = timestep;
 					configured = true;
+					elapsedTime = timestep - startTime;
 				}
 				
 				if(elapsedTime > time[State.PATROL.ordinal()]) {
@@ -122,6 +125,7 @@ public class CompositeController extends CIBehavior {
 				if(!configured) {
 					startTime = timestep;
 					configured = true;
+					elapsedTime = timestep - startTime;
 				}
 				
 				if(elapsedTime > time[State.AGGREGATE.ordinal()]) {
@@ -138,6 +142,7 @@ public class CompositeController extends CIBehavior {
 					drone.setActiveWaypoint(Waypoint.getWaypoints(drone).get(0));
 					startTime = timestep;
 					configured = true;
+					elapsedTime = timestep - startTime;
 				}
 				
 				break;

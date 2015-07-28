@@ -57,6 +57,7 @@ public class ClusterFitnessWeighted extends AvoidCollisionsFunction {
 
         boolean merged = true;
         // stop when the clusters cannot be merged anymore
+        
         while(merged) {
             merged = false;
             // find two existing clusters to merge

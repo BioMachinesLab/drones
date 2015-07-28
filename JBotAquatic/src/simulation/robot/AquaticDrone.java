@@ -137,14 +137,14 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		}
 		
 		headingOffset = args.getArgumentAsDoubleOrSetDefault("headingoffset",headingOffset);
-
+		
 		if(headingOffset > 0) {
 			double error = simulator.getRandom().nextDouble()*2-1;
 			headingOffset*=error;
 		}
 		
 		speedOffset = args.getArgumentAsDoubleOrSetDefault("speedoffset",speedOffset);
-
+		
 		if(speedOffset > 0) {
 			double error = simulator.getRandom().nextDouble()*2-1;
 			speedOffset*=error;
@@ -239,7 +239,6 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		rightPercentage = rightMotorPercentage;
 		
 		if(rudder) {
-			
 			double speed = (leftMotorPercentage+rightMotorPercentage)/2;
 			rudderActuator.setSpeed(speed);
 		}else {
@@ -258,7 +257,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		
 		if(speed > 0) {
 			s = speed*(1.0-speedOffset);
-			s = Math.max(-1,s);
+			s = Math.max(0,s);
 			s = Math.min(1,s);
 		}
 		

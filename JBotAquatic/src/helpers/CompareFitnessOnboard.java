@@ -41,7 +41,7 @@ import gui.renderer.TwoDRenderer;
 import gui.util.Graph;
 
 public class CompareFitnessOnboard extends Thread{
-	
+	/*	
 	static double maxSteps = 1800;
 	
 	String[] experiments = new String[]{"aggregate","dispersion"};
@@ -122,7 +122,7 @@ public class CompareFitnessOnboard extends Thread{
 		for(String experiment : experiments) {
 			
 			for(int controller = 0 ; controller < controllers ; controller++) {
-				for(int sample = 1 ; sample <= samples ; /*sample++*/) {
+				for(int sample = 1 ; sample <= samples ; ) {
 					
 					Setup real = new Setup();
 					Setup sim = new Setup();
@@ -425,5 +425,5 @@ class JFrameViewerFitnessOnboard extends JFrame{
 		add(renderer);
 		this.renderer2 = renderer;
 	}
-	
+	*/	
 }
