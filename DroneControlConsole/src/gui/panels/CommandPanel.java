@@ -793,8 +793,8 @@ public class CommandPanel extends UpdatePanel {
 				brv.x+=15;
 				brv.y-=15;
 				
-				System.out.println(CoordinateUtilities.cartesianToGPS(tlv));
-				System.out.println(CoordinateUtilities.cartesianToGPS(brv));
+//				System.out.println(CoordinateUtilities.cartesianToGPS(tlv));
+//				System.out.println(CoordinateUtilities.cartesianToGPS(brv));
 				
 	//			System.out.println(tl.getLat()+" "+tl.getLon());
 	//			System.out.println(br.getLat()+" "+br.getLon());
@@ -806,11 +806,36 @@ public class CommandPanel extends UpdatePanel {
 				fence.addWaypoint(bl);
 			
 			} else {
+				int i = 0;
 				if(special ==1) {
-					//TODO
+					
+					fence = new GeoFence("geofence");
+					
+					fence.addWaypoint(new Waypoint("wp"+(i++),CoordinateUtilities.cartesianToGPS(center)));
+					center.x+=166.7;
+					fence.addWaypoint(new Waypoint("wp"+(i++),CoordinateUtilities.cartesianToGPS(center)));
+					center.y-=60;
+					fence.addWaypoint(new Waypoint("wp"+(i++),CoordinateUtilities.cartesianToGPS(center)));
+					center.x-=166.7;
+					fence.addWaypoint(new Waypoint("wp"+(i++),CoordinateUtilities.cartesianToGPS(center)));
+					
+					
 				} else if(special == 2) {
-					//TODO
-				}
+					fence = new GeoFence("geofence");
+					
+					fence.addWaypoint(new Waypoint("wp"+(i++),CoordinateUtilities.cartesianToGPS(center)));
+					center.x+=115.47;
+					fence.addWaypoint(new Waypoint("wp"+(i++),CoordinateUtilities.cartesianToGPS(center)));
+//					center.y-=115.47;
+					center.y-=57.74;
+					fence.addWaypoint(new Waypoint("wp"+(i++),CoordinateUtilities.cartesianToGPS(center)));
+					center.x-=57.74;
+					fence.addWaypoint(new Waypoint("wp"+(i++),CoordinateUtilities.cartesianToGPS(center)));
+					center.y-=57.74;
+					fence.addWaypoint(new Waypoint("wp"+(i++),CoordinateUtilities.cartesianToGPS(center)));
+					center.x-=57.73;
+					fence.addWaypoint(new Waypoint("wp"+(i++),CoordinateUtilities.cartesianToGPS(center)));
+				} 
 			}
 			
 			wps = fence.getWaypoints();
@@ -875,6 +900,10 @@ public class CommandPanel extends UpdatePanel {
 			
 			str+=";SIZE;"+(int)width;
 			str+=";SAFETY;"+(int)safetyDistance;
+			
+			if(special > 0) {
+				str = "SPECIAL;"+special+";SEED;"+randomSeed;
+			}
 			
 			console.log(str);
 			autoDeployArea.setText(str);
