@@ -2,7 +2,6 @@ package helpers;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.Scanner;
 
 import org.joda.time.DateTime;
@@ -11,10 +10,12 @@ import org.joda.time.format.DateTimeFormatter;
 
 import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
+
 import commoninterface.entities.RobotLocation;
-import commoninterface.entities.Waypoint;
+import commoninterface.mathutils.Vector2d;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.utils.CoordinateUtilities;
+import commoninterface.utils.jcoord.LatLon;
 import commoninterface.utils.logger.LogData;
 
 public class AssessFitness {
@@ -47,8 +48,8 @@ public class AssessFitness {
 			
 			while(Math.abs(stepTime.getMillis()-currentTime.getMillis()) >= 100) {
 				stepTime = stepTime.plus(100);
-				step++;
 				setup.sim.performOneSimulationStep((double)step);
+				step++;
 				
 				if(gui) {
 					setup.renderer.drawFrame();
@@ -160,13 +161,20 @@ public class AssessFitness {
 				if(d.comment != null)
 					continue;
 				
+				if(d.ip.endsWith("4")) {
+					LatLon latLon = d.latLon;
+					Vector2d vec = CoordinateUtilities.GPSToCartesian(latLon);
+					System.out.println(step+" "+vec.x+" "+vec.y+" "+d.temperatures[1]);
+				}
+				
 				currentTime = DateTime.parse(d.GPSdate,formatter);
 				
 				while(Math.abs(stepTime.getMillis()-currentTime.getMillis()) >= 100) {
 					stepTime = stepTime.plus(100);
-					step++;
+					
 					setupReal.sim.performOneSimulationStep((double)step);
 					setupSim.sim.performOneSimulationStep((double)step);
+					step++;
 					
 					setupSim.renderer.drawFrame();
 					setupReal.renderer.drawFrame();

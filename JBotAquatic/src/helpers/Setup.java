@@ -74,7 +74,11 @@ class Setup {
 			hash.get("--robots").setArgument("badgps", 1);
 		} else {
 			hash.get("--evaluation").setArgument("clusterdistance",10.6);
+			hash.get("--evaluation").setArgument("snapshotfrequency", 300);
+			hash.get("--evaluation").setArgument("resolution", 1);
 		}
+		
+		
 		
 		hash.put("--environment", new Arguments("classname=EmptyEnvironment,width=150,height=150,steps="+exp.timeSteps,true));
 		

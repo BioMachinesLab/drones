@@ -65,12 +65,9 @@ public class CoverageFitnessTest extends AvoidCollisionsFunction {
 
         double maxXAbs = 0, maxYAbs = 0;
 
-        for (PhysicalObject p : simulator.getEnvironment().getAllObjects()) {
-            if (p.getType() == PhysicalObjectType.LINE) {
-                Line l = (Line) p;
-                maxXAbs = Math.max(maxXAbs, Math.abs(l.getPointA().x));
-                maxYAbs = Math.max(maxYAbs, Math.abs(l.getPointA().y));
-            }
+        for (Line l : lines) {
+            maxXAbs = Math.max(maxXAbs, Math.abs(l.getPointA().x));
+            maxYAbs = Math.max(maxYAbs, Math.abs(l.getPointA().y));
         }
 
         width = Math.max(maxXAbs, maxYAbs) * 2;

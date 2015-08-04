@@ -51,13 +51,13 @@ public class FieldTest {
 	
 	public static void main(String[] args) throws Exception{
 		
-		boolean single = false;
+		boolean single = true;
 		
 		if(!single)
-			new FieldTest(EXPO_27_JULY);
+			new FieldTest(EXPO_29_JULY);
 		else {
-			folder = 0;
-			String s = "aggregate_waypoint;0;1;8;15-32-44;240";
+			folder = 1;
+			String s = "patrol;0;3;8;15-53-07;300";
 			String file = "experiments/"+FOLDERS[folder]+"/"+s;
 			ObjectInputStream objectinputstream = new ObjectInputStream(new FileInputStream(file));
 	        Experiment e = (Experiment) objectinputstream.readObject();
