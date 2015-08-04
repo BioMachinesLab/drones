@@ -1,12 +1,14 @@
 package commoninterface.utils.logger;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import commoninterface.AquaticDroneCI;
+import commoninterface.entities.Entity;
 import commoninterface.utils.jcoord.LatLon;
 
 public class LogData implements Comparable<LogData>,Serializable {
@@ -36,6 +38,9 @@ public class LogData implements Comparable<LogData>,Serializable {
 	// Controller
 	public double[] inputNeuronStates = null;
 	public double[] outputNeuronStates = null;
+	
+	//Entities
+	public ArrayList<Entity> entities;
 
 	@Override
 	public int compareTo(LogData o) {

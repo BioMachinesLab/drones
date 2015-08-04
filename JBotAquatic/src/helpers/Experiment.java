@@ -17,6 +17,7 @@ public class Experiment implements Serializable{
 	public ArrayList<Integer> robots = new ArrayList<Integer>();
 	public int sample;
 	public ArrayList<LogData> logs = new ArrayList<LogData>();
+	public int activeRobot = -1;
 	
 	@Override
 	public String toString() {

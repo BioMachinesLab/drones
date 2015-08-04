@@ -1,11 +1,16 @@
 package commoninterface.utils.logger;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Scanner;
+
 import commoninterface.AquaticDroneCI;
 import commoninterface.entities.Entity;
 import commoninterface.entities.GeoEntity;
+import commoninterface.entities.GeoFence;
 import commoninterface.entities.ObstacleLocation;
 import commoninterface.entities.RobotLocation;
+import commoninterface.entities.Waypoint;
 import commoninterface.utils.jcoord.LatLon;
 
 public class LogCodex {
@@ -91,7 +96,7 @@ public class LogCodex {
 
 			switch (logType) {
 			case ENTITIES:
-				if (objs != null && objs.length == 1) {
+				if (objs.length > 0 && infoBlocks.length == 4) {
 					String[] blocks1 = new String[infoBlocks.length - 1];
 
 					for (int i = 0; i < blocks1.length; i++) {
@@ -100,7 +105,11 @@ public class LogCodex {
 
 					ArrayList<Entity> entities = (ArrayList<Entity>) objs[0];
 					decodeEntities(blocks1, entities);
-					decodedLog = new DecodedLog(LogType.ENTITIES, entities);
+					
+					ArrayList<Entity> currentEntities = new ArrayList<Entity>();
+					currentEntities.addAll(entities);
+					
+					decodedLog = new DecodedLog(LogType.ENTITIES, currentEntities);
 				}
 				break;
 
@@ -136,22 +145,31 @@ public class LogCodex {
 	}
 	
 	// Decoders
-	// TODO -> finish decodeEntities implementation
 	private static void decodeEntities(String[] blocks, ArrayList<Entity> entities) {
-		// TODO!
-//		Scanner s = new Scanner(line);
-//		s.next();// ignore first token
-//
-//		String event = s.next();
-//
-//		if (event.equals("added")) {
-//
-//			String className = s.next();
-//
-//			String name = s.next();
-//
-//			if (className.equals(GeoFence.class.getSimpleName())) {
-//
+		
+		String event = blocks[0].split("=")[1];
+		String className = blocks[1].split("=")[1];
+		String data = blocks[2];
+		
+		if (event.equals("ADD")) {
+
+			if (className.equals(GeoFence.class.getSimpleName())) {
+				
+				
+				String[] split = data.split("\\};\\{");
+				
+				GeoFence fence = new GeoFence("geofence");
+				
+				for(String s : split) {
+					
+					Waypoint wp = getWaypoint(s);
+					fence.addWaypoint(wp);
+					
+				}
+				
+				entities.remove(fence);
+				entities.add(fence);
+				
 //				GeoFence fence = new GeoFence(name);
 //
 //				int number = s.nextInt();
@@ -162,40 +180,51 @@ public class LogCodex {
 //					fence.addWaypoint(new LatLon(lat, lon));
 //				}
 //				entities.add(fence);
-//			} else if (className.equals(Waypoint.class.getSimpleName())) {
-//
-//				double lat = s.nextDouble();
-//				double lon = s.nextDouble();
-//				Waypoint wp = new Waypoint(name, new LatLon(lat, lon));
-//				entities.remove(wp);
-//				entities.add(wp);
-//
-//			} else if (className.equals(ObstacleLocation.class.getSimpleName())) {
-//
+			} else if (className.equals(Waypoint.class.getSimpleName())) {
+				
+				Waypoint wp = getWaypoint(data);
+				entities.remove(wp);
+				entities.add(wp);
+
+			} else if (className.equals(ObstacleLocation.class.getSimpleName())) {
+
+				//TODO
 //				double lat = s.nextDouble();
 //				double lon = s.nextDouble();
 //
 //				double radius = s.nextDouble();
 //				entities.add(new ObstacleLocation(name, new LatLon(lat, lon),
 //						radius));
-//			}
+			}
 //
-//		} else if (event.equals("removed")) {
-//
-//			String name = s.next();
-//
-//			Iterator<Entity> i = entities.iterator();
-//			while (i.hasNext()) {
-//				if (i.next().getName().equals(name)) {
-//					i.remove();
-//					break;
-//				}
-//			}
-//		}
-//
-//		s.close();
-	}
+		} else if (event.equals("REMOVE")) {
 
+			data = data.replace('{',' ').trim();
+			data = data.replace('}',' ').trim();
+			String[] split = data.split(";");
+
+			Iterator<Entity> i = entities.iterator();
+			while (i.hasNext()) {
+				if (i.next().getName().equals(split[0])) {
+					i.remove();
+					break;
+				}
+			}
+		}
+	
+	}
+	
+	private static Waypoint getWaypoint(String s) {
+		s = s.replace('{',' ').trim();
+		s = s.replace('}',' ').trim();
+		String[] split = s.split(";");
+
+		String name = split[0];
+		double lat = Double.parseDouble(split[1]);
+		double lon = Double.parseDouble(split[2]);
+		return new Waypoint(name, new LatLon(lat, lon));
+	}
+	
 	private static LogData decodeLogData(String[] infoBlocks){
 
 		LogData logData = new LogData();

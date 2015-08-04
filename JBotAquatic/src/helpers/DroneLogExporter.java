@@ -53,6 +53,8 @@ public class DroneLogExporter {
 		File folder = new File(f);
 		
 		ArrayList<LogData> result = new ArrayList<LogData>();
+		
+		ArrayList<Entity> currentEntities = new ArrayList<Entity>();
 
 		for (String file : folder.list()) {
 			if (!file.contains(".log")|| !file.contains("values"))
@@ -61,22 +63,33 @@ public class DroneLogExporter {
 //			System.out.println("Parsing file: " + file);
 			Scanner s = new Scanner(new File(folder.getPath() + "/" + file));
 
-			ArrayList<Entity> currentEntities = new ArrayList<Entity>();
-			
 			String prevDate = "";
-
+			boolean prevNormalLog = false;
+			
 			while (s.hasNext()) {
 				String l = s.nextLine();
+				
+				if(l.startsWith("[") || l.startsWith("\"")) {
+					//robot restarted, has no entities
+					currentEntities.clear();
+				}
 
 				if (!l.startsWith(LogCodex.COMMENT_CHAR) && !l.isEmpty()) {
-					DecodedLog decodedData = LogCodex.decodeLog(l);
+					DecodedLog decodedData = LogCodex.decodeLog(l,currentEntities);
 					
 					if(decodedData == null)
 						continue;
 
 					switch (decodedData.payloadType()) {
 					case ENTITIES:
+						
+						//TODO there is a bug in the logging of new entities. the old ones are not being logged when they are REMOVED!
+						if(prevNormalLog)
+							currentEntities.clear();
+						
 						currentEntities = (ArrayList<Entity>) LogCodex.decodeLog(l, currentEntities).getPayload();
+						
+						prevNormalLog = false;
 						break;
 
 					case LOGDATA:
@@ -87,12 +100,16 @@ public class DroneLogExporter {
 							continue;
 						
 						LogData d = (LogData)o;
-//						d.entities = currentEntities;
-
+						ArrayList<Entity> cE = new ArrayList<Entity>();
+						cE.addAll(currentEntities);
+						d.entities = cE;
+						
 						if(d != null && d.GPSdate != null) {
 							prevDate = d.GPSdate;
 							result.add(d);
 						}
+						prevNormalLog = true;
+						
 						break;
 						
 					case ERROR:
@@ -141,6 +158,10 @@ public class DroneLogExporter {
 		File folder = new File(f);
 		
 		ArrayList<LogData> result = new ArrayList<LogData>();
+		
+		DateTime current = null;
+		
+		boolean prevNormalLog = false;
 
 		for (String file : folder.list()) {
 			if (!file.contains(".log")|| !file.contains("values"))
@@ -155,14 +176,21 @@ public class DroneLogExporter {
 				String l = s.nextLine();
 
 				if (!l.startsWith(LogCodex.COMMENT_CHAR) && !l.isEmpty()) {
-					DecodedLog decodedData = LogCodex.decodeLog(l);
+					DecodedLog decodedData = LogCodex.decodeLog(l,currentEntities);
 					
 					if(decodedData == null)
 						continue;
 
 					switch (decodedData.payloadType()) {
 					case ENTITIES:
+						
+						if(prevNormalLog)
+							currentEntities.clear();
+						
 						currentEntities = (ArrayList<Entity>) LogCodex.decodeLog(l, currentEntities).getPayload();
+						
+						prevNormalLog = false;
+						
 						break;
 
 					case LOGDATA:
@@ -177,10 +205,14 @@ public class DroneLogExporter {
 
 						if(d != null && d.GPSdate != null) {
 							DateTime date = DateTime.parse(d.GPSdate,formatter);
+							current = DateTime.parse(d.GPSdate,formatter);;
 							
 							if(date.isAfter(start) && date.isBefore(end)) {
 								result.add(d);
 							}
+							
+							d.entities = currentEntities;
+							prevNormalLog = true;
 						}
 						break;
 						

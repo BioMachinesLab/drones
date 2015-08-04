@@ -2,13 +2,17 @@ package helpers;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Scanner;
+
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+
 import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
 import commoninterface.entities.RobotLocation;
+import commoninterface.entities.Waypoint;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.logger.LogData;
@@ -22,7 +26,6 @@ public class AssessFitness {
 	}
 	
 	public static double getSimulatedFitness(Experiment exp, long randomSeed) {
-		
 		return getSimulatedFitness(exp, randomSeed, false);
 	}
 	
@@ -37,6 +40,8 @@ public class AssessFitness {
 			
 			if(d.comment != null)
 				continue;
+			
+			setup.updateRobotEntities(d);
 			
 			currentTime = DateTime.parse(d.GPSdate,formatter);
 			
@@ -88,6 +93,8 @@ public class AssessFitness {
 			
 			if(d.comment != null || d.ip == null)
 				continue;
+			
+			setup.updateRobotEntities(d);
 			
 			currentTime = DateTime.parse(d.GPSdate,formatter);
 			
@@ -166,12 +173,14 @@ public class AssessFitness {
 					setupSim.renderer.repaint();
 					setupReal.renderer.repaint();
 					
-					
 				}
 				RobotLocation rl = Setup.getRobotLocation(d);
 				
 				if(rl == null || rl.getLatLon() == null)
 					continue;
+				
+				setupSim.updateRobotEntities(d);
+				setupReal.updateRobotEntities(d);
 				
 				commoninterface.mathutils.Vector2d pos = CoordinateUtilities.GPSToCartesian(rl.getLatLon());
 				
@@ -202,8 +211,15 @@ public class AssessFitness {
 			BehaviorMessage bm = new BehaviorMessage("ControllerCIBehavior", f.replaceAll("\\s+", ""), true, "dude");
 			
 			for(Robot r : setup.robots) {
-				AquaticDrone drone = (AquaticDrone)r;
-				drone.processInformationRequest(bm, null);
+				if(exp.activeRobot != -1) {
+					if(r.getId() == setup.getRobot(""+exp.activeRobot).getId()) {
+						AquaticDrone drone = (AquaticDrone)r;
+						drone.processInformationRequest(bm, null);
+					}
+				} else {
+					AquaticDrone drone = (AquaticDrone)r;
+					drone.processInformationRequest(bm, null);
+				}
 			}
 			
 		} catch (FileNotFoundException e) {

@@ -20,21 +20,21 @@ public class FieldTest {
 		"dispersion;0;1;8;14-11-38;90","dispersion;0;2;8;14-16-42;90","dispersion;0;3;8;14-19-53;90",
 		"dispersion;1;1;8;14-41-33;90","dispersion;1;2;8;15-17-11;90","dispersion;1;3;8;15-19-38;90",
 		"dispersion;2;1;8;15-22-37;90","dispersion;2;2;8;15-25-08;90","dispersion;2;3;8;15-27-58;90",
-//		"aggregate_waypoint0;1;8;15-32-44;240","aggregate_waypoint0;2;8;15-38-42;240","aggregate_waypoint0;3;8;15-52-25;240",
-//		"waypoint0;1;8;17-11-15;0","waypoint0;2;8;17-14-25;0","waypoint0;3;8;17-19-08;0",
-//		"waypoint1;1;8;17-23-39;0","waypoint1;2;8;17-28-15;0","waypoint1;3;8;17-37-21;0",
-//		"waypoint2;1;8;17-40-39;0","waypoint2;2;8;17-43-14;0","waypoint2;3;8;17-46-46;0", 
+		"aggregate_waypoint;0;1;8;15-32-44;240","aggregate_waypoint;0;2;8;15-38-42;240","aggregate_waypoint;0;3;8;15-52-25;240",
+		"waypoint;0;1;8;17-11-15;180;1,2,3,4,5,6,7,10;4","waypoint;0;2;8;17-14-25;180;1,2,3,4,5,6,7,10;4","waypoint;0;3;8;17-19-08;180;1,2,3,4,5,6,7,10;4",
+		"waypoint;1;1;8;17-23-39;180;1,2,3,4,5,6,7,10;4","waypoint;1;2;8;17-28-15;180;1,2,3,4,5,6,7,10;4","waypoint;1;3;8;17-37-21;180;1,2,3,4,5,6,7,10;4",
+		"waypoint;2;1;8;17-40-39;180;1,2,3,4,5,6,7,10;4","waypoint;2;2;8;17-43-14;180;1,2,3,4,5,6,7,10;4","waypoint;2;3;8;17-46-46;180;1,2,3,4,5,6,7,10;4", 
 	};
 	
 	public static String[] EXPO_29_JULY = new String[]{
-//		"weightedcluster;0;1;8;11-11-37;300","weightedcluster;0;2;8;11-52-26;300","weightedcluster;0;3;8;10-58-52;300", //0 missing 6! changed it manually
-//		"weightedcluster;1;1;8;11-18-01;300","weightedcluster;1;2;8;11-45-46;300","weightedcluster;1;3;8;11-58-46;300",
-//		"weightedcluster;2;1;8;11-31-52;300","weightedcluster;2;2;8;11-38-41;300","weightedcluster;2;3;8;12-04-59;300",
-//		"weightedcluster;0;1;6;13-08-50;300","weightedcluster;0;2;6;13-26-13;300","weightedcluster;0;3;6;13-33-35;300",
-//		"weightedcluster;0;1;4;19-07-17;180","weightedcluster;0;2;4;19-13-23;180","weightedcluster;0;3;4;19-17-32;180",
-//		"dispersion;0;1;6;13-52-19;90","dispersion;0;2;6;13-48-19;90","dispersion;0;3;6;13-45-54;90",
-//		"dispersion;0;1;4;19-00-06;90","dispersion;0;2;4;19-02-32;90","dispersion;0;3;4;19-04-35;90",
-//		"composite;0;1;8;17-54-42;720",
+		"weightedcluster;0;1;8;11-11-37;300","weightedcluster;0;2;8;11-52-26;300","weightedcluster;0;3;8;10-58-52;300", //seed 0 missing robot 6! changed it manually in the onboard log
+		"weightedcluster;1;1;8;11-18-01;300","weightedcluster;1;2;8;11-45-46;300","weightedcluster;1;3;8;11-58-46;300",
+		"weightedcluster;2;1;8;11-31-52;300","weightedcluster;2;2;8;11-38-41;300","weightedcluster;2;3;8;12-04-59;300",
+		"weightedcluster;0;1;6;13-08-50;300","weightedcluster;0;2;6;13-26-13;300","weightedcluster;0;3;6;13-33-35;300",
+		"weightedcluster;0;1;4;19-07-17;180","weightedcluster;0;2;4;19-13-23;180","weightedcluster;0;3;4;19-17-32;180",
+		"dispersion;0;1;6;13-52-19;90","dispersion;0;2;6;13-48-19;90","dispersion;0;3;6;13-45-54;90",
+		"dispersion;0;1;4;19-00-06;90","dispersion;0;2;4;19-02-32;90","dispersion;0;3;4;19-04-35;90",
+		"composite;0;1;8;17-54-42;720",
 		"patrol;0;1;8;12-14-54;300","patrol;0;2;8;17-33-27;300","patrol;0;3;8;15-53-07;300",
 //		"patrol_adaptive;0;1;8;19-47-06;900",//1,2,3,4->4,1 adaptive
 //		"dispersion_adaptive;0;1;8;20-06-21;300", //adaptive, only robots, starts with 4 (6,7,8,10)
@@ -51,19 +51,25 @@ public class FieldTest {
 	
 	public static void main(String[] args) throws Exception{
 		
-		new FieldTest(EXPO_29_JULY);
-//		String s = EXPO_29_JULY[0];
-//		s = "dispersion;0;2;4;19-02-32;90";
-//		String file = "experiments/"+FOLDERS[folder]+"/"+s;
-//		ObjectInputStream objectinputstream = new ObjectInputStream(new FileInputStream(file));
-//        Experiment e = (Experiment) objectinputstream.readObject();
-//        objectinputstream.close();
-////        AssessFitness.compareFitness(e, 1);
-//        double f;
-////        f = AssessFitness.getSimulatedFitness(e, 2, true);
-////        System.out.println(f);
-//        f = AssessFitness.getRealFitness(e, 1, true);
-//        System.out.println(f);
+		boolean single = false;
+		
+		if(!single)
+			new FieldTest(EXPO_27_JULY);
+		else {
+			folder = 0;
+			String s = "aggregate_waypoint;0;1;8;15-32-44;240";
+			String file = "experiments/"+FOLDERS[folder]+"/"+s;
+			ObjectInputStream objectinputstream = new ObjectInputStream(new FileInputStream(file));
+	        Experiment e = (Experiment) objectinputstream.readObject();
+	        objectinputstream.close();
+	        
+	        AssessFitness.compareFitness(e, 1);
+//	        double f;
+//	        f = AssessFitness.getSimulatedFitness(e, 2, true);
+//	        System.out.println(f);
+//	        f = AssessFitness.getRealFitness(e, 1, true);
+//	        System.out.println(f);
+		}
 		
 	}
 	
@@ -164,6 +170,14 @@ public class FieldTest {
 			}
 		}
 		
+		if(split.length == 8) {
+			System.out.println("Manually defining the robots: "+split[6]);
+			participatingRobots.clear();
+			String[] splitRobots = split[6].split(",");
+			for(String id : splitRobots)
+				participatingRobots.add(Integer.parseInt(id));
+		}
+		
 		if(startTime == null) {
 			System.out.println("Can't find start time for experiment "+description);
 			System.exit(0);
@@ -188,6 +202,10 @@ public class FieldTest {
 		Collections.sort(allData);
 		
 		Experiment experiment = new Experiment();
+		
+		if(split.length == 8) {
+			experiment.activeRobot = Integer.parseInt(split[7]);
+		}
 		
 		experiment.robots = participatingRobots;
 		experiment.timeSteps = duration*10;
