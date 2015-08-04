@@ -51,19 +51,19 @@ public class FieldTest {
 	
 	public static void main(String[] args) throws Exception{
 		
-//		new FieldTest(EXPO_27_JULY);
-		String s = EXPO_29_JULY[0];
-		s = "dispersion;0;2;4;19-02-32;90";
-		String file = "experiments/"+FOLDERS[folder]+"/"+s;
-		ObjectInputStream objectinputstream = new ObjectInputStream(new FileInputStream(file));
-        Experiment e = (Experiment) objectinputstream.readObject();
-        objectinputstream.close();
-//        AssessFitness.compareFitness(e, 1);
-        double f;
-//        f = AssessFitness.getSimulatedFitness(e, 2, true);
+		new FieldTest(EXPO_29_JULY);
+//		String s = EXPO_29_JULY[0];
+//		s = "dispersion;0;2;4;19-02-32;90";
+//		String file = "experiments/"+FOLDERS[folder]+"/"+s;
+//		ObjectInputStream objectinputstream = new ObjectInputStream(new FileInputStream(file));
+//        Experiment e = (Experiment) objectinputstream.readObject();
+//        objectinputstream.close();
+////        AssessFitness.compareFitness(e, 1);
+//        double f;
+////        f = AssessFitness.getSimulatedFitness(e, 2, true);
+////        System.out.println(f);
+//        f = AssessFitness.getRealFitness(e, 1, true);
 //        System.out.println(f);
-        f = AssessFitness.getRealFitness(e, 1, true);
-        System.out.println(f);
 		
 	}
 	
