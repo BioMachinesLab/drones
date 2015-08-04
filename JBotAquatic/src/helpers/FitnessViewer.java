@@ -1,6 +1,5 @@
 package helpers;
 
-import java.awt.GridLayout;
 import gui.renderer.Renderer;
 import javax.swing.JFrame;
 

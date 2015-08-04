@@ -2,6 +2,7 @@ package drone;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+
 import commoninterface.AquaticDroneCI;
 import commoninterface.AquaticDroneCI.DroneType;
 import commoninterface.CIBehavior;
@@ -36,6 +37,7 @@ public class CompositeController extends CIBehavior {
 	protected int currentSubController = -1;
 	protected double startTime = 0;
 	protected boolean configured = false;
+	private String description = "";
 	
 	protected ArrayList<CIBehavior> subControllers = new ArrayList<CIBehavior>();
 
@@ -43,6 +45,10 @@ public class CompositeController extends CIBehavior {
 		super(args, robot);
 		this.args = args;
 		this.drone = (AquaticDroneCI)robot;
+		
+		if(args.getArgumentAsString("description") != null) {
+			description+=" "+args.getArgumentAsString("description");
+		}
 	}
 	
 	@Override
@@ -167,11 +173,15 @@ public class CompositeController extends CIBehavior {
 		}
 	}
 	
-	
 	@Override
 	public void cleanUp() {
 		subControllers.get(currentSubController).cleanUp();
 		robot.setMotorSpeeds(0, 0);
 		subControllers.clear();
+	}
+	
+	@Override
+	public String toString() {
+		return super.toString() + description;
 	}
 }

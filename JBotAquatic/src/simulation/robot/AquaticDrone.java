@@ -510,7 +510,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	}
 	
 	private LatLon updateGPSPosition() {
-		if(badGPS && simulator.getTime() % 10 != 0 && prevMeasuredLatLon != null) {
+		if(badGPS && simulator.getTime() % 2 != 0 && prevMeasuredLatLon != null) {
 			return prevMeasuredLatLon;
 		}
 		

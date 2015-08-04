@@ -20,7 +20,7 @@ public class Experiment implements Serializable{
 	
 	@Override
 	public String toString() {
-		return controllerName+""+controllerNumber+"_"+sample;
+		return controllerName+""+controllerNumber+"_"+sample+"_"+robots.size();
 	}
 
 }

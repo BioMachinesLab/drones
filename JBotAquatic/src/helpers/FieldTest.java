@@ -17,90 +17,72 @@ import commoninterface.utils.logger.LogData;
 public class FieldTest {
 	
 	public static String[] EXPO_27_JULY = new String[]{
-		/*	"dispersion;0;1;8;14-11-38;90",
-		"dispersion;0;2;8;14-16-42;90",
-		"dispersion;0;3;8;14-19-53;90",
-		
-		"dispersion;1;1;8;14-41-33;90",
-		"dispersion;1;2;8;15-17-11;90",
-		"dispersion;1;3;8;15-19-38;90",
-		
-		"dispersion;2;1;8;15-22-37;90",
-		"dispersion;2;2;8;15-25-08;90",
-		"dispersion;2;3;8;15-27-58;90",
-		
-		"aggregate_waypoint0;1;8;15-32-44;240",
-		"aggregate_waypoint0;2;8;15-38-42;240",
-		"aggregate_waypoint0;3;8;15-52-25;240",
-		
-		"waypoint0;1;8;17-11-15;0",
-		"waypoint0;2;8;17-14-25;0",
-		"waypoint0;3;8;17-19-08;0",
-		
-		"waypoint1;1;8;17-23-39;0",
-		"waypoint1;2;8;17-28-15;0",
-		"waypoint1;3;8;17-37-21;0",
-		
-		"waypoint2;1;8;17-40-39;0",
-		"waypoint2;2;8;17-43-14;0",
-		"waypoint2;3;8;17-46-46;0", 
-		
-		"patrol0;1;8;17-58-41;1080",*/
-		
-		"cluster;0;1;8;19-00-33;180",
-		"cluster;0;2;8;19-05-14;180",
-		"cluster;0;3;8;19-10-47;180",
-		};
+		"dispersion;0;1;8;14-11-38;90","dispersion;0;2;8;14-16-42;90","dispersion;0;3;8;14-19-53;90",
+		"dispersion;1;1;8;14-41-33;90","dispersion;1;2;8;15-17-11;90","dispersion;1;3;8;15-19-38;90",
+		"dispersion;2;1;8;15-22-37;90","dispersion;2;2;8;15-25-08;90","dispersion;2;3;8;15-27-58;90",
+//		"aggregate_waypoint0;1;8;15-32-44;240","aggregate_waypoint0;2;8;15-38-42;240","aggregate_waypoint0;3;8;15-52-25;240",
+//		"waypoint0;1;8;17-11-15;0","waypoint0;2;8;17-14-25;0","waypoint0;3;8;17-19-08;0",
+//		"waypoint1;1;8;17-23-39;0","waypoint1;2;8;17-28-15;0","waypoint1;3;8;17-37-21;0",
+//		"waypoint2;1;8;17-40-39;0","waypoint2;2;8;17-43-14;0","waypoint2;3;8;17-46-46;0", 
+	};
+	
+	public static String[] EXPO_29_JULY = new String[]{
+//		"weightedcluster;0;1;8;11-11-37;300","weightedcluster;0;2;8;11-52-26;300","weightedcluster;0;3;8;10-58-52;300", //0 missing 6! changed it manually
+//		"weightedcluster;1;1;8;11-18-01;300","weightedcluster;1;2;8;11-45-46;300","weightedcluster;1;3;8;11-58-46;300",
+//		"weightedcluster;2;1;8;11-31-52;300","weightedcluster;2;2;8;11-38-41;300","weightedcluster;2;3;8;12-04-59;300",
+//		"weightedcluster;0;1;6;13-08-50;300","weightedcluster;0;2;6;13-26-13;300","weightedcluster;0;3;6;13-33-35;300",
+//		"weightedcluster;0;1;4;19-07-17;180","weightedcluster;0;2;4;19-13-23;180","weightedcluster;0;3;4;19-17-32;180",
+//		"dispersion;0;1;6;13-52-19;90","dispersion;0;2;6;13-48-19;90","dispersion;0;3;6;13-45-54;90",
+//		"dispersion;0;1;4;19-00-06;90","dispersion;0;2;4;19-02-32;90","dispersion;0;3;4;19-04-35;90",
+//		"composite;0;1;8;17-54-42;720",
+		"patrol;0;1;8;12-14-54;300","patrol;0;2;8;17-33-27;300","patrol;0;3;8;15-53-07;300",
+//		"patrol_adaptive;0;1;8;19-47-06;900",//1,2,3,4->4,1 adaptive
+//		"dispersion_adaptive;0;1;8;20-06-21;300", //adaptive, only robots, starts with 4 (6,7,8,10)
+//		"dispersion_adaptive;0;2;8;20-11-35;300", //adaptive, with kayak
+	};
+	public static String[] FOLDERS = new String[]{"27july","29july"};
+	
+	private static int folder = 1;
 
 	private ArrayList<Experiment> experiments = new ArrayList<Experiment>();
 	private HashMap<Integer,ArrayList<LogData>> completeLogs = new HashMap<Integer, ArrayList<LogData>>();
 	private int[] robots = new int[]{1,2,3,4,5,6,7,8,9,10};
-	private int nSamples = 100;
+	private int nSamples = 10;
 	
 	public static void main(String[] args) throws Exception{
+		
 //		new FieldTest(EXPO_27_JULY);
-		String s = EXPO_27_JULY[0];
-		ObjectInputStream objectinputstream = new ObjectInputStream(new FileInputStream("experiments/"+s));
+		String s = EXPO_29_JULY[0];
+		s = "dispersion;0;2;4;19-02-32;90";
+		String file = "experiments/"+FOLDERS[folder]+"/"+s;
+		ObjectInputStream objectinputstream = new ObjectInputStream(new FileInputStream(file));
         Experiment e = (Experiment) objectinputstream.readObject();
         objectinputstream.close();
-        double f = AssessFitness.getSimulatedFitness(e, 1, true);
-        System.out.println(f);
-//        f = AssessFitness.getRealFitness(e, 1, true);
+//        AssessFitness.compareFitness(e, 1);
+        double f;
+//        f = AssessFitness.getSimulatedFitness(e, 2, true);
 //        System.out.println(f);
+        f = AssessFitness.getRealFitness(e, 1, true);
+        System.out.println(f);
 		
 	}
 	
 	public FieldTest(String[] descriptions) throws Exception{
 		
-		boolean readCompleteFiles = false;
+		if(descriptions == EXPO_27_JULY)
+			folder = 0;
+		if(descriptions == EXPO_29_JULY)
+			folder = 1;
 		
-		/*
-		if(new File("temp.io").exists()) {
-			System.out.print("Getting logs from TEMP file...");
-
-	        ObjectInputStream objectinputstream = new ObjectInputStream(new FileInputStream("temp.io"));
-	        completeLogs = (HashMap<Integer,ArrayList<LogData>>) objectinputstream.readObject();
-	        objectinputstream.close();
-	        
-	        System.out.println(" Done!");
-			
-		} else {
-			System.out.println("Getting logs from ORIGINAL files");
-			
-			populateCompleteLogs();
-			
-//			FileOutputStream fout = new FileOutputStream("temp.io");
-//			ObjectOutputStream oos = new ObjectOutputStream(fout);
-//			oos.writeObject(completeLogs);
-//			oos.close();
-//			fout.close();
-		}*/
+		boolean readCompleteFiles = false;
 		
 		for(String s : descriptions) {
 			
+			String file = "experiments/"+FOLDERS[folder]+"/"+s;
+			
 			Experiment exp = null;
 			
-			if(!(new File("experiments/"+s).exists())) {
+			if(!(new File(file).exists())) {
 				
 				if(!readCompleteFiles) {
 					System.out.println("Reading from the files");
@@ -110,14 +92,16 @@ public class FieldTest {
 				
 				exp = getExperiment(s);
 				
-				FileOutputStream fout = new FileOutputStream("experiments/"+s);
+				new File("experiments/"+FOLDERS[folder]).mkdir();
+				
+				FileOutputStream fout = new FileOutputStream(file);
 				ObjectOutputStream oos = new ObjectOutputStream(fout);
 				oos.writeObject(exp);
 				oos.close();
 				fout.close();
 	        
 			} else {
-				ObjectInputStream objectinputstream = new ObjectInputStream(new FileInputStream("experiments/"+s));
+				ObjectInputStream objectinputstream = new ObjectInputStream(new FileInputStream(file));
 		        exp = (Experiment) objectinputstream.readObject();
 		        objectinputstream.close();
 			}
@@ -129,17 +113,18 @@ public class FieldTest {
 		System.out.println();
 		System.out.println("ASSESSING FITNESS");
 		System.out.println();
-		
+		int j = 0;
 		for(Experiment e : experiments) {
-			System.out.println(e);
 			double fitnessReal = AssessFitness.getRealFitness(e, 1);
 			double fitnessSim = 0;
 			for(int i = 1 ; i <= nSamples ; i++) {
 				 fitnessSim+= AssessFitness.getSimulatedFitness(e, i);
+//				 System.out.print(".");
 			}
+//			System.out.println();
 			fitnessSim/=nSamples;
-			System.out.println("Real: "+fitnessReal+" Sim:"+fitnessSim);
-			System.out.println();
+			System.out.println((j++)+"\t"+fitnessReal+"\t"+fitnessSim+"\t"+e);
+//			System.out.println();
 		}
 		
 	}
@@ -147,7 +132,10 @@ public class FieldTest {
 	private void populateCompleteLogs() throws IOException{
 		
 		for(int i : robots) {
-			completeLogs.put(i, DroneLogExporter.getCompleteLogs(i));
+			
+			String file = "compare/"+FOLDERS[folder]+"/onboard/"+i;
+			
+			completeLogs.put(i, DroneLogExporter.getCompleteLogs(file));
 			System.out.println("Robot "+i+": "+completeLogs.get(i).size()+" logs");
 		}
 		
@@ -184,7 +172,11 @@ public class FieldTest {
 		DateTime endTime = startTime.plus(duration*1000);
 		
 		if(nRobots != participatingRobots.size()) {
-			System.out.println("Missing logs for some of the robots "+description);
+			System.out.print("Missing logs for some of the robots "+description+" [");
+			for(int i : participatingRobots) {
+				System.out.print(i+",");
+			}
+			System.out.println("]");
 		}
 		
 		ArrayList<LogData> allData = new ArrayList<LogData>();
@@ -197,6 +189,7 @@ public class FieldTest {
 		
 		Experiment experiment = new Experiment();
 		
+		experiment.robots = participatingRobots;
 		experiment.timeSteps = duration*10;
 		experiment.start = startTime;
 		experiment.end = endTime;

@@ -10,8 +10,11 @@ import java.util.Collection;
 import java.util.List;
 
 import simulation.Simulator;
+import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
+import commoninterface.utils.CoordinateUtilities;
+import commoninterface.utils.jcoord.LatLon;
 
 /**
  *
@@ -70,11 +73,12 @@ public class ClusterFitnessWeighted extends AvoidCollisionsFunction {
                         for (int rj = 0; rj < c2.size() && !merged; rj++) {
                             Robot r1 = c1.get(ri);
                             Robot r2 = c2.get(rj);
+                            
                             if (r1.getPosition().distanceTo(r2.getPosition()) - r1.getRadius() - r2.getRadius() <= clusterDistance) {
-                                // do the merge
-                                merged = true;
-                                clusters.get(i).addAll(clusters.get(j));
-                                clusters.remove(j);
+	                            // do the merge
+	                            merged = true;
+	                            clusters.get(i).addAll(clusters.get(j));
+	                            clusters.remove(j);
                             }
                         }
                     }

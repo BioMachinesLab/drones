@@ -28,6 +28,7 @@ class Setup {
 	public HashMap<Integer,Integer> robotList = new HashMap<Integer,Integer>();
 	public Vector2d start = new Vector2d(0,0);
 	public commoninterface.mathutils.Vector2d firstPos;
+	public FitnessViewer viewer;
 	
 	public void setupDrones(HashMap<Integer,Integer> robotList, Arguments args, Vector2d start) {
 		for(int i = 0 ; i < robotList.keySet().size() ; i++) {
@@ -46,7 +47,7 @@ class Setup {
 	
 	public Setup() {}
 	
-	public Setup(Experiment exp, long randomSeed, boolean gui) {
+	public Setup(Experiment exp, long randomSeed, boolean gui, boolean simulation) {
 		
 		HashMap<String, Arguments> hash = new HashMap<String, Arguments>();
 		
@@ -57,7 +58,18 @@ class Setup {
 			e1.printStackTrace();
 		}
 		
+		String className = hash.get("--evaluation").getArgumentAsString("classname");
+		hash.get("--evaluation").setArgument("classname", className+"Test");
+		
 		hash.get("--evaluation").setArgument("dontuse",1);
+		hash.get("--evaluation").setArgument("laststeps",1);
+
+		if(simulation) { 
+//			hash.get("--evaluation").setArgument("usegps",1);
+			hash.get("--robots").setArgument("badgps", 1);
+		} else {
+			hash.get("--evaluation").setArgument("clusterdistance",10.6);
+		}
 		
 		EvaluationFunction eval = EvaluationFunction.getEvaluationFunction(hash.get("--evaluation"));
 		hash.put("--environment", new Arguments("classname=EmptyEnvironment,width=150,height=150,steps="+exp.timeSteps,true));
@@ -110,12 +122,19 @@ class Setup {
 		sim.addCallback(new WaterCurrent(new Arguments("maxspeed=0.1")));
 		
 		if(gui) {
-			renderer = new TwoDRenderer(new Arguments("bigrobots=1,drawframes=5"));
-			renderer.setSimulator(sim);
+			renderer = getRenderer();
 			
-			FitnessViewer viewer = new FitnessViewer(renderer);
+			viewer = new FitnessViewer(renderer);
 		}
 		
+	}
+	
+	public Renderer getRenderer() {
+		if(renderer == null) {
+			renderer = new TwoDRenderer(new Arguments("bigrobots=1,drawframes=5"));
+			renderer.setSimulator(sim);
+		}
+		return renderer;
 	}
 	
 	public static RobotLocation getRobotLocation(LogData d) {

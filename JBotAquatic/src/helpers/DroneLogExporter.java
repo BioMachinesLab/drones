@@ -49,9 +49,8 @@ public class DroneLogExporter {
 		return null;
 	}
 	
-	public static ArrayList<LogData> getCompleteLogs(int drone) throws IOException{
-		
-		File folder = new File("compare/onboard/"+drone);
+	public static ArrayList<LogData> getCompleteLogs(String f) throws IOException{
+		File folder = new File(f);
 		
 		ArrayList<LogData> result = new ArrayList<LogData>();
 
@@ -125,19 +124,21 @@ public class DroneLogExporter {
 		ArrayList<LogData> result = new ArrayList<LogData>();
 		
 		for(LogData d : data) {
-			DateTime date = DateTime.parse(d.GPSdate,formatter);
+			try {
+				DateTime date = DateTime.parse(d.GPSdate,formatter);
 			
-			if(date.isAfter(start) && date.isBefore(end)) {
-				result.add(d);
-			}
+				if(date.isAfter(start) && date.isBefore(end)) {
+					result.add(d);
+				}
+			} catch (Exception e){}
 		}
 		
 		return result;
 	}
 	
-	public static ArrayList<LogData> getLogs(int drone, DateTime start, DateTime end) throws IOException{
+	public static ArrayList<LogData> getLogs(String f, DateTime start, DateTime end) throws IOException{
 		
-		File folder = new File("compare/onboard/"+drone);
+		File folder = new File(f);
 		
 		ArrayList<LogData> result = new ArrayList<LogData>();
 
@@ -202,28 +203,28 @@ public class DroneLogExporter {
 	}
 	
 	public static void main(String[] args) throws Exception{
-		for(String experiment : experiments) { 	
-			
-			String[] split = experiment.split(";");
-		
-			ArrayList<LogData> allData = new ArrayList<LogData>();
-			
-			for(String d : split[0].split(",")) {
-				ArrayList<LogData> extracted = getLogs(Integer.parseInt(d),DateTime.parse(split[2],formatter),DateTime.parse(split[2],formatter).plus(Integer.parseInt(split[3])*1000));
-				System.out.println(experiment+" "+d+" "+extracted.size());
-				allData.addAll(extracted);
-			}
-			
-			Collections.sort(allData);
-			
-			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(split[1]+".txt")));
-			
-			for(LogData d : allData)
-				bw.write(LogCodex.encodeLog(LogType.LOGDATA, d));
-			
-			bw.flush();
-			bw.close();
-		}
+//		for(String experiment : experiments) { 	
+//			
+//			String[] split = experiment.split(";");
+//		
+//			ArrayList<LogData> allData = new ArrayList<LogData>();
+//			
+//			for(String d : split[0].split(",")) {
+//				ArrayList<LogData> extracted = getLogs(Integer.parseInt(d),DateTime.parse(split[2],formatter),DateTime.parse(split[2],formatter).plus(Integer.parseInt(split[3])*1000));
+//				System.out.println(experiment+" "+d+" "+extracted.size());
+//				allData.addAll(extracted);
+//			}
+//			
+//			Collections.sort(allData);
+//			
+//			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(split[1]+".txt")));
+//			
+//			for(LogData d : allData)
+//				bw.write(LogCodex.encodeLog(LogType.LOGDATA, d));
+//			
+//			bw.flush();
+//			bw.close();
+//		}
 	}
 
 }

@@ -2,29 +2,16 @@ package helpers;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.Random;
 import java.util.Scanner;
-
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-
-import simulation.Simulator;
 import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
-import simulation.util.Arguments;
-import updatables.WaterCurrent;
-import commoninterface.CIBehavior;
-import commoninterface.controllers.ControllerCIBehavior;
 import commoninterface.entities.RobotLocation;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.logger.LogData;
-import controllers.DroneNeuralNetworkController;
-import evolutionaryrobotics.JBotEvolver;
-import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
-import gui.renderer.TwoDRenderer;
 
 public class AssessFitness {
 	
@@ -40,21 +27,11 @@ public class AssessFitness {
 	}
 	
 	public static double getRealFitness(Experiment exp, long randomSeed, boolean gui) {
-		Setup setup = new Setup(exp, randomSeed, gui);
+		Setup setup = new Setup(exp, randomSeed, gui, false);
 		
 		DateTime stepTime = DateTime.parse(exp.logs.get(0).GPSdate,formatter);
 		DateTime currentTime;
 		int step = 0;
-		
-		int i = 0;
-		for(LogData d : exp.logs) {
-			if(d.ip != null && d.ip.endsWith(".2") && d.inputNeuronStates != null) {
-				System.out.print((i++)+" ");
-				for(double dd : d.inputNeuronStates)
-					System.out.print(dd+" ");
-				System.out.println();
-			}
-		}
 		
 		for(LogData d : exp.logs) {
 			
@@ -63,7 +40,7 @@ public class AssessFitness {
 			
 			currentTime = DateTime.parse(d.GPSdate,formatter);
 			
-			while(Math.abs(stepTime.getMillis()-currentTime.getMillis()) > 100) {
+			while(Math.abs(stepTime.getMillis()-currentTime.getMillis()) >= 100) {
 				stepTime = stepTime.plus(100);
 				step++;
 				setup.sim.performOneSimulationStep((double)step);
@@ -72,9 +49,9 @@ public class AssessFitness {
 					setup.renderer.drawFrame();
 					setup.renderer.repaint();
 //					System.out.println(step);
-//					try {
-//						Thread.sleep(20);
-//					} catch (InterruptedException e) {}
+					try {
+						Thread.sleep(20);
+					} catch (InterruptedException e) {}
 				}
 				
 			}
@@ -99,7 +76,7 @@ public class AssessFitness {
 	
 	public static double getSimulatedFitness(Experiment exp, long randomSeed, boolean gui) {
 		
-		Setup setup = new Setup(exp, randomSeed, gui);
+		Setup setup = new Setup(exp, randomSeed, gui, true);
 		
 		DateTime stepTime = DateTime.parse(exp.logs.get(0).GPSdate,formatter);
 		DateTime currentTime;
@@ -147,6 +124,68 @@ public class AssessFitness {
 		}
 		
 		return setup.eval.getFitness();
+	}
+	
+	public static void compareFitness(Experiment exp, long randomSeed) {
+		
+		DoubleFitnessViewer viewer = new DoubleFitnessViewer();
+		
+		while(true) {
+			
+			Setup setupReal = new Setup(exp, randomSeed, false, false);
+			Setup setupSim = new Setup(exp, randomSeed, false, true);
+			
+			randomSeed++;
+			
+			DateTime stepTime = DateTime.parse(exp.logs.get(0).GPSdate,formatter);
+			DateTime currentTime;
+			int step = 0;
+			
+			startControllers(exp, setupSim);
+			
+			
+			viewer.setRenderer1(setupReal.getRenderer());
+			viewer.setRenderer2(setupSim.getRenderer());
+			viewer.validate();
+		
+			for(LogData d : exp.logs) {
+				
+				if(d.comment != null)
+					continue;
+				
+				currentTime = DateTime.parse(d.GPSdate,formatter);
+				
+				while(Math.abs(stepTime.getMillis()-currentTime.getMillis()) >= 100) {
+					stepTime = stepTime.plus(100);
+					step++;
+					setupReal.sim.performOneSimulationStep((double)step);
+					setupSim.sim.performOneSimulationStep((double)step);
+					
+					setupSim.renderer.drawFrame();
+					setupReal.renderer.drawFrame();
+					setupSim.renderer.repaint();
+					setupReal.renderer.repaint();
+					
+					
+				}
+				RobotLocation rl = Setup.getRobotLocation(d);
+				
+				if(rl == null || rl.getLatLon() == null)
+					continue;
+				
+				commoninterface.mathutils.Vector2d pos = CoordinateUtilities.GPSToCartesian(rl.getLatLon());
+				
+				int id = Integer.parseInt(rl.getName());
+				int position = setupReal.robotList.get(id);
+				
+				setupReal.robots.get(position).setPosition(pos.x+setupReal.start.x-setupReal.firstPos.x, pos.y+setupReal.start.y-setupReal.firstPos.y);
+				double orientation = 360 - (rl.getOrientation() - 90);
+				setupReal.robots.get(position).setOrientation(Math.toRadians(orientation));
+				
+			}
+			
+			System.out.println(setupReal.eval.getFitness()+" "+setupSim.eval.getFitness());
+		}
 	}
 	
 	private static void startControllers(Experiment exp, Setup setup) {

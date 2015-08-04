@@ -5,12 +5,14 @@
  */
 package evaluation;
 
-import commoninterface.sensors.DroneCISensor;
-
 import simulation.Simulator;
+import simulation.robot.AquaticDrone;
 import simulation.robot.CISensorWrapper;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
+
+import commoninterface.sensors.DroneCISensor;
+import commoninterface.utils.CoordinateUtilities;
 
 /**
  *
@@ -57,7 +59,7 @@ public class DispersionFitness extends AvoidCollisionsFunction {
             double minDist = Double.POSITIVE_INFINITY;
             for (Robot r2 : simulator.getRobots()) {
                 if (r != r2) {
-                    minDist = Math.min(minDist, r.getPosition().distanceTo(r2.getPosition()));
+                	minDist = Math.min(minDist, r.getPosition().distanceTo(r2.getPosition()));
                 }
             }
 //            System.out.println(r.getId()+" "+minDist);
