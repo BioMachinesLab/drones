@@ -36,6 +36,7 @@ public class CoverageFitnessTest extends AvoidCollisionsFunction {
         super(args);
         resolution = args.getArgumentAsDoubleOrSetDefault("resolution", resolution);
         distance = args.getArgumentAsDoubleOrSetDefault("distance", distance);
+        instant = args.getFlagIsTrue("instant");
     }
 
     public void setup(Simulator simulator) {
@@ -175,13 +176,14 @@ public class CoverageFitnessTest extends AvoidCollisionsFunction {
             fitness = accum;
         }
 
-        super.update(simulator);
-
-        for (Updatable u : simulator.getCallbacks()) {
-            if (u instanceof CoverageTracer) {
-                CoverageTracer ct = (CoverageTracer) u;
-                ct.setCoverage(coverage, resolution);
-                break;
+        if (simulator.getTime() == 0) {
+            for (Updatable u : simulator.getCallbacks()) {
+                if (u instanceof CoverageTracer) {
+                    CoverageTracer ct = (CoverageTracer) u;
+                    ct.setCoverage(coverage, resolution);
+                    ct.update(simulator);
+                    break;
+                }
             }
         }
     }

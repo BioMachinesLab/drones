@@ -8,6 +8,7 @@ package updatables;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import mathutils.Vector2d;
 import org.jfree.graphics2d.svg.SVGGraphics2D;
 import simulation.Simulator;
 import simulation.robot.Robot;
@@ -21,8 +22,7 @@ public class PathTracer extends Tracer {
 
     private boolean hideStart = false;
     private boolean hideFinal = false;
-    private HashMap<Robot, List<IntPos>> points = null;
-    private SVGGraphics2D gr;
+    private HashMap<Robot, List<Vector2d>> points = null;
 
     public PathTracer(Arguments args) {
         super(args);
@@ -35,38 +35,52 @@ public class PathTracer extends Tracer {
         if (points == null) { // first step -- setup
             width = simulator.getEnvironment().getWidth();
             height = simulator.getEnvironment().getHeight();
-            gr = createCanvas();
             points = new HashMap<>();
         }
 
         if (simulator.getTime() >= timeStart) {
-            // DRAW INITIAL POSITIONS
-            if (!hideStart && simulator.getTime() == timeStart) {
-                drawRobots(gr, simulator);
-            }
-            
             // RECORD PATHS
             for (Robot r : simulator.getRobots()) {
                 if (!points.containsKey(r)) {
-                    points.put(r, new ArrayList<IntPos>());
+                    points.put(r, new ArrayList<Vector2d>());
                 }
-                points.get(r).add(transform(r.getPosition().x, r.getPosition().y));
+                points.get(r).add(new Vector2d(r.getPosition()));
             }
         }
     }
 
     @Override
     public void terminate(Simulator simulator) {
+        // FIND BOUNDARIES
+        double maxAbsX = 0, maxAbsY = 0;
+        for (List<Vector2d> l : points.values()) {
+            for (Vector2d v : l) {
+                maxAbsX = Math.max(maxAbsX, Math.abs(v.x));
+                maxAbsY = Math.max(maxAbsY, Math.abs(v.y));
+            }
+        }
+        width = Math.max(maxAbsX, maxAbsY) * 2;
+        height = width;
+        
+        SVGGraphics2D gr = createCanvas(simulator);
+
+        // DRAW INITIAL POSITIONS
+        if (!hideStart) {
+            for (Robot r : points.keySet()) {
+                drawRobot(gr, r, points.get(r).get(0));
+            }
+        }
+
         // DRAW PATHS
         for (Robot r : points.keySet()) {
-            List<IntPos> pts = points.get(r);
+            List<Vector2d> pts = points.get(r);
             gr.setPaint(robotColor);
-
             int[] xs = new int[pts.size()];
             int[] ys = new int[pts.size()];
             for (int i = 0; i < pts.size(); i++) {
-                xs[i] = pts.get(i).x;
-                ys[i] = pts.get(i).y;
+                IntPos t = transform(pts.get(i).x, pts.get(i).y);
+                xs[i] = t.x;
+                ys[i] = t.y;
             }
             gr.drawPolyline(xs, ys, pts.size());
         }
@@ -76,6 +90,6 @@ public class PathTracer extends Tracer {
             drawRobots(gr, simulator);
         }
 
-        writeGraphics(gr, simulator.hashCode() + "");
+        writeGraphics(gr, simulator, simulator.hashCode() + "");
     }
 }
