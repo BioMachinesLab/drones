@@ -9,11 +9,9 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import mathutils.Vector2d;
 import org.jfree.graphics2d.svg.SVGGraphics2D;
 import org.jfree.graphics2d.svg.SVGUtils;
 import simulation.Simulator;
@@ -27,34 +25,17 @@ import simulation.util.Arguments;
  */
 public class Tracer implements Stoppable {
 
-    private int margin = 50;
-    private double scale = 5;
-    private boolean hideStart = false;
-    private boolean hideFinal = false;
-    private int timeStart = 0;
-    private File folder = new File("traces");
-    private Color robotColor = Color.BLUE;
-    private Color bgColor = Color.WHITE;
-
-    private double width, height;
-    private HashMap<Robot, List<IntPos>> points = null;
-
-    private class IntPos {
-
-        int x;
-        int y;
-
-        IntPos(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-    }
+    protected File folder = new File("traces");
+    protected Color robotColor = Color.BLUE;
+    protected Color bgColor = Color.WHITE;
+    protected int margin = 50;
+    protected double scale = 5;
+    protected int timeStart = 0;
+    protected double width, height;
 
     public Tracer(Arguments args) {
         margin = args.getArgumentAsIntOrSetDefault("imagemargin", margin);
         timeStart = args.getArgumentAsIntOrSetDefault("timestart", timeStart);
-        hideStart = args.getFlagIsTrue("hidestart");
-        hideFinal = args.getFlagIsTrue("hidefinal");
         scale = args.getArgumentAsDoubleOrSetDefault("scale", scale);
         if (args.getArgumentIsDefined("robotcolor")) {
             robotColor = parseColor(args.getArgumentAsString("robotcolor"));
@@ -68,6 +49,27 @@ public class Tracer implements Stoppable {
         if (!folder.exists()) {
             folder.mkdirs();
         }
+    }
+
+    protected class IntPos {
+
+        int x;
+        int y;
+
+        IntPos(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    protected IntPos transform(double x, double y) {
+        return new IntPos(margin + (int) Math.round((x + width / 2) * scale),
+                margin + (int) Math.round((y + height / 2) * scale));
+    }
+    
+    protected IntPos transformNoShift(double x, double y) {
+        return new IntPos(margin + (int) Math.round(x * scale),
+                margin + (int) Math.round(y * scale));
     }
 
     public static Color parseColor(String str) {
@@ -89,74 +91,41 @@ public class Tracer implements Stoppable {
 
     @Override
     public void update(Simulator simulator) {
-        if (points == null) {
-            width = simulator.getEnvironment().getWidth();
-            height = simulator.getEnvironment().getHeight();
-            points = new HashMap<>();
-        }
-
-        // RECORD PATHS
-        for (Robot r : simulator.getRobots()) {
-            if (!points.containsKey(r)) {
-                points.put(r, new ArrayList<IntPos>());
-            }
-            points.get(r).add(new IntPos(margin + (int) Math.round((r.getPosition().x + width / 2) * scale),
-                    margin + (int) Math.round((r.getPosition().y + height / 2) * scale)));
-        }
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public void terminate(Simulator simulator) {
-        // INIT GRAPHICS
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    protected SVGGraphics2D createCanvas() {
         int w = (int) (width * scale) + margin * 2;
         int h = (int) (height * scale) + margin * 2;
         SVGGraphics2D gr = new SVGGraphics2D(w, h);
         gr.setPaint(bgColor);
         gr.fillRect(0, 0, w, h);
+        return gr;
+    }
 
-        // DRAW INITIAL POSITIONS
-        if (!hideStart) {
-            for (Robot r : points.keySet()) {
-                IntPos p = points.get(r).get(0);
-                int s = (int) Math.round(r.getRadius() * 2 * scale);
-                gr.setPaint(robotColor);
-                gr.fillRect(p.x - (int) (r.getRadius() * scale), p.y - (int) (r.getRadius() * scale), s, s);
-            }
-        }
-
-        // DRAW PATHS
-        for (Robot r : points.keySet()) {
-            List<IntPos> pts = points.get(r);
-            gr.setPaint(robotColor);
-
-            int[] xs = new int[pts.size()];
-            int[] ys = new int[pts.size()];
-            for (int i = 0; i < pts.size(); i++) {
-                xs[i] = pts.get(i).x;
-                ys[i] = pts.get(i).y;
-            }
-            gr.drawPolyline(xs, ys, pts.size());
-        }
-
-        // DRAW FINAL POSITIONS
-        if (!hideFinal) {
-            for (Robot r : simulator.getRobots()) {
-                IntPos p = points.get(r).get(points.get(r).size() - 1);
-                int s = (int) Math.round(r.getRadius() * 2 * scale);
-                gr.setPaint(robotColor);
-                gr.fillOval(p.x - (int) (r.getRadius() * scale), p.y - (int) (r.getRadius() * scale), s, s);
-            }
-        }
-        
-
-        // WRITE FILE
-        File out = new File(folder, simulator.hashCode() + ".svg");
+    protected void writeGraphics(SVGGraphics2D gr, String filePrefix) {
+        File out = new File(folder, filePrefix + ".svg");
         try {
             SVGUtils.writeToSVG(out, gr.getSVGElement());
-
         } catch (IOException ex) {
-            Logger.getLogger(Tracer.class
+            Logger.getLogger(PathTracer.class
                     .getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    protected void drawRobots(SVGGraphics2D gr, Simulator sim) {
+        gr.setPaint(robotColor);
+        for (Robot r : sim.getRobots()) {
+            Vector2d pos = r.getPosition();
+            int size = (int) Math.round(r.getRadius() * 2 * scale);
+            int x = (int) Math.round((pos.x + width / 2) * scale - size / 2d);
+            int y = (int) Math.round((pos.y + height / 2) * scale - size / 2d);
+            gr.fillOval(x + margin, y + margin, size, size);
         }
     }
 
