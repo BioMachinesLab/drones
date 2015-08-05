@@ -41,6 +41,7 @@ public abstract class Tracer implements Stoppable {
     protected int margin = 50;
     protected double scale = 5;
     protected int timeStart = 0;
+    protected int timeEnd = -1;
     protected double width, height;
     protected List<Line> lines;
     protected boolean drawGeofence = true;
@@ -48,6 +49,7 @@ public abstract class Tracer implements Stoppable {
     public Tracer(Arguments args) {
         margin = args.getArgumentAsIntOrSetDefault("imagemargin", margin);
         timeStart = args.getArgumentAsIntOrSetDefault("timestart", timeStart);
+        timeEnd = args.getArgumentAsIntOrSetDefault("timeend", timeEnd);
         scale = args.getArgumentAsDoubleOrSetDefault("scale", scale);
         if (args.getArgumentIsDefined("robotcolor")) {
             robotColor = parseColor(args.getArgumentAsString("robotcolor"));
@@ -127,20 +129,24 @@ public abstract class Tracer implements Stoppable {
         }
     }
 
-    protected void drawRobots(SVGGraphics2D gr, Simulator sim) {
-        gr.setPaint(robotColor);
+    protected void drawRobots(SVGGraphics2D gr, Simulator sim, boolean useSquare) {
         for (Robot r : sim.getRobots()) {
-            drawRobot(gr, r, null);
+            drawRobot(gr, r, null, useSquare);
         }
     }
     
-    protected void drawRobot(SVGGraphics2D gr, Robot r, Vector2d position) {
+    protected void drawRobot(SVGGraphics2D gr, Robot r, Vector2d position, boolean useSquare) {
+        gr.setPaint(robotColor);
         if(position == null) {
             position = r.getPosition();
         }
         int size = (int) Math.round(r.getRadius() * 2 * scale);
         IntPos iPos = transform(position.x, position.y);
-        gr.fillOval(iPos.x - size / 2, iPos.y - size / 2, size, size);
+        if(useSquare) {
+            gr.fillRect(iPos.x - size / 2, iPos.y - size / 2, size, size);
+        } else {
+            gr.fillOval(iPos.x - size / 2, iPos.y - size / 2, size, size);
+        }
     }
 
     protected void drawGeofence(SVGGraphics2D gr, Simulator sim) {
@@ -199,5 +205,9 @@ public abstract class Tracer implements Stoppable {
         simulation.physicalobjects.Line l = new simulation.physicalobjects.Line(simulator, "line0", va.getX(), va.getY(), vb.getX(), vb.getY());
         linesList.add(l);
         return linesList;
+    }
+    
+    protected boolean insideTimeframe(Simulator sim) {
+        return sim.getTime() >= timeStart && (timeEnd == -1 || sim.getTime() <= timeEnd);
     }
 }
