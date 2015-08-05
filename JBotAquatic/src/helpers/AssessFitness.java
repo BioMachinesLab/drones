@@ -10,7 +10,8 @@ import org.joda.time.format.DateTimeFormatter;
 
 import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
-
+import simulation.util.Arguments;
+import updatables.CoverageTracer;
 import commoninterface.entities.RobotLocation;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.network.messages.BehaviorMessage;
@@ -155,17 +156,18 @@ public class AssessFitness {
 			viewer.setRenderer1(setupReal.getRenderer());
 			viewer.setRenderer2(setupSim.getRenderer());
 			viewer.validate();
-		
+			
+			Coverage temp = new Coverage(new Arguments("resolution=1,distance=5,decrease=0,min=20,max=25"));
+			CoverageTracer tempTracer = new CoverageTracer(new Arguments("resolution=1,min=20,max=25,folder=temp,color=1"));
+//			setupReal.sim.addCallback(new CoverageTracer(new Arguments("resolution="+1)));
+			
+			double min = Double.MAX_VALUE;
+			double max = -Double.MAX_VALUE;
+			
 			for(LogData d : exp.logs) {
 				
 				if(d.comment != null)
 					continue;
-				
-				if(d.ip.endsWith("4")) {
-					LatLon latLon = d.latLon;
-					Vector2d vec = CoordinateUtilities.GPSToCartesian(latLon);
-					System.out.println(step+" "+vec.x+" "+vec.y+" "+d.temperatures[1]);
-				}
 				
 				currentTime = DateTime.parse(d.GPSdate,formatter);
 				
@@ -180,6 +182,9 @@ public class AssessFitness {
 					setupReal.renderer.drawFrame();
 					setupSim.renderer.repaint();
 					setupReal.renderer.repaint();
+					
+					temp.update(setupReal.sim);
+					tempTracer.update(setupReal.sim, temp.getCoverage());
 					
 				}
 				RobotLocation rl = Setup.getRobotLocation(d);
@@ -196,10 +201,20 @@ public class AssessFitness {
 				int position = setupReal.robotList.get(id);
 				
 				setupReal.robots.get(position).setPosition(pos.x+setupReal.start.x-setupReal.firstPos.x, pos.y+setupReal.start.y-setupReal.firstPos.y);
+				
+				temp.addPoint(setupReal.sim,setupReal.robots.get(position).getPosition(), d.temperatures[1]);
+				
+				if(min > d.temperatures[1])
+					min = d.temperatures[1];
+				if(max < d.temperatures[1])
+					max = d.temperatures[1];
+				
 				double orientation = 360 - (rl.getOrientation() - 90);
 				setupReal.robots.get(position).setOrientation(Math.toRadians(orientation));
 				
 			}
+			
+//			System.out.println(min+" min max "+max);
 			
 			System.out.println(setupReal.eval.getFitness()+" "+setupSim.eval.getFitness());
 		}

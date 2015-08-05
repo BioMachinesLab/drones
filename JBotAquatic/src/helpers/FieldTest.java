@@ -57,7 +57,7 @@ public class FieldTest {
 			new FieldTest(EXPO_29_JULY);
 		else {
 			folder = 1;
-			String s = "patrol;0;3;8;15-53-07;300";
+			String s = "patrol;0;2;8;17-33-27;300";
 			String file = "experiments/"+FOLDERS[folder]+"/"+s;
 			ObjectInputStream objectinputstream = new ObjectInputStream(new FileInputStream(file));
 	        Experiment e = (Experiment) objectinputstream.readObject();
