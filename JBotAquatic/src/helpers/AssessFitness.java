@@ -14,6 +14,7 @@ import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
 import updatables.CoverageTracer;
+import updatables.PathTracer;
 import commoninterface.entities.RobotLocation;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.utils.CoordinateUtilities;
@@ -164,7 +165,7 @@ public class AssessFitness {
 			Coverage temp = new Coverage(new Arguments("resolution=1,distance=5,decrease=0,min=20,max=25"));
 			
 			CoverageTracer tempTracer = new CoverageTracer(new Arguments("resolution=1,min=20,max=25,color=1,folder=temp/"+exp.toString()));
-//			tempTracer.setCoverage(temp.getCoverage());
+			tempTracer.setCoverage(temp.getCoverage());
 			
 			setupReal.sim.addCallback(temp);
 			setupReal.sim.addCallback(tempTracer);
@@ -177,18 +178,18 @@ public class AssessFitness {
 				CoverageEvaluationFunction simEval = (CoverageEvaluationFunction)setupSim.eval;
 				CoverageEvaluationFunction realEval = (CoverageEvaluationFunction)setupReal.eval;
 				
-//				simCoverageTracer.setCoverage(simEval.getCoverage());
-//				realCoverageTracer.setCoverage(realEval.getCoverage());
+				simCoverageTracer.setCoverage(simEval.getCoverage());
+				realCoverageTracer.setCoverage(realEval.getCoverage());
 				
 				setupReal.sim.addCallback(realCoverageTracer);
 				setupSim.sim.addCallback(simCoverageTracer);
 			}
 			
-//			PathTracer simPathTracer = new PathTracer(new Arguments("folder=path/"+exp.toString()+"_sim_"));
-//			PathTracer realPathTracer = new PathTracer(new Arguments("folder=path/"+exp.toString()+"_real_"));
+			PathTracer simPathTracer = new PathTracer(new Arguments("folder=path/"+exp.toString()+"_sim"));
+			PathTracer realPathTracer = new PathTracer(new Arguments("folder=path/"+exp.toString()+"_real"));
 			
-//			setupSim.sim.addCallback(simPathTracer);
-//			setupReal.sim.addCallback(realPathTracer);
+			setupSim.sim.addCallback(simPathTracer);
+			setupReal.sim.addCallback(realPathTracer);
 			
 			double min = Double.MAX_VALUE;
 			double max = -Double.MAX_VALUE;

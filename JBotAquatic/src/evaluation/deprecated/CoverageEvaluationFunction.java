@@ -168,6 +168,10 @@ public class CoverageEvaluationFunction extends EvaluationFunction{
 		return fitness - penalty;
 	}
 	
+	public double[][] getCoverage() {
+		return coverage;
+	}
+	
 	private void printGrid() {
 		System.out.println();
 		System.out.println();

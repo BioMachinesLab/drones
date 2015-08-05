@@ -89,6 +89,10 @@ public class CoverageTracer extends Tracer {
     }
 
     public void drawHeatmap(Simulator sim) {
+    	
+    	if(coverage == null)
+    		return;
+    	
         SVGGraphics2D gr = createCanvas();
         
         // draw heatmap
