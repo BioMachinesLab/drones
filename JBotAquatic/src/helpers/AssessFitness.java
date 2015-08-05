@@ -141,11 +141,14 @@ public class AssessFitness {
 		return setup.eval.getFitness();
 	}
 	
-	public static void compareFitness(Experiment exp, long randomSeed) {
+	public static void compareFitness(Experiment exp, long randomSeed, boolean gui) {
 		
-		DoubleFitnessViewer viewer = new DoubleFitnessViewer();
+		DoubleFitnessViewer viewer = null;
 		
-		while(true) {
+		if(gui)
+			viewer = new DoubleFitnessViewer();
+		
+//		while(true) {
 			
 			Setup setupReal = new Setup(exp, randomSeed, false, false);
 			Setup setupSim = new Setup(exp, randomSeed, false, true);
@@ -158,35 +161,37 @@ public class AssessFitness {
 			
 			startControllers(exp, setupSim);
 			
-			viewer.setRenderer1(setupReal.getRenderer());
-			viewer.setRenderer2(setupSim.getRenderer());
-			viewer.validate();
+			if(gui) {
+				viewer.setRenderer1(setupReal.getRenderer());
+				viewer.setRenderer2(setupSim.getRenderer());
+				viewer.validate();
+			}
 			
 			Coverage temp = new Coverage(new Arguments("resolution=1,distance=5,decrease=0,min=20,max=25"));
 			
 			CoverageTracer tempTracer = new CoverageTracer(new Arguments("resolution=1,min=20,max=25,color=1,folder=temp/"+exp.toString()));
-			tempTracer.setCoverage(temp.getCoverage());
+			tempTracer.setCoverage(temp.getCoverage(),setupReal.resolution);
 			
 			setupReal.sim.addCallback(temp);
 			setupReal.sim.addCallback(tempTracer);
 			
 			if(setupSim.eval instanceof CoverageEvaluationFunction) {
 			
-				CoverageTracer simCoverageTracer = new CoverageTracer(new Arguments("resolution=1,folder=coverag/"+exp.toString()+"_sim"));
+				CoverageTracer simCoverageTracer = new CoverageTracer(new Arguments("resolution=1,folder=coverage/"+exp.toString()+"_sim"));
 				CoverageTracer realCoverageTracer = new CoverageTracer(new Arguments("resolution=1,folder=coverage/"+exp.toString()+"_real"));
 				
 				CoverageEvaluationFunction simEval = (CoverageEvaluationFunction)setupSim.eval;
 				CoverageEvaluationFunction realEval = (CoverageEvaluationFunction)setupReal.eval;
 				
-				simCoverageTracer.setCoverage(simEval.getCoverage());
-				realCoverageTracer.setCoverage(realEval.getCoverage());
+				simCoverageTracer.setCoverage(simEval.getCoverage(),setupSim.resolution);
+				realCoverageTracer.setCoverage(realEval.getCoverage(),setupReal.resolution);
 				
 				setupReal.sim.addCallback(realCoverageTracer);
 				setupSim.sim.addCallback(simCoverageTracer);
 			}
 			
-			PathTracer simPathTracer = new PathTracer(new Arguments("folder=path/"+exp.toString()+"_sim"));
-			PathTracer realPathTracer = new PathTracer(new Arguments("folder=path/"+exp.toString()+"_real"));
+			PathTracer simPathTracer = new PathTracer(new Arguments("folder=path,name="+exp.toString()+"_sim"));
+			PathTracer realPathTracer = new PathTracer(new Arguments("folder=path,name="+exp.toString()+"_real"));
 			
 			setupSim.sim.addCallback(simPathTracer);
 			setupReal.sim.addCallback(realPathTracer);
@@ -208,10 +213,12 @@ public class AssessFitness {
 					setupSim.sim.performOneSimulationStep((double)step);
 					step++;
 					
-					setupSim.renderer.drawFrame();
-					setupReal.renderer.drawFrame();
-					setupSim.renderer.repaint();
-					setupReal.renderer.repaint();
+					if(gui) {
+						setupSim.renderer.drawFrame();
+						setupReal.renderer.drawFrame();
+						setupSim.renderer.repaint();
+						setupReal.renderer.repaint();
+					}
 					
 				}
 				RobotLocation rl = Setup.getRobotLocation(d);
@@ -230,6 +237,7 @@ public class AssessFitness {
 				setupReal.robots.get(position).setPosition(pos.x+setupReal.start.x-setupReal.firstPos.x, pos.y+setupReal.start.y-setupReal.firstPos.y);
 				
 				temp.addPoint(setupReal.sim,setupReal.robots.get(position).getPosition(), d.temperatures[1]);
+				tempTracer.setCoverage(temp.getCoverage(), setupReal.resolution);
 				
 				if(min > d.temperatures[1])
 					min = d.temperatures[1];
@@ -244,10 +252,10 @@ public class AssessFitness {
 			setupReal.sim.terminate();
 			setupSim.sim.terminate();
 			
-//			System.out.println(min+" min max "+max);
+			System.out.println(min+" min max "+max);
 			
 			System.out.println(setupReal.eval.getFitness()+" "+setupSim.eval.getFitness());
-		}
+//		}
 	}
 	
 	private static void startControllers(Experiment exp, Setup setup) {

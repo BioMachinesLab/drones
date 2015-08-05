@@ -90,6 +90,6 @@ public class PathTracer extends Tracer {
             drawRobots(gr, simulator);
         }
 
-        writeGraphics(gr, simulator, simulator.hashCode() + "");
+        writeGraphics(gr, simulator, name.isEmpty() ? simulator.hashCode() + "" : name);
     }
 }

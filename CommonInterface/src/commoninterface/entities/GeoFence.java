@@ -40,7 +40,7 @@ public class GeoFence extends Entity {
 		return waypoints;
 	}
 	
-	public static ArrayList<GeoFence> getWaypoints(AquaticDroneCI drone) {
+	public static ArrayList<GeoFence> getGeoFences(AquaticDroneCI drone) {
 		ArrayList<GeoFence> geoFences = new ArrayList<GeoFence>();
 		
 		for(Entity e : drone.getEntities()) {

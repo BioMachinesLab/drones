@@ -37,13 +37,14 @@ public class Coverage implements Updatable{
     public void setup(Simulator simulator){
     	// SET GEOFENCE
         AquaticDrone ad = (AquaticDrone) simulator.getRobots().get(0);
-        GeoFence fence = null;
-        for (Entity e : ad.getEntities()) {
-            if (e instanceof GeoFence) {
-                fence = (GeoFence) e;
-                break;
-            }
-        }
+        
+        ArrayList<GeoFence> fences = GeoFence.getGeoFences(ad);
+        
+        if(fences.isEmpty())
+        	return;
+        
+        GeoFence fence = fences.get(0);
+        
         lines = getLines(fence.getWaypoints(), simulator);
 
         double maxXAbs = 0, maxYAbs = 0;
@@ -72,6 +73,9 @@ public class Coverage implements Updatable{
     	if(coverage == null)
     		setup(simulator);
     	
+    	if(coverage == null)
+    		return;
+    	
         for (int y = 0; y < coverage.length; y++) {
             for (int x = 0; x < coverage[y].length; x++) {
 
@@ -97,8 +101,11 @@ public class Coverage implements Updatable{
     	if(coverage == null)
     		setup(sim);
     	
+    	if(coverage == null)
+    		return;
+    	
     	if (insideLines(pos)) {
-
+    		
             double rX = pos.getX();
             double rY = pos.getY();
 

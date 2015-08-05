@@ -53,13 +53,21 @@ public class CoverageTracer extends Tracer {
         double maxXAbs = 0, maxYAbs = 0;
 
         super.setupGeofence(sim);
-        for (Line l : lines) {
-            maxXAbs = Math.max(maxXAbs, Math.abs(l.getPointA().x));
-            maxYAbs = Math.max(maxYAbs, Math.abs(l.getPointA().y));
+        
+        if(lines != null) {
+        
+	        for (Line l : lines) {
+	            maxXAbs = Math.max(maxXAbs, Math.abs(l.getPointA().x));
+	            maxYAbs = Math.max(maxYAbs, Math.abs(l.getPointA().y));
+	        }
+	        
+	        width = Math.max(maxXAbs, maxYAbs) * 2;
+	        height = width;
+        } else {
+        	width = sim.getEnvironment().getWidth();
+        	height = width;
         }
 
-        width = Math.max(maxXAbs, maxYAbs) * 2;
-        height = width;
     }
 
     public void setCoverage(double[][] coverage, double resolution) {
@@ -71,7 +79,7 @@ public class CoverageTracer extends Tracer {
         if (coverage == null) {
             return;
         }
-
+        
         SVGGraphics2D gr = createCanvas(sim);
 
         // draw heatmap
@@ -106,8 +114,8 @@ public class CoverageTracer extends Tracer {
 
     public Color getColorForPercentage(double percent) {
 
-        Color[] percentColors = new Color[]{new Color(255, 255, 0), new Color(255, 0, 0)};
-        double[] perentage = {0.0, 1.0};
+        Color[] percentColors = new Color[]{new Color(0, 255, 0), new Color(255, 255, 0), new Color(255, 0, 0)};
+        double[] perentage = {0.0, 0.5, 1.0};
 
         int i;
 

@@ -38,6 +38,7 @@ class Setup {
 	public FitnessViewer viewer;
 	public Experiment exp;
 	public boolean simulation = false;
+	public double resolution = 1;
 	
 	public void setupDrones(HashMap<Integer,Integer> robotList, Arguments args, Vector2d start) {
 		for(int i = 0 ; i < robotList.keySet().size() ; i++) {
@@ -75,7 +76,7 @@ class Setup {
 //			hash.get("--robots").setArgument("badgps", 1);
 		} else {
 			hash.get("--evaluation").setArgument("clusterdistance",10.6);
-			hash.get("--evaluation").setArgument("resolution", 1);
+			hash.get("--evaluation").setArgument("resolution", resolution);
 		}
 		
 		hash.put("--environment", new Arguments("classname=EmptyEnvironment,width=150,height=150,steps="+exp.timeSteps,true));

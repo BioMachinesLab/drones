@@ -182,7 +182,6 @@ public class CoverageFitnessTest extends AvoidCollisionsFunction {
                     CoverageTracer ct = (CoverageTracer) u;
                     ct.setCoverage(coverage, resolution);
                     ct.update(simulator);
-                    break;
                 }
             }
         }

@@ -9,6 +9,7 @@ import commoninterface.entities.Entity;
 import commoninterface.entities.GeoFence;
 import commoninterface.entities.Waypoint;
 import commoninterface.utils.CoordinateUtilities;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.io.File;
@@ -19,9 +20,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import mathutils.Vector2d;
+
 import org.jfree.graphics2d.svg.SVGGraphics2D;
 import org.jfree.graphics2d.svg.SVGUtils;
+
 import simulation.Simulator;
 import simulation.Stoppable;
 import simulation.physicalobjects.Line;
@@ -44,6 +48,7 @@ public abstract class Tracer implements Stoppable {
     protected double width, height;
     protected List<Line> lines;
     protected boolean drawGeofence = true;
+    protected String name = "";
 
     public Tracer(Arguments args) {
         margin = args.getArgumentAsIntOrSetDefault("imagemargin", margin);
@@ -61,6 +66,8 @@ public abstract class Tracer implements Stoppable {
         if (args.getArgumentIsDefined("drawgeofence")) {
             drawGeofence = args.getFlagIsTrue("drawgeofence");
         }
+        
+        name = args.getArgumentAsStringOrSetDefault("name", name);
     }
 
     protected class IntPos {
@@ -118,7 +125,7 @@ public abstract class Tracer implements Stoppable {
         if (!folder.exists()) {
             folder.mkdirs();
         }
-        File out = new File(folder, filePrefix + ".svg");
+        File out = new File(folder, (name.isEmpty() ? filePrefix : name) + ".svg");
         try {
             SVGUtils.writeToSVG(out, gr.getSVGElement());
         } catch (IOException ex) {
