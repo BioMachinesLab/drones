@@ -44,7 +44,7 @@ public class CoverageTracer extends Tracer {
             setup(sim);
             isSetup = true;
         }
-        if (sim.getTime() % snapshotFrequency == 0 && sim.getTime() >= timeStart) {
+        if (sim.getTime() % snapshotFrequency == 0 && insideTimeframe(sim)) {
             drawHeatmap(sim);
         }
     }
@@ -106,7 +106,7 @@ public class CoverageTracer extends Tracer {
         }
 
         // draw robots
-        drawRobots(gr, sim);
+        drawRobots(gr, sim, true);
 
         // write file
         writeGraphics(gr, sim, sim.hashCode() + "_" + sim.getTime());
