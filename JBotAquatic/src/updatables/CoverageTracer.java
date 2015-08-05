@@ -31,7 +31,7 @@ import java.awt.BasicStroke;
  */
 public class CoverageTracer extends Tracer {
 
-    private double resolution = 1;
+    private double resolution;
     private List<Line> lines;
 
     private float min = 0;
@@ -47,7 +47,6 @@ public class CoverageTracer extends Tracer {
         color = args.getFlagIsTrue("color");
         min = (float) args.getArgumentAsDoubleOrSetDefault("min", min);
         max = (float) args.getArgumentAsDoubleOrSetDefault("max", max);
-        resolution = args.getArgumentAsDoubleOrSetDefault("resolution", resolution);
         snapshotFrequency = args.getArgumentAsIntOrSetDefault("snapshotfrequency", snapshotFrequency);
     }
 
@@ -82,24 +81,28 @@ public class CoverageTracer extends Tracer {
 
         width = Math.max(maxXAbs, maxYAbs) * 2;
         height = width;
+        /*width = 100;
+        height = 100;*/
     }
 
-    public void setCoverage(double[][] coverage) {
+    public void setCoverage(double[][] coverage, double resolution) {
         this.coverage = coverage;
+        this.resolution = resolution;
     }
 
     public void drawHeatmap(Simulator sim) {
-    	
-    	if(coverage == null)
-    		return;
-    	
+        if (coverage == null) {
+            return;
+        }
+
         SVGGraphics2D gr = createCanvas();
-        
+
         // draw heatmap
         for (int y = coverage.length - 1; y >= 0; y--) {
             for (int x = 0; x < coverage[y].length; x++) {
                 IntPos lowerBB = transformNoShift(x * resolution, y * resolution);
-                IntPos upperBB = transformNoShift((x + 1) * resolution, (y+1) * resolution);
+                IntPos upperBB = transformNoShift((x + 1) * resolution, (y + 1) * resolution);
+                System.out.println(x+","+y+":"+lowerBB.x + "," + lowerBB.y + "|" + upperBB.x + "," + upperBB.y);
 
                 if (coverage[y][x] >= min && coverage[y][x] <= max) {
                     float cf = ((float) coverage[y][x] - min) / (max - min);
@@ -108,17 +111,22 @@ public class CoverageTracer extends Tracer {
                     if (color) {
                         c = getColorForPercentage(cf);
                     } else {
-                        c = new Color(cf, cf, cf);
+                        c = new Color(1 - cf, 1 - cf, 1 - cf);
                     }
 
                     gr.setPaint(c);
-                    gr.fillRect(lowerBB.x, lowerBB.y, upperBB.x - lowerBB.x, upperBB.y - lowerBB.y);
+                    gr.fillRect(upperBB.x, upperBB.y, lowerBB.x - upperBB.x, lowerBB.y - upperBB.y);
                 }
             }
         }
 
         // draw robots
         drawRobots(gr, sim);
+        gr.fillRect(transformNoShift(5,95).x, transformNoShift(5,95).y, 10, 10);
+        gr.fillRect(transformNoShift(5,5).x, transformNoShift(5,5).y, 10, 10);
+        gr.fillRect(transformNoShift(95,5).x, transformNoShift(95,5).y, 10, 10);
+        
+                
 
         // draw geofence
         gr.setPaint(Color.BLUE);

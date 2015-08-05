@@ -30,14 +30,12 @@ public class CoverageFitnessTest extends AvoidCollisionsFunction {
     private double distance = 10;
     private double steps = 0;
 
-    private boolean trace = false;
     private boolean instant = false;
 
     public CoverageFitnessTest(Arguments args) {
         super(args);
         resolution = args.getArgumentAsDoubleOrSetDefault("resolution", resolution);
         distance = args.getArgumentAsDoubleOrSetDefault("distance", distance);
-        trace = args.getFlagIsTrue("trace");
     }
 
     public void setup(Simulator simulator) {
@@ -146,13 +144,13 @@ public class CoverageFitnessTest extends AvoidCollisionsFunction {
                         }
 
                         for (int x = pMinX; x < pMaxX; x++) {
-                        	
-                        	double distX = Math.abs((pMinX+pMaxX)/2 - x);
-                        	double distY = Math.abs((pMinY+pMaxY)/2 - y);
-                        	
-                        	if(Math.sqrt(Math.pow(distX, 2)+Math.pow(distY,2)) > Math.abs((pMaxX-pMinX))/2) {
-                        		continue;
-                        	}
+
+                            double distX = Math.abs((pMinX + pMaxX) / 2 - x);
+                            double distY = Math.abs((pMinY + pMaxY) / 2 - y);
+
+                            if (Math.sqrt(Math.pow(distX, 2) + Math.pow(distY, 2)) > Math.abs((pMaxX - pMinX)) / 2) {
+                                continue;
+                            }
 
                             if (x >= coverage[y].length || x < 0) {
                                 continue;
@@ -178,15 +176,13 @@ public class CoverageFitnessTest extends AvoidCollisionsFunction {
         }
 
         super.update(simulator);
-        
-        if(trace) {
-        	for(Updatable u : simulator.getCallbacks()) {
-        		if(u instanceof CoverageTracer) {
-        			CoverageTracer ct = (CoverageTracer)u;
-        			ct.setCoverage(coverage);
-        			break;
-        		}
-        	}
+
+        for (Updatable u : simulator.getCallbacks()) {
+            if (u instanceof CoverageTracer) {
+                CoverageTracer ct = (CoverageTracer) u;
+                ct.setCoverage(coverage, resolution);
+                break;
+            }
         }
     }
 
@@ -194,7 +190,7 @@ public class CoverageFitnessTest extends AvoidCollisionsFunction {
     public double getFitness() {
         return fitness;
     }
-    
+
     protected List<Line> getLines(LinkedList<Waypoint> waypoints, Simulator simulator) {
         List<Line> linesList = new ArrayList<Line>();
         for (int i = 1; i < waypoints.size(); i++) {

@@ -23,12 +23,12 @@ import simulation.util.Arguments;
  *
  * @author jorge
  */
-public class Tracer implements Stoppable {
+public abstract class Tracer implements Stoppable {
 
     protected File folder = new File("traces");
     protected Color robotColor = Color.BLUE;
     protected Color bgColor = Color.WHITE;
-    protected int margin = 50;
+    protected int margin = 0;
     protected double scale = 5;
     protected int timeStart = 0;
     protected double width, height;
@@ -64,12 +64,12 @@ public class Tracer implements Stoppable {
 
     protected IntPos transform(double x, double y) {
         return new IntPos(margin + (int) Math.round((x + width / 2) * scale),
-                margin + (int) Math.round((y + height / 2) * scale));
+                margin + (int) Math.round((height / 2 - y) * scale));
     }
     
     protected IntPos transformNoShift(double x, double y) {
         return new IntPos(margin + (int) Math.round(x * scale),
-                margin + (int) Math.round(y * scale));
+                margin + (int) Math.round((height - y) * scale));
     }
 
     public static Color parseColor(String str) {
@@ -87,16 +87,6 @@ public class Tracer implements Stoppable {
             return new Color(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]), Integer.parseInt(split[3]));
         }
         return null;
-    }
-
-    @Override
-    public void update(Simulator simulator) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void terminate(Simulator simulator) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     protected SVGGraphics2D createCanvas() {
@@ -123,9 +113,10 @@ public class Tracer implements Stoppable {
         for (Robot r : sim.getRobots()) {
             Vector2d pos = r.getPosition();
             int size = (int) Math.round(r.getRadius() * 2 * scale);
-            int x = (int) Math.round((pos.x + width / 2) * scale - size / 2d);
-            int y = (int) Math.round((pos.y + height / 2) * scale - size / 2d);
-            gr.fillOval(x + margin, y + margin, size, size);
+            IntPos iPos = transform(pos.x, pos.y);
+            /*int x = (int) Math.round((pos.x + width / 2) * scale - size / 2d);
+            int y = (int) Math.round((pos.y + height / 2) * scale - size / 2d);*/
+            gr.fillOval(iPos.x, iPos.y, size, size);
         }
     }
 
