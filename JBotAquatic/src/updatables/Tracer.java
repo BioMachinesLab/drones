@@ -8,6 +8,7 @@ package updatables;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,9 +31,10 @@ public class Tracer implements Stoppable {
     private double scale = 5;
     private boolean hideStart = false;
     private boolean hideFinal = false;
-    private boolean fillBG = false;
     private int timeStart = 0;
     private File folder = new File("traces");
+    private Color robotColor = Color.BLUE;
+    private Color bgColor = Color.WHITE;
 
     private double width, height;
     private HashMap<Robot, List<IntPos>> points = null;
@@ -53,14 +55,36 @@ public class Tracer implements Stoppable {
         timeStart = args.getArgumentAsIntOrSetDefault("timestart", timeStart);
         hideStart = args.getFlagIsTrue("hidestart");
         hideFinal = args.getFlagIsTrue("hidefinal");
-        fillBG = args.getFlagIsTrue("fillbg");
         scale = args.getArgumentAsDoubleOrSetDefault("scale", scale);
+        if (args.getArgumentIsDefined("robotcolor")) {
+            robotColor = parseColor(args.getArgumentAsString("robotcolor"));
+        }
+        if (args.getArgumentIsDefined("bgcolor")) {
+            bgColor = parseColor(args.getArgumentAsString("bgcolor"));
+        }
         if (args.getArgumentIsDefined("folder")) {
             folder = new File(args.getArgumentAsString("folder"));
         }
         if (!folder.exists()) {
             folder.mkdirs();
         }
+    }
+
+    public static Color parseColor(String str) {
+        String[] split = str.split("-|\\.|,|;");
+        if (split.length == 1) {
+            try {
+                Field field = Color.class.getField(split[0]);
+                return (Color) field.get(null);
+            } catch (Exception ex) {
+                return Color.decode(split[0]);
+            }
+        } else if (split.length == 3) {
+            return new Color(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
+        } else if (split.length == 4) {
+            return new Color(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]), Integer.parseInt(split[3]));
+        }
+        return null;
     }
 
     @Override
@@ -76,38 +100,34 @@ public class Tracer implements Stoppable {
             if (!points.containsKey(r)) {
                 points.put(r, new ArrayList<IntPos>());
             }
-            points.get(r).add(new IntPos((int) Math.round((r.getPosition().x + width / 2) * scale),
-                    (int) Math.round((r.getPosition().y + height / 2) * scale)));
+            points.get(r).add(new IntPos(margin + (int) Math.round((r.getPosition().x + width / 2) * scale),
+                    margin + (int) Math.round((r.getPosition().y + height / 2) * scale)));
         }
     }
 
     @Override
     public void terminate(Simulator simulator) {
         // INIT GRAPHICS
-        int w = (int) (width * scale);
-        int h = (int) (height * scale);
+        int w = (int) (width * scale) + margin * 2;
+        int h = (int) (height * scale) + margin * 2;
         SVGGraphics2D gr = new SVGGraphics2D(w, h);
-        if (fillBG) {
-            gr.setPaint(Color.WHITE);
-            gr.fillRect(0, 0, w, h);
-        }
+        gr.setPaint(bgColor);
+        gr.fillRect(0, 0, w, h);
 
         // DRAW INITIAL POSITIONS
         if (!hideStart) {
             for (Robot r : points.keySet()) {
                 IntPos p = points.get(r).get(0);
                 int s = (int) Math.round(r.getRadius() * 2 * scale);
-                Color c = r.getBodyColor();
-                gr.setPaint(new Color(255 - c.getRed(), 255 - c.getGreen(), 255 - c.getBlue()));
+                gr.setPaint(robotColor);
                 gr.fillRect(p.x - (int) (r.getRadius() * scale), p.y - (int) (r.getRadius() * scale), s, s);
             }
         }
-        
+
         // DRAW PATHS
         for (Robot r : points.keySet()) {
             List<IntPos> pts = points.get(r);
-            Color c = (Color) r.getBodyColor();
-            gr.setPaint(new Color(255 - c.getRed(), 255 - c.getGreen(), 255 - c.getBlue()));
+            gr.setPaint(robotColor);
 
             int[] xs = new int[pts.size()];
             int[] ys = new int[pts.size()];
@@ -117,24 +137,26 @@ public class Tracer implements Stoppable {
             }
             gr.drawPolyline(xs, ys, pts.size());
         }
-        
+
         // DRAW FINAL POSITIONS
         if (!hideFinal) {
             for (Robot r : simulator.getRobots()) {
                 IntPos p = points.get(r).get(points.get(r).size() - 1);
                 int s = (int) Math.round(r.getRadius() * 2 * scale);
-                Color c = r.getBodyColor();
-                gr.setPaint(new Color(255 - c.getRed(), 255 - c.getGreen(), 255 - c.getBlue()));
+                gr.setPaint(robotColor);
                 gr.fillOval(p.x - (int) (r.getRadius() * scale), p.y - (int) (r.getRadius() * scale), s, s);
             }
         }
         
+
         // WRITE FILE
         File out = new File(folder, simulator.hashCode() + ".svg");
         try {
             SVGUtils.writeToSVG(out, gr.getSVGElement());
+
         } catch (IOException ex) {
-            Logger.getLogger(Tracer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Tracer.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
     }
 
