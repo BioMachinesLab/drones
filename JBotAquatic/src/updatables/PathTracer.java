@@ -87,7 +87,9 @@ public class PathTracer extends Tracer {
                     gr.setPaint(c);
                     IntPos old = transform(pts.get(i - 1).x, pts.get(i-1).y);
                     IntPos cur = transform(pts.get(i).x, pts.get(i).y);
-                    gr.drawLine(old.x, old.y, cur.x, cur.y);
+                    if(old.x != cur.x || old.y != cur.y) {
+                        gr.drawLine(old.x, old.y, cur.x, cur.y);
+                    }
                 }
             }
         }
