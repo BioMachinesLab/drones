@@ -2,22 +2,23 @@ package helpers;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import simulation.Updatable;
 import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
 import updatables.CoverageTracer;
 import commoninterface.entities.RobotLocation;
-import commoninterface.mathutils.Vector2d;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.utils.CoordinateUtilities;
-import commoninterface.utils.jcoord.LatLon;
 import commoninterface.utils.logger.LogData;
+import evaluation.deprecated.CoverageEvaluationFunction;
 
 public class AssessFitness {
 	
@@ -78,6 +79,8 @@ public class AssessFitness {
 			
 		}
 		
+		setup.sim.terminate();
+		
 		return setup.eval.getFitness();
 	}
 	
@@ -132,6 +135,8 @@ public class AssessFitness {
 			}
 		}
 		
+		setup.sim.terminate();
+		
 		return setup.eval.getFitness();
 	}
 	
@@ -152,14 +157,38 @@ public class AssessFitness {
 			
 			startControllers(exp, setupSim);
 			
-			
 			viewer.setRenderer1(setupReal.getRenderer());
 			viewer.setRenderer2(setupSim.getRenderer());
 			viewer.validate();
 			
 			Coverage temp = new Coverage(new Arguments("resolution=1,distance=5,decrease=0,min=20,max=25"));
-			CoverageTracer tempTracer = new CoverageTracer(new Arguments("resolution=1,min=20,max=25,folder=temp,color=1"));
-//			setupReal.sim.addCallback(new CoverageTracer(new Arguments("resolution="+1)));
+			
+			CoverageTracer tempTracer = new CoverageTracer(new Arguments("resolution=1,min=20,max=25,color=1,folder=temp/"+exp.toString()));
+//			tempTracer.setCoverage(temp.getCoverage());
+			
+			setupReal.sim.addCallback(temp);
+			setupReal.sim.addCallback(tempTracer);
+			
+			if(setupSim.eval instanceof CoverageEvaluationFunction) {
+			
+				CoverageTracer simCoverageTracer = new CoverageTracer(new Arguments("resolution=1,folder=coverag/"+exp.toString()+"_sim"));
+				CoverageTracer realCoverageTracer = new CoverageTracer(new Arguments("resolution=1,folder=coverage/"+exp.toString()+"_real"));
+				
+				CoverageEvaluationFunction simEval = (CoverageEvaluationFunction)setupSim.eval;
+				CoverageEvaluationFunction realEval = (CoverageEvaluationFunction)setupReal.eval;
+				
+//				simCoverageTracer.setCoverage(simEval.getCoverage());
+//				realCoverageTracer.setCoverage(realEval.getCoverage());
+				
+				setupReal.sim.addCallback(realCoverageTracer);
+				setupSim.sim.addCallback(simCoverageTracer);
+			}
+			
+//			PathTracer simPathTracer = new PathTracer(new Arguments("folder=path/"+exp.toString()+"_sim_"));
+//			PathTracer realPathTracer = new PathTracer(new Arguments("folder=path/"+exp.toString()+"_real_"));
+			
+//			setupSim.sim.addCallback(simPathTracer);
+//			setupReal.sim.addCallback(realPathTracer);
 			
 			double min = Double.MAX_VALUE;
 			double max = -Double.MAX_VALUE;
@@ -182,9 +211,6 @@ public class AssessFitness {
 					setupReal.renderer.drawFrame();
 					setupSim.renderer.repaint();
 					setupReal.renderer.repaint();
-					
-					temp.update(setupReal.sim);
-					tempTracer.update(setupReal.sim, temp.getCoverage());
 					
 				}
 				RobotLocation rl = Setup.getRobotLocation(d);
@@ -213,6 +239,9 @@ public class AssessFitness {
 				setupReal.robots.get(position).setOrientation(Math.toRadians(orientation));
 				
 			}
+			
+			setupReal.sim.terminate();
+			setupSim.sim.terminate();
 			
 //			System.out.println(min+" min max "+max);
 			

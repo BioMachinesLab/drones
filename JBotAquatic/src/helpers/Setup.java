@@ -12,11 +12,12 @@ import java.util.Random;
 
 import mathutils.Vector2d;
 import simulation.Simulator;
+import simulation.Updatable;
 import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
-import updatables.CoverageTracer;
 import updatables.WaterCurrent;
+
 import commoninterface.entities.Entity;
 import commoninterface.entities.GeoFence;
 import commoninterface.entities.RobotLocation;
@@ -71,7 +72,7 @@ class Setup {
 		
 		if(simulation) { 
 //			hash.get("--evaluation").setArgument("usegps",1);
-			hash.get("--robots").setArgument("badgps", 1);
+//			hash.get("--robots").setArgument("badgps", 1);
 		} else {
 			hash.get("--evaluation").setArgument("clusterdistance",10.6);
 			hash.get("--evaluation").setArgument("resolution", 1);
@@ -128,6 +129,7 @@ class Setup {
 		hash.get("--evaluation").setArgument("classname", className+"Test");
 		hash.get("--evaluation").setArgument("dontuse",1);
 		hash.get("--evaluation").setArgument("laststeps",1);
+		
 		if(exp.activeRobot != -1) {
 			hash.get("--evaluation").setArgument("activerobot",getRobot(""+exp.activeRobot).getId());
 		}
