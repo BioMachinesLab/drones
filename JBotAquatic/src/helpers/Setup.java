@@ -76,7 +76,6 @@ class Setup {
 		} else {
 			hash.get("--evaluation").setArgument("clusterdistance",10.6);
 			hash.get("--evaluation").setArgument("resolution", 1);
-			hash.get("--evaluation").setArgument("trace", 1);
 		}
 		
 		hash.put("--environment", new Arguments("classname=EmptyEnvironment,width=150,height=150,steps="+exp.timeSteps,true));
