@@ -27,13 +27,13 @@ public class FieldTest {
 	};
 	
 	public static String[] EXPO_29_JULY = new String[]{
-//		"weightedcluster;0;1;8;11-11-37;300","weightedcluster;0;2;8;11-52-26;300","weightedcluster;0;3;8;10-58-52;300", //seed 0 missing robot 6! changed it manually in the onboard log
-//		"weightedcluster;1;1;8;11-18-01;300","weightedcluster;1;2;8;11-45-46;300","weightedcluster;1;3;8;11-58-46;300",
-//		"weightedcluster;2;1;8;11-31-52;300","weightedcluster;2;2;8;11-38-41;300","weightedcluster;2;3;8;12-04-59;300",
-//		"weightedcluster;0;1;6;13-08-50;300","weightedcluster;0;2;6;13-26-13;300","weightedcluster;0;3;6;13-33-35;300",
-//		"weightedcluster;0;1;4;19-07-17;180","weightedcluster;0;2;4;19-13-23;180","weightedcluster;0;3;4;19-17-32;180",
-//		"dispersion;0;1;6;13-52-19;90","dispersion;0;2;6;13-48-19;90","dispersion;0;3;6;13-45-54;90",
-//		"dispersion;0;1;4;19-00-06;90","dispersion;0;2;4;19-02-32;90","dispersion;0;3;4;19-04-35;90",
+		"weightedcluster;0;1;8;11-11-37;300","weightedcluster;0;2;8;11-52-26;300","weightedcluster;0;3;8;10-58-52;300", //seed 0 missing robot 6! changed it manually in the onboard log
+		"weightedcluster;1;1;8;11-18-01;300","weightedcluster;1;2;8;11-45-46;300","weightedcluster;1;3;8;11-58-46;300",
+		"weightedcluster;2;1;8;11-31-52;300","weightedcluster;2;2;8;11-38-41;300","weightedcluster;2;3;8;12-04-59;300",
+		"weightedcluster;0;1;6;13-08-50;300","weightedcluster;0;2;6;13-26-13;300","weightedcluster;0;3;6;13-33-35;300",
+		"weightedcluster;0;1;4;19-07-17;180","weightedcluster;0;2;4;19-13-23;180","weightedcluster;0;3;4;19-17-32;180",
+		"dispersion;0;1;6;13-52-19;90","dispersion;0;2;6;13-48-19;90","dispersion;0;3;6;13-45-54;90",
+		"dispersion;0;1;4;19-00-06;90","dispersion;0;2;4;19-02-32;90","dispersion;0;3;4;19-04-35;90",
 //		"composite;0;1;8;17-54-42;720",
 		"patrol;0;1;8;12-14-54;300","patrol;0;2;8;17-33-27;300","patrol;0;3;8;15-53-07;300",
 //		"patrol_adaptive;0;1;8;19-47-06;900",//1,2,3,4->4,1 adaptive

@@ -104,7 +104,7 @@ public class CoverageTracer extends Tracer {
                 }
             }
         }
-
+        
         // draw robots
         drawRobots(gr, sim, true);
 

@@ -186,6 +186,10 @@ public class CoverageFitnessTest extends AvoidCollisionsFunction {
             }
         }
     }
+    
+    public double[][] getCoverage() {
+		return coverage;
+	}
 
     @Override
     public double getFitness() {

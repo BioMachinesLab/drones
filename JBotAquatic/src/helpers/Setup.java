@@ -38,7 +38,7 @@ class Setup {
 	public FitnessViewer viewer;
 	public Experiment exp;
 	public boolean simulation = false;
-	public double resolution = 1;
+	public double resolution = 0.6;
 	
 	public void setupDrones(HashMap<Integer,Integer> robotList, Arguments args, Vector2d start) {
 		for(int i = 0 ; i < robotList.keySet().size() ; i++) {
@@ -71,12 +71,13 @@ class Setup {
 			e1.printStackTrace();
 		}
 		
+		hash.get("--evaluation").setArgument("resolution", resolution);
+		
 		if(simulation) { 
 //			hash.get("--evaluation").setArgument("usegps",1);
 //			hash.get("--robots").setArgument("badgps", 1);
 		} else {
 			hash.get("--evaluation").setArgument("clusterdistance",10.6);
-			hash.get("--evaluation").setArgument("resolution", resolution);
 		}
 		
 		hash.put("--environment", new Arguments("classname=EmptyEnvironment,width=150,height=150,steps="+exp.timeSteps,true));
@@ -137,7 +138,7 @@ class Setup {
 		this.eval = eval;
 		
 		sim.addCallback(eval);
-		sim.addCallback(new WaterCurrent(new Arguments("maxspeed=0.1")));
+//		sim.addCallback(new WaterCurrent(new Arguments("maxspeed=0.1")));
 		
 		if(gui) {
 			renderer = getRenderer();

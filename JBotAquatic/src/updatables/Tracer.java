@@ -128,6 +128,7 @@ public abstract class Tracer implements Stoppable {
             folder.mkdirs();
         }
         File out = new File(folder, (name.isEmpty() ? filePrefix : name) + ".svg");
+        
         try {
             SVGUtils.writeToSVG(out, gr.getSVGElement());
         } catch (IOException ex) {
