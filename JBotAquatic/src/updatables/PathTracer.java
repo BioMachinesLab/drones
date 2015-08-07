@@ -8,6 +8,7 @@ package updatables;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import mathutils.Vector2d;
 import org.jfree.graphics2d.svg.SVGGraphics2D;
@@ -24,6 +25,7 @@ public class PathTracer extends Tracer {
     private boolean hideStart = false;
     private boolean hideFinal = false;
     private boolean fade = false;
+    private int steps = 10;
     private HashMap<Robot, List<Vector2d>> points = null;
 
     public PathTracer(Arguments args) {
@@ -31,6 +33,7 @@ public class PathTracer extends Tracer {
         hideStart = args.getFlagIsTrue("hidestart");
         hideFinal = args.getFlagIsTrue("hidefinal");
         fade = args.getFlagIsTrue("fade");
+        steps = args.getArgumentAsIntOrSetDefault("steps", steps);
     }
 
     @Override
@@ -66,7 +69,7 @@ public class PathTracer extends Tracer {
         height = width;
 
         SVGGraphics2D gr = createCanvas(simulator);
-        
+
         // DRAW PATHS
         for (Robot r : points.keySet()) {
             List<Vector2d> pts = points.get(r);
@@ -81,17 +84,35 @@ public class PathTracer extends Tracer {
                 }
                 gr.drawPolyline(xs, ys, pts.size());
             } else {
-            	
-            	
-                for(int i = 1 ; i < pts.size() ; i++) {
-                    int alpha = Math.max(25,(int) Math.round((double) i / pts.size() * 255));
+                if(steps == 0) {
+                    steps = pts.size();
+                }
+                int stepSize = (int) Math.ceil(pts.size() / (double) steps);
+                for (int s = 0; s < steps; s++) {
+                    // GET POINTS FOR SEGMENT
+                    int start = s * stepSize;
+                    int end = Math.min(start + stepSize, pts.size() - 1);
+                    LinkedList<IntPos> polyLine = new LinkedList<>();
+                    for (int i = 0; i <= end - start ; i++) {
+                        IntPos t = transform(pts.get(start + i).x, pts.get(start + i).y);
+                        if(polyLine.isEmpty() || polyLine.getLast().x != t.x || polyLine.getLast().y != t.y) {
+                            polyLine.add(t);
+                        }
+                    }
+                    // CONVERT TO ARRAYS FORMAT
+                    int[] xs = new int[polyLine.size()];
+                    int[] ys = new int[xs.length];
+                    int i = 0;
+                    for(IntPos t : polyLine) {
+                        xs[i] = t.x;
+                        ys[i++] = t.y;
+                    }
+                    
+                    // DRAW POLYLINE
+                    int alpha = Math.max(25, (int) Math.round((double) (s + 1) / steps * 255));
                     Color c = new Color(robotColor.getRed(), robotColor.getGreen(), robotColor.getBlue(), alpha);
                     gr.setPaint(c);
-                    IntPos old = transform(pts.get(i - 1).x, pts.get(i-1).y);
-                    IntPos cur = transform(pts.get(i).x, pts.get(i).y);
-                    if(old.x != cur.x || old.y != cur.y) {
-                        gr.drawLine(old.x, old.y, cur.x, cur.y);
-                    }
+                    gr.drawPolyline(xs, ys, xs.length);
                 }
             }
         }
@@ -105,8 +126,8 @@ public class PathTracer extends Tracer {
 
         // DRAW FINAL POSITIONS
         if (!hideFinal) {
-        	for (Robot r : points.keySet()) {
-                drawRobot(gr, r, points.get(r).get(points.get(r).size()-1), false);
+            for (Robot r : points.keySet()) {
+                drawRobot(gr, r, points.get(r).get(points.get(r).size() - 1), false);
             }
         }
 
