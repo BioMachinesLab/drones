@@ -88,7 +88,6 @@ public class PathTracer extends Tracer {
                     steps = pts.size();
                 }
                 int stepSize = (int) Math.ceil(pts.size() / (double) steps);
-                IntPos lastPos = null;
                 for (int s = 0; s < steps; s++) {
                     // GET POINTS FOR SEGMENT
                     int start = s * stepSize;
@@ -96,16 +95,10 @@ public class PathTracer extends Tracer {
                     LinkedList<IntPos> polyLine = new LinkedList<>();
                     for (int i = 0; i <= end - start ; i++) {
                         IntPos t = transform(pts.get(start + i).x, pts.get(start + i).y);
-                        if(lastPos == null || lastPos.x != t.x || lastPos.y != t.y) {
+                        if(polyLine.isEmpty() || polyLine.getLast().x != t.x || polyLine.getLast().y != t.y) {
                             polyLine.add(t);
-                            lastPos = t;
                         }
                     }
-                    
-                    if(polyLine.isEmpty()) {
-                        continue;
-                    }
-                    
                     // CONVERT TO ARRAYS FORMAT
                     int[] xs = new int[polyLine.size()];
                     int[] ys = new int[xs.length];
