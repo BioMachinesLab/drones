@@ -175,7 +175,7 @@ public class AssessFitness {
 			Coverage temp = new Coverage(new Arguments("resolution="+setupReal.resolution+",distance=5,decrease=0,min=20,max=25"));
 			CoverageTracer tempTracer = new CoverageTracer(new Arguments("bgcolor=0-0-0-0,min=20,max=25,color=1,folder=temp/"+exp.toString()));
 			
-			boolean coverage = true;
+			boolean coverage = false;
 			
 			if(coverage && setupSim.eval instanceof CoverageFitnessTest) {
 				
@@ -263,7 +263,6 @@ public class AssessFitness {
 					setupReal.updateRobotEntities(d);
 				}
 				
-				/*
 				 //THIS IS FOR WAYPOINT BEHAVIORS
 				if(exp.activeRobot != -1 && d.ip.endsWith("."+exp.activeRobot)) {
 					if(d.inputNeuronStates == null)
@@ -284,7 +283,7 @@ public class AssessFitness {
 				if(exp.activeRobot != -1 && !d.ip.endsWith("."+exp.activeRobot)) {
 					if(d.inputNeuronStates != null)
 						continue;
-				}*/
+				}
 				
 				if(ignoreReal)
 					continue;
@@ -336,9 +335,11 @@ public class AssessFitness {
 			}
 			s.close();
 			
-			CIArguments readArguments = new CIArguments(f);
+			String full = f.replaceAll("\\s+", "");
 			
-			BehaviorMessage bm = new BehaviorMessage(readArguments.getArgumentAsString("type"), f.replaceAll("\\s+", ""), true, "dude");
+			CIArguments readArguments = new CIArguments(full);
+			
+			BehaviorMessage bm = new BehaviorMessage(readArguments.getArgumentAsString("type"), full, true, "dude");
 			
 			for(Robot r : setup.robots) {
 				if(exp.activeRobot != -1) {
