@@ -81,6 +81,8 @@ public class CoverageTracer extends Tracer {
         }
         
         SVGGraphics2D gr = createCanvas(sim);
+        
+        double maxx = 0;
 
         // draw heatmap
         for (int y = coverage.length - 1; y >= 0; y--) {
@@ -91,6 +93,8 @@ public class CoverageTracer extends Tracer {
 
                 if (coverage[y][x] >= min && coverage[y][x] <= max) {
                     float cf = ((float) coverage[y][x] - min) / (max - min);
+                    if(coverage[y][x] > maxx)
+                    	maxx = coverage[y][x];
                     Color c;
 
                     if (color) {
@@ -104,6 +108,8 @@ public class CoverageTracer extends Tracer {
                 }
             }
         }
+        
+        System.out.println(sim.getTime()+" "+maxx);
         
         // draw robots
         drawRobots(gr, sim, true);

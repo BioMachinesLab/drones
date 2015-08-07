@@ -34,8 +34,8 @@ public class FieldTest {
 //		"weightedcluster;0;1;4;19-07-17;180","weightedcluster;0;2;4;19-13-23;180","weightedcluster;0;3;4;19-17-32;180",
 //		"dispersion;0;1;6;13-52-19;90","dispersion;0;2;6;13-48-19;90","dispersion;0;3;6;13-45-54;90",
 //		"dispersion;0;1;4;19-00-06;90","dispersion;0;2;4;19-02-32;90","dispersion;0;3;4;19-04-35;90",
-		"composite;0;1;8;17-54-42;720",
-//		"patrol;0;1;8;12-14-54;300","patrol;0;2;8;17-33-27;300","patrol;0;3;8;15-53-07;300",
+//		"composite;0;1;8;17-54-42;720",
+		"patrol;0;1;8;12-14-54;300","patrol;0;2;8;17-33-27;300","patrol;0;3;8;15-53-07;300",
 //		"patrol_adaptive;0;1;8;19-47-06;900",//1,2,3,4->4,1 adaptive
 //		"dispersion_adaptive;0;1;8;20-06-21;300", //adaptive, only robots, starts with 4 (6,7,8,10)
 //		"dispersion_adaptive;0;2;8;20-11-35;300", //adaptive, with kayak

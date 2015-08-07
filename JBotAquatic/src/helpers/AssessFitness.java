@@ -175,7 +175,9 @@ public class AssessFitness {
 			Coverage temp = new Coverage(new Arguments("resolution="+setupReal.resolution+",distance=5,decrease=0,min=20,max=25"));
 			CoverageTracer tempTracer = new CoverageTracer(new Arguments("bgcolor=0-0-0-0,min=20,max=25,color=1,folder=temp/"+exp.toString()));
 			
-			if(setupSim.eval instanceof CoverageFitnessTest) {
+			boolean coverage = true;
+			
+			if(coverage && setupSim.eval instanceof CoverageFitnessTest) {
 				
 				//TEMP
 				tempTracer.setCoverage(temp.getCoverage(),setupReal.resolution);
@@ -183,21 +185,37 @@ public class AssessFitness {
 				setupReal.sim.addCallback(tempTracer);
 			
 				//COVERAGE
-				CoverageTracer simCoverageTracer = new CoverageTracer(new Arguments("bgcolor=0-0-0-0,folder=coverage/"+exp.toString()+"_sim"));
-				CoverageTracer realCoverageTracer = new CoverageTracer(new Arguments("bgcolor=0-0-0-0,folder=coverage/"+exp.toString()+"_real"));
+//				CoverageTracer simCoverageTracer = new CoverageTracer(new Arguments("bgcolor=0-0-0-0,folder=coverage/"+exp.toString()+"_sim"));
+//				CoverageTracer realCoverageTracer = new CoverageTracer(new Arguments("bgcolor=0-0-0-0,folder=coverage/"+exp.toString()+"_real"));
+//				
+//				CoverageFitnessTest simEval = (CoverageFitnessTest)setupSim.eval;
+//				CoverageFitnessTest realEval = (CoverageFitnessTest)setupReal.eval;
+//				
+//				simCoverageTracer.setCoverage(simEval.getCoverage(),setupSim.resolution);
+//				realCoverageTracer.setCoverage(realEval.getCoverage(),setupReal.resolution);
+//				
+//				setupReal.sim.addCallback(realCoverageTracer);
+//				setupSim.sim.addCallback(simCoverageTracer);
 				
-				CoverageFitnessTest simEval = (CoverageFitnessTest)setupSim.eval;
-				CoverageFitnessTest realEval = (CoverageFitnessTest)setupReal.eval;
 				
-				simCoverageTracer.setCoverage(simEval.getCoverage(),setupSim.resolution);
-				realCoverageTracer.setCoverage(realEval.getCoverage(),setupReal.resolution);
-				
-				setupReal.sim.addCallback(realCoverageTracer);
-				setupSim.sim.addCallback(simCoverageTracer);
+				for(Integer id : setupReal.robotList.keySet()) {
+					for(LogData d : exp.logs) {
+						if(d.ip.endsWith("."+id) && d.temperatures != null) {
+							temp.addPoint(setupReal.sim,setupReal.getRobot(d.ip).getPosition(), d.temperatures[1]);
+							break;
+						}
+					}
+				}
+				temp.update(setupReal.sim);
 			}
 			
+//			,timestart=0,timeend=1200
+//			,timestart=1200,timeend=1800
+//			,timestart=1800,timeend=3600
+//			,timestart=3600,timeend=5400
+//			,timestart=5400,timeend=6600
 			PathTracer simPathTracer = new PathTracer(new Arguments("folder=path,bgcolor=0-0-0-0,fade=1,name="+exp.toString()+"_sim"));
-			PathTracer realPathTracer = new PathTracer(new Arguments("folder=path,timestart=5400,timeend=6600,bgcolor=0-0-0-0,fade=1,name="+exp.toString()+"_real"));
+			PathTracer realPathTracer = new PathTracer(new Arguments("folder=path,bgcolor=0-0-0-0,fade=1,name="+exp.toString()+"_real"));
 			
 			setupSim.sim.addCallback(simPathTracer);
 			setupReal.sim.addCallback(realPathTracer);
