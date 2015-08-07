@@ -66,7 +66,7 @@ public class PathTracer extends Tracer {
         height = width;
 
         SVGGraphics2D gr = createCanvas(simulator);
-
+        
         // DRAW PATHS
         for (Robot r : points.keySet()) {
             List<Vector2d> pts = points.get(r);
@@ -81,6 +81,8 @@ public class PathTracer extends Tracer {
                 }
                 gr.drawPolyline(xs, ys, pts.size());
             } else {
+            	
+            	
                 for(int i = 1 ; i < pts.size() ; i++) {
                     int alpha = Math.max(25,(int) Math.round((double) i / pts.size() * 255));
                     Color c = new Color(robotColor.getRed(), robotColor.getGreen(), robotColor.getBlue(), alpha);
@@ -103,7 +105,9 @@ public class PathTracer extends Tracer {
 
         // DRAW FINAL POSITIONS
         if (!hideFinal) {
-            drawRobots(gr, simulator, false);
+        	for (Robot r : points.keySet()) {
+                drawRobot(gr, r, points.get(r).get(points.get(r).size()-1), false);
+            }
         }
 
         writeGraphics(gr, simulator, name.isEmpty() ? simulator.hashCode() + "" : name);

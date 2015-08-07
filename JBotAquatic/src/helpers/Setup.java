@@ -140,6 +140,10 @@ class Setup {
 		sim.addCallback(eval);
 //		sim.addCallback(new WaterCurrent(new Arguments("maxspeed=0.1")));
 		
+		for(Updatable u : sim.getCallbacks())
+			if(u instanceof WaterCurrent)
+				((WaterCurrent)u).disable();
+		
 		if(gui) {
 			renderer = getRenderer();
 			viewer = new FitnessViewer(renderer);

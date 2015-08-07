@@ -16,8 +16,11 @@ import simulation.util.Arguments;
 import updatables.CoverageTracer;
 import updatables.PathTracer;
 import commoninterface.entities.RobotLocation;
+import commoninterface.mathutils.Vector2d;
 import commoninterface.network.messages.BehaviorMessage;
+import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
+import commoninterface.utils.jcoord.LatLon;
 import commoninterface.utils.logger.LogData;
 import evaluation.CoverageFitnessTest;
 import evaluation.deprecated.CoverageEvaluationFunction;
@@ -169,8 +172,8 @@ public class AssessFitness {
 				viewer.validate();
 			}
 			
-			Coverage temp = new Coverage(new Arguments("resolution=1,distance=5,decrease=0,min=20,max=25"));
-			CoverageTracer tempTracer = new CoverageTracer(new Arguments("resolution=1,bgcolor=0-0-0-0,min=20,max=25,color=1,folder=temp/"+exp.toString()));
+			Coverage temp = new Coverage(new Arguments("resolution="+setupReal.resolution+",distance=5,decrease=0,min=20,max=25"));
+			CoverageTracer tempTracer = new CoverageTracer(new Arguments("bgcolor=0-0-0-0,min=20,max=25,color=1,folder=temp/"+exp.toString()));
 			
 			if(setupSim.eval instanceof CoverageFitnessTest) {
 				
@@ -180,8 +183,8 @@ public class AssessFitness {
 				setupReal.sim.addCallback(tempTracer);
 			
 				//COVERAGE
-				CoverageTracer simCoverageTracer = new CoverageTracer(new Arguments("resolution=1,bgcolor=0-0-0-0,folder=coverage/"+exp.toString()+"_sim"));
-				CoverageTracer realCoverageTracer = new CoverageTracer(new Arguments("resolution=1,,bgcolor=0-0-0-0,folder=coverage/"+exp.toString()+"_real"));
+				CoverageTracer simCoverageTracer = new CoverageTracer(new Arguments("bgcolor=0-0-0-0,folder=coverage/"+exp.toString()+"_sim"));
+				CoverageTracer realCoverageTracer = new CoverageTracer(new Arguments("bgcolor=0-0-0-0,folder=coverage/"+exp.toString()+"_real"));
 				
 				CoverageFitnessTest simEval = (CoverageFitnessTest)setupSim.eval;
 				CoverageFitnessTest realEval = (CoverageFitnessTest)setupReal.eval;
@@ -193,8 +196,8 @@ public class AssessFitness {
 				setupSim.sim.addCallback(simCoverageTracer);
 			}
 			
-			PathTracer simPathTracer = new PathTracer(new Arguments("folder=path,bgcolor=0-0-0-0,,fade=1,name="+exp.toString()+"_sim"));
-			PathTracer realPathTracer = new PathTracer(new Arguments("folder=path,bgcolor=0-0-0-0,,fade=1,name="+exp.toString()+"_real"));
+			PathTracer simPathTracer = new PathTracer(new Arguments("folder=path,bgcolor=0-0-0-0,fade=1,name="+exp.toString()+"_sim"));
+			PathTracer realPathTracer = new PathTracer(new Arguments("folder=path,timestart=5400,timeend=6600,bgcolor=0-0-0-0,fade=1,name="+exp.toString()+"_real"));
 			
 			setupSim.sim.addCallback(simPathTracer);
 			setupReal.sim.addCallback(realPathTracer);
@@ -202,7 +205,13 @@ public class AssessFitness {
 			double min = Double.MAX_VALUE;
 			double max = -Double.MAX_VALUE;
 			
+			boolean stopRun = false;
+			boolean ignoreReal = false;
+			
 			for(LogData d : exp.logs) {
+				
+				if(stopRun)
+					break;
 				
 				if(d.comment != null)
 					continue;
@@ -212,7 +221,9 @@ public class AssessFitness {
 				while(Math.abs(stepTime.getMillis()-currentTime.getMillis()) >= 100) {
 					stepTime = stepTime.plus(100);
 					
-					setupReal.sim.performOneSimulationStep((double)step);
+					if(!ignoreReal)
+						setupReal.sim.performOneSimulationStep((double)step);
+					
 					setupSim.sim.performOneSimulationStep((double)step);
 					step++;
 					
@@ -229,8 +240,36 @@ public class AssessFitness {
 				if(rl == null || rl.getLatLon() == null)
 					continue;
 				
-				setupSim.updateRobotEntities(d);
-				setupReal.updateRobotEntities(d);
+				if(!ignoreReal) {
+					setupSim.updateRobotEntities(d);
+					setupReal.updateRobotEntities(d);
+				}
+				
+				/*
+				 //THIS IS FOR WAYPOINT BEHAVIORS
+				if(exp.activeRobot != -1 && d.ip.endsWith("."+exp.activeRobot)) {
+					if(d.inputNeuronStates == null)
+						ignoreReal = true;
+					
+					double distanceToTarget = 2;
+					
+					//Real
+					if(getDistanceToTarget(setupReal.getRobot("."+exp.activeRobot)) < distanceToTarget) 
+						ignoreReal = true;
+
+					//Sim
+					if(getDistanceToTarget(setupSim.getRobot("."+exp.activeRobot)) < distanceToTarget) 
+						stopRun = true;
+					
+				}
+				
+				if(exp.activeRobot != -1 && !d.ip.endsWith("."+exp.activeRobot)) {
+					if(d.inputNeuronStates != null)
+						continue;
+				}*/
+				
+				if(ignoreReal)
+					continue;
 				
 				commoninterface.mathutils.Vector2d pos = CoordinateUtilities.GPSToCartesian(rl.getLatLon());
 				
@@ -261,6 +300,13 @@ public class AssessFitness {
 //		}
 	}
 	
+	private static double getDistanceToTarget(Robot r) {
+		AquaticDrone drone = (AquaticDrone)r;
+		LatLon wp = drone.getActiveWaypoint().getLatLon();
+		Vector2d v = CoordinateUtilities.GPSToCartesian(wp);
+		return drone.getPosition().distanceTo(new mathutils.Vector2d(v.x,v.y));
+	}
+	
 	private static void startControllers(Experiment exp, Setup setup) {
 		String f = "compare/controllers/preset_"+exp.controllerName+exp.controllerNumber+".conf";
 		
@@ -272,7 +318,9 @@ public class AssessFitness {
 			}
 			s.close();
 			
-			BehaviorMessage bm = new BehaviorMessage("ControllerCIBehavior", f.replaceAll("\\s+", ""), true, "dude");
+			CIArguments readArguments = new CIArguments(f);
+			
+			BehaviorMessage bm = new BehaviorMessage(readArguments.getArgumentAsString("type"), f.replaceAll("\\s+", ""), true, "dude");
 			
 			for(Robot r : setup.robots) {
 				if(exp.activeRobot != -1) {
