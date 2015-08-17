@@ -71,8 +71,10 @@ public class CoverageTracer extends Tracer {
     }
 
     public void setCoverage(double[][] coverage, double resolution) {
-        this.coverage = coverage;
-        this.resolution = resolution;
+    	if(this.coverage == null) {
+	        this.coverage = coverage;
+	        this.resolution = resolution;
+    	}
     }
 
     public void drawHeatmap(Simulator sim) {
@@ -83,16 +85,31 @@ public class CoverageTracer extends Tracer {
         SVGGraphics2D gr = createCanvas(sim);
         
         double maxx = 0;
+        
+//        for (int x = 1; x <= coverage[0].length; x++)
+//        	System.out.print(x+" ");
+//        System.out.println();
 
         // draw heatmap
         for (int y = coverage.length - 1; y >= 0; y--) {
+//        	if(color)
+//        		System.out.print((y+1)+" ");
             for (int x = 0; x < coverage[y].length; x++) {
                 IntPos lowerBB = transformNoShift(x * resolution, y * resolution);
                 IntPos upperBB = transformNoShift((x + 1) * resolution, (y + 1) * resolution);
                 int size = Math.abs(lowerBB.x - upperBB.x);
-
+                
+                if(color && coverage[y][x] != -1) {
+                	if(coverage[y][x] == 0)
+                		System.out.print("NA ");
+                	else
+                		System.out.print(coverage[y][x]+" ");
+                }
+                
                 if (coverage[y][x] >= min && coverage[y][x] <= max) {
+                	
                     float cf = ((float) coverage[y][x] - min) / (max - min);
+                    
                     if(coverage[y][x] > maxx)
                     	maxx = coverage[y][x];
                     Color c;
@@ -107,15 +124,23 @@ public class CoverageTracer extends Tracer {
                     gr.fillRect(Math.min(lowerBB.x, upperBB.x), Math.min(lowerBB.y, upperBB.y), size, size);
                 }
             }
+            if(color)
+            System.out.println();
         }
-        
-        System.out.println(sim.getTime()+" "+maxx);
+        if(color)
+        	System.out.println();
         
         // draw robots
         drawRobots(gr, sim, true);
 
         // write file
-        writeGraphics(gr, sim, sim.hashCode() + "_" + sim.getTime());
+        
+        String fileName = ""+sim.getTime();
+        while(fileName.length() < 6) {
+        	fileName = "0"+fileName;
+        }
+        
+        writeGraphics(gr, sim, fileName);
     }
 
     public Color getColorForPercentage(double percent) {
@@ -145,6 +170,9 @@ public class CoverageTracer extends Tracer {
         return new Color(r, g, b);
     }
 
+    public double[][] getCoverage() {
+		return coverage;
+	}
 
 
     @Override
