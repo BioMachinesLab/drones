@@ -6,12 +6,12 @@
 package updatables;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import mathutils.Vector2d;
-import org.jfree.graphics2d.svg.SVGGraphics2D;
 import simulation.Simulator;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
@@ -68,12 +68,12 @@ public class PathTracer extends Tracer {
         width = Math.max(maxAbsX, maxAbsY) * 2;
         height = width;
 
-        SVGGraphics2D gr = createCanvas(simulator);
+        Graphics2D gr = createCanvas(simulator);
 
         // DRAW PATHS
         for (Robot r : points.keySet()) {
             List<Vector2d> pts = points.get(r);
-            gr.setPaint(robotColor);
+            gr.setPaint(mainColor);
             if (!fade) {
                 int[] xs = new int[pts.size()];
                 int[] ys = new int[pts.size()];
@@ -109,8 +109,8 @@ public class PathTracer extends Tracer {
                     }
                     
                     // DRAW POLYLINE
-                    int alpha = Math.max(25, (int) Math.round((double) (s + 1) / steps * 255));
-                    Color c = new Color(robotColor.getRed(), robotColor.getGreen(), robotColor.getBlue(), alpha);
+                    int alpha = Math.max(50, (int) Math.round((double) (s + 1) / steps * 255));
+                    Color c = new Color(mainColor.getRed(), mainColor.getGreen(), mainColor.getBlue(), alpha);
                     gr.setPaint(c);
                     gr.drawPolyline(xs, ys, xs.length);
                 }
@@ -119,15 +119,16 @@ public class PathTracer extends Tracer {
 
         // DRAW INITIAL POSITIONS
         if (!hideStart) {
+            Color color = fade ? new Color(mainColor.getRed(), mainColor.getGreen(), mainColor.getBlue(), 50) : mainColor;
             for (Robot r : points.keySet()) {
-                drawRobot(gr, r, points.get(r).get(0), true);
+                drawRobot(gr, r, points.get(r).get(0), true, color);
             }
         }
 
         // DRAW FINAL POSITIONS
         if (!hideFinal) {
             for (Robot r : points.keySet()) {
-                drawRobot(gr, r, points.get(r).get(points.get(r).size() - 1), false);
+                drawRobot(gr, r, points.get(r).get(points.get(r).size() - 1), false, mainColor);
             }
         }
 
