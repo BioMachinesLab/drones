@@ -6,13 +6,11 @@
 package updatables;
 
 import java.awt.Color;
-
-import org.jfree.graphics2d.svg.SVGGraphics2D;
+import java.awt.Graphics2D;
 
 import simulation.Simulator;
 import simulation.physicalobjects.Line;
 import simulation.util.Arguments;
-
 
 /**
  *
@@ -24,18 +22,21 @@ public class CoverageTracer extends Tracer {
 
     private float min = 0;
     private float max = 1;
-    private boolean color = false;
+    private boolean gradient = false;
 
     private int snapshotFrequency = 300;
     private double[][] coverage;
     private boolean isSetup = false;
+    private boolean sequence = false;
+    private int count = 0;
 
     public CoverageTracer(Arguments args) {
         super(args);
-        color = args.getFlagIsTrue("color");
+        gradient = args.getFlagIsTrue("gradient");
         min = (float) args.getArgumentAsDoubleOrSetDefault("min", min);
         max = (float) args.getArgumentAsDoubleOrSetDefault("max", max);
         snapshotFrequency = args.getArgumentAsIntOrSetDefault("snapshotfrequency", snapshotFrequency);
+        sequence = args.getFlagIsTrue("sequence");
     }
 
     @Override
@@ -53,19 +54,19 @@ public class CoverageTracer extends Tracer {
         double maxXAbs = 0, maxYAbs = 0;
 
         super.setupGeofence(sim);
-        
-        if(lines != null) {
-        
-	        for (Line l : lines) {
-	            maxXAbs = Math.max(maxXAbs, Math.abs(l.getPointA().x));
-	            maxYAbs = Math.max(maxYAbs, Math.abs(l.getPointA().y));
-	        }
-	        
-	        width = Math.max(maxXAbs, maxYAbs) * 2;
-	        height = width;
+
+        if (lines != null) {
+
+            for (Line l : lines) {
+                maxXAbs = Math.max(maxXAbs, Math.abs(l.getPointA().x));
+                maxYAbs = Math.max(maxYAbs, Math.abs(l.getPointA().y));
+            }
+
+            width = Math.max(maxXAbs, maxYAbs) * 2;
+            height = width;
         } else {
-        	width = sim.getEnvironment().getWidth();
-        	height = width;
+            width = sim.getEnvironment().getWidth();
+            height = width;
         }
 
     }
@@ -82,13 +83,7 @@ public class CoverageTracer extends Tracer {
             return;
         }
         
-        SVGGraphics2D gr = createCanvas(sim);
-        
-        double maxx = 0;
-        
-//        for (int x = 1; x <= coverage[0].length; x++)
-//        	System.out.print(x+" ");
-//        System.out.println();
+        Graphics2D gr = createCanvas(sim);
 
         // draw heatmap
         for (int y = coverage.length - 1; y >= 0; y--) {
@@ -99,39 +94,26 @@ public class CoverageTracer extends Tracer {
                 IntPos upperBB = transformNoShift((x + 1) * resolution, (y + 1) * resolution);
                 int size = Math.abs(lowerBB.x - upperBB.x);
                 
-                if(color && coverage[y][x] != -1) {
-                	if(coverage[y][x] == 0)
-                		System.out.print("NA ");
-                	else
-                		System.out.print(coverage[y][x]+" ");
-                }
-                
                 if (coverage[y][x] >= min && coverage[y][x] <= max) {
                 	
                     float cf = ((float) coverage[y][x] - min) / (max - min);
                     
-                    if(coverage[y][x] > maxx)
-                    	maxx = coverage[y][x];
                     Color c;
 
-                    if (color) {
+                    if (gradient) {
                         c = getColorForPercentage(cf);
                     } else {
-                        c = new Color(1 - cf, 1 - cf, 1 - cf);
+                        c = new Color(mainColor.getRed(), mainColor.getGreen(), mainColor.getBlue(), (int) (cf * 255));
                     }
 
                     gr.setPaint(c);
                     gr.fillRect(Math.min(lowerBB.x, upperBB.x), Math.min(lowerBB.y, upperBB.y), size, size);
                 }
             }
-            if(color)
-            System.out.println();
         }
-        if(color)
-        	System.out.println();
-        
+
         // draw robots
-        drawRobots(gr, sim, true);
+        drawRobots(gr, sim, true, altColor);
 
         // write file
         
@@ -140,10 +122,15 @@ public class CoverageTracer extends Tracer {
         	fileName = "0"+fileName;
         }
         
-        writeGraphics(gr, sim, fileName);
+
+        if (sequence) {
+            writeGraphics(gr, sim, "frame_" + count++);
+        } else {
+            writeGraphics(gr, sim, "step_" + (int) (double) sim.getTime());
+        }
     }
 
-    public Color getColorForPercentage(double percent) {
+    public static Color getColorForPercentage(double percent) {
 
         Color[] percentColors = new Color[]{new Color(0, 255, 0), new Color(255, 255, 0), new Color(255, 0, 0)};
         double[] perentage = {0.0, 0.5, 1.0};
@@ -173,7 +160,6 @@ public class CoverageTracer extends Tracer {
     public double[][] getCoverage() {
 		return coverage;
 	}
-
 
     @Override
     public void terminate(Simulator simulator) {
