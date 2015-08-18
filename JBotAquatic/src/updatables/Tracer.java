@@ -58,6 +58,7 @@ public abstract class Tracer implements Stoppable {
 
     protected boolean usePNG = false;
     protected BufferedImage im;
+    protected float lineWidth = 1;
 
     public Tracer(Arguments args) {
         margin = args.getArgumentAsIntOrSetDefault("imagemargin", margin);
@@ -65,6 +66,7 @@ public abstract class Tracer implements Stoppable {
         timeEnd = args.getArgumentAsIntOrSetDefault("timeend", timeEnd);
         scale = args.getArgumentAsDoubleOrSetDefault("scale", scale);
         usePNG = args.getFlagIsTrue("png");
+        lineWidth = (float) args.getArgumentAsDouble("linewidth");
         if (args.getArgumentIsDefined("maincolor")) {
             mainColor = parseColor(args.getArgumentAsString("maincolor"));
         }
@@ -183,7 +185,7 @@ public abstract class Tracer implements Stoppable {
         }
         if (lines != null) {
             gr.setPaint(altColor);
-            BasicStroke dashed = new BasicStroke(1.0f,
+            BasicStroke dashed = new BasicStroke(lineWidth,
                     BasicStroke.CAP_BUTT,
                     BasicStroke.JOIN_MITER,
                     10.0f, new float[]{10f}, 0.0f);

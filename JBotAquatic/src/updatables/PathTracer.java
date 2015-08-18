@@ -5,6 +5,7 @@
  */
 package updatables;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
@@ -73,7 +74,6 @@ public class PathTracer extends Tracer {
         // DRAW PATHS
         for (Robot r : points.keySet()) {
             List<Vector2d> pts = points.get(r);
-            gr.setPaint(mainColor);
             if (!fade) {
                 int[] xs = new int[pts.size()];
                 int[] ys = new int[pts.size()];
@@ -82,9 +82,11 @@ public class PathTracer extends Tracer {
                     xs[i] = t.x;
                     ys[i] = t.y;
                 }
+                gr.setPaint(mainColor);
+                gr.setStroke(new BasicStroke(lineWidth));
                 gr.drawPolyline(xs, ys, pts.size());
             } else {
-                if(steps == 0) {
+                if (steps == 0) {
                     steps = pts.size();
                 }
                 int stepSize = (int) Math.ceil(pts.size() / (double) steps);
@@ -93,9 +95,9 @@ public class PathTracer extends Tracer {
                     int start = s * stepSize;
                     int end = Math.min(start + stepSize, pts.size() - 1);
                     LinkedList<IntPos> polyLine = new LinkedList<>();
-                    for (int i = 0; i <= end - start ; i++) {
+                    for (int i = 0; i <= end - start; i++) {
                         IntPos t = transform(pts.get(start + i).x, pts.get(start + i).y);
-                        if(polyLine.isEmpty() || polyLine.getLast().x != t.x || polyLine.getLast().y != t.y) {
+                        if (polyLine.isEmpty() || polyLine.getLast().x != t.x || polyLine.getLast().y != t.y) {
                             polyLine.add(t);
                         }
                     }
@@ -103,15 +105,16 @@ public class PathTracer extends Tracer {
                     int[] xs = new int[polyLine.size()];
                     int[] ys = new int[xs.length];
                     int i = 0;
-                    for(IntPos t : polyLine) {
+                    for (IntPos t : polyLine) {
                         xs[i] = t.x;
                         ys[i++] = t.y;
                     }
-                    
+
                     // DRAW POLYLINE
                     int alpha = Math.max(50, (int) Math.round((double) (s + 1) / steps * 255));
                     Color c = new Color(mainColor.getRed(), mainColor.getGreen(), mainColor.getBlue(), alpha);
                     gr.setPaint(c);
+                    gr.setStroke(new BasicStroke(lineWidth));
                     gr.drawPolyline(xs, ys, xs.length);
                 }
             }
