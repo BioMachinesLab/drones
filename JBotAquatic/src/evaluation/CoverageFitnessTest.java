@@ -22,7 +22,7 @@ public class CoverageFitnessTest extends AvoidCollisionsFunction {
     private double[][] coverage;
     private double resolution = 1;
     private double width = 5, height = 5;
-    private final double decrease = 0.001; //1000 steps to go from 1.0 to 0.0
+    private double decrease = 1000; //1000 steps to go from 1.0 to 0.0
     private double accum = 0;
     private List<Line> lines;
 
@@ -37,6 +37,7 @@ public class CoverageFitnessTest extends AvoidCollisionsFunction {
         resolution = args.getArgumentAsDoubleOrSetDefault("resolution", resolution);
         distance = args.getArgumentAsDoubleOrSetDefault("distance", distance);
         instant = args.getFlagIsTrue("instant");
+        decrease = 1.0 / args.getArgumentAsDoubleOrSetDefault("decrease",decrease);
     }
 
     public void setup(Simulator simulator) {

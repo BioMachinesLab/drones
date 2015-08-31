@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.imageio.ImageIO;
 
 import mathutils.Vector2d;
@@ -57,8 +58,10 @@ public abstract class Tracer implements Stoppable {
     protected String name = "";
 
     protected boolean usePNG = false;
+    private boolean isSetup = false;
     protected BufferedImage im;
     protected float lineWidth = 1;
+    private int snapshotFrequency = 300;
 
     public Tracer(Arguments args) {
         margin = args.getArgumentAsIntOrSetDefault("imagemargin", margin);
@@ -82,6 +85,8 @@ public abstract class Tracer implements Stoppable {
         if (args.getArgumentIsDefined("drawgeofence")) {
             drawGeofence = args.getFlagIsTrue("drawgeofence");
         }
+        
+        snapshotFrequency = args.getArgumentAsIntOrSetDefault("snapshotfrequency", snapshotFrequency);
 
         name = args.getArgumentAsStringOrSetDefault("name", name);
     }
@@ -144,9 +149,10 @@ public abstract class Tracer implements Stoppable {
         if (drawGeofence) {
             drawGeofence(gr, sim);
         }
-        if (!folder.exists()) {
-            folder.mkdirs();
-        }
+        
+        if(!folder.exists())
+        	folder.mkdirs();
+        
         File out = new File(folder, (name.isEmpty() ? filePrefix : name) + (usePNG ? ".png" : ".svg"));
         try {
             if (usePNG) {
@@ -239,5 +245,40 @@ public abstract class Tracer implements Stoppable {
 
     protected boolean insideTimeframe(Simulator sim) {
         return sim.getTime() >= timeStart && (timeEnd == -1 || sim.getTime() <= timeEnd);
+    }
+    
+    public abstract void snapshot(Simulator simulator);
+    
+    public void setup(Simulator sim) {
+    	double maxXAbs = 0, maxYAbs = 0;
+
+        setupGeofence(sim);
+
+        if (lines != null) {
+
+            for (Line l : lines) {
+                maxXAbs = Math.max(maxXAbs, Math.abs(l.getPointA().x));
+                maxYAbs = Math.max(maxYAbs, Math.abs(l.getPointA().y));
+            }
+
+            width = Math.max(maxXAbs, maxYAbs) * 2;
+            height = width;
+        } else {
+            width = sim.getEnvironment().getWidth();
+            height = width;
+        }
+    }
+    
+    @Override
+    public void update(Simulator sim) {
+    	
+    	 if (!isSetup) {
+             setup(sim);
+             isSetup = true;
+         }
+
+    	 if (sim.getTime() % snapshotFrequency == 0 && insideTimeframe(sim)) {
+            snapshot(sim);
+        }
     }
 }

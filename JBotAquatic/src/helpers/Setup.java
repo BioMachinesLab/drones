@@ -72,13 +72,19 @@ class Setup {
 		}
 		
 		hash.get("--evaluation").setArgument("resolution", resolution);
+//		hash.get("--evaluation").setArgument("decrease", 2000);
+		
+		hash.get("--evaluation").setArgument("min",1);
+//		hash.get("--evaluation").setArgument("targetwp",3);
 		
 		if(simulation) { 
 //			hash.get("--evaluation").setArgument("usegps",1);
 //			hash.get("--robots").setArgument("badgps", 1);
 		} else {
-			hash.get("--evaluation").setArgument("clusterdistance",10.6);
+//			hash.get("--evaluation").setArgument("clusterdistance",7+1.8*2);
+//			hash.get("--evaluation").setArgument("clusterdistance",7+1.8);
 //			hash.get("--evaluation").setArgument("instant", 1);
+			hash.get("--evaluation").setArgument("targetdistance", 2+1.8);
 		}
 		
 		hash.put("--environment", new Arguments("classname=EmptyEnvironment,width=150,height=150,steps="+exp.timeSteps,true));
@@ -141,9 +147,10 @@ class Setup {
 		sim.addCallback(eval);
 //		sim.addCallback(new WaterCurrent(new Arguments("maxspeed=0.1")));
 		
-		for(Updatable u : sim.getCallbacks())
-			if(u instanceof WaterCurrent)
-				((WaterCurrent)u).disable();
+//		for(Updatable u : sim.getCallbacks())
+//			if(u instanceof WaterCurrent)
+//				((WaterCurrent)u).disable();
+		
 		
 		if(gui) {
 			renderer = getRenderer();
@@ -185,15 +192,16 @@ class Setup {
 		}
 	}
 	
-	private Waypoint getShiftedWaypoint(Waypoint wp) {
-		LatLon latLon = wp.getLatLon();
-		
+	public LatLon getShiftedLatLon(LatLon latLon) {
 		commoninterface.mathutils.Vector2d shifted = CoordinateUtilities.GPSToCartesian(latLon);
 		shifted.x = shifted.x+start.x-firstPos.x;
 		shifted.y = shifted.y+start.y-firstPos.y;
-		LatLon latLonShifted = CoordinateUtilities.cartesianToGPS(shifted);
-		
-		return new Waypoint(wp.getName(), latLonShifted);
+		return CoordinateUtilities.cartesianToGPS(shifted);
+	}
+	
+	private Waypoint getShiftedWaypoint(Waypoint wp) {
+		LatLon latLon = wp.getLatLon();
+		return new Waypoint(wp.getName(), getShiftedLatLon(latLon));
 	}
 	
 	public Renderer getRenderer() {

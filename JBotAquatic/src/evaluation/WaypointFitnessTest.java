@@ -28,6 +28,7 @@ public class WaypointFitnessTest extends EvaluationFunction {
     private final double safetyDistance;
     private double minDistanceOthers = Double.POSITIVE_INFINITY;
     private int activeRobot = 0;
+    private double time = 0;
 
     public WaypointFitnessTest(Arguments args) {
         super(args);
@@ -49,27 +50,36 @@ public class WaypointFitnessTest extends EvaluationFunction {
         // DISTANCE TO WAYPOINT + ENERGY USED TO STAY IN WP
         Vector2d wpPos = CoordinateUtilities.GPSToCartesian(wp.getLatLon());
         double distance = wpPos.distanceTo(new Vector2d(drone.getPosition().x, drone.getPosition().y));
+
         if(distance <= targetDistance) {
             energyBonus += 1 - drone.getMotorSpeedsInPercentage();
+          //TODO ENDS WHEN ARRIVED AT WAYPOINT
+            simulator.stopSimulation();
         }
         fitness = (startingDistance - distance) / startingDistance + energyBonus / simulator.getTime();
-
+        
         // COLLISIONS
         if (kill && drone.isInvolvedInCollison()) {
             simulator.stopSimulation();
         }
-        for (int i = 1; i < simulator.getRobots().size(); i++) {
+        for (int i = 0; i < simulator.getRobots().size(); i++) {
             Robot r = simulator.getRobots().get(i);
-            double d = drone.getPosition().distanceTo(r.getPosition()) - drone.getRadius() - r.getRadius();
+            if(r.getId() == drone.getId())
+            	continue;
+            double d = Math.max(0,drone.getPosition().distanceTo(r.getPosition()) - drone.getRadius() - r.getRadius());
             minDistanceOthers = Math.min(d, minDistanceOthers);
         }
+        
         double safetyFactor = Math.min(safetyDistance, minDistanceOthers) / safetyDistance;
         fitness *= safetyFactor;
+        time = simulator.getTime();
     }
 
     @Override
     public double getFitness() {
-        return 10 + fitness;
+//    	return time;
+    	return minDistanceOthers;
+//        return 10 + fitness;
     }
 
     public static double calculateDistance(Waypoint wp, AquaticDrone drone) {

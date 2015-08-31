@@ -25,13 +25,18 @@ public class AggregateWaypointFitnessTest extends AvoidCollisionsFunction {
     private double startingDistance = 0;
     private double meanDistance = 0;
     private Waypoint wp = null;
+    private double savedDistance = 0;
+    private int numberChanges = 0;
+    private int targetwp = 0;
 
     public AggregateWaypointFitnessTest(Arguments args) {
         super(args);
+        targetwp = args.getArgumentAsIntOrSetDefault("targetwp", targetwp);
     }
 
     @Override
     public void update(Simulator simulator) {
+    	
         if (!configured) {
             wp = ((AquaticDrone) simulator.getRobots().get(0)).getActiveWaypoint();
             for (Robot r : simulator.getRobots()) {
@@ -42,12 +47,33 @@ public class AggregateWaypointFitnessTest extends AvoidCollisionsFunction {
         }
 
         // MEAN DISTANCE TO WAYPOINT
+        
+        double minDistance = Double.MAX_VALUE;
+        double maxDistance = 0;
+        
         double currentDistance = 0;
         for (Robot r : simulator.getRobots()) {
             AquaticDrone drone = (AquaticDrone) r;
-            currentDistance += calculateDistance(wp, drone);
+            double dist = calculateDistance(wp, drone);;
+            currentDistance += dist;
+            
+            minDistance = Math.min(dist,minDistance);
+            maxDistance = Math.max(dist,maxDistance);
         }
         currentDistance /= simulator.getRobots().size();
+        
+        System.out.print(currentDistance+" ");
+        
+        if(targetwp == 3)
+        	savedDistance = currentDistance;
+        
+        if(!((AquaticDrone) simulator.getRobots().get(0)).getActiveWaypoint().equals(wp)) {
+    		wp = ((AquaticDrone) simulator.getRobots().get(0)).getActiveWaypoint();
+    		if(numberChanges == targetwp)
+    			savedDistance=currentDistance;
+    		numberChanges++;
+    	}
+        
         meanDistance += (startingDistance - currentDistance) / startingDistance;
         fitness = meanDistance / simulator.getTime();
         
@@ -56,7 +82,8 @@ public class AggregateWaypointFitnessTest extends AvoidCollisionsFunction {
 
     @Override
     public double getFitness() {
-        return 10 + fitness;
+//        return 10 + fitness;
+    	return savedDistance;
     }
 
     static double calculateDistance(Waypoint wp, Robot drone) {

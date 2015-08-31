@@ -60,7 +60,17 @@ public class DispersionFitnessTest extends AvoidCollisionsFunction {
         double distanceDelta = 0;
         for (Robot r : simulator.getRobots()) {
             double minDist = Double.POSITIVE_INFINITY;
+            
+//            if(r.getId() < 4 && simulator.getTime() < 758)
+//            	continue;
+            
             for (Robot r2 : simulator.getRobots()) {
+            	
+//              758 steps all dispersing, 1138 all stop ADAPTIVE
+                //TODO REMOVE THIS
+//                if(r2.getId() < 4 && simulator.getTime() < 758)
+//                	continue;
+            	
                 if (r != r2) {
                 	minDist = Math.min(minDist, r.getPosition().distanceTo(r2.getPosition()));
                 }
@@ -70,6 +80,10 @@ public class DispersionFitnessTest extends AvoidCollisionsFunction {
         }
         
         distanceDelta /= simulator.getRobots().size();
+        
+        //TODO REMOVE THIS
+//        distanceDelta /= simulator.getTime() < 758 ? 4 : simulator.getRobots().size();
+//        System.out.print(distanceDelta+" ");
         
 //        System.out.println(simulator.getTime()+"  "+distanceDelta);
 //        System.out.println();
@@ -93,6 +107,7 @@ public class DispersionFitnessTest extends AvoidCollisionsFunction {
 
     @Override
     public double getFitness() {
+//    	System.out.println();
     	if(lastSteps) {
     		return fitness/ls;
     	}else{

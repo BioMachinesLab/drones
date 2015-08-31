@@ -16,6 +16,7 @@ import simulation.util.Arguments;
 import updatables.CoverageTracer;
 import updatables.PathTracer;
 import commoninterface.entities.RobotLocation;
+import commoninterface.entities.Waypoint;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.utils.CIArguments;
@@ -55,6 +56,7 @@ public class AssessFitness {
 			
 			while(Math.abs(stepTime.getMillis()-currentTime.getMillis()) >= 100) {
 				stepTime = stepTime.plus(100);
+				
 				setup.sim.performOneSimulationStep((double)step);
 				step++;
 				
@@ -63,11 +65,15 @@ public class AssessFitness {
 					setup.renderer.repaint();
 //					System.out.println(step);
 					try {
-						Thread.sleep(20);
+						Thread.sleep(1);
 					} catch (InterruptedException e) {}
 				}
 				
 			}
+			
+			if(setup.sim.simulationFinished())
+				break;
+			
 			RobotLocation rl = Setup.getRobotLocation(d);
 			
 			if(rl == null || rl.getLatLon() == null)
@@ -117,10 +123,11 @@ public class AssessFitness {
 //			double orientation = 360 - (rl.getOrientation() - 90);
 //			r.setOrientation(Math.toRadians(orientation));
 			
-			while(Math.abs(stepTime.getMillis()-currentTime.getMillis()) > 100) {
+			while(Math.abs(stepTime.getMillis()-currentTime.getMillis()) >= 100) {
 				stepTime = stepTime.plus(100);
-				step++;
+				
 				setup.sim.performOneSimulationStep((double)step);
+				step++;
 				
 //				AquaticDrone aq = (AquaticDrone) setup.getRobot("192.168.3.2");
 //				ControllerCIBehavior b = (ControllerCIBehavior)aq.getActiveBehavior();
@@ -138,6 +145,9 @@ public class AssessFitness {
 //					} catch (InterruptedException e) {}
 				}
 			}
+			
+			if(setup.sim.simulationFinished())
+				break;
 		}
 		
 		setup.sim.terminate();
@@ -154,6 +164,12 @@ public class AssessFitness {
 		}
 		
 //		while(true) {
+		
+		int s = 1;
+		
+		double[] samples = new double[s];
+		
+		for(int i = 0 ; i < s ; i++) {
 			
 			Setup setupReal = new Setup(exp, randomSeed, false, false);
 			Setup setupSim = new Setup(exp, randomSeed, false, true);
@@ -176,40 +192,51 @@ public class AssessFitness {
 			CoverageTracer tempTracer = new CoverageTracer(new Arguments("bgcolor=0-0-0-0,min=20,max=25,color=1,folder=temp/"+exp.toString()));
 			
 			boolean coverage = false;
+			boolean tempEnabled = false;
+			boolean pathTracer = false;
 			
-			if(coverage && setupSim.eval instanceof CoverageFitnessTest) {
-				
-				//TEMP
+			//TEMP
+			if(tempEnabled) {
 				temp.setup(setupReal.sim);
 				tempTracer.setCoverage(temp.getCoverage(),setupReal.resolution);
 				setupReal.sim.addCallback(temp);
 				setupReal.sim.addCallback(tempTracer);
+			}
 			
+			if(coverage && setupSim.eval instanceof CoverageFitnessTest) {
+				
 				//COVERAGE
-				CoverageTracer simCoverageTracer = new CoverageTracer(new Arguments("bgcolor=0-0-0-0,folder=coverage/"+exp.toString()+"_sim"));
-				CoverageTracer realCoverageTracer = new CoverageTracer(new Arguments("bgcolor=0-0-0-0,folder=coverage/"+exp.toString()+"_real"));
-				
+				CoverageTracer simCoverageTracer = new CoverageTracer(new Arguments("drawgeofence=0,gradient=0,altcolor=0-0-0-255,png=1,maincolor=46-203-206-255,bgcolor=0-0-0-0,folder=coverage/"+exp.toString()+"_sim"));
 				CoverageFitnessTest simEval = (CoverageFitnessTest)setupSim.eval;
-				CoverageFitnessTest realEval = (CoverageFitnessTest)setupReal.eval;
-				
 				simCoverageTracer.setCoverage(simEval.getCoverage(),setupSim.resolution);
-				realCoverageTracer.setCoverage(realEval.getCoverage(),setupReal.resolution);
-				
-				setupReal.sim.addCallback(realCoverageTracer);
 				setupSim.sim.addCallback(simCoverageTracer);
+
+				CoverageTracer realCoverageTracer = new CoverageTracer(new Arguments("drawgeofence=0,gradient=0,altcolor=255-0-0-255,png=1,maincolor=46-203-206-255,bgcolor=0-0-0-0,folder=coverage/"+exp.toString()+"_real"));
+//				CoverageTracer realCoverageTracer = new CoverageTracer(new Arguments("png=1,sequence=1,linewidth=3,snapshotfrequency=5,scale=10,gradient=0,altcolor=255-0-0-255,png=1,maincolor=255-255-000-255,bgcolor=0-0-0-0,folder=coverage/"+exp.toString()+"_real"));
+				CoverageFitnessTest realEval = (CoverageFitnessTest)setupReal.eval;
+				realCoverageTracer.setCoverage(realEval.getCoverage(),setupReal.resolution);
+				setupReal.sim.addCallback(realCoverageTracer);
 				
 			}
 			
-//			,timestart=0,timeend=1200
-//			,timestart=1200,timeend=1800
-//			,timestart=1800,timeend=3600
-//			,timestart=3600,timeend=5400
-//			,timestart=5400,timeend=6600
-			PathTracer simPathTracer = new PathTracer(new Arguments("folder=path,bgcolor=0-0-0-0,robotcolor=255-255-000-255,fade=1,name="+exp.toString()+"_sim"));
-			PathTracer realPathTracer = new PathTracer(new Arguments("folder=path,bgcolor=0-0-0-0,robotcolor=255-255-000-255,fade=1,name="+exp.toString()+"_real"));
+			if(pathTracer) {
+				PathTracer realPathTracer = new PathTracer(new Arguments("drawgeofence=1,linewidth=3,folder=path,bgcolor=0-0-0-0,altcolor=0-0-0-255,maincolor=255-000-000-255,fade=0,name="+exp.toString()+"_real"));
+				setupReal.sim.addCallback(realPathTracer);
+				PathTracer simPathTracer = new PathTracer(new Arguments("drawgeofence=1,linewidth=3,folder=path,bgcolor=0-0-0-0,altcolor=0-0-0-255,maincolor=255-000-000-255,fade=0,name="+exp.toString()+"_sim"));
+				setupSim.sim.addCallback(simPathTracer);
+			}
 			
-			setupSim.sim.addCallback(simPathTracer);
-			setupReal.sim.addCallback(realPathTracer);
+//			DISPERSION ADAPTIVE
+//			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=0,timeend=400,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_1")));
+//			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=400,timeend=758,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_2")));
+//			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=758,timeend=1138,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_3")));
+			
+//			PATROL ADAPTIVE
+			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=0,timeend=1200,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_1")));
+			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=1200,timeend=1800,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_2")));
+			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=1,png=0,snapshotfrequency=5,timestart=1800,timeend=3600,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_3")));
+			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=3600,timeend=5400,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_4")));
+			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=5400,timeend=6600,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_5")));
 			
 			double min = Double.MAX_VALUE;
 			double max = -Double.MAX_VALUE;
@@ -217,23 +244,26 @@ public class AssessFitness {
 			boolean stopRun = false;
 			boolean ignoreReal = false;
 			
-			int index = 0;
-			
 			for(LogData d : exp.logs) {
 				
 				if(stopRun)
 					break;
 				
-				if(d.comment != null)
+				
+				if(d.comment != null) {
+//					System.out.println(step+" "+d.comment);
 					continue;
+				}
 				
 				currentTime = DateTime.parse(d.GPSdate,formatter);
 				
 				while(Math.abs(stepTime.getMillis()-currentTime.getMillis()) >= 100) {
 					stepTime = stepTime.plus(100);
 					
-					if(!ignoreReal)
+					if(!ignoreReal) {
 						setupReal.sim.performOneSimulationStep((double)step);
+						
+					}
 					
 					setupSim.sim.performOneSimulationStep((double)step);
 					step++;
@@ -266,7 +296,7 @@ public class AssessFitness {
 						double distanceToTarget = 2;
 						
 						//Real
-						if(getDistanceToTarget(setupReal.getRobot("."+exp.activeRobot)) < distanceToTarget) 
+						if(getDistanceToTarget(setupReal.getRobot("."+exp.activeRobot)) < distanceToTarget)
 							ignoreReal = true;
 	
 						//Sim
@@ -279,6 +309,13 @@ public class AssessFitness {
 				if(exp.activeRobot != -1 && !d.ip.endsWith("."+exp.activeRobot)) {
 					if(d.inputNeuronStates != null)
 						continue;
+					
+					//force location of immobile robots
+					RobotLocation rlStopped = Setup.getRobotLocation(d);
+					Robot rStopped = setupSim.getRobot(d.ip);
+					Vector2d  vecStopped = CoordinateUtilities.GPSToCartesian(setupSim.getShiftedLatLon(rlStopped.getLatLon()));
+					rStopped.setPosition(vecStopped.x, vecStopped.y);
+					
 				}
 				
 				if(ignoreReal)
@@ -294,7 +331,7 @@ public class AssessFitness {
 				temp.addPoint(setupReal.sim,setupReal.robots.get(position).getPosition(), d.temperatures[1]);
 				tempTracer.setCoverage(temp.getCoverage(), setupReal.resolution);
 				
-				System.out.println(pos.x+" "+pos.y+" "+d.temperatures[1]);
+//				System.out.println(pos.x+" "+pos.y+" "+d.temperatures[1]);
 				
 				if(min > d.temperatures[1])
 					min = d.temperatures[1];
@@ -311,8 +348,20 @@ public class AssessFitness {
 			
 //			System.out.println(min+" min max "+max);
 			
-			System.out.println(setupReal.eval.getFitness()+" "+setupSim.eval.getFitness());
-//		}
+			samples[i] = setupSim.eval.getFitness();
+			
+//			System.out.println();
+			
+			if(s == 1)
+				System.out.println(setupReal.eval.getFitness()+" "+setupSim.eval.getFitness());
+		}
+		
+		if(s > 1) {
+//			System.out.println(exp);
+			for(int i = 0 ; i < samples.length ; i++) {
+				System.out.println(samples[i]);
+			}
+		}
 	}
 	
 	private static double getDistanceToTarget(Robot r) {

@@ -7,9 +7,7 @@ package updatables;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-
 import simulation.Simulator;
-import simulation.physicalobjects.Line;
 import simulation.util.Arguments;
 
 /**
@@ -24,9 +22,7 @@ public class CoverageTracer extends Tracer {
     private float max = 1;
     private boolean gradient = false;
 
-    private int snapshotFrequency = 300;
     private double[][] coverage;
-    private boolean isSetup = false;
     private boolean sequence = false;
     private int count = 0;
 
@@ -35,40 +31,7 @@ public class CoverageTracer extends Tracer {
         gradient = args.getFlagIsTrue("gradient");
         min = (float) args.getArgumentAsDoubleOrSetDefault("min", min);
         max = (float) args.getArgumentAsDoubleOrSetDefault("max", max);
-        snapshotFrequency = args.getArgumentAsIntOrSetDefault("snapshotfrequency", snapshotFrequency);
         sequence = args.getFlagIsTrue("sequence");
-    }
-
-    @Override
-    public void update(Simulator sim) {
-        if (!isSetup) {
-            setup(sim);
-            isSetup = true;
-        }
-        if (sim.getTime() % snapshotFrequency == 0 && insideTimeframe(sim)) {
-            drawHeatmap(sim);
-        }
-    }
-
-    protected void setup(Simulator sim) {
-        double maxXAbs = 0, maxYAbs = 0;
-
-        super.setupGeofence(sim);
-
-        if (lines != null) {
-
-            for (Line l : lines) {
-                maxXAbs = Math.max(maxXAbs, Math.abs(l.getPointA().x));
-                maxYAbs = Math.max(maxYAbs, Math.abs(l.getPointA().y));
-            }
-
-            width = Math.max(maxXAbs, maxYAbs) * 2;
-            height = width;
-        } else {
-            width = sim.getEnvironment().getWidth();
-            height = width;
-        }
-
     }
 
     public void setCoverage(double[][] coverage, double resolution) {
@@ -78,7 +41,8 @@ public class CoverageTracer extends Tracer {
     	}
     }
 
-    public void drawHeatmap(Simulator sim) {
+    @Override
+    public void snapshot(Simulator sim) {
         if (coverage == null) {
             return;
         }
@@ -163,7 +127,7 @@ public class CoverageTracer extends Tracer {
 
     @Override
     public void terminate(Simulator simulator) {
-        drawHeatmap(simulator);
+        snapshot(simulator);
     }
 
 }

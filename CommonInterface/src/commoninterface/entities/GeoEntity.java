@@ -9,6 +9,7 @@ import commoninterface.utils.logger.LogCodex.LogType;
 
 public abstract class GeoEntity extends Entity {
 	
+	private static final long serialVersionUID = -2730857744364736763L;
 	protected LatLon latLon;
 	
 	public GeoEntity(String name, LatLon latLon) {
@@ -34,4 +35,5 @@ public abstract class GeoEntity extends Entity {
 	public String toString() {
 		return this.getClass().getSimpleName()+";"+getLatLon().getLat()+";"+getLatLon().getLon()+";";
 	}
+	
 }

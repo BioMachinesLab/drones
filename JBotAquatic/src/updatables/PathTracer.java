@@ -28,6 +28,7 @@ public class PathTracer extends Tracer {
     private boolean fade = false;
     private int steps = 10;
     private HashMap<Robot, List<Vector2d>> points = null;
+    private int frameCount = 0;
 
     public PathTracer(Arguments args) {
         super(args);
@@ -54,11 +55,11 @@ public class PathTracer extends Tracer {
                 points.get(r).add(new Vector2d(r.getPosition()));
             }
         }
+        super.update(simulator);
     }
-
-    @Override
-    public void terminate(Simulator simulator) {
-        // FIND BOUNDARIES
+    
+    public void snapshot(Simulator simulator) {
+    	// FIND BOUNDARIES
         double maxAbsX = 0, maxAbsY = 0;
         for (List<Vector2d> l : points.values()) {
             for (Vector2d v : l) {
@@ -66,7 +67,7 @@ public class PathTracer extends Tracer {
                 maxAbsY = Math.max(maxAbsY, Math.abs(v.y));
             }
         }
-        width = Math.max(maxAbsX, maxAbsY) * 2;
+        width = Math.max(Math.max(maxAbsX, maxAbsY) * 2,width);
         height = width;
 
         Graphics2D gr = createCanvas(simulator);
@@ -83,7 +84,7 @@ public class PathTracer extends Tracer {
                     ys[i] = t.y;
                 }
                 gr.setPaint(mainColor);
-                gr.setStroke(new BasicStroke(lineWidth));
+                gr.setStroke(new BasicStroke(1.0f));
                 gr.drawPolyline(xs, ys, pts.size());
             } else {
                 if (steps == 0) {
@@ -94,6 +95,10 @@ public class PathTracer extends Tracer {
                     // GET POINTS FOR SEGMENT
                     int start = s * stepSize;
                     int end = Math.min(start + stepSize, pts.size() - 1);
+                    
+                    if(end < start)
+                    	continue;
+                    
                     LinkedList<IntPos> polyLine = new LinkedList<>();
                     for (int i = 0; i <= end - start; i++) {
                         IntPos t = transform(pts.get(start + i).x, pts.get(start + i).y);
@@ -114,11 +119,14 @@ public class PathTracer extends Tracer {
                     int alpha = Math.max(50, (int) Math.round((double) (s + 1) / steps * 255));
                     Color c = new Color(mainColor.getRed(), mainColor.getGreen(), mainColor.getBlue(), alpha);
                     gr.setPaint(c);
-                    gr.setStroke(new BasicStroke(lineWidth));
+                    gr.setStroke(new BasicStroke(1.0f));
                     gr.drawPolyline(xs, ys, xs.length);
                 }
             }
         }
+        
+        //size
+        gr.drawLine(0, 0, (int)(5*scale), 0);
 
         // DRAW INITIAL POSITIONS
         if (!hideStart) {
@@ -135,6 +143,11 @@ public class PathTracer extends Tracer {
             }
         }
 
-        writeGraphics(gr, simulator, name.isEmpty() ? simulator.hashCode() + "" : name);
+        writeGraphics(gr, simulator, name.isEmpty() ? ""+frameCount++ : name);
+    }
+
+    @Override
+    public void terminate(Simulator simulator) {
+        snapshot(simulator);
     }
 }

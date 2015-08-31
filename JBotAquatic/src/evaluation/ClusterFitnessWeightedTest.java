@@ -27,13 +27,16 @@ public class ClusterFitnessWeightedTest extends AvoidCollisionsFunction {
     private double totalNorm = 0;
     private boolean useGPS = false;
     private boolean lastSteps = false;
+    private boolean min = false;
     private double ls = 0;
+    private double currentMin = Double.MAX_VALUE;
     
     public ClusterFitnessWeightedTest(Arguments args) {
         super(args);
         clusterDistance = args.getArgumentAsDoubleOrSetDefault("clusterdistance", clusterDistance);
         useGPS = args.getFlagIsTrue("usegps");
         lastSteps = args.getFlagIsTrue("laststeps");
+        min = args.getFlagIsTrue("min");
     }
 
     @Override
@@ -45,8 +48,12 @@ public class ClusterFitnessWeightedTest extends AvoidCollisionsFunction {
         totalNorm += weight;
         totalClusters += numClusters * weight;
         
+        if(min && numClusters < currentMin) {
+        	currentMin = numClusters;
+        }
+        
         if(lastSteps) {
-        	if(simulator.getTime() > simulator.getEnvironment().getSteps() - 100) {
+        	if(simulator.getTime() > simulator.getEnvironment().getSteps() - 300) {
         		ls++;
         		fitness+=numClusters;
         	} else {
@@ -61,6 +68,10 @@ public class ClusterFitnessWeightedTest extends AvoidCollisionsFunction {
 
     @Override
     public double getFitness() {
+    	
+    	if(min)
+    		return currentMin;
+    	
     	if(lastSteps) {
     		return fitness/ls;
     	}else{
