@@ -146,12 +146,28 @@ class Setup {
 		
 		sim.addCallback(eval);
 //		sim.addCallback(new WaterCurrent(new Arguments("maxspeed=0.1")));
+	
+/*		
+		for(Updatable u : sim.getCallbacks())
+			if(u instanceof WaterCurrent)
+				((WaterCurrent)u).disable();
 		
-//		for(Updatable u : sim.getCallbacks())
-//			if(u instanceof WaterCurrent)
-//				((WaterCurrent)u).disable();
+		double val = 0;
 		
+		if(exp.toString().equals("waypoint0_1_8")) val = 0.1855567202347092;
+		if(exp.toString().equals("waypoint0_2_8")) val = 0.1974116191050818;
+		if(exp.toString().equals("waypoint0_3_8")) val = 0.16910446848365188;
 		
+		if(exp.toString().equals("waypoint1_1_8")) val = 0.11666613512650208;
+		if(exp.toString().equals("waypoint1_2_8")) val = 0.08472035916661572;
+		if(exp.toString().equals("waypoint1_3_8")) val = 0.14570037325057994;
+		
+		if(exp.toString().equals("waypoint2_1_8")) val = 0.12181122407714738;
+		if(exp.toString().equals("waypoint2_2_8")) val = 0.14696682730072963;
+		if(exp.toString().equals("waypoint2_3_8")) val = 0.07183482937207943;
+		
+		sim.addCallback(new WaterCurrent(new Arguments("fixedspeed=1,angle=-45,maxspeed="+val)));
+*/
 		if(gui) {
 			renderer = getRenderer();
 			viewer = new FitnessViewer(renderer);

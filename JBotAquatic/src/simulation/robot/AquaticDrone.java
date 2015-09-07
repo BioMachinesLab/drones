@@ -265,52 +265,6 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		rudderActuator.setSpeed(s);
 	}
 	
-	/*
-	@Override
-	public void updateActuators(Double time, double timeDelta) {
-		
-		for(CIBehavior b : alwaysActiveBehaviors)
-			b.step(time);
-		
-		if(stopTimestep > 0) {
-			rightWheelSpeed = 0;
-			leftWheelSpeed = 0;
-			stopTimestep--;
-		}
-		
-		double lw = Math.signum(rightWheelSpeed - leftWheelSpeed);
-		
-//		orientation = MathUtils.modPI2(orientation + motorModel(rightWheelSpeed-leftWheelSpeed)*lw);
-		orientation = MathUtils.modPI2(orientation + motorModel(rightWheelSpeed-leftWheelSpeed)*lw);
-		
-		double accelDirection = (rightWheelSpeed+leftWheelSpeed) < 0 ? -1 : 1;
-		
-		double lengthOfAcc = accelarationConstant * (leftWheelSpeed + rightWheelSpeed);
-		
-		//Backwards motion should be slower. This value here is just an
-		//estimate, and should be improved by taking real world samples
-		if(accelDirection < 0)
-			lengthOfAcc*=0.2;
-		
-		Vector2d accelaration = new Vector2d(lengthOfAcc * FastMath.cosQuick(orientation), lengthOfAcc * FastMath.sinQuick(orientation));
-		
-		velocity.setX(velocity.getX() * (1 - frictionConstant));
-		velocity.setY(velocity.getY() * (1 - frictionConstant));    
-		
-		velocity.add(accelaration);
-		
-		position.set(
-				position.getX() + timeDelta * velocity.getX(), 
-				position.getY() + timeDelta * velocity.getY());
-		
-		for (Actuator actuator : actuators) {
-			actuator.apply(this);
-		}
-		
-		broadcastHandler.update(time);
-	}*/
-	
-	
 	@Override
 	public void updateActuators(Double time, double timeDelta) {
 		
@@ -377,9 +331,6 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	@Override
 	public void setActiveWaypoint(Waypoint wp) {
 		this.activeWaypoint = wp;
-		//TODO REMOVE THIS DEBUG LINE!!
-//		System.out.println("DEBUG DEBUG DEBUG AQUATICDRONE");
-//		this.activeWaypoint = Waypoint.getWaypoints(this).get(getId());
 	}
 	
 	@Override
@@ -517,12 +468,6 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		LatLon gpsLatLon = CoordinateUtilities.cartesianToGPS(getPosition().getX(), getPosition().getY());
 		
 		if(gpsError > 0) {
-			
-//			if(simulator.getTime()-lastGPSerrorStep > 200) {
-//				lastGPSerrorStep = (int)((double)simulator.getTime());
-//				radius = simulator.getRandom().nextDouble()*gpsError;
-//				angle = simulator.getRandom().nextDouble()*Math.PI*2;
-//			}
 			
 			commoninterface.mathutils.Vector2d pos = CoordinateUtilities.GPSToCartesian(gpsLatLon);
 			double radius = simulator.getRandom().nextDouble()*gpsError;

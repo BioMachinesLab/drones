@@ -1,28 +1,31 @@
 package evaluation;
 
+import mathutils.Vector2d;
 import simulation.Simulator;
+import simulation.physicalobjects.Line;
+import simulation.physicalobjects.PhysicalObject;
+import simulation.physicalobjects.PhysicalObjectType;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
-import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
 
-public class EnemyEvaluationFunction extends EvaluationFunction{
+public class EnemyEvaluationFunction extends AvoidCollisionsFunction{
 	
 	@ArgumentsAnnotation(name="targetdistance", defaultValue="10")
 	private double targetDistance = 10;
 	@ArgumentsAnnotation(name="minimumdistance", defaultValue="4")
-	private double minimumDistance = 4;
-	@ArgumentsAnnotation(name="kill", defaultValue="0")
-	private boolean kill = false;
-	private double value = 0;
+	private double minimumDistance = 3;
 	
 	private Robot enemy = null;
+	private double time = 0;
+	private double numberDetecting = 0;
+	private double numberOutside = 0;
 
 	public EnemyEvaluationFunction(Arguments args) {
 		super(args);
 		targetDistance = args.getArgumentAsDoubleOrSetDefault("targetdistance", targetDistance);
 		minimumDistance = args.getArgumentAsDoubleOrSetDefault("minimumdistance", minimumDistance);
-		kill = args.getArgumentAsDoubleOrSetDefault("kill", 0) == 1;
+		fitness = 1;
 	}
 
 	@Override
@@ -30,33 +33,60 @@ public class EnemyEvaluationFunction extends EvaluationFunction{
 		
 		if(enemy == null) {
 			enemy = simulator.getRobots().get(simulator.getRobots().size()-1);
-			value = 1.0/simulator.getEnvironment().getSteps()/(simulator.getRobots().size()-1);
 			fitness = 0;
 		}
+		
+		double numberDetecting = 0;
+		double numberOutside = 0;
 		
 		for(Robot r : simulator.getRobots()) {
 			if(r.getId() != enemy.getId()) {
 				
-				double dist = r.getPosition().distanceTo(enemy.getPosition());
-				
-				if(r.isInvolvedInCollison()) {
-					if(kill) {
-						simulator.stopSimulation();
-						fitness = 0;
-					} else
-						fitness-=value*2;
-				} else if(dist < targetDistance && dist > minimumDistance) {
-					fitness+=value;
-				} else {
-//					fitness-=value;
+				if(!insideLines(r.getPosition(), simulator))
+					numberOutside++;
+				else {
+					double dist = r.getPosition().distanceTo(enemy.getPosition());
+					if(dist < targetDistance && dist > minimumDistance) {
+						numberDetecting++;
+					}
 				}
+			} else {
+				if(insideLines(r.getPosition(), simulator))
+					time++;
 			}
 		}
+		
+		if(numberOutside == 0) {
+//			fitness+=numberDetecting;
+//			fitness-=numberOutside*10;
+			this.numberDetecting+= numberDetecting;
+			this.numberOutside+= numberOutside;
+		}
+		
+		super.update(simulator);
+		
+		fitness = this.numberDetecting / time;
+		
 	}
 	
 	@Override
 	public double getFitness() {
-		return Math.max(fitness,0);
+		return Math.max(10+fitness,0);
 	}
+	
+	public boolean insideLines(Vector2d v, Simulator sim) {
+        //http://en.wikipedia.org/wiki/Point_in_polygon
+        int count = 0;
+
+        for (PhysicalObject p : sim.getEnvironment().getAllObjects()) {
+            if (p.getType() == PhysicalObjectType.LINE) {
+                Line l = (Line) p;
+                if (l.intersectsWithLineSegment(v, new Vector2d(0, -Integer.MAX_VALUE)) != null) {
+                    count++;
+                }
+            }
+        }
+        return count % 2 != 0;
+    }
 	
 }

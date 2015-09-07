@@ -69,6 +69,7 @@ public class CompositeController extends CIBehavior {
 
 		double elapsedTime = timestep - startTime;
 		
+		
 		switch(currentState) {
 			case GO_TO_AREA:
 				
@@ -85,7 +86,8 @@ public class CompositeController extends CIBehavior {
 					configured = true;
 					elapsedTime = timestep - startTime;
 				} 
-				
+				//TODO remove
+				drone.setActiveWaypoint(Waypoint.getWaypoints(drone).get(1));
 				if(elapsedTime > time[State.GO_TO_AREA.ordinal()]) {
 					currentState = State.DISPERSE;
 					configured = false;

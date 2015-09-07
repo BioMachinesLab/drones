@@ -6,6 +6,7 @@ import java.util.List;
 
 import simulation.Simulator;
 import simulation.robot.Robot;
+import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
@@ -37,6 +38,11 @@ public class GatewayRobot implements RobotCI {
 			Robot r = sim.getRobots().get(i);
 			if(r instanceof RobotCI) {
 				RobotCI robot = (RobotCI)r;
+				
+				if(robot instanceof AquaticDroneCI)
+					if(((AquaticDroneCI)robot).getDroneType() != AquaticDroneCI.DroneType.DRONE)
+						continue;
+				
 				robot.processInformationRequest(request, i == chosenIndex  ? conn : null);
 			}
 		}
@@ -106,6 +112,11 @@ public class GatewayRobot implements RobotCI {
 			Robot r = sim.getRobots().get(i);
 			if(r instanceof RobotCI) {
 				RobotCI robot = (RobotCI)r;
+				
+				if(robot instanceof AquaticDroneCI)
+					if(((AquaticDroneCI)robot).getDroneType() != AquaticDroneCI.DroneType.DRONE)
+						continue;
+				
 				robot.startBehavior(b);
 			}
 		}
@@ -117,6 +128,11 @@ public class GatewayRobot implements RobotCI {
 			Robot r = sim.getRobots().get(i);
 			if(r instanceof RobotCI) {
 				RobotCI robot = (RobotCI)r;
+				
+				if(robot instanceof AquaticDroneCI)
+					if(((AquaticDroneCI)robot).getDroneType() != AquaticDroneCI.DroneType.DRONE)
+						continue;
+				
 				robot.stopActiveBehavior();
 			}
 		}

@@ -62,7 +62,7 @@ public class AggregateWaypointFitnessTest extends AvoidCollisionsFunction {
         }
         currentDistance /= simulator.getRobots().size();
         
-        System.out.print(currentDistance+" ");
+//        System.out.print(currentDistance+" ");
         
         if(targetwp == 3)
         	savedDistance = currentDistance;

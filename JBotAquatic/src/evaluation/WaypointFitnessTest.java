@@ -77,8 +77,8 @@ public class WaypointFitnessTest extends EvaluationFunction {
 
     @Override
     public double getFitness() {
-//    	return time;
-    	return minDistanceOthers;
+    	return time;
+//    	return minDistanceOthers;
 //        return 10 + fitness;
     }
 

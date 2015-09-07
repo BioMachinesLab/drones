@@ -29,8 +29,8 @@ public class RobotLocation extends GeoEntity{
 		return type;
 	}
 	
-	public static LinkedHashSet<RobotLocation> getDroneLocations(RobotCI robot) {
-		LinkedHashSet<RobotLocation> droneLocations = new LinkedHashSet<RobotLocation>();
+	public static ArrayList<RobotLocation> getDroneLocations(RobotCI robot) {
+		ArrayList<RobotLocation> droneLocations = new ArrayList<RobotLocation>();
 		
 		for(Entity e : robot.getEntities()) {
 			if(e instanceof RobotLocation)

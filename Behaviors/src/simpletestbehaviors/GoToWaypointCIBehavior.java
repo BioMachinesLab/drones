@@ -12,7 +12,11 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 
 	private double distanceTolerance = 3;
 	private double angleTolerance = 10;
+	private double wait = 0;
 	private AquaticDroneCI drone;
+	private double currentWait = 0;
+	private boolean waiting = false;
+	private Waypoint wp;
 	
 	public GoToWaypointCIBehavior(CIArguments args, RobotCI drone) {
 		super(args, drone);
@@ -20,17 +24,24 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 		
 		distanceTolerance = args.getArgumentAsDoubleOrSetDefault("distancetolerance", distanceTolerance);
 		angleTolerance = args.getArgumentAsDoubleOrSetDefault("angletolerance", angleTolerance);
+		wait = args.getArgumentAsDoubleOrSetDefault("wait", wait);
 	}
 	
 	@Override
 	public void step(double timestep) {
 		
-		Waypoint wp = drone.getActiveWaypoint();
+		if(waiting && currentWait++ > wait) {
+			waiting = false;
+			currentWait = 0;
+			wp = null;
+		}
 		
 		if(wp == null) {
 			drone.setLed(0, LedState.OFF);
 			drone.setMotorSpeeds(0, 0);
-			return;
+			wp = drone.getActiveWaypoint();
+			if(wp == null)
+				return;
 		}
 		
 		double currentOrientation = drone.getCompassOrientationInDegrees();
@@ -51,6 +62,7 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 		if(Math.abs(currentDistance) < distanceTolerance){
 			drone.setLed(0, LedState.OFF);
 			drone.setMotorSpeeds(0, 0);
+			waiting = true;
 		}else{
 			if (Math.abs(difference) <= angleTolerance) {
 				drone.setLed(0, LedState.ON);

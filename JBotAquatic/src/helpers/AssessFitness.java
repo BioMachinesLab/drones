@@ -2,29 +2,35 @@ package helpers;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
+import java.sql.Time;
+import java.util.HashMap;
 import java.util.Scanner;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import simulation.Updatable;
 import simulation.robot.AquaticDrone;
+import simulation.robot.CISensorWrapper;
 import simulation.robot.Robot;
+import simulation.robot.sensors.Sensor;
 import simulation.util.Arguments;
 import updatables.CoverageTracer;
 import updatables.PathTracer;
+import commoninterface.AquaticDroneCI;
+import commoninterface.entities.GeoEntity;
+import commoninterface.entities.GeoFence;
 import commoninterface.entities.RobotLocation;
 import commoninterface.entities.Waypoint;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.network.messages.BehaviorMessage;
+import commoninterface.sensors.GeoFenceCISensor;
+import commoninterface.sensors.InsideBoundaryCISensor;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
 import commoninterface.utils.logger.LogData;
 import evaluation.CoverageFitnessTest;
-import evaluation.deprecated.CoverageEvaluationFunction;
 
 public class AssessFitness {
 	
@@ -220,10 +226,10 @@ public class AssessFitness {
 			}
 			
 			if(pathTracer) {
-				PathTracer realPathTracer = new PathTracer(new Arguments("drawgeofence=1,linewidth=3,folder=path,bgcolor=0-0-0-0,altcolor=0-0-0-255,maincolor=255-000-000-255,fade=0,name="+exp.toString()+"_real"));
+				PathTracer realPathTracer = new PathTracer(new Arguments("drawgeofence=0,linewidth=3,folder=path,bgcolor=0-0-0-0,altcolor=0-0-0-255,maincolor=255-000-000-255,fade=1,name="+exp.toString()+"_real"));
 				setupReal.sim.addCallback(realPathTracer);
-				PathTracer simPathTracer = new PathTracer(new Arguments("drawgeofence=1,linewidth=3,folder=path,bgcolor=0-0-0-0,altcolor=0-0-0-255,maincolor=255-000-000-255,fade=0,name="+exp.toString()+"_sim"));
-				setupSim.sim.addCallback(simPathTracer);
+//				PathTracer simPathTracer = new PathTracer(new Arguments("drawgeofence=1,linewidth=3,folder=path,bgcolor=0-0-0-0,altcolor=0-0-0-255,maincolor=255-000-000-255,fade=0,name="+exp.toString()+"_sim"));
+//				setupSim.sim.addCallback(simPathTracer);
 			}
 			
 //			DISPERSION ADAPTIVE
@@ -232,17 +238,36 @@ public class AssessFitness {
 //			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=758,timeend=1138,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_3")));
 			
 //			PATROL ADAPTIVE
-			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=0,timeend=1200,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_1")));
-			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=1200,timeend=1800,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_2")));
-			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=1,png=0,snapshotfrequency=5,timestart=1800,timeend=3600,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_3")));
-			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=3600,timeend=5400,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_4")));
-			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=5400,timeend=6600,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_5")));
+//			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=0,timeend=1200,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_1")));
+//			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=1200,timeend=1800,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_2")));
+//			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=1,png=0,snapshotfrequency=5,timestart=1800,timeend=3600,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_3")));
+//			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=3600,timeend=5400,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_4")));
+//			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=5400,timeend=6600,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_5")));
+			
+//			AGG WP
+//			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=0,timeend=600,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_1")));
+//			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=0,timeend=1200,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_2")));
+//			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=0,timeend=1800,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_3")));
+//			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=0,timeend=2400,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_4")));
 			
 			double min = Double.MAX_VALUE;
 			double max = -Double.MAX_VALUE;
 			
 			boolean stopRun = false;
 			boolean ignoreReal = false;
+			
+			HashMap<String,LatLon> startLatLon = new HashMap<String,LatLon>();
+			HashMap<String,LatLon> endLatLon = new HashMap<String,LatLon>();
+			HashMap<String,Integer> time = new HashMap<String,Integer>();
+			
+			double distanceToTarget = 2;
+			
+			boolean measureSpeed = false;
+			
+			HashMap<Integer,LatLon> currentLatLonSim = new HashMap<Integer,LatLon>();
+			HashMap<Integer,LatLon> currentLatLonReal = new HashMap<Integer,LatLon>();
+			double[] totalDistanceSim = new double[8];
+			double[] totalDistanceReal = new double[8];
 			
 			for(LogData d : exp.logs) {
 				
@@ -259,10 +284,33 @@ public class AssessFitness {
 				
 				while(Math.abs(stepTime.getMillis()-currentTime.getMillis()) >= 100) {
 					stepTime = stepTime.plus(100);
-					
 					if(!ignoreReal) {
 						setupReal.sim.performOneSimulationStep((double)step);
-						
+					}
+					if(measureSpeed) {
+						if(step % 10 == 0) {
+							for(Robot r : setupSim.sim.getRobots()) {
+								mathutils.Vector2d vec = ((AquaticDrone)r).getPosition();
+								LatLon current = CoordinateUtilities.cartesianToGPS(new Vector2d(vec.x,vec.y));
+								if(currentLatLonSim.get(r.getId()) == null) {
+									currentLatLonSim.put(r.getId(), current);
+								}else {
+									totalDistanceSim[r.getId()]+=current.distance(currentLatLonSim.get(r.getId()))*1000;
+									currentLatLonSim.put(r.getId(), current);
+								}
+								
+							}
+							for(Robot r : setupReal.sim.getRobots()) {
+								mathutils.Vector2d vec = ((AquaticDrone)r).getPosition();
+								LatLon current = CoordinateUtilities.cartesianToGPS(new Vector2d(vec.x,vec.y));
+								if(currentLatLonReal.get(r.getId()) == null) {
+									currentLatLonReal.put(r.getId(), current);
+								}else {
+									totalDistanceReal[r.getId()]+=current.distance(currentLatLonReal.get(r.getId()))*1000;
+									currentLatLonReal.put(r.getId(), current);
+								}
+							}
+						}
 					}
 					
 					setupSim.sim.performOneSimulationStep((double)step);
@@ -293,15 +341,14 @@ public class AssessFitness {
 						if(d.inputNeuronStates == null)
 							ignoreReal = true;
 						
-						double distanceToTarget = 2;
-						
 						//Real
 						if(getDistanceToTarget(setupReal.getRobot("."+exp.activeRobot)) < distanceToTarget)
 							ignoreReal = true;
 	
 						//Sim
-						if(getDistanceToTarget(setupSim.getRobot("."+exp.activeRobot)) < distanceToTarget) 
+						if(getDistanceToTarget(setupSim.getRobot("."+exp.activeRobot)) < distanceToTarget) {
 							stopRun = true;
+						}
 						
 					}
 				}
@@ -315,6 +362,13 @@ public class AssessFitness {
 					Robot rStopped = setupSim.getRobot(d.ip);
 					Vector2d  vecStopped = CoordinateUtilities.GPSToCartesian(setupSim.getShiftedLatLon(rlStopped.getLatLon()));
 					rStopped.setPosition(vecStopped.x, vecStopped.y);
+					
+					if(startLatLon.get(d.ip) == null) {
+						startLatLon.put(d.ip, setupSim.getShiftedLatLon(rlStopped.getLatLon()));
+					}
+					
+					endLatLon.put(d.ip, setupSim.getShiftedLatLon(rlStopped.getLatLon()));
+					time.put(d.ip, step);
 					
 				}
 				
@@ -331,7 +385,7 @@ public class AssessFitness {
 				temp.addPoint(setupReal.sim,setupReal.robots.get(position).getPosition(), d.temperatures[1]);
 				tempTracer.setCoverage(temp.getCoverage(), setupReal.resolution);
 				
-//				System.out.println(pos.x+" "+pos.y+" "+d.temperatures[1]);
+//				System.out.println(step+"\t"+d.ip+"\t"+(pos.x+setupReal.start.x-setupReal.firstPos.x)+"\t"+(pos.y+setupReal.start.y-setupReal.firstPos.y)+"\t"+d.temperatures[1]);
 				
 				if(min > d.temperatures[1])
 					min = d.temperatures[1];
@@ -341,10 +395,60 @@ public class AssessFitness {
 				double orientation = 360 - (rl.getOrientation() - 90);
 				setupReal.robots.get(position).setOrientation(Math.toRadians(orientation));
 				
+//				System.out.println(GeoFence.getGeoFences((AquaticDroneCI)setupSim.sim.getRobots().get(0)));
+//				for(Waypoint wp : GeoFence.getGeoFences((AquaticDroneCI)setupSim.sim.getRobots().get(0)).get(0).getWaypoints()) {
+//					pos = CoordinateUtilities.GPSToCartesian(wp.getLatLon());
+//					System.out.println(pos);
+//				}
+//				System.out.println();
+				
+				
 			}
+			
+//			while(!stopRun) {
+//				setupSim.sim.performOneSimulationStep((double)step);
+//				step++;
+//				
+//				if(gui) {
+//					setupSim.renderer.drawFrame();
+//					setupSim.renderer.repaint();
+//				}
+//				
+//				if(getDistanceToTarget(setupSim.getRobot("."+exp.activeRobot)) < distanceToTarget) {
+//					stopRun = true;
+//				}
+//			}
+			
+//			double avg = 0;
+//			double count = 0;
+//			
+//			for(String ss : time.keySet()) {
+//				count++;
+//				double meters = endLatLon.get(ss).distance(startLatLon.get(ss))*1000.0;
+//				double metersPerSecond = meters/ (time.get(ss)/10.0);
+//				avg+= metersPerSecond;
+//			}
+//			
+//			avg/=count;
+//			
+//			System.out.println(exp+" "+avg+" m/s");
 			
 			setupReal.sim.terminate();
 			setupSim.sim.terminate();
+			
+			if(measureSpeed) {
+				double totalReal = 0;
+				double totalSim = 0;
+				for(int j = 0 ; j < totalDistanceSim.length ; j++) {
+					totalReal+= totalDistanceReal[j]/8.0/step;
+					System.out.println("Speed real: "+j+" "+totalDistanceReal[j]/step);
+					totalSim+=totalDistanceSim[j]/8.0/step;
+				}
+				for(int j = 0 ; j < totalDistanceSim.length ; j++) {
+					System.out.println("Speed sim: "+j+" "+totalDistanceSim[j]/step);
+				}
+				System.out.println("AVG SPEEDS "+totalReal+" "+totalSim);
+			}
 			
 //			System.out.println(min+" min max "+max);
 			
@@ -355,6 +459,8 @@ public class AssessFitness {
 			if(s == 1)
 				System.out.println(setupReal.eval.getFitness()+" "+setupSim.eval.getFitness());
 		}
+		
+		
 		
 		if(s > 1) {
 //			System.out.println(exp);

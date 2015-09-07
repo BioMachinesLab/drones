@@ -1,7 +1,9 @@
 package drone;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
+
 import commoninterface.AquaticDroneCI;
 import commoninterface.AquaticDroneCI.DroneType;
 import commoninterface.CIBehavior;
@@ -9,6 +11,7 @@ import commoninterface.RobotCI;
 import commoninterface.controllers.ControllerCIBehavior;
 import commoninterface.entities.Entity;
 import commoninterface.entities.GeoFence;
+import commoninterface.entities.RobotLocation;
 import commoninterface.entities.SharedDroneLocation;
 import commoninterface.entities.Waypoint;
 import commoninterface.mathutils.Vector2d;
@@ -114,7 +117,9 @@ public class MissionController extends CIBehavior {
 			case PATROL:
 				subController = Controller.PATROL.ordinal();
 				
-				if(foundIntruder()) {
+				LatLon intruderPos = intruderPosition();
+				
+				if(intruderPos != null && insideBoundary(intruderPos) && eligibleToPursue(intruderPos)) {
 					currentState = State.PURSUE_INTRUDER;
 				}
 				
@@ -122,9 +127,16 @@ public class MissionController extends CIBehavior {
 			case PURSUE_INTRUDER:
 				subController = Controller.INTRUDER.ordinal();
 				
-				if(foundIntruder()) {
-					lastIntruderTime = timestep;
-					alertNearbyDrones();
+				intruderPos = intruderPosition();
+				
+				if(intruderPos != null) {
+					
+					if(insideBoundary(intruderPos) && eligibleToPursue(intruderPos)) {
+						lastIntruderTime = timestep;
+						alertNearbyDrones();
+					} else {
+						currentState = State.PATROL;
+					}
 				} else if(timestep - lastIntruderTime > ALERT_TIMEOUT) {
 					currentState = State.PATROL;
 				}
@@ -179,16 +191,38 @@ public class MissionController extends CIBehavior {
 		
 	}
 	
-	protected boolean foundIntruder() {
+	protected boolean eligibleToPursue(LatLon intruderPos) {
+		
+		ArrayList<RobotLocation> locations = RobotLocation.getDroneLocations(drone);
+		
+		int position = 0;
+		double droneDist = drone.getGPSLatLon().distance(intruderPos);
+		
+		for(RobotLocation loc : locations) {
+			
+			if(loc.getDroneType() == DroneType.ENEMY)
+				continue;
+			
+			double dist = loc.getLatLon().distance(intruderPos);
+			if(dist < droneDist)
+				position++;
+			if(position >= 3)
+				return false;
+		}
+		
+		return true;
+	}
+	
+	protected LatLon intruderPosition() {
 		
 		LinkedList<SharedDroneLocation> locations = SharedDroneLocation.getSharedDroneLocations(drone);
 		
 		for(SharedDroneLocation loc : locations) {
 			if(loc.getDroneType() == DroneType.ENEMY)
-				return true;
+				return loc.getLatLon();
 		}
 		
-		return false;
+		return null;
 		
 	}
 	
