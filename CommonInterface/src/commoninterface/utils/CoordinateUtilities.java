@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.jcoord.*;
+import net.jafama.FastMath;
 
 public class CoordinateUtilities implements Serializable {
 
@@ -58,17 +59,17 @@ public class CoordinateUtilities implements Serializable {
 	
 	public static double angleInDegrees(LatLon latLon1, LatLon latLon2) {
 		
-		double lat1 = Math.toRadians(latLon1.getLat());
-		double lat2 = Math.toRadians(latLon2.getLat());
-		double lon1 = Math.toRadians(latLon1.getLon());
-		double lon2 = Math.toRadians(latLon2.getLon());
+		double lat1 = FastMath.toRadians(latLon1.getLat());
+		double lat2 = FastMath.toRadians(latLon2.getLat());
+		double lon1 = FastMath.toRadians(latLon1.getLon());
+		double lon2 = FastMath.toRadians(latLon2.getLon());
 		
-		double result = Math.atan2(
-				Math.sin(lon2-lon1)*Math.cos(lat2),
-				Math.cos(lat1)*Math.sin(lat2)-Math.sin(lat1)*Math.cos(lat2)*Math.cos(lon2-lon1)
+		double result = FastMath.atan2(
+				FastMath.sin(lon2-lon1)*FastMath.cos(lat2),
+				FastMath.cos(lat1)*FastMath.sin(lat2)-FastMath.sin(lat1)*FastMath.cos(lat2)*FastMath.cos(lon2-lon1)
 			);
 	
-		return Math.toDegrees(result);
+		return FastMath.toDegrees(result);
 	}
 	
 	public static double distanceInMeters(LatLon coord1, LatLon coord2) {

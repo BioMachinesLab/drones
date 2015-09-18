@@ -1,6 +1,7 @@
 package commoninterface.utils.jcoord;
 
 import java.io.Serializable;
+import net.jafama.FastMath;
 
 /**
  * Some utility functions used by classes in the uk.me.jstott.jcoord package.
@@ -24,7 +25,7 @@ class Util implements Serializable {
    * @since 1.0
    */
   protected static double sinSquared(double x) {
-    return Math.sin(x) * Math.sin(x);
+    return FastMath.sin(x) * FastMath.sin(x);
   }
 
 
@@ -37,7 +38,7 @@ class Util implements Serializable {
    * @since 1.0
    */
   protected static double cosSquared(double x) {
-    return Math.cos(x) * Math.cos(x);
+    return FastMath.cos(x) * FastMath.cos(x);
   }
 
 
@@ -50,7 +51,7 @@ class Util implements Serializable {
    * @since 1.0
    */
   protected static double tanSquared(double x) {
-    return Math.tan(x) * Math.tan(x);
+    return FastMath.tan(x) * FastMath.tan(x);
   }
 
 
@@ -63,6 +64,6 @@ class Util implements Serializable {
    * @since 1.0
    */
   protected static double sec(double x) {
-    return 1.0 / Math.cos(x);
+    return 1.0 / FastMath.cos(x);
   }
 }

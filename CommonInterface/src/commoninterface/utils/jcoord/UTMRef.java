@@ -1,6 +1,7 @@
 package commoninterface.utils.jcoord;
 
 import java.io.Serializable;
+import net.jafama.FastMath;
 
 /**
  * Class to represent a UTM reference
@@ -68,7 +69,7 @@ public class UTMRef implements Serializable {
     double a = RefEll.WGS84.getMaj();
     double eSquared = RefEll.WGS84.getEcc();
     double ePrimeSquared = eSquared / (1.0 - eSquared);
-    double e1 = (1 - Math.sqrt(1 - eSquared)) / (1 + Math.sqrt(1 - eSquared));
+    double e1 = (1 - FastMath.sqrt(1 - eSquared)) / (1 + FastMath.sqrt(1 - eSquared));
     double x = easting - 500000.0;
     ;
     double y = northing;
@@ -85,45 +86,45 @@ public class UTMRef implements Serializable {
     double m = y / UTM_F0;
     double mu =
         m
-            / (a * (1.0 - eSquared / 4.0 - 3.0 * eSquared * eSquared / 64.0 - 5.0 * Math
+            / (a * (1.0 - eSquared / 4.0 - 3.0 * eSquared * eSquared / 64.0 - 5.0 * FastMath
                 .pow(eSquared, 3.0) / 256.0));
 
     double phi1Rad =
-        mu + (3.0 * e1 / 2.0 - 27.0 * Math.pow(e1, 3.0) / 32.0)
-            * Math.sin(2.0 * mu)
-            + (21.0 * e1 * e1 / 16.0 - 55.0 * Math.pow(e1, 4.0) / 32.0)
-            * Math.sin(4.0 * mu) + (151.0 * Math.pow(e1, 3.0) / 96.0)
-            * Math.sin(6.0 * mu);
+        mu + (3.0 * e1 / 2.0 - 27.0 * FastMath.pow(e1, 3.0) / 32.0)
+            * FastMath.sin(2.0 * mu)
+            + (21.0 * e1 * e1 / 16.0 - 55.0 * FastMath.pow(e1, 4.0) / 32.0)
+            * FastMath.sin(4.0 * mu) + (151.0 * FastMath.pow(e1, 3.0) / 96.0)
+            * FastMath.sin(6.0 * mu);
 
     double n =
-        a / Math.sqrt(1.0 - eSquared * Math.sin(phi1Rad) * Math.sin(phi1Rad));
-    double t = Math.tan(phi1Rad) * Math.tan(phi1Rad);
-    double c = ePrimeSquared * Math.cos(phi1Rad) * Math.cos(phi1Rad);
+        a / FastMath.sqrt(1.0 - eSquared * FastMath.sin(phi1Rad) * FastMath.sin(phi1Rad));
+    double t = FastMath.tan(phi1Rad) * FastMath.tan(phi1Rad);
+    double c = ePrimeSquared * FastMath.cos(phi1Rad) * FastMath.cos(phi1Rad);
     double r =
         a
             * (1.0 - eSquared)
-            / Math.pow(1.0 - eSquared * Math.sin(phi1Rad) * Math.sin(phi1Rad),
+            / FastMath.pow(1.0 - eSquared * FastMath.sin(phi1Rad) * FastMath.sin(phi1Rad),
                 1.5);
     double d = x / (n * UTM_F0);
 
     double latitude =
-        (phi1Rad - (n * Math.tan(phi1Rad) / r)
+        (phi1Rad - (n * FastMath.tan(phi1Rad) / r)
             * (d
                 * d
                 / 2.0
                 - (5.0 + (3.0 * t) + (10.0 * c) - (4.0 * c * c) - (9.0 * ePrimeSquared))
-                * Math.pow(d, 4.0) / 24.0 + (61.0 + (90.0 * t) + (298.0 * c)
+                * FastMath.pow(d, 4.0) / 24.0 + (61.0 + (90.0 * t) + (298.0 * c)
                 + (45.0 * t * t) - (252.0 * ePrimeSquared) - (3.0 * c * c))
-                * Math.pow(d, 6.0) / 720.0))
-            * (180.0 / Math.PI);
+                * FastMath.pow(d, 6.0) / 720.0))
+            * (180.0 / FastMath.PI);
 
     double longitude =
         longitudeOrigin
-            + ((d - (1.0 + 2.0 * t + c) * Math.pow(d, 3.0) / 6.0 + (5.0
+            + ((d - (1.0 + 2.0 * t + c) * FastMath.pow(d, 3.0) / 6.0 + (5.0
                 - (2.0 * c) + (28.0 * t) - (3.0 * c * c)
                 + (8.0 * ePrimeSquared) + (24.0 * t * t))
-                * Math.pow(d, 5.0) / 120.0) / Math.cos(phi1Rad))
-            * (180.0 / Math.PI);
+                * FastMath.pow(d, 5.0) / 120.0) / FastMath.cos(phi1Rad))
+            * (180.0 / FastMath.PI);
 
     return new LatLon(latitude, longitude);
   }

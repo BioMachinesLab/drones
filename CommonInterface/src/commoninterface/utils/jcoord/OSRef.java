@@ -1,6 +1,7 @@
 package commoninterface.utils.jcoord;
 
 import java.io.Serializable;
+import net.jafama.FastMath;
 
 /**
  * Class to represent an Ordnance Survey grid reference
@@ -75,7 +76,7 @@ public class OSRef implements Serializable {
     if (char2ord > 73)
       char2ord--; // Adjust for no I
     double nx = ((char2ord - 65) % 5) * 100000;
-    double ny = (4 - Math.floor((char2ord - 65) / 5)) * 100000;
+    double ny = (4 - FastMath.floor((char2ord - 65) / 5)) * 100000;
     easting = east + nx;
     northing = north + ny;
   }
@@ -102,8 +103,8 @@ public class OSRef implements Serializable {
    * @since 1.0
    */
   public String toSixFigureString() {
-    int hundredkmE = (int) Math.floor(easting / 100000);
-    int hundredkmN = (int) Math.floor(northing / 100000);
+    int hundredkmE = (int) FastMath.floor(easting / 100000);
+    int hundredkmN = (int) FastMath.floor(northing / 100000);
     String firstLetter;
     if (hundredkmN < 5) {
       if (hundredkmE < 5) {
@@ -127,8 +128,8 @@ public class OSRef implements Serializable {
       index++;
     String secondLetter = Character.toString((char) index);
 
-    int e = (int) Math.floor((easting - (100000 * hundredkmE)) / 100);
-    int n = (int) Math.floor((northing - (100000 * hundredkmN)) / 100);
+    int e = (int) FastMath.floor((easting - (100000 * hundredkmE)) / 100);
+    int n = (int) FastMath.floor((northing - (100000 * hundredkmN)) / 100);
     String es = "" + e;
     if (e < 100)
       es = "0" + es;
@@ -157,8 +158,8 @@ public class OSRef implements Serializable {
     double OSGB_F0 = 0.9996012717;
     double N0 = -100000.0;
     double E0 = 400000.0;
-    double phi0 = Math.toRadians(49.0);
-    double lambda0 = Math.toRadians(-2.0);
+    double phi0 = FastMath.toRadians(49.0);
+    double lambda0 = FastMath.toRadians(-2.0);
     double a = RefEll.AIRY_1830.getMaj();
     double b = RefEll.AIRY_1830.getMin();
     double eSquared = RefEll.AIRY_1830.getEcc();
@@ -174,28 +175,28 @@ public class OSRef implements Serializable {
           (b * OSGB_F0)
               * (((1 + n + ((5.0 / 4.0) * n * n) + ((5.0 / 4.0) * n * n * n)) * (phiPrime - phi0))
                   - (((3 * n) + (3 * n * n) + ((21.0 / 8.0) * n * n * n))
-                      * Math.sin(phiPrime - phi0) * Math.cos(phiPrime + phi0))
+                      * FastMath.sin(phiPrime - phi0) * FastMath.cos(phiPrime + phi0))
                   + ((((15.0 / 8.0) * n * n) + ((15.0 / 8.0) * n * n * n))
-                      * Math.sin(2.0 * (phiPrime - phi0)) * Math
+                      * FastMath.sin(2.0 * (phiPrime - phi0)) * FastMath
                       .cos(2.0 * (phiPrime + phi0))) - (((35.0 / 24.0) * n * n * n)
-                  * Math.sin(3.0 * (phiPrime - phi0)) * Math
+                  * FastMath.sin(3.0 * (phiPrime - phi0)) * FastMath
                   .cos(3.0 * (phiPrime + phi0))));
       phiPrime += (N - N0 - M) / (a * OSGB_F0);
     } while ((N - N0 - M) >= 0.001);
     double v =
         a * OSGB_F0
-            * Math.pow(1.0 - eSquared * Util.sinSquared(phiPrime), -0.5);
+            * FastMath.pow(1.0 - eSquared * Util.sinSquared(phiPrime), -0.5);
     double rho =
         a * OSGB_F0 * (1.0 - eSquared)
-            * Math.pow(1.0 - eSquared * Util.sinSquared(phiPrime), -1.5);
+            * FastMath.pow(1.0 - eSquared * Util.sinSquared(phiPrime), -1.5);
     double etaSquared = (v / rho) - 1.0;
-    double VII = Math.tan(phiPrime) / (2 * rho * v);
+    double VII = FastMath.tan(phiPrime) / (2 * rho * v);
     double VIII =
-        (Math.tan(phiPrime) / (24.0 * rho * Math.pow(v, 3.0)))
+        (FastMath.tan(phiPrime) / (24.0 * rho * FastMath.pow(v, 3.0)))
             * (5.0 + (3.0 * Util.tanSquared(phiPrime)) + etaSquared - (9.0 * Util
                 .tanSquared(phiPrime) * etaSquared));
     double IX =
-        (Math.tan(phiPrime) / (720.0 * rho * Math.pow(v, 5.0)))
+        (FastMath.tan(phiPrime) / (720.0 * rho * FastMath.pow(v, 5.0)))
             * (61.0 + (90.0 * Util.tanSquared(phiPrime)) + (45.0 * Util
                 .tanSquared(phiPrime) * Util.tanSquared(phiPrime)));
     double X = Util.sec(phiPrime) / v;
@@ -203,24 +204,24 @@ public class OSRef implements Serializable {
         (Util.sec(phiPrime) / (6.0 * v * v * v))
             * ((v / rho) + (2 * Util.tanSquared(phiPrime)));
     double XII =
-        (Util.sec(phiPrime) / (120.0 * Math.pow(v, 5.0)))
+        (Util.sec(phiPrime) / (120.0 * FastMath.pow(v, 5.0)))
             * (5.0 + (28.0 * Util.tanSquared(phiPrime)) + (24.0 * Util
                 .tanSquared(phiPrime) * Util.tanSquared(phiPrime)));
     double XIIA =
-        (Util.sec(phiPrime) / (5040.0 * Math.pow(v, 7.0)))
+        (Util.sec(phiPrime) / (5040.0 * FastMath.pow(v, 7.0)))
             * (61.0
                 + (662.0 * Util.tanSquared(phiPrime))
                 + (1320.0 * Util.tanSquared(phiPrime) * Util
                     .tanSquared(phiPrime)) + (720.0 * Util.tanSquared(phiPrime)
                 * Util.tanSquared(phiPrime) * Util.tanSquared(phiPrime)));
     phi =
-        phiPrime - (VII * Math.pow(E - E0, 2.0))
-            + (VIII * Math.pow(E - E0, 4.0)) - (IX * Math.pow(E - E0, 6.0));
+        phiPrime - (VII * FastMath.pow(E - E0, 2.0))
+            + (VIII * FastMath.pow(E - E0, 4.0)) - (IX * FastMath.pow(E - E0, 6.0));
     lambda =
-        lambda0 + (X * (E - E0)) - (XI * Math.pow(E - E0, 3.0))
-            + (XII * Math.pow(E - E0, 5.0)) - (XIIA * Math.pow(E - E0, 7.0));
+        lambda0 + (X * (E - E0)) - (XI * FastMath.pow(E - E0, 3.0))
+            + (XII * FastMath.pow(E - E0, 5.0)) - (XIIA * FastMath.pow(E - E0, 7.0));
 
-    return new LatLon(Math.toDegrees(phi), Math.toDegrees(lambda));
+    return new LatLon(FastMath.toDegrees(phi), FastMath.toDegrees(lambda));
   }
 
 
