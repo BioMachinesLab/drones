@@ -30,20 +30,29 @@ public class AvoidCollisionsFunction extends EvaluationFunction {
 
     @Override
     public void update(Simulator simulator) {
-    	if(dontUse)
-    		return;
-    	
+        if (dontUse) {
+            return;
+        }
+
         for (int i = 0; i < simulator.getRobots().size(); i++) {
-            for (int j = i + 1; j < simulator.getRobots().size(); j++) {
-                Robot ri = simulator.getRobots().get(i);
-                Robot rj = simulator.getRobots().get(j);
-                minDistanceOthers = Math.min(minDistanceOthers, ri.getPosition().distanceTo(rj.getPosition()) - ri.getRadius() - rj.getRadius());
-            }
-            if (kill && simulator.getRobots().get(i).isInvolvedInCollison()) {
-                simulator.stopSimulation();
+            Robot ri = simulator.getRobots().get(i);
+            if (checkCollisions(ri)) {
+                for (int j = i + 1; j < simulator.getRobots().size(); j++) {
+                    Robot rj = simulator.getRobots().get(j);
+                    if (checkCollisions(rj)) {
+                        minDistanceOthers = Math.min(minDistanceOthers, ri.getPosition().distanceTo(rj.getPosition()) - ri.getRadius() - rj.getRadius());
+                    }
+                }
+                if (kill && ri.isInvolvedInCollison()) {
+                    simulator.stopSimulation();
+                }
             }
         }
         double safetyFactor = 0.1 + (Math.max(0, Math.min(safetyDistance, minDistanceOthers)) / safetyDistance) * 0.9;
         fitness *= safetyFactor;
+    }
+
+    protected boolean checkCollisions(Robot r) {
+        return true;
     }
 }
