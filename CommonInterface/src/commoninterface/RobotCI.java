@@ -156,4 +156,9 @@ public interface RobotCI {
 	 * @return the logger
 	 */
 	public RobotLogger getLogger();
+	
+	/**
+	 * Allows the change of a configuration during runtime
+	 */
+	public void setProperty(String name, String value);
 }

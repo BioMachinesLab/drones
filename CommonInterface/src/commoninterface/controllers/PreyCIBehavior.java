@@ -43,13 +43,13 @@ public class PreyCIBehavior extends CIBehavior {
             if (e instanceof RobotLocation) {
                 RobotLocation rl = (RobotLocation) e;
                 double d = ad.getGPSLatLon().distance(rl.getLatLon());
-                if (d < closestDist && d / 1000 <= escapeRange) {
+                if (d < closestDist && d * 1000.0 <= escapeRange) {
                     closest = rl.getLatLon();
                     closestDist = d;
                 }
             }
         }
-
+        
         if (closest == null) {
             ad.setRudder(0, 0);
         } else {

@@ -2,6 +2,7 @@ package simulation.robot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import mathutils.MathUtils;
@@ -26,6 +27,7 @@ import commoninterface.entities.Entity;
 import commoninterface.entities.RobotLocation;
 import commoninterface.entities.Waypoint;
 import commoninterface.instincts.AvoidDronesInstinct;
+import commoninterface.instincts.AvoidObstaclesInstinct;
 import commoninterface.messageproviders.BehaviorMessageProvider;
 import commoninterface.messageproviders.EntitiesMessageProvider;
 import commoninterface.messageproviders.EntityMessageProvider;
@@ -96,11 +98,14 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	
 	private double headingOffset = 0;
 	private double speedOffset = 0;
-	private boolean configuredSensors = false;;
+	private boolean configuredSensors = false;
+	private Arguments args;
 	
 	public AquaticDrone(Simulator simulator, Arguments args) {
 		super(simulator, args);
 		this.simulator = simulator;
+		
+		this.args = args;
 		
 		ArrayList<BroadcastMessage> broadcastMessages = new ArrayList<BroadcastMessage>();
 		
@@ -125,16 +130,15 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		if(commRange == 0)
 			throw new RuntimeException("[AquaticDrone] CommRange is at 0!");
 		
-		if(args.getArgumentAsIntOrSetDefault("changewaypoint", 1) == 1)
-			alwaysActiveBehaviors.add(new ChangeWaypointCIBehavior(new CIArguments(""), this));
 		
-		if(args.getArgumentAsIntOrSetDefault("avoiddrones", 1) == 1)
-			alwaysActiveBehaviors.add(new AvoidDronesInstinct(new CIArguments(""), this));
+		if(args.getArgumentIsDefined("changewaypoint"))
+			setProperty("changewaypoint", args.getArgumentAsString("changewaypoint"));
 		
-		if(args.getArgumentAsIntOrSetDefault("kalman", 0) == 1) {
-			kalmanFilterGPS = new RobotKalman();
-			kalmanFilterCompass = new RobotKalman();
-		}
+		if(args.getArgumentIsDefined("avoiddrones"))
+			setProperty("avoiddrones", args.getArgumentAsString("avoiddrones"));
+		
+		if(args.getArgumentIsDefined("kalmanfilter"))
+			setProperty("kalmanfilter", args.getArgumentAsString("kalmanfilter"));
 		
 		headingOffset = args.getArgumentAsDoubleOrSetDefault("headingoffset",headingOffset);
 		
@@ -152,15 +156,10 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		
 		badGPS = args.getFlagIsTrue("badgps");
 		
-		rudder = args.getFlagIsTrue("rudder");
+		if(args.getArgumentIsDefined("rudder"))
+			setProperty("rudder", args.getArgumentAsString("rudder"));
 		
-		if(rudder) {
-			rudderActuator = new RudderActuator(simulator, actuators.size()+1, args); 
-			actuators.add(rudderActuator);
-		} else {
-			propellers = new PropellersActuator(simulator, actuators.size()+1, args);
-			actuators.add(propellers);
-		}
+		rudder = args.getFlagIsTrue("rudder");
 		
 		log(LogCodex.encodeLog(LogType.MESSAGE, "IP " + getNetworkAddress()));
 	}
@@ -529,5 +528,71 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 			return rudderActuator.getSpeed();
 		else
 			return (leftPercentage+rightPercentage) / 2.0;
+	}
+	
+	@Override
+	public void setProperty(String name, String value) {
+		if(name.equals("changewaypoint")) {
+			boolean found = findBehavior(ChangeWaypointCIBehavior.class, alwaysActiveBehaviors.iterator(), value.equals("0"));
+			if(value.equals("1") && !found)
+				alwaysActiveBehaviors.add(new ChangeWaypointCIBehavior(new CIArguments(""), this));
+		}
+		
+		if(name.equals("avoiddrones")) {
+			boolean found = findBehavior(AvoidDronesInstinct.class, alwaysActiveBehaviors.iterator(), value.equals("0"));
+			if(value.equals("1") && !found)
+				alwaysActiveBehaviors.add(new AvoidDronesInstinct(new CIArguments(""), this));
+		}
+		
+		if(name.equals("avoidobstacles")) {
+			boolean found = findBehavior(AvoidObstaclesInstinct.class, alwaysActiveBehaviors.iterator(), value.equals("0"));
+			if(value.equals("1") && !found)
+				alwaysActiveBehaviors.add(new AvoidObstaclesInstinct(new CIArguments(""), this));
+		}
+		
+		if(name.equals("kalmanfilter")) {
+			if(value.equals("1")) {
+				kalmanFilterGPS = new RobotKalman();
+				kalmanFilterCompass = new RobotKalman();
+			} else {
+				kalmanFilterGPS = null;
+				kalmanFilterCompass = null;
+			}
+		}
+		
+		if(name.equals("rudder")) {
+			
+			findBehavior(RudderActuator.class, actuators.iterator(), true);
+			findBehavior(PropellersActuator.class, actuators.iterator(), true);
+			rudderActuator = null;
+			propellers = null;
+			
+			rudder = value.equals("1");
+			if(rudder) {
+				rudderActuator = new RudderActuator(simulator, actuators.size()+1, args); 
+				actuators.add(rudderActuator);
+			} else {
+				propellers = new PropellersActuator(simulator, actuators.size()+1, args);
+				actuators.add(propellers);
+			}
+		}
+		
+		if(name.equals("dronetype"))
+			droneType = DroneType.valueOf(value);
+	}
+	
+	private boolean findBehavior(Class<?> c, Iterator<?> i, boolean remove) {
+		boolean found = false;
+		
+		while(i.hasNext()) {
+			Object current = i.next();
+			if(c.isInstance(current)) {
+				found = true;
+				if(remove)
+					i.remove();
+				break;
+			}
+		}
+		return found;
 	}
 }

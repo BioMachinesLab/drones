@@ -793,6 +793,7 @@ public class MapPanel extends UpdatePanel {
 		ArrayList<Coordinate> coords = new ArrayList<Coordinate>();
 
 		for(Waypoint wp : geo.getWaypoints()) {
+			System.out.println("GEOFENCE "+wp);
 			Coordinate coord = c(wp.getLatLon().getLat(), wp.getLatLon().getLon());
 
 			MapMarker marker = new MapMarkerDot(coord);
@@ -921,7 +922,7 @@ public class MapPanel extends UpdatePanel {
 		map().removeAllMapPolygons();
 		updateCommandPanel();
 	}
-
+	
 	public void clearWaypoints() {
 
 		for(MapMarker m : waypointMarkers) {
@@ -962,8 +963,10 @@ public class MapPanel extends UpdatePanel {
 				if(ge instanceof ObstacleLocation)
 					addObstacle(c(ge.getLatLon().getLat(),ge.getLatLon().getLon()));
 			}
-			if(e instanceof GeoFence)
+			if(e instanceof GeoFence) {
+				System.out.println("FOUND A GEOFENCE");
 				addGeoFence((GeoFence)e);
+			}
 		}
 
 		updateCommandPanel();

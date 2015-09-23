@@ -373,4 +373,10 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 			entities.add(e);
 		}
 	}
+	
+	@Override
+	public void setProperty(String name, String value) {
+		// TODO Auto-generated method stub
+		
+	}
 }

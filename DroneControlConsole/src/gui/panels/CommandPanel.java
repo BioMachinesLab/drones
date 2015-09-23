@@ -33,6 +33,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import observers.ForagingMissionMonitor;
+
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -99,6 +101,8 @@ public class CommandPanel extends UpdatePanel {
 	
 	private JLabel currentExperiment;
 	
+	private ForagingMissionMonitor monitor;
+	
 	/*
 	 * author: @miguelduarte42 This has to be this way because some behaviors
 	 * are specific to the RaspberryController, and this project cannot include
@@ -110,11 +114,14 @@ public class CommandPanel extends UpdatePanel {
 		updateHostname();
 
 		this.console = console;
-
+		
 		this.gui = gui;
 
-		if (gui instanceof DroneGUI)
+		if (gui instanceof DroneGUI) {
 			dronePanel = true;
+			monitor = new ForagingMissionMonitor((DroneControlConsole)console);
+			monitor.start();
+		}
 		
 		initNeuralActivationsWindow();
 
@@ -375,7 +382,7 @@ public class CommandPanel extends UpdatePanel {
 			JOptionPane.showMessageDialog(null, "Contoller type not defined on preset configuration file!");
 		
 	}
-	private void deployEntities() {
+	public void deployEntities() {
 		deployEntities(false);
 	}
 	

@@ -20,6 +20,13 @@ public abstract class CIBehavior {
 	public CIBehavior(CIArguments args, RobotCI robot) {
 		this.robot  = robot;
 		this.args   = args;
+		
+		if(args.getArgumentIsDefined("robotproperties")) {
+			CIArguments properties = new CIArguments(args.getArgumentAsString("robotproperties"));
+			for(String cprop : properties.getArguments()) {
+				robot.setProperty(cprop, properties.getArgumentAsString(cprop));
+			}
+		}
 	}
 
 	/**
@@ -56,7 +63,7 @@ public abstract class CIBehavior {
 	 * is called to allow the behavior to clean up.
 	 */
 	public void cleanUp() {
-		
+		robot.setMotorSpeeds(0, 0);
 	}
 	
 	public static CIBehavior getController(CIArguments args, RobotCI robot) {

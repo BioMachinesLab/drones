@@ -47,7 +47,7 @@ public class MissionController extends CIBehavior {
 	protected long stop = 15*60*10;//15 min mission
 	
 	protected ArrayList<CIBehavior> subControllers = new ArrayList<CIBehavior>();
-
+	
 	//TODO we have to remove the "change active waypoint" instinct for this to work
 
 	public MissionController(CIArguments args, RobotCI robot) {
@@ -342,8 +342,10 @@ public class MissionController extends CIBehavior {
 	
 	@Override
 	public void cleanUp() {
-		subControllers.get(currentSubController).cleanUp();
+		if(!subControllers.isEmpty())
+			subControllers.get(currentSubController).cleanUp();
 		robot.setMotorSpeeds(0, 0);
 		subControllers.clear();
+		drone.setActiveWaypoint(Waypoint.getWaypoints(drone).get(0));
 	}
 }

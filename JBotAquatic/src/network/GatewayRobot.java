@@ -39,9 +39,9 @@ public class GatewayRobot implements RobotCI {
 			if(r instanceof RobotCI) {
 				RobotCI robot = (RobotCI)r;
 				
-				if(robot instanceof AquaticDroneCI)
-					if(((AquaticDroneCI)robot).getDroneType() != AquaticDroneCI.DroneType.DRONE)
-						continue;
+//				if(robot instanceof AquaticDroneCI)
+//					if(((AquaticDroneCI)robot).getDroneType() != AquaticDroneCI.DroneType.DRONE)
+//						continue;
 				
 				robot.processInformationRequest(request, i == chosenIndex  ? conn : null);
 			}
@@ -113,9 +113,9 @@ public class GatewayRobot implements RobotCI {
 			if(r instanceof RobotCI) {
 				RobotCI robot = (RobotCI)r;
 				
-				if(robot instanceof AquaticDroneCI)
-					if(((AquaticDroneCI)robot).getDroneType() != AquaticDroneCI.DroneType.DRONE)
-						continue;
+//				if(robot instanceof AquaticDroneCI)
+//					if(((AquaticDroneCI)robot).getDroneType() != AquaticDroneCI.DroneType.DRONE)
+//						continue;
 				
 				robot.startBehavior(b);
 			}
@@ -129,9 +129,9 @@ public class GatewayRobot implements RobotCI {
 			if(r instanceof RobotCI) {
 				RobotCI robot = (RobotCI)r;
 				
-				if(robot instanceof AquaticDroneCI)
-					if(((AquaticDroneCI)robot).getDroneType() != AquaticDroneCI.DroneType.DRONE)
-						continue;
+//				if(robot instanceof AquaticDroneCI)
+//					if(((AquaticDroneCI)robot).getDroneType() != AquaticDroneCI.DroneType.DRONE)
+//						continue;
 				
 				robot.stopActiveBehavior();
 			}
@@ -165,6 +165,11 @@ public class GatewayRobot implements RobotCI {
 	@Override
 	public void replaceEntity(Entity e) {
 		// TODO Auto-generated method stub
+	}
+	
+	@Override
+	public void setProperty(String name, String value) {
+		
 	}
 
 }

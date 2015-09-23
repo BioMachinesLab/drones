@@ -120,18 +120,16 @@ public class ConsoleBroadcastHandler {
 	}
 
 	public void newBroadcastMessage(String address, String message) {
-
+		
 		String[] split = message.split(BroadcastMessage.MESSAGE_SEPARATOR);
 		switch (split[0]) {
 		case "HEARTBEAT":
-			if (!address.equals(ownAddress)) {
 				long timeElapsed = Long.parseLong(HeartbeatBroadcastMessage
 						.decode(message)[1]);
 				console.getGUI().getConnectionPanel().newAddress(address);
-//				updateDroneData(address,
-//						HeartbeatBroadcastMessage.decode(message)[2], split[0],
-//						timeElapsed);
-			}
+				updateDroneData(address,
+						HeartbeatBroadcastMessage.decode(message)[2], split[0],
+						timeElapsed);
 			break;
 		case "GPS":
 			RobotLocation di = PositionBroadcastMessage
@@ -141,7 +139,7 @@ public class ConsoleBroadcastHandler {
 					((DroneGUI) console.getGUI()).getMapPanel().displayData(di);
 				}
 				console.getGUI().getConnectionPanel().newAddress(address);
-//				updateDroneData(address, di.getName(), split[0], di);
+				updateDroneData(address, di.getName(), split[0], di);
 			}
 			break;
 		case "ENTITIES":
@@ -182,8 +180,9 @@ public class ConsoleBroadcastHandler {
 				}
 
 				switch (msgType) {
+				
 				case "HEARTBEAT":
-					drone.setTimeSinceLastHeartbeat((long) obj);
+					drone.setTimeSinceLastHeartbeat(System.currentTimeMillis());
 					break;
 				case "GPS":
 					drone.getGPSData().setLatitudeDecimal(((RobotLocation) obj).getLatLon().getLat());	

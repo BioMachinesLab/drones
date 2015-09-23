@@ -4,12 +4,11 @@ import io.IOManager;
 import io.SystemStatusMessageProvider;
 import io.input.ControllerInput;
 import io.output.ControllerOutput;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-
 import network.broadcast.RealBroadcastHandler;
 import simpletestbehaviors.ChangeWaypointCIBehavior;
 import utils.FileLogger;
@@ -17,6 +16,7 @@ import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CISensor;
 import commoninterface.LedState;
+import commoninterface.AquaticDroneCI.DroneType;
 import commoninterface.dataobjects.GPSData;
 import commoninterface.entities.Entity;
 import commoninterface.entities.RobotLocation;
@@ -511,8 +511,9 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	}
 	
 	private void configureArguments(CIArguments args) {
+		
 		if(args.getArgumentIsDefined("dronetype"))
-			this.setDroneType(DroneType.values()[args.getArgumentAsInt("dronetype")]);
+			setProperty("dronetype", args.getArgumentAsString("dronetype"));
 		
 		if(args.getFlagIsTrue("filelogger"))
 			this.startLogger();
@@ -520,19 +521,17 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		if(args.getArgumentIsDefined("compassoffset") && ioManager.getCompassModule() != null)
 			ioManager.getCompassModule().setOffset(args.getArgumentAsInt("compassoffset"));
 		
-		if(args.getFlagIsTrue("changewaypointinstinct"))
-			alwaysActiveBehaviors.add(new ChangeWaypointCIBehavior(new CIArguments(""), this));
+		if(args.getArgumentIsDefined("changewaypoint"))
+			setProperty("changewaypoint", args.getArgumentAsString("changewaypoint"));
 		
-		if(args.getFlagIsTrue("avoiddronesinstinct"))
-			alwaysActiveBehaviors.add(new AvoidDronesInstinct(new CIArguments(""), this));
+		if(args.getArgumentIsDefined("avoiddrones"))
+			setProperty("avoiddrones", args.getArgumentAsString("avoiddrones"));
 		
-		if(args.getFlagIsTrue("avoidobstaclesinstinct"))
-			alwaysActiveBehaviors.add(new AvoidObstaclesInstinct(new CIArguments(""), this));
+		if(args.getArgumentIsDefined("avoidobstacles"))
+			setProperty("avoidobstacles", args.getArgumentAsString("avoidobstacles"));
 		
-		if(args.getFlagIsTrue("kalmanfilter")) {
-			kalmanFilterGPS = new RobotKalman();
-			kalmanFilterCompass = new RobotKalman();
-		}
+		if(args.getArgumentIsDefined("kalmanfilter"))
+			setProperty("kalmanfilter", args.getArgumentAsString("kalmanfilter"));
 				
 	}
 	
@@ -656,6 +655,55 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	@Override
 	public double getMotorSpeedsInPercentage() {
 		return (getLeftMotorSpeed()+getRightMotorSpeed())/2.0;
+	}
+	
+	@Override
+	public void setProperty(String name, String value) {
+		if(name.equals("changewaypoint")) {
+			boolean found = findBehavior(ChangeWaypointCIBehavior.class, alwaysActiveBehaviors.iterator(), value.equals("0"));
+			if(value.equals("1") && !found)
+				alwaysActiveBehaviors.add(new ChangeWaypointCIBehavior(new CIArguments(""), this));
+		}
+		
+		if(name.equals("avoiddrones")) {
+			boolean found = findBehavior(AvoidDronesInstinct.class, alwaysActiveBehaviors.iterator(), value.equals("0"));
+			if(value.equals("1") && !found)
+				alwaysActiveBehaviors.add(new AvoidDronesInstinct(new CIArguments(""), this));
+		}
+		
+		if(name.equals("avoidobstacles")) {
+			boolean found = findBehavior(AvoidObstaclesInstinct.class, alwaysActiveBehaviors.iterator(), value.equals("0"));
+			if(value.equals("1") && !found)
+				alwaysActiveBehaviors.add(new AvoidObstaclesInstinct(new CIArguments(""), this));
+		}
+		
+		if(name.equals("kalmanfilter")) {
+			if(value.equals("1")) {
+				kalmanFilterGPS = new RobotKalman();
+				kalmanFilterCompass = new RobotKalman();
+			} else {
+				kalmanFilterGPS = null;
+				kalmanFilterCompass = null;
+			}
+		}
+		
+		if(name.equals("dronetype"))
+			droneType = DroneType.valueOf(value);
+	}
+	
+	private boolean findBehavior(Class<?> c, Iterator<?> i, boolean remove) {
+		boolean found = false;
+		
+		while(i.hasNext()) {
+			Object current = i.next();
+			if(c.isInstance(current)) {
+				found = true;
+				if(remove)
+					i.remove();
+				break;
+			}
+		}
+		return found;
 	}
 
 }

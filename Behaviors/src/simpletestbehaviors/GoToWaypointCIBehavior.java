@@ -90,5 +90,6 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 	public void cleanUp() {
 		drone.setLed(0, LedState.OFF);
 		drone.setMotorSpeeds(0, 0);
+		System.out.println("STOP DUDE");
 	}
 }
