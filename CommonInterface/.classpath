@@ -18,5 +18,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/CommonInterface/lib/junit-4.12-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/jafama.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
