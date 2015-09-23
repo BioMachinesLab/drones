@@ -37,18 +37,32 @@ public class MissionEnvironment extends BoundaryEnvironment{
 		
 		GeoFence fenceDrones = new GeoFence("fence");
 		
+		int size = 100;
+		
 		commoninterface.mathutils.Vector2d vec = CoordinateUtilities.GPSToCartesian(new LatLon(38.766524638824215, -9.094010382164727));
 		fenceDrones.addWaypoint(CoordinateUtilities.cartesianToGPS(vec));
-		vec.x+=100;
+		vec.x+=size;
 		fenceDrones.addWaypoint(CoordinateUtilities.cartesianToGPS(vec));
-		vec.y-=100;
+		vec.y-=size;
 		fenceDrones.addWaypoint(CoordinateUtilities.cartesianToGPS(vec));
-		vec.x-=100;
+		vec.x-=size;
 		fenceDrones.addWaypoint(CoordinateUtilities.cartesianToGPS(vec));
+		
+		//base
+		vec.y+= (size+size/4);
+		vec.x+= size/2;
 		
 		for(Robot r : simulator.getRobots()) {
 			((RobotCI)r).replaceEntity(fenceDrones);
-			((RobotCI)r).replaceEntity(new Waypoint("base", new LatLon(38.76661560306668,-9.092575907707214)));
+			((RobotCI)r).replaceEntity(new Waypoint("base", CoordinateUtilities.cartesianToGPS(vec)));
+			
+			double rand = simulator.getRandom().nextDouble()*5;//5 m
+			
+			double x = vec.x + rand*2 - rand;
+			double y = vec.y + rand*2 - rand;
+			
+			r.setPosition(x, y);
+			r.setOrientation(Math.PI*2*simulator.getRandom().nextDouble());
 		}
 		
 		wallsDistance = enemyDistance;
