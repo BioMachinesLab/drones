@@ -3,6 +3,7 @@ package helpers;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
@@ -37,39 +38,7 @@ public class BestControllersWeights {
 				
 				try {
 					
-					String post = subFolder.getPath()+"/post.txt";
-					
-					File postFile = new File(post);
-				
-					Scanner s = new Scanner(postFile);
-					s.nextLine();
-					
-					ArrayList<RunData> data = new ArrayList<RunData>();
-					
-					while(s.hasNextLine()) {
-						
-						String line = s.nextLine();
-						
-						if(!line.startsWith("O")) {
-							
-							Scanner lineScanner = new Scanner(line);
-							
-							RunData d = new RunData();
-							
-							d.run = lineScanner.nextInt();
-							d.fitness = lineScanner.nextDouble();
-							
-							String[] split = line.trim().split(" ");
-							int gen = Integer.parseInt(split[split.length-1]);
-							d.gen = gen;
-							
-							data.add(d);
-							
-							lineScanner.close();
-						}
-					}
-					
-					Collections.sort(data);
+					ArrayList<RunData> data = getData(subFolder);
 					
 					for(int i = 0 ; i < TOP ; i++) {
 						
@@ -122,13 +91,53 @@ public class BestControllersWeights {
 						wr.close();
 					}
 					
-					s.close();
+					
 				
 				} catch(Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}
+	}
+	
+	public static ArrayList<RunData> getData(File subFolder) throws IOException{
+		String post = subFolder.getPath()+"/post.txt";
+		
+		File postFile = new File(post);
+	
+		Scanner s = new Scanner(postFile);
+		s.nextLine();
+		
+		ArrayList<RunData> data = new ArrayList<RunData>();
+		
+		while(s.hasNextLine()) {
+			
+			String line = s.nextLine();
+			
+			if(!line.startsWith("O")) {
+				
+				Scanner lineScanner = new Scanner(line);
+				
+				RunData d = new RunData();
+				
+				d.run = lineScanner.nextInt();
+				d.fitness = lineScanner.nextDouble();
+				
+				String[] split = line.trim().split(" ");
+				int gen = Integer.parseInt(split[split.length-1]);
+				d.gen = gen;
+				
+				data.add(d);
+				
+				lineScanner.close();
+			}
+		}
+		
+		s.close();
+		
+		Collections.sort(data);
+		
+		return data;
 	}
 	
 	public static String implode(double[] vals) {

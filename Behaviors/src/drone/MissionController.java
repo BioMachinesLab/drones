@@ -30,7 +30,7 @@ public class MissionController extends CIBehavior {
 		PATROL,INTRUDER,WAYPOINT
 	}
 	
-	protected static long BATTERY_LIFE = 10*60*10; //10 min in timesteps
+	protected static long BATTERY_LIFE = 8*60*10; //8 min in timesteps
 	protected static double GO_BACK_BATTERY = 0.1;
 	protected static double WAYPOINT_DISTANCE_THRESHOLD = 3; //3 meters
 	protected static double BASE_DISTANCE_THRESHOLD = 5; //5 meters 
@@ -44,7 +44,7 @@ public class MissionController extends CIBehavior {
 	protected double lastIntruderTime;
 	protected int currentSubController = 0;
 	
-	protected long stop = 0;
+	protected long stop = 15*60*10;//15 min mission
 	
 	protected ArrayList<CIBehavior> subControllers = new ArrayList<CIBehavior>();
 
@@ -54,6 +54,7 @@ public class MissionController extends CIBehavior {
 		super(args, robot);
 		this.args = args;
 		this.drone = (AquaticDroneCI)robot;
+		this.currentBattery = 0.5 + Math.random()*0.5;//50% to 100%
 	}
 	
 	@Override
@@ -71,8 +72,10 @@ public class MissionController extends CIBehavior {
 	@Override
 	public void step(double timestep) {
 		
-		if(timestep < stop)
+		if(stop != 0 && timestep > stop) {
+			robot.setMotorSpeeds(0, 0);
 			return;
+		}
 		
 		int subController = 0;
 		
@@ -184,7 +187,8 @@ public class MissionController extends CIBehavior {
 			double distance = CoordinateUtilities.distanceInMeters(drone.getActiveWaypoint().getLatLon(),drone.getGPSLatLon());
 			
 			if(distance < BASE_DISTANCE_THRESHOLD)
-				currentBattery+= (1.0/BATTERY_LIFE)*5;
+//				currentBattery+= (1.0/BATTERY_LIFE)*5;
+				currentBattery = 1.0;
 			else
 				currentBattery-= 1.0/BATTERY_LIFE;	
 		}
