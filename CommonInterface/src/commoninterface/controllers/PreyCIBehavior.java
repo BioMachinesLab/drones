@@ -23,11 +23,13 @@ public class PreyCIBehavior extends CIBehavior {
     
     private double speed = 1;
     private double headingRandom = 0;
+    private double escapeRange = 10;
     
     public PreyCIBehavior(CIArguments args, RobotCI robot) {
         super(args, robot);
         this.speed = args.getArgumentAsDouble("speed");
         this.headingRandom = args.getArgumentAsDouble("headingrandom");
+        this.escapeRange = args.getArgumentAsDouble("escaperange");
     }
 
     @Override
@@ -41,7 +43,7 @@ public class PreyCIBehavior extends CIBehavior {
             if (e instanceof RobotLocation) {
                 RobotLocation rl = (RobotLocation) e;
                 double d = ad.getGPSLatLon().distance(rl.getLatLon());
-                if (d < closestDist) {
+                if (d < closestDist && d / 1000 <= escapeRange) {
                     closest = rl.getLatLon();
                     closestDist = d;
                 }
