@@ -584,7 +584,9 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 					int i = 0;
 					synchronized (currentValues) {
 						for (String s : currentValues.keySet()) {
-							keys[i++] = s;
+							if (i >= keys.length) {
+								keys[i++] = s;
+							}
 						}
 					}
 				}
