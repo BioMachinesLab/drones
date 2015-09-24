@@ -3,6 +3,7 @@ package drone;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Random;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.AquaticDroneCI.DroneType;
@@ -34,7 +35,7 @@ public class MissionController extends CIBehavior {
 	protected static double GO_BACK_BATTERY = 0.1;
 	protected static double WAYPOINT_DISTANCE_THRESHOLD = 3; //3 meters
 	protected static double BASE_DISTANCE_THRESHOLD = 5; //5 meters 
-	protected static double ALERT_TIMEOUT = 1*60*10; //1 min
+	protected static double ALERT_TIMEOUT = 0;//0 min
 	
 	protected CIArguments args;
 	protected AquaticDroneCI drone;
@@ -43,18 +44,31 @@ public class MissionController extends CIBehavior {
 	protected double currentBattery = 1.0;
 	protected double lastIntruderTime;
 	protected int currentSubController = 0;
+	protected boolean share = false;
 	
-	protected long stop = 15*60*10;//15 min mission
+	protected int stop = 13*60*10;//13 min mission
+	
+	protected String description = "";
 	
 	protected ArrayList<CIBehavior> subControllers = new ArrayList<CIBehavior>();
 	
-	//TODO we have to remove the "change active waypoint" instinct for this to work
-
+	protected int onboardRange = 20;
+	
 	public MissionController(CIArguments args, RobotCI robot) {
 		super(args, robot);
 		this.args = args;
 		this.drone = (AquaticDroneCI)robot;
-		this.currentBattery = 0.5 + Math.random()*0.5;//50% to 100%
+		if(args.getArgumentIsDefined("ip"+drone.getNetworkAddress())) {
+			this.currentBattery = args.getArgumentAsDouble("ip"+drone.getNetworkAddress());
+		} else {
+			this.currentBattery = 0.5 + Math.random()*0.5;//50% to 100%
+		}
+		
+		onboardRange = args.getArgumentAsIntOrSetDefault("onboardrange", onboardRange);
+		stop = args.getArgumentAsIntOrSetDefault("stop", stop);
+		share = args.getFlagIsTrue("share");
+		
+		description+="starting battery="+currentBattery+";";
 	}
 	
 	@Override
@@ -66,7 +80,6 @@ public class MissionController extends CIBehavior {
 		
 		drone.setActiveWaypoint(null);
 		
-//		this.stop = (long)(Math.random()*4000);
 	}
 	
 	@Override
@@ -82,6 +95,9 @@ public class MissionController extends CIBehavior {
 		updateEnergy(timestep);
 		
 		boolean skipSubController = false;
+		
+//		if(robot.getNetworkAddress().endsWith("103"))
+//			System.out.println(currentState);
 		
 		if(currentBattery < GO_BACK_BATTERY) {
 			currentState = State.RECHARGE;
@@ -131,6 +147,9 @@ public class MissionController extends CIBehavior {
 				subController = Controller.INTRUDER.ordinal();
 				
 				intruderPos = intruderPosition();
+				
+//				if(robot.getNetworkAddress().endsWith("103"))
+//					System.out.println(intruderPos);
 				
 				if(intruderPos != null) {
 					
@@ -219,11 +238,23 @@ public class MissionController extends CIBehavior {
 	
 	protected LatLon intruderPosition() {
 		
-		LinkedList<SharedDroneLocation> locations = SharedDroneLocation.getSharedDroneLocations(drone);
-		
-		for(SharedDroneLocation loc : locations) {
-			if(loc.getDroneType() == DroneType.ENEMY)
-				return loc.getLatLon();
+		if(share) {
+			LinkedList<SharedDroneLocation> locations = SharedDroneLocation.getSharedDroneLocations(drone);
+			
+			for(SharedDroneLocation loc : locations) {
+				if(loc.getDroneType() == DroneType.ENEMY)
+					return loc.getLatLon();
+			}
+		} else {
+			ArrayList<RobotLocation> locations = RobotLocation.getDroneLocations(drone);
+			
+			for(RobotLocation loc : locations) {
+				if(loc.getDroneType() == DroneType.ENEMY && loc.getLatLon().distance(drone.getGPSLatLon())*1000 < onboardRange) {
+//					if(robot.getNetworkAddress().endsWith("103"))
+//						System.out.println(loc.getLatLon().distance(drone.getGPSLatLon())*1000+" < "+onboardRange);
+					return loc.getLatLon();
+				}
+			}
 		}
 		
 		return null;
@@ -263,10 +294,12 @@ public class MissionController extends CIBehavior {
 			int tries = 0;
 			boolean success = false;
 			
+			Random r = new Random((long)(currentBattery*1000));
+			
 			do {
 				
-				double rLat = minLat+(maxLat-minLat)*Math.random();
-				double rLon = minLon+(maxLon-minLon)*Math.random();
+				double rLat = minLat+(maxLat-minLat)*r.nextDouble();
+				double rLon = minLon+(maxLon-minLon)*r.nextDouble();
 				
 				LatLon rLatLon = new LatLon(rLat,rLon);
 				
@@ -348,4 +381,10 @@ public class MissionController extends CIBehavior {
 		subControllers.clear();
 		drone.setActiveWaypoint(Waypoint.getWaypoints(drone).get(0));
 	}
+	
+	@Override
+	public String toString() {
+		return super.toString() + description;
+	}
+	
 }

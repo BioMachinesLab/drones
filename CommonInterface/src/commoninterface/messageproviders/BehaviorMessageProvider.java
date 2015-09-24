@@ -38,7 +38,7 @@ public class BehaviorMessageProvider implements MessageProvider {
 					
 					for(Object b : classes) {
 						Class<CIBehavior> ci = (Class<CIBehavior>) b;
-						if(ci.getCanonicalName().endsWith(bm.getSelectedBehavior()))
+						if(ci.getCanonicalName().endsWith("."+bm.getSelectedBehavior()))
 							chosenClass = ci;
 					}
 					

@@ -1,6 +1,9 @@
 package environment;
 
-import mathutils.Vector2d;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+import simpletestbehaviors.GoToWaypointCIBehavior;
 import simulation.Simulator;
 import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
@@ -9,13 +12,16 @@ import commoninterface.AquaticDroneCI.DroneType;
 import commoninterface.RobotCI;
 import commoninterface.entities.GeoFence;
 import commoninterface.entities.Waypoint;
+import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
-import controllers.GoToWayPointController;
+import drone.MissionController;
 
 public class MissionEnvironment extends BoundaryEnvironment{
 	
 	public double enemyDistance = 30;
+	public GeoFence fence = null;
+	public double seenSteps = 0;
 	
 	public MissionEnvironment(Simulator simulator, Arguments args) {
 		super(simulator, args);
@@ -27,33 +33,29 @@ public class MissionEnvironment extends BoundaryEnvironment{
 		
 		this.setup = true;
 		
-		for (Robot r : simulator.getRobots()) {
-        	do{
-        		positionDrone((AquaticDrone) r, simulator);
-        		simulator.updatePositions(0);
-        	}while(!safe(r, simulator));
-        	
-        }
+		AquaticDrone enemy = new AquaticDrone(simulator, new Arguments("diameter=2,gpserror=1.8,commrange=40,rudder=0"));
+		enemy.setDroneType(DroneType.ENEMY);
+		addRobot(enemy);
 		
-		GeoFence fenceDrones = new GeoFence("fence");
+		fence = new GeoFence("fence");
 		
 		int size = 100;
 		
 		commoninterface.mathutils.Vector2d vec = CoordinateUtilities.GPSToCartesian(new LatLon(38.766524638824215, -9.094010382164727));
-		fenceDrones.addWaypoint(CoordinateUtilities.cartesianToGPS(vec));
+		fence.addWaypoint(CoordinateUtilities.cartesianToGPS(vec));
 		vec.x+=size;
-		fenceDrones.addWaypoint(CoordinateUtilities.cartesianToGPS(vec));
+		fence.addWaypoint(CoordinateUtilities.cartesianToGPS(vec));
 		vec.y-=size;
-		fenceDrones.addWaypoint(CoordinateUtilities.cartesianToGPS(vec));
+		fence.addWaypoint(CoordinateUtilities.cartesianToGPS(vec));
 		vec.x-=size;
-		fenceDrones.addWaypoint(CoordinateUtilities.cartesianToGPS(vec));
+		fence.addWaypoint(CoordinateUtilities.cartesianToGPS(vec));
 		
 		//base
 		vec.y+= (size+size/4);
 		vec.x+= size/2;
 		
 		for(Robot r : simulator.getRobots()) {
-			((RobotCI)r).replaceEntity(fenceDrones);
+			((RobotCI)r).replaceEntity(fence);
 			((RobotCI)r).replaceEntity(new Waypoint("base", CoordinateUtilities.cartesianToGPS(vec)));
 			
 			double rand = simulator.getRandom().nextDouble()*5;//5 m
@@ -66,21 +68,76 @@ public class MissionEnvironment extends BoundaryEnvironment{
 		}
 		
 		wallsDistance = enemyDistance;
-		GeoFence fenceEnemy = getFence(simulator);
 		
-		AquaticDrone drone = new AquaticDrone(simulator, new Arguments("diameter=2,gpserror=1.8,commrange=40,avoiddrones=0"));
-		drone.setDroneType(DroneType.ENEMY);
-		GoToWayPointController controller = new GoToWayPointController(simulator, drone, new Arguments("wait=300"));
-		drone.setController(controller);
-		drone.getEntities().addAll(fenceEnemy.getWaypoints());
-		drone.setPosition(new Vector2d(-2*wallsDistance, 1*wallsDistance));
-		addRobot(drone);
-		drone.setActiveWaypoint(fenceEnemy.getWaypoints().get(0));
 	}
 	
 	@Override
 	public void update(double time) {
 		
+		AquaticDrone enemy = (AquaticDrone)getRobots().get(getRobots().size()-1);
+		
+		if(time == 1) {
+			
+			File f = new File("../DroneControlConsole/controllers/preset_hierarchical8r.conf");
+			StringBuffer str = new StringBuffer();
+			
+			try {
+				Scanner s = new Scanner(f);
+				
+				while(s.hasNextLine())
+					str.append(s.nextLine()+"\n");
+				
+				s.close();
+				
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+			
+			CIArguments args = new CIArguments(str.toString().replaceAll("\\s+", ""),true);
+			
+			for(int i = 0 ; i < getRobots().size()-1 ; i++) {
+				AquaticDrone r = (AquaticDrone)getRobots().get(i);
+				r.startBehavior(new MissionController(args, r));
+			}
+		}
+		
+		if(time == 600) {
+			
+			File f = new File("../DroneControlConsole/controllers/preset_preprog_waypoint.conf");
+			StringBuffer str = new StringBuffer();
+			
+			try {
+				Scanner s = new Scanner(f);
+				
+				while(s.hasNextLine())
+					str.append(s.nextLine()+"\n");
+				
+				s.close();
+				
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+			
+			CIArguments args = new CIArguments(str.toString().replaceAll("\\s+", ""),true);
+			
+			enemy.startBehavior(new GoToWaypointCIBehavior(args, enemy));
+		}
+		
+		if(time > 600*2) {
+			
+			double seenStepsNow = 0;
+		
+			for(int i = 0 ; i < getRobots().size()-1 ; i++) {
+				AquaticDrone r = (AquaticDrone)getRobots().get(i);
+				if(r.getPosition().distanceTo(enemy.getPosition()) < 20) {
+					seenStepsNow++;
+				}
+			}
+			
+//			seenSteps+=Math.min(seenStepsNow, 1);
+			seenSteps+=seenStepsNow;
+		}
+//		System.out.println(seenSteps);
 	}
 	
 	public GeoFence getFence(Simulator simulator) {

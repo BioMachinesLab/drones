@@ -46,7 +46,7 @@ public class EnemyEnvironment extends BoundaryEnvironment{
 		
 //		addLines(fence.getWaypoints(), simulator);
 		
-		AquaticDrone drone = new AquaticDrone(simulator, new Arguments("diameter=2,gpserror=1.8,commrange=40,avoiddrones=0"));
+		AquaticDrone drone = new AquaticDrone(simulator, new Arguments("diameter=2,gpserror=1.8,commrange=40,avoiddrones=0,rudder=0"));
 		drone.setDroneType(DroneType.ENEMY);
 		GoToWayPointController controller = new GoToWayPointController(simulator, drone, new Arguments(""));
 		drone.setController(controller);

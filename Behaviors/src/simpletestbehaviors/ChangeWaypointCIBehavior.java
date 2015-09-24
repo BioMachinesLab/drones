@@ -11,7 +11,7 @@ import commoninterface.utils.CoordinateUtilities;
 
 public class ChangeWaypointCIBehavior extends CIBehavior{
 	
-	private double distance = 1.5;
+	private double distance = 3;
 	private AquaticDroneCI drone;
 	
 	public ChangeWaypointCIBehavior(CIArguments args, RobotCI robot) {

@@ -1,9 +1,12 @@
 package simpletestbehaviors;
 
+import java.util.ArrayList;
+
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.LedState;
 import commoninterface.RobotCI;
+import commoninterface.entities.GeoFence;
 import commoninterface.entities.Waypoint;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
@@ -14,9 +17,17 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 	private double angleTolerance = 10;
 	private double wait = 0;
 	private AquaticDroneCI drone;
-	private double currentWait = 0;
 	private boolean waiting = false;
 	private Waypoint wp;
+	private boolean defineWPs = false;
+	
+	private double offsetX = 0;
+	private double offsetY = 0;
+	private double distance = 100;
+	
+	private int currentWP = 0;
+	private Waypoint prevWP = null;
+	private double timeOffset = 0;
 	
 	public GoToWaypointCIBehavior(CIArguments args, RobotCI drone) {
 		super(args, drone);
@@ -25,21 +36,57 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 		distanceTolerance = args.getArgumentAsDoubleOrSetDefault("distancetolerance", distanceTolerance);
 		angleTolerance = args.getArgumentAsDoubleOrSetDefault("angletolerance", angleTolerance);
 		wait = args.getArgumentAsDoubleOrSetDefault("wait", wait);
+		defineWPs = args.getFlagIsTrue("definewps");
+	}
+
+	public void start() {		
+		if(defineWPs) {
+			ArrayList<GeoFence> fences = GeoFence.getGeoFences(drone);
+			
+			if(fences.isEmpty())
+				return;
+			
+			GeoFence fence = GeoFence.getGeoFences(drone).get(0);
+			drone.getEntities().clear();
+			drone.getEntities().add(fence);
+			
+			distance = fence.getWaypoints().get(0).getLatLon().distance(fence.getWaypoints().get(1).getLatLon())*1000;
+			
+			offsetX = CoordinateUtilities.GPSToCartesian(fence.getWaypoints().get(0).getLatLon()).x+distance/2;
+			offsetY = CoordinateUtilities.GPSToCartesian(fence.getWaypoints().get(0).getLatLon()).y+distance/2;
+			
+			ArrayList<Waypoint> wps = getWPs();
+			
+			drone.getEntities().addAll(wps);
+			drone.setActiveWaypoint(wps.get(0));
+		}
 	}
 	
 	@Override
 	public void step(double timestep) {
 		
-		if(waiting && currentWait++ > wait) {
-			waiting = false;
-			currentWait = 0;
-			wp = null;
+		if(waiting) {
+			
+			int c = currentWP/2;
+			
+			if(currentWP % 2 == 0  || (timestep-timeOffset) >= c*wait) {
+				
+				waiting = false;
+				prevWP = wp;
+				wp = null;
+			}
 		}
 		
 		if(wp == null) {
 			drone.setLed(0, LedState.OFF);
 			drone.setMotorSpeeds(0, 0);
 			wp = drone.getActiveWaypoint();
+			if(wp != prevWP) {
+				if(currentWP == 1) {
+					timeOffset = timestep;
+				}
+				currentWP++;
+			}
 			if(wp == null)
 				return;
 		}
@@ -90,6 +137,46 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 	public void cleanUp() {
 		drone.setLed(0, LedState.OFF);
 		drone.setMotorSpeeds(0, 0);
-		System.out.println("STOP DUDE");
 	}
+	
+	private void addNode(ArrayList<Waypoint> wps, double x, double y) {
+
+        x *= distance/2;
+        y *= distance/2;
+        
+        System.out.println(x+" "+y);
+        
+        x+=offsetX;
+        y+=offsetY;
+        y-=distance;
+        
+        wps.add(new Waypoint("wp", CoordinateUtilities.cartesianToGPS(new commoninterface.mathutils.Vector2d(x, y))));
+    }
+	
+	public ArrayList<Waypoint> getWPs() {
+		ArrayList<Waypoint> wps = new ArrayList<Waypoint>();
+		
+		addNode(wps,-1.2,0.75);
+		
+		addNode(wps,1.2,0.75);
+		addNode(wps,1.2,0.45);
+		
+		addNode(wps,-1.2,0.45);
+		addNode(wps,-1.2,0.15);
+		
+		addNode(wps,1.2,0.15);
+		addNode(wps,1.2,-0.15);
+		
+		addNode(wps,-1.2,-0.15);
+		addNode(wps,-1.2,-0.45);
+		
+		addNode(wps,1.2,-0.45);
+		addNode(wps,1.2,-0.75);
+		
+		addNode(wps,-1.2,-0.75);	
+		
+		return wps;
+	
+	}
+	
 }

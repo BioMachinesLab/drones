@@ -519,6 +519,7 @@ public class CommandPanel extends UpdatePanel {
 							@Override
 							public void actionPerformed(ActionEvent e) {
 								JButton b = (JButton) e.getSource();
+								readConfigForButton(b.getText());
 								String arguments = presetsConfig.get(b.getText());
 								deployPreset(b.getText(),arguments);
 							}
@@ -526,12 +527,8 @@ public class CommandPanel extends UpdatePanel {
 						
 						presetsPanel.add(b);
 						
-						try {
-							String config = readConfigurationFile(new File(CONTROLLERS_FOLDER + "/" + s));
-							presetsConfig.put(buttonName, config);
-						} catch (FileNotFoundException e) {
-							e.printStackTrace();
-						}
+						readConfigForButton(b.getText());
+						
 					}else{
 						list.addItem(s);
 					}
@@ -540,6 +537,15 @@ public class CommandPanel extends UpdatePanel {
 			}
 		}
 
+	}
+	
+	private void readConfigForButton(String buttonText) {
+		try {
+			String config = readConfigurationFile(new File(CONTROLLERS_FOLDER + "/" + "preset_"+buttonText+".conf"));
+			presetsConfig.put(buttonText, config);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private String readConfigurationFile(File file) throws FileNotFoundException {
