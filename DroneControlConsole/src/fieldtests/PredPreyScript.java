@@ -10,22 +10,14 @@ import commoninterface.entities.GeoFence;
 import commoninterface.entities.Waypoint;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CoordinateUtilities;
-import commoninterface.utils.jcoord.LatLon;
 import gui.panels.CommandPanel;
 import gui.panels.map.MapPanel;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
 import main.DroneControlConsole;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
 
 /**
  *
@@ -33,9 +25,6 @@ import org.joda.time.format.DateTimeFormat;
  */
 public class PredPreyScript extends FieldTestScript {
 
-    public static final double MIN_DISTANCE = 5;
-    public static final double BOX_SIDE = 10;
-    public static final int NUM_ROBOTS = 3;
     private static String[] lastOptions = null;
 
     public PredPreyScript(DroneControlConsole console, CommandPanel commandPanel, MapPanel mapPanel) {
@@ -49,8 +38,8 @@ public class PredPreyScript extends FieldTestScript {
          Get options
          */
         String[] options = getMultipleInputsDialog(
-                new String[]{"Seed", "Prey distance", "IPs", "Predator behavior", "Prey behavior", "Placement box", "Safety distance"},
-                lastOptions != null ? lastOptions : new String[]{"0", "30", "", "", "present_prey_10", "10", "3"});
+                new String[]{"Seed", "Prey distance", "IPs", "Predator behavior", "Prey behavior", "Placement box", "Safety distance", "Num. predators"},
+                lastOptions != null ? lastOptions : new String[]{"0", "30", "", "", "present_prey_10", "10", "3","3"});
         if (options == null) {
             return;
         }
@@ -61,16 +50,19 @@ public class PredPreyScript extends FieldTestScript {
         String[] ips = options[2].split("[;,\\s]");
         String predBehav = options[3];
         String preyBehav = options[4];
+        double boxSize = Double.parseDouble(options[5]);
+        double safetyDist = Double.parseDouble(options[6]);
+        int numPreds = Integer.parseInt(options[7]);
 
         /*
          Generate starting positions
          */
         Waypoint center = getCentralPoint();
         super.removeEntityFromMap(center);
-        GeoFence fence = super.defineGeoFence(center.getLatLon(), BOX_SIDE, BOX_SIDE);
+        GeoFence fence = super.defineGeoFence(center.getLatLon(), boxSize, boxSize);
 
         // Generate positions
-        ArrayList<Waypoint> predatorsPos = super.generateWaypointsInGeoFence(fence, NUM_ROBOTS, MIN_DISTANCE, 40, seed);
+        ArrayList<Waypoint> predatorsPos = super.generateWaypointsInGeoFence(fence, numPreds, safetyDist, 40, seed);
         double a = rand.nextDouble() * Math.PI * 2;
         double x = Math.cos(a) * preyDist;
         double y = Math.sin(a) * preyDist;
@@ -97,7 +89,7 @@ public class PredPreyScript extends FieldTestScript {
          Go to starting positions
          */
         super.clearMapEntities();
-        for (int i = 0; i < NUM_ROBOTS; i++) {
+        for (int i = 0; i < numPreds; i++) {
             super.goToWaypoint(singletonList(ips[i]), predatorsPos.get(i));
         }
         super.goToWaypoint(singletonList(ips[ips.length - 1]), preyWp);
@@ -108,7 +100,7 @@ public class PredPreyScript extends FieldTestScript {
         int confirm = JOptionPane.showConfirmDialog(console.getGUI(), "Yes to start, no to stop", "Last confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         if (confirm == JOptionPane.YES_OPTION) {
             String description = super.startExperimentTimer(predBehav);
-            for (int i = 0; i < NUM_ROBOTS; i++) {
+            for (int i = 0; i < numPreds; i++) {
                 super.startControllers(singletonList(ips[i]), predBehav + "-" + i, description);
             }
             super.startControllers(singletonList(ips[ips.length - 1]), preyBehav, description);
