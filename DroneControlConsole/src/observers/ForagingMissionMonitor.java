@@ -17,7 +17,7 @@ import main.DroneControlConsole;
 public class ForagingMissionMonitor extends Thread {
 	
 	protected DroneControlConsole console;
-	protected double targetDistance = 2;
+	protected double targetDistance = 5;
 	protected double targetRobots = 2;
 	
 	public ForagingMissionMonitor(DroneControlConsole console) {

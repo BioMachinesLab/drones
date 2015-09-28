@@ -35,7 +35,7 @@ public class MissionController extends CIBehavior {
 	protected static double GO_BACK_BATTERY = 0.1;
 	protected static double WAYPOINT_DISTANCE_THRESHOLD = 3; //3 meters
 	protected static double BASE_DISTANCE_THRESHOLD = 5; //5 meters 
-	protected static double ALERT_TIMEOUT = 0;//0 min
+	protected static double ALERT_TIMEOUT = 30*10;//30 sec
 	
 	protected CIArguments args;
 	protected AquaticDroneCI drone;
@@ -103,6 +103,9 @@ public class MissionController extends CIBehavior {
 			currentState = State.RECHARGE;
 		}
 		
+		if(timestep % 10 == 0)
+			System.out.println(currentState+" "+currentBattery);
+		
 		switch(currentState) {
 			case GO_TO_AREA:
 				if(drone.getActiveWaypoint() == null) {
@@ -130,6 +133,12 @@ public class MissionController extends CIBehavior {
 							robot.getEntities().remove(drone.getActiveWaypoint());
 						}
 					}
+				}
+				
+				LatLon intruderPos2 = intruderPosition();
+				
+				if(intruderPos2 != null && insideBoundary(intruderPos2) && eligibleToPursue(intruderPos2)) {
+					currentState = State.PURSUE_INTRUDER;
 				}
 				
 				break;
@@ -184,6 +193,10 @@ public class MissionController extends CIBehavior {
 		
 		if(!skipSubController)
 			chooseSubController(subController,timestep);
+		
+		if(timestep % 100 == 0) {
+			drone.setRudder(0, 0);
+		}
 	}
 	
 	protected void chooseSubController(int output, double time) {

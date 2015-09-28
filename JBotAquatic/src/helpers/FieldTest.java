@@ -23,7 +23,7 @@ public class FieldTest {
 //		"dispersion;1;1;8;14-41-33;90","dispersion;1;2;8;15-17-11;90","dispersion;1;3;8;15-19-38;90",
 //		"dispersion;2;1;8;15-22-37;90","dispersion;2;2;8;15-25-08;90","dispersion;2;3;8;15-27-58;90",
 //		"aggregate_waypoint;0;1;8;15-32-44;240","aggregate_waypoint;0;2;8;15-38-42;240",
-		"aggregate_waypoint;0;3;8;15-52-25;240",
+//		"aggregate_waypoint;0;3;8;15-52-25;240",
 //		"waypoint;0;1;8;17-11-15;180;1,2,3,4,5,6,7,10;4","waypoint;0;2;8;17-14-25;180;1,2,3,4,5,6,7,10;4","waypoint;0;3;8;17-19-08;180;1,2,3,4,5,6,7,10;4",
 //		"waypoint;1;1;8;17-23-39;180;1,2,3,4,5,6,7,10;4","waypoint;1;2;8;17-28-15;180;1,2,3,4,5,6,7,10;4","waypoint;1;3;8;17-37-21;180;1,2,3,4,5,6,7,10;4",
 //		"waypoint;2;1;8;17-40-39;180;1,2,3,4,5,6,7,10;4","waypoint;2;2;8;17-43-14;180;1,2,3,4,5,6,7,10;4","waypoint;2;3;8;17-46-46;180;1,2,3,4,5,6,7,10;4", 
@@ -43,9 +43,20 @@ public class FieldTest {
 //		"dispersion;0;1;8;20-06-21;300;1,2,3,4,6,7,8,10", //adaptive, only robots, starts with 4 (6,7,8,10), (1,2,3,4) afterwards
 //		"dispersion;0;2;8;20-11-35;300;1,2,3,4,6,7,8,10,5,9", //adaptive, with kayak, not interesting!
 	};
-	public static String[] FOLDERS = new String[]{"27july","29july"};
 	
-	private static int folder = 1;
+	public static String[] EXPO_25_SEP = new String[]{
+		"dispersion;2;0;4;12-09-41;90",
+		"dispersion;2;1;4;12-12-02;90",
+		"dispersion;2;2;4;12-14-33;90",
+		
+		"dispersion;2;0;6;12-33-04;90",
+		"dispersion;2;1;6;12-35-45;90",
+		"dispersion;2;2;6;12-38-24;90",
+	};
+	
+	public static String[] FOLDERS = new String[]{"27july","29july","25sep"};
+	
+	private static int folder = 2;
 
 	private ArrayList<Experiment> experiments = new ArrayList<Experiment>();
 	private HashMap<Integer,ArrayList<LogData>> completeLogs = new HashMap<Integer, ArrayList<LogData>>();
@@ -59,6 +70,7 @@ public class FieldTest {
 		if(!single) {
 			new FieldTest(EXPO_27_JULY);
 			new FieldTest(EXPO_29_JULY);
+			new FieldTest(EXPO_25_SEP);
 		}else {
 			
 			folder = 0;
@@ -75,6 +87,16 @@ public class FieldTest {
 			folder = 1;
 			
 			for(String s :EXPO_29_JULY) {
+				String file = "experiments/"+FOLDERS[folder]+"/"+s;
+				ObjectInputStream objectinputstream = new ObjectInputStream(new FileInputStream(file));
+		        Experiment e = (Experiment) objectinputstream.readObject();
+		        objectinputstream.close();
+		        AssessFitness.compareFitness(e, 1,gui);
+			}
+			
+			folder = 2;
+			
+			for(String s :EXPO_25_SEP) {
 				String file = "experiments/"+FOLDERS[folder]+"/"+s;
 				ObjectInputStream objectinputstream = new ObjectInputStream(new FileInputStream(file));
 		        Experiment e = (Experiment) objectinputstream.readObject();
@@ -104,6 +126,8 @@ public class FieldTest {
 			folder = 0;
 		if(descriptions == EXPO_29_JULY)
 			folder = 1;
+		if(descriptions == EXPO_25_SEP)
+			folder = 2;
 		
 		boolean readCompleteFiles = false;
 		

@@ -81,6 +81,8 @@ public class DispersionFitnessTest extends AvoidCollisionsFunction {
         
         distanceDelta /= simulator.getRobots().size();
         
+//        System.out.println(distanceDelta);
+        
         //TODO REMOVE THIS
 //        distanceDelta /= simulator.getTime() < 758 ? 4 : simulator.getRobots().size();
 //        System.out.println(distanceDelta+" "+(simulator.getTime() < 758 ? 4 : simulator.getRobots().size()));

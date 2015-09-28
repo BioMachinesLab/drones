@@ -949,6 +949,13 @@ public class MapPanel extends UpdatePanel {
 			}
 		}
 	}
+	
+	public void clearEntities() {
+		clearObstacles();
+		clearGeoFence();
+		clearWaypoints();
+		updateCommandPanel();
+	}
 
 	public void replaceEntities(ArrayList<Entity> entities) {
 		clearObstacles();

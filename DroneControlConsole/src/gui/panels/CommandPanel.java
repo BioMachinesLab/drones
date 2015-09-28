@@ -62,7 +62,7 @@ import commoninterface.utils.jcoord.LatLon;
 public class CommandPanel extends UpdatePanel {
 	private static final long serialVersionUID = 4038133860317693008L;
 	
-	private static String CONTROLLERS_FOLDER = "controllers";
+	public static String CONTROLLERS_FOLDER = "controllers";
 
 	private String myHostname = "";
 
@@ -120,7 +120,7 @@ public class CommandPanel extends UpdatePanel {
 		if (gui instanceof DroneGUI) {
 			dronePanel = true;
 			monitor = new ForagingMissionMonitor((DroneControlConsole)console);
-			monitor.start();
+//			monitor.start();
 		}
 		
 		initNeuralActivationsWindow();
@@ -648,7 +648,7 @@ public class CommandPanel extends UpdatePanel {
 	public void updateHostname() {
 		myHostname = NetworkUtils.getHostname();
 	}
-
+	
 	public void setLogText(String text) {
 		logMessage.setText(text);
 	}

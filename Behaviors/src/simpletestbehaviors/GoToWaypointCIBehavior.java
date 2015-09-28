@@ -6,6 +6,7 @@ import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.LedState;
 import commoninterface.RobotCI;
+import commoninterface.controllers.ControllerCIBehavior;
 import commoninterface.entities.GeoFence;
 import commoninterface.entities.Waypoint;
 import commoninterface.utils.CIArguments;
@@ -28,6 +29,7 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 	private int currentWP = 0;
 	private Waypoint prevWP = null;
 	private double timeOffset = 0;
+	private CIBehavior ann;
 	
 	public GoToWaypointCIBehavior(CIArguments args, RobotCI drone) {
 		super(args, drone);
@@ -37,6 +39,12 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 		angleTolerance = args.getArgumentAsDoubleOrSetDefault("angletolerance", angleTolerance);
 		wait = args.getArgumentAsDoubleOrSetDefault("wait", wait);
 		defineWPs = args.getFlagIsTrue("definewps");
+		
+		if(args.getArgumentIsDefined("ann")) {
+			CIArguments annArgs = new CIArguments(args.getArgumentAsString("ann"));
+			ann = new ControllerCIBehavior(annArgs, drone);
+			ann.start();
+		}
 	}
 
 	public void start() {		
@@ -91,6 +99,12 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 				return;
 		}
 		
+		if(ann != null) {
+			ann.step(timestep);
+			return;
+		}
+		
+		
 		double currentOrientation = drone.getCompassOrientationInDegrees();
 		double coordinatesAngle = CoordinateUtilities.angleInDegrees(drone.getGPSLatLon(),
 				wp.getLatLon());
@@ -116,6 +130,7 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 				
 				double reduction = 1-(1.0*(Math.abs(difference)/angleTolerance));
 				
+				
 				if(difference < 0)
 					drone.setMotorSpeeds(1.0, reduction);
 				else if(difference > 0)
@@ -125,9 +140,9 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 			}else {
 				drone.setLed(0, LedState.BLINKING);
 				if (difference > 0) {
-					drone.setMotorSpeeds(0, 0.1);
+					drone.setMotorSpeeds(0, 0.5);
 				} else {
-					drone.setMotorSpeeds(0.1, 0);
+					drone.setMotorSpeeds(0.5, 0);
 				}
 			}
 		}

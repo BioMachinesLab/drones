@@ -171,7 +171,7 @@ public class AssessFitness {
 		
 //		while(true) {
 		
-		int s = 1;
+		int s = 100;
 		
 		double[] samples = new double[s];
 		
@@ -283,6 +283,7 @@ public class AssessFitness {
 				currentTime = DateTime.parse(d.GPSdate,formatter);
 				
 				while(Math.abs(stepTime.getMillis()-currentTime.getMillis()) >= 100) {
+					
 					stepTime = stepTime.plus(100);
 					if(!ignoreReal) {
 						setupReal.sim.performOneSimulationStep((double)step);
@@ -382,15 +383,15 @@ public class AssessFitness {
 				
 				setupReal.robots.get(position).setPosition(pos.x+setupReal.start.x-setupReal.firstPos.x, pos.y+setupReal.start.y-setupReal.firstPos.y);
 				
-				temp.addPoint(setupReal.sim,setupReal.robots.get(position).getPosition(), d.temperatures[1]);
+//				temp.addPoint(setupReal.sim,setupReal.robots.get(position).getPosition(), d.temperatures[1]);
 				tempTracer.setCoverage(temp.getCoverage(), setupReal.resolution);
 				
 //				System.out.println(step+"\t"+d.ip+"\t"+(pos.x+setupReal.start.x-setupReal.firstPos.x)+"\t"+(pos.y+setupReal.start.y-setupReal.firstPos.y)+"\t"+d.temperatures[1]);
 				
-				if(min > d.temperatures[1])
-					min = d.temperatures[1];
-				if(max < d.temperatures[1])
-					max = d.temperatures[1];
+//				if(min > d.temperatures[1])
+//					min = d.temperatures[1];
+//				if(max < d.temperatures[1])
+//					max = d.temperatures[1];
 				
 				double orientation = 360 - (rl.getOrientation() - 90);
 				setupReal.robots.get(position).setOrientation(Math.toRadians(orientation));
@@ -459,7 +460,6 @@ public class AssessFitness {
 			if(s == 1)
 				System.out.println(setupReal.eval.getFitness()+" "+setupSim.eval.getFitness());
 		}
-		
 		
 		
 		if(s > 1) {
