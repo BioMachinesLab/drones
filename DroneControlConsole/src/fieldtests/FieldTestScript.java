@@ -90,7 +90,7 @@ public abstract class FieldTestScript {
 		startControllers(ips, "waypoint", "gotowaypoint");
 	}
 	
-	protected boolean arrivedAtWaypoint(ArrayList<String> ips, Waypoint wp, int distanceThresholdInMeters) {
+	protected boolean arrivedAtWaypoint(ArrayList<String> ips, Waypoint wp, double distanceThresholdInMeters) {
 		
 		DronesSet set = console.getDronesSet();
 		
@@ -105,7 +105,7 @@ public abstract class FieldTestScript {
 		return true;
 	}
 	
-	protected GeoFence defineGeoFence(LatLon center, int width, int height) {
+	protected GeoFence defineGeoFence(LatLon center, double width, double height) {
 		
 		GeoFence fence = new GeoFence("fence");
 		
@@ -139,7 +139,7 @@ public abstract class FieldTestScript {
 		mapPanel.replaceEntities(newEntities);
 	}
 	
-	protected ArrayList<Waypoint> generateWaypointsInGeoFence(GeoFence fence, int number, int minDistance, int maxDistance, long randomSeed) {
+	protected ArrayList<Waypoint> generateWaypointsInGeoFence(GeoFence fence, int number, double minDistance, double maxDistance, long randomSeed) {
 		ArrayList<Waypoint> wps = new ArrayList<Waypoint>();
 		
 		Random r = new Random(randomSeed);
