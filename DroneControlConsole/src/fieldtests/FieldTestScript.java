@@ -87,6 +87,7 @@ public abstract class FieldTestScript {
 		entities.add(wp);
 		EntitiesMessage m = new EntitiesMessage(entities, NetworkUtils.getHostname());
 		deploy(m,ips);
+		startControllers(ips, "waypoint", "gotowaypoint");
 	}
 	
 	protected boolean arrivedAtWaypoint(ArrayList<String> ips, Waypoint wp, int distanceThresholdInMeters) {
