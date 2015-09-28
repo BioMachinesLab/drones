@@ -5,7 +5,6 @@ import gui.RobotGUI;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -19,12 +18,10 @@ import java.util.LinkedList;
 import java.util.Random;
 import java.util.Scanner;
 
-import javafx.scene.layout.Border;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -37,13 +34,11 @@ import observers.ForagingMissionMonitor;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import main.DroneControlConsole;
 import main.RobotControlConsole;
 import network.CommandSender;
 import threads.UpdateThread;
-import commoninterface.CIBehavior;
 import commoninterface.entities.Entity;
 import commoninterface.entities.GeoFence;
 import commoninterface.entities.Waypoint;
@@ -54,19 +49,25 @@ import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.network.messages.EntitiesMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.utils.CIArguments;
-import commoninterface.utils.ClassLoadHelper;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.Line;
 import commoninterface.utils.jcoord.LatLon;
+import fieldtests.FieldTestScript;
+import java.awt.Color;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.lang.reflect.Constructor;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CommandPanel extends UpdatePanel {
 	private static final long serialVersionUID = 4038133860317693008L;
 	
 	public static String CONTROLLERS_FOLDER = "controllers";
+        public static String SCRIPTS_LIST = "scripts.txt";
 
 	private String myHostname = "";
 
-	private UpdateThread thread;
 	private JLabel statusMessage;
 	private BehaviorMessage currentMessage;
 	private JTextArea config;
@@ -82,8 +83,6 @@ public class CommandPanel extends UpdatePanel {
 	public JButton deploy;
 	public JButton stopAll;
 	public JButton entitiesButton;
-	private JComboBox<String> behaviors;
-	private JComboBox<String> controllers;
 	
 	private JTextField gpsCoordinate = new JTextField(10);
 	private JButton gpsButton = new JButton("Set waypoint");
@@ -101,6 +100,7 @@ public class CommandPanel extends UpdatePanel {
 	
 	private JLabel currentExperiment;
 	
+        private UpdateThread thread;
 	private ForagingMissionMonitor monitor;
 	
 	/*
@@ -110,7 +110,7 @@ public class CommandPanel extends UpdatePanel {
 	 */
 	private String[] hardcodedClasses = new String[] { "CalibrationCIBehavior", "ShutdownCIBehavior", "LogDronesCIBehavior" };
 
-	public CommandPanel(RobotControlConsole console, RobotGUI gui) {
+	public CommandPanel(RobotControlConsole console, final RobotGUI gui) {
 		updateHostname();
 
 		this.console = console;
@@ -131,23 +131,9 @@ public class CommandPanel extends UpdatePanel {
 
 		JPanel topPanel = new JPanel(new BorderLayout());
 		JPanel controllersPanel = new JPanel(new BorderLayout());
-		JPanel comboBoxes = new JPanel(new BorderLayout());
 
-		behaviors = new JComboBox<String>();
-		behaviors.setPreferredSize(new Dimension(20, 20));
-		populateBehaviors(behaviors);
-		comboBoxes.add(behaviors, BorderLayout.NORTH);
-
-		controllers = new JComboBox<String>();
-		controllers.setPreferredSize(new Dimension(20, 20));
-		populateControllers(controllers);
-		comboBoxes.add(controllers, BorderLayout.SOUTH);
-
-		controllers.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				loadController((String) controllers.getSelectedItem());
-			}
-		});
+		populateControllers();
+                populateScripts();
 		
 		JLabel selectedDronesLabel = new JLabel("Selected drones");
 		selectedDronesLabel.setHorizontalAlignment(JLabel.HORIZONTAL);
@@ -162,7 +148,6 @@ public class CommandPanel extends UpdatePanel {
 		presetsPanel.setBorder(BorderFactory.createTitledBorder("Controllers"));
 		
 		controllersPanel.add(presetsPanel, BorderLayout.SOUTH);
-//		controllersPanel.add(comboBoxes, BorderLayout.SOUTH);
 		topPanel.add(controllersPanel, BorderLayout.NORTH);
 		
 		JPanel selectedPanel = new JPanel();
@@ -175,12 +160,6 @@ public class CommandPanel extends UpdatePanel {
 		deploy = new JButton("Deploy");
 		stopAll = new JButton("Stop All");
 
-		deploy.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				deployBehavior((String) behaviors.getSelectedItem(), true);
-			}
-		});
-
 		stopAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				deployBehavior("ControllerCIBehavior", false);
@@ -189,7 +168,6 @@ public class CommandPanel extends UpdatePanel {
 
 		config = new JTextArea(7, 8);
 		config.setFont(new Font("Monospaced", Font.PLAIN, 11));
-		JScrollPane scroll = new JScrollPane(config);
 
 		statusMessage = new JLabel("");
 		statusMessage.setPreferredSize(new Dimension(10, 20));
@@ -357,7 +335,7 @@ public class CommandPanel extends UpdatePanel {
 			timer.stopTimer();
 	}
 	
-	private String getExperimentDescription(String name) {
+	public String getExperimentDescription(String name) {
 		DateTime now = new DateTime();
 		String description = now.toString(DateTimeFormat.forPattern("HH-mm-ss"))+"-"+name;
 		currentExperiment.setText(description);
@@ -471,26 +449,9 @@ public class CommandPanel extends UpdatePanel {
 	public void setText(String text) {
 		statusMessage.setText(text);
 	}
-
-	private void populateBehaviors(JComboBox<String> list) {
-		ArrayList<Class<?>> classes = ClassLoadHelper
-				.findRelatedClasses(CIBehavior.class);
-		for (Class<?> c : classes) {
-			list.addItem(c.getSimpleName());
-			availableBehaviors.add(c.getSimpleName());
-		}
-
-		for (String s : hardcodedClasses) {
-			list.addItem(s);
-			availableBehaviors.add(s);
-		}
-	}
-
-	private void populateControllers(JComboBox<String> list) {
-		list.addItem("");
-		
+        
+	private void populateControllers() {		
 		File controllersFolder = new File(CONTROLLERS_FOLDER);
-
 		if (controllersFolder.exists() && controllersFolder.isDirectory()) {
 			
 			int numberOfPreset = 0;
@@ -529,15 +490,41 @@ public class CommandPanel extends UpdatePanel {
 						
 						readConfigForButton(b.getText());
 						
-					}else{
-						list.addItem(s);
 					}
 				}
 				availableControllers.add(s);
 			}
 		}
-
 	}
+        
+        private void populateScripts() {
+            File scripts= new File(SCRIPTS_LIST);
+            if(!scripts.exists()) {
+                System.out.println("******** SCRIPTS FILE NOT FOUND ********");
+            } else {
+                try {
+                    BufferedReader br = new BufferedReader(new FileReader(scripts));
+                    String line = null;
+                    while((line = br.readLine()) != null) {
+                        Class c = Class.forName(line);
+                        Constructor[] constr = c.getDeclaredConstructors();
+                        final FieldTestScript s = (FieldTestScript) constr[0].newInstance(console, this, ((DroneGUI)gui).getMapPanel());
+                        JButton b = new JButton(line);
+                        b.setBackground(Color.ORANGE);
+                        b.addActionListener(new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                        s.start();
+                                }
+                        });
+                        presetsPanel.add(b);
+                    }
+                    br.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
 	
 	private void readConfigForButton(String buttonText) {
 		try {
@@ -563,9 +550,9 @@ public class CommandPanel extends UpdatePanel {
 		BehaviorMessage result = currentMessage;
 		currentMessage = null;
 		return result;
-	}
-
-	@Override
+        }
+        
+        @Override
 	public void registerThread(UpdateThread t) {
 		this.thread = t;
 	}
@@ -594,34 +581,6 @@ public class CommandPanel extends UpdatePanel {
 		result += message.getSelectedStatus() ? "start" : "stop";
 
 		setText(result);
-	}
-
-	private void loadController(String file) {
-
-		if (!file.isEmpty()) {
-			File f = new File(CONTROLLERS_FOLDER + "/" + file);
-
-			if (f.exists()) {
-				Scanner s = null;
-				try {
-					s = new Scanner(f);
-					String result = "";
-
-					while (s.hasNextLine())
-						result += s.nextLine() + "\n";
-
-					config.setText(result);
-					s.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				} finally {
-					if (s != null)
-						s.close();
-				}
-			}
-		} else {
-			config.setText("");
-		}
 	}
 
 	public JTextArea getSelectedDronesTextField() {
@@ -655,24 +614,6 @@ public class CommandPanel extends UpdatePanel {
 
 	public void setConfiguration(String configStr) {
 		config.setText(configStr);
-	}
-
-	public void setSeletedJComboBoxBehavior(String str) {
-		for (int i = 0; i < behaviors.getItemCount(); i++) {
-			if (behaviors.getItemAt(i).contains(str)) {
-				behaviors.setSelectedIndex(i);
-				break;
-			}
-		}
-	}
-
-	public void setSeletedJComboBoxConfigurationFile(String str) {
-		for (int i = 0; i < controllers.getItemCount(); i++) {
-			if (controllers.getItemAt(i).contains(str)) {
-				controllers.setSelectedIndex(i);
-				break;
-			}
-		}
 	}
 	
 	public void placeDronesRandomly() {
@@ -967,7 +908,7 @@ public class CommandPanel extends UpdatePanel {
 		return count % 2 != 0;
 	}
 	
-	class Timer extends Thread {
+	public class Timer extends Thread {
 		
 		DateTime startTime = null;
 		boolean enabled = false;
@@ -1004,4 +945,8 @@ public class CommandPanel extends UpdatePanel {
 		}
 		
 	}
+        
+        public Timer getTimer() {
+            return timer;
+        }
 }
