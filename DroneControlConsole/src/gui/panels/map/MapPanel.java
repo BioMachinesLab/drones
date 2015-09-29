@@ -971,7 +971,6 @@ public class MapPanel extends UpdatePanel {
 					addObstacle(c(ge.getLatLon().getLat(),ge.getLatLon().getLon()));
 			}
 			if(e instanceof GeoFence) {
-				System.out.println("FOUND A GEOFENCE");
 				addGeoFence((GeoFence)e);
 			}
 		}

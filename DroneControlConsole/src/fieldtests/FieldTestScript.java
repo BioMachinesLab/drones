@@ -34,7 +34,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public abstract class FieldTestScript {
+public abstract class FieldTestScript extends Thread{
 
     protected CommandPanel commandPanel;
     protected MapPanel mapPanel;
@@ -62,7 +62,7 @@ public abstract class FieldTestScript {
      * Console's map)
      *
      */
-    public void start() {
+    public void run() {
     	this.mapPanel = ((DroneGUI)console.getGUI()).getMapPanel();
     }
 
@@ -70,11 +70,15 @@ public abstract class FieldTestScript {
         try {
             CIArguments args = readConfigurationFile(behavior);
             args.setArgument("description", description);
-            BehaviorMessage msg = new BehaviorMessage(args.getArgumentAsString("type"), args.getCompleteArgumentString(), true, NetworkUtils.getHostname());
-            deploy(msg, ips);
+            startControllers(ips, args);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    
+    protected void startControllers(ArrayList<String> ips, CIArguments args) {
+    	BehaviorMessage msg = new BehaviorMessage(args.getArgumentAsString("type"), args.getCompleteArgumentString(), true, NetworkUtils.getHostname());
+        deploy(msg, ips);
     }
 
     protected void stopControllers(ArrayList<String> ips, String description) {
@@ -102,7 +106,7 @@ public abstract class FieldTestScript {
         LatLon latLon = new LatLon(d.getGPSData().getLatitudeDecimal(), d.getGPSData().getLongitudeDecimal());
         return latLon.distance(wp.getLatLon()) * 1000 < distanceThresholdInMeters;
     }
-
+    
     protected boolean arrivedAtWaypoint(ArrayList<String> ips, Waypoint wp, double distanceThresholdInMeters) {
 
         DronesSet set = console.getDronesSet();
@@ -225,7 +229,7 @@ public abstract class FieldTestScript {
         new CommandSender(m, ips, commandPanel, false).start();
     }
 
-    private CIArguments readConfigurationFile(String name) throws FileNotFoundException {
+    protected CIArguments readConfigurationFile(String name) throws FileNotFoundException {
 
         File f = new File(CommandPanel.CONTROLLERS_FOLDER + "/" + name + ".conf");
 
@@ -283,12 +287,12 @@ public abstract class FieldTestScript {
     }
 
     protected void fatalErrorDialog(String message) {
-        JOptionPane.showMessageDialog(console.getGUI(),
+        JOptionPane.showMessageDialog(null,
                 message, "Fatal error", JOptionPane.ERROR_MESSAGE);
     }
 
     protected void warningDialog(String message) {
-        JOptionPane.showMessageDialog(console.getGUI(),
+        JOptionPane.showMessageDialog(null,
                 message, "Warning", JOptionPane.WARNING_MESSAGE);
     }    
 
@@ -305,7 +309,7 @@ public abstract class FieldTestScript {
             myPanel.add(new JLabel(questions[i] + ":"));
             myPanel.add(fields[i]);
         }
-        int result = JOptionPane.showConfirmDialog(console.getGUI(), myPanel, "Options", JOptionPane.OK_CANCEL_OPTION);
+        int result = JOptionPane.showConfirmDialog(null, myPanel, "Options", JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
             String[] answers = new String[questions.length];
             for (int i = 0; i < questions.length; i++) {
@@ -322,4 +326,38 @@ public abstract class FieldTestScript {
         commandPanel.getTimer().startTimer();
         return s;
     }
+    
+    protected Waypoint getCentralPoint() {
+        ArrayList<Entity> entities = mapPanel.getEntities();
+        Waypoint wp = null;
+        for (Entity e : entities) {
+            if (e instanceof Waypoint) {
+                if (wp == null) {
+                    wp = (Waypoint) e;
+                } else {
+                    warningDialog("More than one waypoint found for central point. Going with the first.");
+                    break;
+                }
+            }
+        }
+        if (wp == null) {
+            fatalErrorDialog("No waypoint is defined for central point");
+            return null;
+        } else {
+            return wp;
+        }
+    }
+    
+    protected String listToString(ArrayList<String> list) {
+        if(list.isEmpty()) {
+            return "";
+        }
+        String res = "";
+        for(int i = 0 ; i < list.size() - 1 ; i++) {
+            res += list.get(i) + " ";
+        }
+        res += list.get(list.size() - 1);
+        return res;
+    }
+    
 }

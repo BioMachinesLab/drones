@@ -5,13 +5,11 @@
  */
 package fieldtests;
 
-import commoninterface.entities.Entity;
 import commoninterface.entities.GeoFence;
 import commoninterface.entities.Waypoint;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CoordinateUtilities;
 import gui.panels.CommandPanel;
-import gui.panels.map.MapPanel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,21 +29,9 @@ public class PredPreyScript extends FieldTestScript {
         super(console, commandPanel);
     }
     
-    private String listToString(ArrayList<String> list) {
-        if(list.isEmpty()) {
-            return "";
-        }
-        String res = "";
-        for(int i = 0 ; i < list.size() - 1 ; i++) {
-            res += list.get(i) + " ";
-        }
-        res += list.get(list.size() - 1);
-        return res;
-    }
-
     @Override
-    public void start() {
-        super.start();
+    public void run() {
+        super.run();
         /*
          Read options
          */
@@ -120,24 +106,4 @@ public class PredPreyScript extends FieldTestScript {
         }
     }
 
-    protected Waypoint getCentralPoint() {
-        ArrayList<Entity> entities = super.mapPanel.getEntities();
-        Waypoint wp = null;
-        for (Entity e : entities) {
-            if (e instanceof Waypoint) {
-                if (wp == null) {
-                    wp = (Waypoint) e;
-                } else {
-                    warningDialog("More than one waypoint found for central point. Going with the first.");
-                    break;
-                }
-            }
-        }
-        if (wp == null) {
-            fatalErrorDialog("No waypoint is defined for central point");
-            return null;
-        } else {
-            return wp;
-        }
-    }
 }

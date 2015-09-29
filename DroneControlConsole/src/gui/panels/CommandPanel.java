@@ -100,8 +100,9 @@ public class CommandPanel extends UpdatePanel {
 	
 	private JLabel currentExperiment;
 	
-        private UpdateThread thread;
+    private UpdateThread thread;
 	private ForagingMissionMonitor monitor;
+	private FieldTestScript currentScript;
 	
 	/*
 	 * author: @miguelduarte42 This has to be this way because some behaviors
@@ -133,7 +134,7 @@ public class CommandPanel extends UpdatePanel {
 		JPanel controllersPanel = new JPanel(new BorderLayout());
 
 		populateControllers();
-                populateScripts();
+		populateScripts();
 		
 		JLabel selectedDronesLabel = new JLabel("Selected drones");
 		selectedDronesLabel.setHorizontalAlignment(JLabel.HORIZONTAL);
@@ -454,21 +455,7 @@ public class CommandPanel extends UpdatePanel {
 		File controllersFolder = new File(CONTROLLERS_FOLDER);
 		if (controllersFolder.exists() && controllersFolder.isDirectory()) {
 			
-			int numberOfPreset = 0;
-			for (String s : controllersFolder.list()) {
-				if (s.endsWith(".conf")){
-					if(s.startsWith("preset")){
-						numberOfPreset++;
-					}
-				}
-			}
-			
-			if(numberOfPreset > 2){
-				int rows = (int)Math.ceil(numberOfPreset/2.0);
-				
-				presetsPanel.setLayout(new GridLayout(rows,2));
-			}else
-				presetsPanel.setLayout(new GridLayout(1, 2));
+			presetsPanel.setLayout(new GridLayout(0,2));
 			
 			for (String s : controllersFolder.list()) {
 				if (s.endsWith(".conf")){
@@ -489,7 +476,6 @@ public class CommandPanel extends UpdatePanel {
 						presetsPanel.add(b);
 						
 						readConfigForButton(b.getText());
-						
 					}
 				}
 				availableControllers.add(s);
@@ -497,34 +483,49 @@ public class CommandPanel extends UpdatePanel {
 		}
 	}
         
-        private void populateScripts() {
-            File scripts= new File(SCRIPTS_LIST);
-            if(!scripts.exists()) {
-                System.out.println("******** SCRIPTS FILE NOT FOUND ********");
-            } else {
-                try {
-                    BufferedReader br = new BufferedReader(new FileReader(scripts));
-                    String line = null;
-                    while((line = br.readLine()) != null) {
-                        Class c = Class.forName(line);
-                        Constructor[] constr = c.getDeclaredConstructors();
-                        final FieldTestScript s = (FieldTestScript) constr[0].newInstance(console, this);
-                        JButton b = new JButton(c.getSimpleName());
-                        b.setForeground(Color.BLUE);
-                        b.addActionListener(new ActionListener() {
-                                @Override
-                                public void actionPerformed(ActionEvent e) {
-                                        s.start();
-                                }
-                        });
-                        presetsPanel.add(b);
-                    }
-                    br.close();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+    private void populateScripts() {
+        File scripts= new File(SCRIPTS_LIST);
+        if(!scripts.exists()) {
+            System.out.println("******** SCRIPTS FILE NOT FOUND ********");
+        } else {
+        	try {
+                BufferedReader br = new BufferedReader(new FileReader(scripts));
+                String line = null;
+                while((line = br.readLine()) != null) {
+                    Class c = Class.forName(line);
+                    Constructor[] constr = c.getDeclaredConstructors();
+                    JButton b = new JButton(c.getSimpleName());
+                    b.setForeground(Color.BLUE);
+                    b.addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                        	if(currentScript != null)
+                        		currentScript.interrupt();
+                        	 try {
+                        		 currentScript = (FieldTestScript) constr[0].newInstance(console, CommandPanel.this);
+                        		 currentScript.start();
+                        	 } catch (Exception ex) {
+                        		 currentExperiment = null;
+                                 ex.printStackTrace();
+                             }
+                        }
+                    });
+                    presetsPanel.add(b);
                 }
+                br.close();
+        	} catch (Exception ex) {
+                ex.printStackTrace();
             }
         }
+        JButton b = new JButton("Stop Script");
+        b.setForeground(Color.BLUE);
+        presetsPanel.add(b);
+        b.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(currentScript != null)
+            		currentScript.interrupt();
+			}
+		});
+    }
 	
 	private void readConfigForButton(String buttonText) {
 		try {
