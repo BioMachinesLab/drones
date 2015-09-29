@@ -156,6 +156,10 @@ public abstract class FieldTestScript {
         newEntities.remove(e);
         mapPanel.replaceEntities(newEntities);
     }
+    
+    protected ArrayList<String> getSelectedIPs() {
+        return commandPanel.getSelectedAddresses();
+    }
 
     protected ArrayList<Waypoint> generateWaypointsInGeoFence(GeoFence fence, int number, double minDistance, double maxDistance, long randomSeed) {
         ArrayList<Waypoint> wps = new ArrayList<Waypoint>();
@@ -282,6 +286,11 @@ public abstract class FieldTestScript {
         JOptionPane.showMessageDialog(console.getGUI(),
                 message, "Fatal error", JOptionPane.ERROR_MESSAGE);
     }
+
+    protected void warningDialog(String message) {
+        JOptionPane.showMessageDialog(console.getGUI(),
+                message, "Warning", JOptionPane.WARNING_MESSAGE);
+    }    
 
     protected String[] getMultipleInputsDialog(String[] questions, String[] defaultAnswers) {
         JTextField[] fields = new JTextField[questions.length];
