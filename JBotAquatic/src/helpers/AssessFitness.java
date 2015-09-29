@@ -171,7 +171,7 @@ public class AssessFitness {
 		
 //		while(true) {
 		
-		int s = 100;
+		int s = 1;
 		
 		double[] samples = new double[s];
 		
@@ -283,6 +283,13 @@ public class AssessFitness {
 				currentTime = DateTime.parse(d.GPSdate,formatter);
 				
 				while(Math.abs(stepTime.getMillis()-currentTime.getMillis()) >= 100) {
+					
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					
 					stepTime = stepTime.plus(100);
 					if(!ignoreReal) {

@@ -112,7 +112,7 @@ public class PostEvalExporter {
 	}
 	
 	public static void main(String[] args) throws Exception{
-		evalBest();
-//		new PostEvalExporter("bigdisk/july2015/rudder_final/","weightedcluster").export();
+//		evalBest();
+		new PostEvalExporter("bigdisk/september2015/rudder_final/","weightedcluster").export();
 	}
 }

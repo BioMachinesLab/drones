@@ -1,5 +1,6 @@
 package fieldtests;
 
+import gui.DroneGUI;
 import gui.panels.CommandPanel;
 import gui.panels.map.MapPanel;
 
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.Scanner;
+
 import main.DroneControlConsole;
 import network.CommandSender;
 import network.server.shared.dataObjects.DroneData;
@@ -25,6 +27,7 @@ import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.Line;
 import commoninterface.utils.jcoord.LatLon;
+
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -37,7 +40,7 @@ public abstract class FieldTestScript {
     protected MapPanel mapPanel;
     protected DroneControlConsole console;
 
-    public FieldTestScript(DroneControlConsole console, CommandPanel commandPanel, MapPanel mapPanel) {
+    public FieldTestScript(DroneControlConsole console, CommandPanel commandPanel) {
         this.commandPanel = commandPanel;
         this.console = console;
     }
@@ -60,7 +63,7 @@ public abstract class FieldTestScript {
      *
      */
     public void start() {
-
+    	this.mapPanel = ((DroneGUI)console.getGUI()).getMapPanel();
     }
 
     protected void startControllers(ArrayList<String> ips, String behavior, String description) {
@@ -90,7 +93,7 @@ public abstract class FieldTestScript {
         entities.add(wp);
         EntitiesMessage m = new EntitiesMessage(entities, NetworkUtils.getHostname());
         deploy(m, ips);
-        startControllers(ips, "waypoint", "gotowaypoint");
+        startControllers(ips, "preset_waypoint", "gotowaypoint");
     }
 
     protected boolean arrivedAtWaypoint(String ip, Waypoint wp, double distanceThresholdInMeters) {

@@ -27,8 +27,8 @@ public class PredPreyScript extends FieldTestScript {
 
     private static String[] lastOptions = null;
 
-    public PredPreyScript(DroneControlConsole console, CommandPanel commandPanel, MapPanel mapPanel) {
-        super(console, commandPanel, mapPanel);
+    public PredPreyScript(DroneControlConsole console, CommandPanel commandPanel) {
+        super(console, commandPanel);
     }
 
     @Override
@@ -83,12 +83,12 @@ public class PredPreyScript extends FieldTestScript {
             return;
         }
         
-        super.clearMapEntities();
+        
 
         /*
          Go to starting positions
          */
-        super.clearMapEntities();
+//        super.clearMapEntities();
         for (int i = 0; i < numPreds; i++) {
             super.goToWaypoint(singletonList(ips[i]), predatorsPos.get(i));
         }
@@ -99,6 +99,7 @@ public class PredPreyScript extends FieldTestScript {
          */
         int confirm = JOptionPane.showConfirmDialog(console.getGUI(), "Yes to start, no to stop", "Last confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         if (confirm == JOptionPane.YES_OPTION) {
+        	super.clearMapEntities();
             String description = super.startExperimentTimer(predBehav);
             for (int i = 0; i < numPreds; i++) {
                 super.startControllers(singletonList(ips[i]), predBehav + "-" + i, description);

@@ -508,7 +508,7 @@ public class CommandPanel extends UpdatePanel {
                     while((line = br.readLine()) != null) {
                         Class c = Class.forName(line);
                         Constructor[] constr = c.getDeclaredConstructors();
-                        final FieldTestScript s = (FieldTestScript) constr[0].newInstance(console, this, ((DroneGUI)gui).getMapPanel());
+                        final FieldTestScript s = (FieldTestScript) constr[0].newInstance(console, this);
                         JButton b = new JButton(line);
                         b.setBackground(Color.ORANGE);
                         b.addActionListener(new ActionListener() {

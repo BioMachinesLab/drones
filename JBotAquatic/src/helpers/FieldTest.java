@@ -19,7 +19,7 @@ import commoninterface.utils.logger.LogData;
 public class FieldTest {
 	
 	public static String[] EXPO_27_JULY = new String[]{
-//		"dispersion;0;1;8;14-11-38;90","dispersion;0;2;8;14-16-42;90","dispersion;0;3;8;14-19-53;90",
+		"dispersion;0;1;8;14-11-38;90","dispersion;0;2;8;14-16-42;90","dispersion;0;3;8;14-19-53;90",
 //		"dispersion;1;1;8;14-41-33;90","dispersion;1;2;8;15-17-11;90","dispersion;1;3;8;15-19-38;90",
 //		"dispersion;2;1;8;15-22-37;90","dispersion;2;2;8;15-25-08;90","dispersion;2;3;8;15-27-58;90",
 //		"aggregate_waypoint;0;1;8;15-32-44;240","aggregate_waypoint;0;2;8;15-38-42;240",
@@ -45,13 +45,12 @@ public class FieldTest {
 	};
 	
 	public static String[] EXPO_25_SEP = new String[]{
-		"dispersion;2;0;4;12-09-41;90",
-		"dispersion;2;1;4;12-12-02;90",
-		"dispersion;2;2;4;12-14-33;90",
-		
-		"dispersion;2;0;6;12-33-04;90",
-		"dispersion;2;1;6;12-35-45;90",
-		"dispersion;2;2;6;12-38-24;90",
+//		"dispersion;2;0;4;12-09-41;90",
+//		"dispersion;2;1;4;12-12-02;90",
+//		"dispersion;2;2;4;12-14-33;90",
+//		"dispersion;2;0;6;12-33-04;90",
+//		"dispersion;2;1;6;12-35-45;90",
+//		"dispersion;2;2;6;12-38-24;90",
 	};
 	
 	public static String[] FOLDERS = new String[]{"27july","29july","25sep"};
@@ -74,7 +73,7 @@ public class FieldTest {
 		}else {
 			
 			folder = 0;
-			boolean gui = false;
+			boolean gui = true;
 			
 			for(String s :EXPO_27_JULY) {
 				String file = "experiments/"+FOLDERS[folder]+"/"+s;
