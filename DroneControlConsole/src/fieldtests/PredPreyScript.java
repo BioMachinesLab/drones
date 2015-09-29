@@ -30,16 +30,28 @@ public class PredPreyScript extends FieldTestScript {
     public PredPreyScript(DroneControlConsole console, CommandPanel commandPanel) {
         super(console, commandPanel);
     }
+    
+    private String listToString(ArrayList<String> list) {
+        if(list.isEmpty()) {
+            return "";
+        }
+        String res = "";
+        for(int i = 0 ; i < list.size() - 1 ; i++) {
+            res += list.get(i) + " ";
+        }
+        res += list.get(list.size() - 1);
+        return res;
+    }
 
     @Override
     public void start() {
         super.start();
         /*
-         Get options
+         Read options
          */
         String[] options = getMultipleInputsDialog(
-                new String[]{"Seed", "Prey distance", "IPs", "Predator behavior", "Prey behavior", "Placement box", "Safety distance", "Num. predators"},
-                lastOptions != null ? lastOptions : new String[]{"0", "30", "", "", "present_prey_10", "10", "3","3"});
+                new String[]{"Seed", "Prey distance", "IPs (last will be prey)", "Predator behavior", "Prey behavior", "Placement box", "Safety distance", "Num. predators"},
+                lastOptions != null ? lastOptions : new String[]{"0", "30", listToString(super.getSelectedIPs()), "", "prey10", "10", "3","3"});
         if (options == null) {
             return;
         }
@@ -47,7 +59,7 @@ public class PredPreyScript extends FieldTestScript {
         long seed = Long.parseLong(options[0]);
         Random rand = new Random(seed);
         double preyDist = Double.parseDouble(options[1]);
-        String[] ips = options[2].split("[;,\\s]");
+        String[] ips = options[2].split("[;,\\-\\s]+");
         String predBehav = options[3];
         String preyBehav = options[4];
         double boxSize = Double.parseDouble(options[5]);
@@ -60,8 +72,6 @@ public class PredPreyScript extends FieldTestScript {
         Waypoint center = getCentralPoint();
         super.removeEntityFromMap(center);
         GeoFence fence = super.defineGeoFence(center.getLatLon(), boxSize, boxSize);
-
-        // Generate positions
         ArrayList<Waypoint> predatorsPos = super.generateWaypointsInGeoFence(fence, numPreds, safetyDist, 40, seed);
         double a = rand.nextDouble() * Math.PI * 2;
         double x = Math.cos(a) * preyDist;
@@ -75,7 +85,9 @@ public class PredPreyScript extends FieldTestScript {
         }
         super.addEntityToMap(preyWp);
 
-        // Confirm positions
+        /*
+         Confirm starting positions
+         */
         int go = JOptionPane.showConfirmDialog(console.getGUI(), "Go with these positions?", "Position check", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
         if (go != JOptionPane.YES_OPTION) {
             super.clearMapEntities();
@@ -83,12 +95,9 @@ public class PredPreyScript extends FieldTestScript {
             return;
         }
         
-        
-
         /*
          Go to starting positions
          */
-//        super.clearMapEntities();
         for (int i = 0; i < numPreds; i++) {
             super.goToWaypoint(singletonList(ips[i]), predatorsPos.get(i));
         }
@@ -97,7 +106,7 @@ public class PredPreyScript extends FieldTestScript {
         /*
          Ask for permission to start
          */
-        int confirm = JOptionPane.showConfirmDialog(console.getGUI(), "Yes to start, no to stop", "Last confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        int confirm = JOptionPane.showConfirmDialog(console.getGUI(), "Yes to start experiment, no to kill", "Confirm when ready", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         if (confirm == JOptionPane.YES_OPTION) {
         	super.clearMapEntities();
             String description = super.startExperimentTimer(predBehav);
@@ -119,8 +128,8 @@ public class PredPreyScript extends FieldTestScript {
                 if (wp == null) {
                     wp = (Waypoint) e;
                 } else {
-                    fatalErrorDialog("More than one waypoint found for central point");
-                    return null;
+                    warningDialog("More than one waypoint found for central point. Going with the first.");
+                    break;
                 }
             }
         }

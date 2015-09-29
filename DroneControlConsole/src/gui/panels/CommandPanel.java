@@ -400,7 +400,7 @@ public class CommandPanel extends UpdatePanel {
 		new CommandSender(m, addresses, this, dynamicIds).start();
 	}
 	
-	private ArrayList<String> getSelectedAddresses() {
+	public ArrayList<String> getSelectedAddresses() {
 
 		String[] addresses = gui.getConnectionPanel().getCurrentAddresses();
 		
@@ -509,8 +509,8 @@ public class CommandPanel extends UpdatePanel {
                         Class c = Class.forName(line);
                         Constructor[] constr = c.getDeclaredConstructors();
                         final FieldTestScript s = (FieldTestScript) constr[0].newInstance(console, this);
-                        JButton b = new JButton(line);
-                        b.setBackground(Color.ORANGE);
+                        JButton b = new JButton(c.getSimpleName());
+                        b.setForeground(Color.BLUE);
                         b.addActionListener(new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
