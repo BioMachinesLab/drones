@@ -78,6 +78,7 @@ public class MissionEnvironment extends BoundaryEnvironment{
 		
 		if(time == 1) {
 			
+			//DRONES
 			File f = new File("../DroneControlConsole/controllers/preset_hierarchical8r.conf");
 			StringBuffer str = new StringBuffer();
 			
@@ -99,12 +100,10 @@ public class MissionEnvironment extends BoundaryEnvironment{
 				AquaticDrone r = (AquaticDrone)getRobots().get(i);
 				r.startBehavior(new MissionController(args, r));
 			}
-		}
-		
-		if(time == 600) {
 			
-			File f = new File("../DroneControlConsole/controllers/preset_preprog_waypoint.conf");
-			StringBuffer str = new StringBuffer();
+			//ENEMY
+			f = new File("../DroneControlConsole/controllers/preset_preprog_waypoint.conf");
+			str = new StringBuffer();
 			
 			try {
 				Scanner s = new Scanner(f);
@@ -118,7 +117,7 @@ public class MissionEnvironment extends BoundaryEnvironment{
 				e.printStackTrace();
 			}
 			
-			CIArguments args = new CIArguments(str.toString().replaceAll("\\s+", ""),true);
+			args = new CIArguments(str.toString().replaceAll("\\s+", ""),true);
 			
 			enemy.startBehavior(new GoToWaypointCIBehavior(args, enemy));
 		}

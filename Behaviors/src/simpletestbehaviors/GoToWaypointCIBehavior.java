@@ -30,6 +30,7 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 	private Waypoint prevWP = null;
 	private double timeOffset = 0;
 	private CIBehavior ann;
+	private ArrayList<Waypoint> wps;
 	
 	public GoToWaypointCIBehavior(CIArguments args, RobotCI drone) {
 		super(args, drone);
@@ -63,54 +64,79 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 			offsetX = CoordinateUtilities.GPSToCartesian(fence.getWaypoints().get(0).getLatLon()).x+distance/2;
 			offsetY = CoordinateUtilities.GPSToCartesian(fence.getWaypoints().get(0).getLatLon()).y+distance/2;
 			
-			ArrayList<Waypoint> wps = getWPs();
+			wps = getWPs();
 			
 			drone.getEntities().addAll(wps);
-			drone.setActiveWaypoint(wps.get(0));
+			drone.setActiveWaypoint(wps.get(currentWP));
 		}
 	}
 	
 	@Override
 	public void step(double timestep) {
 		
+		Waypoint wp = drone.getActiveWaypoint();
+		
+		double currentDistance = CoordinateUtilities.distanceInMeters(drone.getGPSLatLon(), wp.getLatLon());
+		
+		if(Math.abs(currentDistance) < distanceTolerance){
+			currentWP++;
+			currentWP%=wps.size();
+			drone.setActiveWaypoint(wps.get(currentWP));
+			
+			if(currentWP % 2 == 0) {
+				waiting = true;
+			}
+			
+		}
+		
+//		if(wp != null) {
+//			double currentDistance = CoordinateUtilities.distanceInMeters(drone.getGPSLatLon(), wp.getLatLon());
+//			if(Math.abs(currentDistance) < distanceTolerance){
+//				prevWP = wp;
+//				wp = null;
+//			}
+//		}
+//		
+//		System.out.println(currentWP);
+//		
+//		if(wp == null) {
+//			wp = drone.getActiveWaypoint();
+//			if(wp != prevWP) {
+//				if(currentWP == 1) {
+//					timeOffset = timestep;
+//				}
+//				if(prevWP != null)
+//					currentWP++;
+//				
+//				waiting = true;
+//			}
+//			if(wp == null)
+//				return;
+//		}
+		
 		if(waiting) {
+			
+			drone.setMotorSpeeds(0, 0);
 			
 			int c = currentWP/2;
 			
-			if(currentWP % 2 == 0  || (timestep-timeOffset) >= c*wait) {
-				
+			if(currentWP % 2 != 0  || (timestep-timeOffset) >= c*wait) {
 				waiting = false;
-				prevWP = wp;
-				wp = null;
 			}
-		}
-		
-		if(wp == null) {
-			drone.setLed(0, LedState.OFF);
-			drone.setMotorSpeeds(0, 0);
-			wp = drone.getActiveWaypoint();
-			if(wp != prevWP) {
-				if(currentWP == 1) {
-					timeOffset = timestep;
-				}
-				currentWP++;
-			}
-			if(wp == null)
-				return;
-		}
-		
-		if(ann != null) {
-			ann.step(timestep);
+			
 			return;
+		} else {
+			if(ann != null) {
+				ann.step(timestep);
+				return;
+			}
 		}
-		
 		
 		double currentOrientation = drone.getCompassOrientationInDegrees();
 		double coordinatesAngle = CoordinateUtilities.angleInDegrees(drone.getGPSLatLon(),
 				wp.getLatLon());
 		
-		double currentDistance = CoordinateUtilities.distanceInMeters(drone.getGPSLatLon(),
-				wp.getLatLon());
+		currentDistance = CoordinateUtilities.distanceInMeters(drone.getGPSLatLon(), wp.getLatLon());
 
 		double difference = currentOrientation - coordinatesAngle;
 		
@@ -123,7 +149,6 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 		if(Math.abs(currentDistance) < distanceTolerance){
 			drone.setLed(0, LedState.OFF);
 			drone.setMotorSpeeds(0, 0);
-			waiting = true;
 		}else{
 			if (Math.abs(difference) <= angleTolerance) {
 				drone.setLed(0, LedState.ON);
@@ -159,8 +184,6 @@ public class GoToWaypointCIBehavior extends CIBehavior {
         x *= distance/2;
         y *= distance/2;
         
-        System.out.println(x+" "+y);
-        
         x+=offsetX;
         y+=offsetY;
         y-=distance;
@@ -171,24 +194,19 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 	public ArrayList<Waypoint> getWPs() {
 		ArrayList<Waypoint> wps = new ArrayList<Waypoint>();
 		
-		addNode(wps,-1.2,0.75);
+		addNode(wps,-1.2,1.2);
 		
-		addNode(wps,1.2,0.75);
-		addNode(wps,1.2,0.45);
+		addNode(wps,-1.2,0.6);
+		addNode(wps,1.2,0.6);
 		
-		addNode(wps,-1.2,0.45);
-		addNode(wps,-1.2,0.15);
+		addNode(wps,1.2,0.2);
+		addNode(wps,-1.2,0.2);
 		
-		addNode(wps,1.2,0.15);
-		addNode(wps,1.2,-0.15);
+		addNode(wps,-1.2,-0.2);
+		addNode(wps,1.2,-0.2);
 		
-		addNode(wps,-1.2,-0.15);
-		addNode(wps,-1.2,-0.45);
-		
-		addNode(wps,1.2,-0.45);
-		addNode(wps,1.2,-0.75);
-		
-		addNode(wps,-1.2,-0.75);	
+		addNode(wps,1.2,-0.6);
+		addNode(wps,-1.2,-0.6);	
 		
 		return wps;
 	

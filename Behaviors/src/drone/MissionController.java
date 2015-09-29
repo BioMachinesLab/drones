@@ -46,7 +46,7 @@ public class MissionController extends CIBehavior {
 	protected int currentSubController = 0;
 	protected boolean share = false;
 	
-	protected int stop = 13*60*10;//13 min mission
+	protected int stop = 10*60*10;//10 min mission
 	
 	protected String description = "";
 	
@@ -96,18 +96,15 @@ public class MissionController extends CIBehavior {
 		
 		boolean skipSubController = false;
 		
-//		if(robot.getNetworkAddress().endsWith("103"))
-//			System.out.println(currentState);
-		
 		if(currentBattery < GO_BACK_BATTERY) {
 			currentState = State.RECHARGE;
 		}
 		
-		if(timestep % 10 == 0)
-			System.out.println(currentState+" "+currentBattery);
+//		if(timestep % 10 == 0 && drone.getNetworkAddress().endsWith("0"))
+//			System.out.println(currentState+" "+currentBattery);
 		
 		switch(currentState) {
-			case GO_TO_AREA:
+			case GO_TO_AREA: 
 				if(drone.getActiveWaypoint() == null) {
 					Waypoint wp = chooseWaypointInGeoFence();
 					if(wp != null) {
@@ -137,7 +134,7 @@ public class MissionController extends CIBehavior {
 				
 				LatLon intruderPos2 = intruderPosition();
 				
-				if(intruderPos2 != null && insideBoundary(intruderPos2) && eligibleToPursue(intruderPos2)) {
+				if(intruderPos2 != null && insideBoundary(drone.getGPSLatLon()) && insideBoundary(intruderPos2) && eligibleToPursue(intruderPos2)) {
 					currentState = State.PURSUE_INTRUDER;
 				}
 				
@@ -233,6 +230,12 @@ public class MissionController extends CIBehavior {
 		
 		int position = 0;
 		double droneDist = drone.getGPSLatLon().distance(intruderPos);
+
+//		if(drone.getNetworkAddress().endsWith("0"))
+//			System.out.println(droneDist);
+		
+		if(droneDist*1000 > 40) //comm range
+			return false;
 		
 		for(RobotLocation loc : locations) {
 			
@@ -287,34 +290,35 @@ public class MissionController extends CIBehavior {
 			
 			LinkedList<Waypoint> wps = fence.getWaypoints();
 			
-			LatLon coord = wps.getFirst().getLatLon();
+			Vector2d coord = CoordinateUtilities.GPSToCartesian(wps.getFirst().getLatLon());
 			
-			double minLat = coord.getLat();
-			double maxLat = coord.getLat();
-			double minLon = coord.getLon();
-			double maxLon = coord.getLon();
+			double minX = coord.x;
+			double maxX = coord.x;
+			double minY = coord.y;
+			double maxY = coord.y;
 			
 			for(int i = 1 ; i < wps.size() ; i++) {
-				LatLon wpLatLon = wps.get(i).getLatLon();
+				Vector2d wpCoord = CoordinateUtilities.GPSToCartesian(wps.get(i).getLatLon());
 				
-				minLat = Math.min(minLat, wpLatLon.getLat());
-				maxLat = Math.max(maxLat, wpLatLon.getLat());
+				minX = Math.min(minX, wpCoord.x);
+				maxX = Math.max(maxX, wpCoord.x);
 				
-				minLon = Math.min(minLon, wpLatLon.getLon());
-				maxLon = Math.max(maxLon, wpLatLon.getLon());
+				minY = Math.min(minY, wpCoord.y);
+				maxY = Math.max(maxY, wpCoord.y);
 			}
 			
 			int tries = 0;
 			boolean success = false;
 			
-			Random r = new Random((long)(currentBattery*1000));
+			//diversify the seed, they are all almost the same with [0,1]
+			Random r = new Random((long)(Math.pow(currentBattery*1000,2)));
 			
 			do {
 				
-				double rLat = minLat+(maxLat-minLat)*r.nextDouble();
-				double rLon = minLon+(maxLon-minLon)*r.nextDouble();
+				double x = minX+(maxX-minX)*r.nextDouble();
+				double y = minY+(maxY-minY)*r.nextDouble();
 				
-				LatLon rLatLon = new LatLon(rLat,rLon);
+				LatLon rLatLon = CoordinateUtilities.cartesianToGPS(new Vector2d(x,y));
 				
 				if(insideBoundary(rLatLon)) {
 					success = true;
