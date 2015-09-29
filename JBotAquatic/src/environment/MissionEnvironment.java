@@ -39,20 +39,21 @@ public class MissionEnvironment extends BoundaryEnvironment{
 		
 		fence = new GeoFence("fence");
 		
-		int size = 100;
+		int sizeW = 200;
+		int sizeH = 100;
 		
 		commoninterface.mathutils.Vector2d vec = CoordinateUtilities.GPSToCartesian(new LatLon(38.766524638824215, -9.094010382164727));
 		fence.addWaypoint(CoordinateUtilities.cartesianToGPS(vec));
-		vec.x+=size;
+		vec.x+=sizeW;
 		fence.addWaypoint(CoordinateUtilities.cartesianToGPS(vec));
-		vec.y-=size;
+		vec.y-=sizeH;
 		fence.addWaypoint(CoordinateUtilities.cartesianToGPS(vec));
-		vec.x-=size;
+		vec.x-=sizeW;
 		fence.addWaypoint(CoordinateUtilities.cartesianToGPS(vec));
 		
 		//base
-		vec.y+= (size+size/4);
-		vec.x+= size/2;
+		vec.y+= (sizeH+sizeH/5);
+		vec.x+= sizeW/2;
 		
 		for(Robot r : simulator.getRobots()) {
 			((RobotCI)r).replaceEntity(fence);
@@ -79,7 +80,7 @@ public class MissionEnvironment extends BoundaryEnvironment{
 		if(time == 1) {
 			
 			//DRONES
-			File f = new File("../DroneControlConsole/controllers/preset_hierarchical8r.conf");
+			File f = new File("../DroneControlConsole/controllers/hierarchical.conf");
 			StringBuffer str = new StringBuffer();
 			
 			try {
@@ -102,7 +103,7 @@ public class MissionEnvironment extends BoundaryEnvironment{
 			}
 			
 			//ENEMY
-			f = new File("../DroneControlConsole/controllers/preset_preprog_waypoint.conf");
+			f = new File("../DroneControlConsole/controllers/preprog_waypoint.conf");
 			str = new StringBuffer();
 			
 			try {
@@ -139,25 +140,4 @@ public class MissionEnvironment extends BoundaryEnvironment{
 //		System.out.println(seenSteps);
 	}
 	
-	public GeoFence getFence(Simulator simulator) {
-		GeoFence fence = new GeoFence("fence");
-		
-		rand = 0;
-		
-		addNode(fence,-2,1,simulator.getRandom());
-		addNode(fence,2,1,simulator.getRandom());
-		addNode(fence,2,0.5,simulator.getRandom());
-		addNode(fence,-2,0.5,simulator.getRandom());
-		addNode(fence,-2,0,simulator.getRandom());
-		addNode(fence,2,0,simulator.getRandom());
-		addNode(fence,2,-0.5,simulator.getRandom());
-		addNode(fence,-2,-0.5,simulator.getRandom());
-		addNode(fence,-2,-1,simulator.getRandom());
-		addNode(fence,2,-1,simulator.getRandom());
-		addNode(fence,2,-1.5,simulator.getRandom());
-		addNode(fence,-2,-1.5,simulator.getRandom());
-		
-		return fence;
-	
-	}
 }

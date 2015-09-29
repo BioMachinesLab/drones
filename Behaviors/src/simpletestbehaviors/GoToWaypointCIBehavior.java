@@ -24,7 +24,8 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 	
 	private double offsetX = 0;
 	private double offsetY = 0;
-	private double distance = 100;
+	private double distanceW = 100;
+	private double distanceH = 100;
 	
 	private int currentWP = 0;
 	private Waypoint prevWP = null;
@@ -59,10 +60,11 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 			drone.getEntities().clear();
 			drone.getEntities().add(fence);
 			
-			distance = fence.getWaypoints().get(0).getLatLon().distance(fence.getWaypoints().get(1).getLatLon())*1000;
+			distanceW = fence.getWaypoints().get(0).getLatLon().distance(fence.getWaypoints().get(1).getLatLon())*1000;
+			distanceH = fence.getWaypoints().get(1).getLatLon().distance(fence.getWaypoints().get(2).getLatLon())*1000;
 			
-			offsetX = CoordinateUtilities.GPSToCartesian(fence.getWaypoints().get(0).getLatLon()).x+distance/2;
-			offsetY = CoordinateUtilities.GPSToCartesian(fence.getWaypoints().get(0).getLatLon()).y+distance/2;
+			offsetX = CoordinateUtilities.GPSToCartesian(fence.getWaypoints().get(0).getLatLon()).x+distanceW/2;
+			offsetY = CoordinateUtilities.GPSToCartesian(fence.getWaypoints().get(0).getLatLon()).y+distanceH/2;
 			
 			wps = getWPs();
 			
@@ -181,12 +183,12 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 	
 	private void addNode(ArrayList<Waypoint> wps, double x, double y) {
 
-        x *= distance/2;
-        y *= distance/2;
+        x *= distanceW/2;
+        y *= distanceH/2;
         
         x+=offsetX;
         y+=offsetY;
-        y-=distance;
+        y-=distanceH;
         
         wps.add(new Waypoint("wp", CoordinateUtilities.cartesianToGPS(new commoninterface.mathutils.Vector2d(x, y))));
     }
@@ -194,19 +196,35 @@ public class GoToWaypointCIBehavior extends CIBehavior {
 	public ArrayList<Waypoint> getWPs() {
 		ArrayList<Waypoint> wps = new ArrayList<Waypoint>();
 		
-		addNode(wps,-1.2,1.2);
-		
-		addNode(wps,-1.2,0.6);
-		addNode(wps,1.2,0.6);
-		
-		addNode(wps,1.2,0.2);
-		addNode(wps,-1.2,0.2);
-		
-		addNode(wps,-1.2,-0.2);
-		addNode(wps,1.2,-0.2);
-		
-		addNode(wps,1.2,-0.6);
-		addNode(wps,-1.2,-0.6);	
+		if(distanceW <= distanceH) {
+			addNode(wps,-1.2,1.2);
+			
+			addNode(wps,-1.2,0.6);
+			addNode(wps,1.2,0.6);
+			
+			addNode(wps,1.2,0.2);
+			addNode(wps,-1.2,0.2);
+			
+			addNode(wps,-1.2,-0.2);
+			addNode(wps,1.2,-0.2);
+			
+			addNode(wps,1.2,-0.6);
+			addNode(wps,-1.2,-0.6);	
+		} else {
+			addNode(wps,-0.6,1.4);
+			
+			addNode(wps,-0.6,1.2);
+			addNode(wps,-0.6,-1.2);
+			
+			addNode(wps,-0.2,-1.2);
+			addNode(wps,-0.2,1.2);
+			
+			addNode(wps,0.2,1.2);
+			addNode(wps,0.2,-1.2);
+			
+			addNode(wps,0.6,-1.2);
+			addNode(wps,0.6,1.2);	
+		}
 		
 		return wps;
 	
