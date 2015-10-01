@@ -103,6 +103,12 @@ public class HierarchicalScript extends FieldTestScript {
         	deployMapEntities(deployDroneIPs);
         	deployMapEntities(singletonList(ips[ips.length - 1]));
         	
+        	try {
+        		Thread.sleep(3000);
+        	} catch(Exception e) {
+        		
+        	}
+        	
             String description = super.startExperimentTimer(droneController);
             
             try {

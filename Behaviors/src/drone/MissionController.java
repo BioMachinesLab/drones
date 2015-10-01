@@ -396,7 +396,11 @@ public class MissionController extends CIBehavior {
 			subControllers.get(currentSubController).cleanUp();
 		robot.setMotorSpeeds(0, 0);
 		subControllers.clear();
-		drone.setActiveWaypoint(Waypoint.getWaypoints(drone).get(0));
+		
+		ArrayList<Waypoint> wps = Waypoint.getWaypoints(drone);
+		if(wps != null && !wps.isEmpty()) {
+			drone.setActiveWaypoint(wps.get(0));
+		}
 	}
 	
 	@Override
