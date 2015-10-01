@@ -171,11 +171,11 @@ public class AssessFitness {
 		
 //		while(true) {
 		
-		int s = 1;
+		int simSamples = 1;
 		
-		double[] samples = new double[s];
+		double[] samples = new double[simSamples];
 		
-		for(int i = 0 ; i < s ; i++) {
+		for(int i = 0 ; i < simSamples ; i++) {
 			
 			Setup setupReal = new Setup(exp, randomSeed, false, false);
 			Setup setupSim = new Setup(exp, randomSeed, false, true);
@@ -233,9 +233,9 @@ public class AssessFitness {
 			}
 			
 //			DISPERSION ADAPTIVE
-//			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=0,timeend=400,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_1")));
-//			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=400,timeend=758,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_2")));
-//			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=758,timeend=1138,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_3")));
+//			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=0,timeend=600,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_1")));
+//			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=600,timeend=1800,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_2")));
+//			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=1800,timeend=2400,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_3")));
 			
 //			PATROL ADAPTIVE
 //			setupReal.sim.addCallback(new PathTracer(new Arguments("drawgeofence=0,png=0,snapshotfrequency=5,timestart=0,timeend=1200,linewidth=3,bgcolor=0-0-0-0,altcolor=255-0-0-255,maincolor=255-0-000-255,fade=1,folder=path/"+exp.toString()+"_1")));
@@ -284,12 +284,12 @@ public class AssessFitness {
 				
 				while(Math.abs(stepTime.getMillis()-currentTime.getMillis()) >= 100) {
 					
-					try {
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+//					try {
+//						Thread.sleep(10);
+//					} catch (InterruptedException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
 					
 					stepTime = stepTime.plus(100);
 					if(!ignoreReal) {
@@ -321,7 +321,7 @@ public class AssessFitness {
 						}
 					}
 					
-					setupSim.sim.performOneSimulationStep((double)step);
+//					setupSim.sim.performOneSimulationStep((double)step);
 					step++;
 					
 					if(gui) {
@@ -464,12 +464,12 @@ public class AssessFitness {
 			
 //			System.out.println();
 			
-			if(s == 1)
+			if(simSamples == 1)
 				System.out.println(setupReal.eval.getFitness()+" "+setupSim.eval.getFitness());
 		}
 		
 		
-		if(s > 1) {
+		if(simSamples > 1) {
 //			System.out.println(exp);
 			for(int i = 0 ; i < samples.length ; i++) {
 				System.out.println(samples[i]);

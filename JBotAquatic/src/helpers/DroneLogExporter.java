@@ -55,7 +55,7 @@ public class DroneLogExporter {
 		ArrayList<LogData> result = new ArrayList<LogData>();
 		
 		ArrayList<Entity> currentEntities = new ArrayList<Entity>();
-
+		
 		for (String file : folder.list()) {
 			if (!file.contains(".log")|| !file.contains("values"))
 				continue;

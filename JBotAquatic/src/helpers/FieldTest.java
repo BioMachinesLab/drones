@@ -19,7 +19,7 @@ import commoninterface.utils.logger.LogData;
 public class FieldTest {
 	
 	public static String[] EXPO_27_JULY = new String[]{
-		"dispersion;0;1;8;14-11-38;90","dispersion;0;2;8;14-16-42;90","dispersion;0;3;8;14-19-53;90",
+//		"dispersion;0;1;8;14-11-38;90","dispersion;0;2;8;14-16-42;90","dispersion;0;3;8;14-19-53;90",
 //		"dispersion;1;1;8;14-41-33;90","dispersion;1;2;8;15-17-11;90","dispersion;1;3;8;15-19-38;90",
 //		"dispersion;2;1;8;15-22-37;90","dispersion;2;2;8;15-25-08;90","dispersion;2;3;8;15-27-58;90",
 //		"aggregate_waypoint;0;1;8;15-32-44;240","aggregate_waypoint;0;2;8;15-38-42;240",
@@ -50,12 +50,17 @@ public class FieldTest {
 //		"dispersion;2;2;4;12-14-33;90",
 //		"dispersion;2;0;6;12-33-04;90",
 //		"dispersion;2;1;6;12-35-45;90",
-//		"dispersion;2;2;6;12-38-24;90",
+//		"dispersion;2;2;6;12-38-24;90;",
 	};
 	
-	public static String[] FOLDERS = new String[]{"27july","29july","25sep"};
+	public static String[] EXPO_30_SEP = new String[]{
+//		"dispersion;2;0;8;11-43-45;240",
+		"dispersion;2;1;8;11-50-41;240",
+	};
 	
-	private static int folder = 2;
+	public static String[] FOLDERS = new String[]{"27july","29july","25sep","30sep"};
+	
+	private static int folder = 3;
 
 	private ArrayList<Experiment> experiments = new ArrayList<Experiment>();
 	private HashMap<Integer,ArrayList<LogData>> completeLogs = new HashMap<Integer, ArrayList<LogData>>();
@@ -64,12 +69,13 @@ public class FieldTest {
 	
 	public static void main(String[] args) throws Exception{
 		
-		boolean single = true;
+		boolean export = false;
 		
-		if(!single) {
+		if(export) {
 			new FieldTest(EXPO_27_JULY);
 			new FieldTest(EXPO_29_JULY);
 			new FieldTest(EXPO_25_SEP);
+			new FieldTest(EXPO_30_SEP);
 		}else {
 			
 			folder = 0;
@@ -103,6 +109,16 @@ public class FieldTest {
 		        AssessFitness.compareFitness(e, 1,gui);
 			}
 			
+			folder = 3;
+			
+			for(String s :EXPO_30_SEP) {
+				String file = "experiments/"+FOLDERS[folder]+"/"+s;
+				ObjectInputStream objectinputstream = new ObjectInputStream(new FileInputStream(file));
+		        Experiment e = (Experiment) objectinputstream.readObject();
+		        objectinputstream.close();
+		        AssessFitness.compareFitness(e, 1,gui);
+			}
+			
 //			String s = "aggregate_waypoint;0;3;8;15-52-25;240";
 //			String file = "experiments/"+FOLDERS[folder]+"/"+s;
 //			ObjectInputStream objectinputstream = new ObjectInputStream(new FileInputStream(file));
@@ -127,6 +143,8 @@ public class FieldTest {
 			folder = 1;
 		if(descriptions == EXPO_25_SEP)
 			folder = 2;
+		if(descriptions == EXPO_30_SEP)
+			folder = 3;
 		
 		boolean readCompleteFiles = false;
 		
@@ -214,6 +232,10 @@ public class FieldTest {
 		for(int i : robots) {
 			DateTime timeFound = DroneLogExporter.getStartTime(completeLogs.get(i), experimentName);
 			if(timeFound != null) {
+				
+				if(startTime != null && startTime.isBefore(timeFound))
+					timeFound = startTime;
+				
 				startTime = timeFound;
 				participatingRobots.add(i);
 			}
