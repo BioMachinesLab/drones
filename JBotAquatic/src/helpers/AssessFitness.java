@@ -2,6 +2,7 @@ package helpers;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.Time;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -18,6 +19,7 @@ import simulation.util.Arguments;
 import updatables.CoverageTracer;
 import updatables.PathTracer;
 import commoninterface.AquaticDroneCI;
+import commoninterface.AquaticDroneCI.DroneType;
 import commoninterface.entities.GeoEntity;
 import commoninterface.entities.GeoFence;
 import commoninterface.entities.RobotLocation;
@@ -163,6 +165,9 @@ public class AssessFitness {
 	
 	public static void compareFitness(Experiment exp, long randomSeed, boolean gui) {
 		
+		boolean useSim = true;
+		boolean useReal = true;
+		
 		DoubleFitnessViewer viewer = null;
 		
 		if(gui) {
@@ -186,7 +191,10 @@ public class AssessFitness {
 			DateTime currentTime;
 			int step = 0;
 			
-			startControllers(exp, setupSim);
+			if(useSim)
+				startControllers(exp, setupSim);
+			if(useReal)
+				startControllers(exp, setupReal);
 			
 			if(gui) {
 				viewer.setRenderer1(setupReal.getRenderer());
@@ -254,7 +262,7 @@ public class AssessFitness {
 			double max = -Double.MAX_VALUE;
 			
 			boolean stopRun = false;
-			boolean ignoreReal = false;
+			
 			
 			HashMap<String,LatLon> startLatLon = new HashMap<String,LatLon>();
 			HashMap<String,LatLon> endLatLon = new HashMap<String,LatLon>();
@@ -292,7 +300,7 @@ public class AssessFitness {
 //					}
 					
 					stepTime = stepTime.plus(100);
-					if(!ignoreReal) {
+					if(useReal) {
 						setupReal.sim.performOneSimulationStep((double)step);
 					}
 					if(measureSpeed) {
@@ -321,7 +329,8 @@ public class AssessFitness {
 						}
 					}
 					
-//					setupSim.sim.performOneSimulationStep((double)step);
+					if(useSim)
+						setupSim.sim.performOneSimulationStep((double)step);
 					step++;
 					
 					if(gui) {
@@ -337,21 +346,20 @@ public class AssessFitness {
 				if(rl == null || rl.getLatLon() == null)
 					continue;
 				
-				if(!ignoreReal) {
-					setupSim.updateRobotEntities(d);
-					setupReal.updateRobotEntities(d);
-				}
-				
+//				if(!ignoreReal) {
+//					setupSim.updateRobotEntities(d);
+//					setupReal.updateRobotEntities(d);
+//				}
 				
 				 //THIS IS FOR WAYPOINT BEHAVIORS
 				if(exp.controllerName.startsWith("waypoint")) {
 					if(exp.activeRobot != -1 && d.ip.endsWith("."+exp.activeRobot)) {
 						if(d.inputNeuronStates == null)
-							ignoreReal = true;
+							useReal = false;
 						
 						//Real
 						if(getDistanceToTarget(setupReal.getRobot("."+exp.activeRobot)) < distanceToTarget)
-							ignoreReal = true;
+							useReal = false;
 	
 						//Sim
 						if(getDistanceToTarget(setupSim.getRobot("."+exp.activeRobot)) < distanceToTarget) {
@@ -380,7 +388,7 @@ public class AssessFitness {
 					
 				}
 				
-				if(ignoreReal)
+				if(!useReal)
 					continue;
 				
 				commoninterface.mathutils.Vector2d pos = CoordinateUtilities.GPSToCartesian(rl.getLatLon());
@@ -391,7 +399,7 @@ public class AssessFitness {
 				setupReal.robots.get(position).setPosition(pos.x+setupReal.start.x-setupReal.firstPos.x, pos.y+setupReal.start.y-setupReal.firstPos.y);
 				
 //				temp.addPoint(setupReal.sim,setupReal.robots.get(position).getPosition(), d.temperatures[1]);
-				tempTracer.setCoverage(temp.getCoverage(), setupReal.resolution);
+//				tempTracer.setCoverage(temp.getCoverage(), setupReal.resolution);
 				
 //				System.out.println(step+"\t"+d.ip+"\t"+(pos.x+setupReal.start.x-setupReal.firstPos.x)+"\t"+(pos.y+setupReal.start.y-setupReal.firstPos.y)+"\t"+d.temperatures[1]);
 				
@@ -474,6 +482,7 @@ public class AssessFitness {
 			for(int i = 0 ; i < samples.length ; i++) {
 				System.out.println(samples[i]);
 			}
+			System.out.println();
 		}
 	}
 	
@@ -488,34 +497,53 @@ public class AssessFitness {
 		String f = "compare/controllers/preset_"+exp.controllerName+exp.controllerNumber+".conf";
 		
 		try {
-			Scanner s = new Scanner(new File(f));
-			f="";
-			while(s.hasNextLine()) {
-				f+=s.nextLine()+"\n";
-			}
-			s.close();
 			
-			String full = f.replaceAll("\\s+", "");
+			CIArguments readArguments = getConfigurationFile(f); 
 			
-			CIArguments readArguments = new CIArguments(full);
+			BehaviorMessage bm = new BehaviorMessage(readArguments.getArgumentAsString("type"), readArguments.getCompleteArgumentString(), true, "dude");
 			
-			BehaviorMessage bm = new BehaviorMessage(readArguments.getArgumentAsString("type"), full, true, "dude");
-			
-			for(Robot r : setup.robots) {
+			for(int i = 0 ; i < setup.robots.size() ; i++) {
+				Robot r = setup.robots.get(i); 
 				if(exp.activeRobot != -1) {
 					if(r.getId() == setup.getRobot(""+exp.activeRobot).getId()) {
 						AquaticDrone drone = (AquaticDrone)r;
 						drone.processInformationRequest(bm, null);
 					}
 				} else {
+					
 					AquaticDrone drone = (AquaticDrone)r;
-					drone.processInformationRequest(bm, null);
+					
+					if(exp.controllerName.contains("hierarchical") && i == setup.robots.size() - 1) {
+						CIArguments preprogArgs = getConfigurationFile("compare/controllers/preprog_waypoint.conf"); 
+						BehaviorMessage preprogbm = new BehaviorMessage(preprogArgs.getArgumentAsString("type"), preprogArgs.getCompleteArgumentString(), true, "dude");
+						drone.processInformationRequest(preprogbm, null);
+						drone.setDroneType(DroneType.ENEMY);
+						drone.setGpsError(0);
+					} else {
+						CIArguments readArguments2 = new CIArguments(readArguments.getCompleteArgumentString());
+						readArguments2.setArgument("ip"+drone.getNetworkAddress(), (0.5+0.5/(setup.robots.size()-1-1)*i));
+						bm = new BehaviorMessage(readArguments2.getArgumentAsString("type"), readArguments2.getCompleteArgumentString(), true, "dude");
+						drone.processInformationRequest(bm, null);
+					}
 				}
 			}
 			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private static CIArguments getConfigurationFile(String filename) throws FileNotFoundException{
+		Scanner s = new Scanner(new File(filename));
+		filename="";
+		while(s.hasNextLine()) {
+			filename+=s.nextLine()+"\n";
+		}
+		s.close();
+		
+		String full = filename.replaceAll("\\s+", "");
+		
+		return new CIArguments(full);
 	}
 	
 

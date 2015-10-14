@@ -28,6 +28,8 @@ public class DispersionFitnessTest extends AvoidCollisionsFunction {
     private double startingDistance = 0;
     private boolean lastSteps = false;
     private double ls = 0;
+    private boolean adaptive = false;
+    private boolean useGPS = false;
     
     public DispersionFitnessTest(Arguments args) {
         super(args);
@@ -35,6 +37,7 @@ public class DispersionFitnessTest extends AvoidCollisionsFunction {
         range = args.getArgumentAsDoubleOrSetDefault("range", range);
         startingDistance = args.getArgumentAsDoubleOrSetDefault("startingdistance", startingDistance);
         lastSteps = args.getFlagIsTrue("laststeps");
+        useGPS = args.getFlagIsTrue("usegps");
     }
 
     @Override
@@ -61,31 +64,35 @@ public class DispersionFitnessTest extends AvoidCollisionsFunction {
         for (Robot r : simulator.getRobots()) {
             double minDist = Double.POSITIVE_INFINITY;
             
-//            if(r.getId() > 3 && simulator.getTime() < 60*10+120*10)
-//            	continue;
+            if(adaptive && r.getId() > 3 && simulator.getTime() < 60*10+120*10)
+            	continue;
             
             for (Robot r2 : simulator.getRobots()) {
             	
 //              758 steps all dispersing, 1138 all stop ADAPTIVE
                 //TODO REMOVE THIS
-//                if(r2.getId() > 3 && simulator.getTime() < 60*10+120*10)
-//                	continue;
+                if(adaptive && r2.getId() > 3 && simulator.getTime() < 60*10+120*10)
+                	continue;
             	
                 if (r != r2) {
-                	minDist = Math.min(minDist, r.getPosition().distanceTo(r2.getPosition()));
+                	if(!useGPS)
+                		minDist = Math.min(minDist, r.getPosition().distanceTo(r2.getPosition()));
+                	else
+                		minDist = Math.min(minDist,((AquaticDrone)r).getGPSLatLon().distance(((AquaticDrone)r2).getGPSLatLon())*1000);
+//                	System.out.println(minDist);
                 }
             }
-//            System.out.println(r.getId()+" "+minDist);
+//            System.out.println(r.getId()+" "+minDist + " "+(minDist - targetDistance));
             distanceDelta += Math.abs(minDist - targetDistance);
         }
         
-        distanceDelta /= simulator.getRobots().size();
-//        System.out.println(distanceDelta);
-        
-        //TODO REMOVE THIS
-//        distanceDelta /= simulator.getTime() < 60*10+120*10 ? 4 : simulator.getRobots().size();
-//        System.out.println(distanceDelta+" "+(simulator.getTime() < 60*10+120*10 ? 4 : simulator.getRobots().size()));
-        
+        if(!adaptive) {
+        	distanceDelta /= simulator.getRobots().size();
+//        	System.out.println(distanceDelta);
+        } else {
+        	distanceDelta /= simulator.getTime() < 60*10+120*10 ? 4 : simulator.getRobots().size();
+        	System.out.println(distanceDelta+" "+(simulator.getTime() < 60*10+120*10 ? 4 : simulator.getRobots().size()));
+        }
 //        System.out.println(simulator.getTime()+"  "+distanceDelta);
 //        System.out.println();
         

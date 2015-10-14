@@ -22,7 +22,7 @@ public class WaypointEnvironment extends Environment {
     @ArgumentsAnnotation(name = "distance", defaultValue = "0")
     private double distance = 0;
     @ArgumentsAnnotation(name = "random", defaultValue = "0")
-    private double rand = 0;
+    private double random = 0;
     @ArgumentsAnnotation(name = "otherrobots", defaultValue = "0")
     private int otherRobots = 0;
 
@@ -32,7 +32,7 @@ public class WaypointEnvironment extends Environment {
         super(simulator, args);
         nWaypoints = args.getArgumentAsIntOrSetDefault("numberwaypoints", nWaypoints);
         distance = args.getArgumentAsDoubleOrSetDefault("distance", distance);
-        rand = args.getArgumentAsDoubleOrSetDefault("random", rand);
+        random = args.getArgumentAsDoubleOrSetDefault("random", random);
         otherRobots = args.getArgumentAsIntOrSetDefault("otherrobots", 0);
     }
 
@@ -45,7 +45,7 @@ public class WaypointEnvironment extends Environment {
         }
 
         for (int i = 0; i < otherRobots; i++) {
-            AquaticDrone drone = new AquaticDrone(simulator, new Arguments("gpserror=1.0,radius=0.30,diameter=0.60,commrange=0.01"));
+            AquaticDrone drone = new AquaticDrone(simulator, new Arguments("gpserror=1.0,radius=0.30,diameter=0.60,commrange=0.01,rudder=1"));
 
             double dist = (distance) * simulator.getRandom().nextDouble() + 5;
             double angle = simulator.getRandom().nextDouble() * Math.PI * 2;
@@ -57,7 +57,7 @@ public class WaypointEnvironment extends Environment {
         }
 
         for (int i = 0; i < nWaypoints; i++) {
-            double dist = distance + distance * rand * simulator.getRandom().nextDouble() * 2 - rand;
+            double dist = distance + distance * random * simulator.getRandom().nextDouble() * 2 - random;
 
             double angle = simulator.getRandom().nextDouble() * Math.PI * 2;
 

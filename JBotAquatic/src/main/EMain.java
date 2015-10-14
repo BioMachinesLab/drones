@@ -8,7 +8,7 @@ import gui.evolution.EvolutionGui;
 public class EMain {
 	public static void main(String[] args) throws Exception {
 		
-		String configName = "stationkeeping.conf";
+		String configName = "swarm/intruder.conf";
 		
 		try {
 			args = new String[]{configName};

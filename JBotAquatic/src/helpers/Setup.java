@@ -85,6 +85,10 @@ class Setup {
 //			hash.get("--evaluation").setArgument("clusterdistance",7+1.8);
 //			hash.get("--evaluation").setArgument("instant", 1);
 			hash.get("--evaluation").setArgument("targetdistance", 2+1.8);
+			//TODO REMOVE
+			hash.get("--robots").setArgument("kalmanfilter",1);
+			hash.get("--robots").setArgument("gpserror",0);
+			hash.get("--evaluation").setArgument("usegps",1);
 		}
 		
 		hash.put("--environment", new Arguments("classname=EmptyEnvironment,width=150,height=150,steps="+exp.timeSteps,true));
@@ -133,6 +137,18 @@ class Setup {
 			}
 		}
 		
+		if(exp.controllerName.contains("hierarchical")) {
+			for(Robot r : robots) {
+				int c = 0;
+				for(LogData d : exp.logs) {
+					if(d.entities.size()==2)
+						break;
+					c++;
+				}
+				updateRobotEntities(exp.logs.get(c), (AquaticDrone)r);
+			}
+		}
+		
 		String className = hash.get("--evaluation").getArgumentAsString("classname");
 		hash.get("--evaluation").setArgument("classname", className+"Test");
 		hash.get("--evaluation").setArgument("dontuse",1);
@@ -175,9 +191,7 @@ class Setup {
 		
 	}
 	
-	public void updateRobotEntities(LogData d) {
-		
-		AquaticDrone aq = (AquaticDrone)getRobot(d.ip);
+	public void updateRobotEntities(LogData d, AquaticDrone aq) {
 		Iterator<Entity> i = aq.getEntities().iterator();
 		while(i.hasNext()) {
 			Entity e = i.next();
@@ -206,6 +220,16 @@ class Setup {
 		if(!wps.isEmpty()) {
 			aq.setActiveWaypoint(wps.get(0));
 		}
+	}
+	
+	
+	public void updateRobotEntities(LogData d, String ip) {
+		AquaticDrone aq = (AquaticDrone)getRobot(ip);
+		updateRobotEntities(d,aq);
+	}
+	
+	public void updateRobotEntities(LogData d) {
+		updateRobotEntities(d,d.ip);
 	}
 	
 	public LatLon getShiftedLatLon(LatLon latLon) {

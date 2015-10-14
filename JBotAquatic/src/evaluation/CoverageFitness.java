@@ -17,7 +17,7 @@ public class CoverageFitness extends AvoidCollisionsFunction {
     private double[][] coverage;
     private double resolution = 1;
     private double width = 5, height = 5;
-    private final double decrease = 0.001;//1000 steps to go from 1.0 to 0.0
+    private double decay = 0.001;//1000 steps to go from 1.0 to 0.0
     private double accum = 0;
 
     private double v = 0;
@@ -29,6 +29,7 @@ public class CoverageFitness extends AvoidCollisionsFunction {
         super(args);
         resolution = args.getArgumentAsDoubleOrSetDefault("resolution", resolution);
         distance = args.getArgumentAsDoubleOrSetDefault("distance", distance);
+        decay = args.getArgumentAsDoubleOrSetDefault("decay", decay);
     }
 
     public void setup(Simulator simulator) {
@@ -84,7 +85,7 @@ public class CoverageFitness extends AvoidCollisionsFunction {
 
                 if (coverage[y][x] > 0) {
                     if (coverage[y][x] <= 1) {
-                        coverage[y][x] -= decrease;
+                        coverage[y][x] -= decay;
                         if (coverage[y][x] < 0) {
                             coverage[y][x] = 0;
                         }

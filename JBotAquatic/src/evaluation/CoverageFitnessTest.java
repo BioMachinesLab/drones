@@ -31,6 +31,7 @@ public class CoverageFitnessTest extends AvoidCollisionsFunction {
     private double steps = 0;
 
     private boolean instant = false;
+    private boolean useGPS = false;
 
     public CoverageFitnessTest(Arguments args) {
         super(args);
@@ -38,6 +39,7 @@ public class CoverageFitnessTest extends AvoidCollisionsFunction {
         distance = args.getArgumentAsDoubleOrSetDefault("distance", distance);
         instant = args.getFlagIsTrue("instant");
         decrease = 1.0 / args.getArgumentAsDoubleOrSetDefault("decrease",decrease);
+        useGPS = args.getFlagIsTrue("usegps");
     }
 
     public void setup(Simulator simulator) {
@@ -123,9 +125,15 @@ public class CoverageFitnessTest extends AvoidCollisionsFunction {
             if (r.isEnabled()) {
                 AquaticDrone ad = (AquaticDrone) r;
                 if (insideLines(r.getPosition(), simulator)) {
-
+                	
                     double rX = ad.getPosition().getX();
                     double rY = ad.getPosition().getY();
+                    
+                    if(useGPS) {
+                    	commoninterface.mathutils.Vector2d vpos = CoordinateUtilities.GPSToCartesian(ad.getGPSLatLon());
+                    	rX = vpos.x;
+                    	rY = vpos.y;
+                    }
 
                     double minX = rX - distance;
                     double minY = rY - distance;
@@ -169,7 +177,7 @@ public class CoverageFitnessTest extends AvoidCollisionsFunction {
                 }
             }
         }
-
+        
         if (instant) {
             fitness = sum / max;
         } else {

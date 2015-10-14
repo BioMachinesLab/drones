@@ -476,7 +476,6 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 				pos.setX(pos.getX()+radius*Math.cos(angle));
 				pos.setY(pos.getY()+radius*Math.sin(angle));
 			}
-			
 			gpsLatLon = CoordinateUtilities.cartesianToGPS(pos);
 		}
 		
@@ -594,5 +593,9 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 			}
 		}
 		return found;
+	}
+	
+	public void setGpsError(double gpsError) {
+		this.gpsError = gpsError;
 	}
 }

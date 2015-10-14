@@ -27,6 +27,7 @@ public class EnemyCISensor extends ConeTypeCISensor{
 	
 	@Override
 	protected void sensedEntity(Entity e){
+		
 		if(share && e instanceof RobotLocation) {
 			RobotLocation rl = (RobotLocation)e;
 			if(rl.getDroneType() == AquaticDroneCI.DroneType.ENEMY) {

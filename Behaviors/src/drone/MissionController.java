@@ -85,6 +85,8 @@ public class MissionController extends CIBehavior {
 	@Override
 	public void step(double timestep) {
 		
+//		System.out.println(currentState);
+		
 		if(stop != 0 && timestep > stop) {
 			robot.setMotorSpeeds(0, 0);
 			return;
@@ -191,9 +193,6 @@ public class MissionController extends CIBehavior {
 		if(!skipSubController)
 			chooseSubController(subController,timestep);
 		
-		if(timestep % 100 == 0) {
-			drone.setRudder(0, 0);
-		}
 	}
 	
 	protected void chooseSubController(int output, double time) {
@@ -258,8 +257,9 @@ public class MissionController extends CIBehavior {
 			LinkedList<SharedDroneLocation> locations = SharedDroneLocation.getSharedDroneLocations(drone);
 			
 			for(SharedDroneLocation loc : locations) {
-				if(loc.getDroneType() == DroneType.ENEMY)
+				if(loc.getDroneType() == DroneType.ENEMY) {
 					return loc.getLatLon();
+				}
 			}
 		} else {
 			ArrayList<RobotLocation> locations = RobotLocation.getDroneLocations(drone);
@@ -340,7 +340,7 @@ public class MissionController extends CIBehavior {
 		return null;
 	}
 	
-	private boolean insideBoundary(LatLon latLon) {
+	public boolean insideBoundary(LatLon latLon) {
 		//http://en.wikipedia.org/wiki/Point_in_polygon
 		int count = 0;
 		
@@ -377,7 +377,6 @@ public class MissionController extends CIBehavior {
 			Waypoint wb = waypoints.get(0);
 			
 			lines.add(getLine(wa,wb));
-			
 			return lines;
 		}
 		return null;
@@ -406,6 +405,32 @@ public class MissionController extends CIBehavior {
 	@Override
 	public String toString() {
 		return super.toString() + description;
+	}
+	
+	public State getCurrentState() {
+		return currentState;
+	}
+	
+	public boolean seeingEnemyDirectly() {
+		
+		LatLon intruderPosition = intruderPosition();
+		
+		if(intruderPosition == null || !insideBoundary(intruderPosition))
+			return false;
+		
+		double droneDist = drone.getGPSLatLon().distance(intruderPosition);
+		return droneDist*1000 <= 20;
+	}
+	
+	public boolean seeingEnemyShared() {
+		
+		LatLon intruderPosition = intruderPosition();
+		
+		if(intruderPosition == null || !insideBoundary(intruderPosition))
+			return false;
+		
+		double droneDist = drone.getGPSLatLon().distance(intruderPosition);
+		return droneDist*1000 <= 40;
 	}
 	
 }
