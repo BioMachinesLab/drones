@@ -1,4 +1,4 @@
-package helpers;
+package fieldtests.data;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -113,6 +113,6 @@ public class PostEvalExporter {
 	
 	public static void main(String[] args) throws Exception{
 //		evalBest();
-		new PostEvalExporter("bigdisk/september2015/rudder_final/","weightedcluster").export();
+		new PostEvalExporter("bigdisk/october2015/maritime/","intruder").export();
 	}
 }

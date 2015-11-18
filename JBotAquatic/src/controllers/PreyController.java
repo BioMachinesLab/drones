@@ -43,7 +43,7 @@ public class PreyController extends Controller {
         for (Entity e : entities) {
             if (e instanceof RobotLocation) {
                 RobotLocation rl = (RobotLocation) e;
-                double d = ad.getGPSLatLon().distance(rl.getLatLon());
+                double d = ad.getGPSLatLon().distanceInKM(rl.getLatLon());
                 if (d < closestDist) {
                     closest = rl.getLatLon();
                     closestDist = d;

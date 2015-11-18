@@ -1,4 +1,4 @@
-package helpers;
+package fieldtests.data;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -32,7 +32,8 @@ import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
 import commoninterface.utils.logger.LogData;
-import evaluation.CoverageFitnessTest;
+import fieldtests.evaluation.CoverageFitnessTest;
+import fieldtests.updatables.Coverage;
 
 public class AssessFitness {
 	
@@ -165,7 +166,7 @@ public class AssessFitness {
 	
 	public static void compareFitness(Experiment exp, long randomSeed, boolean gui) {
 		
-		boolean useSim = true;
+		boolean useSim = false;
 		boolean useReal = true;
 		
 		DoubleFitnessViewer viewer = null;
@@ -311,7 +312,7 @@ public class AssessFitness {
 								if(currentLatLonSim.get(r.getId()) == null) {
 									currentLatLonSim.put(r.getId(), current);
 								}else {
-									totalDistanceSim[r.getId()]+=current.distance(currentLatLonSim.get(r.getId()))*1000;
+									totalDistanceSim[r.getId()]+=current.distanceInKM(currentLatLonSim.get(r.getId()))*1000;
 									currentLatLonSim.put(r.getId(), current);
 								}
 								
@@ -322,7 +323,7 @@ public class AssessFitness {
 								if(currentLatLonReal.get(r.getId()) == null) {
 									currentLatLonReal.put(r.getId(), current);
 								}else {
-									totalDistanceReal[r.getId()]+=current.distance(currentLatLonReal.get(r.getId()))*1000;
+									totalDistanceReal[r.getId()]+=current.distanceInKM(currentLatLonReal.get(r.getId()))*1000;
 									currentLatLonReal.put(r.getId(), current);
 								}
 							}

@@ -100,6 +100,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	private double speedOffset = 0;
 	private boolean configuredSensors = false;
 	private Arguments args;
+	private boolean fault = false;
 	
 	public AquaticDrone(Simulator simulator, Arguments args) {
 		super(simulator, args);
@@ -162,6 +163,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		rudder = args.getFlagIsTrue("rudder");
 		
 		log(LogCodex.encodeLog(LogType.MESSAGE, "IP " + getNetworkAddress()));
+		
 	}
 	
 	@Override
@@ -247,6 +249,9 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	}
 	
 	public void setRudder(double heading, double speed) {
+		
+		if(fault)
+			speed = 0;
 		
 		double h = heading+headingOffset;
 		h = Math.max(-1, h);
@@ -597,5 +602,13 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	
 	public void setGpsError(double gpsError) {
 		this.gpsError = gpsError;
+	}
+	
+	public void setFault(boolean val) {
+		this.fault = val;
+	}
+	
+	public boolean hasFault() {
+		return fault;
 	}
 }

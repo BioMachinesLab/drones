@@ -73,7 +73,7 @@ public class CoordinateUtilities implements Serializable {
 	}
 	
 	public static double distanceInMeters(LatLon coord1, LatLon coord2) {
-		return coord1.distance(coord2)*1000;
+		return coord1.distanceInKM(coord2)*1000;
 	}
 	
 	public static void main(String[] args) {

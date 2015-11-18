@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package evaluation;
+package fieldtests.evaluation;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,6 +15,7 @@ import simulation.robot.Robot;
 import simulation.util.Arguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
+import evaluation.AvoidCollisionsFunction;
 
 /**
  *

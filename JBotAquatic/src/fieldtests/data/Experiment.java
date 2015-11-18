@@ -1,4 +1,4 @@
-package helpers;
+package fieldtests.data;
 
 import java.io.Serializable;
 import java.util.ArrayList;

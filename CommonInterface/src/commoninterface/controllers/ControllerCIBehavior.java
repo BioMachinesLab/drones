@@ -18,6 +18,7 @@ public class ControllerCIBehavior extends CIBehavior {
 	private ArrayList<Double[]> outputs;
 	private CIArguments args;
 	private String description = "";
+	private boolean logInputsOutputs = false;
 	
 	public ControllerCIBehavior(CIArguments args, RobotCI robot) {
 		super(args, robot);
@@ -28,8 +29,10 @@ public class ControllerCIBehavior extends CIBehavior {
 	public void start() {
 		inputsNames = new ArrayList<String>();
 		outputsNames = new ArrayList<String>();
-		inputs = new ArrayList<Double[]>();
-		outputs = new ArrayList<Double[]>();
+		if(logInputsOutputs) {
+			inputs = new ArrayList<Double[]>();
+			outputs = new ArrayList<Double[]>();
+		}
 		initSensors(new CIArguments(args.getArgumentAsString("sensors")));
 		network = CINeuralNetwork.getNeuralNetwork(robot, new CIArguments(args.getArgumentAsString("network")));
 		
@@ -103,8 +106,10 @@ public class ControllerCIBehavior extends CIBehavior {
 			}
 		}
 
-		inputs.add(convertDoubleArray(network.getInputNeuronStates()));
-		outputs.add(convertDoubleArray(network.getOutputNeuronStates()));
+		if(logInputsOutputs) {
+			inputs.add(convertDoubleArray(network.getInputNeuronStates()));
+			outputs.add(convertDoubleArray(network.getOutputNeuronStates()));
+		}
 		
 	}
 	

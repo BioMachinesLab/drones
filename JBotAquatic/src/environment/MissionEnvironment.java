@@ -1,10 +1,16 @@
 package environment;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Scanner;
-import simpletestbehaviors.GoToWaypointCIBehavior;
+
+import simpletestbehaviors.GoToMultiWaypointCIBehavior;
 import simulation.Simulator;
+import simulation.physicalobjects.LightPole;
 import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
@@ -12,6 +18,7 @@ import commoninterface.AquaticDroneCI.DroneType;
 import commoninterface.RobotCI;
 import commoninterface.entities.GeoFence;
 import commoninterface.entities.Waypoint;
+import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
@@ -23,9 +30,14 @@ public class MissionEnvironment extends BoundaryEnvironment{
 	public GeoFence fence = null;
 	public double seenSteps = 0;
 	
+	public boolean lampedusa = false;
+	
+	private ArrayList<Waypoint> bases = new ArrayList<Waypoint>();
+	
 	public MissionEnvironment(Simulator simulator, Arguments args) {
 		super(simulator, args);
 		this.enemyDistance = args.getArgumentAsDoubleOrSetDefault("enemydistance", enemyDistance);
+		
 	}
 	
 	@Override
@@ -39,7 +51,16 @@ public class MissionEnvironment extends BoundaryEnvironment{
 		
 		fence = new GeoFence("fence");
 		
-		int sizeW = 200;
+		createFence(simulator);
+		
+		wallsDistance = enemyDistance;
+		
+	}
+	
+	private void createFence(Simulator simulator) {
+		
+		
+		int sizeW = 100;
 		int sizeH = 100;
 		
 		commoninterface.mathutils.Vector2d vec = CoordinateUtilities.GPSToCartesian(new LatLon(38.766524638824215, -9.094010382164727));
@@ -68,19 +89,17 @@ public class MissionEnvironment extends BoundaryEnvironment{
 			r.setOrientation(Math.PI*2*simulator.getRandom().nextDouble());
 		}
 		
-		wallsDistance = enemyDistance;
-		
 	}
 	
 	@Override
 	public void update(double time) {
 		
 		AquaticDrone enemy = (AquaticDrone)getRobots().get(getRobots().size()-1);
-		
+
 		if(time == 1) {
-			
+				
 			//DRONES
-			File f = new File("../DroneControlConsole/controllers/hierarchical.conf");
+			File f = new File("swarm/hierarchical.conf");
 			StringBuffer str = new StringBuffer();
 			
 			try {
@@ -103,7 +122,7 @@ public class MissionEnvironment extends BoundaryEnvironment{
 			}
 			
 			//ENEMY
-			f = new File("../DroneControlConsole/controllers/preprog_waypoint.conf");
+			f = new File("swarm/preprog_waypoint.conf");
 			str = new StringBuffer();
 			
 			try {
@@ -119,8 +138,8 @@ public class MissionEnvironment extends BoundaryEnvironment{
 			}
 			
 			args = new CIArguments(str.toString().replaceAll("\\s+", ""),true);
-			
-			enemy.startBehavior(new GoToWaypointCIBehavior(args, enemy));
+				
+			enemy.startBehavior(new GoToMultiWaypointCIBehavior(args, enemy));
 		}
 		
 		if(time > 600*2) {

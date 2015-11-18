@@ -1,4 +1,4 @@
-package evaluation;
+package fieldtests.evaluation;
 
 import commoninterface.CIBehavior;
 import commoninterface.AquaticDroneCI.DroneType;
@@ -21,7 +21,9 @@ public class HierarchicalFitnessTest extends EvaluationFunction {
 	private int stepsSeeing = 0;
 	private int stepsSeeingShared = 0;
 	
-	private boolean print = false;
+	private boolean print = true;
+	
+	private int stepsGood = 0;
 
     public HierarchicalFitnessTest(Arguments args) {
         super(args);
@@ -29,7 +31,7 @@ public class HierarchicalFitnessTest extends EvaluationFunction {
 
     @Override
     public void update(Simulator simulator) {
-    	
+//    	System.out.println(countCrossings);
     	if(countCrossings == 4)
     		return;
     	
@@ -62,7 +64,7 @@ public class HierarchicalFitnessTest extends EvaluationFunction {
     			}
     		}
     	}
-    	
+    	System.out.println(enemyInside);
     	stepsEnemyInside+=enemyInside;
     	stepsSeeing+= countSeeing > 0 ? 1 : 0;
     	stepsSeeingShared+= countSeeingShared > 0 ? 1 : 0;
@@ -76,24 +78,24 @@ public class HierarchicalFitnessTest extends EvaluationFunction {
     	}
     	
     	prevCrossing = enemyInside;
-    	
     	if(print) {
-    		if(simulator.getTime()==0) {
-    			System.out.print("Time\tseeing\tseeingShared\tenemyInside\tseenThisCrossing\tseenCrossings\tstepsEnemyInside\tstepsSeeing\tstepsSeeingShared");
-    			for(State s : states)
-    				System.out.print("\t"+s);
-    		}
-    		System.out.print(simulator.getTime()+"\t"+countSeeing+"\t"+countSeeingShared+"\t"+enemyInside+"\t"+seenThisCrossing+"\t"+countCrossings+"\t"+stepsEnemyInside+"\t"+stepsSeeing+"\t"+stepsSeeingShared);
-    		for(int i : countStates)
-    			System.out.print("\t"+i);
-    		System.out.println();
+//    		if(simulator.getTime()==0) {
+//    			System.out.print("Time\tseeing\tseeingShared\tenemyInside\tseenThisCrossing\tseenCrossings\tstepsEnemyInside\tstepsSeeing\tstepsSeeingShared");
+//    			for(State s : states)
+//    				System.out.print("\t"+s);
+//    		}
+//    		System.out.print(simulator.getTime()+"\t"+countSeeing+"\t"+countSeeingShared+"\t"+enemyInside+"\t"+seenThisCrossing+"\t"+countCrossings+"\t"+stepsEnemyInside+"\t"+stepsSeeing+"\t"+stepsSeeingShared);
+//    		for(int i : countStates)
+//    			System.out.print("\t"+i);
+//    		System.out.println();
     	}
     	
     }
 
     @Override
     public double getFitness() {
-    	return stepsSeeingShared;
+    	System.out.println(stepsEnemyInside+" "+stepsSeeing);
+    	return stepsSeeing/(double)stepsEnemyInside;
     }
 
 }

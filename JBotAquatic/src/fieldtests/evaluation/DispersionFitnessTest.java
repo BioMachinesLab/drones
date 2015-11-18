@@ -3,16 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package evaluation;
+package fieldtests.evaluation;
 
 import simulation.Simulator;
 import simulation.robot.AquaticDrone;
 import simulation.robot.CISensorWrapper;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
-
 import commoninterface.sensors.DroneCISensor;
 import commoninterface.utils.CoordinateUtilities;
+import evaluation.AvoidCollisionsFunction;
 
 /**
  *
@@ -78,7 +78,7 @@ public class DispersionFitnessTest extends AvoidCollisionsFunction {
                 	if(!useGPS)
                 		minDist = Math.min(minDist, r.getPosition().distanceTo(r2.getPosition()));
                 	else
-                		minDist = Math.min(minDist,((AquaticDrone)r).getGPSLatLon().distance(((AquaticDrone)r2).getGPSLatLon())*1000);
+                		minDist = Math.min(minDist,((AquaticDrone)r).getGPSLatLon().distanceInKM(((AquaticDrone)r2).getGPSLatLon())*1000);
 //                	System.out.println(minDist);
                 }
             }

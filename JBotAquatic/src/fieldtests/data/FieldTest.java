@@ -1,4 +1,4 @@
-package helpers;
+package fieldtests.data;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -62,7 +62,7 @@ public class FieldTest {
 //		"hierarchical;0;1;6;12-12-24;550;1,2,3,4,8,10",
 //		"hierarchical;0;2;6;13-08-53;550;1,2,3,4,6,10",//robot 2 (jbot) had a malfunctioning motor
 //		"hierarchical;0;3;6;13-22-45;550;1,2,3,4,6,10",
-//		"hierarchical;0;4;6;17-57-48;550;2,3,4,6,8,10",
+		"hierarchical;0;4;6;17-57-48;550;2,3,4,6,8,10",
 	};
 	
 	public static String[] FOLDERS = new String[]{"27july","29july","25sep","30sep"};
@@ -115,7 +115,6 @@ public class FieldTest {
 		        objectinputstream.close();
 		        AssessFitness.compareFitness(e, 1,gui);
 			}
-			
 			folder = 3;
 			
 			for(String s :EXPO_30_SEP) {

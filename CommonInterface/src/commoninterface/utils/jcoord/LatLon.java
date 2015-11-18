@@ -15,8 +15,13 @@ import net.jafama.FastMath;
  * @since 1.0
  */
 public class LatLon implements Serializable {
-
+	
   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 6626864179053038215L;
+
+/**
    * Latitude in degrees.
    */
   private double lat;
@@ -317,7 +322,7 @@ public class LatLon implements Serializable {
    * @return the surface distance in km
    * @since 1.0
    */
-  public double distance(LatLon ll) {
+  public double distanceInKM(LatLon ll) {
     double er = 6366.707;
 
     double latFrom = FastMath.toRadians(getLat());
@@ -338,6 +343,18 @@ public class LatLon implements Serializable {
             * er;
 
     return d;
+  }
+  
+  /**
+   * Calculate the surface distance in meters from the this LatLng to the
+   * given LatLng.
+   * 
+   * @param ll
+   * @return the surface distance in meters
+   * @since 1.0
+   */
+  public double distanceInMeters(LatLon ll) {
+	  return distanceInKM(ll)*1000;
   }
 
 

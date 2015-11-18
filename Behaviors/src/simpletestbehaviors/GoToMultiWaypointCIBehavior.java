@@ -60,8 +60,8 @@ public class GoToMultiWaypointCIBehavior extends CIBehavior {
 			drone.getEntities().clear();
 			drone.getEntities().add(fence);
 			
-			distanceW = fence.getWaypoints().get(0).getLatLon().distance(fence.getWaypoints().get(1).getLatLon())*1000;
-			distanceH = fence.getWaypoints().get(1).getLatLon().distance(fence.getWaypoints().get(2).getLatLon())*1000;
+			distanceW = fence.getWaypoints().get(0).getLatLon().distanceInKM(fence.getWaypoints().get(1).getLatLon())*1000;
+			distanceH = fence.getWaypoints().get(1).getLatLon().distanceInKM(fence.getWaypoints().get(2).getLatLon())*1000;
 			
 			offsetX = CoordinateUtilities.GPSToCartesian(fence.getWaypoints().get(0).getLatLon()).x+distanceW/2;
 			offsetY = CoordinateUtilities.GPSToCartesian(fence.getWaypoints().get(0).getLatLon()).y+distanceH/2;
@@ -75,7 +75,6 @@ public class GoToMultiWaypointCIBehavior extends CIBehavior {
 	
 	@Override
 	public void step(double timestep) {
-		
 		Waypoint wp = drone.getActiveWaypoint();
 		
 		double currentDistance = CoordinateUtilities.distanceInMeters(drone.getGPSLatLon(), wp.getLatLon());

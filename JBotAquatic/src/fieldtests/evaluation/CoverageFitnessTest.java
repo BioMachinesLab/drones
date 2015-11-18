@@ -1,8 +1,9 @@
-package evaluation;
+package fieldtests.evaluation;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
 import mathutils.Vector2d;
 import simulation.Simulator;
 import simulation.Updatable;
@@ -11,10 +12,12 @@ import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
 import updatables.CoverageTracer;
+import commoninterface.AquaticDroneCI.DroneType;
 import commoninterface.entities.Entity;
 import commoninterface.entities.GeoFence;
 import commoninterface.entities.Waypoint;
 import commoninterface.utils.CoordinateUtilities;
+import evaluation.AvoidCollisionsFunction;
 
 public class CoverageFitnessTest extends AvoidCollisionsFunction {
 
@@ -124,7 +127,8 @@ public class CoverageFitnessTest extends AvoidCollisionsFunction {
         for (Robot r : robots) {
             if (r.isEnabled()) {
                 AquaticDrone ad = (AquaticDrone) r;
-                if (insideLines(r.getPosition(), simulator)) {
+                
+                if (ad.getDroneType()== DroneType.DRONE && insideLines(r.getPosition(), simulator)) {
                 	
                     double rX = ad.getPosition().getX();
                     double rY = ad.getPosition().getY();
@@ -173,7 +177,7 @@ public class CoverageFitnessTest extends AvoidCollisionsFunction {
                         }
                     }
                 } else if (ad.isInvolvedInCollison()) {
-                    r.setEnabled(false);
+//                    r.setEnabled(false);
                 }
             }
         }
@@ -194,6 +198,7 @@ public class CoverageFitnessTest extends AvoidCollisionsFunction {
                 }
             }
         }
+
     }
     
     public double[][] getCoverage() {

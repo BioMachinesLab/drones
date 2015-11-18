@@ -28,36 +28,33 @@ public class SimulatedBroadcastHandler extends BroadcastHandler {
 		if(address.equals(robot.getNetworkAddress()))
 			return;
 		
-		String identifier = message.split(BroadcastMessage.MESSAGE_SEPARATOR)[0];
-		
-		switch(identifier) {
-			case PositionBroadcastMessage.IDENTIFIER:
+		if(message.startsWith(PositionBroadcastMessage.IDENTIFIER)) {
 				
-				RobotLocation dl = PositionBroadcastMessage.decode(message);
-				
-				if(robot.getNetworkAddress().equals(dl.getName()))
-					break;
-				
-				if(robot instanceof AquaticDrone) {
-					AquaticDrone drone = (AquaticDrone)robot;
-					if(CoordinateUtilities.distanceInMeters(drone.getGPSLatLon(),dl.getLatLon()) > drone.getCommRange())
-						robot.getEntities().remove(dl);
-					else {
-						replaceEntity(dl);
-						if(DEBUG)
-							System.out.println("Added DroneLocation "+dl);
-					}
-						
-				} else {
+			RobotLocation dl = PositionBroadcastMessage.decode(message);
+			
+			if(robot.getNetworkAddress().equals(dl.getName()))
+				return;
+			
+			if(robot instanceof AquaticDrone) {
+				AquaticDrone drone = (AquaticDrone)robot;
+				if(drone.getGPSLatLon() == null || dl.getLatLon() == null)
+					return;
+				if(CoordinateUtilities.distanceInMeters(drone.getGPSLatLon(),dl.getLatLon()) > drone.getCommRange())
+					robot.getEntities().remove(dl);
+				else {
 					replaceEntity(dl);
 					if(DEBUG)
 						System.out.println("Added DroneLocation "+dl);
 				}
+					
+			} else {
+				replaceEntity(dl);
+				if(DEBUG)
+					System.out.println("Added DroneLocation "+dl);
+			}
 				
-				break;
-			default:
-				super.messageReceived(address, message);
-				break;
+		} else {
+			super.messageReceived(address, message);
 		}
 	}
 	

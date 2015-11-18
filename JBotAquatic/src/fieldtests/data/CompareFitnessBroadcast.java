@@ -1,4 +1,4 @@
-package helpers;
+package fieldtests.data;
 
 import evaluation.AggregateFitness;
 import evolutionaryrobotics.JBotEvolver;

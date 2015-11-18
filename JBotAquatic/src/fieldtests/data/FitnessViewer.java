@@ -1,4 +1,4 @@
-package helpers;
+package fieldtests.data;
 
 import gui.renderer.Renderer;
 import javax.swing.JFrame;

@@ -1,4 +1,4 @@
-package helpers;
+package fieldtests.data;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -16,11 +16,11 @@ import evolutionaryrobotics.JBotEvolver;
 
 public class BestControllersWeights {
 	
-	static int TOP = 3;
+	static int TOP = 1;
 	
 	public static void main(String[] args) {
 		
-		String folder = "bigdisk/september2015/rudder_final/";
+		String folder = "bigdisk/october2015/maritime100/";
 		
 		File f = new File(folder);
 		
@@ -84,7 +84,7 @@ public class BestControllersWeights {
 						
 						result = Arguments.beautifyString(result);
 						
-						File saving = new File(save.getPath()+"/preset_"+subFolder.getName()+i+".conf");
+						File saving = new File(save.getPath()+"/"+subFolder.getName()+i+".conf");
 						BufferedWriter wr = new BufferedWriter(new FileWriter(saving));
 						wr.write(result);
 						wr.flush();

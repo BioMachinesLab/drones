@@ -42,7 +42,7 @@ public class PreyCIBehavior extends CIBehavior {
         for (Entity e : entities) {
             if (e instanceof RobotLocation) {
                 RobotLocation rl = (RobotLocation) e;
-                double d = ad.getGPSLatLon().distance(rl.getLatLon());
+                double d = ad.getGPSLatLon().distanceInKM(rl.getLatLon());
                 if (d < closestDist && d * 1000.0 <= escapeRange) {
                     closest = rl.getLatLon();
                     closestDist = d;

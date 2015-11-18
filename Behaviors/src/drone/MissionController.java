@@ -1,7 +1,6 @@
 package drone;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -31,28 +30,37 @@ public class MissionController extends CIBehavior {
 		PATROL,INTRUDER,WAYPOINT
 	}
 	
-	protected static long BATTERY_LIFE = 8*60*10; //8 min in timesteps
 	protected static double GO_BACK_BATTERY = 0.1;
-	protected static double WAYPOINT_DISTANCE_THRESHOLD = 3; //3 meters
-	protected static double BASE_DISTANCE_THRESHOLD = 5; //5 meters 
 	protected static double ALERT_TIMEOUT = 30*10;//30 sec
 	
 	protected CIArguments args;
 	protected AquaticDroneCI drone;
 
+	protected int waypointDistanceThreshold = 3;
+	protected int baseDistanceThreshold = 5; //5 meters
+	protected int batteryLife = 8*60*10; //8 min in timesteps
 	protected State currentState = State.GO_TO_AREA;
 	protected double currentBattery = 1.0;
 	protected double lastIntruderTime;
 	protected int currentSubController = 0;
 	protected boolean share = false;
+	protected boolean lampedusa = false;
+	protected Waypoint baseWP;
+	protected Vector2d baseWPcartesian;
+	protected ArrayList<Line> lines;
+	protected int commRange = 40;
 	
-	protected int stop = 10*60*10;//10 min mission
+	protected int stop = 0;//10*60*10;//10 min mission
 	
 	protected String description = "";
 	
 	protected ArrayList<CIBehavior> subControllers = new ArrayList<CIBehavior>();
 	
 	protected int onboardRange = 20;
+	
+	protected double startingBattery = 0;
+	
+	protected int numberRobotsPursuing = 3;
 	
 	public MissionController(CIArguments args, RobotCI robot) {
 		super(args, robot);
@@ -64,11 +72,22 @@ public class MissionController extends CIBehavior {
 			this.currentBattery = 0.5 + Math.random()*0.5;//50% to 100%
 		}
 		
+		commRange = args.getArgumentAsIntOrSetDefault("commrange", commRange);
 		onboardRange = args.getArgumentAsIntOrSetDefault("onboardrange", onboardRange);
 		stop = args.getArgumentAsIntOrSetDefault("stop", stop);
 		share = args.getFlagIsTrue("share");
+		lampedusa = args.getFlagIsTrue("lampedusa");
+		batteryLife = args.getArgumentAsIntOrSetDefault("batterylife", batteryLife);
+		baseDistanceThreshold = args.getArgumentAsIntOrSetDefault("basedistancethreshold", baseDistanceThreshold);
+		waypointDistanceThreshold = args.getArgumentAsIntOrSetDefault("waypointdistancethreshold", waypointDistanceThreshold);
+		numberRobotsPursuing = args.getArgumentAsIntOrSetDefault("numberrobotspursuing",numberRobotsPursuing);
+		
+		startingBattery = currentBattery;
 		
 		description+="starting battery="+currentBattery+";";
+		
+		//TODO remove this debug line
+		stop = 0;
 	}
 	
 	@Override
@@ -78,6 +97,8 @@ public class MissionController extends CIBehavior {
 			subControllers.add(new ControllerCIBehavior(a, drone));
 		}
 		
+		baseWP = Waypoint.getWaypoints(drone).get(0);
+		baseWPcartesian = CoordinateUtilities.GPSToCartesian(baseWP.getLatLon());
 		drone.setActiveWaypoint(null);
 		
 	}
@@ -108,7 +129,7 @@ public class MissionController extends CIBehavior {
 		switch(currentState) {
 			case GO_TO_AREA: 
 				if(drone.getActiveWaypoint() == null) {
-					Waypoint wp = chooseWaypointInGeoFence();
+					Waypoint wp = chooseWaypointInGeoFence(timestep);
 					if(wp != null) {
 						robot.replaceEntity(wp);
 						drone.setActiveWaypoint(wp);
@@ -124,7 +145,7 @@ public class MissionController extends CIBehavior {
 				
 					double distance = CoordinateUtilities.distanceInMeters(drone.getActiveWaypoint().getLatLon(),drone.getGPSLatLon());
 					
-					if(distance < WAYPOINT_DISTANCE_THRESHOLD) {
+					if(distance < waypointDistanceThreshold) {
 						
 						currentState = State.PATROL;
 						
@@ -182,7 +203,7 @@ public class MissionController extends CIBehavior {
 				} else {
 					double distance = CoordinateUtilities.distanceInMeters(drone.getActiveWaypoint().getLatLon(),drone.getGPSLatLon());
 
-					if(distance < BASE_DISTANCE_THRESHOLD) {
+					if(distance < baseDistanceThreshold) {
 						robot.setMotorSpeeds(0, 0);
 						skipSubController = true;
 					}
@@ -210,15 +231,15 @@ public class MissionController extends CIBehavior {
 	
 	protected void updateEnergy(double timestep) {
 		if(currentState != State.RECHARGE) {
-			currentBattery-= 1.0/BATTERY_LIFE;
+			currentBattery-= 1.0/batteryLife;
 		} else {
 			double distance = CoordinateUtilities.distanceInMeters(drone.getActiveWaypoint().getLatLon(),drone.getGPSLatLon());
 			
-			if(distance < BASE_DISTANCE_THRESHOLD)
+			if(distance < baseDistanceThreshold)
 //				currentBattery+= (1.0/BATTERY_LIFE)*5;
 				currentBattery = 1.0;
 			else
-				currentBattery-= 1.0/BATTERY_LIFE;	
+				currentBattery-= 1.0/batteryLife;	
 		}
 		
 	}
@@ -228,12 +249,12 @@ public class MissionController extends CIBehavior {
 		ArrayList<RobotLocation> locations = RobotLocation.getDroneLocations(drone);
 		
 		int position = 0;
-		double droneDist = drone.getGPSLatLon().distance(intruderPos);
+		double droneDist = drone.getGPSLatLon().distanceInMeters(intruderPos);
 
 //		if(drone.getNetworkAddress().endsWith("0"))
 //			System.out.println(droneDist);
 		
-		if(droneDist*1000 > 40) //comm range
+		if(droneDist > commRange) //comm range
 			return false;
 		
 		for(RobotLocation loc : locations) {
@@ -241,10 +262,10 @@ public class MissionController extends CIBehavior {
 			if(loc.getDroneType() == DroneType.ENEMY)
 				continue;
 			
-			double dist = loc.getLatLon().distance(intruderPos);
+			double dist = loc.getLatLon().distanceInMeters(intruderPos);
 			if(dist < droneDist)
 				position++;
-			if(position >= 3)
+			if(position >= numberRobotsPursuing)
 				return false;
 		}
 		
@@ -261,15 +282,12 @@ public class MissionController extends CIBehavior {
 					return loc.getLatLon();
 				}
 			}
-		} else {
-			ArrayList<RobotLocation> locations = RobotLocation.getDroneLocations(drone);
-			
-			for(RobotLocation loc : locations) {
-				if(loc.getDroneType() == DroneType.ENEMY && loc.getLatLon().distance(drone.getGPSLatLon())*1000 < onboardRange) {
-//					if(robot.getNetworkAddress().endsWith("103"))
-//						System.out.println(loc.getLatLon().distance(drone.getGPSLatLon())*1000+" < "+onboardRange);
-					return loc.getLatLon();
-				}
+		}
+		ArrayList<RobotLocation> robotLocations = RobotLocation.getDroneLocations(drone);
+		
+		for(RobotLocation loc : robotLocations) {
+			if(loc.getDroneType() == DroneType.ENEMY && loc.getLatLon().distanceInMeters(drone.getGPSLatLon()) < onboardRange) {
+				return loc.getLatLon();
 			}
 		}
 		
@@ -281,7 +299,7 @@ public class MissionController extends CIBehavior {
 		//This is done automatically by the sensor that shares
 	}
 	
-	protected Waypoint chooseWaypointInGeoFence() {
+	protected Waypoint chooseWaypointInGeoFence(double timestep) {
 
 		Waypoint result = null;
 		GeoFence fence = getGeoFence();
@@ -311,21 +329,25 @@ public class MissionController extends CIBehavior {
 			boolean success = false;
 			
 			//diversify the seed, they are all almost the same with [0,1]
-			Random r = new Random((long)(Math.pow(currentBattery*1000,2)));
+			
+			Random r = new Random((long)(Math.pow(startingBattery*1000,2)));
 			
 			do {
 				
 				double x = minX+(maxX-minX)*r.nextDouble();
 				double y = minY+(maxY-minY)*r.nextDouble();
 				
-				LatLon rLatLon = CoordinateUtilities.cartesianToGPS(new Vector2d(x,y));
+				if(!lampedusa || Math.signum(baseWPcartesian.x) == Math.signum(x)) {
 				
-				if(insideBoundary(rLatLon)) {
-					success = true;
-					result = new Waypoint("waypointX", rLatLon);
+					LatLon rLatLon = CoordinateUtilities.cartesianToGPS(new Vector2d(x,y));
+					
+					if(insideBoundary(rLatLon)) {
+						success = true;
+						result = new Waypoint("waypointX", rLatLon);
+					}
 				}
 				
-			} while(!success && ++tries < 100);
+			} while(!success && ++tries < 1000);
 			
 		}
 		return result;
@@ -357,28 +379,34 @@ public class MissionController extends CIBehavior {
 	
 	private ArrayList<Line> getGeoFenceLines() {
 		
-		GeoFence fence = getGeoFence();
+		if(lines == null) {
 		
-		if(fence != null) {
-			ArrayList<Line> lines = new ArrayList<Line>();
+			GeoFence fence = getGeoFence();
 			
-			LinkedList<Waypoint> waypoints = fence.getWaypoints();
-			
-			for(int i = 1 ; i < waypoints.size() ; i++) {
+			if(fence != null) {
+				lines = new ArrayList<Line>();
 				
-				Waypoint wa = waypoints.get(i-1);
-				Waypoint wb = waypoints.get(i);
+				LinkedList<Waypoint> waypoints = fence.getWaypoints();
+				
+				for(int i = 1 ; i < waypoints.size() ; i++) {
+					
+					Waypoint wa = waypoints.get(i-1);
+					Waypoint wb = waypoints.get(i);
+					
+					lines.add(getLine(wa,wb));
+				}
+				
+				//loop around
+				Waypoint wa = waypoints.get(waypoints.size()-1);
+				Waypoint wb = waypoints.get(0);
 				
 				lines.add(getLine(wa,wb));
+				return lines;
 			}
-			
-			//loop around
-			Waypoint wa = waypoints.get(waypoints.size()-1);
-			Waypoint wb = waypoints.get(0);
-			
-			lines.add(getLine(wa,wb));
+		} else {
 			return lines;
 		}
+		
 		return null;
 	}
 	
@@ -418,8 +446,8 @@ public class MissionController extends CIBehavior {
 		if(intruderPosition == null || !insideBoundary(intruderPosition))
 			return false;
 		
-		double droneDist = drone.getGPSLatLon().distance(intruderPosition);
-		return droneDist*1000 <= 20;
+		double droneDist = drone.getGPSLatLon().distanceInMeters(intruderPosition);
+		return droneDist <= onboardRange;
 	}
 	
 	public boolean seeingEnemyShared() {
@@ -429,8 +457,8 @@ public class MissionController extends CIBehavior {
 		if(intruderPosition == null || !insideBoundary(intruderPosition))
 			return false;
 		
-		double droneDist = drone.getGPSLatLon().distance(intruderPosition);
-		return droneDist*1000 <= 40;
+		double droneDist = drone.getGPSLatLon().distanceInKM(intruderPosition);
+		return droneDist*1000 <= commRange;
 	}
 	
 }

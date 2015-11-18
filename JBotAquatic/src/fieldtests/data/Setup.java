@@ -1,4 +1,4 @@
-package helpers;
+package fieldtests.data;
 
 import evolutionaryrobotics.JBotEvolver;
 import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
@@ -86,12 +86,17 @@ class Setup {
 //			hash.get("--evaluation").setArgument("instant", 1);
 			hash.get("--evaluation").setArgument("targetdistance", 2+1.8);
 			//TODO REMOVE
-			hash.get("--robots").setArgument("kalmanfilter",1);
+			hash.get("--robots").setArgument("kalmanfilter",0);
 			hash.get("--robots").setArgument("gpserror",0);
 			hash.get("--evaluation").setArgument("usegps",1);
+			
 		}
 		
 		hash.put("--environment", new Arguments("classname=EmptyEnvironment,width=150,height=150,steps="+exp.timeSteps,true));
+		
+//		hash.put("--environment", new Arguments("classname=environment.TestHierarchicalMissionEnvironment,enemydistance=30,width=200,height=200,steps=5001,deploytime=0,onboardrange=40,simple=1"));
+//		//percentageseeing,averagerobotsseeing coverage
+//		hash.put("--evaluation",new Arguments("classname=evaluation.IntruderStatisticsFitness,type=coverage"));
 		
 		sim = new Simulator(new Random(randomSeed), hash);
 		
@@ -104,7 +109,7 @@ class Setup {
 				robotList.put(id, 0);
 			}
 		}
-		
+
 		setupDrones(robotList,hash.get("--robots"),start);
 		sim.addRobots(robots);
 		this.robotList = robotList;
@@ -153,6 +158,7 @@ class Setup {
 		hash.get("--evaluation").setArgument("classname", className+"Test");
 		hash.get("--evaluation").setArgument("dontuse",1);
 		hash.get("--evaluation").setArgument("laststeps",1);
+	
 		
 		if(exp.activeRobot != -1) {
 			hash.get("--evaluation").setArgument("activerobot",getRobot(""+exp.activeRobot).getId());

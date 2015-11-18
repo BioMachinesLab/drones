@@ -104,7 +104,7 @@ public abstract class FieldTestScript extends Thread{
         DronesSet set = console.getDronesSet();
         DroneData d = set.getDrone(ip);
         LatLon latLon = new LatLon(d.getGPSData().getLatitudeDecimal(), d.getGPSData().getLongitudeDecimal());
-        return latLon.distance(wp.getLatLon()) * 1000 < distanceThresholdInMeters;
+        return latLon.distanceInKM(wp.getLatLon()) * 1000 < distanceThresholdInMeters;
     }
     
     protected boolean arrivedAtWaypoint(ArrayList<String> ips, Waypoint wp, double distanceThresholdInMeters) {
@@ -114,7 +114,7 @@ public abstract class FieldTestScript extends Thread{
         for (String ip : ips) {
             DroneData d = set.getDrone(ip);
             LatLon latLon = new LatLon(d.getGPSData().getLatitudeDecimal(), d.getGPSData().getLongitudeDecimal());
-            if (latLon.distance(wp.getLatLon()) * 1000 > distanceThresholdInMeters) {
+            if (latLon.distanceInKM(wp.getLatLon()) * 1000 > distanceThresholdInMeters) {
                 return false;
             }
         }
