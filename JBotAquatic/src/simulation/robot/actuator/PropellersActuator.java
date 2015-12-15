@@ -50,7 +50,7 @@ public class PropellersActuator extends Actuator {
 	}
 
 	@Override
-	public void apply(Robot robot) {
+	public void apply(Robot robot, double timeDelta) {
 		
 		double ls = leftSpeed * (1 + random.nextGaussian() * NOISESTDEV);
 		double rs = rightSpeed * (1 + random.nextGaussian() * NOISESTDEV);

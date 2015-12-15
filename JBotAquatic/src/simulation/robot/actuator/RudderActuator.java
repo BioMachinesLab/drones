@@ -60,7 +60,7 @@ public class RudderActuator extends Actuator {
 	}
 
 	@Override
-	public void apply(Robot drone) {
+	public void apply(Robot drone, double timeDelta) {
 		
 //		if(drone.getId()==0 && heading != 0)
 //			System.out.println(heading);

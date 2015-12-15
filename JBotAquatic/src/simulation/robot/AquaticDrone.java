@@ -271,7 +271,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	
 	@Override
 	public void updateActuators(Double time, double timeDelta) {
-		
+		this.previousPosition = new Vector2d(position);
 		
 		for(CIBehavior b : alwaysActiveBehaviors) {
 			b.step(time);
@@ -282,7 +282,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		}
 		
 		for (Actuator actuator : actuators) {
-			actuator.apply(this);
+			actuator.apply(this, timeDelta);
 			//rudder updates the robot position here
 		}
 		
