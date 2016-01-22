@@ -1,12 +1,8 @@
 package commoninterface.sensors;
 
-import java.util.ArrayList;
-
 import commoninterface.AquaticDroneCI;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
-import commoninterface.controllers.StationKeepingCIBehavior;
-import commoninterface.entities.Entity;
 import commoninterface.entities.Waypoint;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
@@ -15,8 +11,8 @@ import commoninterface.utils.jcoord.LatLon;
 public class WaypointCISensor extends CISensor{
 	
 	private AquaticDroneCI drone;
-	private double[] readings = {0,0};
-	private double range = 1;
+	protected double[] readings = {0,0};
+	protected double range = 1;
 
 	public WaypointCISensor(int id, RobotCI robot, CIArguments args) {
 		super(id, robot, args);
