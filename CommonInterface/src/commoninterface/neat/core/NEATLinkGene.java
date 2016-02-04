@@ -1,8 +1,6 @@
 /*
  * Created on 20-Jun-2005
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 package commoninterface.neat.core;
 
@@ -87,6 +85,7 @@ public class NEATLinkGene implements NEATGene {
 	/**
 	 * @return Returns the innovationNumber.
 	 */
+	@Override
 	public int getInnovationNumber() {
 		return innovationNumber;
 	}
@@ -122,10 +121,12 @@ public class NEATLinkGene implements NEATGene {
 	/**
 	 * Not used within NEAT.  
 	 */
+	@Override
 	public Number geneAsNumber() {
 		return (new Integer(this.innovationNumber));
 	}
 
+	@Override
 	public String geneAsString() {
 		return (this.innovationNumber + ":" + 
 				this.enabled + ":" + 

@@ -19,7 +19,6 @@ public class FaultInjection implements Updatable {
 	private double unFaultVal = 0;
 	
 	public FaultInjection(Arguments args) {
-		// TODO Auto-generated constructor stub
 		
 		faultEveryMinutes = args.getArgumentAsDoubleOrSetDefault("faulteveryminutes", faultEveryMinutes);
 		unfaultEveryMinutes = args.getArgumentAsDoubleOrSetDefault("unfaulteveryminutes", unfaultEveryMinutes);

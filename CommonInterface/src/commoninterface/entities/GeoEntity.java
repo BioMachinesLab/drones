@@ -36,4 +36,7 @@ public abstract class GeoEntity extends Entity {
 		return this.getClass().getSimpleName()+";"+getLatLon().getLat()+";"+getLatLon().getLon()+";";
 	}
 	
+	public void setLatLon(LatLon latLon) {
+		this.latLon = latLon;
+	}
 }

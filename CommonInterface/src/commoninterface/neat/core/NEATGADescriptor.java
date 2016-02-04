@@ -1,8 +1,6 @@
 /*
  * Created on 20-Jun-2005
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 package commoninterface.neat.core;
 
@@ -263,6 +261,7 @@ public class NEATGADescriptor implements GADescriptor {
 	/* (non-Javadoc)
 	 * @see org.neat4j.ailibrary.ga.core.GADescriptor#gaPopulationSize()
 	 */
+	@Override
 	public int gaPopulationSize() {
 		return this.popSize;
 	}
@@ -274,27 +273,28 @@ public class NEATGADescriptor implements GADescriptor {
 	/* (non-Javadoc)
 	 * @see org.neat4j.ailibrary.ga.core.GADescriptor#mutationProbability()
 	 */
+	@Override
 	public double mutationProbability() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.neat4j.ailibrary.ga.core.GADescriptor#crossOverProbability()
 	 */
+	@Override
 	public double crossOverProbability() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.neat4j.ailibrary.ga.core.GADescriptor#elitistSize()
 	 */
+	@Override
 	public int elitistSize() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
+	@Override
 	public boolean isNaturalOrder() {
 		return (this.naturalOrder);
 	}

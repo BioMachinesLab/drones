@@ -1,17 +1,16 @@
 package controllers;
 
 import java.awt.Color;
-import mathutils.Vector2d;
 
-import controllers.Controller;
+import mathutils.Vector2d;
 import simulation.Simulator;
-import simulation.robot.Robot;
 import simulation.robot.DifferentialDriveRobot;
-import simulation.robot.sensors.PositionSensor;
-import simulation.util.Arguments;
-import simulation.robot.sensors.WallRaySensor;
+import simulation.robot.Robot;
 import simulation.robot.actuator.PropellersActuator;
 import simulation.robot.actuators.TwoWheelActuator;
+import simulation.robot.sensors.PositionSensor;
+import simulation.robot.sensors.WallRaySensor;
+import simulation.util.Arguments;
 
 
 
@@ -32,7 +31,6 @@ public class TaskAllocationController extends Controller {
 	public TaskAllocationController(Simulator simulator, Robot robot,
 			Arguments args) {
 		super(simulator, robot, args);
-		// TODO Auto-generated constructor stub
 		numberOfRobots = args.getArgumentAsIntOrSetDefault("numberofrobot", 1);
 		width = args.getArgumentAsDoubleOrSetDefault("width", 45);
 		height = args.getArgumentAsDoubleOrSetDefault("height", 45);
@@ -83,7 +81,6 @@ public class TaskAllocationController extends Controller {
 	}
 	
 	private void allocateArea() {
-		// TODO Auto-generated method stub
 		double areaToMonitor = (width*height)/numberOfRobots;
 		System.out.println(areaToMonitor);
 		boolean flag = false;

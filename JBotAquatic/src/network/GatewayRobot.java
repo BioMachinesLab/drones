@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import simulation.Simulator;
-import simulation.robot.Robot;
-import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
@@ -17,6 +14,8 @@ import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.RobotLogger;
+import simulation.Simulator;
+import simulation.robot.Robot;
 
 public class GatewayRobot implements RobotCI {
 	
@@ -33,6 +32,7 @@ public class GatewayRobot implements RobotCI {
 	@Override
 	public void shutdown() {}
 	
+	@Override
 	public void processInformationRequest(Message request, ConnectionHandler conn) {
 		for(int i = 0 ; i < sim.getRobots().size() ; i++) {
 			Robot r = sim.getRobots().get(i);
@@ -48,6 +48,7 @@ public class GatewayRobot implements RobotCI {
 		}
 	}
 	
+	@Override
 	public void setMotorSpeeds(double leftMotor, double rightMotor) {
 		if(sim.getRobots().size() > chosenIndex) {
 			RobotCI robot = (RobotCI)sim.getRobots().get(chosenIndex);
@@ -90,19 +91,16 @@ public class GatewayRobot implements RobotCI {
 	
 	@Override
 	public RobotLogger getLogger() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	
 	@Override
 	public List<MessageProvider> getMessageProviders() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	
 	@Override
 	public String getStatus() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	
@@ -140,7 +138,6 @@ public class GatewayRobot implements RobotCI {
 	
 	@Override
 	public CIBehavior getActiveBehavior() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	
@@ -164,7 +161,6 @@ public class GatewayRobot implements RobotCI {
 	
 	@Override
 	public void replaceEntity(Entity e) {
-		// TODO Auto-generated method stub
 	}
 	
 	@Override

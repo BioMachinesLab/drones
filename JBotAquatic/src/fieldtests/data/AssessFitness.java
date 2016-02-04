@@ -2,8 +2,6 @@ package fieldtests.data;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.sql.Time;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -11,29 +9,21 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import simulation.robot.AquaticDrone;
-import simulation.robot.CISensorWrapper;
-import simulation.robot.Robot;
-import simulation.robot.sensors.Sensor;
-import simulation.util.Arguments;
-import updatables.CoverageTracer;
-import updatables.PathTracer;
-import commoninterface.AquaticDroneCI;
 import commoninterface.AquaticDroneCI.DroneType;
-import commoninterface.entities.GeoEntity;
-import commoninterface.entities.GeoFence;
 import commoninterface.entities.RobotLocation;
-import commoninterface.entities.Waypoint;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.network.messages.BehaviorMessage;
-import commoninterface.sensors.GeoFenceCISensor;
-import commoninterface.sensors.InsideBoundaryCISensor;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
 import commoninterface.utils.logger.LogData;
 import fieldtests.evaluation.CoverageFitnessTest;
 import fieldtests.updatables.Coverage;
+import simulation.robot.AquaticDrone;
+import simulation.robot.Robot;
+import simulation.util.Arguments;
+import updatables.CoverageTracer;
+import updatables.PathTracer;
 
 public class AssessFitness {
 	
@@ -296,7 +286,6 @@ public class AssessFitness {
 //					try {
 //						Thread.sleep(10);
 //					} catch (InterruptedException e) {
-//						// TODO Auto-generated catch block
 //						e.printStackTrace();
 //					}
 					
