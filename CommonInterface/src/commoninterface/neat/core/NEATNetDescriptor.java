@@ -1,8 +1,7 @@
 /*
  * Created on 23-Jun-2005
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * 
  */
 package commoninterface.neat.core;
 
@@ -39,26 +38,32 @@ public class NEATNetDescriptor implements NeuralNetDescriptor {
 		return (this.structure);
 	}
 	
+	@Override
 	public void addLayerDescriptor(NeuralNetLayerDescriptor descriptor) {
 		throw new UnsupportedOperationException("addLayerDescriptor not used in NEAT");
 	}
 
+	@Override
 	public NeuralNetType neuralNetType() {
 		return (new NEAT());
 	}
 
+	@Override
 	public int numInputs() {
 		return (this.inputSize);
 	}
 
+	@Override
 	public Collection layerDescriptors() {
 		throw new UnsupportedOperationException("layerDescriptors not used in NEAT");
 	}
 
+	@Override
 	public Learnable learnable() {
 		return (this.learnable);
 	}
 
+	@Override
 	public boolean isRecurrent() {
 		return false;
 	}

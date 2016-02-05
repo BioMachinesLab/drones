@@ -1,8 +1,7 @@
 /*
  * Created on 20-Jun-2005
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * 
  */
 package commoninterface.neat.core.mutators;
 
@@ -13,7 +12,6 @@ import commoninterface.neat.core.InnovationDatabase;
 import commoninterface.neat.core.NEATChromosome;
 import commoninterface.neat.core.NEATFeatureGene;
 import commoninterface.neat.core.NEATLinkGene;
-import commoninterface.neat.core.NEATNeuron;
 import commoninterface.neat.core.NEATNodeGene;
 import commoninterface.neat.ga.core.Chromosome;
 import commoninterface.neat.ga.core.Gene;
@@ -61,7 +59,8 @@ public class NEATMutator implements Mutator {
         this.recurrencyAllowed = allowed;
     }
 
-    public void setProbability(double prob) {
+    @Override
+	public void setProbability(double prob) {
         this.pPerturb = prob;
     }
 
@@ -72,7 +71,8 @@ public class NEATMutator implements Mutator {
     /**
      * Mutates the chromsome based on the set of probabilities.
      */
-    public Chromosome mutate(Chromosome mutatee) {
+    @Override
+	public Chromosome mutate(Chromosome mutatee) {
         Gene[] genes = mutatee.genes();
         int originalSize = genes.length;
         NEATChromosome mutated;

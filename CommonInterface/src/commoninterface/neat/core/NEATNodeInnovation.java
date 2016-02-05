@@ -1,8 +1,7 @@
 /*
  * Created on 21-Jun-2005
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * 
  */
 package commoninterface.neat.core;
 
@@ -25,15 +24,17 @@ public class NEATNodeInnovation implements NEATInnovation {
 		this.linkInnovationId = linkInnovationId;
 	}
 
+	@Override
 	public int innovationId() {
 		return (this.innovationId);
 	}
 
+	@Override
 	public int type() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
+	@Override
 	public void setInnovationId(int id) {
 		this.innovationId = id;
 	}
@@ -50,6 +51,7 @@ public class NEATNodeInnovation implements NEATInnovation {
 		return (this.linkInnovationId);
 	}
 
+	@Override
 	public boolean equals(Object test) {
 		boolean equals = false;
 		if (test instanceof NEATNodeInnovation) {

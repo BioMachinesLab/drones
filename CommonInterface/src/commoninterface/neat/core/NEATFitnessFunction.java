@@ -1,8 +1,6 @@
 /*
  * Created on 22-Jun-2005
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 package commoninterface.neat.core;
 
@@ -30,6 +28,7 @@ public abstract class NEATFitnessFunction extends NeuralFitnessFunction {
 		((NEATNeuralNet)this.net()).updateNetStructure();
 	}
 
+	@Override
 	public int requiredChromosomeSize() {
 		return 0;
 	}

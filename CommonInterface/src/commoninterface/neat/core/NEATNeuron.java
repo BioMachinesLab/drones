@@ -1,8 +1,7 @@
 /*
  * Created on 23-Jun-2005
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * 
  */
 package commoninterface.neat.core;
 
@@ -55,6 +54,7 @@ public class NEATNeuron implements Neuron {
 		return (this.sourceNeurons);
 	}
 	
+	@Override
 	public double lastActivation() {
 		return (this.lastActivation);
 	}
@@ -63,6 +63,7 @@ public class NEATNeuron implements Neuron {
 	 * If it is an input neuron, returns the input, else will run through the specified activation function.
 	 * 
 	 */
+	@Override
 	public double activate(double[] nInputs) {
 		double neuronIp = 0;
 		int i = 0;
@@ -94,31 +95,38 @@ public class NEATNeuron implements Neuron {
 		return (this.lastActivation);
 	}
 
+	@Override
 	public ActivationFunction function() {
 		return (this.activationFunction);
 	}
 
+	@Override
 	public void modifyWeights(double[] weightMods, double[] momentum, boolean mode) {
 		System.arraycopy(weightMods, 0, this.weights, 0, this.weights.length);
 
 	}
 
+	@Override
 	public void modifyBias(double biasMod, double momentum, boolean mode) {
 		this.bias = biasMod;
 	}
 
+	@Override
 	public double[] weights() {
 		return (this.weights);
 	}
 
+	@Override
 	public double bias() {
 		return (this.bias);
 	}
 
+	@Override
 	public double[] lastWeightDeltas() {
 		return null;
 	}
 
+	@Override
 	public double lastBiasDelta() {
 		return 0;
 	}

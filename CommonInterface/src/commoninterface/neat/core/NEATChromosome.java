@@ -1,8 +1,6 @@
 /*
  * Created on 20-Jun-2005
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 package commoninterface.neat.core;
 
@@ -43,23 +41,28 @@ public class NEATChromosome implements Chromosome {
 		this.specieId = specieId;
 	}
 
+	@Override
 	public Gene[] genes() {
 		return (this.genes);
 	}
 
+	@Override
 	public int size() {
 		return (this.genes.length);
 	}
 
+	@Override
 	public void updateChromosome(Gene[] newGenes) {
 		this.genes = new NEATGene[newGenes.length];
 		System.arraycopy(newGenes, 0, this.genes, 0, this.genes.length);
 	}
 
+	@Override
 	public void updateFitness(double fitness) {
 		this.fitness = fitness;
 	}
 
+	@Override
 	public double fitness() {
 		return (this.fitness);
 	}
@@ -68,6 +71,7 @@ public class NEATChromosome implements Chromosome {
 		this.nOrder = nOrder;
 	}
 
+	@Override
 	public int compareTo(Object o) {
 		int returnVal = 0;
 		NEATChromosome test = (NEATChromosome)o;

@@ -10,5 +10,6 @@
 	<classpathentry kind="lib" path="/CommonInterface/lib/joda-time-2.4.jar"/>
 	<classpathentry kind="lib" path="jfreesvg-3.0.jar"/>
 	<classpathentry kind="lib" path="/JBotSim/BaseClient.jar"/>
+	<classpathentry kind="lib" path="voronoi.jar" sourcepath="/Voronoi"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

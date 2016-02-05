@@ -1,8 +1,6 @@
 /*
  * Created on 20-Jun-2005
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
  */
 package commoninterface.neat.core.xover;
 
@@ -11,7 +9,6 @@ import java.util.Random;
 
 import commoninterface.neat.core.NEATChromosome;
 import commoninterface.neat.core.NEATGene;
-import commoninterface.neat.core.NEATLinkGene;
 import commoninterface.neat.ga.core.Chromosome;
 import commoninterface.neat.ga.core.ChromosomeSet;
 import commoninterface.neat.ga.core.CrossOver;
@@ -27,10 +24,12 @@ public class NEATCrossover implements CrossOver {
 	private final Random rand = new Random();
 	private double pXOver;
 	
+	@Override
 	public void setProbability(double prob) {
 		this.pXOver = prob;
 	}
 
+	@Override
 	public ChromosomeSet crossOver(ChromosomeSet parents) {
 		ChromosomeSet childSet = new ChromosomeSet(false);
 		ArrayList childGenes = new ArrayList();

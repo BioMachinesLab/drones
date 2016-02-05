@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.Random;
 import java.util.Vector;
 
-import commoninterface.AquaticDroneCI;
 import commoninterface.CIFactory;
 import commoninterface.RobotCI;
 import commoninterface.neuralnetwork.inputs.CINNInput;

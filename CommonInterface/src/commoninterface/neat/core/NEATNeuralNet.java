@@ -1,8 +1,7 @@
 /*
  * Created on 22-Jun-2005
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * 
  */
 package commoninterface.neat.core;
 
@@ -48,6 +47,7 @@ public class NEATNeuralNet implements NeuralNet {
 	/**
 	 * Exercises the network for the given input data set
 	 */
+	@Override
 	public NetworkOutputSet execute(NetworkInput netInput) {
 		NEATNetOutputSet opSet;
 		double[] outputs;
@@ -236,33 +236,41 @@ public class NEATNeuralNet implements NeuralNet {
 	/**
 	 * Updates the internal network structure
 	 */
+	@Override
 	public void createNetStructure(NeuralNetDescriptor descriptor) {
 		this.descriptor = (NEATNetDescriptor)descriptor;
 	}
 
+	@Override
 	public NeuralNetDescriptor netDescriptor() {
 		return (this.descriptor);
 	}
 
+	@Override
 	public Collection hiddenLayers() {
 		return null;
 	}
 
+	@Override
 	public NeuralNetLayer outputLayer() {
 		return null;
 	}
 
+	@Override
 	public void seedNet(double[] weights) {
 	}
 
+	@Override
 	public int requiredWeightCount() {
 		return 0;
 	}
 
+	@Override
 	public int netID() {
 		return 0;
 	}
 
+	@Override
 	public Neuron neuronAt(int x, int y) {
 		return null;
 	}
