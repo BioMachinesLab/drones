@@ -1,8 +1,8 @@
 # The CORATAM and HANCAD projects #
-<center>
+
 <a href='https://www.youtube.com/watch?v=JBrkszUnms8' target='_blank'><img src='http://img.youtube.com/vi/JBrkszUnms8/0.jpg' width='425' height=344 /></a>
+
 (click for video)
-</center>
 
 The sea represents one of Portugal’s main resources. Novel ways of exploring and exploiting maritime opportunities are of particular interest given the proposed expansion of Portugal’s continental shelf. Land-based and air-based swarm robotics systems have been subjected to an extensive study but, that reality does not hold true for swarms in an aquatic environments, mainly because it is an environment where tasks are usually expensive to conduct, due to all the operational requirements of support crews and manned vehicles. We propose an alternative approach, using collectives of relatively simple and inexpensive aquatic robots (swarms). This alternative approach, in which robots are easily replaceable, has a high potential of applicability on essential tasks such as prospecting sites for aquaculture, environmental monitoring, sea life localization, bridges inspection, sea border patrolling, and so on. Many of these tasks require distributed sensing, scalability, and robustness to faults, which can be facilitated by collectives of robots with decentralized control based on principles of self-organization.
 
