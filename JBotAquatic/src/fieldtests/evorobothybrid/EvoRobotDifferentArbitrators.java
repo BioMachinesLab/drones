@@ -18,21 +18,21 @@ public class EvoRobotDifferentArbitrators {
 		
 		double areaPerRobot = (100*100)/(double)5;
 		
-		int[] chosenRobots = new int[]{5,10,20,30,40,50};
+		int[] chosenRobots = new int[]{5/*,10,20,30,40,50*/};
 		double[] chosenAreas = new double[chosenRobots.length];
 		
 		for(int i = 0 ; i < chosenAreas.length ; i++)
 			chosenAreas[i] = chosenRobots[i]*areaPerRobot;
 		
-		int[] times = new int[chosenAreas.length];
+		int[] times =  new int[chosenAreas.length];
 		
 		for(int i = 0 ; i < times.length ; i++)
 			times[i] = (int)(Math.sqrt(chosenAreas[i])/100 * 5000);
 		
 		int maxSamples = 100;
 		
-		String[] files = new String[]{"0","1","3","999"};
-		String[] allTypes = new String[]{"averagerobotsseeing","percentageseeing","coverage"};
+		String[] files = new String[]{/*"0","1",*/"3",/*"999","-1"*/};
+		String[] allTypes = new String[]{/*"averagerobotsseeing","percentageseeing",*/"coverage"};
 		
 		String configName = "h_tests/test.conf";
 		
@@ -52,12 +52,15 @@ public class EvoRobotDifferentArbitrators {
 			
 			taskExecutor.setDescription("miguel 0/"+files.length*maxSamples);
 			taskExecutor.setTotalNumberOfTasks(files.length*maxSamples);
-			
-			for(String type : allTypes) {
-				for(String controller : files) {
-					for(int robots : chosenRobots) {
-						for(int a = 0 ; a < chosenAreas.length ; a++) {
-							
+
+			for(int r = 0 ; r < chosenRobots.length ; r++) {
+				for(String type : allTypes) {
+					for(String controller : files) {
+						
+						int robots = chosenRobots[r];
+						int a = r;
+//						for(int a = 0 ; a < chosenAreas.length ; a++) {
+						
 							double area = chosenAreas[a];
 				
 							double size = Math.sqrt(area);
@@ -73,8 +76,10 @@ public class EvoRobotDifferentArbitrators {
 							
 							jBotEvolver.loadFile(configName, s);
 							
-							for(int sample = 0 ; sample < maxSamples ; sample++) {
-								
+//							System.out.println(s);
+							
+ 							for(int sample = 0 ; sample < maxSamples ; sample++) {
+ 								
 								SingleSamplePostEvaluationTask task =
 										new SingleSamplePostEvaluationTask(
 												robots,
@@ -95,7 +100,7 @@ public class EvoRobotDifferentArbitrators {
 						}
 					}
 				}
-			}
+//			}
 			
 			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(fileOut)));
 			bw.write(out);

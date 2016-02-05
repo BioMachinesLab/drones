@@ -92,11 +92,13 @@ class Setup {
 			
 		}
 		
-		hash.put("--environment", new Arguments("classname=EmptyEnvironment,width=150,height=150,steps="+exp.timeSteps,true));
+		//real environment
+//		hash.put("--environment", new Arguments("classname=EmptyEnvironment,width=150,height=150,steps="+exp.timeSteps,true));
 		
-//		hash.put("--environment", new Arguments("classname=environment.TestHierarchicalMissionEnvironment,enemydistance=30,width=200,height=200,steps=5001,deploytime=0,onboardrange=40,simple=1"));
+		//test environment for simulations
+		hash.put("--environment", new Arguments("classname=environment.TestHierarchicalMissionEnvironment,enemydistance=30,width=200,height=200,steps=5001,deploytime=0,onboardrange=40,simple=1"));
 //		//percentageseeing,averagerobotsseeing coverage
-//		hash.put("--evaluation",new Arguments("classname=evaluation.IntruderStatisticsFitness,type=coverage"));
+		hash.put("--evaluation",new Arguments("classname=IntruderStatisticsFitness,type=coverage",true));
 		
 		sim = new Simulator(new Random(randomSeed), hash);
 		
@@ -155,11 +157,10 @@ class Setup {
 		}
 		
 		String className = hash.get("--evaluation").getArgumentAsString("classname");
-		hash.get("--evaluation").setArgument("classname", className+"Test");
+//		hash.get("--evaluation").setArgument("classname", className+"Test");
 		hash.get("--evaluation").setArgument("dontuse",1);
 		hash.get("--evaluation").setArgument("laststeps",1);
 	
-		
 		if(exp.activeRobot != -1) {
 			hash.get("--evaluation").setArgument("activerobot",getRobot(""+exp.activeRobot).getId());
 		}

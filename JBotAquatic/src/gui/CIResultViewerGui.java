@@ -13,7 +13,8 @@ public class CIResultViewerGui extends ResultViewerGui{
 	}
 	
 	protected void launchGraphPlotter(JBotEvolver jbot, Simulator sim) {
-		new CIGraphPlotter(jbot,sim);
+		super.launchGraphPlotter(jbot, sim);
+//		new CIGraphPlotter(jbot,sim);
 	}
 
 }

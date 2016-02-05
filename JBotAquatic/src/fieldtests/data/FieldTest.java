@@ -39,7 +39,7 @@ public class FieldTest {
 //		"dispersion;0;1;6;13-52-19;90","dispersion;0;2;6;13-48-19;90","dispersion;0;3;6;13-45-54;90",
 //		"dispersion;0;1;4;19-00-06;90","dispersion;0;2;4;19-02-32;90","dispersion;0;3;4;19-04-35;90",
 //		"composite;0;1;8;17-54-42;720",
-//		"patrol;0;1;8;12-14-54;300",
+		"patrol;0;1;8;12-14-54;300",
 //		"patrol;0;2;8;17-33-27;300",
 //		"patrol;0;3;8;15-53-07;300",
 //		"patrol_adaptive;0;1;8;19-47-06;900",//1,2,3,4->4,1 adaptive
@@ -62,7 +62,7 @@ public class FieldTest {
 //		"hierarchical;0;1;6;12-12-24;550;1,2,3,4,8,10",
 //		"hierarchical;0;2;6;13-08-53;550;1,2,3,4,6,10",//robot 2 (jbot) had a malfunctioning motor
 //		"hierarchical;0;3;6;13-22-45;550;1,2,3,4,6,10",
-		"hierarchical;0;4;6;17-57-48;550;2,3,4,6,8,10",
+//		"hierarchical;0;4;6;17-57-48;550;2,3,4,6,8,10",
 	};
 	
 	public static String[] FOLDERS = new String[]{"27july","29july","25sep","30sep"};

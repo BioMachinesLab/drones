@@ -573,8 +573,15 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 			
 			rudder = value.equals("1");
 			if(rudder) {
-				rudderActuator = new RudderActuator(simulator, actuators.size()+1, args); 
-				actuators.add(rudderActuator);
+				
+				Actuator a = getActuatorByType(RudderActuator.class);
+				
+				if(a == null) {
+					rudderActuator = new RudderActuator(simulator, actuators.size()+1, args); 
+					actuators.add(rudderActuator);
+				} else {
+					rudderActuator = (RudderActuator)a;
+				}
 			} else {
 				propellers = new PropellersActuator(simulator, actuators.size()+1, args);
 				actuators.add(propellers);

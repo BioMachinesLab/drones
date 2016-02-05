@@ -3,6 +3,7 @@ package commoninterface.sensors;
 import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
 import commoninterface.entities.Entity;
+import commoninterface.entities.GeoEntity;
 import commoninterface.entities.RobotLocation;
 import commoninterface.utils.CIArguments;
 

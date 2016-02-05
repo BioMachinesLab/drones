@@ -64,7 +64,7 @@ public class HierarchicalFitnessTest extends EvaluationFunction {
     			}
     		}
     	}
-    	System.out.println(enemyInside);
+//    	System.out.println(enemyInside);
     	stepsEnemyInside+=enemyInside;
     	stepsSeeing+= countSeeing > 0 ? 1 : 0;
     	stepsSeeingShared+= countSeeingShared > 0 ? 1 : 0;

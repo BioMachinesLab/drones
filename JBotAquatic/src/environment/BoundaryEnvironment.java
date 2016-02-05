@@ -33,6 +33,16 @@ public class BoundaryEnvironment extends OpenEnvironment {
         rand = args.getArgumentAsDoubleOrSetDefault("random", rand);
         wallsDistance = args.getArgumentAsDoubleOrSetDefault("wallsdistance", wallsDistance);
         placeOutside = args.getFlagIsTrue("placeoutside");
+        boolean randomWidth = args.getFlagIsTrue("randomwidth");
+        
+        if(randomWidth) {
+        	double fitnesssample = args.getArgumentAsDouble("fitnesssample");
+        	double size = 1.0 + fitnesssample/10.0;
+        	width*=size;
+        	height*=size;
+        	distance*=size;
+        	wallsDistance*=size;
+        }
     }
 
     @Override

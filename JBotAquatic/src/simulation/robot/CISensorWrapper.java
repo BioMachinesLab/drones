@@ -11,6 +11,7 @@ import commoninterface.CISensor;
 import commoninterface.RobotCI;
 import commoninterface.entities.Entity;
 import commoninterface.utils.CIArguments;
+import evolutionaryrobotics.neuralnetworks.inputs.SensorNNInput;
 
 public class CISensorWrapper extends Sensor{
 
@@ -30,9 +31,11 @@ public class CISensorWrapper extends Sensor{
     public CISensor getCisensor() {
         return cisensor;
     }
+    
+    public int getNumberOfSensors() {
+    	return cisensor.getNumberOfSensors();
+    }
         
-        
-
 	@Override
 	public double getSensorReading(int sensorNumber) {
 		return cisensor.getSensorReading(sensorNumber);

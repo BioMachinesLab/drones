@@ -15,7 +15,7 @@ public class FakeGPSModuleInput extends GPSModuleInput {
 	private RealAquaticDroneCI drone;
 
 	public FakeGPSModuleInput(RealAquaticDroneCI drone) {
-		super(true);
+		super(drone,true);
 		this.drone = drone;
 		FakeInputThread t = new FakeInputThread();
 		t.start();

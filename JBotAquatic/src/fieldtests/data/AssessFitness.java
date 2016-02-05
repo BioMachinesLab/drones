@@ -166,8 +166,8 @@ public class AssessFitness {
 	
 	public static void compareFitness(Experiment exp, long randomSeed, boolean gui) {
 		
-		boolean useSim = false;
 		boolean useReal = true;
+		boolean useSim = false;
 		
 		DoubleFitnessViewer viewer = null;
 		

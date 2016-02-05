@@ -26,7 +26,6 @@ public class FaultInjection implements Updatable {
 		
 		faultVal = 1/(faultEveryMinutes*10*60);
 		unFaultVal = 1/(unfaultEveryMinutes*10*60);
-		
 	}
 	
 	@Override

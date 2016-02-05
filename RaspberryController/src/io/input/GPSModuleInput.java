@@ -74,9 +74,10 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 	private boolean alreadySetDate = false;
 
-	public GPSModuleInput(boolean fake) {
+	public GPSModuleInput(RobotCI robotCI, boolean fake) {
 		if (!fake)
 			init();
+		this.robotCI = robotCI;
 	}
 
 	public GPSModuleInput(RobotCI robotCI) {

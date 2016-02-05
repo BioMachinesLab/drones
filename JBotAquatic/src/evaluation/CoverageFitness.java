@@ -24,12 +24,18 @@ public class CoverageFitness extends AvoidCollisionsFunction {
     private double max = 0;
     private double distance = 10;  
     private double steps = 0;
+    private boolean robotNormalization = true;
+    private boolean mean = false;
+    private boolean countFullCell = false;
 
     public CoverageFitness(Arguments args) {
         super(args);
         resolution = args.getArgumentAsDoubleOrSetDefault("resolution", resolution);
         distance = args.getArgumentAsDoubleOrSetDefault("distance", distance);
         decay = args.getArgumentAsDoubleOrSetDefault("decay", decay);
+        robotNormalization = args.getFlagIsTrue("robotnormalization");
+        mean = args.getFlagIsTrue("mean");
+        countFullCell = args.getFlagIsTrue("countfullcell");
     }
 
     public void setup(Simulator simulator) {
@@ -93,11 +99,11 @@ public class CoverageFitness extends AvoidCollisionsFunction {
                 }
 
                 if (coverage[y][x] > 0) {
-                    sum += coverage[y][x];
+                    sum += countFullCell ? 1 : coverage[y][x];
                 }
             }
         }
-
+        
         for (Robot r : robots) {
             if (r.isEnabled()) {
                 AquaticDrone ad = (AquaticDrone) r;
@@ -142,8 +148,17 @@ public class CoverageFitness extends AvoidCollisionsFunction {
             }
         }
 
-        accum += ((sum / max) / steps / robots.size() * 10);
+        if(robotNormalization) {
+        	accum += ((sum / max) / steps / robots.size() * 10);
+        } else if(mean){
+        	accum += ((sum / max) / steps);
+        } else {
+        	accum = (sum / max);
+        }
+//        System.out.println(simulator.getTime()+" "+accum);
         fitness = accum;
+        
+//        printGrid();
         
         super.update(simulator);
     }

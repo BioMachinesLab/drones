@@ -27,7 +27,7 @@ public class IntruderStatisticsFitness extends EvaluationFunction {
 	//percentageseeing,averagerobotsseeing coverage
 	String type = "percentageseeing";
 	
-	CoverageFitnessTest coverage = null;
+	Coverage2FitnessTest coverage = null;
 
     public IntruderStatisticsFitness(Arguments args) {
         super(args);
@@ -38,7 +38,7 @@ public class IntruderStatisticsFitness extends EvaluationFunction {
     public void update(Simulator simulator) {
     	if(type.equals("coverage")) {
     		if(coverage == null)
-    			coverage = new CoverageFitnessTest(new Arguments("distance=20,kill=1,resolution=5,safetydistance=3,dontuse=1"));
+    			coverage = new Coverage2FitnessTest(new Arguments("distance=20,kill=1,resolution=5,safetydistance=3,dontuse=1"));
     		coverage.update(simulator);
     		
     	} else {

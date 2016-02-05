@@ -6,9 +6,13 @@ import java.awt.Graphics2D;
 import java.awt.RadialGradientPaint;
 import java.awt.geom.Point2D;
 import java.util.LinkedList;
+
+import kn.uni.voronoitreemap.j2d.PolygonSimple;
+import kn.uni.voronoitreemap.j2d.Site;
 import net.jafama.FastMath;
 import simulation.physicalobjects.Line;
 import simulation.robot.Robot;
+import simulation.robot.sensor.GridSensor;
 import simulation.robot.sensors.ConeTypeSensor;
 import simulation.robot.sensors.Sensor;
 import simulation.util.Arguments;
@@ -25,6 +29,9 @@ import commoninterface.mathutils.Vector2d;
 import commoninterface.sensors.ConeTypeCISensor;
 import commoninterface.sensors.ThymioConeTypeCISensor;
 import commoninterface.utils.CoordinateUtilities;
+import environment.GridBoundaryEnvironment;
+import environment.VoronoiEnvironment;
+import environment.utils.EnvironmentGrid;
 
 public class CITwoDRenderer extends TwoDRenderer {
 	
@@ -45,6 +52,93 @@ public class CITwoDRenderer extends TwoDRenderer {
 		coneSensorId = args.getArgumentAsIntOrSetDefault("conesensorid",-1);
 		coneClass = args.getArgumentAsStringOrSetDefault("coneclass","");
 	}
+	
+	@Override
+	public synchronized void drawFrame() {
+		super.drawFrame();
+		
+		drawEnvironment();
+		
+	}
+	
+	protected void drawEnvironment() {
+		
+		if(simulator.getEnvironment() instanceof VoronoiEnvironment) {
+			VoronoiEnvironment env = (VoronoiEnvironment)simulator.getEnvironment();
+			
+			// for each site we can no get the resulting polygon of its cell. 
+			// note that the cell can also be empty, in this case there is no polygon for the corresponding site.
+			
+			if(env.getSites() != null) {
+				
+				Graphics2D g = (Graphics2D)graphics;
+
+				for(Site s : env.getSites()) {
+					
+					PolygonSimple polygon = s.getPolygon();
+					
+					if(polygon != null) {
+						double[] x = new double[polygon.length];
+						double[] y = new double[polygon.length];
+						
+						for(int i = 0 ; i < polygon.length ; i++) {
+							x[i] = transformX(polygon.getXPoints()[i]);
+							y[i] = transformY(polygon.getYPoints()[i]);
+						}
+						
+						PolygonSimple translated = new PolygonSimple(x,y);
+						g.draw(translated);
+					}
+				}
+			}
+		}
+		
+		if(simulator.getEnvironment() instanceof GridBoundaryEnvironment) {
+			
+			GridBoundaryEnvironment env = (GridBoundaryEnvironment)simulator.getEnvironment();
+			
+			EnvironmentGrid first = env.getGrids().get(0);
+			
+			double[][] firstGrid = first.getGrid();
+			double[][] drawGrid = new double[firstGrid.length][firstGrid[0].length];
+			
+			for(EnvironmentGrid g : env.getGrids()) {
+				
+				double[][] grid = g.getGrid();
+				
+				for(int y = 0 ; y < grid.length ; y++) {
+					for(int x = 0 ; x < grid[y].length ; x++) {
+						drawGrid[y][x] = Math.max(drawGrid[y][x], grid[y][x]);
+					}
+				}
+			}
+			
+			for(int y = 0 ; y < drawGrid.length ; y++) {
+				for(int x = 0 ; x < drawGrid[y].length ; x++) {
+					
+					mathutils.Vector2d pos = first.getCartesianPosition(x, y);
+					
+					int w = (int)(first.getResolution()*scale);
+					
+					graphics.setColor(drawGrid[y][x] > 0 ? Color.LIGHT_GRAY : Color.white);
+					
+					if(first.getDecay() == 0)
+						graphics.drawRect(transformX(pos.x), transformY(pos.y)-w, w, w);
+					else if(drawGrid[y][x] > 0 && simulator.getTime() - first.getDecay() < drawGrid[y][x])
+						graphics.drawRect(transformX(pos.x), transformY(pos.y)-w, w, w);
+				}
+			}
+			
+			for(Robot r : simulator.getRobots()) {
+				Sensor s = r.getSensorByType(GridSensor.class);
+				if(s != null) {
+					GridSensor gs = (GridSensor)s;
+					gs.paint(graphics,this);
+				}
+			}
+		}
+	}
+	
 
 	@Override
 	protected void drawEntities(Graphics graphics, Robot robot) {
@@ -91,7 +185,6 @@ public class CITwoDRenderer extends TwoDRenderer {
 	
 	protected void drawGeoFence(GeoFence geo, Color c) {
 		LinkedList<Waypoint> waypoints = geo.getWaypoints();
-		
 		for(int i = 1 ; i < waypoints.size() ; i++) {
 			
 			Waypoint wa = waypoints.get(i-1);

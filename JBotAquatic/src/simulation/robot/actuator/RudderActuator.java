@@ -2,6 +2,7 @@ package simulation.robot.actuator;
 
 import java.util.Random;
 
+import mathutils.MathUtils;
 import mathutils.Vector2d;
 import simulation.Simulator;
 import simulation.robot.Robot;
@@ -151,6 +152,7 @@ public class RudderActuator extends Actuator {
 			double newOrientation = a + Math.toRadians(angleInDegrees);
 			
 			if(oldDynamics) {
+				newOrientation = MathUtils.modPI2(newOrientation);
 				drone.setOrientation(newOrientation);
 				a = newOrientation;
 			} else {
@@ -179,6 +181,7 @@ public class RudderActuator extends Actuator {
 				
 				a+=change*(1-Math.abs(inertiaDiff));
 				
+				a = MathUtils.modPI2(a);
 				drone.setOrientation(a);
 				
 			}

@@ -8,7 +8,6 @@ import simulation.robot.actuators.Actuator;
 import simulation.robot.sensors.Sensor;
 import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
-import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
 import commoninterface.neuralnetwork.CINeuralNetwork;
 import commoninterface.utils.CIArguments;
