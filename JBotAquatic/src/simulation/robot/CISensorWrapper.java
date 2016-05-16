@@ -2,16 +2,14 @@ package simulation.robot;
 
 import java.util.ArrayList;
 
+import commoninterface.CISensor;
+import commoninterface.RobotCI;
+import commoninterface.utils.CIArguments;
 import simulation.Simulator;
 import simulation.physicalobjects.PhysicalObject;
 import simulation.robot.sensors.Sensor;
 import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
-import commoninterface.CISensor;
-import commoninterface.RobotCI;
-import commoninterface.entities.Entity;
-import commoninterface.utils.CIArguments;
-import evolutionaryrobotics.neuralnetworks.inputs.SensorNNInput;
 
 public class CISensorWrapper extends Sensor{
 
