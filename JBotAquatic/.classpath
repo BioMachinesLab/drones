@@ -6,10 +6,10 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/CommonInterface"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/JBotEvolver"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/JBotSim"/>
-	<classpathentry kind="lib" path="/JBotSim/jafama.jar"/>
 	<classpathentry kind="lib" path="/CommonInterface/lib/joda-time-2.4.jar"/>
 	<classpathentry kind="lib" path="jfreesvg-3.0.jar"/>
-	<classpathentry kind="lib" path="/JBotSim/BaseClient.jar"/>
 	<classpathentry kind="lib" path="voronoi.jar"/>
+	<classpathentry kind="lib" path="/JBotSim/lib/BaseClient.jar"/>
+	<classpathentry kind="lib" path="/JBotSim/lib/jafama.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
