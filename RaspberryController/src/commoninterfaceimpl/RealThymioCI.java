@@ -39,7 +39,7 @@ import commoninterface.utils.RobotLogger;
 import commoninterface.utils.logger.LogCodex;
 import commoninterface.utils.logger.LogCodex.LogType;
 
-public class RealThymioCI extends Thread  implements ThymioCI {
+public class RealThymioCI extends Thread implements ThymioCI {
 
 	private static long CYCLE_TIME = 100;// in miliseconds
 
@@ -52,7 +52,7 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 	private MotorConnectionListener motorConnectionListener;
 	private CommandConnectionListener commandConnectionListener;
 	private BroadcastHandler broadcastHandler;
-	
+
 	private List<MessageProvider> messageProviders = new ArrayList<MessageProvider>();
 	private ArrayList<CISensor> cisensors = new ArrayList<CISensor>();
 
@@ -63,17 +63,17 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 	private double rightSpeed = 0;
 
 	private boolean startBehavior;
-	
+
 	private CIBehavior activeBehavior = null;
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
-	
+
 	private Vector2d virtualPosition;
 	private Double virtualOrientation;
-	
+
 	private RobotLogger logger;
-	
+
 	@Override
-	public void begin(HashMap<String,CIArguments> args) {
+	public void begin(HashMap<String, CIArguments> args) {
 		this.startTimeInMillis = System.currentTimeMillis();
 
 		addShutdownHooks();
@@ -97,21 +97,21 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 			long lastCycleTime = System.currentTimeMillis();
 			CIBehavior current = activeBehavior;
 			if (current != null) {
-				if(startBehavior)
+				if (startBehavior)
 					behaviorTimeStep = 0;
-				
+
 				current.step(behaviorTimeStep);
-				
-				if(startBehavior)
+
+				if (startBehavior)
 					startBehavior = false;
-				
+
 				if (current.getTerminateBehavior()) {
 					stopActiveBehavior();
 				}
 			}
 
 			ioManager.setMotorSpeeds(leftSpeed, rightSpeed);
-			
+
 			if (broadcastHandler != null)
 				broadcastHandler.update(timestep);
 
@@ -128,7 +128,7 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 			behaviorTimeStep++;
 		}
 	}
-	
+
 	private void addShutdownHooks() {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
@@ -136,7 +136,7 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 			}
 		});
 	}
-	
+
 	@Override
 	public void shutdown() {
 		logger.logMessage(LogCodex.encodeLog(LogType.MESSAGE, "Shutting down Controller..."));
@@ -164,30 +164,30 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 		}
 
 	}
-	
+
 	public void processInformationRequest(Message request, ConnectionHandler conn) {
 		messageHandler.addMessage(request, conn);
 	}
-	
+
 	// Init's
 	private void initIO(CIArguments args) {
 		ioManager = new ThymioIOManager(this, args);
 		initMessages += ioManager.getInitMessages();
 	}
-	
+
 	private void initMessageProviders() {
 		System.out.println("Creating Message Providers:");
-		
+
 		messageProviders.add(new SystemStatusMessageProvider(this));
 		System.out.println("\tSystemStatusMessageProvider");
 
 		for (ControllerInput i : ioManager.getInputs()) {
 			if (i instanceof MessageProvider) {
 				messageProviders.add((MessageProvider) i);
-				System.out.println("\t"+i.getClass().getSimpleName());
+				System.out.println("\t" + i.getClass().getSimpleName());
 			}
 		}
-		
+
 		messageProviders.add(new EntityMessageProvider(this));
 		System.out.println("\tEntityMessageProvider");
 		messageProviders.add(new EntitiesMessageProvider(this));
@@ -200,12 +200,12 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 		System.out.println("\tLogMessageProvider");
 		messageProviders.add(new ThymioVirtualPositionMessageProvider(this));
 		System.out.println("\tThymioVirtualPositionMessageProvider");
-		
+
 	}
-	
+
 	private void initConnections() {
 		try {
-			
+
 			System.out.println("Starting connections...");
 
 			connectionListener = new ConnectionListener(this);
@@ -215,23 +215,22 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 
 			motorConnectionListener = new MotorConnectionListener(this);
 			motorConnectionListener.start();
-			
+
 			commandConnectionListener = new CommandConnectionListener(this);
 			commandConnectionListener.start();
-			
+
 			ArrayList<BroadcastMessage> broadcastMessages = new ArrayList<BroadcastMessage>();
 			broadcastMessages.add(new HeartbeatBroadcastMessage(this));
 			broadcastMessages.add(new SharedThymioBroadcastMessage(this));
-			broadcastHandler = new RealBroadcastHandler(this,broadcastMessages);
+			broadcastHandler = new RealBroadcastHandler(this, broadcastMessages);
 
 			initMessages += "[INIT] MotorConnectionListener: ok\n";
 
 		} catch (IOException e) {
-			initMessages += "[INIT] Unable to start Network Connection Listeners! ("
-					+ e.getMessage() + ")\n";
+			initMessages += "[INIT] Unable to start Network Connection Listeners! (" + e.getMessage() + ")\n";
 		}
 	}
-	
+
 	// Behaviors
 	public void startBehavior(CIBehavior b) {
 		stopActiveBehavior();
@@ -246,17 +245,17 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 			ioManager.setMotorSpeeds(0, 0);
 		}
 	}
-	
+
 	@Override
 	public void setMotorSpeeds(double left, double right) {
 		leftSpeed = left;
 		rightSpeed = right;
 	}
-	
+
 	public void setStatus(String status) {
 		this.status = status;
 	}
-	
+
 	// Getters
 	@Override
 	public String getNetworkAddress() {
@@ -282,7 +281,7 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 	public ArrayList<Entity> getEntities() {
 		return entities;
 	}
-	
+
 	public String getInitMessages() {
 		return initMessages;
 	}
@@ -295,7 +294,7 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 	public List<Short> getInfraredSensorsReadings() {
 		return (List<Short>) ioManager.getProximitySensorsReadings();
 	}
-	
+
 	@Override
 	public double[] getCameraReadings() {
 		// TODO Auto-generated method stub
@@ -322,20 +321,20 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 		fileLogger.start();
 		this.logger = fileLogger;
 	}
-	
+
 	@Override
 	public Vector2d getVirtualPosition() {
 		return virtualPosition;
 	}
-	
+
 	@Override
 	public void setVirtualPosition(double x, double y) {
-		if(virtualPosition == null)
+		if (virtualPosition == null)
 			virtualPosition = new Vector2d(x, y);
 		else
 			virtualPosition.set(x, y);
 	}
-	
+
 	@Override
 	public Double getVirtualOrientation() {
 		return virtualOrientation;
@@ -350,33 +349,38 @@ public class RealThymioCI extends Thread  implements ThymioCI {
 	public double getThymioRadius() {
 		return 0.08;
 	}
-	
+
 	@Override
 	public RobotLogger getLogger() {
 		return logger;
 	}
-	
+
 	@Override
 	public double getLeftMotorSpeed() {
 		return leftSpeed;
 	}
-	
+
 	@Override
 	public double getRightMotorSpeed() {
 		return rightSpeed;
 	}
-	
+
 	@Override
 	public void replaceEntity(Entity e) {
-		synchronized(entities){
+		synchronized (entities) {
 			entities.remove(e);
 			entities.add(e);
 		}
 	}
-	
+
 	@Override
 	public void setProperty(String name, String value) {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	@Override
+	public void setEntities(ArrayList<Entity> entities) {
+		this.entities = entities;
 	}
 }
