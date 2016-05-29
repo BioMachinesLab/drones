@@ -705,9 +705,6 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	@Override
 	public void setEntities(ArrayList<Entity> entities) {
-		synchronized (entities) {
-			this.entities = entities;
-		}
+		this.entities = entities;
 	}
-
 }

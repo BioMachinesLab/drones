@@ -387,8 +387,6 @@ public class RealThymioCI extends Thread implements ThymioCI {
 
 	@Override
 	public void setEntities(ArrayList<Entity> entities) {
-		synchronized (entities) {
-			this.entities = entities;
-		}
+		this.entities = entities;
 	}
 }
