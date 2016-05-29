@@ -1,22 +1,15 @@
 package commoninterfaceimpl;
 
-import io.IOManager;
-import io.SystemStatusMessageProvider;
-import io.input.ControllerInput;
-import io.output.ControllerOutput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import network.broadcast.RealBroadcastHandler;
-import simpletestbehaviors.ChangeWaypointCIBehavior;
-import utils.FileLogger;
+
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CISensor;
 import commoninterface.LedState;
-import commoninterface.AquaticDroneCI.DroneType;
 import commoninterface.dataobjects.GPSData;
 import commoninterface.entities.Entity;
 import commoninterface.entities.RobotLocation;
@@ -48,6 +41,13 @@ import commoninterface.utils.RobotLogger;
 import commoninterface.utils.jcoord.LatLon;
 import commoninterface.utils.logger.LogCodex;
 import commoninterface.utils.logger.LogCodex.LogType;
+import io.IOManager;
+import io.SystemStatusMessageProvider;
+import io.input.ControllerInput;
+import io.output.ControllerOutput;
+import network.broadcast.RealBroadcastHandler;
+import simpletestbehaviors.ChangeWaypointCIBehavior;
+import utils.FileLogger;
 
 public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
@@ -72,32 +72,32 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	private double leftSpeed = 0;
 	private double rightSpeed = 0;
 	private double behaviorTimestep = 0;
-	
+
 	private CIBehavior activeBehavior = null;
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
-	
+
 	private Waypoint activeWaypoint;
-	
+
 	private DroneType droneType = DroneType.DRONE;
-	
-	private ArrayList<CIBehavior> alwaysActiveBehaviors = new ArrayList<CIBehavior>(); 
-	
+
+	private ArrayList<CIBehavior> alwaysActiveBehaviors = new ArrayList<CIBehavior>();
+
 	private RobotLogger logger;
-	
+
 	private double currentOrientation = 0;
 	private double currentGPSOrientation = 0;
 	private LatLon currentLatLon = null;
 	private LatLon prevMeasuredLatLon = null;
-	
+
 	private RobotKalman kalmanFilterGPS;
 	private RobotKalman kalmanFilterCompass;
-	private LatLon origin = CoordinateUtilities.cartesianToGPS(0,0);
-	
+	private LatLon origin = CoordinateUtilities.cartesianToGPS(0, 0);
+
 	private double rudderHeading = 0;
 	private double rudderSpeed = 0;
 
 	@Override
-	public void begin(HashMap<String,CIArguments> args) {
+	public void begin(HashMap<String, CIArguments> args) {
 		this.startTimeInMillis = System.currentTimeMillis();
 
 		addShutdownHooks();
@@ -105,12 +105,12 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		initIO(args.get("--io"));
 		initMessageProviders();
 		initConnections();
-		
+
 		configureArguments(args.get("--general"));
-		
+
 		messageHandler = new ControllerMessageHandler(this);
 		messageHandler.start();
-		
+
 		setStatus("Running!\n");
 
 		log(LogCodex.encodeLog(LogType.MESSAGE, initMessages));
@@ -119,41 +119,41 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	@Override
 	public void run() {
 		while (run) {
-			
+
 			updateSensors();
-			
+
 			long lastCycleTime = System.currentTimeMillis();
 			CIBehavior current = activeBehavior;
 			try {
-				
+
 				if (current != null) {
-					
+
 					current.step(behaviorTimestep++);
-					
-					for(CIBehavior b : alwaysActiveBehaviors)
+
+					for (CIBehavior b : alwaysActiveBehaviors)
 						b.step(timestep);
-					
+
 					if (current.getTerminateBehavior()) {
 						stopActiveBehavior();
 					}
 				}
-				
-			} catch(Exception e){
+
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
+
 			ioManager.setMotorSpeeds(leftSpeed, rightSpeed);
 
 			if (broadcastHandler != null)
 				broadcastHandler.update(timestep);
 
-			long timeToSleep = CYCLE_TIME
-					- (System.currentTimeMillis() - lastCycleTime);
+			long timeToSleep = CYCLE_TIME - (System.currentTimeMillis() - lastCycleTime);
 
 			if (timeToSleep > 0) {
 				try {
 					Thread.sleep(timeToSleep);
-				} catch (InterruptedException e) {}
+				} catch (InterruptedException e) {
+				}
 			}
 
 			timestep++;
@@ -162,12 +162,13 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	private void addShutdownHooks() {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
+			@Override
 			public void run() {
 				shutdown();
 			}
 		});
 	}
-	
+
 	@Override
 	public void shutdown() {
 		log(LogCodex.encodeLog(LogType.MESSAGE, "Shutting down Controller..."));
@@ -176,7 +177,6 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 		if (logger != null)
 			logger.stopLogging();
-		
 
 		ioManager.shutdown();
 
@@ -199,10 +199,9 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		}
 
 	}
-	
+
 	@Override
-	public void processInformationRequest(Message request,
-			ConnectionHandler conn) {
+	public void processInformationRequest(Message request, ConnectionHandler conn) {
 		messageHandler.addMessage(request, conn);
 	}
 
@@ -214,7 +213,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	private void initConnections() {
 		try {
-			
+
 			System.out.println("Starting connections...");
 
 			connectionListener = new ConnectionListener(this);
@@ -224,25 +223,23 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 			motorConnectionListener = new MotorConnectionListener(this);
 			motorConnectionListener.start();
-			
+
 			commandConnectionListener = new CommandConnectionListener(this);
 			commandConnectionListener.start();
 
 			ArrayList<BroadcastMessage> broadcastMessages = new ArrayList<BroadcastMessage>();
-			
+
 			broadcastMessages.add(new HeartbeatBroadcastMessage(this));
 			broadcastMessages.add(new PositionBroadcastMessage(this));
 			broadcastMessages.add(new SharedDroneBroadcastMessage(this));
-					
+
 			broadcastHandler = new RealBroadcastHandler(this, broadcastMessages);
 
 			initMessages += "[INIT] MotorConnectionListener: ok\n";
-			
-			log(LogCodex
-					.encodeLog(LogType.MESSAGE, "IP " + getNetworkAddress()));
+
+			log(LogCodex.encodeLog(LogType.MESSAGE, "IP " + getNetworkAddress()));
 		} catch (IOException e) {
-			initMessages += "[INIT] Unable to start Network Connection Listeners! ("
-					+ e.getMessage() + ")\n";
+			initMessages += "[INIT] Unable to start Network Connection Listeners! (" + e.getMessage() + ")\n";
 		}
 	}
 
@@ -252,27 +249,27 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	 */
 	private void initMessageProviders() {
 		System.out.println("Creating Message Providers:");
-		//@miguelduarte42 SystemInfoMessageProvider takes ~20 seconds and it
-		//is not currently used, so I just removed it
-//		messageProviders.add(new SystemInfoMessageProvider());
-//		System.out.println("\tSystemInfoMessageProvider");
+		// @miguelduarte42 SystemInfoMessageProvider takes ~20 seconds and it
+		// is not currently used, so I just removed it
+		// messageProviders.add(new SystemInfoMessageProvider());
+		// System.out.println("\tSystemInfoMessageProvider");
 		messageProviders.add(new SystemStatusMessageProvider(this));
 		System.out.println("\tSystemStatusMessageProvider");
 
 		for (ControllerInput i : ioManager.getInputs()) {
 			if (i instanceof MessageProvider) {
 				messageProviders.add((MessageProvider) i);
-				System.out.println("\t"+i.getClass().getSimpleName());
+				System.out.println("\t" + i.getClass().getSimpleName());
 			}
 		}
 
 		for (ControllerOutput o : ioManager.getOutputs()) {
 			if (o instanceof MessageProvider) {
 				messageProviders.add((MessageProvider) o);
-				System.out.println("\t"+o.getClass().getSimpleName());
+				System.out.println("\t" + o.getClass().getSimpleName());
 			}
 		}
-		
+
 		messageProviders.add(new EntityMessageProvider(this));
 		System.out.println("\tEntityMessageProvider");
 		messageProviders.add(new EntitiesMessageProvider(this));
@@ -292,8 +289,8 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		activeBehavior = b;
 		behaviorTimestep = 0;
 		activeBehavior.start();
-		
-		String str= "Starting CIBehavior "+activeBehavior.toString();
+
+		String str = "Starting CIBehavior " + activeBehavior.toString();
 		log(LogCodex.encodeLog(LogType.MESSAGE, str));
 	}
 
@@ -301,11 +298,10 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	public void stopActiveBehavior() {
 		if (activeBehavior != null) {
 			activeBehavior.cleanUp();
-			
-			String str = "Stopping CIBehavior "
-					+ activeBehavior.toString();
+
+			String str = "Stopping CIBehavior " + activeBehavior.toString();
 			log(LogCodex.encodeLog(LogType.MESSAGE, str));
-			
+
 			activeBehavior = null;
 			ioManager.setMotorSpeeds(leftSpeed, rightSpeed);
 		}
@@ -315,8 +311,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	@Override
 	public void setLed(int index, LedState state) {
 		if (ioManager.getDebugLeds() != null) {
-			if (index >= 0
-					&& index < ioManager.getDebugLeds().getNumberOfOutputs()) {
+			if (index >= 0 && index < ioManager.getDebugLeds().getNumberOfOutputs()) {
 				switch (state) {
 				case ON:
 					ioManager.getDebugLeds().removeBlinkLed(index);
@@ -331,10 +326,9 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 					break;
 				}
 			} else {
-				if(logger != null)
-					logger.logError("Invalid led index: " + index
-						+ ", must be >= 0 and < "
-						+ ioManager.getDebugLeds().getNumberOfOutputs());
+				if (logger != null)
+					logger.logError("Invalid led index: " + index + ", must be >= 0 and < "
+							+ ioManager.getDebugLeds().getNumberOfOutputs());
 			}
 		}
 	}
@@ -399,16 +393,19 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	public double getGPSOrientationInDegrees() {
 		return currentGPSOrientation;
 	}
-	
+
 	private void updateSensors() {
-		
+
 		LatLon measuredLatLon = updateGPS();
 		double measuredCompass = updateCompass();
-		
-		if(kalmanFilterGPS != null) {
-			if(measuredLatLon != null) {
-				//timestep < 100 so that the filtered position converges to the real position 
-				if(timestep < 100 || prevMeasuredLatLon == null || prevMeasuredLatLon.getLat() != measuredLatLon.getLat() || prevMeasuredLatLon.getLon() != measuredLatLon.getLon()) {
+
+		if (kalmanFilterGPS != null) {
+			if (measuredLatLon != null) {
+				// timestep < 100 so that the filtered position converges to the
+				// real position
+				if (timestep < 100 || prevMeasuredLatLon == null
+						|| prevMeasuredLatLon.getLat() != measuredLatLon.getLat()
+						|| prevMeasuredLatLon.getLon() != measuredLatLon.getLon()) {
 					RobotLocation rl = kalmanFilterGPS.getEstimation(measuredLatLon, currentOrientation);
 					prevMeasuredLatLon = measuredLatLon;
 					currentLatLon = rl.getLatLon();
@@ -417,10 +414,10 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		} else {
 			currentLatLon = measuredLatLon;
 		}
-		
-		if(kalmanFilterCompass != null) {
-			
-			if(measuredCompass != -1) {
+
+		if (kalmanFilterCompass != null) {
+
+			if (measuredCompass != -1) {
 				RobotLocation rl = kalmanFilterCompass.getEstimation(origin, measuredCompass);
 				currentOrientation = rl.getOrientation();
 			}
@@ -428,29 +425,27 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			currentOrientation = measuredCompass;
 		}
 	}
-	
+
 	private LatLon updateGPS() {
 		try {
-			
+
 			GPSData gpsData = ioManager.getGpsModule().getReadings();
-			
+
 			currentGPSOrientation = gpsData.getOrientation();
-			
-			if (gpsData.getLatitudeDecimal() == 0
-					|| gpsData.getLongitudeDecimal() == 0)
+
+			if (gpsData.getLatitudeDecimal() == 0 || gpsData.getLongitudeDecimal() == 0)
 				return null;
 			else
-				return new LatLon(gpsData.getLatitudeDecimal(),gpsData.getLongitudeDecimal());
+				return new LatLon(gpsData.getLatitudeDecimal(), gpsData.getLongitudeDecimal());
 		} catch (Exception e) {
 			currentOrientation = -1;
 			return null;
 		}
 	}
-	
+
 	private double updateCompass() {
 		try {
-			double orientation = ioManager.getCompassModule()
-					.getHeadingInDegrees();
+			double orientation = ioManager.getCompassModule().getHeadingInDegrees();
 			return (orientation % 360.0);
 		} catch (Exception e) {
 			return -1;
@@ -460,9 +455,8 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	@Override
 	public double getTimeSinceStart() {
-		long elapsedMillis = System.currentTimeMillis()
-				- this.startTimeInMillis;
-		return ((double) elapsedMillis) / 1000.0;
+		long elapsedMillis = System.currentTimeMillis() - this.startTimeInMillis;
+		return (elapsedMillis) / 1000.0;
 	}
 
 	@Override
@@ -473,73 +467,73 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	public IOManager getIOManager() {
 		return ioManager;
 	}
-	
+
 	public void startLogger() {
 		FileLogger fileLogger = new FileLogger(this);
 		fileLogger.start();
 		this.logger = fileLogger;
 	}
-	
+
 	@Override
 	public Waypoint getActiveWaypoint() {
 		return activeWaypoint;
 	}
-	
+
 	@Override
 	public void setActiveWaypoint(Waypoint wp) {
-		this.activeWaypoint = wp;	
+		this.activeWaypoint = wp;
 	}
-	
+
 	public void log(String msg) {
-		if(logger != null)
+		if (logger != null)
 			logger.logMessage(msg);
 	}
-	
+
 	@Override
 	public RobotLogger getLogger() {
 		return logger;
 	}
-	
+
 	@Override
 	public DroneType getDroneType() {
 		return droneType;
 	}
-	
+
 	@Override
 	public void setDroneType(DroneType droneType) {
 		this.droneType = droneType;
 	}
-	
+
 	private void configureArguments(CIArguments args) {
-		
-		if(args.getArgumentIsDefined("dronetype"))
+
+		if (args.getArgumentIsDefined("dronetype"))
 			setProperty("dronetype", args.getArgumentAsString("dronetype"));
-		
-		if(args.getFlagIsTrue("filelogger"))
+
+		if (args.getFlagIsTrue("filelogger"))
 			this.startLogger();
-		
-		if(args.getArgumentIsDefined("compassoffset") && ioManager.getCompassModule() != null)
+
+		if (args.getArgumentIsDefined("compassoffset") && ioManager.getCompassModule() != null)
 			ioManager.getCompassModule().setOffset(args.getArgumentAsInt("compassoffset"));
-		
-		if(args.getArgumentIsDefined("changewaypoint"))
+
+		if (args.getArgumentIsDefined("changewaypoint"))
 			setProperty("changewaypoint", args.getArgumentAsString("changewaypoint"));
-		
-		if(args.getArgumentIsDefined("avoiddrones"))
+
+		if (args.getArgumentIsDefined("avoiddrones"))
 			setProperty("avoiddrones", args.getArgumentAsString("avoiddrones"));
-		
-		if(args.getArgumentIsDefined("avoidobstacles"))
+
+		if (args.getArgumentIsDefined("avoidobstacles"))
 			setProperty("avoidobstacles", args.getArgumentAsString("avoidobstacles"));
-		
-		if(args.getArgumentIsDefined("kalmanfilter"))
+
+		if (args.getArgumentIsDefined("kalmanfilter"))
 			setProperty("kalmanfilter", args.getArgumentAsString("kalmanfilter"));
-				
+
 	}
-	
+
 	@Override
 	public double getLeftMotorSpeed() {
 		return leftSpeed;
 	}
-	
+
 	@Override
 	public double getRightMotorSpeed() {
 		return rightSpeed;
@@ -547,138 +541,141 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	@Override
 	public void replaceEntity(Entity e) {
-		synchronized(entities){
+		synchronized (entities) {
 			entities.remove(e);
 			entities.add(e);
 		}
 	}
-	
+
 	@Override
 	public void setRudder(double heading, double speed) {
-		
+
 		this.rudderHeading = heading;
 		this.rudderSpeed = speed;
-		
-		double angleInDegrees = getTurningAngleFromHeading(heading)*-1;
+
+		double angleInDegrees = getTurningAngleFromHeading(heading) * -1;
 		double motorDifference = 0;
 		double forwardComponent = 0;
 		double turningComponent = 0;
 		double turningSpeed = 0;
-		
+
 		double lw = 0;
 		double rw = 0;
-		
-		if(Math.abs(heading) >= 0.9/* || Math.abs(heading) < 0.1*/) {
-			
-			if(Math.abs(heading) >= 0.9)
-				heading = 1.0*Math.signum(heading);
-			
-			if(Math.abs(heading) <= 0.1)
+
+		if (Math.abs(heading) >= 0.9/* || Math.abs(heading) < 0.1 */) {
+
+			if (Math.abs(heading) >= 0.9)
+				heading = 1.0 * Math.signum(heading);
+
+			if (Math.abs(heading) <= 0.1)
 				heading = 0;
-			
-			angleInDegrees = getTurningAngleFromHeading(heading)*-1;
+
+			angleInDegrees = getTurningAngleFromHeading(heading) * -1;
 			motorDifference = getMotorDifferenceFromTurningAngle(Math.abs(angleInDegrees));
-			
+
 			forwardComponent = 1.0 - motorDifference;
 			turningComponent = 1.0 - forwardComponent;
-			
-			turningComponent*=speed;
-			forwardComponent*=speed;
-			
-			if(heading > 0) {
+
+			turningComponent *= speed;
+			forwardComponent *= speed;
+
+			if (heading > 0) {
 				lw = turningComponent;
-			} else if(heading < 0) {
+			} else if (heading < 0) {
 				rw = turningComponent;
 			} else {
 				lw = forwardComponent;
 				rw = forwardComponent;
 			}
-			
-			angleInDegrees = getTurningAngleFromTurningSpeed(turningSpeed)*Math.signum(angleInDegrees);
-			
+
+			angleInDegrees = getTurningAngleFromTurningSpeed(turningSpeed) * Math.signum(angleInDegrees);
+
 		} else {
-			
+
 			motorDifference = getMotorDifferenceFromAngleOneFullMotor(Math.abs(angleInDegrees));
-			
-			if(heading > 0) {
+
+			if (heading > 0) {
 				lw = 1;
 				rw = 1 - motorDifference;
-			} else if(heading < 0) {
+			} else if (heading < 0) {
 				lw = 1 - motorDifference;
 				rw = 1;
 			}
-			
-			lw*=speed;
-			rw*=speed;
+
+			lw *= speed;
+			rw *= speed;
 		}
-		
-		if(speed < 0.01) {
+
+		if (speed < 0.01) {
 			lw = 0;
 			rw = 0;
 		}
-		
+
 		setMotorSpeeds(lw, rw);
 	}
-	
+
 	private double getMotorDifferenceFromAngleOneFullMotor(double angle) {
-		return -0.0068 * Math.pow(angle,2) + 0.1614*angle+ 0.0903;
+		return -0.0068 * Math.pow(angle, 2) + 0.1614 * angle + 0.0903;
 	}
-	
+
 	public double getTurningAngleFromDifferenceOneMotorFull(double speedDifference) {
 		return 10.564 * speedDifference - 2.0412;
 	}
-	
+
 	public double getTurningSpeedFromMotorDifferenceOneMotorFull(double difference) {
-		return (-28.958*difference + 139.88) / 100.0;
+		return (-28.958 * difference + 139.88) / 100.0;
 	}
-	
+
 	private double getMotorDifferenceFromTurningAngle(double angle) {
-		return Math.min(0.0098*Math.pow(angle,2) + 0.0244*angle,1);
+		return Math.min(0.0098 * Math.pow(angle, 2) + 0.0244 * angle, 1);
 	}
-	
+
 	private double getTurningAngleFromTurningSpeed(double turningSpeed) {
 		return 7.6401 * turningSpeed;
 	}
-	
+
 	private double getTurningAngleFromHeading(double heading) {
-		return 9*heading;
+		return 9 * heading;
 	}
-	
+
 	public double getRudderHeading() {
 		return rudderHeading;
 	}
-	
+
 	public double getRudderSpeed() {
 		return rudderSpeed;
 	}
-	
+
 	@Override
 	public double getMotorSpeedsInPercentage() {
-		return (getLeftMotorSpeed()+getRightMotorSpeed())/2.0;
+		return (getLeftMotorSpeed() + getRightMotorSpeed()) / 2.0;
 	}
-	
+
 	@Override
 	public void setProperty(String name, String value) {
-		if(name.equals("changewaypoint")) {
-			boolean found = findBehavior(ChangeWaypointCIBehavior.class, alwaysActiveBehaviors.iterator(), value.equals("0"));
-			if(value.equals("1") && !found)
+		if (name.equals("changewaypoint")) {
+			boolean found = findBehavior(ChangeWaypointCIBehavior.class, alwaysActiveBehaviors.iterator(),
+					value.equals("0"));
+			if (value.equals("1") && !found)
 				alwaysActiveBehaviors.add(new ChangeWaypointCIBehavior(new CIArguments(""), this));
 		}
-		
-		if(name.equals("avoiddrones")) {
-			boolean found = findBehavior(AvoidDronesInstinct.class, alwaysActiveBehaviors.iterator(), value.equals("0"));
-			if(value.equals("1") && !found)
+
+		if (name.equals("avoiddrones")) {
+			boolean found = findBehavior(AvoidDronesInstinct.class, alwaysActiveBehaviors.iterator(),
+					value.equals("0"));
+			if (value.equals("1") && !found)
 				alwaysActiveBehaviors.add(new AvoidDronesInstinct(new CIArguments(""), this));
 		}
-		
-		if(name.equals("avoidobstacles")) {
-			boolean found = findBehavior(AvoidObstaclesInstinct.class, alwaysActiveBehaviors.iterator(), value.equals("0"));
-			if(value.equals("1") && !found)
+
+		if (name.equals("avoidobstacles")) {
+			boolean found = findBehavior(AvoidObstaclesInstinct.class, alwaysActiveBehaviors.iterator(),
+					value.equals("0"));
+			if (value.equals("1") && !found)
 				alwaysActiveBehaviors.add(new AvoidObstaclesInstinct(new CIArguments(""), this));
 		}
-		
-		if(name.equals("kalmanfilter")) {
-			if(value.equals("1")) {
+
+		if (name.equals("kalmanfilter")) {
+			if (value.equals("1")) {
 				kalmanFilterGPS = new RobotKalman();
 				kalmanFilterCompass = new RobotKalman();
 			} else {
@@ -686,24 +683,31 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 				kalmanFilterCompass = null;
 			}
 		}
-		
-		if(name.equals("dronetype"))
+
+		if (name.equals("dronetype"))
 			droneType = DroneType.valueOf(value);
 	}
-	
+
 	private boolean findBehavior(Class<?> c, Iterator<?> i, boolean remove) {
 		boolean found = false;
-		
-		while(i.hasNext()) {
+
+		while (i.hasNext()) {
 			Object current = i.next();
-			if(c.isInstance(current)) {
+			if (c.isInstance(current)) {
 				found = true;
-				if(remove)
+				if (remove)
 					i.remove();
 				break;
 			}
 		}
 		return found;
+	}
+
+	@Override
+	public void setEntities(ArrayList<Entity> entities) {
+		synchronized (entities) {
+			this.entities = entities;
+		}
 	}
 
 }
