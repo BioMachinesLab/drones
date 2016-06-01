@@ -51,10 +51,11 @@ import simulation.util.ArgumentsAnnotation;
 public class AquaticDrone extends DifferentialDriveRobot implements AquaticDroneCI {
 
 	private Simulator simulator;
+	private Arguments args;
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
 	private ArrayList<CISensor> cisensors = new ArrayList<CISensor>();
-	private PropellersActuator propellers;
-	private RudderActuator rudderActuator;
+	protected PropellersActuator propellers;
+	protected RudderActuator rudderActuator;
 	private SimulatedBroadcastHandler broadcastHandler;
 	private Waypoint activeWaypoint;
 
@@ -92,13 +93,12 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	private LatLon origin = CoordinateUtilities.cartesianToGPS(0, 0);
 	private boolean badGPS = false;
 
-	private boolean rudder = false;
+	protected boolean rudder = false;
 
-	private double headingOffset = 0;
-	private double speedOffset = 0;
+	protected double headingOffset = 0;
+	protected double speedOffset = 0;
 	private boolean configuredSensors = false;
-	private Arguments args;
-	private boolean fault = false;
+	protected boolean fault = false;
 
 	public AquaticDrone(Simulator simulator, Arguments args) {
 		super(simulator, args);
