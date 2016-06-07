@@ -68,6 +68,8 @@ public interface RobotCI {
 	 * @return the list with all the current entities.
 	 */
 	public ArrayList<Entity> getEntities();
+	
+	public void setEntities(ArrayList<Entity> entities);
 
 	/**
 	 * Replaces an old entity with a more recent one.

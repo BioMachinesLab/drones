@@ -65,6 +65,10 @@ public class GatewayRobot implements RobotCI {
 	public ArrayList<Entity> getEntities() {
 		return null;
 	}
+	
+	@Override
+	public void setEntities(ArrayList<Entity> entities) {	
+	}
 
 	@Override
 	public ArrayList<CISensor> getCISensors() {

@@ -11,13 +11,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import threads.UpdateThread;
-
 import commoninterface.network.messages.TemperatureMessage;
+import threads.UpdateThread;
 
 public class TemperaturePanel extends UpdatePanel {
 	private static final long serialVersionUID = -834153200645748947L;
-	private static final String TEMP_UNIT = "ºC";
+	private static final String TEMP_UNIT = "ÂºC";
 
 	private UpdateThread thread;
 	private long sleepTime = 10000;
@@ -41,6 +40,7 @@ public class TemperaturePanel extends UpdatePanel {
 				new String[] { "10 Hz", "5 Hz", "1 Hz", "0.1Hz" }));
 		comboBoxUpdateRate.setSelectedIndex(3);
 		comboBoxUpdateRate.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				switch (comboBoxUpdateRate.getSelectedIndex()) {
 				case 0:

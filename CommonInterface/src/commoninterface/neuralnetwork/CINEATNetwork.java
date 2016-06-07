@@ -5,6 +5,10 @@
  */
 package commoninterface.neuralnetwork;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Vector;
+
 import commoninterface.neat.core.NEATChromosome;
 import commoninterface.neat.core.NEATLinkGene;
 import commoninterface.neat.core.NEATNetDescriptor;
@@ -17,10 +21,6 @@ import commoninterface.neat.ga.core.Gene;
 import commoninterface.neuralnetwork.inputs.CINNInput;
 import commoninterface.neuralnetwork.outputs.CINNOutput;
 import commoninterface.utils.CIArguments;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Vector;
 
 /**
  *
@@ -100,4 +100,8 @@ public class CINEATNetwork extends CINeuralNetwork {
     public void setWeights(double[] weights) {
         this.network = deserialize(weights);
     }
+    
+    public NEATNeuralNet getNetwork() {
+		return network;
+	}
 }

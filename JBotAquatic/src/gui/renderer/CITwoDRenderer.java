@@ -7,16 +7,6 @@ import java.awt.RadialGradientPaint;
 import java.awt.geom.Point2D;
 import java.util.LinkedList;
 
-import kn.uni.voronoitreemap.j2d.PolygonSimple;
-import kn.uni.voronoitreemap.j2d.Site;
-import net.jafama.FastMath;
-import simulation.physicalobjects.Line;
-import simulation.robot.Robot;
-import simulation.robot.sensor.GridSensor;
-import simulation.robot.sensors.ConeTypeSensor;
-import simulation.robot.sensors.Sensor;
-import simulation.util.Arguments;
-
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
 import commoninterface.entities.Entity;
@@ -30,23 +20,31 @@ import commoninterface.mathutils.Vector2d;
 import commoninterface.sensors.ConeTypeCISensor;
 import commoninterface.sensors.ThymioConeTypeCISensor;
 import commoninterface.utils.CoordinateUtilities;
-
 import environment.GridBoundaryEnvironment;
 import environment.VoronoiEnvironment;
 import environment.utils.EnvironmentGrid;
+import kn.uni.voronoitreemap.j2d.PolygonSimple;
+import kn.uni.voronoitreemap.j2d.Site;
+import net.jafama.FastMath;
+import simulation.physicalobjects.Line;
+import simulation.robot.Robot;
+import simulation.robot.sensor.GridSensor;
+import simulation.robot.sensors.ConeTypeSensor;
+import simulation.robot.sensors.Sensor;
+import simulation.util.Arguments;
 
 public class CITwoDRenderer extends TwoDRenderer {
 
 	private static final double ENTITY_DIAMETER = 1.08;
 
-	private int droneID;
-	private boolean seeSensors;
-	private boolean seeEntities;
-	private int coneSensorId;
-	private double coneTransparence = .1;
-	private String coneClass = "";
-	private Color[] lineColors = new Color[] { Color.RED, Color.BLUE, Color.GREEN };
-	private int colorIndex = 0;
+	protected int droneID;
+	protected boolean seeSensors;
+	protected boolean seeEntities;
+	protected int coneSensorId;
+	protected double coneTransparence = .1;
+	protected String coneClass = "";
+	protected Color[] lineColors = new Color[] { Color.RED, Color.BLUE, Color.GREEN };
+	protected int colorIndex = 0;
 
 	public CITwoDRenderer(Arguments args) {
 		super(args);
@@ -58,88 +56,89 @@ public class CITwoDRenderer extends TwoDRenderer {
 		coneTransparence = args.getArgumentAsDoubleOrSetDefault("coneTransparence", coneTransparence);
 		coneClass = args.getArgumentAsStringOrSetDefault("coneclass", "");
 	}
-	
+
 	@Override
 	public synchronized void drawFrame() {
 		super.drawFrame();
-		
-		drawEnvironment();
-		
-	}
-	
-	protected void drawEnvironment() {
-		
-		if(simulator.getEnvironment() instanceof VoronoiEnvironment) {
-			VoronoiEnvironment env = (VoronoiEnvironment)simulator.getEnvironment();
-			
-			// for each site we can no get the resulting polygon of its cell. 
-			// note that the cell can also be empty, in this case there is no polygon for the corresponding site.
-			
-			if(env.getSites() != null) {
-				
-				Graphics2D g = (Graphics2D)graphics;
 
-				for(Site s : env.getSites()) {
-					
+		drawEnvironment();
+
+	}
+
+	protected void drawEnvironment() {
+
+		if (simulator.getEnvironment() instanceof VoronoiEnvironment) {
+			VoronoiEnvironment env = (VoronoiEnvironment) simulator.getEnvironment();
+
+			// for each site we can no get the resulting polygon of its cell.
+			// note that the cell can also be empty, in this case there is no
+			// polygon for the corresponding site.
+
+			if (env.getSites() != null) {
+
+				Graphics2D g = (Graphics2D) graphics;
+
+				for (Site s : env.getSites()) {
+
 					PolygonSimple polygon = s.getPolygon();
-					
-					if(polygon != null) {
+
+					if (polygon != null) {
 						double[] x = new double[polygon.length];
 						double[] y = new double[polygon.length];
-						
-						for(int i = 0 ; i < polygon.length ; i++) {
+
+						for (int i = 0; i < polygon.length; i++) {
 							x[i] = transformX(polygon.getXPoints()[i]);
 							y[i] = transformY(polygon.getYPoints()[i]);
 						}
-						
-						PolygonSimple translated = new PolygonSimple(x,y);
+
+						PolygonSimple translated = new PolygonSimple(x, y);
 						g.draw(translated);
 					}
 				}
 			}
 		}
-		
-		if(simulator.getEnvironment() instanceof GridBoundaryEnvironment) {
-			
-			GridBoundaryEnvironment env = (GridBoundaryEnvironment)simulator.getEnvironment();
-			
+
+		if (simulator.getEnvironment() instanceof GridBoundaryEnvironment) {
+
+			GridBoundaryEnvironment env = (GridBoundaryEnvironment) simulator.getEnvironment();
+
 			EnvironmentGrid first = env.getGrids().get(0);
-			
+
 			double[][] firstGrid = first.getGrid();
 			double[][] drawGrid = new double[firstGrid.length][firstGrid[0].length];
-			
-			for(EnvironmentGrid g : env.getGrids()) {
-				
+
+			for (EnvironmentGrid g : env.getGrids()) {
+
 				double[][] grid = g.getGrid();
-				
-				for(int y = 0 ; y < grid.length ; y++) {
-					for(int x = 0 ; x < grid[y].length ; x++) {
+
+				for (int y = 0; y < grid.length; y++) {
+					for (int x = 0; x < grid[y].length; x++) {
 						drawGrid[y][x] = Math.max(drawGrid[y][x], grid[y][x]);
 					}
 				}
 			}
-			
-			for(int y = 0 ; y < drawGrid.length ; y++) {
-				for(int x = 0 ; x < drawGrid[y].length ; x++) {
-					
+
+			for (int y = 0; y < drawGrid.length; y++) {
+				for (int x = 0; x < drawGrid[y].length; x++) {
+
 					mathutils.Vector2d pos = first.getCartesianPosition(x, y);
-					
-					int w = (int)(first.getResolution()*scale);
-					
+
+					int w = (int) (first.getResolution() * scale);
+
 					graphics.setColor(drawGrid[y][x] > 0 ? Color.LIGHT_GRAY : Color.white);
-					
-					if(first.getDecay() == 0)
-						graphics.drawRect(transformX(pos.x), transformY(pos.y)-w, w, w);
-					else if(drawGrid[y][x] > 0 && simulator.getTime() - first.getDecay() < drawGrid[y][x])
-						graphics.drawRect(transformX(pos.x), transformY(pos.y)-w, w, w);
+
+					if (first.getDecay() == 0)
+						graphics.drawRect(transformX(pos.x), transformY(pos.y) - w, w, w);
+					else if (drawGrid[y][x] > 0 && simulator.getTime() - first.getDecay() < drawGrid[y][x])
+						graphics.drawRect(transformX(pos.x), transformY(pos.y) - w, w, w);
 				}
 			}
-			
-			for(Robot r : simulator.getRobots()) {
+
+			for (Robot r : simulator.getRobots()) {
 				Sensor s = r.getSensorByType(GridSensor.class);
-				if(s != null) {
-					GridSensor gs = (GridSensor)s;
-					gs.paint(graphics,this);
+				if (s != null) {
+					GridSensor gs = (GridSensor) s;
+					gs.paint(graphics, this);
 				}
 			}
 		}
@@ -187,7 +186,6 @@ public class CITwoDRenderer extends TwoDRenderer {
 					colorIndex++;
 				}
 			}
-			// }
 		}
 	}
 
@@ -284,7 +282,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 
 				// Color[] colors = { Color.DARK_GRAY, Color.LIGHT_GRAY };
 				Color[] colors = { dark_grey, light_grey };
-				
+
 				RadialGradientPaint rgp = new RadialGradientPaint(p, radius, dist, colors);
 				graphics2D.setPaint(rgp);
 
