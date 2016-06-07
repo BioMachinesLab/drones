@@ -25,6 +25,7 @@ public class BoundaryEnvironment extends OpenEnvironment {
     @ArgumentsAnnotation(name = "random", defaultValue = "0.5")
     protected double rand = 0.5;
     protected boolean placeOutside = false;
+    protected String env = "square";
     
     protected GeoFence fence;
 
@@ -34,6 +35,8 @@ public class BoundaryEnvironment extends OpenEnvironment {
         wallsDistance = args.getArgumentAsDoubleOrSetDefault("wallsdistance", wallsDistance);
         placeOutside = args.getFlagIsTrue("placeoutside");
         boolean randomWidth = args.getFlagIsTrue("randomwidth");
+        
+        env = args.getArgumentAsStringOrSetDefault("environment", env);
         
         if(randomWidth) {
         	double fitnesssample = args.getArgumentAsDouble("fitnesssample");
@@ -49,14 +52,39 @@ public class BoundaryEnvironment extends OpenEnvironment {
     public void setup(Simulator simulator) {
         fence = new GeoFence("fence");
 
-        addNode(fence, -1, -1, simulator.getRandom());
-        addNode(fence, -1, 0, simulator.getRandom());
-        addNode(fence, -1, 1, simulator.getRandom());
-        addNode(fence, 0, 1, simulator.getRandom());
-        addNode(fence, 1, 1, simulator.getRandom());
-        addNode(fence, 1, 0, simulator.getRandom());
-        addNode(fence, 1, -1, simulator.getRandom());
-        addNode(fence, 0, -1, simulator.getRandom());
+        switch(env) {
+	        case "square":
+		        addNode(fence, -1, -1, simulator.getRandom());
+		        addNode(fence, -1, 0, simulator.getRandom());
+		        addNode(fence, -1, 1, simulator.getRandom());
+		        addNode(fence, 0, 1, simulator.getRandom());
+		        addNode(fence, 1, 1, simulator.getRandom());
+		        addNode(fence, 1, 0, simulator.getRandom());
+		        addNode(fence, 1, -1, simulator.getRandom());
+		        addNode(fence, 0, -1, simulator.getRandom());
+		        break;
+			case "rectangle"://1.667, 0.6
+				addNode(fence, -1.667, -0.6, simulator.getRandom());
+				addNode(fence, -1.667, 0, simulator.getRandom());
+				addNode(fence, -1.667, 0.6, simulator.getRandom());
+				addNode(fence, 0, 0.6, simulator.getRandom());
+				addNode(fence, 1.667, 0.6, simulator.getRandom());
+				addNode(fence, 1.667, 0, simulator.getRandom());
+				addNode(fence, 1.667, -0.6, simulator.getRandom());
+				addNode(fence, 0, -0.6, simulator.getRandom());
+				break;
+			case "l": //1.1547
+				addNode(fence, -1.1547, -1.1547, simulator.getRandom());
+		        addNode(fence, -1.1547, 0, simulator.getRandom());
+		        addNode(fence, -1.1547, 1.1547, simulator.getRandom());
+		        addNode(fence, 0, 1.1547, simulator.getRandom());
+		        addNode(fence, 1.1547, 1.1547, simulator.getRandom());
+		        addNode(fence, 1.1547, 0, simulator.getRandom());
+		        addNode(fence, 0, 0, simulator.getRandom());
+		        addNode(fence, 0, -1.1547, simulator.getRandom());
+				break;
+	        
+        }
 
         addLines(fence.getWaypoints(), simulator);
         
@@ -105,7 +133,7 @@ public class BoundaryEnvironment extends OpenEnvironment {
             x += r.nextDouble() * rand * wallsDistance * 2 - rand * wallsDistance;
             y += r.nextDouble() * rand * wallsDistance * 2 - rand * wallsDistance;
         }
-
+        System.out.println(x+","+y);
         fence.addWaypoint(CoordinateUtilities.cartesianToGPS(new commoninterface.mathutils.Vector2d(x, y)));
     }
 

@@ -14,16 +14,17 @@ import simulation.robot.Robot;
 import simulation.util.Arguments;
 import updatables.CoverageTracer;
 import updatables.PathTracer;
-
+import commoninterface.AquaticDroneCI;
 import commoninterface.AquaticDroneCI.DroneType;
+import commoninterface.entities.GeoFence;
 import commoninterface.entities.RobotLocation;
+import commoninterface.entities.Waypoint;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
 import commoninterface.utils.logger.LogData;
-
 import fieldtests.evaluation.CoverageFitnessTest;
 import fieldtests.updatables.Coverage;
 
@@ -403,6 +404,16 @@ public class AssessFitness {
 				
 				double orientation = 360 - (rl.getOrientation() - 90);
 				setupReal.robots.get(position).setOrientation(Math.toRadians(orientation));
+				
+				String expid = setupReal.exp.toString();
+				FieldTest.writer.println(expid + " " + step + " " + position + " " + (pos.x + setupReal.start.x - setupReal.firstPos.x) + " " + (pos.y + setupReal.start.y - setupReal.firstPos.y) + " " + Math.toRadians(orientation));
+				
+				System.out.println(Waypoint.getWaypoints(((AquaticDroneCI)setupSim.sim.getRobots().get(0))));
+				for(Waypoint wp : Waypoint.getWaypoints((AquaticDroneCI)setupSim.sim.getRobots().get(0))) {
+					pos = CoordinateUtilities.GPSToCartesian(wp.getLatLon());
+					System.out.println(pos);
+				}
+				System.out.println();
 				
 //				System.out.println(GeoFence.getGeoFences((AquaticDroneCI)setupSim.sim.getRobots().get(0)));
 //				for(Waypoint wp : GeoFence.getGeoFences((AquaticDroneCI)setupSim.sim.getRobots().get(0)).get(0).getWaypoints()) {
