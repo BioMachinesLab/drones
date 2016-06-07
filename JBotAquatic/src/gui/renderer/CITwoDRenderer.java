@@ -147,6 +147,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 	@Override
 	protected void drawEntities(Graphics graphics, Robot robot) {
 		if (seeEntities) {
+			Color color = graphics.getColor();
 			RobotCI robotci = (RobotCI) robot;
 			int circleDiameter = bigRobots ? (int) Math.max(10, Math.round(ENTITY_DIAMETER * scale))
 					: (int) Math.round(ENTITY_DIAMETER * scale);
@@ -186,6 +187,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 					colorIndex++;
 				}
 			}
+			graphics.setColor(color);
 		}
 	}
 
@@ -218,7 +220,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 	protected void drawCones(Graphics graphics, Robot robot) {
 		if (seeSensors) {
 			RobotCI robotCI = (RobotCI) robot;
-			if (coneSensorId >= 0 || !coneClass.isEmpty()) {
+			if (robot.getId() == droneID && (coneSensorId >= 0 || !coneClass.isEmpty())) {
 				for (CISensor ciSensor : robotCI.getCISensors()) {
 					if (ciSensor.getClass().getSimpleName().equals(coneClass) || ciSensor.getId() == coneSensorId) {
 						if (ciSensor != null) {
