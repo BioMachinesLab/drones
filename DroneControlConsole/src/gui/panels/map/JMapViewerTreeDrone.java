@@ -59,10 +59,12 @@ public class JMapViewerTreeDrone extends JPanel{
         setLayout(new BorderLayout());
         setTreeVisible(treeVisible);
         tree.addNodeListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent e) {
+            @Override
+			public void mousePressed(MouseEvent e) {
                 maybeShowPopup(e);
             }
-            public void mouseReleased(MouseEvent e) {
+            @Override
+			public void mouseReleased(MouseEvent e) {
                 maybeShowPopup(e);
             }
             private void maybeShowPopup(MouseEvent e) {

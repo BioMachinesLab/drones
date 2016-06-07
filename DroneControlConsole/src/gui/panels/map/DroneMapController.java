@@ -10,163 +10,183 @@ import java.awt.event.MouseWheelListener;
 import org.openstreetmap.gui.jmapviewer.JMapController;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 
-public class DroneMapController extends JMapController implements MouseListener, MouseMotionListener, MouseWheelListener {
+public class DroneMapController extends JMapController
+		implements MouseListener, MouseMotionListener, MouseWheelListener {
 
-    private static final int MOUSE_BUTTONS_MASK = MouseEvent.BUTTON3_DOWN_MASK | MouseEvent.BUTTON1_DOWN_MASK
-    | MouseEvent.BUTTON2_DOWN_MASK;
+	private static final int MOUSE_BUTTONS_MASK = MouseEvent.BUTTON3_DOWN_MASK | MouseEvent.BUTTON1_DOWN_MASK
+			| MouseEvent.BUTTON2_DOWN_MASK;
 
-    private static final int MAC_MOUSE_BUTTON3_MASK = MouseEvent.CTRL_DOWN_MASK | MouseEvent.BUTTON3_DOWN_MASK;
-    
-    public DroneMapController(JMapViewer map) {
-        super(map);
-    }
+	private static final int MAC_MOUSE_BUTTON3_MASK = MouseEvent.CTRL_DOWN_MASK | MouseEvent.BUTTON3_DOWN_MASK;
 
-    private Point lastDragPoint;
+	public DroneMapController(JMapViewer map) {
+		super(map);
+	}
 
-    private boolean isMoving = false;
+	private Point lastDragPoint;
 
-    private boolean movementEnabled = true;
+	private boolean isMoving = false;
 
-    private int movementMouseButton = MouseEvent.BUTTON3;
-    private int movementMouseButtonMask = MouseEvent.BUTTON3_DOWN_MASK;
+	private boolean movementEnabled = true;
 
-    private boolean wheelZoomEnabled = true;
-    private boolean doubleClickZoomEnabled = true;
+	private int movementMouseButton = MouseEvent.BUTTON3;
+	private int movementMouseButtonMask = MouseEvent.BUTTON3_DOWN_MASK;
 
-    public void mouseDragged(MouseEvent e) {
-        if (!movementEnabled || !isMoving)
-            return;
-        // Is only the selected mouse button pressed?
-        if ((e.getModifiersEx() & MOUSE_BUTTONS_MASK) == movementMouseButtonMask) {
-            Point p = e.getPoint();
-            if (lastDragPoint != null) {
-                int diffx = lastDragPoint.x - p.x;
-                int diffy = lastDragPoint.y - p.y;
-                map.moveMap(diffx, diffy);
-            }
-            lastDragPoint = p;
-        }
-    }
+	private boolean wheelZoomEnabled = true;
+	private boolean doubleClickZoomEnabled = true;
 
-    public void mouseClicked(MouseEvent e) {
-        if (doubleClickZoomEnabled && e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON3) {
-            map.zoomIn(e.getPoint());
-        }
-    }
+	@Override
+	public void mouseDragged(MouseEvent e) {
+		if (!movementEnabled || !isMoving)
+			return;
+		// Is only the selected mouse button pressed?
+		if ((e.getModifiersEx() & MOUSE_BUTTONS_MASK) == movementMouseButtonMask) {
+			Point p = e.getPoint();
+			if (lastDragPoint != null) {
+				int diffx = lastDragPoint.x - p.x;
+				int diffy = lastDragPoint.y - p.y;
+				map.moveMap(diffx, diffy);
+			}
+			lastDragPoint = p;
+		}
+	}
 
-    public void mousePressed(MouseEvent e) {
-        if (e.getButton() == movementMouseButton || isPlatformOsx() && e.getModifiersEx() == MAC_MOUSE_BUTTON3_MASK) {
-            lastDragPoint = null;
-            isMoving = true;
-        }
-    }
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		if (doubleClickZoomEnabled && e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON3) {
+			map.zoomIn(e.getPoint());
+		}
+	}
 
-    public void mouseReleased(MouseEvent e) {
-        if (e.getButton() == movementMouseButton || isPlatformOsx() && e.getButton() == MouseEvent.BUTTON3) {
-            lastDragPoint = null;
-            isMoving = false;
-        }
-    }
+	@Override
+	public void mousePressed(MouseEvent e) {
+		if (e.getButton() == movementMouseButton || isPlatformOsx() && e.getModifiersEx() == MAC_MOUSE_BUTTON3_MASK) {
+			lastDragPoint = null;
+			isMoving = true;
+		}
+	}
 
-    public void mouseWheelMoved(MouseWheelEvent e) {
-//        if (wheelZoomEnabled) {
-//            map.setZoom(map.getZoom() + e.getWheelRotation(), e.getPoint());
-//        }
-    }
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		if (e.getButton() == movementMouseButton || isPlatformOsx() && e.getButton() == MouseEvent.BUTTON3) {
+			lastDragPoint = null;
+			isMoving = false;
+		}
+	}
 
-    public boolean isMovementEnabled() {
-        return movementEnabled;
-    }
+	@Override
+	public void mouseWheelMoved(MouseWheelEvent e) {
+		 if (wheelZoomEnabled) {
+		 map.setZoom(map.getZoom() - e.getWheelRotation(), e.getPoint());
+		 }
+	}
 
-    /**
-     * Enables or disables that the map pane can be moved using the mouse.
-     *
-     * @param movementEnabled
-     */
-    public void setMovementEnabled(boolean movementEnabled) {
-        this.movementEnabled = movementEnabled;
-    }
+	public boolean isMovementEnabled() {
+		return movementEnabled;
+	}
 
-    public int getMovementMouseButton() {
-        return movementMouseButton;
-    }
+	/**
+	 * Enables or disables that the map pane can be moved using the mouse.
+	 *
+	 * @param movementEnabled
+	 */
+	public void setMovementEnabled(boolean movementEnabled) {
+		this.movementEnabled = movementEnabled;
+	}
 
-    /**
-     * Sets the mouse button that is used for moving the map. Possible values
-     * are:
-     * <ul>
-     * <li>{@link MouseEvent#BUTTON1} (left mouse button)</li>
-     * <li>{@link MouseEvent#BUTTON2} (middle mouse button)</li>
-     * <li>{@link MouseEvent#BUTTON3} (right mouse button)</li>
-     * </ul>
-     *
-     * @param movementMouseButton
-     */
-    public void setMovementMouseButton(int movementMouseButton) {
-        this.movementMouseButton = movementMouseButton;
-        switch (movementMouseButton) {
-            case MouseEvent.BUTTON1:
-                movementMouseButtonMask = MouseEvent.BUTTON1_DOWN_MASK;
-                break;
-            case MouseEvent.BUTTON2:
-                movementMouseButtonMask = MouseEvent.BUTTON2_DOWN_MASK;
-                break;
-            case MouseEvent.BUTTON3:
-                movementMouseButtonMask = MouseEvent.BUTTON3_DOWN_MASK;
-                break;
-            default:
-                throw new RuntimeException("Unsupported button");
-        }
-    }
+	public int getMovementMouseButton() {
+		return movementMouseButton;
+	}
 
-    public boolean isWheelZoomEnabled() {
-        return wheelZoomEnabled;
-    }
+	/**
+	 * Sets the mouse button that is used for moving the map. Possible values
+	 * are:
+	 * <ul>
+	 * <li>{@link MouseEvent#BUTTON1} (left mouse button)</li>
+	 * <li>{@link MouseEvent#BUTTON2} (middle mouse button)</li>
+	 * <li>{@link MouseEvent#BUTTON3} (right mouse button)</li>
+	 * </ul>
+	 *
+	 * @param movementMouseButton
+	 */
+	public void setMovementMouseButton(int movementMouseButton) {
+		this.movementMouseButton = movementMouseButton;
+		switch (movementMouseButton) {
+		case MouseEvent.BUTTON1:
+			movementMouseButtonMask = MouseEvent.BUTTON1_DOWN_MASK;
+			break;
+		case MouseEvent.BUTTON2:
+			movementMouseButtonMask = MouseEvent.BUTTON2_DOWN_MASK;
+			break;
+		case MouseEvent.BUTTON3:
+			movementMouseButtonMask = MouseEvent.BUTTON3_DOWN_MASK;
+			break;
+		default:
+			throw new RuntimeException("Unsupported button");
+		}
+	}
 
-    public void setWheelZoomEnabled(boolean wheelZoomEnabled) {
-        this.wheelZoomEnabled = wheelZoomEnabled;
-    }
+	public boolean isWheelZoomEnabled() {
+		return wheelZoomEnabled;
+	}
 
-    public boolean isDoubleClickZoomEnabled() {
-        return doubleClickZoomEnabled;
-    }
+	public void setWheelZoomEnabled(boolean wheelZoomEnabled) {
+		this.wheelZoomEnabled = wheelZoomEnabled;
+	}
 
-    public void setDoubleClickZoomEnabled(boolean doubleClickZoomEnabled) {
-        this.doubleClickZoomEnabled = doubleClickZoomEnabled;
-    }
+	public boolean isDoubleClickZoomEnabled() {
+		return doubleClickZoomEnabled;
+	}
 
-    public void mouseEntered(MouseEvent e) {
-    }
+	public void setDoubleClickZoomEnabled(boolean doubleClickZoomEnabled) {
+		this.doubleClickZoomEnabled = doubleClickZoomEnabled;
+	}
 
-    public void mouseExited(MouseEvent e) {
-    }
+	@Override
+	public void mouseEntered(MouseEvent e) {
+	}
 
-    public void mouseMoved(MouseEvent e) {
-        // Mac OSX simulates with  ctrl + mouse 1  the second mouse button hence no dragging events get fired.
-        //
-        if (isPlatformOsx()) {
-            if (!movementEnabled || !isMoving)
-                return;
-            // Is only the selected mouse button pressed?
-            if (e.getModifiersEx() == MouseEvent.CTRL_DOWN_MASK) {
-                Point p = e.getPoint();
-                if (lastDragPoint != null) {
-                    int diffx = lastDragPoint.x - p.x;
-                    int diffy = lastDragPoint.y - p.y;
-                    map.moveMap(diffx, diffy);
-                }
-                lastDragPoint = p;
-            }
-        }
-    }
+	@Override
+	public void mouseExited(MouseEvent e) {
+	}
 
-    /**
-     * Replies true if we are currently running on OSX
-     *
-     * @return true if we are currently running on OSX
-     */
-    public static boolean isPlatformOsx() {
-        String os = System.getProperty("os.name");
-        return os != null && os.toLowerCase().startsWith("mac os x");
-    }
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		// Mac OSX simulates with ctrl + mouse 1 the second mouse button hence
+		// no dragging events get fired.
+		//
+		if (isPlatformOsx()) {
+			if (!movementEnabled || !isMoving)
+				return;
+			// Is only the selected mouse button pressed?
+			if (e.getModifiersEx() == MouseEvent.CTRL_DOWN_MASK) {
+				Point p = e.getPoint();
+				if (lastDragPoint != null) {
+					int diffx = lastDragPoint.x - p.x;
+					int diffy = lastDragPoint.y - p.y;
+					map.moveMap(diffx, diffy);
+				}
+				lastDragPoint = p;
+			}
+		}
+	}
+
+	/**
+	 * Replies true if we are currently running on OSX
+	 *
+	 * @return true if we are currently running on OSX
+	 */
+	public static boolean isPlatformOsx() {
+		String os = System.getProperty("os.name");
+		return os != null && os.toLowerCase().startsWith("mac os x");
+	}
+
+	/**
+	 * Replies true if we are currently running on Windows
+	 *
+	 * @return true if we are currently running on Windows
+	 */
+	public static boolean isPlatformWindows() {
+		String os = System.getProperty("os.name");
+		return os != null && os.toLowerCase().startsWith("Windows");
+	}
 }
