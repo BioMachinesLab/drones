@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Behaviors"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/CommonInterface"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/JBotEvolver"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/JBotSim"/>
-	<classpathentry kind="lib" path="/CommonInterface/lib/joda-time-2.4.jar"/>
-	<classpathentry kind="lib" path="jfreesvg-3.0.jar"/>
+	<classpathentry kind="lib" path="/CommonInterface/lib/joda-time-2.4.jar" sourcepath="/CommonInterface/lib/joda-time-2.4-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/CommonInterface/lib/joda-time-2.4-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/JBotSim/BaseClient.jar"/>
 	<classpathentry kind="lib" path="voronoi.jar"/>
-	<classpathentry kind="lib" path="/JBotSim/lib/BaseClient.jar"/>
-	<classpathentry kind="lib" path="/JBotSim/lib/jafama.jar"/>
+	<classpathentry kind="lib" path="/CommonInterface/lib/jafama.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
