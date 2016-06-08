@@ -32,6 +32,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
@@ -138,7 +141,7 @@ public class CommandPanel extends UpdatePanel {
 		populateControllers();
 		populateScripts();
 
-		selectedDrones=new JTextPane();
+		selectedDrones = new JTextPane();
 		selectedDrones.setText("Drones IDs");
 		selectedDrones.setForeground(selectedDrones.getDisabledTextColor());
 		System.out.println(selectedDrones.getDocument().getClass().getName());
@@ -165,10 +168,39 @@ public class CommandPanel extends UpdatePanel {
 				}
 			}
 		});
+		selectedDrones.getDocument().addDocumentListener(new DocumentListener() {
+
+			@Override
+			public void removeUpdate(DocumentEvent arg0) {
+				remove();
+			}
+
+			private void remove() {
+				Runnable runnable = new Runnable() {
+					@Override
+					public void run() {
+						if (selectedDrones.getText() == null || selectedDrones.getText().isEmpty()
+								|| selectedDrones.getText().length() == 0) {
+							selectedDrones.setText("Drones IDs");
+							selectedDrones.setForeground(selectedDrones.getDisabledTextColor());
+						}
+					}
+				};
+				SwingUtilities.invokeLater(runnable);
+			}
+
+			@Override
+			public void insertUpdate(DocumentEvent arg0) {
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent arg0) {
+			}
+		});
 		JScrollPane selectDronesScroll = new JScrollPane(selectedDrones);
 
 		JPanel selectedPanel = new JPanel(new BorderLayout());
-		selectedPanel.add(selectDronesScroll,BorderLayout.CENTER);
+		selectedPanel.add(selectDronesScroll, BorderLayout.CENTER);
 		selectedPanel.setBorder(BorderFactory.createTitledBorder("Drones selection"));
 
 		presetsPanel.setBorder(BorderFactory.createTitledBorder("Controllers"));
@@ -666,10 +698,10 @@ public class CommandPanel extends UpdatePanel {
 		setText(result);
 	}
 
-//	public JTextArea getSelectedDronesTextField() {
-//		return selectedDrones;
-//	}
-	
+	// public JTextArea getSelectedDronesTextField() {
+	// return selectedDrones;
+	// }
+
 	public JTextPane getSelectedDronesTextField() {
 		return selectedDrones;
 	}

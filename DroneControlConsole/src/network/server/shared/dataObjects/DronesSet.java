@@ -13,8 +13,8 @@ public class DronesSet {
 
 	public void addDrone(DroneData drone) {
 		dronesSet.put(drone.getName(), drone);
-		System.out.println("[DRONES SET] Added new drone " + drone.getName()
-				+ "@" + drone.getIpAddr() + " to set");
+		System.out.printf("[%s] Added new drone %s@%s to set\n", getClass().getName(), drone.getName(),
+				drone.getIpAddr());
 	}
 
 	public void removeDrone(String name) {
