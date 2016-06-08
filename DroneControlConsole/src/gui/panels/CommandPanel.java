@@ -190,6 +190,20 @@ public class CommandPanel extends UpdatePanel {
 
 			@Override
 			public void insertUpdate(DocumentEvent arg0) {
+				insert();
+			}
+
+			private void insert() {
+				Runnable runnable = new Runnable() {
+					@Override
+					public void run() {
+						if (selectedDrones.getText() != null && !selectedDrones.getText().isEmpty()
+								|| selectedDrones.getText().length() == 0) {
+							selectedDrones.setForeground(Color.BLACK);
+						}
+					}
+				};
+				SwingUtilities.invokeLater(runnable);
 			}
 
 			@Override
