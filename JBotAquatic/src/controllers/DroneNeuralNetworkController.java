@@ -2,15 +2,15 @@ package controllers;
 
 import java.util.LinkedList;
 
+import commoninterface.RobotCI;
+import commoninterface.neuralnetwork.CINeuralNetwork;
+import commoninterface.utils.CIArguments;
 import simulation.Simulator;
 import simulation.robot.Robot;
 import simulation.robot.actuators.Actuator;
 import simulation.robot.sensors.Sensor;
 import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
-import commoninterface.RobotCI;
-import commoninterface.neuralnetwork.CINeuralNetwork;
-import commoninterface.utils.CIArguments;
 
 public class DroneNeuralNetworkController extends Controller implements FixedLenghtGenomeEvolvableController {
 
