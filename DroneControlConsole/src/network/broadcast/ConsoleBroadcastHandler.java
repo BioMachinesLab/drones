@@ -1,8 +1,5 @@
 package network.broadcast;
 
-import gui.DroneGUI;
-import gui.panels.LogsPanel;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -10,10 +7,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-import main.DroneControlConsole;
-import main.RobotControlConsole;
-import network.server.shared.dataObjects.DroneData;
-import network.server.shared.dataObjects.DronesSet;
 import commoninterface.entities.Entity;
 import commoninterface.entities.RobotLocation;
 import commoninterface.network.NetworkUtils;
@@ -21,6 +14,12 @@ import commoninterface.network.broadcast.BroadcastMessage;
 import commoninterface.network.broadcast.EntitiesBroadcastMessage;
 import commoninterface.network.broadcast.HeartbeatBroadcastMessage;
 import commoninterface.network.broadcast.PositionBroadcastMessage;
+import gui.DroneGUI;
+import gui.panels.LogsPanel;
+import main.DroneControlConsole;
+import main.RobotControlConsole;
+import network.server.shared.dataObjects.DroneData;
+import network.server.shared.dataObjects.DronesSet;
 
 public class ConsoleBroadcastHandler {
 
@@ -33,7 +32,7 @@ public class ConsoleBroadcastHandler {
 	private RobotControlConsole console;
 	private String ownAddress;
 	private String broadcastAddress;
-	
+
 	// TODO this has to be true for the mixed experiments to work
 	private boolean retransmit = false;
 
@@ -64,17 +63,15 @@ public class ConsoleBroadcastHandler {
 
 		public BroadcastSender() {
 			try {
-				InetAddress ownInetAddress = InetAddress.getByName(NetworkUtils
-						.getAddress());
+				InetAddress ownInetAddress = InetAddress.getByName(NetworkUtils.getAddress());
 				ownAddress = ownInetAddress.getHostAddress();
-				System.out.println("SENDER " + ownInetAddress);
+				System.out.printf("[%s] SENDER %s\n", getClass().getName(), ownInetAddress);
 				broadcastAddress = NetworkUtils.getBroadcastAddress(ownAddress);
 				socket = new DatagramSocket(PORT + 1, ownInetAddress);
 				socket.setBroadcast(true);
 
 				if (retransmit) {
-					retransmitSocket = new DatagramSocket(RETRANSMIT_PORT - 1,
-							ownInetAddress);
+					retransmitSocket = new DatagramSocket(RETRANSMIT_PORT - 1, ownInetAddress);
 					retransmitSocket.setBroadcast(true);
 				}
 			} catch (Exception e) {
@@ -85,8 +82,7 @@ public class ConsoleBroadcastHandler {
 		public void sendMessage(String message) {
 			try {
 				byte[] sendData = message.getBytes();
-				DatagramPacket sendPacket = new DatagramPacket(sendData,
-						sendData.length,
+				DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length,
 						InetAddress.getByName(broadcastAddress), PORT);
 				socket.send(sendPacket);
 			} catch (IOException e) {
@@ -101,10 +97,8 @@ public class ConsoleBroadcastHandler {
 
 			try {
 				byte[] sendData = message.getBytes();
-				DatagramPacket sendPacket = new DatagramPacket(sendData,
-						sendData.length,
-						InetAddress.getByName(broadcastAddress),
-						RETRANSMIT_PORT);
+				DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length,
+						InetAddress.getByName(broadcastAddress), RETRANSMIT_PORT);
 				retransmitSocket.send(sendPacket);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -120,20 +114,16 @@ public class ConsoleBroadcastHandler {
 	}
 
 	public void newBroadcastMessage(String address, String message) {
-		
+
 		String[] split = message.split(BroadcastMessage.MESSAGE_SEPARATOR);
 		switch (split[0]) {
 		case "HEARTBEAT":
-				long timeElapsed = Long.parseLong(HeartbeatBroadcastMessage
-						.decode(message)[1]);
-				console.getGUI().getConnectionPanel().newAddress(address);
-				updateDroneData(address,
-						HeartbeatBroadcastMessage.decode(message)[2], split[0],
-						timeElapsed);
+			long timeElapsed = Long.parseLong(HeartbeatBroadcastMessage.decode(message)[1]);
+			console.getGUI().getConnectionPanel().newAddress(address);
+			updateDroneData(address, HeartbeatBroadcastMessage.decode(message)[2], split[0], timeElapsed);
 			break;
 		case "GPS":
-			RobotLocation di = PositionBroadcastMessage
-					.decode(message);
+			RobotLocation di = PositionBroadcastMessage.decode(message);
 			if (di != null) {
 				if (console.getGUI() instanceof DroneGUI) {
 					((DroneGUI) console.getGUI()).getMapPanel().displayData(di);
@@ -144,17 +134,14 @@ public class ConsoleBroadcastHandler {
 			break;
 		case "ENTITIES":
 			if (!address.equals(ownAddress)) {
-				ArrayList<Entity> entities = EntitiesBroadcastMessage.decode(
-						address, message);
+				ArrayList<Entity> entities = EntitiesBroadcastMessage.decode(address, message);
 				if (console instanceof DroneControlConsole) {
-					((DroneGUI) ((DroneControlConsole) console).getGUI())
-							.getMapPanel().replaceEntities(entities);
+					((DroneGUI) ((DroneControlConsole) console).getGUI()).getMapPanel().replaceEntities(entities);
 				}
 			}
 			break;
 		default:
-			System.out.println("Uncategorized message > " + message
-					+ " < from " + address);
+			System.out.printf("[%s] Uncategorized message > %s < from %s\n", getClass().getName(), message, address);
 		}
 
 		if (retransmit)
@@ -165,8 +152,7 @@ public class ConsoleBroadcastHandler {
 	private void updateDroneData(String address, String name, String msgType, Object obj) {
 		if (console instanceof DroneControlConsole) {
 			try {
-				DronesSet dronesSet = ((DroneControlConsole) console)
-						.getDronesSet();
+				DronesSet dronesSet = ((DroneControlConsole) console).getDronesSet();
 				DroneData drone;
 				boolean exists = false;
 
@@ -180,28 +166,26 @@ public class ConsoleBroadcastHandler {
 				}
 
 				switch (msgType) {
-				
+
 				case "HEARTBEAT":
 					drone.setTimeSinceLastHeartbeat(System.currentTimeMillis());
 					break;
 				case "GPS":
-					drone.getGPSData().setLatitudeDecimal(((RobotLocation) obj).getLatLon().getLat());	
+					drone.getGPSData().setLatitudeDecimal(((RobotLocation) obj).getLatLon().getLat());
 					drone.getGPSData().setLongitudeDecimal(((RobotLocation) obj).getLatLon().getLon());
-					drone.setOrientation(((RobotLocation)obj).getOrientation());
+					drone.setOrientation(((RobotLocation) obj).getOrientation());
 					break;
 				default:
-					System.out
-							.println("Uncategorized message type to update on drone data, from "
-									+ name + " at " + address);
+					System.out.printf("[%s] Uncategorized message type to update on drone data, from %s at %s\n",
+							getClass().getName(), name, address);
 				}
 
 				if (!exists) {
 					dronesSet.addDrone(drone);
 				}
 			} catch (UnknownHostException e) {
-				System.err
-						.println("UnknownHostException on ConsoleBroadcastHandler....\n"
-								+ e.getMessage());
+				System.err.printf("[%s] UnknownHostException on ConsoleBroadcastHandler....\n%s\n",
+						getClass().getName(), e.getMessage());
 			}
 
 		}
@@ -214,10 +198,9 @@ public class ConsoleBroadcastHandler {
 
 		public BroadcastReceiver() {
 			try {
-				System.out.println("RECEIVER "
-						+ InetAddress.getByName("0.0.0.0") + ", port: " + PORT);
-				socket = new DatagramSocket(PORT,
-						InetAddress.getByName("0.0.0.0"));
+				System.out.printf("[%s] RECEIVER %s, port: %d\n", getClass().getName(),
+						InetAddress.getByName("0.0.0.0").toString(), PORT);
+				socket = new DatagramSocket(PORT, InetAddress.getByName("0.0.0.0"));
 				socket.setBroadcast(true);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -229,20 +212,18 @@ public class ConsoleBroadcastHandler {
 			try {
 				while (execute) {
 					byte[] recvBuf = new byte[BUFFER_LENGTH];
-					DatagramPacket packet = new DatagramPacket(recvBuf,
-							recvBuf.length);
+					DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
 					socket.receive(packet);
 
 					String message = new String(packet.getData()).trim();
 
 					// if(!packet.getAddress().getHostAddress().equals(ownAddress))
-					messageReceived(packet.getAddress().getHostAddress(),
-							message);
-					
-					if(console.getGUI() instanceof DroneGUI){
-						LogsPanel logsPanel = ((DroneGUI)console.getGUI()).getLogsPanel();
-						
-						if(logsPanel.getLoggerCheckBox().isSelected())
+					messageReceived(packet.getAddress().getHostAddress(), message);
+
+					if (console.getGUI() instanceof DroneGUI) {
+						LogsPanel logsPanel = ((DroneGUI) console.getGUI()).getLogsPanel();
+
+						if (logsPanel.getLoggerCheckBox().isSelected())
 							logsPanel.getBroadcastLogger().log(message);
 					}
 				}
