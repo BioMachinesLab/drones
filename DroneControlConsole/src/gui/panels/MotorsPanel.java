@@ -6,11 +6,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.Hashtable;
 
 import javax.swing.AbstractAction;
@@ -65,8 +64,8 @@ public class MotorsPanel extends UpdatePanel {
 		setBorder(BorderFactory.createTitledBorder("Motors Control"));
 		setLayout(new BorderLayout());
 
-		setPreferredSize(new Dimension(380, 270));
-		
+		setPreferredSize(new Dimension(380, 290));
+
 		leftSlider = new JSlider(-100, 100);
 		rightSlider = new JSlider(-100, 100);
 
@@ -75,19 +74,18 @@ public class MotorsPanel extends UpdatePanel {
 
 		JPanel slidersPanel = new JPanel(new BorderLayout());
 
-		slidersPanel.add(
-				buildMotorSliderPanel(leftProgressBar, leftSlider, "Left"),
-				BorderLayout.WEST);
-		slidersPanel.add(
-				buildMotorSliderPanel(rightProgressBar, rightSlider, "Right"),
-				BorderLayout.EAST);
+		slidersPanel.add(buildMotorSliderPanel(leftProgressBar, leftSlider, "Left"), BorderLayout.WEST);
+		slidersPanel.add(buildMotorSliderPanel(rightProgressBar, rightSlider, "Right"), BorderLayout.EAST);
 
-		add(slidersPanel, BorderLayout.WEST);
-
-		add(buildAdjustmentPanel(), BorderLayout.EAST);
+		JPanel topPanel = new JPanel(new GridLayout(1, 2));
+		topPanel.add(slidersPanel);
+		topPanel.add(buildAdjustmentPanel());
+		add(topPanel, BorderLayout.CENTER);
 
 		JCheckBox chckbxLockControl = new JCheckBox("Lock Control");
+		chckbxLockControl.setHorizontalAlignment(JCheckBox.CENTER);
 		chckbxLockControl.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				locked = chckbxLockControl.isSelected();
 				if (locked) {
@@ -98,58 +96,65 @@ public class MotorsPanel extends UpdatePanel {
 		});
 
 		JButton resetOffset = new JButton("Reset Offset");
-
 		resetOffset.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				offsetSlider.setValue(0);
 			}
 		});
 
-		JPanel soutPanel = new JPanel();
-
+		JPanel soutPanel = new JPanel(new GridLayout(1, 2));
 		soutPanel.add(chckbxLockControl);
 		soutPanel.add(resetOffset);
 
 		add(soutPanel, BorderLayout.SOUTH);
-		
+
 		initActions();
 	}
 
 	protected void initActions() {
 		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("UP"), "UP");
-		this.getActionMap().put("UP", new AbstractAction(){  
+		this.getActionMap().put("UP", new AbstractAction() {
 			protected static final long serialVersionUID = 1L;
-			public void actionPerformed(ActionEvent evt) {  
+
+			@Override
+			public void actionPerformed(ActionEvent evt) {
 				leftSlider.setValue(100);
 				rightSlider.setValue(100);
 			}
 		});
 		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("DOWN"), "DOWN");
-		this.getActionMap().put("DOWN", new AbstractAction(){  
+		this.getActionMap().put("DOWN", new AbstractAction() {
 			protected static final long serialVersionUID = 1L;
-			public void actionPerformed(ActionEvent evt) {  
+
+			@Override
+			public void actionPerformed(ActionEvent evt) {
 				leftSlider.setValue(0);
 				rightSlider.setValue(0);
 			}
 		});
 		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("LEFT"), "LEFT");
-		this.getActionMap().put("LEFT", new AbstractAction(){  
+		this.getActionMap().put("LEFT", new AbstractAction() {
 			protected static final long serialVersionUID = 1L;
-			public void actionPerformed(ActionEvent evt) {  
+
+			@Override
+			public void actionPerformed(ActionEvent evt) {
 				leftSlider.setValue(0);
 				rightSlider.setValue(100);
 			}
 		});
 		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("RIGHT"), "RIGHT");
-		this.getActionMap().put("RIGHT", new AbstractAction(){  
+		this.getActionMap().put("RIGHT", new AbstractAction() {
 			protected static final long serialVersionUID = 1L;
-			public void actionPerformed(ActionEvent evt) {  
+
+			@Override
+			public void actionPerformed(ActionEvent evt) {
 				leftSlider.setValue(100);
 				rightSlider.setValue(0);
 			}
 		});
 	}
-	
+
 	private JPanel buildAdjustmentPanel() {
 		JPanel panel = new JPanel(new BorderLayout());
 
@@ -171,6 +176,7 @@ public class MotorsPanel extends UpdatePanel {
 		limitSlider.setLabelTable(labelTable);
 
 		limitSlider.addChangeListener(new ChangeListener() {
+			@Override
 			public void stateChanged(ChangeEvent arg0) {
 				motorLimit = limitSlider.getValue();
 				if (thread != null) {
@@ -180,11 +186,8 @@ public class MotorsPanel extends UpdatePanel {
 		});
 
 		JPanel topSliderPanel = new JPanel(new BorderLayout());
-
-		topSliderPanel.setBorder(BorderFactory.createTitledBorder(
-				UIManager.getBorder("TitledBorder.border"), "Speed Limit",
-				TitledBorder.CENTER, TitledBorder.TOP));
-
+		topSliderPanel.setBorder(BorderFactory.createTitledBorder(UIManager.getBorder("TitledBorder.border"),
+				"Speed Limit", TitledBorder.CENTER, TitledBorder.TOP));
 		topSliderPanel.add(limitSlider, BorderLayout.NORTH);
 
 		offsetSlider = new JSlider(-100, 100);
@@ -193,9 +196,10 @@ public class MotorsPanel extends UpdatePanel {
 		offsetSlider.setPaintTicks(true);
 		offsetSlider.setSnapToTicks(false);
 		offsetSlider.setOrientation(SwingConstants.HORIZONTAL);
-		offsetSlider.setPreferredSize(new Dimension(150, 50));
+		offsetSlider.setPreferredSize(new Dimension(150, 60));
 
 		offsetSlider.addChangeListener(new ChangeListener() {
+			@Override
 			public void stateChanged(ChangeEvent arg0) {
 				motorOffset = offsetSlider.getValue();
 				if (thread != null) {
@@ -207,11 +211,8 @@ public class MotorsPanel extends UpdatePanel {
 		offsetSlider.setValue(0);
 
 		JPanel bottomSliderPanel = new JPanel(new BorderLayout());
-
-		bottomSliderPanel.setBorder(BorderFactory.createTitledBorder(
-				UIManager.getBorder("TitledBorder.border"), "Motor Offset",
-				TitledBorder.CENTER, TitledBorder.TOP));
-
+		bottomSliderPanel.setBorder(BorderFactory.createTitledBorder(UIManager.getBorder("TitledBorder.border"),
+				"Motor Offset", TitledBorder.CENTER, TitledBorder.TOP));
 		bottomSliderPanel.add(offsetSlider, BorderLayout.NORTH);
 
 		labelTable = new Hashtable<Integer, JLabel>();
@@ -226,15 +227,12 @@ public class MotorsPanel extends UpdatePanel {
 		return panel;
 	}
 
-	private JPanel buildMotorSliderPanel(JProgressBar progressBar,
-			JSlider slider, String name) {
+	private JPanel buildMotorSliderPanel(JProgressBar progressBar, JSlider slider, String name) {
 		JPanel panel = new JPanel(new BorderLayout());
-		panel.setBorder(BorderFactory.createTitledBorder(
-				UIManager.getBorder("TitledBorder.border"), name,
+		panel.setBorder(BorderFactory.createTitledBorder(UIManager.getBorder("TitledBorder.border"), name,
 				TitledBorder.CENTER, TitledBorder.TOP));
 
-		slider.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null,
-				null));
+		slider.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		slider.setValue(0);
 		slider.setMinorTickSpacing(5);
 		slider.setPaintLabels(true);
@@ -242,6 +240,7 @@ public class MotorsPanel extends UpdatePanel {
 		slider.setSnapToTicks(true);
 		slider.setOrientation(SwingConstants.VERTICAL);
 		slider.addChangeListener(new ChangeListener() {
+			@Override
 			public void stateChanged(ChangeEvent arg0) {
 				if (locked) {
 					setLeftMotorPower(slider.getValue());
@@ -271,6 +270,7 @@ public class MotorsPanel extends UpdatePanel {
 
 		JButton btnStop = new JButton("Stop");
 		btnStop.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				if (locked) {
 					leftSlider.setValue(0);
@@ -364,8 +364,7 @@ public class MotorsPanel extends UpdatePanel {
 
 			double percentage = amountFull / (double) barRectHeight;
 			double drawingPercentage = ((int) (percentage * 100) / 100.0);
-			int textPercentage = (int) Math.round(((amountFull
-					/ (double) barRectHeight - 0.5) * 200));
+			int textPercentage = (int) Math.round(((amountFull / (double) barRectHeight - 0.5) * 200));
 
 			barRectHeight -= 25;
 			int top = b.top + 10;
@@ -373,31 +372,26 @@ public class MotorsPanel extends UpdatePanel {
 			// draw the cells
 			if (cellSpacing == 0 && amountFull > 0) {
 				// draw one big Rect because there is no space between cells
-				g2.setStroke(new BasicStroke((float) barRectWidth,
-						BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
+				g2.setStroke(new BasicStroke(barRectWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
 			} else {
 				// draw each individual cell
-				g2.setStroke(new BasicStroke((float) barRectWidth,
-						BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0f,
+				g2.setStroke(new BasicStroke(barRectWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0f,
 						new float[] { cellLength, cellSpacing }, 0f));
 			}
 			if (percentage > 0.5) {
 				g2.setColor(Color.GREEN);
-				g2.drawLine(barRectWidth / 2 + b.left, top + barRectHeight
-						- (int) (barRectHeight * drawingPercentage),
+				g2.drawLine(barRectWidth / 2 + b.left, top + barRectHeight - (int) (barRectHeight * drawingPercentage),
 						barRectWidth / 2 + b.left, top + barRectHeight / 2);
 			} else if (percentage < 0.5) {
 				g2.setColor(Color.RED);
-				g2.drawLine(barRectWidth / 2 + b.left, top + barRectHeight / 2,
-						barRectWidth / 2 + b.left, top + barRectHeight
-								- (int) (barRectHeight * drawingPercentage));
+				g2.drawLine(barRectWidth / 2 + b.left, top + barRectHeight / 2, barRectWidth / 2 + b.left,
+						top + barRectHeight - (int) (barRectHeight * drawingPercentage));
 			}
 
 			g2.setColor(Color.BLACK);
 			String s = textPercentage + "%";
 			SwingUtilities2.drawString(progressBar, g2, textPercentage + "%",
-					b.left + barRectWidth / 3 - s.length() * 1, b.top
-							+ barRectHeight / 2 - 10);
+					b.left + barRectWidth / 3 - s.length() * 1, b.top + barRectHeight / 2 - 10);
 
 		}
 	}
@@ -433,8 +427,8 @@ public class MotorsPanel extends UpdatePanel {
 			offsetSlider.setValue(offset);
 		}
 	}
-	
-	public void setMaximumSpeed(int maximumSpeed){
+
+	public void setMaximumSpeed(int maximumSpeed) {
 		if (maximumSpeed > limitSlider.getMaximum()) {
 			limitSlider.setValue(limitSlider.getMaximum());
 		} else if (maximumSpeed < limitSlider.getMinimum()) {

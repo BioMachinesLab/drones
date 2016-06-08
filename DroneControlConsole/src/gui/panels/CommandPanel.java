@@ -32,9 +32,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
-import javax.swing.SwingUtilities;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
@@ -161,53 +158,10 @@ public class CommandPanel extends UpdatePanel {
 
 			@Override
 			public void focusGained(FocusEvent e) {
-				if (selectedDrones.getText().equals("Drones IDs")) {
+				if (selectedDrones.getText().contains("Drones IDs")) {
 					selectedDrones.setText("");
-					selectedDrones.setForeground(Color.BLACK);
 				}
-			}
-		});
-		selectedDrones.getDocument().addDocumentListener(new DocumentListener() {
-
-			@Override
-			public void removeUpdate(DocumentEvent arg0) {
-				remove();
-			}
-
-			private void remove() {
-				Runnable runnable = new Runnable() {
-					@Override
-					public void run() {
-						if (selectedDrones.getText() == null || selectedDrones.getText().isEmpty()
-								|| selectedDrones.getText().length() == 0) {
-							selectedDrones.setText("Drones IDs");
-							selectedDrones.setForeground(selectedDrones.getDisabledTextColor());
-						}
-					}
-				};
-				SwingUtilities.invokeLater(runnable);
-			}
-
-			@Override
-			public void insertUpdate(DocumentEvent arg0) {
-				insert();
-			}
-
-			private void insert() {
-				Runnable runnable = new Runnable() {
-					@Override
-					public void run() {
-						if (selectedDrones.getText() != null && !selectedDrones.getText().isEmpty()
-								|| selectedDrones.getText().length() == 0) {
-							selectedDrones.setForeground(Color.BLACK);
-						}
-					}
-				};
-				SwingUtilities.invokeLater(runnable);
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent arg0) {
+				selectedDrones.setForeground(Color.BLACK);
 			}
 		});
 		JScrollPane selectDronesScroll = new JScrollPane(selectedDrones);
@@ -323,7 +277,7 @@ public class CommandPanel extends UpdatePanel {
 
 			@Override
 			public void focusGained(FocusEvent e) {
-				if (autoDeployArea.getText().equals("Possible args: SEED, SIZE, SAFETY, SPECIAL\n(; delimiter)")) {
+				if (autoDeployArea.getText().contains("Possible args: SEED, SIZE, SAFETY, SPECIAL\n(; delimiter)")) {
 					autoDeployArea.setText("");
 					autoDeployArea.setForeground(Color.BLACK);
 				}
@@ -379,7 +333,7 @@ public class CommandPanel extends UpdatePanel {
 
 			@Override
 			public void focusGained(FocusEvent arg0) {
-				if (gpsCoordinate.getText().equals("Latitude/ Longitude")) {
+				if (gpsCoordinate.getText().contains("Latitude/ Longitude")) {
 					gpsCoordinate.setText("");
 					gpsCoordinate.setForeground(Color.BLACK);
 				}

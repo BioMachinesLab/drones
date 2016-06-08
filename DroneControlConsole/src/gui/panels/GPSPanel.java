@@ -46,8 +46,10 @@ public class GPSPanel extends UpdatePanel {
 		setBorder(BorderFactory.createTitledBorder("GPS Data"));
 		setLayout(new BorderLayout());
 
-		add(buildCoordinatesPanel(), BorderLayout.WEST);
-		add(buildGPSFixInformationPanel(), BorderLayout.EAST);
+		JPanel topPanel = new JPanel(new GridLayout(1, 2));
+		topPanel.add(buildCoordinatesPanel());
+		topPanel.add(buildGPSFixInformationPanel());
+		add(topPanel, BorderLayout.CENTER);
 		add(buildRefreshPanel(), BorderLayout.SOUTH);
 	}
 
@@ -62,6 +64,7 @@ public class GPSPanel extends UpdatePanel {
 		add(comboBoxUpdateRate, BorderLayout.SOUTH);
 
 		comboBoxUpdateRate.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				switch (comboBoxUpdateRate.getSelectedIndex()) {
 				case 0:
@@ -230,6 +233,7 @@ public class GPSPanel extends UpdatePanel {
 		textFieldVDOP.setText("");
 	}
 	
+	@Override
 	public void registerThread(UpdateThread t) {
 		this.thread = t;
 	}
@@ -244,6 +248,7 @@ public class GPSPanel extends UpdatePanel {
 		}
 	}
 
+	@Override
 	public long getSleepTime() {
 		return sleepTime;
 	}
