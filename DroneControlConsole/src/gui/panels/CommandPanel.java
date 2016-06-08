@@ -144,7 +144,6 @@ public class CommandPanel extends UpdatePanel {
 		selectedDrones = new JTextPane();
 		selectedDrones.setText("Drones IDs");
 		selectedDrones.setForeground(selectedDrones.getDisabledTextColor());
-		System.out.println(selectedDrones.getDocument().getClass().getName());
 		StyledDocument doc = (StyledDocument) selectedDrones.getDocument();
 		SimpleAttributeSet center = new SimpleAttributeSet();
 		StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
