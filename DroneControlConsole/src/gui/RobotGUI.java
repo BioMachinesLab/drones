@@ -1,21 +1,20 @@
 package gui;
 
-import gui.panels.CommandPanel;
-import gui.panels.ConnectionPanel;
-import gui.panels.MessagesPanel;
-import gui.panels.MotorsPanel;
-import gui.panels.NeuralActivationsPanel;
-
 import java.awt.BorderLayout;
 import java.awt.Window;
 import java.lang.reflect.Method;
 
 import javax.swing.JFrame;
 
+import gui.panels.CommandPanel;
+import gui.panels.ConnectionPanel;
+import gui.panels.MessagesPanel;
+import gui.panels.MotorsPanel;
+import gui.panels.NeuralActivationsPanel;
 import main.RobotControlConsole;
 
 public abstract class RobotGUI extends JFrame {
-
+	private static final long serialVersionUID = 846515035741661639L;
 	protected MotorsPanel motorsPanel;
 	protected ConnectionPanel connectionPanel;
 	protected CommandPanel commandPanel;
@@ -30,8 +29,7 @@ public abstract class RobotGUI extends JFrame {
 		msgPanel = new MessagesPanel();
 
 		neuralActivationsPanel = new NeuralActivationsPanel();
-		commandPanel.getNeuralActivationsWindow().add(neuralActivationsPanel,
-				BorderLayout.CENTER);
+		commandPanel.getNeuralActivationsWindow().add(neuralActivationsPanel, BorderLayout.CENTER);
 	}
 
 	public MotorsPanel getMotorsPanel() {

@@ -1,10 +1,5 @@
 package gui.panels;
 
-import gui.IPRequestToUserModal;
-import gui.utils.DroneIP;
-import gui.utils.DroneIP.DroneStatus;
-import gui.utils.SortedListModel;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
@@ -33,14 +28,18 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
-import main.DroneControlConsole;
-import main.RobotControlConsole;
-import threads.UpdateThread;
-
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+
+import gui.IPRequestToUserModal;
+import gui.utils.DroneIP;
+import gui.utils.DroneIP.DroneStatus;
+import gui.utils.SortedListModel;
+import main.DroneControlConsole;
+import main.RobotControlConsole;
+import threads.UpdateThread;
 
 public class ConnectionPanel extends UpdatePanel {
 	private static final long serialVersionUID = -4874186493593218098L;
@@ -135,6 +134,7 @@ public class ConnectionPanel extends UpdatePanel {
 		
 		JButton connect = new JButton("Connect");
 		connect.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(droneConnected){
 					disconnect.doClick();
@@ -154,6 +154,7 @@ public class ConnectionPanel extends UpdatePanel {
 
 		disconnect = new JButton("Disconnect");
 		disconnect.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				disconnect();
 			}
@@ -170,6 +171,7 @@ public class ConnectionPanel extends UpdatePanel {
 
 		JButton startController = new JButton("Start Controller");
 		startController.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				int index = list.getSelectedIndex();
 
@@ -185,6 +187,7 @@ public class ConnectionPanel extends UpdatePanel {
 		
 		JButton stopController = new JButton("Stop Controller");
 		stopController.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				int index = list.getSelectedIndex();
 
