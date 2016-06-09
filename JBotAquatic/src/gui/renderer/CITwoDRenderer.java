@@ -171,9 +171,14 @@ public class CITwoDRenderer extends TwoDRenderer {
 				Entity entity = (Entity) o;
 				if (entity instanceof GeoEntity) {
 					if (entity instanceof Target && !drawTargets.contains(entity)) {
-						graphics.setColor(Color.ORANGE);
-
 						Target t = (Target) entity;
+						
+						if(t.isOccupied()){
+							graphics.setColor(Color.GREEN);
+						}else{
+							graphics.setColor(Color.ORANGE);
+						}
+						
 						Vector2d pos = CoordinateUtilities.GPSToCartesian(t.getLatLon());
 						int diam = (int) (t.getRadius() * 2 * scale);
 						int x = transformX(pos.x) - diam / 2;
@@ -470,9 +475,5 @@ public class CITwoDRenderer extends TwoDRenderer {
 
 	public void displayVelocityVectors(boolean show) {
 		this.showVelocityVectors = show;
-		
-		//if()
 	}
-
-
 }
