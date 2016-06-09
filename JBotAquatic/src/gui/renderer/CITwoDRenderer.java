@@ -172,18 +172,19 @@ public class CITwoDRenderer extends TwoDRenderer {
 				if (entity instanceof GeoEntity) {
 					if (entity instanceof Target && !drawTargets.contains(entity)) {
 						Target t = (Target) entity;
-						
-						if(t.isOccupied()){
+
+						if (t.isOccupied()) {
 							graphics.setColor(Color.GREEN);
-						}else{
+						} else {
 							graphics.setColor(Color.ORANGE);
 						}
-						
+
 						Vector2d pos = CoordinateUtilities.GPSToCartesian(t.getLatLon());
 						int diam = (int) (t.getRadius() * 2 * scale);
 						int x = transformX(pos.x) - diam / 2;
 						int y = transformY(pos.y) - diam / 2;
 						graphics.fillOval(x, y, diam, diam);
+						drawTargetId(graphics,t);
 
 						if (showVelocityVectors
 								&& ((Target) entity).getTargetMotionData() instanceof FormationMotionData) {
@@ -194,7 +195,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 							if (velocityVector.length() > 0) {
 								velocityVector.setLength(velocityVector.length() * 10);
 								velocityVector.add(targetPos);
-								
+
 								graphics.setColor(Color.BLACK);
 								graphics.drawLine(transformX(targetPos.x), transformY(targetPos.y),
 										transformX(velocityVector.x), transformY(velocityVector.y));
@@ -202,7 +203,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 								Color color = graphics.getColor();
 								graphics.setColor(Color.RED);
 
-								int radius = diam/10;
+								int radius = diam / 10;
 								int x_pos = transformX(velocityVector.x) - radius;
 								int y_pos = transformY(velocityVector.y) - radius;
 
@@ -240,6 +241,19 @@ public class CITwoDRenderer extends TwoDRenderer {
 
 			graphics.setColor(initialColor);
 		}
+	}
+
+	protected void drawTargetId(Graphics g, Target target) {
+		Vector2d position = CoordinateUtilities.GPSToCartesian(target.getLatLon());
+
+		int x = transformX(position.x + target.getRadius());
+		int y = transformY(position.y - target.getRadius());
+
+		g.setColor(Color.WHITE);
+		g.fillRect(x, y - 10, 8, 10);
+
+		g.setColor(Color.BLACK);
+		g.drawString(String.valueOf(target.getName()), x, y);
 	}
 
 	protected void drawGeoFence(GeoFence geo, Color c) {
