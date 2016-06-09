@@ -56,6 +56,7 @@ import commoninterface.entities.GeoFence;
 import commoninterface.entities.ObstacleLocation;
 import commoninterface.entities.RobotLocation;
 import commoninterface.entities.Waypoint;
+import commoninterface.entities.target.Formation;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.network.messages.EntityMessage;
 import commoninterface.utils.CoordinateUtilities;
@@ -66,14 +67,14 @@ import gui.utils.SortedListModel;
 import threads.UpdateThread;
 
 public class MapPanel extends UpdatePanel {
-
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 3792686069879535790L;
 	private static int POSITION_HISTORY = 1;
+	private static int SLEEP_TIME = 10;
 	private static final int MAP_TOP_OFFSET = 75;
 	protected static final int SHIFT_IDENTIFIER = 64;
 
 	public enum MapStatus {
-		NONE, WAYPOINT, GEOFENCE, OBSTACLE
+		NONE, WAYPOINT, GEOFENCE, OBSTACLE, FORMATION
 	}
 
 	private JMapViewerTreeDrone treeMap = null;
@@ -82,9 +83,9 @@ public class MapPanel extends UpdatePanel {
 
 	private HashMap<String, LinkedList<MapMarker>> robotPositions = new HashMap<String, LinkedList<MapMarker>>();
 	private HashMap<String, Long> robotPositionsUpdate = new HashMap<String, Long>();
-	private UpdateThread thread = null;
 
 	private GeoFence geoFence = new GeoFence("geofence");
+	private Formation formation = null;
 	private LinkedList<Waypoint> waypoints = new LinkedList<Waypoint>();
 	private LinkedList<MapMarker> waypointMarkers = new LinkedList<MapMarker>();
 	private LinkedList<ObstacleLocation> obstacles = new LinkedList<ObstacleLocation>();
@@ -92,6 +93,7 @@ public class MapPanel extends UpdatePanel {
 	private LinkedList<String> selectedMarkerDrones = new LinkedList<String>();
 
 	private Layer geoFenceLayer;
+	private Layer formationLayer;
 	private DroneGUI droneGUI;
 	private MapStatus status = MapStatus.NONE;
 
@@ -102,6 +104,8 @@ public class MapPanel extends UpdatePanel {
 
 	private Point dragBoxStart;
 	private Point dragBoxEnd;
+
+	private UpdateThread thread = null;
 
 	public MapPanel(DroneGUI droneGUI) {
 		this();
@@ -132,18 +136,18 @@ public class MapPanel extends UpdatePanel {
 			tileSourceSelector.addItemListener(new ItemListener() {
 				@Override
 				public void itemStateChanged(ItemEvent e) {
-					map().setTileSource((TileSource) e.getItem());
+					getMap().setTileSource((TileSource) e.getItem());
 				}
 			});
 
-			map().setTileSource(tileSourceSelector.getItemAt(0));
+			getMap().setTileSource(tileSourceSelector.getItemAt(0));
 
 			panelTopInformation.add(tileSourceSelector);
 
 			try {
-				map().setTileLoader(new OsmFileCacheTileLoader(map()));
+				getMap().setTileLoader(new OsmFileCacheTileLoader(getMap()));
 			} catch (IOException e) {
-				map().setTileLoader(new OsmTileLoader(map()));
+				getMap().setTileLoader(new OsmTileLoader(getMap()));
 			}
 
 		} catch (MalformedURLException e) {
@@ -152,14 +156,16 @@ public class MapPanel extends UpdatePanel {
 
 		helpButton = new JButton("Help");
 		helpButton.addActionListener(new ActionListener() {
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(null, "<html><strong>W</strong>:  Add Waypoints <br><br>"
-						+ "<strong>G</strong>: Add GeoFence <br><br>" + "<strong>O</strong>: Add Obstacles <br><br>"
-						+ "<strong>Ctrl+OBJECT_KEY</strong>: Clear Objects <br><br>"
-						+ "<strong>F</strong>: Fit Markers <br><br>" + "<strong>+</strong>: Zoom In <br><br>"
-						+ "<strong>-</strong>: Zoom Out <br><br>" + "<strong>Ctrl+C</strong>: Cancel Option <br><br>"
-						+ "<strong>Ctrl+E</strong>: Clear All Objects</html>");
+				JOptionPane.showMessageDialog(null,
+						"<html><strong>W</strong>:  Add Waypoints <br>" + "<strong>G</strong>: Add GeoFence <br>"
+								+ "<strong>O</strong>: Add Obstacles <br>" + "<strong>T</strong>: Add Target <br>"
+								+ "<strong>Ctrl+OBJECT_KEY</strong>: Clear Objects <br>"
+								+ "<strong>F</strong>: Fit Markers <br>" + "<strong>+</strong>: Zoom In <br>"
+								+ "<strong>-</strong>: Zoom Out <br>" + "<strong>Ctrl+C</strong>: Cancel Option <br>"
+								+ "<strong>Ctrl+E</strong>: Clear All Objects</html>");
 			}
 		});
 		panelTopInformation.add(helpButton);
@@ -171,8 +177,9 @@ public class MapPanel extends UpdatePanel {
 		mapStatusComboBox.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() == ItemEvent.SELECTED)
+				if (e.getStateChange() == ItemEvent.SELECTED) {
 					status = (MapStatus) e.getItem();
+				}
 			}
 		});
 
@@ -205,12 +212,13 @@ public class MapPanel extends UpdatePanel {
 		add(treeMap, BorderLayout.CENTER);
 
 		geoFenceLayer = treeMap.addLayer("_GeoFence");
+		formationLayer = treeMap.addLayer("_target");
 		initActions();
 
 		// Lisbon
-		map().setDisplayPosition(new Coordinate(38.7166700, -9.1333300), 13);
+		getMap().setDisplayPosition(new Coordinate(38.7166700, -9.1333300), 13);
 
-		map().addMouseListener(new MouseAdapter() {
+		getMap().addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (e.getButton() == MouseEvent.BUTTON1) {
@@ -222,7 +230,7 @@ public class MapPanel extends UpdatePanel {
 							selectedTextField.setText("");
 						}
 
-						Coordinate clickCoord = map().getPosition(e.getPoint());
+						Coordinate clickCoord = getMap().getPosition(e.getPoint());
 						Vector2d clickPosition = CoordinateUtilities
 								.GPSToCartesian(new LatLon(clickCoord.getLat(), clickCoord.getLon()));
 
@@ -234,11 +242,13 @@ public class MapPanel extends UpdatePanel {
 
 						repaint();
 					} else if (status.equals(MapStatus.OBSTACLE)) {
-						addObstacle(map().getPosition(e.getPoint()));
+						addObstacle(getMap().getPosition(e.getPoint()));
 					} else if (status.equals(MapStatus.GEOFENCE)) {
-						addToGeoFence(map().getPosition(e.getPoint()));
+						addToGeoFence(getMap().getPosition(e.getPoint()));
+					} else if (status.equals(MapStatus.FORMATION)) {
+						addFormation(getMap().getPosition(e.getPoint()));
 					} else {
-						addWaypoint(map().getPosition(e.getPoint()));
+						addWaypoint(getMap().getPosition(e.getPoint()));
 					}
 				}
 			}
@@ -254,10 +264,10 @@ public class MapPanel extends UpdatePanel {
 					}
 
 					if (dragBoxStart != null && dragBoxEnd != null) {
-						Coordinate mapStartPosition = map().getPosition(dragBoxStart);
+						Coordinate mapStartPosition = getMap().getPosition(dragBoxStart);
 						Vector2d start = CoordinateUtilities
 								.GPSToCartesian(new LatLon(mapStartPosition.getLat(), mapStartPosition.getLon()));
-						Coordinate mapEndPosition = map().getPosition(dragBoxEnd);
+						Coordinate mapEndPosition = getMap().getPosition(dragBoxEnd);
 						Vector2d end = CoordinateUtilities
 								.GPSToCartesian(new LatLon(mapEndPosition.getLat(), mapEndPosition.getLon()));
 
@@ -282,15 +292,15 @@ public class MapPanel extends UpdatePanel {
 			}
 		});
 
-		map().addMouseMotionListener(new MouseAdapter() {
+		getMap().addMouseMotionListener(new MouseAdapter() {
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				Point p = e.getPoint();
-				boolean cursorHand = map().getAttribution().handleAttributionCursor(p);
+				boolean cursorHand = getMap().getAttribution().handleAttributionCursor(p);
 				if (cursorHand) {
-					map().setCursor(new Cursor(Cursor.HAND_CURSOR));
+					getMap().setCursor(new Cursor(Cursor.HAND_CURSOR));
 				} else {
-					map().setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+					getMap().setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 				}
 			}
 
@@ -309,61 +319,29 @@ public class MapPanel extends UpdatePanel {
 
 	}
 
-	private void selectDroneMarker(JTextPane selectedTextField, MapMarkerDrone m) {
-		m.setSelected(true);
-		selectedMarkerDrones.add(m.getName());
-		String[] split = m.getName().split("\\.");
-		String id = split[split.length - 1];
+	private class RefreshDrones extends Thread {
+		long timeToDelete = 1000 * 5;// 5 sec
 
-		if (Integer.valueOf(id) > 99) {
-			SortedListModel listModel = droneGUI.getConnectionPanel().getListModel();
+		@Override
+		public void run() {
+			while (true) {
 
-			for (int i = 0; i < listModel.getSize(); i++) {
-				String[] tmp = listModel.get(i).getIp().split("\\.");
-				String newID = tmp[tmp.length - 1];
+				for (String s : robotPositionsUpdate.keySet()) {
+					if (System.currentTimeMillis() - robotPositionsUpdate.get(s) > timeToDelete)
+						clearRobot(s);
+				}
 
-				if (Integer.valueOf(newID) > 99)
-					id = newID;
+				try {
+					Thread.sleep(timeToDelete);
+				} catch (InterruptedException e) {
+				}
 			}
 		}
-
-		String rsl = selectedTextField.getText();
-		if (!selectedTextField.getText().contains(id)) {
-			if (rsl.isEmpty())
-				selectedTextField.setText(id);
-			else
-				selectedTextField.setText(rsl + "," + id);
-		}
-
 	}
 
-	private synchronized void cleanSelectedMarkersList() {
-		for (String selectedDroneIP : selectedMarkerDrones) {
-			MapMarkerDrone marker = (MapMarkerDrone) robotPositions.get(selectedDroneIP).peek();
-			marker.setSelected(false);
-		}
-
-		selectedMarkerDrones.clear();
-		repaint();
-	}
-
-	@Override
-	public void paint(Graphics g) {
-		super.paint(g);
-		Graphics2D g2d = (Graphics2D) g.create();
-
-		if (dragBoxStart != null && dragBoxEnd != null) {
-			g2d.setColor(Color.WHITE);
-			g2d.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[] { 9 }, 0));
-
-			int width = Math.abs(dragBoxEnd.x - dragBoxStart.x);
-			int height = Math.abs((dragBoxEnd.y + MAP_TOP_OFFSET) - (dragBoxStart.y + MAP_TOP_OFFSET));
-
-			g2d.drawRect(Math.min(dragBoxStart.x, dragBoxEnd.x),
-					Math.min((dragBoxStart.y + MAP_TOP_OFFSET), (dragBoxEnd.y + MAP_TOP_OFFSET)), width, height);
-		}
-	}
-
+	/*
+	 * GUI stuff
+	 */
 	protected void initActions() {
 		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke('+'), "+");
 		this.getActionMap().put("+", new AbstractAction() {
@@ -371,7 +349,7 @@ public class MapPanel extends UpdatePanel {
 
 			@Override
 			public void actionPerformed(ActionEvent evt) {
-				map().zoomIn();
+				getMap().zoomIn();
 			}
 		});
 		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke('-'), "-");
@@ -380,7 +358,7 @@ public class MapPanel extends UpdatePanel {
 
 			@Override
 			public void actionPerformed(ActionEvent evt) {
-				map().zoomOut();
+				getMap().zoomOut();
 			}
 		});
 		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("control E"), "control E");
@@ -411,7 +389,7 @@ public class MapPanel extends UpdatePanel {
 
 			@Override
 			public void actionPerformed(ActionEvent evt) {
-				map().setDisplayToFitMapMarkers();
+				getMap().setDisplayToFitMapMarkers();
 			}
 		});
 		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("W"), "W");
@@ -477,6 +455,27 @@ public class MapPanel extends UpdatePanel {
 				clearStatus();
 			}
 		});
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("F"), "F");
+		this.getActionMap().put("F", new AbstractAction() {
+			protected static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent evt) {
+				status = MapStatus.FORMATION;
+				mapStatusComboBox.setSelectedItem(status);
+			}
+		});
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("control F"), "control F");
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("meta F"), "control F");
+		this.getActionMap().put("control F", new AbstractAction() {
+			protected static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent evt) {
+				clearFormation();
+				clearStatus();
+			}
+		});
 		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("1"), "1");
 		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("1"), "1");
 		this.getActionMap().put("1", new AbstractAction() {
@@ -539,132 +538,6 @@ public class MapPanel extends UpdatePanel {
 		});
 	}
 
-	private void saveDronesGroup(int id) {
-		LinkedList<String> group = groupsMap.get(id);
-		group.addAll(selectedMarkerDrones);
-		groupsMap.put(id, group);
-	}
-
-	private synchronized void selectDronesFromGroup(int id) {
-		/*
-		 * //THIS WAS CAUSING PROBLEMS WHEN TYPING NUMBERS IN THE TEXT FIELDS!
-		 * cleanSelectedMarkersList(); JTextArea selectedTextField =
-		 * droneGUI.getCommandPanel().getSelectedDronesTextField();
-		 * selectedTextField.setText("");
-		 * 
-		 * LinkedList<String> group = groupsMap.get(id);
-		 * 
-		 * for (String droneIP : group) { MapMarkerDrone m =
-		 * (MapMarkerDrone)robotPositions.get(droneIP).peek();
-		 * if(isDroneConnected(m.getName()) || isVirtualDrone(m.getName()))
-		 * selectDroneMarker(selectedTextField, m); }
-		 */
-	}
-
-	private boolean isDroneConnected(String ip) {
-		SortedListModel listModel = droneGUI.getConnectionPanel().getListModel();
-
-		for (int i = 0; i < listModel.getSize(); i++) {
-			if (listModel.get(i).getIp().equals(ip))
-				return true;
-		}
-
-		return false;
-	}
-
-	private boolean isVirtualDrone(String ip) {
-		String[] split = ip.split("\\.");
-		if (Integer.valueOf(split[split.length - 1]) > 99)
-			return true;
-		else
-			return false;
-	}
-
-	private MapMarkerDrone getClosestMarker(Vector2d clickPosition) {
-		MapMarkerDrone closestMarker = null;
-		double closestDistance = 5;
-
-		for (MapMarker marker : map().getMapMarkerList()) {
-			if (marker instanceof MapMarkerDrone) {
-				MapMarkerDrone markerDrone = (MapMarkerDrone) marker;
-				Vector2d robotPosition = CoordinateUtilities
-						.GPSToCartesian(new LatLon(markerDrone.getLat(), markerDrone.getLon()));
-				double dist = robotPosition.distanceTo(clickPosition);
-
-				if (dist < closestDistance) {
-					closestMarker = markerDrone;
-					closestDistance = dist;
-				}
-			}
-		}
-
-		return closestMarker;
-	}
-
-	private ArrayList<MapMarkerDrone> getMarkersBetween(Vector2d start, Vector2d end) {
-		ArrayList<MapMarkerDrone> mrks = new ArrayList<MapMarkerDrone>();
-
-		for (MapMarker m : map().getMapMarkerList()) {
-			if (m instanceof MapMarkerDrone) {
-				MapMarkerDrone mD = (MapMarkerDrone) m;
-				Vector2d dP = CoordinateUtilities.GPSToCartesian(new LatLon(mD.getLat(), mD.getLon()));
-
-				if (dP.x > start.x && dP.x < end.x && dP.y > start.y && dP.y < end.y)
-					mrks.add(mD);
-			}
-		}
-
-		return mrks;
-	}
-
-	private void clearStatus() {
-		status = MapStatus.NONE;
-		mapStatusComboBox.setSelectedItem(status);
-	}
-
-	private JMapViewer map() {
-		return treeMap.getViewer();
-	}
-
-	public static Coordinate c(double lat, double lon) {
-		return new Coordinate(lat, lon);
-	}
-
-	public synchronized void addWaypoint(Waypoint wp) {
-		addWaypoint(c(wp.getLatLon().getLat(), wp.getLatLon().getLon()));
-	}
-
-	public synchronized void addWaypoint(Coordinate c) {
-
-		String layerName = "waypoints";
-
-		Layer l = null;
-
-		for (Layer layer : treeMap.getLayers())
-			if (layer.getName().equals("waypoints"))
-				l = layer;
-
-		if (l == null) {
-			l = treeMap.addLayer(layerName);
-		}
-
-		String markerName = "waypoint" + waypoints.size();
-
-		MapMarker m = new MapMarkerWaypoint(l, markerName, c);
-
-		l.add(m);
-		waypointMarkers.add(m);
-
-		map().addMapMarker(m);
-
-		synchronized (this) {
-			Waypoint waypoint = new Waypoint(markerName, new LatLon(c.getLat(), c.getLon()));
-			waypoints.add(waypoint);
-			updateCommandPanel();
-			// notifyAll();
-		}
-	}
-
 	public synchronized void updateRobotPosition(RobotLocation di) {
 
 		LatLon latLon = di.getLatLon();
@@ -689,7 +562,7 @@ public class MapPanel extends UpdatePanel {
 			robotPositionsUpdate.put(name, System.currentTimeMillis());
 		}
 
-		Iterator<MapMarker> i = map().getMapMarkerList().iterator();
+		Iterator<MapMarker> i = getMap().getMapMarkerList().iterator();
 
 		while (i.hasNext()) {
 			MapMarker m = i.next();
@@ -707,13 +580,13 @@ public class MapPanel extends UpdatePanel {
 
 		if (!robotMarkers.isEmpty()) {
 
-			Style styleOld = new Style(Color.black, Color.LIGHT_GRAY, new BasicStroke(1),
+			Style styleOld = new Style(Color.BLACK, Color.LIGHT_GRAY, new BasicStroke(1),
 					new Font("Dialog", Font.PLAIN, 0));
 
 			// remove last value from previous iteration
 			MapMarker last = robotMarkers.pollLast();
 			treeMap.removeFromLayer(last);
-			map().removeMapMarker(last);
+			getMap().removeMapMarker(last);
 			if (((MapMarkerDrone) last).isSelected())
 				markerSelected = true;
 
@@ -721,7 +594,7 @@ public class MapPanel extends UpdatePanel {
 			MapMarker old = new MapMarkerDot(l, "" + robotMarkerIndex++, last.getCoordinate(), styleOld);
 			robotMarkers.add(old);
 			l.add(old);
-			map().addMapMarker(old);
+			getMap().addMapMarker(old);
 			robotPositionsUpdate.put(name, System.currentTimeMillis());
 
 		}
@@ -730,25 +603,25 @@ public class MapPanel extends UpdatePanel {
 
 		switch (di.getDroneType()) {
 		case DRONE:
-			styleNew = new Style(Color.RED, Color.green, new BasicStroke(1), new Font("Dialog", Font.PLAIN, 12));
+			styleNew = new Style(Color.RED, Color.GREEN, new BasicStroke(1), new Font("Dialog", Font.PLAIN, 12));
 			break;
 		case ENEMY:
 			styleNew = new Style(Color.RED, Color.RED, new BasicStroke(1), new Font("Dialog", Font.PLAIN, 12));
 			break;
 		default:
-			styleNew = new Style(Color.RED, Color.green, new BasicStroke(1), new Font("Dialog", Font.PLAIN, 12));
+			styleNew = new Style(Color.RED, Color.GREEN, new BasicStroke(1), new Font("Dialog", Font.PLAIN, 12));
 		}
 
-		MapMarker m = new MapMarkerDrone(l, name, c(lat, lon), styleNew, orientation);
+		MapMarker m = new MapMarkerDrone(l, name, latLonToCoord(lat, lon), styleNew, orientation);
 		((MapMarkerDrone) m).setSelected(markerSelected);
 		l.add(m);
-		map().addMapMarker(m);
+		getMap().addMapMarker(m);
 		robotMarkers.add(m);
 
 		while (robotMarkers.size() > POSITION_HISTORY) {
 			MapMarker old = robotMarkers.pollFirst();
 			treeMap.removeFromLayer(old);
-			map().removeMapMarker(old);
+			getMap().removeMapMarker(old);
 		}
 
 		if (robotMarkers.size() == 1 && robotPositions.size() == 1) {
@@ -756,8 +629,12 @@ public class MapPanel extends UpdatePanel {
 		}
 	}
 
-	public void displayData(RobotLocation di) {
+	public void displayData(EntityMessage message) {
+		// TODO
+		System.out.println("TODO MapPanel");
+	}
 
+	public void displayData(RobotLocation di) {
 		LatLon latLon = di.getLatLon();
 
 		if (latLon != null) {
@@ -767,35 +644,27 @@ public class MapPanel extends UpdatePanel {
 			if (lat == 0 && lon == 0)
 				return;
 
-			if (usefulRobotCoordinate(di.getName(), c(lat, lon))) {
+			if (usefulRobotCoordinate(di.getName(), latLonToCoord(lat, lon))) {
 				updateRobotPosition(di);
 			}
 		}
 	}
 
-	private boolean usefulRobotCoordinate(String name, Coordinate n) {
-
-		if (n.getLat() == -1 && n.getLon() == -1)
-			return false;
-
-		LinkedList<MapMarker> robotMarkers = robotPositions.get(name);
-
-		if (robotMarkers == null || robotMarkers.isEmpty())
-			return true;
-
-		robotPositionsUpdate.put(name, System.currentTimeMillis());
-
-		Coordinate c = robotMarkers.peekLast().getCoordinate();
-
-		if (c.getLat() == n.getLat() && c.getLon() == n.getLon())
-			return false;
-
-		return true;
-	}
-
 	@Override
-	public long getSleepTime() {
-		return 10;
+	public void paint(Graphics g) {
+		super.paint(g);
+		Graphics2D g2d = (Graphics2D) g.create();
+
+		if (dragBoxStart != null && dragBoxEnd != null) {
+			g2d.setColor(Color.WHITE);
+			g2d.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[] { 9 }, 0));
+
+			int width = Math.abs(dragBoxEnd.x - dragBoxStart.x);
+			int height = Math.abs((dragBoxEnd.y + MAP_TOP_OFFSET) - (dragBoxStart.y + MAP_TOP_OFFSET));
+
+			g2d.drawRect(Math.min(dragBoxStart.x, dragBoxEnd.x),
+					Math.min((dragBoxStart.y + MAP_TOP_OFFSET), (dragBoxEnd.y + MAP_TOP_OFFSET)), width, height);
+		}
 	}
 
 	@Override
@@ -813,47 +682,44 @@ public class MapPanel extends UpdatePanel {
 		}
 	}
 
-	public void displayData(EntityMessage message) {
-		System.out.println("TODO MapPanel");
+	private void updateCommandPanel() {
+		if (droneGUI != null)
+			droneGUI.getCommandPanel().updateMapInfo(getEntities());
 	}
 
-	private synchronized void addToGeoFence(Coordinate coord) {
-		MapMarker marker = new MapMarkerDot(coord);
-		geoFence.addWaypoint(new LatLon(coord.getLat(), coord.getLon()));
-		geoFenceLayer.add(marker);
-		map().addMapMarker(marker);
+	private void selectDroneMarker(JTextPane selectedTextField, MapMarkerDrone m) {
+		m.setSelected(true);
+		selectedMarkerDrones.add(m.getName());
+		String[] split = m.getName().split("\\.");
+		String id = split[split.length - 1];
 
-		ArrayList<Coordinate> coords = new ArrayList<Coordinate>();
+		if (Integer.valueOf(id) > 99) {
+			SortedListModel listModel = droneGUI.getConnectionPanel().getListModel();
 
-		for (Waypoint wp : geoFence.getWaypoints())
-			coords.add(new Coordinate(wp.getLatLon().getLat(), wp.getLatLon().getLon()));
+			for (int i = 0; i < listModel.getSize(); i++) {
+				String[] tmp = listModel.get(i).getIp().split("\\.");
+				String newID = tmp[tmp.length - 1];
 
-		map().removeAllMapPolygons();
-		MapPolygonImpl po = new MapPolygonImpl(coords);
-		geoFenceLayer.add(po);
-		map().addMapPolygon(po);
-		updateCommandPanel();
-	}
-
-	public synchronized void addGeoFence(GeoFence geo) {
-		ArrayList<Coordinate> coords = new ArrayList<Coordinate>();
-
-		for (Waypoint wp : geo.getWaypoints()) {
-			System.out.println("GEOFENCE " + wp);
-			Coordinate coord = c(wp.getLatLon().getLat(), wp.getLatLon().getLon());
-
-			MapMarker marker = new MapMarkerDot(coord);
-			geoFence.addWaypoint(new LatLon(coord.getLat(), coord.getLon()));
-			geoFenceLayer.add(marker);
-			map().addMapMarker(marker);
-			coords.add(new Coordinate(wp.getLatLon().getLat(), wp.getLatLon().getLon()));
+				if (Integer.valueOf(newID) > 99)
+					id = newID;
+			}
 		}
 
-		map().removeAllMapPolygons();
-		MapPolygonImpl po = new MapPolygonImpl(coords);
-		geoFenceLayer.add(po);
-		map().addMapPolygon(po);
-		updateCommandPanel();
+		String rsl = selectedTextField.getText();
+		if (!selectedTextField.getText().contains(id)) {
+			if (rsl.isEmpty())
+				selectedTextField.setText(id);
+			else
+				selectedTextField.setText(rsl + "," + id);
+		}
+	}
+
+	/*
+	 * Getters and setters
+	 */
+	@Override
+	public long getSleepTime() {
+		return SLEEP_TIME;
 	}
 
 	public ArrayList<Entity> getEntities() {
@@ -868,7 +734,141 @@ public class MapPanel extends UpdatePanel {
 		if (obstacles != null)
 			entities.addAll(obstacles);
 
+		if (formation != null) {
+			entities.add(formation);
+		}
+
 		return entities;
+	}
+
+	private JMapViewer getMap() {
+		return treeMap.getViewer();
+	}
+
+	private MapMarkerDrone getClosestMarker(Vector2d clickPosition) {
+		MapMarkerDrone closestMarker = null;
+		double closestDistance = 5;
+
+		for (MapMarker marker : getMap().getMapMarkerList()) {
+			if (marker instanceof MapMarkerDrone) {
+				MapMarkerDrone markerDrone = (MapMarkerDrone) marker;
+				Vector2d robotPosition = CoordinateUtilities
+						.GPSToCartesian(new LatLon(markerDrone.getLat(), markerDrone.getLon()));
+				double dist = robotPosition.distanceTo(clickPosition);
+
+				if (dist < closestDistance) {
+					closestMarker = markerDrone;
+					closestDistance = dist;
+				}
+			}
+		}
+
+		return closestMarker;
+	}
+
+	private ArrayList<MapMarkerDrone> getMarkersBetween(Vector2d start, Vector2d end) {
+		ArrayList<MapMarkerDrone> mrks = new ArrayList<MapMarkerDrone>();
+
+		for (MapMarker m : getMap().getMapMarkerList()) {
+			if (m instanceof MapMarkerDrone) {
+				MapMarkerDrone mD = (MapMarkerDrone) m;
+				Vector2d dP = CoordinateUtilities.GPSToCartesian(new LatLon(mD.getLat(), mD.getLon()));
+
+				if (dP.x > start.x && dP.x < end.x && dP.y > start.y && dP.y < end.y)
+					mrks.add(mD);
+			}
+		}
+
+		return mrks;
+	}
+
+	/*
+	 * Add/ replace entities
+	 */
+	public synchronized void addWaypoint(Waypoint wp) {
+		addWaypoint(latLonToCoord(wp.getLatLon().getLat(), wp.getLatLon().getLon()));
+	}
+
+	public synchronized void addWaypoint(Coordinate c) {
+
+		String layerName = "waypoints";
+
+		Layer l = null;
+
+		for (Layer layer : treeMap.getLayers())
+			if (layer.getName().equals("waypoints"))
+				l = layer;
+
+		if (l == null) {
+			l = treeMap.addLayer(layerName);
+		}
+
+		String markerName = "waypoint" + waypoints.size();
+
+		MapMarker m = new MapMarkerWaypoint(l, markerName, c);
+
+		l.add(m);
+		waypointMarkers.add(m);
+
+		getMap().addMapMarker(m);
+
+		synchronized (this) {
+			Waypoint waypoint = new Waypoint(markerName, new LatLon(c.getLat(), c.getLon()));
+			waypoints.add(waypoint);
+			updateCommandPanel();
+			// notifyAll();
+		}
+	}
+
+	private synchronized void addToGeoFence(Coordinate coord) {
+		MapMarker marker = new MapMarkerDot(coord);
+		geoFence.addWaypoint(new LatLon(coord.getLat(), coord.getLon()));
+		geoFenceLayer.add(marker);
+		getMap().addMapMarker(marker);
+
+		ArrayList<Coordinate> coords = new ArrayList<Coordinate>();
+
+		for (Waypoint wp : geoFence.getWaypoints())
+			coords.add(new Coordinate(wp.getLatLon().getLat(), wp.getLatLon().getLon()));
+
+		getMap().removeAllMapPolygons();
+		MapPolygonImpl po = new MapPolygonImpl(coords);
+		geoFenceLayer.add(po);
+		getMap().addMapPolygon(po);
+		updateCommandPanel();
+	}
+
+	public synchronized void addGeoFence(GeoFence geo) {
+		ArrayList<Coordinate> coords = new ArrayList<Coordinate>();
+
+		for (Waypoint wp : geo.getWaypoints()) {
+			System.out.println("GEOFENCE " + wp);
+			Coordinate coord = latLonToCoord(wp.getLatLon().getLat(), wp.getLatLon().getLon());
+
+			MapMarker marker = new MapMarkerDot(coord);
+			geoFence.addWaypoint(new LatLon(coord.getLat(), coord.getLon()));
+			geoFenceLayer.add(marker);
+			getMap().addMapMarker(marker);
+			coords.add(new Coordinate(wp.getLatLon().getLat(), wp.getLatLon().getLon()));
+		}
+
+		getMap().removeAllMapPolygons();
+		MapPolygonImpl po = new MapPolygonImpl(coords);
+		geoFenceLayer.add(po);
+		getMap().addMapPolygon(po);
+		updateCommandPanel();
+	}
+
+	public synchronized void addFormation(Coordinate c) {
+		if (formation != null) {
+			clearFormation();
+		}
+
+		formation = new Formation("formation", new LatLon(c.getLat(), c.getLon()));
+		MapMarker marker = new MapMarkerFormation(formationLayer, formation);
+		formationLayer.add(marker);
+		getMap().addMapMarker(marker);
+		updateCommandPanel();
 	}
 
 	private void addObstacle(Coordinate c) {
@@ -891,7 +891,7 @@ public class MapPanel extends UpdatePanel {
 		l.add(m);
 		obstacleMarkers.add(m);
 
-		map().addMapMarker(m);
+		getMap().addMapMarker(m);
 
 		synchronized (this) {
 			ObstacleLocation ol = new ObstacleLocation(markerName, new LatLon(c.getLat(), c.getLon()));
@@ -900,12 +900,36 @@ public class MapPanel extends UpdatePanel {
 		}
 	}
 
+	public void replaceEntities(ArrayList<Entity> entities) {
+		clearObstacles();
+		clearGeoFence();
+		clearWaypoints();
+		clearFormation();
+
+		for (Entity e : entities) {
+			if (e instanceof GeoEntity) {
+				GeoEntity ge = (GeoEntity) e;
+				if (ge instanceof Waypoint)
+					addWaypoint(latLonToCoord(ge.getLatLon().getLat(), ge.getLatLon().getLon()));
+				if (ge instanceof ObstacleLocation)
+					addObstacle(latLonToCoord(ge.getLatLon().getLat(), ge.getLatLon().getLon()));
+				if (ge instanceof Formation)
+					addFormation(latLonToCoord(ge.getLatLon().getLat(), ge.getLatLon().getLon()));
+			}
+			if (e instanceof GeoFence) {
+				addGeoFence((GeoFence) e);
+			}
+		}
+
+		updateCommandPanel();
+	}
+
+	/*
+	 * Clears
+	 */
 	private synchronized void clearRobot(String name) {
-
 		LinkedList<MapMarker> robotMarkers = robotPositions.get(name);
-
-		Iterator<MapMarker> i = map().getMapMarkerList().iterator();
-
+		Iterator<MapMarker> i = getMap().getMapMarkerList().iterator();
 		Layer l = null;
 
 		while (i.hasNext()) {
@@ -923,22 +947,58 @@ public class MapPanel extends UpdatePanel {
 			while (i.hasNext()) {
 				MapMarker m = i.next();
 				treeMap.removeFromLayer(m);
-				map().removeMapMarker(m);
+				getMap().removeMapMarker(m);
 				i.remove();
 			}
 		}
 	}
 
-	private void updateCommandPanel() {
-		if (droneGUI != null)
-			droneGUI.getCommandPanel().updateMapInfo(getEntities());
+	public void clearEntities() {
+		clearObstacles();
+		clearGeoFence();
+		clearWaypoints();
+		clearFormation();
+		updateCommandPanel();
+	}
+
+	public void clearWaypoints() {
+		for (MapMarker m : waypointMarkers) {
+			treeMap.removeFromLayer(m);
+			getMap().removeMapMarker(m);
+		}
+
+		waypoints.clear();
+		waypointMarkers.clear();
+
+		updateCommandPanel();
+	}
+
+	public void clearFormation() {
+		LinkedList<MapMarker> list = new LinkedList<MapMarker>();
+
+		if (formationLayer.getElements() != null) {
+			for (MapObject mo : formationLayer.getElements()) {
+				if (mo instanceof MapMarker) {
+					list.add((MapMarker) mo);
+					getMap().removeMapMarker((MapMarker) mo);
+				}
+			}
+
+			for (MapMarker m : list) {
+				treeMap.removeFromLayer(m);
+			}
+
+			formationLayer.getElements().clear();
+			formation = null;
+		}
+
+		updateCommandPanel();
 	}
 
 	private synchronized void clearObstacles() {
-
 		for (MapMarker m : obstacleMarkers) {
 			treeMap.removeFromLayer(m);
-			map().removeMapMarker(m);
+			getMap().removeMapMarker(m);
 		}
 
 		obstacles.clear();
@@ -947,14 +1007,13 @@ public class MapPanel extends UpdatePanel {
 	}
 
 	public synchronized void clearGeoFence() {
-
 		LinkedList<MapMarker> list = new LinkedList<MapMarker>();
 
 		if (geoFenceLayer.getElements() != null) {
 			for (MapObject mo : geoFenceLayer.getElements()) {
 				if (mo instanceof MapMarker) {
 					list.add((MapMarker) mo);
-					map().removeMapMarker((MapMarker) mo);
+					getMap().removeMapMarker((MapMarker) mo);
 				}
 			}
 
@@ -964,83 +1023,80 @@ public class MapPanel extends UpdatePanel {
 			geoFenceLayer.getElements().clear();
 			geoFence.clear();
 		}
-		map().removeAllMapPolygons();
+		getMap().removeAllMapPolygons();
 		updateCommandPanel();
 	}
 
-	public void clearWaypoints() {
-
-		for (MapMarker m : waypointMarkers) {
-			treeMap.removeFromLayer(m);
-			map().removeMapMarker(m);
-		}
-
-		waypoints.clear();
-		waypointMarkers.clear();
-
-		updateCommandPanel();
+	private void clearStatus() {
+		status = MapStatus.NONE;
+		mapStatusComboBox.setSelectedItem(status);
 	}
 
 	public void clearHistory() {
-
 		for (String s : robotPositions.keySet()) {
-
 			LinkedList<MapMarker> robotMarkers = robotPositions.get(s);
 
 			while (!robotMarkers.isEmpty()) {
 				MapMarker old = robotMarkers.pollFirst();
 				treeMap.removeFromLayer(old);
-				map().removeMapMarker(old);
+				getMap().removeMapMarker(old);
 			}
 		}
 	}
 
-	public void clearEntities() {
-		clearObstacles();
-		clearGeoFence();
-		clearWaypoints();
-		updateCommandPanel();
-	}
-
-	public void replaceEntities(ArrayList<Entity> entities) {
-		clearObstacles();
-		clearGeoFence();
-		clearWaypoints();
-
-		for (Entity e : entities) {
-			if (e instanceof GeoEntity) {
-				GeoEntity ge = (GeoEntity) e;
-				if (ge instanceof Waypoint)
-					addWaypoint(c(ge.getLatLon().getLat(), ge.getLatLon().getLon()));
-				if (ge instanceof ObstacleLocation)
-					addObstacle(c(ge.getLatLon().getLat(), ge.getLatLon().getLon()));
-			}
-			if (e instanceof GeoFence) {
-				addGeoFence((GeoFence) e);
-			}
+	private synchronized void cleanSelectedMarkersList() {
+		for (String selectedDroneIP : selectedMarkerDrones) {
+			MapMarkerDrone marker = (MapMarkerDrone) robotPositions.get(selectedDroneIP).peek();
+			marker.setSelected(false);
 		}
 
-		updateCommandPanel();
+		selectedMarkerDrones.clear();
+		repaint();
 	}
 
-	class RefreshDrones extends Thread {
+	/*
+	 * Utils
+	 */
+	private void saveDronesGroup(int id) {
+		LinkedList<String> group = groupsMap.get(id);
+		group.addAll(selectedMarkerDrones);
+		groupsMap.put(id, group);
+	}
 
-		long timeToDelete = 1000 * 5;// 5 sec
+	private synchronized void selectDronesFromGroup(int id) {
+		/*
+		 * //THIS WAS CAUSING PROBLEMS WHEN TYPING NUMBERS IN THE TEXT FIELDS!
+		 * cleanSelectedMarkersList(); JTextArea selectedTextField =
+		 * droneGUI.getCommandPanel().getSelectedDronesTextField();
+		 * selectedTextField.setText("");
+		 * 
+		 * LinkedList<String> group = groupsMap.get(id);
+		 * 
+		 * for (String droneIP : group) { MapMarkerDrone m =
+		 * (MapMarkerDrone)robotPositions.get(droneIP).peek();
+		 * if(isDroneConnected(m.getName()) || isVirtualDrone(m.getName()))
+		 * selectDroneMarker(selectedTextField, m); }
+		 */
+	}
 
-		@Override
-		public void run() {
-			while (true) {
+	public static Coordinate latLonToCoord(double lat, double lon) {
+		return new Coordinate(lat, lon);
+	}
 
-				for (String s : robotPositionsUpdate.keySet()) {
-					if (System.currentTimeMillis() - robotPositionsUpdate.get(s) > timeToDelete)
-						clearRobot(s);
-				}
+	private boolean usefulRobotCoordinate(String name, Coordinate n) {
+		if (n.getLat() == -1 && n.getLon() == -1)
+			return false;
 
-				try {
-					Thread.sleep(timeToDelete);
-				} catch (InterruptedException e) {
-				}
-			}
+		LinkedList<MapMarker> robotMarkers = robotPositions.get(name);
+		if (robotMarkers == null || robotMarkers.isEmpty()) {
+			return true;
 		}
+
+		robotPositionsUpdate.put(name, System.currentTimeMillis());
+		Coordinate c = robotMarkers.peekLast().getCoordinate();
+		if (c.getLat() == n.getLat() && c.getLon() == n.getLon())
+			return false;
+
+		return true;
 	}
 }
