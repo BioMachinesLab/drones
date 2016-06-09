@@ -4,11 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RadialGradientPaint;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -41,7 +36,7 @@ import simulation.robot.sensors.ConeTypeSensor;
 import simulation.robot.sensors.Sensor;
 import simulation.util.Arguments;
 
-public class CITwoDRenderer extends TwoDRenderer implements MouseListener, MouseMotionListener, MouseWheelListener {
+public class CITwoDRenderer extends TwoDRenderer {
 
 	private static final double ENTITY_DIAMETER = 1.08;
 	protected int droneID;
@@ -55,9 +50,6 @@ public class CITwoDRenderer extends TwoDRenderer implements MouseListener, Mouse
 	protected int colorIndex = 0;
 
 	private ArrayList<Target> drawTargets = new ArrayList<Target>();
-	private int px;
-	private int py;
-	private boolean clicked = false;
 
 	public CITwoDRenderer(Arguments args) {
 		super(args);
@@ -272,6 +264,7 @@ public class CITwoDRenderer extends TwoDRenderer implements MouseListener, Mouse
 
 	@Override
 	protected void drawCones(Graphics graphics, Robot robot) {
+		System.out.println("Hello");
 		if (seeSensors) {
 			RobotCI robotCI = (RobotCI) robot;
 			if (robot.getId() == droneID && (coneSensorId >= 0 || !coneClass.isEmpty())) {
@@ -478,71 +471,9 @@ public class CITwoDRenderer extends TwoDRenderer implements MouseListener, Mouse
 
 	public void displayVelocityVectors(boolean show) {
 		this.showVelocityVectors = show;
+		
+		//if()
 	}
 
-	/*
-	 * Interfaces implementation
-	 */
-	@Override
-	public void mouseClicked(MouseEvent e) {
-	}
 
-	@Override
-	public void mousePressed(MouseEvent e) {
-		if (e.getButton() == MouseEvent.BUTTON3) {
-			clicked = true;
-			px = e.getX();
-			py = e.getY();
-		}
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		if (e.getButton() == MouseEvent.BUTTON3) {
-			// int dx = e.getX() - px;
-			// int dy = e.getY() - py;
-			// verticalMovement += dy / scale;
-			// horizontalMovement -= dx / scale;
-			// componentResized(null);
-			clicked = false;
-		}
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-	}
-
-	@Override
-	public void mouseDragged(MouseEvent e) {
-		if (clicked) {
-			int dx = e.getX() - px;
-			int dy = e.getY() - py;
-			px = e.getX();
-			py = e.getY();
-			verticalMovement += dy / scale * 1.5;
-			horizontalMovement -= dx / scale * 1.5;
-			componentResized(null);
-		}
-	}
-
-	@Override
-	public void mouseMoved(MouseEvent e) {
-
-	}
-
-	@Override
-	public void mouseWheelMoved(MouseWheelEvent e) {
-		for (int i = 0; i < Math.abs(e.getWheelRotation()); i++) {
-			if (e.getWheelRotation() < 0) {
-				zoomIn();
-			} else {
-				zoomOut();
-			}
-		}
-		componentResized(null);
-	}
 }
