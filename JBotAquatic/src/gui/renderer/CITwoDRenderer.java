@@ -4,7 +4,13 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RadialGradientPaint;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import commoninterface.CISensor;
@@ -16,6 +22,8 @@ import commoninterface.entities.RobotLocation;
 import commoninterface.entities.SharedDroneLocation;
 import commoninterface.entities.VirtualEntity;
 import commoninterface.entities.Waypoint;
+import commoninterface.entities.target.FormationMotionData;
+import commoninterface.entities.target.Target;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.sensors.ConeTypeCISensor;
 import commoninterface.sensors.ThymioConeTypeCISensor;
@@ -33,18 +41,23 @@ import simulation.robot.sensors.ConeTypeSensor;
 import simulation.robot.sensors.Sensor;
 import simulation.util.Arguments;
 
-public class CITwoDRenderer extends TwoDRenderer {
+public class CITwoDRenderer extends TwoDRenderer implements MouseListener, MouseMotionListener, MouseWheelListener {
 
 	private static final double ENTITY_DIAMETER = 1.08;
-
 	protected int droneID;
 	protected boolean seeSensors;
 	protected boolean seeEntities;
+	protected boolean showVelocityVectors;
 	protected int coneSensorId;
 	protected double coneTransparence = .1;
 	protected String coneClass = "";
 	protected Color[] lineColors = new Color[] { Color.RED, Color.BLUE, Color.GREEN };
 	protected int colorIndex = 0;
+
+	private ArrayList<Target> drawTargets = new ArrayList<Target>();
+	private int px;
+	private int py;
+	private boolean clicked = false;
 
 	public CITwoDRenderer(Arguments args) {
 		super(args);
@@ -55,14 +68,18 @@ public class CITwoDRenderer extends TwoDRenderer {
 		coneSensorId = args.getArgumentAsIntOrSetDefault("conesensorid", -1);
 		coneTransparence = args.getArgumentAsDoubleOrSetDefault("coneTransparence", coneTransparence);
 		coneClass = args.getArgumentAsStringOrSetDefault("coneclass", "");
+		showVelocityVectors = args.getArgumentAsIntOrSetDefault("showVelocityVectors", 0) == 1;
+
+		addMouseListener(this);
+		addMouseMotionListener(this);
+		addMouseWheelListener(this);
 	}
 
 	@Override
 	public synchronized void drawFrame() {
+		drawTargets.clear();
 		super.drawFrame();
-
 		drawEnvironment();
-
 	}
 
 	protected void drawEnvironment() {
@@ -147,7 +164,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 	@Override
 	protected void drawEntities(Graphics graphics, Robot robot) {
 		if (seeEntities) {
-			Color color = graphics.getColor();
+			Color initialColor = graphics.getColor();
 			RobotCI robotci = (RobotCI) robot;
 			int circleDiameter = bigRobots ? (int) Math.max(10, Math.round(ENTITY_DIAMETER * scale))
 					: (int) Math.round(ENTITY_DIAMETER * scale);
@@ -155,27 +172,63 @@ public class CITwoDRenderer extends TwoDRenderer {
 			if (robot.getId() == 0)
 				colorIndex = 0;
 
-			// if(robot.getId() == droneID){
-
 			// to prevent ConcurrentModificationExceptions
 			Object[] entities = robotci.getEntities().toArray();
 
 			for (Object o : entities) {
 				Entity entity = (Entity) o;
 				if (entity instanceof GeoEntity) {
+					if (entity instanceof Target && !drawTargets.contains(entity)) {
+						graphics.setColor(Color.ORANGE);
 
-					if (entity instanceof SharedDroneLocation)
-						graphics.setColor(Color.BLUE.darker());
-					else if (entity instanceof RobotLocation)
-						graphics.setColor(Color.GREEN.darker());
-					else
-						graphics.setColor(Color.yellow.darker());
+						Target t = (Target) entity;
+						Vector2d pos = CoordinateUtilities.GPSToCartesian(t.getLatLon());
+						int diam = (int) (t.getRadius() * 2 * scale);
+						int x = transformX(pos.x) - diam / 2;
+						int y = transformY(pos.y) - diam / 2;
+						graphics.fillOval(x, y, diam, diam);
 
-					GeoEntity e = (GeoEntity) entity;
-					Vector2d pos = CoordinateUtilities.GPSToCartesian(e.getLatLon());
-					int x = transformX(pos.x) - circleDiameter / 2;
-					int y = transformY(pos.y) - circleDiameter / 2;
-					graphics.fillOval(x, y, circleDiameter, circleDiameter);
+						if (showVelocityVectors
+								&& ((Target) entity).getTargetMotionData() instanceof FormationMotionData) {
+							FormationMotionData formationMotionData = ((FormationMotionData) t.getTargetMotionData());
+							Vector2d targetPos = CoordinateUtilities.GPSToCartesian(t.getLatLon());
+							Vector2d velocityVector = new Vector2d(formationMotionData.getVelocityVector(t));
+
+							if (velocityVector.length() > 0) {
+								velocityVector.setLength(velocityVector.length() * 10);
+								velocityVector.add(targetPos);
+								
+								graphics.setColor(Color.BLACK);
+								graphics.drawLine(transformX(targetPos.x), transformY(targetPos.y),
+										transformX(velocityVector.x), transformY(velocityVector.y));
+
+								Color color = graphics.getColor();
+								graphics.setColor(Color.RED);
+
+								int radius = diam/10;
+								int x_pos = transformX(velocityVector.x) - radius;
+								int y_pos = transformY(velocityVector.y) - radius;
+
+								graphics.fillOval(x_pos, y_pos, radius * 2, radius * 2);
+								graphics.setColor(color);
+							}
+						}
+
+						drawTargets.add(t);
+					} else {
+						if (entity instanceof SharedDroneLocation)
+							graphics.setColor(Color.BLUE.darker());
+						else if (entity instanceof RobotLocation)
+							graphics.setColor(Color.GREEN.darker());
+						else
+							graphics.setColor(Color.yellow.darker());
+
+						GeoEntity e = (GeoEntity) entity;
+						Vector2d pos = CoordinateUtilities.GPSToCartesian(e.getLatLon());
+						int x = transformX(pos.x) - circleDiameter / 2;
+						int y = transformY(pos.y) - circleDiameter / 2;
+						graphics.fillOval(x, y, circleDiameter, circleDiameter);
+					}
 				} else if (entity instanceof VirtualEntity) {
 					graphics.setColor(Color.GREEN.darker());
 					VirtualEntity e = (VirtualEntity) entity;
@@ -187,7 +240,8 @@ public class CITwoDRenderer extends TwoDRenderer {
 					colorIndex++;
 				}
 			}
-			graphics.setColor(color);
+
+			graphics.setColor(initialColor);
 		}
 	}
 
@@ -387,4 +441,108 @@ public class CITwoDRenderer extends TwoDRenderer {
 		}
 	}
 
+	/*
+	 * Getter and setters
+	 */
+	public void seeSensors(boolean seeSensors) {
+		this.seeSensors = seeSensors;
+	}
+
+	public void seeEntities(boolean seeEntities) {
+		this.seeEntities = seeEntities;
+	}
+
+	public boolean isSeeSensorEnabled() {
+		return seeSensors;
+	}
+
+	public boolean isSeeEntitiesEnabled() {
+		return seeEntities;
+	}
+
+	public void setDroneID(int droneID) {
+		this.droneID = droneID;
+	}
+
+	public void setConeSensorID(int coneSensorId) {
+		this.coneSensorId = coneSensorId;
+	}
+
+	public void setConeTransparency(double coneTransparence) {
+		this.coneTransparence = coneTransparence;
+	}
+
+	public void setConeClass(String coneClass) {
+		this.coneClass = coneClass;
+	}
+
+	public void displayVelocityVectors(boolean show) {
+		this.showVelocityVectors = show;
+	}
+
+	/*
+	 * Interfaces implementation
+	 */
+	@Override
+	public void mouseClicked(MouseEvent e) {
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		if (e.getButton() == MouseEvent.BUTTON3) {
+			clicked = true;
+			px = e.getX();
+			py = e.getY();
+		}
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		if (e.getButton() == MouseEvent.BUTTON3) {
+			// int dx = e.getX() - px;
+			// int dy = e.getY() - py;
+			// verticalMovement += dy / scale;
+			// horizontalMovement -= dx / scale;
+			// componentResized(null);
+			clicked = false;
+		}
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseDragged(MouseEvent e) {
+		if (clicked) {
+			int dx = e.getX() - px;
+			int dy = e.getY() - py;
+			px = e.getX();
+			py = e.getY();
+			verticalMovement += dy / scale * 1.5;
+			horizontalMovement -= dx / scale * 1.5;
+			componentResized(null);
+		}
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent e) {
+
+	}
+
+	@Override
+	public void mouseWheelMoved(MouseWheelEvent e) {
+		for (int i = 0; i < Math.abs(e.getWheelRotation()); i++) {
+			if (e.getWheelRotation() < 0) {
+				zoomIn();
+			} else {
+				zoomOut();
+			}
+		}
+		componentResized(null);
+	}
 }
