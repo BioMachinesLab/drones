@@ -264,7 +264,6 @@ public class CITwoDRenderer extends TwoDRenderer {
 
 	@Override
 	protected void drawCones(Graphics graphics, Robot robot) {
-		System.out.println("Hello");
 		if (seeSensors) {
 			RobotCI robotCI = (RobotCI) robot;
 			if (robot.getId() == droneID && (coneSensorId >= 0 || !coneClass.isEmpty())) {
