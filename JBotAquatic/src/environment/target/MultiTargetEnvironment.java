@@ -1,12 +1,11 @@
 package environment.target;
 
-import java.util.Arrays;
-
 import commoninterface.AquaticDroneCI;
 import commoninterface.entities.target.Target;
-import commoninterface.entities.target.TargetLinearMotionData;
+import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
+import net.jafama.FastMath;
 import simulation.Simulator;
 import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
@@ -35,13 +34,12 @@ public class MultiTargetEnvironment extends TargetEnvironment {
 			}
 		}
 
-		targets = new Target[definedTargetsQuantity];
-
 		for (int i = 0; i < definedTargetsQuantity; i++) {
-			double x_pos = radiusOfObjPositioning * 2 * simulator.getRandom().nextDouble() - radiusOfObjPositioning;
-			double y_pos = radiusOfObjPositioning * 2 * simulator.getRandom().nextDouble() - radiusOfObjPositioning;
-			LatLon latLon = CoordinateUtilities.cartesianToGPS(x_pos, y_pos);
-			Target target = new Target("target" + i, latLon);
+			double radius = radiusOfObjPositioning * simulator.getRandom().nextDouble();
+			double orientation = (simulator.getRandom().nextDouble() * FastMath.PI * 2) % 360;
+			Vector2d position = new Vector2d(radius * FastMath.cos(orientation), radius * FastMath.sin(orientation));
+			LatLon latLon = CoordinateUtilities.cartesianToGPS(position);
+			Target target = new Target("target" + i, latLon, targetRadius);
 
 			if (i != 0) {
 				while (!safeForTarget(target, simulator)) {
@@ -50,16 +48,20 @@ public class MultiTargetEnvironment extends TargetEnvironment {
 				}
 			}
 
-			targets[i] = target;
+			targets.add(target);
 
 			if (moveTargets) {
-				double targetVelocity = movementVelocity;
-				if (variateTargetVelocity) {
-					targetVelocity += targetVelocity * simulator.getRandom().nextDouble() * 0.1;
-				}
-
-				double orientation = simulator.getRandom().nextDouble() * Math.PI * 2;
-				motionData.put(target, new TargetLinearMotionData(target, targetVelocity, orientation));
+				// TODO
+				// double targetVelocity = movementVelocity;
+				// if (variateTargetVelocity) {
+				// targetVelocity += targetVelocity *
+				// simulator.getRandom().nextDouble() * 0.1;
+				// }
+				//
+				// double orientation = simulator.getRandom().nextDouble() *
+				// Math.PI * 2;
+				// motionData.put(target, new TargetLinearMotionData(target,
+				// targetVelocity, orientation));
 			}
 		}
 
@@ -69,7 +71,7 @@ public class MultiTargetEnvironment extends TargetEnvironment {
 				updateCollisions(0);
 			} while (!safeForRobot(r, simulator));
 
-			((AquaticDroneCI) r).getEntities().addAll(Arrays.asList(targets));
+			((AquaticDroneCI) r).getEntities().addAll(targets);
 		}
 
 		setup = true;

@@ -2,10 +2,10 @@ package environment.target;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.entities.target.Target;
-import commoninterface.entities.target.TargetLinearMotionData;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
+import net.jafama.FastMath;
 import simulation.Simulator;
 import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
@@ -22,21 +22,25 @@ public class MonoTargetEnvironment extends TargetEnvironment {
 	public void setup(Simulator simulator) {
 		super.setup(simulator);
 
-		double x_pos = radiusOfObjPositioning * 2 * simulator.getRandom().nextDouble() - radiusOfObjPositioning;
-		double y_pos = radiusOfObjPositioning * 2 * simulator.getRandom().nextDouble() - radiusOfObjPositioning;
+		double radius = radiusOfObjPositioning * simulator.getRandom().nextDouble();
+		double orientation = (simulator.getRandom().nextDouble() * FastMath.PI * 2) % 360;
+		Vector2d position = new Vector2d(radius * FastMath.cos(orientation), radius * FastMath.sin(orientation));
 
-		LatLon latLon = CoordinateUtilities.cartesianToGPS(new Vector2d(x_pos, y_pos));
-		targets = new Target[1];
-		targets[0] = new Target("target", latLon);
+		LatLon latLon = CoordinateUtilities.cartesianToGPS(position);
+		targets.add(new Target("target", latLon, targetRadius));
 
 		if (moveTargets) {
-			double targetVelocity = movementVelocity;
-			if (variateTargetVelocity) {
-				targetVelocity += targetVelocity * simulator.getRandom().nextDouble() * 0.1;
-			}
-
-			double orientation = simulator.getRandom().nextDouble() * Math.PI * 2;
-			motionData.put(targets[0], new TargetLinearMotionData(targets[0], targetVelocity, orientation));
+			// TODO
+			// double targetVelocity = movementVelocity;
+			// if (variateTargetVelocity) {
+			// targetVelocity += targetVelocity *
+			// simulator.getRandom().nextDouble() * 0.1;
+			// }
+			//
+			// double orientation = simulator.getRandom().nextDouble() * Math.PI
+			// * 2;
+			// motionData.put(targets[0], new TargetLinearMotionData(targets[0],
+			// targetVelocity, orientation));
 		}
 
 		for (Robot r : robots) {
@@ -44,8 +48,8 @@ public class MonoTargetEnvironment extends TargetEnvironment {
 				positionDroneInRandomPos((AquaticDrone) r, simulator);
 				updateCollisions(0);
 			} while (!safeForRobot(r, simulator));
-		
-			((AquaticDroneCI) r).getEntities().add(targets[0]);
+
+			((AquaticDroneCI) r).getEntities().add(targets.get(0));
 		}
 
 		setup = true;

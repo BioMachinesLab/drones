@@ -1,5 +1,6 @@
 package environment.target;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import commoninterface.entities.target.MotionData;
@@ -28,8 +29,7 @@ public abstract class TargetEnvironment extends Environment {
 	protected double movementAzimuth = 0;
 	protected boolean variateTargetAzimuth = true;
 
-	protected Target[] targets;
-	protected HashMap<Target, MotionData> motionData = new HashMap<Target, MotionData>();
+	protected ArrayList<Target> targets = new ArrayList<Target>();
 	protected HashMap<String, LightPole> markers = new HashMap<String, LightPole>();
 
 	public TargetEnvironment(Simulator simulator, Arguments args) {
