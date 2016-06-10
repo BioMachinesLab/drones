@@ -27,7 +27,7 @@ public class Formation extends GeoEntity {
 	private double circleFormation_radius = 7.5;
 	private double arrowFormation_xDelta = lineFormationDelta;
 	private double arrowFormation_yDelta = lineFormationDelta;
-	private Vector2d initialTranslation = new Vector2d(0, 0);
+	private Vector2d initialTranslation = null;
 	private double initialRotation = 0;
 
 	public enum FormationType {
@@ -36,6 +36,7 @@ public class Formation extends GeoEntity {
 
 	public Formation(String name, LatLon latLon) {
 		super(name, latLon);
+		initialTranslation = CoordinateUtilities.GPSToCartesian(latLon);
 	}
 
 	/*
@@ -72,10 +73,6 @@ public class Formation extends GeoEntity {
 
 	public void setCircleFormationRadius(double circleFormation_radius) {
 		this.circleFormation_radius = circleFormation_radius;
-	}
-
-	public void setInitialTranslation(Vector2d initialTranslation) {
-		this.initialTranslation = initialTranslation;
 	}
 
 	public void setInitialRotation(double initialRotation) {
@@ -242,12 +239,9 @@ public class Formation extends GeoEntity {
 		targets = new ArrayList<Target>();
 		targetsRelativePositions = new HashMap<Target, Vector2d>();
 
-		Vector2d centroid = CoordinateUtilities.GPSToCartesian(latLon);
 		for (int i = 0; i < transformedPositons.length; i++) {
-			Vector2d finalPosition = new Vector2d(centroid.x + transformedPositons[i].x,
-					centroid.y + transformedPositons[i].y);
-			Target target = new Target("formation_target_" + i, CoordinateUtilities.cartesianToGPS(finalPosition),
-					targetRadius);
+			Target target = new Target("formation_target_" + i,
+					CoordinateUtilities.cartesianToGPS(transformedPositons[i]), targetRadius);
 			targets.add(target);
 			targetsRelativePositions.put(target, positions[i]);
 		}
@@ -274,5 +268,13 @@ public class Formation extends GeoEntity {
 		}
 
 		return newPositions;
+	}
+	
+	public void move(){
+		// TODO
+	}
+	
+	public void move(long step){
+		// TODO
 	}
 }

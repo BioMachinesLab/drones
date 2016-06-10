@@ -1223,28 +1223,6 @@ public class MapPanel extends UpdatePanel {
 		}
 		bottomPanel.add(initialRotationTextField);
 
-		bottomPanel.add(new JLabel("Initial translation: "));
-		JPanel translationPanel = new JPanel(new GridLayout(1, 4));
-		JLabel xLabel_2 = new JLabel("X=");
-		xLabel_2.setHorizontalAlignment(JLabel.CENTER);
-		translationPanel.add(xLabel_2);
-		JTextField translationXTextField = new JTextField(10);
-		translationXTextField.setHorizontalAlignment(JTextField.CENTER);
-		if (args.get("initialTranslationX") != null) {
-			translationXTextField.setText(args.get("initialTranslationX"));
-		}
-		translationPanel.add(translationXTextField);
-		JLabel yLabel_2 = new JLabel("Y=");
-		yLabel_2.setHorizontalAlignment(JLabel.CENTER);
-		translationPanel.add(yLabel_2);
-		JTextField translationYTextField = new JTextField(10);
-		translationYTextField.setHorizontalAlignment(JTextField.CENTER);
-		if (args.get("initialTranslationY") != null) {
-			translationYTextField.setText(args.get("initialTranslationY"));
-		}
-		translationPanel.add(translationYTextField);
-		bottomPanel.add(translationPanel);
-
 		bottomPanel.add(new JLabel("Target radius: "));
 		JTextField targetRadiusTextField = new JTextField(10);
 		targetRadiusTextField.setHorizontalAlignment(JTextField.CENTER);
@@ -1263,7 +1241,7 @@ public class MapPanel extends UpdatePanel {
 
 		optionsPanel.add(bottomPanel);
 		panel.add(optionsPanel, BorderLayout.SOUTH);
-		panel.setPreferredSize(new Dimension(360, 290));
+		panel.setPreferredSize(new Dimension(360, 270));
 
 		if (JOptionPane.showConfirmDialog(null, panel, "Formation parameters", JOptionPane.OK_CANCEL_OPTION,
 				JOptionPane.PLAIN_MESSAGE) == JOptionPane.OK_OPTION) {
@@ -1275,8 +1253,6 @@ public class MapPanel extends UpdatePanel {
 				double circleFormationRadius = Double.parseDouble(circleFormationRadiusTextField.getText());
 				boolean variateFormationParameters = variateFormationParametersCheckBox.isSelected();
 				double initialRotation = Double.parseDouble(initialRotationTextField.getText());
-				double translationX = Double.parseDouble(translationXTextField.getText());
-				double translationY = Double.parseDouble(translationYTextField.getText());
 				double targetRadius = Double.parseDouble(targetRadiusTextField.getText());
 				Long randomSeed = Long.parseLong(randomSeedTextField.getText());
 				FormationType formationType = (FormationType) formationTypeComboBox.getSelectedItem();
@@ -1287,7 +1263,6 @@ public class MapPanel extends UpdatePanel {
 				formation.setCircleFormationRadius(circleFormationRadius);
 				formation.setVariateFormationParameters(variateFormationParameters);
 				formation.setInitialRotation(initialRotation * Math.PI / 180);
-				formation.setInitialTranslation(new Vector2d(translationX, translationY));
 				formation.setRandom(new Random(randomSeed));
 				formation.buildFormation(targetQuantity, formationType, targetRadius);
 
