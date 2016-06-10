@@ -16,22 +16,30 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Random;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 
@@ -57,6 +65,8 @@ import commoninterface.entities.ObstacleLocation;
 import commoninterface.entities.RobotLocation;
 import commoninterface.entities.Waypoint;
 import commoninterface.entities.target.Formation;
+import commoninterface.entities.target.Formation.FormationType;
+import commoninterface.entities.target.Target;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.network.messages.EntityMessage;
 import commoninterface.utils.CoordinateUtilities;
@@ -67,7 +77,7 @@ import gui.utils.SortedListModel;
 import threads.UpdateThread;
 
 public class MapPanel extends UpdatePanel {
-	private static final long serialVersionUID = 3792686069879535790L;
+	private static final long serialVersionUID = 2367574368471038828L;
 	private static int POSITION_HISTORY = 1;
 	private static int SLEEP_TIME = 10;
 	private static final int MAP_TOP_OFFSET = 75;
@@ -86,6 +96,8 @@ public class MapPanel extends UpdatePanel {
 
 	private GeoFence geoFence = new GeoFence("geofence");
 	private Formation formation = null;
+	private LinkedList<Target> targets = new LinkedList<Target>();
+	private LinkedList<MapMarker> targetMarkers = new LinkedList<MapMarker>();
 	private LinkedList<Waypoint> waypoints = new LinkedList<Waypoint>();
 	private LinkedList<MapMarker> waypointMarkers = new LinkedList<MapMarker>();
 	private LinkedList<ObstacleLocation> obstacles = new LinkedList<ObstacleLocation>();
@@ -93,7 +105,6 @@ public class MapPanel extends UpdatePanel {
 	private LinkedList<String> selectedMarkerDrones = new LinkedList<String>();
 
 	private Layer geoFenceLayer;
-	private Layer formationLayer;
 	private DroneGUI droneGUI;
 	private MapStatus status = MapStatus.NONE;
 
@@ -212,7 +223,6 @@ public class MapPanel extends UpdatePanel {
 		add(treeMap, BorderLayout.CENTER);
 
 		geoFenceLayer = treeMap.addLayer("_GeoFence");
-		formationLayer = treeMap.addLayer("_target");
 		initActions();
 
 		// Lisbon
@@ -672,6 +682,10 @@ public class MapPanel extends UpdatePanel {
 		this.thread = t;
 	}
 
+	public UpdateThread getThread() {
+		return thread;
+	}
+
 	@Override
 	public synchronized void threadWait() {
 		while (true) {
@@ -790,15 +804,14 @@ public class MapPanel extends UpdatePanel {
 	}
 
 	public synchronized void addWaypoint(Coordinate c) {
-
 		String layerName = "waypoints";
-
 		Layer l = null;
 
-		for (Layer layer : treeMap.getLayers())
-			if (layer.getName().equals("waypoints"))
+		for (Layer layer : treeMap.getLayers()) {
+			if (layer.getName().equals(layerName)) {
 				l = layer;
-
+			}
+		}
 		if (l == null) {
 			l = treeMap.addLayer(layerName);
 		}
@@ -860,15 +873,40 @@ public class MapPanel extends UpdatePanel {
 	}
 
 	public synchronized void addFormation(Coordinate c) {
+		Formation formation = buildFormation(c);
 		if (formation != null) {
 			clearFormation();
-		}
+			String layerName = "formation";
+			Layer layer = null;
 
-		formation = new Formation("formation", new LatLon(c.getLat(), c.getLon()));
-		MapMarker marker = new MapMarkerFormation(formationLayer, formation);
-		formationLayer.add(marker);
-		getMap().addMapMarker(marker);
-		updateCommandPanel();
+			for (Layer l : treeMap.getLayers()) {
+				if (l.getName().equals(layerName)) {
+					layer = l;
+					break;
+				}
+			}
+
+			if (layer == null) {
+				layer = treeMap.addLayer(layerName);
+			}
+
+			clearFormation();
+
+			for (Target t : formation.getTargets()) {
+				Coordinate position = new Coordinate(t.getLatLon().getLat(), t.getLatLon().getLon());
+				String name = t.getName().replace("formation_target_", "");
+
+				MapMarker marker = new MapMarkerWaypoint(layer, name, position, Color.BLUE);
+				layer.add(marker);
+				targetMarkers.add(marker);
+				getMap().addMapMarker(marker);
+			}
+
+			synchronized (this) {
+				targets.addAll(formation.getTargets());
+				updateCommandPanel();
+			}
+		}
 	}
 
 	private void addObstacle(Coordinate c) {
@@ -974,23 +1012,14 @@ public class MapPanel extends UpdatePanel {
 	}
 
 	public void clearFormation() {
-		LinkedList<MapMarker> list = new LinkedList<MapMarker>();
-
-		if (formationLayer.getElements() != null) {
-			for (MapObject mo : formationLayer.getElements()) {
-				if (mo instanceof MapMarker) {
-					list.add((MapMarker) mo);
-					getMap().removeMapMarker((MapMarker) mo);
-				}
-			}
-
-			for (MapMarker m : list) {
-				treeMap.removeFromLayer(m);
-			}
-
-			formationLayer.getElements().clear();
-			formation = null;
+		for (MapMarker m : targetMarkers) {
+			treeMap.removeFromLayer(m);
+			getMap().removeMapMarker(m);
 		}
+
+		targets.clear();
+		targetMarkers.clear();
+		formation = null;
 
 		updateCommandPanel();
 	}
@@ -1098,5 +1127,212 @@ public class MapPanel extends UpdatePanel {
 			return false;
 
 		return true;
+	}
+
+	private Formation buildFormation(Coordinate c) {
+		HashMap<String, String> args = readArgsFromFile("formationParameters.conf");
+
+		JPanel panel = new JPanel(new BorderLayout());
+		JLabel label = new JLabel("Insert formation parameters");
+		Font font = label.getFont();
+		Font boldFont = new Font(font.getFontName(), Font.BOLD, font.getSize());
+		label.setFont(boldFont);
+		label.setHorizontalAlignment(JLabel.CENTER);
+		panel.add(label, BorderLayout.NORTH);
+
+		JPanel optionsPanel = new JPanel();
+		optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.PAGE_AXIS));
+
+		JPanel topPanel = new JPanel(new GridLayout(0, 2));
+		topPanel.add(new JLabel("Targets quantity: "));
+		JTextField targetsQuantityTextField = new JTextField(10);
+		targetsQuantityTextField.setHorizontalAlignment(JTextField.CENTER);
+		if (args.get("targetsQuantity") != null) {
+			targetsQuantityTextField.setText(args.get("targetsQuantity"));
+		}
+		topPanel.add(targetsQuantityTextField);
+
+		topPanel.add(new JLabel("Formation shape"));
+		JComboBox<FormationType> formationTypeComboBox = new JComboBox<FormationType>(FormationType.values());
+		DefaultListCellRenderer dlcr = new DefaultListCellRenderer();
+		dlcr.setHorizontalAlignment(DefaultListCellRenderer.CENTER);
+		formationTypeComboBox.setRenderer(dlcr);
+		int index = 0;
+		if (args.get("formationShape") != null) {
+			index = FormationType.valueOf(args.get("formationShape")).ordinal();
+		}
+		formationTypeComboBox.setSelectedIndex(index);
+		topPanel.add(formationTypeComboBox);
+
+		topPanel.add(new JLabel("Line formation delta: "));
+		JTextField lineFormationDeltaTextField = new JTextField(10);
+		lineFormationDeltaTextField.setHorizontalAlignment(JTextField.CENTER);
+		if (args.get("lineFormationDelta") != null) {
+			lineFormationDeltaTextField.setText(args.get("lineFormationDelta"));
+		}
+		topPanel.add(lineFormationDeltaTextField);
+
+		topPanel.add(new JLabel("Arrow formation delta: "));
+		JPanel deltasPanel = new JPanel(new GridLayout(1, 4));
+		JLabel xLabel_1 = new JLabel("X=");
+		xLabel_1.setHorizontalAlignment(JLabel.CENTER);
+		deltasPanel.add(xLabel_1);
+		JTextField arrowFormationXDeltaTextField = new JTextField(10);
+		arrowFormationXDeltaTextField.setHorizontalAlignment(JTextField.CENTER);
+		if (args.get("arrowFormation_xDelta") != null) {
+			arrowFormationXDeltaTextField.setText(args.get("arrowFormation_xDelta"));
+		}
+		deltasPanel.add(arrowFormationXDeltaTextField);
+		JLabel yLabel_1 = new JLabel("Y=");
+		yLabel_1.setHorizontalAlignment(JLabel.CENTER);
+		deltasPanel.add(yLabel_1);
+		JTextField arrowFormationYDeltaTextField = new JTextField(10);
+		arrowFormationYDeltaTextField.setHorizontalAlignment(JTextField.CENTER);
+		if (args.get("arrowFormation_yDelta") != null) {
+			arrowFormationYDeltaTextField.setText(args.get("arrowFormation_yDelta"));
+		}
+		deltasPanel.add(arrowFormationYDeltaTextField);
+		topPanel.add(deltasPanel);
+
+		topPanel.add(new JLabel("Circle formation radius: "));
+		JTextField circleFormationRadiusTextField = new JTextField(10);
+		circleFormationRadiusTextField.setHorizontalAlignment(JTextField.CENTER);
+		if (args.get("circleFormation_radius") != null) {
+			circleFormationRadiusTextField.setText(args.get("circleFormation_radius"));
+		}
+		topPanel.add(circleFormationRadiusTextField);
+		optionsPanel.add(topPanel);
+
+		JPanel dummyPanel_2 = new JPanel(new GridLayout(1, 1));
+		JCheckBox variateFormationParametersCheckBox = new JCheckBox("Add noise to formation parameters");
+		variateFormationParametersCheckBox.setHorizontalAlignment(JCheckBox.CENTER);
+		if (args.get("noiseInParameters") != null) {
+			variateFormationParametersCheckBox.setSelected((args.get("noiseInParameters").equals("1")));
+		} else {
+			variateFormationParametersCheckBox.setSelected(false);
+		}
+		dummyPanel_2.add(variateFormationParametersCheckBox);
+		optionsPanel.add(dummyPanel_2);
+
+		JPanel bottomPanel = new JPanel(new GridLayout(0, 2));
+		bottomPanel.add(new JLabel("Initial rotation (º): "));
+		JTextField initialRotationTextField = new JTextField(10);
+		initialRotationTextField.setHorizontalAlignment(JTextField.CENTER);
+		if (args.get("initialRotation") != null) {
+			initialRotationTextField.setText(args.get("initialRotation"));
+		}
+		bottomPanel.add(initialRotationTextField);
+
+		bottomPanel.add(new JLabel("Initial translation: "));
+		JPanel translationPanel = new JPanel(new GridLayout(1, 4));
+		JLabel xLabel_2 = new JLabel("X=");
+		xLabel_2.setHorizontalAlignment(JLabel.CENTER);
+		translationPanel.add(xLabel_2);
+		JTextField translationXTextField = new JTextField(10);
+		translationXTextField.setHorizontalAlignment(JTextField.CENTER);
+		if (args.get("initialTranslationX") != null) {
+			translationXTextField.setText(args.get("initialTranslationX"));
+		}
+		translationPanel.add(translationXTextField);
+		JLabel yLabel_2 = new JLabel("Y=");
+		yLabel_2.setHorizontalAlignment(JLabel.CENTER);
+		translationPanel.add(yLabel_2);
+		JTextField translationYTextField = new JTextField(10);
+		translationYTextField.setHorizontalAlignment(JTextField.CENTER);
+		if (args.get("initialTranslationY") != null) {
+			translationYTextField.setText(args.get("initialTranslationY"));
+		}
+		translationPanel.add(translationYTextField);
+		bottomPanel.add(translationPanel);
+
+		bottomPanel.add(new JLabel("Target radius: "));
+		JTextField targetRadiusTextField = new JTextField(10);
+		targetRadiusTextField.setHorizontalAlignment(JTextField.CENTER);
+		if (args.get("targetRadius") != null) {
+			targetRadiusTextField.setText(args.get("targetRadius"));
+		}
+		bottomPanel.add(targetRadiusTextField);
+
+		bottomPanel.add(new JLabel("Random seed: "));
+		JTextField randomSeedTextField = new JTextField(10);
+		randomSeedTextField.setHorizontalAlignment(JTextField.CENTER);
+		if (args.get("randomSeed") != null) {
+			randomSeedTextField.setText(args.get("randomSeed"));
+		}
+		bottomPanel.add(randomSeedTextField);
+
+		optionsPanel.add(bottomPanel);
+		panel.add(optionsPanel, BorderLayout.SOUTH);
+		panel.setPreferredSize(new Dimension(360, 290));
+
+		if (JOptionPane.showConfirmDialog(null, panel, "Formation parameters", JOptionPane.OK_CANCEL_OPTION,
+				JOptionPane.PLAIN_MESSAGE) == JOptionPane.OK_OPTION) {
+			try {
+				int targetQuantity = Integer.parseInt(targetsQuantityTextField.getText());
+				double lineFormationDelta = Double.parseDouble(lineFormationDeltaTextField.getText());
+				double arrowFormationXDelta = Double.parseDouble(arrowFormationXDeltaTextField.getText());
+				double arrowFormationYDelta = Double.parseDouble(arrowFormationYDeltaTextField.getText());
+				double circleFormationRadius = Double.parseDouble(circleFormationRadiusTextField.getText());
+				boolean variateFormationParameters = variateFormationParametersCheckBox.isSelected();
+				double initialRotation = Double.parseDouble(initialRotationTextField.getText());
+				double translationX = Double.parseDouble(translationXTextField.getText());
+				double translationY = Double.parseDouble(translationYTextField.getText());
+				double targetRadius = Double.parseDouble(targetRadiusTextField.getText());
+				Long randomSeed = Long.parseLong(randomSeedTextField.getText());
+				FormationType formationType = (FormationType) formationTypeComboBox.getSelectedItem();
+
+				formation = new Formation("formation", new LatLon(c.getLat(), c.getLon()));
+				formation.setLineFormationDelta(lineFormationDelta);
+				formation.setArrowFormationDeltas(new Vector2d(arrowFormationXDelta, arrowFormationYDelta));
+				formation.setCircleFormationRadius(circleFormationRadius);
+				formation.setVariateFormationParameters(variateFormationParameters);
+				formation.setInitialRotation(initialRotation * Math.PI / 180);
+				formation.setInitialTranslation(new Vector2d(translationX, translationY));
+				formation.setRandom(new Random(randomSeed));
+				formation.buildFormation(targetQuantity, formationType, targetRadius);
+
+				return formation;
+			} catch (NumberFormatException e) {
+				JOptionPane.showMessageDialog(this, "Illegal argument(s)!", "Error", JOptionPane.ERROR_MESSAGE);
+				return null;
+			}
+		} else {
+			return null;
+		}
+	}
+
+	private HashMap<String, String> readArgsFromFile(String fileName) {
+		HashMap<String, String> args = new HashMap<String, String>();
+
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new FileReader(fileName));
+
+			String line = br.readLine();
+			while (line != null) {
+				if (!line.startsWith("#")) {
+					String[] elements = line.trim().split("=");
+					if (elements.length >= 2) {
+						args.put(elements[0].trim(), elements[1].trim());
+					}
+				}
+				line = br.readLine();
+			}
+		} catch (FileNotFoundException e) {
+			System.err.printf("[%s] File %s not found!\n", getClass().getName(), fileName);
+		} catch (IOException e) {
+			System.err.printf("[%s] Error reading file %s!\n", getClass().getName(), fileName);
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					System.err.printf("[%s] Error closing file %s\n%s\n", getClass().getName(), fileName,
+							e.getMessage());
+				}
+			}
+		}
+
+		return args;
 	}
 }
