@@ -31,7 +31,7 @@ public class GPSTimeProviderServerConnectionHandler extends Thread {
 
 			while (true) {
 				Message message = (Message) in.readObject();
-
+				
 				if (message instanceof InformationRequest) {
 					processData((InformationRequest) message);
 				}
@@ -100,7 +100,7 @@ public class GPSTimeProviderServerConnectionHandler extends Thread {
 				out.writeObject(toSend);
 				out.flush();
 			} catch (IOException e) {
-				server.setErrorMessage("Unable to write object to socket ->" + e.getMessage());
+				server.setErrorMessage("Unable to write object to socket -> " + e.getMessage());
 			}
 		} else {
 			server.setErrorMessage("Error: " + message.getSenderIPAddr() + " (" + message.getSenderHostname()

@@ -207,8 +207,8 @@ public class GPSModuleInput {
 		return available;
 	}
 
-	public GPSData getGPSData() {
-		return gpsData;
+	public synchronized GPSData getGPSData() {
+		return gpsData.clone();
 	}
 
 	private void print(String str) {
@@ -219,13 +219,11 @@ public class GPSModuleInput {
 
 	public static String[] getSerialPortIdentifiers() {
 		ArrayList<String> identifiersStrings = new ArrayList<String>();
-
-		Enumeration identifiers = CommPortIdentifier.getPortIdentifiers();
+		@SuppressWarnings("unchecked")
+		Enumeration<CommPortIdentifier> identifiers = CommPortIdentifier.getPortIdentifiers();
 
 		while (identifiers.hasMoreElements()) {
-			System.out.println("Teste: " + identifiers.nextElement().getClass().toString());
-
-			// identifiersStrings.add(identifiers.nextElement().toString());
+			identifiersStrings.add(identifiers.nextElement().getName());
 		}
 
 		return identifiersStrings.toArray(new String[identifiersStrings.size()]);

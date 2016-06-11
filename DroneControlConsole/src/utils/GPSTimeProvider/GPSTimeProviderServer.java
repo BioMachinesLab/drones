@@ -55,6 +55,7 @@ public class GPSTimeProviderServer implements GPSTimeProviderServerObservated {
 			enable.set(false);
 
 			closeConnections();
+			observer.setMessage("Shutting down server!");
 			try {
 				serverSocket.close();
 			} catch (IOException e) {
@@ -64,8 +65,6 @@ public class GPSTimeProviderServer implements GPSTimeProviderServerObservated {
 			observer.setOfflineServer();
 			server = null;
 			connections.clear();
-
-			// TODO kill gpsModule
 		} else {
 			observer.setErrorMessage("Server already offline!");
 		}
@@ -90,6 +89,7 @@ public class GPSTimeProviderServer implements GPSTimeProviderServerObservated {
 
 				if (gpsModuleInput.isAvailable()) {
 					observer.setOnlineGPSModule();
+					observer.setMessage("Initialized GPS module!");
 				} else {
 					observer.setErrorMessage("Error initializing GPS module!");
 				}
@@ -170,7 +170,7 @@ public class GPSTimeProviderServer implements GPSTimeProviderServerObservated {
 
 	public void closeConnections() {
 		if (!connections.isEmpty()) {
-			System.out.printf("[%s] Closing Connections!\n");
+			observer.setMessage("Closing Connections!");
 			for (GPSTimeProviderServerConnectionHandler conn : connections) {
 				if (!conn.getSocket().isClosed())
 					conn.closeConnectionWhitoutRemove();
