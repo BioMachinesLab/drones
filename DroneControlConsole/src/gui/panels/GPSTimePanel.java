@@ -140,7 +140,7 @@ public class GPSTimePanel extends JPanel {
 		actionButton.setBackground(Color.RED);
 
 		updater.interrupt();
-		
+
 		gui.getMapPanel().clearBaseStation();
 	}
 
@@ -174,16 +174,20 @@ public class GPSTimePanel extends JPanel {
 					timeTextField.setText(date.getHourOfDay() + ":" + date.getMinuteOfHour() + ":"
 							+ date.getSecondOfMinute() + "," + date.getSecondOfMinute());
 					satelitesTextField.setText(Integer.toString(sateliteCount));
-					gui.getMapPanel().clearBaseStation();
+
+					if (gpsTimeProviderClient.getGPSData().isFix()) {
+						LatLon latLon = new LatLon(gpsTimeProviderClient.getGPSData().getLatitudeDecimal(),
+								gpsTimeProviderClient.getGPSData().getLongitudeDecimal());
+						gui.getMapPanel().setBaseStation(latLon);
+					} else {
+						gui.getMapPanel().clearBaseStation();
+					}
 				} else {
 					LocalDateTime date = new LocalDateTime();
 					timeTextField.setText(date.getHourOfDay() + ":" + date.getMinuteOfHour() + ":"
 							+ date.getSecondOfMinute() + "," + date.getSecondOfMinute());
 					satelitesTextField.setText("Local time");
-
-					LatLon latLon = new LatLon(gpsTimeProviderClient.getGPSData().getLatitudeDecimal(),
-							gpsTimeProviderClient.getGPSData().getLongitudeDecimal());
-					gui.getMapPanel().setBaseStation(latLon);
+					gui.getMapPanel().clearBaseStation();
 				}
 			}
 			stopClient();
