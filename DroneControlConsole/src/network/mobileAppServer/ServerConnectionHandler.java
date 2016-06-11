@@ -1,27 +1,25 @@
 package network.mobileAppServer;
 
-import gui.panels.CommandPanel;
-import gui.panels.MotorsPanel;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import main.DroneControlConsole;
-import main.RobotControlConsole;
-import network.server.shared.dataObjects.DroneData;
-import network.server.shared.dataObjects.ServerStatusData;
-import network.server.shared.messages.CommandMessage;
-import network.server.shared.messages.DronesInformationRequest;
-import network.server.shared.messages.DronesInformationResponse;
-import network.server.shared.messages.DronesMotorsSet;
-import network.server.shared.messages.NetworkMessage;
-import network.server.shared.messages.ServerMessage;
-import network.server.shared.messages.ServerStatusResponse;
-
 import com.google.gson.Gson;
+
+import gui.panels.CommandPanel;
+import gui.panels.MotorsPanel;
+import main.DroneControlConsole;
+import network.mobileAppServer.shared.dataObjects.DroneData;
+import network.mobileAppServer.shared.dataObjects.ServerStatusData;
+import network.mobileAppServer.shared.messages.CommandMessage;
+import network.mobileAppServer.shared.messages.DronesInformationRequest;
+import network.mobileAppServer.shared.messages.DronesInformationResponse;
+import network.mobileAppServer.shared.messages.DronesMotorsSet;
+import network.mobileAppServer.shared.messages.NetworkMessage;
+import network.mobileAppServer.shared.messages.ServerMessage;
+import network.mobileAppServer.shared.messages.ServerStatusResponse;
 
 public class ServerConnectionHandler extends Thread {
 	protected Socket socket;
@@ -89,7 +87,7 @@ public class ServerConnectionHandler extends Thread {
 					.getClientQuantity());
 
 			if (console instanceof DroneControlConsole) {
-				serverStatusData.setConnectedTo(((DroneControlConsole) console)
+				serverStatusData.setConnectedTo(console
 						.getDronesSet().getConnectedToAddress());
 			}
 
@@ -144,7 +142,7 @@ public class ServerConnectionHandler extends Thread {
 			break;
 		default:
 			System.out.println("Received message with unknown type: "
-					+ ((ServerMessage) inMessage).getMessageType());
+					+ inMessage.getMessageType());
 			break;
 		}
 	}
