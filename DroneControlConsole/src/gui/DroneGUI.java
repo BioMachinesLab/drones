@@ -124,7 +124,7 @@ public class DroneGUI extends RobotGUI {
 		logsPanel = new LogsPanel(this);
 		leftPanel.add(logsPanel, BorderLayout.CENTER);
 
-		gpsTimePanel = new GPSTimePanel();
+		gpsTimePanel = new GPSTimePanel(this);
 		leftPanel.add(gpsTimePanel, BorderLayout.SOUTH);
 
 		add(leftPanel, BorderLayout.WEST);
