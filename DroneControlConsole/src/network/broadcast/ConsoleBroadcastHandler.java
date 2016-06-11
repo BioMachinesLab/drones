@@ -1,9 +1,11 @@
 package network.broadcast;
 
 import java.io.IOException;
+import java.net.BindException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
@@ -38,9 +40,13 @@ public class ConsoleBroadcastHandler {
 
 	public ConsoleBroadcastHandler(RobotControlConsole console) {
 		this.console = console;
-		receiver = new BroadcastReceiver();
-		sender = new BroadcastSender();
-		receiver.start();
+		try {
+			receiver = new BroadcastReceiver();
+			sender = new BroadcastSender();
+			receiver.start();
+		} catch (IOException e) {
+			System.err.printf("[%s] Error initializing handlers! -> %s\n", getClass().getName(), e.getMessage());
+		}
 	}
 
 	public void messageReceived(String address, String message) {
@@ -52,8 +58,13 @@ public class ConsoleBroadcastHandler {
 	}
 
 	public void closeConnections() {
-		receiver.shutdown();
-		sender.shutdown();
+		if (receiver != null) {
+			receiver.shutdown();
+		}
+
+		if (sender != null) {
+			sender.shutdown();
+		}
 	}
 
 	class BroadcastSender {
@@ -65,16 +76,18 @@ public class ConsoleBroadcastHandler {
 			try {
 				InetAddress ownInetAddress = InetAddress.getByName(NetworkUtils.getAddress());
 				ownAddress = ownInetAddress.getHostAddress();
-				System.out.printf("[%s] SENDER %s\n", getClass().getName(), ownInetAddress);
 				broadcastAddress = NetworkUtils.getBroadcastAddress(ownAddress);
 				socket = new DatagramSocket(PORT + 1, ownInetAddress);
 				socket.setBroadcast(true);
+				System.out.printf("[%s] SENDER %s\n", getClass().getName(), ownInetAddress);
 
 				if (retransmit) {
 					retransmitSocket = new DatagramSocket(RETRANSMIT_PORT - 1, ownInetAddress);
 					retransmitSocket.setBroadcast(true);
 				}
-			} catch (Exception e) {
+			} catch (BindException e) {
+				System.err.printf("[%s] Socket already in use!\n", getClass().getName());
+			} catch (SocketException | UnknownHostException e) {
 				e.printStackTrace();
 			}
 		}
@@ -196,14 +209,17 @@ public class ConsoleBroadcastHandler {
 		private DatagramSocket socket;
 		private boolean execute = true;
 
-		public BroadcastReceiver() {
+		public BroadcastReceiver() throws IOException {
 			try {
-				System.out.printf("[%s] RECEIVER %s, port: %d\n", getClass().getName(),
-						InetAddress.getByName("0.0.0.0").toString(), PORT);
 				socket = new DatagramSocket(PORT, InetAddress.getByName("0.0.0.0"));
 				socket.setBroadcast(true);
-			} catch (Exception e) {
-				e.printStackTrace();
+				System.out.printf("[%s] RECEIVER %s, port: %d\n", getClass().getName(),
+						InetAddress.getByName("0.0.0.0").toString(), PORT);
+			} catch (BindException e) {
+				System.err.printf("[%s] Socket already in use!\n", getClass().getName());
+				throw e;
+			} catch (SocketException | UnknownHostException e) {
+				throw e;
 			}
 		}
 

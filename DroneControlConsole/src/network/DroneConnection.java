@@ -59,7 +59,7 @@ public abstract class DroneConnection extends Thread {
 							data.getClass().getSimpleName());
 			}
 		} catch (IOException e) {
-			System.err.printf("[%s] Unable to send data... there is an open connection?\n", this.getClass().getName());
+			System.err.printf("[%s] Unable to send data... is there an open connection?\n", this.getClass().getName());
 			e.printStackTrace();
 		}
 	}
