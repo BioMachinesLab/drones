@@ -17,6 +17,8 @@ import javax.swing.JTextField;
 
 import org.joda.time.LocalDateTime;
 
+import commoninterface.utils.jcoord.LatLon;
+import gui.DroneGUI;
 import network.GPSTimeProviderClient;
 
 public class GPSTimePanel extends JPanel {
@@ -25,13 +27,15 @@ public class GPSTimePanel extends JPanel {
 	private final static int SERVER_PORT = 9190;
 	private GPSTimeProviderClient gpsTimeProviderClient = null;
 
+	private DroneGUI gui;
 	private JButton actionButton;
 	private JTextField timeTextField;
 	private JTextField satelitesTextField;
 
 	private Updater updater = null;
 
-	public GPSTimePanel() {
+	public GPSTimePanel(DroneGUI gui) {
+		this.gui = gui;
 		buildPanel();
 
 		try {
@@ -91,6 +95,20 @@ public class GPSTimePanel extends JPanel {
 				stopClient();
 			}
 
+			if (!gpsTimeProviderClient.isAlive() && gpsTimeProviderClient.exited()) {
+				try {
+					if (InetAddress.getByName(SERVER_IP).isReachable(5 * 1000)) {
+						gpsTimeProviderClient = new GPSTimeProviderClient(InetAddress.getByName(SERVER_IP),
+								SERVER_PORT);
+					} else {
+						System.err.printf("[%s] Unreachable GPS time provider server\n", getClass().getName());
+					}
+				} catch (IOException e) {
+					System.err.printf("[%s] Error resolving server address -> %s\n", getClass().getName(),
+							e.getMessage());
+				}
+			}
+
 			gpsTimeProviderClient.connect();
 			gpsTimeProviderClient.start();
 
@@ -122,35 +140,54 @@ public class GPSTimePanel extends JPanel {
 		actionButton.setBackground(Color.RED);
 
 		updater.interrupt();
+		
+		gui.getMapPanel().clearBaseStation();
 	}
 
 	private class Updater extends Thread {
 
 		@Override
 		public void run() {
-			while (gpsTimeProviderClient.connectionOK()) {
+			boolean exit = false;
+			int errors = 0;
+
+			while (gpsTimeProviderClient.connectionOK() && !exit) {
 				try {
 					gpsTimeProviderClient.requestUpdate();
-					sleep(1000);
+					sleep(500);
 				} catch (InterruptedException e) {
+				} catch (IOException e) {
+					// System.err.printf("[%s] Unable to send data... is there
+					// an open connection?\n",
+					// getClass().getName());
+					errors++;
+
+					if (errors == 5) {
+						exit = true;
+						System.err.printf("[%s] GPS time provider server is down!\n", getClass().getName());
+					}
 				}
 
-				LocalDateTime data = gpsTimeProviderClient.getGPSData().getDate();
-
-				if (data != null) {
+				if (gpsTimeProviderClient.getGPSData() != null) {
+					LocalDateTime date = gpsTimeProviderClient.getGPSData().getDate();
 					int sateliteCount = gpsTimeProviderClient.getGPSData().getNumberOfSatellitesInView();
-					timeTextField.setText(data.getHourOfDay() + ":" + data.getMinuteOfHour() + ":"
-							+ data.getSecondOfMinute() + "," + data.getSecondOfMinute());
+					timeTextField.setText(date.getHourOfDay() + ":" + date.getMinuteOfHour() + ":"
+							+ date.getSecondOfMinute() + "," + date.getSecondOfMinute());
 					satelitesTextField.setText(Integer.toString(sateliteCount));
+					gui.getMapPanel().clearBaseStation();
 				} else {
-					data = new LocalDateTime();
-					timeTextField.setText(data.getHourOfDay() + ":" + data.getMinuteOfHour() + ":"
-							+ data.getSecondOfMinute() + "," + data.getSecondOfMinute());
+					LocalDateTime date = new LocalDateTime();
+					timeTextField.setText(date.getHourOfDay() + ":" + date.getMinuteOfHour() + ":"
+							+ date.getSecondOfMinute() + "," + date.getSecondOfMinute());
 					satelitesTextField.setText("Local time");
+
+					LatLon latLon = new LatLon(gpsTimeProviderClient.getGPSData().getLatitudeDecimal(),
+							gpsTimeProviderClient.getGPSData().getLongitudeDecimal());
+					gui.getMapPanel().setBaseStation(latLon);
 				}
 			}
+			stopClient();
 		}
-
 	}
 
 	public LocalDateTime getDate() {
