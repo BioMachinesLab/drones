@@ -1339,10 +1339,12 @@ public class MapPanel extends UpdatePanel {
 	}
 
 	public void clearBaseStation() {
-		treeMap.removeFromLayer(basestationMarker);
-		getMap().removeMapMarker(basestationMarker);
-		basestationMarker = null;
+		if (basestationMarker != null) {
+			treeMap.removeFromLayer(basestationMarker);
+			getMap().removeMapMarker(basestationMarker);
+			basestationMarker = null;
 
-		updateCommandPanel();
+			updateCommandPanel();
+		}
 	}
 }
