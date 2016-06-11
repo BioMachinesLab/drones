@@ -1,5 +1,6 @@
 package gui.panels;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -30,6 +31,9 @@ public class GPSTimePanel extends JPanel {
 	private DroneGUI gui;
 	private JButton actionButton;
 	private JTextField timeTextField;
+	private JTextField hasFixTextField;
+	private JTextField latitudeTextField;
+	private JTextField longitudeTextField;
 	private JTextField satelitesTextField;
 
 	private Updater updater = null;
@@ -50,24 +54,41 @@ public class GPSTimePanel extends JPanel {
 	}
 
 	private void buildPanel() {
-		setBorder(BorderFactory.createTitledBorder("GPS Time Client"));
-		setLayout(new GridLayout(3, 1));
-
-		JPanel inputPanel = new JPanel(new GridLayout(2, 2));
+		JPanel inputPanel = new JPanel(new GridLayout(5, 2));
 		inputPanel.add(new JLabel("Time:"));
 		timeTextField = new JTextField("N/A");
-		timeTextField.setEditable(false);
 		timeTextField.setHorizontalAlignment(JTextField.CENTER);
+		timeTextField.setEditable(false);
 		inputPanel.add(timeTextField);
+
+		inputPanel.add(new JLabel("Has fix:"));
+		hasFixTextField = new JTextField("NO");
+		hasFixTextField.setBackground(Color.RED);
+		hasFixTextField.setHorizontalAlignment(JTextField.CENTER);
+		hasFixTextField.setEditable(false);
+		inputPanel.add(hasFixTextField);
+
+		inputPanel.add(new JLabel("Latitude:"));
+		latitudeTextField = new JTextField("N/A");
+		latitudeTextField.setHorizontalAlignment(JTextField.CENTER);
+		latitudeTextField.setEditable(false);
+		inputPanel.add(latitudeTextField);
+
+		inputPanel.add(new JLabel("Longitude:"));
+		longitudeTextField = new JTextField("N/A");
+		longitudeTextField.setHorizontalAlignment(JTextField.CENTER);
+		longitudeTextField.setEditable(false);
+		inputPanel.add(longitudeTextField);
 
 		inputPanel.add(new JLabel("Satelites:"));
 		satelitesTextField = new JTextField("N/A");
-		satelitesTextField.setEditable(false);
 		satelitesTextField.setHorizontalAlignment(JTextField.CENTER);
+		satelitesTextField.setEditable(false);
 		inputPanel.add(satelitesTextField);
 
 		actionButton = new JButton("Start");
 		actionButton.setBackground(Color.RED);
+		actionButton.setSize(new Dimension(100, 20));
 		actionButton.addActionListener(new ActionListener() {
 
 			@Override
@@ -76,9 +97,11 @@ public class GPSTimePanel extends JPanel {
 			}
 		});
 
-		add(inputPanel);
-		add(actionButton);
-		setPreferredSize(new Dimension(100, 150));
+		setBorder(BorderFactory.createTitledBorder("GPS Time Client"));
+		setLayout(new BorderLayout());
+		add(inputPanel, BorderLayout.CENTER);
+		add(actionButton, BorderLayout.SOUTH);
+		setPreferredSize(new Dimension(100, 180));
 	}
 
 	private void toggleButton() {
@@ -124,7 +147,7 @@ public class GPSTimePanel extends JPanel {
 						JOptionPane.ERROR_MESSAGE);
 			}
 		} catch (IOException e) {
-			System.err.printf("[%s] Error initializing GPS time provider client %s\n", getClass().getName(),
+			System.err.printf("[%s] Error initializing GPS time provider client -> %s\n", getClass().getName(),
 					e.getMessage());
 			JOptionPane.showMessageDialog(this, "Error initializing GPS time provider client!\n " + e.getMessage(),
 					"Error", JOptionPane.ERROR_MESSAGE);
@@ -134,13 +157,16 @@ public class GPSTimePanel extends JPanel {
 	public void stopClient() {
 		gpsTimeProviderClient.closeConnection();
 
-		timeTextField = new JTextField("N/A");
-		satelitesTextField = new JTextField("N/A");
+		timeTextField.setText("N/A");
+		satelitesTextField.setText("N/A");
+		latitudeTextField.setText("N/A");
+		longitudeTextField.setText("N/A");
 		actionButton.setText("Start");
 		actionButton.setBackground(Color.RED);
+		hasFixTextField.setText("NO");
+		hasFixTextField.setBackground(Color.RED);
 
 		updater.interrupt();
-
 		gui.getMapPanel().clearBaseStation();
 	}
 
@@ -179,15 +205,30 @@ public class GPSTimePanel extends JPanel {
 						LatLon latLon = new LatLon(gpsTimeProviderClient.getGPSData().getLatitudeDecimal(),
 								gpsTimeProviderClient.getGPSData().getLongitudeDecimal());
 						gui.getMapPanel().setBaseStation(latLon);
+
+						latitudeTextField
+								.setText(Double.toString(gpsTimeProviderClient.getGPSData().getLatitudeDecimal()));
+						longitudeTextField
+								.setText(Double.toString(gpsTimeProviderClient.getGPSData().getLongitudeDecimal()));
+						hasFixTextField.setText("YES");
+						hasFixTextField.setBackground(Color.GREEN);
 					} else {
 						gui.getMapPanel().clearBaseStation();
+						latitudeTextField.setText("N/A");
+						longitudeTextField.setText("N/A");
+						hasFixTextField.setText("NO");
+						hasFixTextField.setBackground(Color.RED);
 					}
 				} else {
 					LocalDateTime date = new LocalDateTime();
 					timeTextField.setText(date.getHourOfDay() + ":" + date.getMinuteOfHour() + ":"
 							+ date.getSecondOfMinute() + "," + date.getSecondOfMinute());
-					satelitesTextField.setText("Local time");
+					satelitesTextField.setText("Server time");
 					gui.getMapPanel().clearBaseStation();
+					latitudeTextField.setText("N/A");
+					longitudeTextField.setText("N/A");
+					hasFixTextField.setText("NO");
+					hasFixTextField.setBackground(Color.RED);
 				}
 			}
 			stopClient();
