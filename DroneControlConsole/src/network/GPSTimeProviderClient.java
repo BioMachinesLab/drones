@@ -11,7 +11,7 @@ import commoninterface.dataobjects.GPSData;
 import commoninterface.network.messages.GPSMessage;
 import commoninterface.network.messages.InformationRequest;
 import commoninterface.network.messages.InformationRequest.MessageType;
-import main.RobotControlConsole;
+import commoninterface.network.messages.Message;
 
 public class GPSTimeProviderClient extends Thread {
 
@@ -23,7 +23,6 @@ public class GPSTimeProviderClient extends Thread {
 	private InetAddress destHost;
 	private String destHostName;
 	private String myHostname;
-	private RobotControlConsole console;
 
 	private boolean ready = false;
 	private boolean exit = false;
@@ -46,52 +45,51 @@ public class GPSTimeProviderClient extends Thread {
 	@Override
 	public void run() {
 		try {
-			initializeCommunications();
+			try {
+				initializeCommunications();
+			} catch (ClassNotFoundException e) {
+				System.err.printf("[%s] I didn't reveived a correct name from %s\n", getClass().getName(),
+						socket.getInetAddress().getHostAddress());
+				exit = true;
+			}
 
 			while (!exit) {
-				receiveData();
+				Message message = (Message) in.readObject();
+
+				if (message instanceof GPSMessage) {
+					if (gpsData == null) {
+						gpsData = ((GPSMessage) message).getGPSData();
+					} else {
+						synchronized (gpsData) {
+							gpsData = ((GPSMessage) message).getGPSData();
+						}
+					}
+					if (DEBUG)
+						System.out.printf("[%s] Received %s\n", this.getClass().getName(),
+								message.getClass().getSimpleName());
+				}
 			}
 		} catch (IOException e) {
-			System.out.printf("[%s] GPS Time server closed the connection with %s (%s:%d)\n", getClass().getName(),
+			System.out.printf("[%s] GPS Time server %s (%s:%d) closed the connection\n", getClass().getName(),
 					destHostName, destHost.getHostAddress(), port);
-		} catch (ClassNotFoundException e) {
-			System.err.printf("[%s] I didn't reveived a correct name from %s\n", getClass().getName(),
-					socket.getInetAddress().getHostAddress());
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			console.disconnect();
-		}
-	}
-
-	private void receiveData() throws IOException {
-		try {
-			GPSMessage message = (GPSMessage) in.readObject();
-			if (DEBUG)
-				System.out.printf("[%s] Received %s\n", this.getClass().getName(), message.getClass().getSimpleName());
-
-			gpsData = message.getGPSData();
 		} catch (ClassNotFoundException e) {
 			System.err.printf("[%s] Received class of unknown type from %s, so it was discarded....\n",
 					getClass().getName(), destHostName);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
-	public synchronized void requestUpdate() {
+	public synchronized void requestUpdate() throws IOException {
 		if (!ready)
 			return;
 
-		try {
-			if (socket != null && !socket.isClosed()) {
-				InformationRequest request = new InformationRequest(MessageType.GPS, myHostname);
-				out.writeObject(request);
-				out.flush();
-				if (DEBUG)
-					System.out.printf("[%s] Sent %s\n", getClass().getName(), request.getClass().getSimpleName());
-			}
-		} catch (IOException e) {
-			System.err.printf("[%s] Unable to send data... is there an open connection?\n", getClass().getName());
-			e.printStackTrace();
+		if (socket != null && !socket.isClosed()) {
+			InformationRequest request = new InformationRequest(MessageType.GPS, myHostname);
+			out.writeObject(request);
+			out.flush();
+			if (DEBUG)
+				System.out.printf("[%s] Sent %s\n", getClass().getName(), request.getClass().getSimpleName());
 		}
 	}
 
@@ -122,7 +120,6 @@ public class GPSTimeProviderClient extends Thread {
 					destHost.getHostAddress(), port);
 			try {
 				exit = true;
-				this.interrupt();
 				socket.close();
 				in.close();
 				out.close();
@@ -157,5 +154,9 @@ public class GPSTimeProviderClient extends Thread {
 
 	public GPSData getGPSData() {
 		return gpsData;
+	}
+
+	public synchronized boolean exited() {
+		return exit;
 	}
 }
