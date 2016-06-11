@@ -9,7 +9,7 @@ import gui.RobotGUI;
 import network.DroneConsoleMessageHandler;
 import network.broadcast.ConsoleBroadcastHandler;
 import network.mobileAppServer.ServerConnectionListener;
-import network.server.shared.dataObjects.DronesSet;
+import network.mobileAppServer.shared.dataObjects.DronesSet;
 import threads.BehaviorMessageThread;
 import threads.ConnectionThread;
 import threads.MotorUpdateThread;

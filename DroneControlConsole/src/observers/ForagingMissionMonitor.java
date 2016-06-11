@@ -9,10 +9,10 @@ import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
 import gui.DroneGUI;
 import gui.panels.map.MapPanel;
-import network.server.shared.GPSServerData;
-import network.server.shared.dataObjects.DroneData;
-import network.server.shared.dataObjects.DronesSet;
 import main.DroneControlConsole;
+import network.mobileAppServer.shared.GPSServerData;
+import network.mobileAppServer.shared.dataObjects.DroneData;
+import network.mobileAppServer.shared.dataObjects.DronesSet;
 
 public class ForagingMissionMonitor extends Thread {
 	
