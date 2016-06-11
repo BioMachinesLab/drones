@@ -52,11 +52,13 @@ public class GPSTimePanel extends JPanel {
 		JPanel inputPanel = new JPanel(new GridLayout(2, 2));
 		inputPanel.add(new JLabel("Time:"));
 		timeTextField = new JTextField("N/A");
+		timeTextField.setEditable(false);
 		timeTextField.setHorizontalAlignment(JTextField.CENTER);
 		inputPanel.add(timeTextField);
 
 		inputPanel.add(new JLabel("Satelites:"));
 		satelitesTextField = new JTextField("N/A");
+		satelitesTextField.setEditable(false);
 		satelitesTextField.setHorizontalAlignment(JTextField.CENTER);
 		inputPanel.add(satelitesTextField);
 
