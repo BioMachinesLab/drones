@@ -94,6 +94,7 @@ public class MapPanel extends UpdatePanel {
 	private HashMap<String, LinkedList<MapMarker>> robotPositions = new HashMap<String, LinkedList<MapMarker>>();
 	private HashMap<String, Long> robotPositionsUpdate = new HashMap<String, Long>();
 
+	private MapMarker basestationMarker = null;
 	private GeoFence geoFence = new GeoFence("geofence");
 	private Formation formation = null;
 	private LinkedList<Target> targets = new LinkedList<Target>();
@@ -1309,5 +1310,39 @@ public class MapPanel extends UpdatePanel {
 		}
 
 		return args;
+	}
+
+	public void setBaseStation(LatLon position) {
+		if (basestationMarker != null) {
+			basestationMarker.setLat(position.getLat());
+			basestationMarker.setLon(position.getLon());
+		} else {
+			String layerName = "markers";
+			Layer l = null;
+
+			for (Layer layer : treeMap.getLayers()) {
+				if (layer.getName().equals(layerName)) {
+					l = layer;
+				}
+			}
+			if (l == null) {
+				l = treeMap.addLayer(layerName);
+			}
+
+			String markerName = "basestation";
+			basestationMarker = new MapMarkerBaseStation(l, markerName,
+					new Coordinate(position.getLat(), position.getLon()));
+			l.add(basestationMarker);
+			getMap().addMapMarker(basestationMarker);
+		}
+		updateCommandPanel();
+	}
+
+	public void clearBaseStation() {
+		treeMap.removeFromLayer(basestationMarker);
+		getMap().removeMapMarker(basestationMarker);
+		basestationMarker = null;
+
+		updateCommandPanel();
 	}
 }
