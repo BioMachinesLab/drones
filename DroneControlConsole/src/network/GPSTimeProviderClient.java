@@ -22,7 +22,7 @@ public class GPSTimeProviderClient extends Thread {
 	private ObjectOutputStream out;
 	private InetAddress destHost;
 	private String destHostName;
-	private String myHostName;
+	private String myHostname;
 	private RobotControlConsole console;
 
 	private boolean ready = false;
@@ -83,7 +83,7 @@ public class GPSTimeProviderClient extends Thread {
 
 		try {
 			if (socket != null && !socket.isClosed()) {
-				InformationRequest request = new InformationRequest(MessageType.GPS, myHostName);
+				InformationRequest request = new InformationRequest(MessageType.GPS, myHostname);
 				out.writeObject(request);
 				out.flush();
 				if (DEBUG)
@@ -99,8 +99,8 @@ public class GPSTimeProviderClient extends Thread {
 	 * Rise and kill connections
 	 */
 	private void initializeCommunications() throws IOException, ClassNotFoundException {
-		myHostName = InetAddress.getLocalHost().getHostName();
-		out.writeObject(myHostName);
+		myHostname = InetAddress.getLocalHost().getHostName();
+		out.writeObject(myHostname);
 		out.flush();
 
 		destHostName = (String) in.readObject();

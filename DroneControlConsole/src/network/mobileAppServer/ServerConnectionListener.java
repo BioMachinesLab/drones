@@ -40,6 +40,7 @@ public class ServerConnectionListener implements ServerObservated {
 		}
 	}
 
+	@Override
 	public void stopServer() {
 		if (server != null) {
 			enable.set(false);
@@ -67,10 +68,12 @@ public class ServerConnectionListener implements ServerObservated {
 		return connections;
 	}
 
+	@Override
 	public void startServer() {
 		startServer(SERVER_PORT);
 	}
 
+	@Override
 	public void startServer(int port) {
 		if (server == null) {
 			try {
@@ -91,6 +94,7 @@ public class ServerConnectionListener implements ServerObservated {
 		return console;
 	}
 
+	@Override
 	public void setObserver(ServerObserver observer) {
 		this.observer = observer;
 	}
@@ -161,6 +165,7 @@ public class ServerConnectionListener implements ServerObservated {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void printConnections() {
 		System.out.println("[SERVER CONNECTION LISTENER]");
 		System.out.println("###### Connected clients list init");

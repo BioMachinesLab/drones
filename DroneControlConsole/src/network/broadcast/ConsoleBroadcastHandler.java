@@ -20,8 +20,8 @@ import gui.DroneGUI;
 import gui.panels.LogsPanel;
 import main.DroneControlConsole;
 import main.RobotControlConsole;
-import network.server.shared.dataObjects.DroneData;
-import network.server.shared.dataObjects.DronesSet;
+import network.mobileAppServer.shared.dataObjects.DroneData;
+import network.mobileAppServer.shared.dataObjects.DronesSet;
 
 public class ConsoleBroadcastHandler {
 
