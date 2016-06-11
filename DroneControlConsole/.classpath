@@ -9,13 +9,7 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/jinput.jar">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="DroneControlConsole/lib/nativeLibs"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="lib"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/inputLib">
-		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="JoystickInputTest/dist"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="DroneControlConsole/lib/jInputNativeLibs"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/JMapViewer.jar" sourcepath="/Users/robot/Downloads/jmapviewer-1.06"/>
@@ -48,5 +42,10 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/jsch-0.1.53.jar"/>
+	<classpathentry kind="lib" path="lib/RXTXcomm.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="DroneControlConsole/lib/rxtxNativeLibs"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
