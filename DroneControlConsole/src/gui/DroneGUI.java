@@ -1,13 +1,5 @@
 package gui;
 
-import gui.panels.BatteryPanel;
-import gui.panels.CompassPanel;
-import gui.panels.GPSPanel;
-import gui.panels.LogsPanel;
-import gui.panels.SystemInfoPanel;
-import gui.panels.TemperaturePanel;
-import gui.panels.map.MapPanel;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -18,6 +10,14 @@ import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import gui.panels.BatteryPanel;
+import gui.panels.CompassPanel;
+import gui.panels.GPSPanel;
+import gui.panels.GPSTimePanel;
+import gui.panels.LogsPanel;
+import gui.panels.SystemInfoPanel;
+import gui.panels.TemperaturePanel;
+import gui.panels.map.MapPanel;
 import main.DroneControlConsole;
 
 public class DroneGUI extends RobotGUI {
@@ -30,6 +30,7 @@ public class DroneGUI extends RobotGUI {
 	private MapPanel mapPanel;
 	private TemperaturePanel temperaturePanel;
 	private LogsPanel logsPanel;
+	private GPSTimePanel gpsTimePanel;
 
 	private JPanel rightPanel;
 
@@ -38,10 +39,9 @@ public class DroneGUI extends RobotGUI {
 
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (ClassNotFoundException | InstantiationException
-				| IllegalAccessException | UnsupportedLookAndFeelException e) {
-			System.err
-			.println("Not able to set LookAndFeel for the current OS");
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException e) {
+			System.err.println("Not able to set LookAndFeel for the current OS");
 		}
 
 		enableOSXFullscreen(this);
@@ -90,10 +90,10 @@ public class DroneGUI extends RobotGUI {
 		JPanel compassAndBatteriesPanel = new JPanel(new GridLayout(1, 2));
 		compassPanel = new CompassPanel();
 		temperaturePanel = new TemperaturePanel();
-		//		batteryPanel = new BatteryPanel();
+		// batteryPanel = new BatteryPanel();
 
 		compassAndBatteriesPanel.add(compassPanel);
-		//		compassAndBatteriesPanel.add(batteryPanel);
+		// compassAndBatteriesPanel.add(batteryPanel);
 		compassAndBatteriesPanel.add(temperaturePanel);
 		GPSCompassBatteriesPanel.add(compassAndBatteriesPanel, BorderLayout.CENTER);
 
@@ -115,28 +115,35 @@ public class DroneGUI extends RobotGUI {
 		leftPanel.add(leftTopPanel, BorderLayout.NORTH);
 
 		// Messages
-		//leftPanel.add(msgPanel, BorderLayout.CENTER);
+		// leftPanel.add(msgPanel, BorderLayout.CENTER);
 
 		// Mobile Application Server
-		//serverPanel = new ServerPanel(this);
-		//leftPanel.add(serverPanel, BorderLayout.SOUTH);
+		// serverPanel = new ServerPanel(this);
+		// leftPanel.add(serverPanel, BorderLayout.SOUTH);
 
 		logsPanel = new LogsPanel(this);
 		leftPanel.add(logsPanel, BorderLayout.CENTER);
 
+		gpsTimePanel = new GPSTimePanel();
+		leftPanel.add(gpsTimePanel, BorderLayout.SOUTH);
+
 		add(leftPanel, BorderLayout.WEST);
 	}
 
-	public void hideRightPanel(){
+	public void hideRightPanel() {
 		rightPanel.setVisible(false);
 	}
 
-	public void showRightPanel(){
+	public void showRightPanel() {
 		rightPanel.setVisible(true);
 	}
 
 	public GPSPanel getGPSPanel() {
 		return gpsPanel;
+	}
+
+	public GPSTimePanel getGPSTimePanel() {
+		return gpsTimePanel;
 	}
 
 	public CompassPanel getCompassPanel() {
