@@ -1,5 +1,9 @@
 package main;
 
+import org.joda.time.LocalDateTime;
+
+import commoninterface.network.messages.InformationRequest.MessageType;
+import dataObjects.ConsoleMotorSpeeds;
 import gui.DroneGUI;
 import gui.RobotGUI;
 import network.DroneConsoleMessageHandler;
@@ -11,11 +15,9 @@ import threads.ConnectionThread;
 import threads.MotorUpdateThread;
 import threads.NetworkActivationsUpdateThread;
 import threads.UpdateThread;
-import commoninterface.network.messages.InformationRequest.MessageType;
-import dataObjects.ConsoleMotorSpeeds;
 
 public class DroneControlConsole extends RobotControlConsole {
-	
+
 	private DronesSet dronesSet = new DronesSet();
 
 	private ServerConnectionListener mobileAppServer;
@@ -37,8 +39,7 @@ public class DroneControlConsole extends RobotControlConsole {
 
 			// Special case which does not depend on a connection and should
 			// only be started once
-			ConnectionThread t = new ConnectionThread(this,
-					gui.getConnectionPanel());
+			ConnectionThread t = new ConnectionThread(this, gui.getConnectionPanel());
 			t.start();
 
 			addShutdownHooks();
@@ -58,20 +59,15 @@ public class DroneControlConsole extends RobotControlConsole {
 
 		updateThreads.clear();
 
-		updateThreads.add(new UpdateThread(this,
-				((DroneGUI) gui).getGPSPanel(), MessageType.GPS));
-		updateThreads.add(new UpdateThread(this, gui.getMessagesPanel(),
-				MessageType.SYSTEM_STATUS));
+		updateThreads.add(new UpdateThread(this, ((DroneGUI) gui).getGPSPanel(), MessageType.GPS));
+		updateThreads.add(new UpdateThread(this, gui.getMessagesPanel(), MessageType.SYSTEM_STATUS));
 		updateThreads.add(new MotorUpdateThread(this, gui.getMotorsPanel()));
-		updateThreads.add(new UpdateThread(this, ((DroneGUI) gui)
-				.getCompassPanel(), MessageType.COMPASS));
-		updateThreads.add(new BehaviorMessageThread(this, gui
-				.getCommandPanel()));
-		updateThreads.add(new NetworkActivationsUpdateThread(this, gui
-				.getNeuralActivationsPanel(), MessageType.NEURAL_ACTIVATIONS));
-		updateThreads.add(new UpdateThread(this, ((DroneGUI)gui).getTemperaturesPanel(),
-				MessageType.TEMPERATURE));
-		
+		updateThreads.add(new UpdateThread(this, ((DroneGUI) gui).getCompassPanel(), MessageType.COMPASS));
+		updateThreads.add(new BehaviorMessageThread(this, gui.getCommandPanel()));
+		updateThreads.add(new NetworkActivationsUpdateThread(this, gui.getNeuralActivationsPanel(),
+				MessageType.NEURAL_ACTIVATIONS));
+		updateThreads.add(new UpdateThread(this, ((DroneGUI) gui).getTemperaturesPanel(), MessageType.TEMPERATURE));
+
 		for (UpdateThread t : updateThreads)
 			t.start();
 
@@ -97,10 +93,11 @@ public class DroneControlConsole extends RobotControlConsole {
 	public ServerConnectionListener getMobileAppServer() {
 		return mobileAppServer;
 	}
-	
+
 	@Override
 	protected void addShutdownHooks() {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
+			@Override
 			public void run() {
 				disconnect();
 
@@ -113,9 +110,17 @@ public class DroneControlConsole extends RobotControlConsole {
 			}
 		});
 	}
-	
+
 	@Override
 	public void log(String s) {
-		((DroneGUI)gui).getLogsPanel().getIncidentLogger().log(s);
+		((DroneGUI) gui).getLogsPanel().getIncidentLogger().log(s);
+	}
+
+	public LocalDateTime getGPSTime() {
+		if (gui instanceof DroneGUI) {
+			return ((DroneGUI) gui).getGPSTimePanel().getDate();
+		} else {
+			return new LocalDateTime();
+		}
 	}
 }
