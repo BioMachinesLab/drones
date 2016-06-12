@@ -17,9 +17,9 @@ public class GPSData implements Serializable {
 	private static final long serialVersionUID = -2077018378793167250L;
 	private final static int NUMBER_OF_PARAMETERS = 15;
 	private long PRINT_NUMBER = 0;
-	
+
 	private String address;
-	
+
 	// Coordinates
 	private double latitudeDecimal;
 	private double longitudeDecimal;
@@ -76,16 +76,17 @@ public class GPSData implements Serializable {
 	public String getLatitude() {
 		return latitude;
 	}
-	
+
 	public void setLatitude(String latitude) {
-		
 		this.latitude = latitude;
-		
-		double lat = Double.parseDouble(latitude.substring(0,latitude.length()-1));
-		char latPos = latitude.charAt(latitude.length()-1);
-		lat = Nmea0183ToDecimalConverter.convertLatitudeToDecimal(lat, latPos);
-		
-		this.latitudeDecimal = lat;
+
+		if (latitude != null) {
+			double lat = Double.parseDouble(latitude.substring(0, latitude.length() - 1));
+			char latPos = latitude.charAt(latitude.length() - 1);
+			lat = Nmea0183ToDecimalConverter.convertLatitudeToDecimal(lat, latPos);
+
+			this.latitudeDecimal = lat;
+		}
 	}
 
 	public String getLongitude() {
@@ -93,25 +94,26 @@ public class GPSData implements Serializable {
 	}
 
 	public void setLongitude(String longitude) {
-		
 		this.longitude = longitude;
-		
-		double lon = Double.parseDouble(longitude.substring(0,longitude.length()-1));
-		char lonPos = longitude.charAt(longitude.length()-1);
-		
-		lon = Nmea0183ToDecimalConverter.convertLongitudeToDecimal(lon, lonPos);		
-		
-		this.longitudeDecimal = lon;
+
+		if (longitude != null) {
+			double lon = Double.parseDouble(longitude.substring(0, longitude.length() - 1));
+			char lonPos = longitude.charAt(longitude.length() - 1);
+
+			lon = Nmea0183ToDecimalConverter.convertLongitudeToDecimal(lon, lonPos);
+
+			this.longitudeDecimal = lon;
+		}
 	}
-	
+
 	public void setLatitudeDecimal(double lat) {
 		this.latitudeDecimal = lat;
 	}
-	
+
 	public void setLongitudeDecimal(double lon) {
 		this.longitudeDecimal = lon;
 	}
-	
+
 	public double getAltitude() {
 		return altitude;
 	}
@@ -215,11 +217,11 @@ public class GPSData implements Serializable {
 	public void setDate(LocalDateTime date) {
 		this.date = date;
 	}
-	
+
 	public double getLatitudeDecimal() {
 		return latitudeDecimal;
 	}
-	
+
 	public double getLongitudeDecimal() {
 		return longitudeDecimal;
 	}
@@ -252,11 +254,42 @@ public class GPSData implements Serializable {
 		return str;
 	}
 
-//	public RobotLocation toDroneLocation() {
-//		return new RobotLocation(address, new LatLon(latitudeDecimal,longitudeDecimal), orientation);
-//	}
+	// public RobotLocation toDroneLocation() {
+	// return new RobotLocation(address, new
+	// LatLon(latitudeDecimal,longitudeDecimal), orientation);
+	// }
 
 	public String getDroneAddress() {
 		return address;
+	}
+
+	public void setDroneAddress(String address) {
+		this.address = address;
+	}
+
+	@Override
+	public GPSData clone() {
+		GPSData data = new GPSData();
+
+		data.setLatitude(getLatitude());
+		data.setLongitude(getLongitude());
+		data.setAltitude(getAltitude());
+		data.setFix(isFix());
+		data.setFixType(getFixType());
+		data.setNumberOfSatellitesInView(getNumberOfSatellitesInView());
+		data.setNumberOfSatellitesInUse(getNumberOfSatellitesInUse());
+		data.setHDOP(getHDOP());
+		data.setVDOP(getVDOP());
+		data.setPDOP(getPDOP());
+		data.setGPSSourceType(getGPSSourceType());
+		data.setGroundSpeedKmh(getGroundSpeedKmh());
+		data.setGroundSpeedKnts(getGroundSpeedKnts());
+		data.setOrientation(getOrientation());
+		data.setDate(new LocalDateTime(getDate()));
+		data.setLatitudeDecimal(getLatitudeDecimal());
+		data.setLongitudeDecimal(getLongitudeDecimal());
+		data.setDroneAddress(getDroneAddress());
+
+		return data;
 	}
 }
