@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Random;
 
 import commoninterface.entities.GeoEntity;
+import commoninterface.entities.target.motion.MotionData;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
@@ -15,7 +16,7 @@ public class Formation extends GeoEntity {
 	private ArrayList<Target> targets;
 	private HashMap<Target, Vector2d> targetsRelativePositions;
 
-	private FormationMotionData formationMotionData = null;
+	private MotionData formationMotionData = null;
 	private FormationType formationType;
 	private int targetQnt;
 	private double targetRadius;
@@ -50,13 +51,12 @@ public class Formation extends GeoEntity {
 		return targetQnt;
 	}
 
-	public FormationMotionData getFormationtMotionData() {
+	public MotionData getMotionData() {
 		return formationMotionData;
 	}
 
-	public void setFormationMotionData(FormationMotionData formationMotionData) {
+	public void setMotionData(MotionData formationMotionData) {
 		this.formationMotionData = formationMotionData;
-		// TODO update motion data on targets....
 	}
 
 	public void setRandom(Random random) {
@@ -183,7 +183,6 @@ public class Formation extends GeoEntity {
 			if (i == vertice && targetQnt % 2 != 0) {
 				factor = -factor;
 			}
-
 		}
 
 		placeTargets(positions);
@@ -242,6 +241,7 @@ public class Formation extends GeoEntity {
 		for (int i = 0; i < transformedPositons.length; i++) {
 			Target target = new Target("formation_target_" + i,
 					CoordinateUtilities.cartesianToGPS(transformedPositons[i]), targetRadius);
+			target.setFormation(this);
 			targets.add(target);
 			targetsRelativePositions.put(target, positions[i]);
 		}
@@ -269,12 +269,10 @@ public class Formation extends GeoEntity {
 
 		return newPositions;
 	}
-	
-	public void move(){
-		// TODO
-	}
-	
-	public void move(long step){
-		// TODO
+
+	public void step(double time) {
+		for (Target t : targets) {
+			t.step(time);
+		}
 	}
 }

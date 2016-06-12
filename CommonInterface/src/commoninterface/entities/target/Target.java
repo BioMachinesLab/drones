@@ -2,20 +2,28 @@ package commoninterface.entities.target;
 
 import commoninterface.RobotCI;
 import commoninterface.entities.GeoEntity;
+import commoninterface.entities.target.motion.MixedMotionData;
+import commoninterface.entities.target.motion.MotionData;
 import commoninterface.utils.jcoord.LatLon;
 
 public class Target extends GeoEntity {
-	private static final long serialVersionUID = -5889567979726217144L;
+	private static final long serialVersionUID = -8376280695329140274L;
+
 	private double radius;
 
 	private Formation formation = null;
-	private MotionData targetMotionData = null;
+	private MotionData motionData = null;
 	private boolean occupied = false;
 	private RobotCI occupant = null;
+	private boolean inFormation = false;
 
 	public Target(String name, LatLon latLon, double radius) {
 		super(name, latLon);
 		this.radius = radius;
+	}
+
+	public void step(double time) {
+		setLatLon(motionData.calculatePosition(time));
 	}
 
 	/*
@@ -29,12 +37,20 @@ public class Target extends GeoEntity {
 		}
 	}
 
-	public void setMotionData(MotionData targetMotionData) {
-		this.targetMotionData = targetMotionData;
+	public void setMotionData(MotionData motionData) {
+		this.motionData = motionData;
 	}
 
 	public MotionData getTargetMotionData() {
-		return targetMotionData;
+		if (inFormation) {
+			MixedMotionData m = new MixedMotionData(this);
+			m.addMotionData(motionData);
+			m.addMotionData(formation.getMotionData());
+
+			return m;
+		} else {
+			return motionData;
+		}
 	}
 
 	public double getRadius() {
@@ -64,6 +80,11 @@ public class Target extends GeoEntity {
 
 	public void setFormation(Formation formation) {
 		this.formation = formation;
+		inFormation = true;
+	}
+
+	public boolean isInFormation() {
+		return inFormation;
 	}
 
 	/*
