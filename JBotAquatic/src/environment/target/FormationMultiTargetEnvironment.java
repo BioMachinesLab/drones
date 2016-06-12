@@ -3,7 +3,9 @@ package environment.target;
 import commoninterface.AquaticDroneCI;
 import commoninterface.entities.target.Formation;
 import commoninterface.entities.target.Formation.FormationType;
+import commoninterface.entities.target.Target;
 import commoninterface.entities.target.motion.LinearMotionData;
+import commoninterface.entities.target.motion.RotationMotionData;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CoordinateUtilities;
 import net.jafama.FastMath;
@@ -16,6 +18,7 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 	private static final long serialVersionUID = -6746690210418679841L;
 
 	private int targetsQuantity = 1;
+	private String formationShape = null;
 	private boolean variateTargetsQuantity = false;
 	private boolean variateFormationParameters = false;
 	private boolean onePerOneRobotTarget = false;
@@ -37,9 +40,7 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 	private double arrowFormation_xDelta = lineFormationDelta;
 	private double arrowFormation_yDelta = lineFormationDelta;
 
-	private String formationShape = null;
 	private Formation formation = null;
-	private LinearMotionData formationMotionData = null;
 
 	public FormationMultiTargetEnvironment(Simulator simulator, Arguments args) {
 		super(simulator, args);
@@ -151,53 +152,39 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 	}
 
 	private void generateFormationMotionData() {
-		// TODO
-		// double targetsAzimuth = movementAzimuth;
-		// double targetsVelocity = movementVelocity;
-		// double angularVelocity = rotationVelocity;
-		// boolean direction = rotationDirection;
-		//
-		// if (variateTargetVelocity) {
-		// targetsVelocity = 0.1 * movementVelocity +
-		// simulator.getRandom().nextDouble() * movementVelocity * 2;
-		// }
-		//
-		// if (variateTargetAzimuth) {
-		// targetsAzimuth = simulator.getRandom().nextDouble() * Math.PI * 2;
-		// }
-		//
-		// if (variateRotationVelocity) {
-		// angularVelocity = 0.1 * rotationVelocity +
-		// simulator.getRandom().nextDouble() * rotationVelocity * 1.5;
-		// }
-		//
-		// if (variateRotationDirection) {
-		// direction = simulator.getRandom().nextBoolean();
-		// }
-		//
-		// if (decideRandomExclusiveMoveType) {
-		// // Rotate
-		// if (simulator.getRandom().nextDouble() < 0.5) {
-		// rotateFormation = true;
-		// moveTargets = false;
-		//
-		// } else {
-		// // Translation
-		// rotateFormation = false;
-		// moveTargets = true;
-		// }
-		// }
-		//
-		//
-		//
-		// formation = new FormationMotionData(targets,
-		// targetsRelativePositions, targetsAzimuth, targetsVelocity,
-		// angularVelocity);
-		// formation.setCentroid(new Vector2d(translation_x, translation_y));
-		// formation.setShapeRotationAngle(initialRotationAngle);
-		// formation.setRotationDirection(direction);
-		// formation.setRotate(rotateFormation);
-		// formation.setMove(moveTargets);
+		double targetsVelocity = movementVelocity;
+		if (variateTargetVelocity) {
+			targetsVelocity = 0.1 * movementVelocity + simulator.getRandom().nextDouble() * movementVelocity * 2;
+		}
+
+		double targetsAzimuth = movementAzimuth;
+		if (variateTargetAzimuth) {
+			targetsAzimuth = simulator.getRandom().nextDouble() * Math.PI * 2;
+		}
+
+		double angularVelocity = rotationVelocity;
+		if (variateRotationVelocity) {
+			angularVelocity = 0.1 * rotationVelocity + simulator.getRandom().nextDouble() * rotationVelocity * 1.5;
+		}
+
+		boolean direction = rotationDirection;
+		if (variateRotationDirection) {
+			direction = simulator.getRandom().nextBoolean();
+		}
+
+		if (rotateFormation) {
+			for (Target t : formation.getTargets()) {
+
+				RotationMotionData rmd = new RotationMotionData(t, formation.getLatLon(), angularVelocity, direction);
+				t.setMotionData(rmd);
+			}
+		}
+
+		if (moveTargets) {
+			LinearMotionData lmd = new LinearMotionData(formation, formation.getLatLon(), targetsVelocity,
+					targetsAzimuth);
+			formation.setMotionData(lmd);
+		}
 	}
 
 	@Override
