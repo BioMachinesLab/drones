@@ -5,22 +5,18 @@
  */
 package fieldtests;
 
-import commoninterface.entities.Entity;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.swing.JOptionPane;
+
 import commoninterface.entities.GeoFence;
 import commoninterface.entities.Waypoint;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import gui.panels.CommandPanel;
-import gui.panels.map.MapPanel;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-
-import javax.swing.JOptionPane;
-
 import main.DroneControlConsole;
 
 public class HierarchicalScript extends FieldTestScript {

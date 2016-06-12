@@ -13,8 +13,8 @@ import java.util.Scanner;
 
 import main.DroneControlConsole;
 import network.CommandSender;
-import network.server.shared.dataObjects.DroneData;
-import network.server.shared.dataObjects.DronesSet;
+import network.mobileAppServer.shared.dataObjects.DroneData;
+import network.mobileAppServer.shared.dataObjects.DronesSet;
 import commoninterface.entities.Entity;
 import commoninterface.entities.GeoFence;
 import commoninterface.entities.Waypoint;
