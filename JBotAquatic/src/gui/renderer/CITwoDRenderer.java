@@ -17,8 +17,8 @@ import commoninterface.entities.RobotLocation;
 import commoninterface.entities.SharedDroneLocation;
 import commoninterface.entities.VirtualEntity;
 import commoninterface.entities.Waypoint;
-import commoninterface.entities.target.FormationMotionData;
 import commoninterface.entities.target.Target;
+import commoninterface.entities.target.motion.MotionData;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.sensors.ConeTypeCISensor;
 import commoninterface.sensors.ThymioConeTypeCISensor;
@@ -184,13 +184,12 @@ public class CITwoDRenderer extends TwoDRenderer {
 						int x = transformX(pos.x) - diam / 2;
 						int y = transformY(pos.y) - diam / 2;
 						graphics.fillOval(x, y, diam, diam);
-						drawTargetId(graphics,t);
+						drawTargetId(graphics, t);
 
-						if (showVelocityVectors
-								&& ((Target) entity).getTargetMotionData() instanceof FormationMotionData) {
-							FormationMotionData formationMotionData = ((FormationMotionData) t.getTargetMotionData());
+						if (showVelocityVectors && ((Target) entity).getTargetMotionData() != null) {
+							MotionData motionData = (t.getTargetMotionData());
 							Vector2d targetPos = CoordinateUtilities.GPSToCartesian(t.getLatLon());
-							Vector2d velocityVector = new Vector2d(formationMotionData.getVelocityVector(t));
+							Vector2d velocityVector = new Vector2d(motionData.getVelocityVector(simulator.getTime()));
 
 							if (velocityVector.length() > 0) {
 								velocityVector.setLength(velocityVector.length() * 10);
