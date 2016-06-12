@@ -3,7 +3,6 @@ package environment.target;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import commoninterface.entities.target.MotionData;
 import commoninterface.entities.target.Target;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CoordinateUtilities;
@@ -124,10 +123,8 @@ public abstract class TargetEnvironment extends Environment {
 	@Override
 	public void update(double time) {
 		for (Target target : targets) {
-			MotionData motionData = target.getTargetMotionData();
-
-			if (moveTargets && motionData != null) {
-				motionData.move();
+			if (moveTargets) {
+				target.step(time);
 			}
 		}
 	}

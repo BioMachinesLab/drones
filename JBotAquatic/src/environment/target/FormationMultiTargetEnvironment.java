@@ -3,7 +3,7 @@ package environment.target;
 import commoninterface.AquaticDroneCI;
 import commoninterface.entities.target.Formation;
 import commoninterface.entities.target.Formation.FormationType;
-import commoninterface.entities.target.FormationMotionData;
+import commoninterface.entities.target.motion.LinearMotionData;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CoordinateUtilities;
 import net.jafama.FastMath;
@@ -39,7 +39,7 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 
 	private String formationShape = null;
 	private Formation formation = null;
-	private FormationMotionData formationMotionData = null;
+	private LinearMotionData formationMotionData = null;
 
 	public FormationMultiTargetEnvironment(Simulator simulator, Arguments args) {
 		super(simulator, args);
@@ -202,7 +202,7 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 
 	@Override
 	public void update(double time) {
-		formation.move();
+		formation.step(time);
 
 		if (injectFaults) {
 			// Time to recover from fault?
