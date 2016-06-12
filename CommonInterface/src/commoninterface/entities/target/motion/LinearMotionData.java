@@ -11,8 +11,8 @@ public class LinearMotionData extends MotionData {
 	private double movementVelocity;
 	private double movementAzimuth;
 
-	public LinearMotionData(GeoEntity entity, LatLon originalPosition, double movementAzimuth,
-			double movementVelocity) {
+	public LinearMotionData(GeoEntity entity, LatLon originalPosition, double movementVelocity,
+			double movementAzimuth) {
 		super(entity, MovementType.LINEAR);
 
 		this.movementAzimuth = movementAzimuth;

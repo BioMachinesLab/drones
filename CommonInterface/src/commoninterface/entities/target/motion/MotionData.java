@@ -7,7 +7,7 @@ import commoninterface.utils.jcoord.LatLon;
 
 public abstract class MotionData {
 	public static enum MovementType {
-		LINEAR, ROTATIONAL;
+		LINEAR, ROTATIONAL, MIXED;
 	}
 
 	protected static final int UPDATE_RATE = 10; // Assuming 100ms simulation
