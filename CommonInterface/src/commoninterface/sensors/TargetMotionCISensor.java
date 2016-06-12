@@ -6,8 +6,8 @@ import java.util.HashMap;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
-import commoninterface.entities.target.FormationMotionData;
 import commoninterface.entities.target.Target;
+import commoninterface.entities.target.motion.LinearMotionData;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
@@ -53,7 +53,7 @@ public class TargetMotionCISensor extends CISensor {
 		Target target = getClosestTarget(excludeOccupied, entities);
 		if (vascos) {
 			if (target != null) {
-				Vector2d vel = ((FormationMotionData) target.getTargetMotionData()).getVelocityVector(target);
+				Vector2d vel = target.getTargetMotionData().getVelocityVector(time);
 				readings[0] = vel.getAngle() / Math.PI / 2;
 				readings[1] = vel.length();
 
@@ -67,7 +67,7 @@ public class TargetMotionCISensor extends CISensor {
 				if (robot instanceof AquaticDroneCI) {
 					// Is the sensed target inside the sensor range?
 					double distance = ((AquaticDroneCI) robot).getGPSLatLon().distanceInMeters(target.getLatLon());
-					if (target.getTargetMotionData() instanceof FormationMotionData && distance < range) {
+					if (target.getTargetMotionData() instanceof LinearMotionData && distance < range) {
 						if (normalize) {
 							readings[0] /= (FastMath.PI * 2);
 						}
@@ -84,7 +84,7 @@ public class TargetMotionCISensor extends CISensor {
 		} else {
 			// Sancho's version
 			if (target != null) {
-				Vector2d vel = ((FormationMotionData) target.getTargetMotionData()).getVelocityVector(target);
+				Vector2d vel = target.getTargetMotionData().getVelocityVector(time);
 				readings[0] = vel.length();
 				readings[1] = (vel.getAngle() + Math.PI) / Math.PI / 2;
 			}
