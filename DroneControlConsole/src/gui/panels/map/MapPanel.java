@@ -173,7 +173,7 @@ public class MapPanel extends UpdatePanel {
 			public void actionPerformed(ActionEvent e) {
 				JOptionPane.showMessageDialog(null,
 						"<html><strong>W</strong>:  Add Waypoints <br>" + "<strong>G</strong>: Add GeoFence <br>"
-								+ "<strong>O</strong>: Add Obstacles <br>" + "<strong>T</strong>: Add Target <br>"
+								+ "<strong>O</strong>: Add Obstacles <br>" + "<strong>T</strong>: Add formation <br>"
 								+ "<strong>Ctrl+OBJECT_KEY</strong>: Clear Objects <br>"
 								+ "<strong>F</strong>: Fit Markers <br>" + "<strong>+</strong>: Zoom In <br>"
 								+ "<strong>-</strong>: Zoom Out <br>" + "<strong>Ctrl+C</strong>: Cancel Option <br>"
@@ -466,8 +466,8 @@ public class MapPanel extends UpdatePanel {
 				clearStatus();
 			}
 		});
-		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("F"), "F");
-		this.getActionMap().put("F", new AbstractAction() {
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("T"), "T");
+		this.getActionMap().put("T", new AbstractAction() {
 			protected static final long serialVersionUID = 1L;
 
 			@Override
@@ -476,9 +476,9 @@ public class MapPanel extends UpdatePanel {
 				mapStatusComboBox.setSelectedItem(status);
 			}
 		});
-		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("control F"), "control F");
-		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("meta F"), "control F");
-		this.getActionMap().put("control F", new AbstractAction() {
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("control T"), "control T");
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("meta T"), "control T");
+		this.getActionMap().put("control T", new AbstractAction() {
 			protected static final long serialVersionUID = 1L;
 
 			@Override
@@ -797,6 +797,10 @@ public class MapPanel extends UpdatePanel {
 		return mrks;
 	}
 
+	public Formation getFormation() {
+		return formation;
+	}
+
 	/*
 	 * Add/ replace entities
 	 */
@@ -874,7 +878,11 @@ public class MapPanel extends UpdatePanel {
 	}
 
 	public synchronized void addFormation(Coordinate c) {
-		Formation formation = buildFormation(c);
+		Formation formation = buildFormation(c,null);
+		addFormation(formation);
+	}
+
+	public synchronized void addFormation(Formation formation) {
 		if (formation != null) {
 			clearFormation();
 			String layerName = "formation";
@@ -1130,9 +1138,12 @@ public class MapPanel extends UpdatePanel {
 		return true;
 	}
 
-	private Formation buildFormation(Coordinate c) {
+	public Formation buildFormation(Coordinate c, HashMap<String, String> extraArgs) {
 		HashMap<String, String> args = readArgsFromFile("formationParameters.conf");
+		return buildFormation(c, args, extraArgs);
+	}
 
+	public Formation buildFormation(Coordinate c, HashMap<String, String> args, HashMap<String, String> extraArgs) {
 		JPanel panel = new JPanel(new BorderLayout());
 		JLabel label = new JLabel("Insert formation parameters");
 		Font font = label.getFont();
@@ -1161,6 +1172,14 @@ public class MapPanel extends UpdatePanel {
 		int index = 0;
 		if (args.get("formationShape") != null) {
 			index = FormationType.valueOf(args.get("formationShape")).ordinal();
+		}
+		if (extraArgs != null) {
+			if (extraArgs.get("formationShape") != null) {
+				index = FormationType.valueOf(args.get("formationShape")).ordinal();
+			}
+			if (extraArgs.get("lockFormationShape") != null && extraArgs.get("lockFormationShape").equals("1")) {
+				formationTypeComboBox.setEnabled(false);
+			}
 		}
 		formationTypeComboBox.setSelectedIndex(index);
 		topPanel.add(formationTypeComboBox);
