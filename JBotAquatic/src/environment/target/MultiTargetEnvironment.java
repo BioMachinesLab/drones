@@ -2,6 +2,7 @@ package environment.target;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.entities.target.Target;
+import commoninterface.entities.target.motion.LinearMotionData;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
@@ -51,17 +52,10 @@ public class MultiTargetEnvironment extends TargetEnvironment {
 			targets.add(target);
 
 			if (moveTargets) {
-				// TODO
-				// double targetVelocity = movementVelocity;
-				// if (variateTargetVelocity) {
-				// targetVelocity += targetVelocity *
-				// simulator.getRandom().nextDouble() * 0.1;
-				// }
-				//
-				// double orientation = simulator.getRandom().nextDouble() *
-				// Math.PI * 2;
-				// motionData.put(target, new TargetLinearMotionData(target,
-				// targetVelocity, orientation));
+				for (Target t : targets) {
+					LinearMotionData lmd = new LinearMotionData(t, t.getLatLon(), movementVelocity, movementAzimuth);
+					t.setMotionData(lmd);
+				}
 			}
 		}
 
