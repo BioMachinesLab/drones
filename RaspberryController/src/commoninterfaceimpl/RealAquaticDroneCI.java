@@ -6,10 +6,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.joda.time.LocalDateTime;
+
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CISensor;
 import commoninterface.LedState;
+import commoninterface.controllers.ControllerCIBehavior;
 import commoninterface.dataobjects.GPSData;
 import commoninterface.entities.Entity;
 import commoninterface.entities.RobotLocation;
@@ -118,26 +121,50 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	@Override
 	public void run() {
+		boolean started = false;
 		while (run) {
 
 			updateSensors();
 
 			long lastCycleTime = System.currentTimeMillis();
 			CIBehavior current = activeBehavior;
+
 			try {
-
+				// Vasco: I know, this can be compressed in one IF condition,
+				// But this way is more clear
 				if (current != null) {
+					if (!(activeBehavior instanceof ControllerCIBehavior)) {
+						current.step(behaviorTimestep++);
 
-					current.step(behaviorTimestep++);
+						for (CIBehavior b : alwaysActiveBehaviors) {
+							b.step(timestep);
+						}
 
-					for (CIBehavior b : alwaysActiveBehaviors)
-						b.step(timestep);
+						if (current.getTerminateBehavior()) {
+							stopActiveBehavior();
+						}
+					} else {
+						if (((ControllerCIBehavior) activeBehavior).getStartDate() == null || new LocalDateTime()
+								.isAfter(((ControllerCIBehavior) activeBehavior).getStartDate())) {
+							if (!started) {
+								logger.logMessage("Started experiment at "
+										+ ((ControllerCIBehavior) activeBehavior).getStartDate() + " with "
+										+ activeBehavior.getClass().getName());
+								started = true;
+							}
 
-					if (current.getTerminateBehavior()) {
-						stopActiveBehavior();
+							current.step(behaviorTimestep++);
+
+							for (CIBehavior b : alwaysActiveBehaviors) {
+								b.step(timestep);
+							}
+
+							if (current.getTerminateBehavior()) {
+								stopActiveBehavior();
+							}
+						}
 					}
 				}
-
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -158,6 +185,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 			timestep++;
 		}
+
 	}
 
 	private void addShutdownHooks() {
