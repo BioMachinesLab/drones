@@ -17,8 +17,6 @@ public class LinearMotionData extends MotionData {
 
 		this.movementAzimuth = movementAzimuth;
 		this.movementVelocity = movementVelocity;
-
-		velocityVector.setPolarCoordinates(movementVelocity, movementAzimuth);
 	}
 
 	@Override
@@ -30,15 +28,12 @@ public class LinearMotionData extends MotionData {
 
 	@Override
 	public Vector2d calculateTranslationVector(double step) {
-		double walkedDistance = 0;
-		double azimuth = getVelocityVector(0).getAngle();
-
-		for (int i = 0; i < step; i++) {
-			walkedDistance = (getVelocityVector(step).length()) / UPDATE_RATE;
-		}
+		double walkedDistance = (movementVelocity / UPDATE_RATE) * (int) step;
+		double azimuth = movementAzimuth;
 
 		Vector2d walkedVector = new Vector2d(0, 0);
 		walkedVector.setPolarCoordinates(walkedDistance, azimuth);
+
 		return walkedVector;
 	}
 
@@ -48,7 +43,9 @@ public class LinearMotionData extends MotionData {
 	@Override
 	public Vector2d getVelocityVector(double step) {
 		if (move) {
-			return super.getVelocityVector(step);
+			Vector2d velocityVector = new Vector2d(0, 0);
+			velocityVector.setPolarCoordinates(movementVelocity / UPDATE_RATE, movementAzimuth);
+			return velocityVector;
 		} else {
 			return new Vector2d(0, 0);
 		}

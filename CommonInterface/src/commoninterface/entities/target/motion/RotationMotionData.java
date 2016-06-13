@@ -12,21 +12,19 @@ public class RotationMotionData extends MotionData {
 	// and true for clockwise
 
 	private double angularVelocity; // In rad/sec
-	private LatLon rotationCenter;
-	private Vector2d rotationCenterCartesian;
+	private Vector2d rotationCenter;
 	private Vector2d initialRelativePosition;
 
-	public RotationMotionData(GeoEntity entity, LatLon rotationCenter, double angularVelocity,
+	public RotationMotionData(GeoEntity entity, Vector2d rotationCenter, double angularVelocity,
 			boolean rotationDirection) {
 		super(entity, MovementType.ROTATIONAL);
 
 		this.rotationCenter = rotationCenter;
-		rotationCenterCartesian = CoordinateUtilities.GPSToCartesian(rotationCenter);
 		this.angularVelocity = angularVelocity;
 		this.rotationDirection = rotationDirection;
 
-		double x_rel_position_to_center = originalPositionCartesian.x - rotationCenterCartesian.x;
-		double y_rel_position_to_center = originalPositionCartesian.y - rotationCenterCartesian.y;
+		double x_rel_position_to_center = originalPositionCartesian.x - rotationCenter.x;
+		double y_rel_position_to_center = originalPositionCartesian.y - rotationCenter.y;
 		initialRelativePosition = new Vector2d(x_rel_position_to_center, y_rel_position_to_center);
 	}
 
@@ -39,12 +37,28 @@ public class RotationMotionData extends MotionData {
 
 	@Override
 	public Vector2d calculateTranslationVector(double step) {
-		Vector2d translationVector = new Vector2d(0, 0);
-		for (int i = 0; i < step; i++) {
-			translationVector.add(getVelocityVector(i));
+		double currentAngle = (angularVelocity / UPDATE_RATE) * step;
+		if (rotationDirection) {
+			currentAngle = -currentAngle;
 		}
 
-		return translationVector;
+		// Rotation given by a 2D rotation matrix:
+		// x= x.cos(tetha) - y.sin(tetha)
+		// Y= x.sin(tetha) + y.cos(tetha)
+		double cos = FastMath.cos(currentAngle);
+		double sin = FastMath.sin(currentAngle);
+		Vector2d finalPosition = new Vector2d(0, 0);
+		finalPosition.x = initialRelativePosition.x * cos - initialRelativePosition.y * sin;
+		finalPosition.y = initialRelativePosition.x * sin + initialRelativePosition.y * cos;
+
+		// Translation given by a 2D translation matrix:
+		// x= x + dx
+		// y= y + dy
+		finalPosition.x += rotationCenter.x;
+		finalPosition.y += rotationCenter.y;
+		
+		finalPosition.sub(initialRelativePosition);
+		return finalPosition;
 	}
 
 	@Override
@@ -52,21 +66,27 @@ public class RotationMotionData extends MotionData {
 		if (!rotate) {
 			return new Vector2d(0, 0);
 		} else {
-			double initialRotationAngle = initialRelativePosition.getAngle();
-			double currentAngle = initialRotationAngle * angularVelocity * step;
-
+			double currentAngle = (angularVelocity / UPDATE_RATE) * step;
 			if (rotationDirection) {
 				currentAngle = -currentAngle;
 			}
+			currentAngle += initialRelativePosition.getAngle();
+
+			// Given by the angle of vector (0,0)->(targetx,targety) +- Pi/2
+			// (depending on the movement direction)
+			double angular_momentum_angle = (FastMath.PI / 2) * (rotationDirection ? -1 : 1) + currentAngle;
 
 			// Given by the formula v=r*w (v=linear velocity, r=radius,
-			// w=angular velocity), we obtain the linear velocity from the
-			// radius and the angular velocity
-			double angular_momentum_intensity = initialRelativePosition.length() * angularVelocity;
+			// w=angular
+			// velocity), we obtain the linear velocity from the radius and the
+			// angular velocity
+			double angular_momentum_intensity = initialRelativePosition.length() * (angularVelocity / UPDATE_RATE);
 
-			double x_coordinate = angular_momentum_intensity * FastMath.cos(currentAngle);
-			double y_coordinate = angular_momentum_intensity * FastMath.sin(currentAngle);
-			return new Vector2d(x_coordinate, y_coordinate);
+			double x_coordinate = angular_momentum_intensity * FastMath.cos(angular_momentum_angle);
+			double y_coordinate = angular_momentum_intensity * FastMath.sin(angular_momentum_angle);
+			Vector2d angularMomentum = new Vector2d(x_coordinate, y_coordinate);
+
+			return angularMomentum;
 		}
 	}
 
@@ -94,7 +114,7 @@ public class RotationMotionData extends MotionData {
 		this.rotate = rotate;
 	}
 
-	public LatLon getRotationCenter() {
+	public Vector2d getRotationCenter() {
 		return rotationCenter;
 	}
 }
