@@ -14,6 +14,10 @@ public class MixedMotionData extends MotionData {
 		super(entity, MovementType.MIXED);
 	}
 
+	public MixedMotionData(GeoEntity entity, LatLon position) {
+		super(entity, position, MovementType.MIXED);
+	}
+
 	@Override
 	public LatLon calculatePosition(double step) {
 		Vector2d currentPosition = new Vector2d(originalPositionCartesian);
@@ -26,9 +30,9 @@ public class MixedMotionData extends MotionData {
 		Vector2d translationVector = new Vector2d(0, 0);
 
 		for (MotionData m : motionData) {
+
 			Vector2d t = m.calculateTranslationVector(step);
-			translationVector.x += t.x;
-			translationVector.y += t.y;
+			translationVector.add(t);
 		}
 
 		return translationVector;
@@ -36,5 +40,17 @@ public class MixedMotionData extends MotionData {
 
 	public void addMotionData(MotionData m) {
 		motionData.add(m);
+	}
+
+	@Override
+	public Vector2d getVelocityVector(double step) {
+		Vector2d velocityVector = new Vector2d(0, 0);
+		for (MotionData m : motionData) {
+
+			Vector2d t = m.getVelocityVector(step);
+			velocityVector.add(t);
+		}
+
+		return velocityVector;
 	}
 }
