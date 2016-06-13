@@ -17,23 +17,23 @@ public abstract class MotionData {
 	protected GeoEntity entity;
 	protected Vector2d originalPositionCartesian;
 	protected MovementType motionType;
-	protected Vector2d velocityVector;
 
 	public MotionData(GeoEntity entity, MovementType motionType) {
+		this(entity,entity.getLatLon(),motionType);
+	}
+	
+	public MotionData(GeoEntity entity, LatLon position, MovementType motionType) {
 		this.entity = entity;
-		this.originalPosition = entity.getLatLon();
-		originalPositionCartesian = CoordinateUtilities.GPSToCartesian(entity.getLatLon());
+		this.originalPosition = new LatLon(position);
+		originalPositionCartesian = CoordinateUtilities.GPSToCartesian(position);
 		this.motionType = motionType;
-		velocityVector = new Vector2d(0, 0);
 	}
 
 	public MovementType getMotionType() {
 		return motionType;
 	}
 
-	public Vector2d getVelocityVector(double step) {
-		return velocityVector;
-	}
+	public abstract Vector2d getVelocityVector(double step);
 
 	public LatLon getOriginalPosition() {
 		return originalPosition;
