@@ -31,31 +31,29 @@ public class ConnectionListener extends Thread {
 	public void run() {
 
 		try {
-			if (System.getProperty("os.name").equals("Linux")
-					&& System.getProperty("os.arch").equals("arm")) {
-				System.out
-						.println("[CONNECTION HANDLER] Connection Handler Initialized on "
-								+ NetworkUtils.getAddress("wlan0") + ":" + port);
+			if (System.getProperty("os.name").equals("Linux") && System.getProperty("os.arch").equals("arm")) {
+				System.out.printf("[%s] Connection Handler Initialized on %s:%d\n".getClass().getName(),
+						InetAddress.getLocalHost().getHostAddress(), port);
+				System.out.printf("[%s] Connection Handler Initialized on %s:%d\n".getClass().getName(),
+						NetworkUtils.getAddress("wlan0"), port);
 			} else {
-				System.out
-				.println("[CONNECTION HANDLER] Connection Handler Initialized on "
-						+ InetAddress.getLocalHost().getHostAddress() + ":" + port);
+				System.out.printf("[%s] Connection Handler Initialized on %s:%d\n".getClass().getName(),
+						InetAddress.getLocalHost().getHostAddress(), port);
 			}
-			
-			System.out
-					.println("[CONNECTION HANDLER] Waiting for connection requests!");
+
+			System.out.printf("[%s] Waiting for connection requests!\n", getClass().getName());
 			while (true) {
-					Socket socket = serverSocket.accept();
-					createHandler(socket);
+				Socket socket = serverSocket.accept();
+				createHandler(socket);
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.err.printf("[%s] Error: %s\n", getClass().getName(), e.getMessage());
 		} finally {
 			try {
 				serverSocket.close();
 			} catch (IOException e) {
-				System.out
-						.println("[CONNECTION HANDLER] Unable to close server socket.... there was an open socket?");
+				System.out.printf("[%s] Unable to close server socket.... there was an open socket?\n",
+						getClass().getName());
 			}
 		}
 	}
@@ -72,7 +70,7 @@ public class ConnectionListener extends Thread {
 
 	public void closeConnections() {
 		if (!connections.isEmpty()) {
-			System.out.println("[CONNECTION HANDLER] Closing Connections!");
+			System.out.printf("[%s] Closing Connections!\n", getClass().getName());
 			for (ConnectionHandler conn : connections) {
 				if (!conn.getSocket().isClosed())
 					conn.closeConnectionWthoutDiscardConnListener();
@@ -85,8 +83,7 @@ public class ConnectionListener extends Thread {
 		try {
 			serverSocket.close();
 		} catch (IOException e) {
-			System.out
-					.println("[CONNECTION HANDLER] Unable to close server socket.... there was an open socket?");
+			System.out.printf("[%s] Unable to close server socket.... there was an open socket?\n", getClass().getName());
 		}
 	}
 
