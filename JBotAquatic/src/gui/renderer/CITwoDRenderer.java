@@ -170,6 +170,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 			for (Object o : entities) {
 				Entity entity = (Entity) o;
 				if (entity instanceof GeoEntity) {
+					//System.out.println("Hello! "+entity.getName());
 					if (entity instanceof Target && !drawTargets.contains(entity)) {
 						Target t = (Target) entity;
 
@@ -185,6 +186,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 						int y = transformY(pos.y) - diam / 2;
 						graphics.fillOval(x, y, diam, diam);
 						drawTargetId(graphics, t);
+						//System.out.println("Entered! "+t+getName());
 
 						if (showVelocityVectors && ((Target) entity).getTargetMotionData() != null) {
 							MotionData motionData = (t.getTargetMotionData());
@@ -192,7 +194,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 							Vector2d velocityVector = new Vector2d(motionData.getVelocityVector(simulator.getTime()));
 
 							if (velocityVector.length() > 0) {
-								velocityVector.setLength(velocityVector.length() * 10);
+								velocityVector.setLength(velocityVector.length() * 100);
 								velocityVector.add(targetPos);
 
 								graphics.setColor(Color.BLACK);
