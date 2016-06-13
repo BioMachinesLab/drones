@@ -44,7 +44,11 @@ public abstract class TargetEnvironment extends Environment {
 		movementVelocity = args.getArgumentAsDoubleOrSetDefault("targetMovementVelocity", movementVelocity);
 		variateTargetVelocity = args.getArgumentAsIntOrSetDefault("variateTargetsSpeed", 0) == 1;
 
-		movementAzimuth = args.getArgumentAsDoubleOrSetDefault("targetMovementVelocity", movementAzimuth);
+		if (args.getArgumentIsDefined("targetMovementAzimuth")) {
+			movementAzimuth = args.getArgumentAsDouble("targetMovementAzimuth") * FastMath.PI / 180;
+			movementAzimuth %= 360;
+		}
+
 		variateTargetAzimuth = args.getArgumentAsIntOrSetDefault("variateTargetsAzimuth", 1) == 1;
 	}
 
