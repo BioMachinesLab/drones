@@ -1,6 +1,7 @@
 package commoninterface.utils.jcoord;
 
 import java.io.Serializable;
+
 import net.jafama.FastMath;
 
 /**
@@ -45,6 +46,11 @@ public class LatLon implements Serializable {
     this.lat = lat;
     this.lng = lng;
   }
+  
+  public LatLon(LatLon latLon){
+	  this.lat=latLon.getLat();
+	  this.lng=latLon.getLon();
+  }
 
 
   /**
@@ -53,7 +59,8 @@ public class LatLon implements Serializable {
    * @return a String representation of this LatLng object.
    * @since 1.0
    */
-  public String toString() {
+  @Override
+public String toString() {
     return "(" + this.lat + ", " + this.lng + ")";
   }
 
