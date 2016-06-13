@@ -3,11 +3,13 @@ package commoninterface.utils;
 import java.io.Serializable;
 
 import commoninterface.mathutils.Vector2d;
-import commoninterface.utils.jcoord.*;
+import commoninterface.utils.jcoord.LatLon;
+import commoninterface.utils.jcoord.UTMRef;
 import net.jafama.FastMath;
 
 public class CoordinateUtilities implements Serializable {
-
+	private static final long serialVersionUID = -6889997584557342203L;
+	
 	/**
 	 * The reference coordinate is located in Lisbon, Portugal. I'm not sure what's 
 	 * the consequence if the reference coordinate is in a different UTM zone!
@@ -108,5 +110,4 @@ public class CoordinateUtilities implements Serializable {
 		System.out.println(angleInDegrees(o, cartesianToGPS(l)));
 		
 	}
-	
 }

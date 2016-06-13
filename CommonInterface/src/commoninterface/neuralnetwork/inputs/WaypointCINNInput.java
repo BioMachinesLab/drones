@@ -5,6 +5,7 @@ import commoninterface.sensors.WaypointCISensor;
 import commoninterface.utils.CIArguments;
 
 public class WaypointCINNInput extends CINNInput {
+	private static final long serialVersionUID = -7947094643315050589L;
 
 	public WaypointCINNInput(CISensor sensor, CIArguments args) {
 		super(sensor, args);

@@ -7,6 +7,7 @@ import commoninterface.utils.Factory;
  * @author alc
  */
 public abstract class CIBehavior {
+	@SuppressWarnings("unused")
 	private CIArguments args;
 	protected RobotCI robot; 
 	
@@ -14,8 +15,7 @@ public abstract class CIBehavior {
 	 * Initialize the controller
 	 * 
 	 * @param args    Command-line arguments.
-	 * @param robot   Common drone hardware interface. 
-	 * @param logger  Instance of the CI logger to use.
+	 * @param robot   Common drone hardware interface.
 	 */
 	public CIBehavior(CIArguments args, RobotCI robot) {
 		this.robot  = robot;

@@ -4,6 +4,7 @@ import commoninterface.CISensor;
 import commoninterface.utils.CIArguments;
 
 public class RealThymioIRCINNInput extends CINNInput {
+	private static final long serialVersionUID = 2683774918493355476L;
 
 	static double sensorAverages[] = { 4513.437143, 4539.878571, 4527.204286, 4499.942857, 4466.281429, 4312.424286, 3868.898571, 3473.807143, 3097.858571, 2795.664286, 2623.207143, 2398.692857, 2213.665714, 2029.824286, 1856.642857, 1672.965714, 1167.87, 983.0885714, 507.1414286 };
 	

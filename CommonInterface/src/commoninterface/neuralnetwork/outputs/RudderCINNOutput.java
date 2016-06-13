@@ -5,14 +5,14 @@ import commoninterface.RobotCI;
 import commoninterface.utils.CIArguments;
 
 public class RudderCINNOutput extends CINNOutput {
-
+	private static final long serialVersionUID = -6786816191708652763L;
 	private double heading;
 	private double speed;
-	
+
 	public RudderCINNOutput(RobotCI robot, CIArguments args) {
-		super(robot,args);
+		super(robot, args);
 	}
-	
+
 	@Override
 	public int getNumberOfOutputValues() {
 		return 2;
@@ -21,7 +21,7 @@ public class RudderCINNOutput extends CINNOutput {
 	@Override
 	public void setValue(int output, double value) {
 		if (output == 0) {
-			heading = value;	
+			heading = value;
 		} else {
 			speed = value;
 		}
@@ -29,7 +29,7 @@ public class RudderCINNOutput extends CINNOutput {
 
 	@Override
 	public void apply() {
-		((AquaticDroneCI)robot).setRudder(heading*2-1, speed);
+		((AquaticDroneCI) robot).setRudder(heading * 2 - 1, speed);
 	}
 
 }

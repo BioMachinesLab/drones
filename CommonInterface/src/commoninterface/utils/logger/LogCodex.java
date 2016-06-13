@@ -2,7 +2,6 @@ package commoninterface.utils.logger;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Scanner;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.entities.Entity;
@@ -103,6 +102,7 @@ public class LogCodex {
 						blocks1[i] = infoBlocks[i + 1];
 					}
 
+					@SuppressWarnings("unchecked")
 					ArrayList<Entity> entities = (ArrayList<Entity>) objs[0];
 					decodeEntities(blocks1, entities);
 					

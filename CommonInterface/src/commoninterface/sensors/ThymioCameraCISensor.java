@@ -6,13 +6,13 @@ import commoninterface.ThymioCI;
 import commoninterface.utils.CIArguments;
 
 public class ThymioCameraCISensor extends CISensor {
-
+	private static final long serialVersionUID = -7227245166667467732L;
 	private ThymioCI thymio;
 	private double[] readings;
-	
+
 	public ThymioCameraCISensor(int id, RobotCI robot, CIArguments args) {
 		super(id, robot, args);
-		thymio = (ThymioCI)robot;
+		thymio = (ThymioCI) robot;
 	}
 
 	@Override

@@ -4,13 +4,13 @@ import commoninterface.RobotCI;
 import commoninterface.utils.CIArguments;
 
 public class StopCINNOutput extends CINNOutput {
-
+	private static final long serialVersionUID = 2179896003923771832L;
 	private boolean stop = false;
-	
+
 	public StopCINNOutput(RobotCI robot, CIArguments args) {
-		super(robot,args);
+		super(robot, args);
 	}
-	
+
 	@Override
 	public int getNumberOfOutputValues() {
 		return 1;
@@ -26,7 +26,7 @@ public class StopCINNOutput extends CINNOutput {
 
 	@Override
 	public void apply() {
-		if(stop)
+		if (stop)
 			robot.setMotorSpeeds(0, 0);
 	}
 

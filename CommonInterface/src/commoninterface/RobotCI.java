@@ -142,10 +142,9 @@ public interface RobotCI {
 	/**
 	 * Starts a specific behavior.
 	 * 
-	 * @param the
-	 *            behavior that will control the robot
+	 * @param behavior that will control the robot
 	 */
-	public void startBehavior(CIBehavior b);
+	public void startBehavior(CIBehavior behavior);
 
 	/**
 	 * Stops the currently active behavior.

@@ -1,14 +1,14 @@
 package commoninterface.entities;
 
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
 import commoninterface.utils.jcoord.LatLon;
 
-public class SharedDroneLocation extends GeoEntity{
-	
+public class SharedDroneLocation extends GeoEntity {
+
+	private static final long serialVersionUID = 2645528509058118310L;
 	private AquaticDroneCI.DroneType type;
 	private String observerAddress;
 
@@ -17,26 +17,26 @@ public class SharedDroneLocation extends GeoEntity{
 		this.type = type;
 		this.observerAddress = observerAddress;
 	}
-	
+
 	public AquaticDroneCI.DroneType getDroneType() {
 		return type;
 	}
-	
+
 	public String getObserverAddress() {
 		return observerAddress;
 	}
-	
+
 	public static LinkedList<SharedDroneLocation> getSharedDroneLocations(RobotCI robot) {
 		LinkedList<SharedDroneLocation> droneLocations = new LinkedList<SharedDroneLocation>();
-		
+
 		Object[] entities = robot.getEntities().toArray();
-		
-		for(Object e : entities) {
-			if(e instanceof SharedDroneLocation)
-				droneLocations.add((SharedDroneLocation)e);
+
+		for (Object e : entities) {
+			if (e instanceof SharedDroneLocation)
+				droneLocations.add((SharedDroneLocation) e);
 		}
-		
+
 		return droneLocations;
 	}
-	
+
 }

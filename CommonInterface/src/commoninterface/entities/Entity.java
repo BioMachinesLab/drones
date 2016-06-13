@@ -2,27 +2,27 @@ package commoninterface.entities;
 
 import java.io.Serializable;
 
-public abstract class Entity implements Serializable{
-	
+public abstract class Entity implements Serializable {
+	private static final long serialVersionUID = -4849725760482295389L;
 	protected String name = "";
 	protected long timestepReceived = 0;
-	
+
 	public Entity(String name) {
 		this.name = name;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
-	
+
 	public void setTimestepReceived(long timestep) {
 		this.timestepReceived = timestep;
 	}
-	
+
 	public long getTimestepReceived() {
 		return timestepReceived;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -47,10 +47,10 @@ public abstract class Entity implements Serializable{
 			return false;
 		return true;
 	}
-	
+
 	@Override
 	public String toString() {
 		return name;
 	}
-	
+
 }

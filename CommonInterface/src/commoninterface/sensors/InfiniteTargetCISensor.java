@@ -71,11 +71,6 @@ public class InfiniteTargetCISensor extends WaypointCISensor {
 			double orientationDifference = currentOrientation - coordinatesAngle + 180;
 
 			if (normalize) {
-				// if (orientationDifference < 90) {
-				// orientationDifference = -(orientationDifference - 90);
-				// } else {
-				// orientationDifference = 450 - orientationDifference;
-				// }
 				orientationDifference %= 360;
 				orientationDifference /= 360;
 			} else {

@@ -8,19 +8,19 @@ import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
 
-public class WaypointCISensor extends CISensor{
-	
+public class WaypointCISensor extends CISensor {
+	private static final long serialVersionUID = -6113447242030466562L;
 	private AquaticDroneCI drone;
-	protected double[] readings = {0,0};
+	protected double[] readings = { 0, 0 };
 	protected double range = 1;
 
 	public WaypointCISensor(int id, RobotCI robot, CIArguments args) {
 		super(id, robot, args);
 		range = args.getArgumentAsDoubleOrSetDefault("range", range);
-		
-		drone = (AquaticDroneCI)robot;
+
+		drone = (AquaticDroneCI) robot;
 	}
-	
+
 	@Override
 	public double getSensorReading(int sensorNumber) {
 		return readings[sensorNumber];
@@ -28,38 +28,38 @@ public class WaypointCISensor extends CISensor{
 
 	@Override
 	public void update(double time, Object[] entities) {
-		
+
 		LatLon robotLatLon = drone.getGPSLatLon();
-		
+
 		Waypoint wp = drone.getActiveWaypoint();
-		if(wp != null) {
-				
+		if (wp != null) {
+
 			LatLon latLon = wp.getLatLon();
-			
-			double currentDistance = CoordinateUtilities.distanceInMeters(robotLatLon,latLon);
-			
+
+			double currentDistance = CoordinateUtilities.distanceInMeters(robotLatLon, latLon);
+
 			double currentOrientation = drone.getCompassOrientationInDegrees();
-			double coordinatesAngle = CoordinateUtilities.angleInDegrees(robotLatLon,latLon);
-			
+			double coordinatesAngle = CoordinateUtilities.angleInDegrees(robotLatLon, latLon);
+
 			double difference = currentOrientation - coordinatesAngle;
-			
-			difference%=360;
-			
-			if(difference > 180){
-				difference = -((180 -difference) + 180);
+
+			difference %= 360;
+
+			if (difference > 180) {
+				difference = -((180 - difference) + 180);
 			}
-			
+
 			readings[0] = difference;
 			readings[1] = currentDistance;
-		}  else {
-			//If there is no waypoint, the sensor
-			//should act as if the robot arrived at a waypoint
+		} else {
+			// If there is no waypoint, the sensor
+			// should act as if the robot arrived at a waypoint
 			readings[0] = 0.5;
 			readings[1] = 1;
 		}
-		
+
 	}
-	
+
 	public double getRange() {
 		return range;
 	}

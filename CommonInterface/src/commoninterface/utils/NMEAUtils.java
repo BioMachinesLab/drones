@@ -25,14 +25,22 @@ public class NMEAUtils {
 	 */
 	public void calculateNMEAChecksum() {
 		Scanner in = new Scanner(System.in);
-		
-		while(true) {
+
+		boolean exit = false;
+		while (!exit) {
 			System.out.println("Entrer NMEA sentence to calculate checksum: ");
-			String checksum = calculateNMEAChecksum(in.nextLine());
-			// System.out.println("Checksum (DEC): " + checksum);
-			System.out.println("Chechsum (HEX): "
-					+ checksum);
+
+			String line = in.nextLine();
+			if (line.equals("exit")) {
+				exit = true;
+			} else {
+				String checksum = calculateNMEAChecksum(in.nextLine());
+				// System.out.println("Checksum (DEC): " + checksum);
+				System.out.println("Chechsum (HEX): " + checksum);
+			}
 		}
+
+		in.close();
 	}
 
 	/**
@@ -54,10 +62,10 @@ public class NMEAUtils {
 					checksum ^= (byte) sentence.charAt(i);
 			}
 		}
-		
+
 		String stringChecksum = Integer.toHexString(checksum).toUpperCase();
-		if(stringChecksum.length() == 1)
-			stringChecksum = "0"+stringChecksum;
+		if (stringChecksum.length() == 1)
+			stringChecksum = "0" + stringChecksum;
 
 		return stringChecksum;
 	}
@@ -68,17 +76,24 @@ public class NMEAUtils {
 	 */
 	public void checkNMEAChecksum() {
 		Scanner in = new Scanner(System.in);
-		
-		while(true) {
+
+		boolean exit = false;
+		while (!exit) {
 			System.out.println("Entrer NMEA sentence to check checksum: ");
 			String sentence = in.nextLine();
-			boolean check = checkNMEAChecksum(sentence);
-			String ck = calculateNMEAChecksum(sentence);
-	
-			System.out.println("The checksum is "
-					+ (check ? "correct" : "incorrect"));
-			System.out.println("Expected="+ck);
+
+			if (sentence.equals("exit")) {
+				exit = true;
+			} else {
+				boolean check = checkNMEAChecksum(sentence);
+				String ck = calculateNMEAChecksum(sentence);
+
+				System.out.println("The checksum is " + (check ? "correct" : "incorrect"));
+				System.out.println("Expected=" + ck);
+			}
 		}
+
+		in.close();
 	}
 
 	/**
@@ -90,17 +105,17 @@ public class NMEAUtils {
 	 *         if not)
 	 */
 	public boolean checkNMEAChecksum(String sentence) {
-		
-		if(sentence.length() < 4)
+
+		if (sentence.length() < 4)
 			return false;
-		
+
 		if (sentence.charAt(sentence.length() - 3) == '*') {
-			
-			String ck = sentence.substring(sentence.length() - 2,sentence.length());
+
+			String ck = sentence.substring(sentence.length() - 2, sentence.length());
 			String calculatedChecksum = calculateNMEAChecksum(sentence);
 			return ck.equals(calculatedChecksum);
 		}
-		
+
 		return false;
 	}
 }

@@ -3,6 +3,7 @@ package commoninterface.mathutils;
 import java.io.Serializable;
 
 public class Point2d implements Serializable {
+	private static final long serialVersionUID = -7072329437513454044L;
 	public double x;
 	public double y;
 

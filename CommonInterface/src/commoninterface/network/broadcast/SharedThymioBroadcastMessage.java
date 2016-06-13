@@ -3,7 +3,6 @@ package commoninterface.network.broadcast;
 import java.util.LinkedList;
 
 import commoninterface.RobotCI;
-import commoninterface.AquaticDroneCI.DroneType;
 import commoninterface.entities.Entity;
 import commoninterface.entities.ThymioSharedEntity;
 import commoninterface.mathutils.Vector2d;

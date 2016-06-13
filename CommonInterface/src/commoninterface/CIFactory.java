@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CIFactory implements Serializable {
-
+	private static final long serialVersionUID = -7385054166052929712L;
 	public final static Map<Class<?>, Class<?>> map = initializeMap();
 
 	private static Map<Class<?>, Class<?>> initializeMap() {
@@ -24,41 +24,40 @@ public class CIFactory implements Serializable {
 	}
 
 	public static Object getInstance(String className, Object... objects) {
-//		System.out.println("Build by reflection class "+ className); 
-		String s = "";
+		// System.out.println("Build by reflection class "+ className);
 		try {
 			Constructor<?>[] constructors = Class.forName(className).getDeclaredConstructors();
 			for (Constructor<?> constructor : constructors) {
 				boolean found = true;
 				Class<?>[] params = constructor.getParameterTypes();
-				if(params.length == objects.length) {
+				if (params.length == objects.length) {
 					found = true;
-					for(int i = 0 ; i < objects.length; i++) {
+					for (int i = 0; i < objects.length; i++) {
+						@SuppressWarnings("rawtypes")
 						Class c = objects[i].getClass();
-						if(params[i].isPrimitive())
+						if (params[i].isPrimitive())
 							c = map.get(objects[i].getClass());
-						
-						s+=params[i].getName()+"=="+c.getName()+"\n";
-						
-						if(!params[i].isAssignableFrom(c)) {
+
+						if (!params[i].isAssignableFrom(c)) {
 							found = false;
-//							System.out.println(className +" not assignable with "+params[i].getCanonicalName());
+							// System.out.println(className +" not assignable
+							// with "+params[i].getCanonicalName());
 							break;
 						}
 					}
-					s+="\n_____\n";
-					if(found) {
-//						System.out.println("found: "+s);
-						
+					if (found) {
+						// System.out.println("found: "+s);
+
 						return constructor.newInstance(objects);
 					}
 				}
 			}
-//			System.out.println(s);
-			
-//			System.out.println(className+" ## "+Class.forName(className).getName());
+			// System.out.println(s);
+
+			// System.out.println(className+" ##
+			// "+Class.forName(className).getName());
 		} catch (Exception e) {
-			System.out.println("Problem with class "+className);
+			System.out.println("Problem with class " + className);
 			e.printStackTrace();
 		}
 		throw new RuntimeException("Unknown classname: " + className);

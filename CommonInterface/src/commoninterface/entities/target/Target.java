@@ -8,6 +8,7 @@ import commoninterface.utils.jcoord.LatLon;
 
 public class Target extends GeoEntity {
 	private static final long serialVersionUID = -8376280695329140274L;
+	private static final double HYSTERESIS_TIME = 50; // In miliseconds
 
 	private double radius;
 	private Formation formation = null;
@@ -17,10 +18,11 @@ public class Target extends GeoEntity {
 	private boolean inFormation = false;
 	private LatLon originalPosition;
 
-	private double hysteresisTime=0;// In miliseconds
-	private double releaseTime = 0;
-	private boolean toRelease = false;
-	private boolean inProcess = false;
+	private double histeresysTime = HYSTERESIS_TIME;
+	private double histeresysTimeStorage = HYSTERESIS_TIME;
+
+	private double enterTime = 0;
+	private boolean entered = false;
 
 	public Target(String name, LatLon latLon, double radius) {
 		super(name, latLon);
@@ -31,43 +33,44 @@ public class Target extends GeoEntity {
 	public void step(double time) {
 		setLatLon(getTargetMotionData().calculatePosition(time));
 
-		if (toRelease && !inProcess) {
-			releaseTime = time;
-			inProcess = true;
+		if (entered) {
+			enterTime = time;
+			entered = false;
+			occupied = true;
 		}
 
-		if (occupant != null || (toRelease && inProcess && (time - releaseTime < hysteresisTime))) {
-			occupied = true;
-		} else {
+		if (occupied && (time - enterTime >= histeresysTime)) {
 			occupant = null;
 			occupied = false;
-			toRelease = false;
-			inProcess = false;
 		}
+
 	}
 
 	/*
 	 * Getters and setters
 	 */
 	public void setOccupied(boolean occupied) {
-		if (occupied) {
-			this.occupied = true;
-			toRelease = false;
-			inProcess = false;
+		entered = occupied;
+	}
+
+	public void setMotionData(MotionData motionData) {
+		this.motionData = motionData;
+	}
+
+	public void enableHisteresys(boolean enable) {
+		if (enable) {
+			histeresysTime = histeresysTimeStorage;
 		} else {
-			if (occupant != null && !inProcess) {
-				occupant = null;
-				toRelease = true;
-			}
+			histeresysTime = 0;
 		}
 	}
 
-	public void setHysteresisTime(double hysteresisTime) {
-		this.hysteresisTime = hysteresisTime;
-	}
-	
-	public void setMotionData(MotionData motionData) {
-		this.motionData = motionData;
+	public void setHisteresysTime(double histeresysTime) {
+		this.histeresysTimeStorage = histeresysTime;
+
+		if (histeresysTime != 0) {
+			this.histeresysTime = histeresysTime;
+		}
 	}
 
 	public MotionData getTargetMotionData() {
@@ -101,14 +104,7 @@ public class Target extends GeoEntity {
 	}
 
 	public void setOccupant(RobotCI occupant) {
-		if (occupant == null && this.occupant != null) {
-			toRelease = true;
-		} else if (occupant != null) {
-			occupied = true;
-			toRelease = false;
-			inProcess = false;
-		}
-
+		entered = true;
 		this.occupant = occupant;
 	}
 

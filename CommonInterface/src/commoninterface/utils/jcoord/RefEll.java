@@ -16,77 +16,78 @@ import java.io.Serializable;
  */
 public class RefEll implements Serializable {
 
-  /**
-   * Airy 1830 Reference Ellipsoid
-   */
-  public static final RefEll AIRY_1830 = new RefEll(6377563.396, 6356256.909);
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6148736722721943032L;
 
-  /**
-   * WGS84 Reference Ellipsoid
-   */
-  public static final RefEll WGS84     = new RefEll(6378137.000, 6356752.3141);
+	/**
+	 * Airy 1830 Reference Ellipsoid
+	 */
+	public static final RefEll AIRY_1830 = new RefEll(6377563.396, 6356256.909);
 
-  /**
-   * Semi-major axis
-   */
-  private double             maj;
+	/**
+	 * WGS84 Reference Ellipsoid
+	 */
+	public static final RefEll WGS84 = new RefEll(6378137.000, 6356752.3141);
 
-  /**
-   * Semi-minor axis
-   */
-  private double             min;
+	/**
+	 * Semi-major axis
+	 */
+	private double maj;
 
-  /**
-   * Eccentricity
-   */
-  private double             ecc;
+	/**
+	 * Semi-minor axis
+	 */
+	private double min;
 
+	/**
+	 * Eccentricity
+	 */
+	private double ecc;
 
-  /**
-   * Create a new reference ellipsoid
-   * 
-   * @param maj
-   *          semi-major axis
-   * @param min
-   *          semi-minor axis
-   * @since 1.0
-   */
-  public RefEll(double maj, double min) {
-    this.maj = maj;
-    this.min = min;
-    this.ecc = ((maj * maj) - (min * min)) / (maj * maj);
-  }
+	/**
+	 * Create a new reference ellipsoid
+	 * 
+	 * @param maj
+	 *            semi-major axis
+	 * @param min
+	 *            semi-minor axis
+	 * @since 1.0
+	 */
+	public RefEll(double maj, double min) {
+		this.maj = maj;
+		this.min = min;
+		this.ecc = ((maj * maj) - (min * min)) / (maj * maj);
+	}
 
+	/**
+	 * Return the semi-major axis.
+	 * 
+	 * @return the semi-major axis
+	 * @since 1.0
+	 */
+	public double getMaj() {
+		return maj;
+	}
 
-  /**
-   * Return the semi-major axis.
-   * 
-   * @return the semi-major axis
-   * @since 1.0
-   */
-  public double getMaj() {
-    return maj;
-  }
+	/**
+	 * Return the semi-minor axis
+	 * 
+	 * @return the semi-minor axis
+	 * @since 1.0
+	 */
+	public double getMin() {
+		return min;
+	}
 
-
-  /**
-   * Return the semi-minor axis
-   * 
-   * @return the semi-minor axis
-   * @since 1.0
-   */
-  public double getMin() {
-    return min;
-  }
-
-
-  /**
-   * Return the eccentricity.
-   * 
-   * @return the eccentricity
-   * @since 1.0
-   */
-  public double getEcc() {
-    return ecc;
-  }
+	/**
+	 * Return the eccentricity.
+	 * 
+	 * @return the eccentricity
+	 * @since 1.0
+	 */
+	public double getEcc() {
+		return ecc;
+	}
 }

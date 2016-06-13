@@ -10,11 +10,11 @@ public class MathUtils {
 	 * the range, because out-of-range values are sometimes intended and useful.
 	 * The function also handles negative numbers well.
 	 * 
-	 * @param The value to be mapped on a new range
-	 * @param Old minimum bound
-	 * @param Old maximum bound
-	 * @param New minimum bound
-	 * @param New maximum bound
+	 * @param x - The value to be mapped on a new range
+	 * @param in_min - Old minimum bound
+	 * @param in_max - Old maximum bound
+	 * @param out_min - New minimum bound
+	 * @param out_max - New maximum bound
 	 * @return The input value mapped on the new range
 	 */
 	public static double map(double x, double in_min, double in_max, double out_min,

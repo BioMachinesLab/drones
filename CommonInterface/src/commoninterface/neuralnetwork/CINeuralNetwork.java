@@ -11,6 +11,7 @@ import commoninterface.neuralnetwork.outputs.CINNOutput;
 import commoninterface.utils.CIArguments;
 
 public abstract class CINeuralNetwork implements Serializable {
+	private static final long serialVersionUID = 8250390656834922291L;
 	protected Vector<CINNInput> inputs;
 	protected Vector<CINNOutput> outputs;
 

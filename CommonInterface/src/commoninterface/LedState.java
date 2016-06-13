@@ -1,9 +1,5 @@
 package commoninterface;
 
-import java.io.Serializable;
-
-public enum LedState implements Serializable{
-	OFF,
-	ON,
-	BLINKING
+public enum LedState {
+	OFF, ON, BLINKING
 }

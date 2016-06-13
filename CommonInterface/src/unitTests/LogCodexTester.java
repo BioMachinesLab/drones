@@ -9,7 +9,6 @@ import org.junit.Test;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.AquaticDroneCI.DroneType;
-import commoninterface.entities.GeoFence;
 import commoninterface.entities.ObstacleLocation;
 import commoninterface.entities.RobotLocation;
 import commoninterface.entities.Waypoint;
@@ -44,8 +43,8 @@ public class LogCodexTester {
 	private final String WP_NAME = "WP";
 	private final Waypoint WAYPOINT = new Waypoint(WP_NAME, LATLON);
 
-	private final String GEOFENC_NAME = "GEOFENCE";
-	private final GeoFence GEOFENCE = new GeoFence(GEOFENC_NAME);
+	//private final String GEOFENC_NAME = "GEOFENCE";
+	//private final GeoFence GEOFENCE = new GeoFence(GEOFENC_NAME);
 
 	private final String OBST_NAME = "OBSTACLE";
 	private final double OBST_RADIUS = 10.1102;

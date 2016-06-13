@@ -5,7 +5,7 @@ import java.io.Serializable;
 import commoninterface.utils.CIArguments;
 
 public abstract class CISensor implements Serializable {
-
+	private static final long serialVersionUID = 5271625983138408442L;
 	protected int id = 0;
 	protected RobotCI robot;
 
@@ -21,8 +21,7 @@ public abstract class CISensor implements Serializable {
 
 	public abstract void update(double time, Object[] entities);
 
-	public static CISensor getSensor(RobotCI robot, String name,
-			CIArguments arguments) {
+	public static CISensor getSensor(RobotCI robot, String name, CIArguments arguments) {
 		int id = arguments.getArgumentAsIntOrSetDefault("id", 0);
 		return (CISensor) CIFactory.getInstance(name, id, robot, arguments);
 	}

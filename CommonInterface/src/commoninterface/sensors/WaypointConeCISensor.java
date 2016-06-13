@@ -15,14 +15,15 @@ import commoninterface.utils.CIArguments;
  * @author jorge
  */
 public class WaypointConeCISensor extends ConeTypeCISensor {
+	private static final long serialVersionUID = 2372212367162635891L;
 
-    public WaypointConeCISensor(int id, RobotCI robot, CIArguments args) {
-        super(id, robot, args);
-    }
+	public WaypointConeCISensor(int id, RobotCI robot, CIArguments args) {
+		super(id, robot, args);
+	}
 
-    @Override
-    public boolean validEntity(Entity e) {
-        return e instanceof Waypoint;
-    }
-    
+	@Override
+	public boolean validEntity(Entity e) {
+		return e instanceof Waypoint;
+	}
+
 }

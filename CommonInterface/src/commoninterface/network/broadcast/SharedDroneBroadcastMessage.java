@@ -3,10 +3,9 @@ package commoninterface.network.broadcast;
 import java.util.LinkedList;
 
 import commoninterface.AquaticDroneCI;
-import commoninterface.RobotCI;
 import commoninterface.AquaticDroneCI.DroneType;
+import commoninterface.RobotCI;
 import commoninterface.entities.Entity;
-import commoninterface.entities.RobotLocation;
 import commoninterface.entities.SharedDroneLocation;
 import commoninterface.utils.jcoord.LatLon;
 

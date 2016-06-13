@@ -4,14 +4,14 @@ import commoninterface.RobotCI;
 import commoninterface.utils.CIArguments;
 
 public class TwoWheelCINNOutput extends CINNOutput {
-
+	private static final long serialVersionUID = 9128716687719498738L;
 	private double leftSpeed;
 	private double rightSpeed;
-	
+
 	public TwoWheelCINNOutput(RobotCI robot, CIArguments args) {
-		super(robot,args);
+		super(robot, args);
 	}
-	
+
 	@Override
 	public int getNumberOfOutputValues() {
 		return 2;
@@ -19,11 +19,11 @@ public class TwoWheelCINNOutput extends CINNOutput {
 
 	@Override
 	public void setValue(int output, double value) {
-		
+
 		if (output == 0)
-			leftSpeed = value*2 - 1;
+			leftSpeed = value * 2 - 1;
 		else
-			rightSpeed = value*2 - 1;
+			rightSpeed = value * 2 - 1;
 	}
 
 	@Override

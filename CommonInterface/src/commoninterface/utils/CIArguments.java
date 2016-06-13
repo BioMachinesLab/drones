@@ -56,7 +56,7 @@ public class CIArguments implements Serializable {
 	 * Vector of the values for the arguments in "arguments".
 	 */
 	protected Vector<String> values = new Vector<String>();
-	
+
 	protected String loadedFile = "";
 
 	/**
@@ -65,18 +65,16 @@ public class CIArguments implements Serializable {
 	 * 
 	 * @param unparsedArgumentString
 	 *            Raw, unparsed argument string.
-	 * @throws MultipleClassDefinitionException
-	 * @throws ClassNotFoundException
 	 */
 	public CIArguments(String unparsedArgumentString) {
 		parseString(unparsedArgumentString);
 		removeRepeated();
 	}
-	
+
 	public CIArguments(String unparsedArgumentString, boolean translateClasses) {
-		if(translateClasses) {
+		if (translateClasses) {
 			unparsedArgumentString = translateClasses(unparsedArgumentString);
-//			System.out.println(unparsedArgumentString);
+			// System.out.println(unparsedArgumentString);
 		}
 		parseString(unparsedArgumentString);
 		removeRepeated();
@@ -85,38 +83,38 @@ public class CIArguments implements Serializable {
 	private void removeRepeated() {
 		Iterator<String> iArgs = arguments.iterator();
 		Iterator<String> iValues = values.iterator();
-		
+
 		ArrayList<String> found = new ArrayList<String>();
-		
-		while(iArgs.hasNext()) {
+
+		while (iArgs.hasNext()) {
 			String current = iArgs.next();
 			iValues.next();
-			if(found.contains(current)) {
+			if (found.contains(current)) {
 				iArgs.remove();
 				iValues.remove();
-			}else {
+			} else {
 				found.add(current);
 			}
 		}
 	}
-	
-	public static String replaceAndGetArguments(String argName, String arg ,String by,List<String> removedStrings){
-		Pattern p = Pattern.compile(argName+"=\\w*(\\.\\w*)*");
-	 	Matcher m = p.matcher(arg);
 
-		while(m.find()) {
+	public static String replaceAndGetArguments(String argName, String arg, String by, List<String> removedStrings) {
+		Pattern p = Pattern.compile(argName + "=\\w*(\\.\\w*)*");
+		Matcher m = p.matcher(arg);
+
+		while (m.find()) {
 			String found = m.group();
 			String[] split = found.split("=");
 			removedStrings.add(split[1]);
 			arg = m.replaceFirst(by);
 			m = p.matcher(arg);
-	 	}
+		}
 		return arg;
 	}
-	
-	public static String repleceTagByStrings(String argName, String arg, String tag, List<String> newStrings){
-		for(String s : newStrings)
-			arg = arg.replaceFirst(tag, argName+"="+s);
+
+	public static String repleceTagByStrings(String argName, String arg, String tag, List<String> newStrings) {
+		for (String s : newStrings)
+			arg = arg.replaceFirst(tag, argName + "=" + s);
 		return arg;
 	}
 
@@ -153,8 +151,7 @@ public class CIArguments implements Serializable {
 			} else if (currentChar == '=' && parenthesisLevel == 0) {
 				if (currentArgument.length() == 0)
 					throw new java.lang.RuntimeException(
-							"Something is wrong. Argument starts with a = "
-									+ unparsedArgumentString);
+							"Something is wrong. Argument starts with a = " + unparsedArgumentString);
 
 				currentlyValue = true;
 			} else if (currentChar == ',' && parenthesisLevel == 0) {
@@ -179,7 +176,7 @@ public class CIArguments implements Serializable {
 				values.add(currentValue.toString());
 			}
 		}
-		
+
 	}
 
 	/**
@@ -258,9 +255,8 @@ public class CIArguments implements Serializable {
 		try {
 			result = Integer.parseInt(value);
 		} catch (NumberFormatException e) {
-			throw new RuntimeException("Trying to parse the argument \""
-					+ argument + "\" as an int, but the specified value \""
-					+ value + "\" isn't an int");
+			throw new RuntimeException("Trying to parse the argument \"" + argument
+					+ "\" as an int, but the specified value \"" + value + "\" isn't an int");
 		}
 		return result;
 
@@ -272,7 +268,8 @@ public class CIArguments implements Serializable {
 	 * 
 	 * @param argument
 	 *            the argument for which a new value should be set
-	 * @value the new value for the argument
+	 * @param value
+	 *            -> the new value for the argument
 	 */
 	public void setArgument(String argument, String value) {
 		if (getArgumentIsDefined(argument)) {
@@ -300,7 +297,8 @@ public class CIArguments implements Serializable {
 	 * 
 	 * @param argument
 	 *            the argument for which a new value should be set
-	 * @value the new value for the argument
+	 * @param value
+	 *            -> the new value for the argument
 	 */
 	public void setArgument(String argument, int value) {
 		setArgument(argument, "" + value);
@@ -312,7 +310,8 @@ public class CIArguments implements Serializable {
 	 * 
 	 * @param argument
 	 *            the argument for which a new value should be set
-	 * @value the new value for the argument
+	 * @param value
+	 *            -> the new value for the argument
 	 */
 	public void setArgument(String argument, double value) {
 		setArgument(argument, "" + value);
@@ -342,8 +341,7 @@ public class CIArguments implements Serializable {
 	 * @return the double value of the argument or the default value if it does
 	 *         not exist.
 	 */
-	public double getArgumentAsDoubleOrSetDefault(String argument,
-			double defaultValue) {
+	public double getArgumentAsDoubleOrSetDefault(String argument, double defaultValue) {
 		String value = getArgumentValue(argument);
 		if (value == null) {
 			return defaultValue;
@@ -352,9 +350,8 @@ public class CIArguments implements Serializable {
 		try {
 			return Double.parseDouble(value);
 		} catch (NumberFormatException e) {
-			throw new RuntimeException("Trying to parse the argument \""
-					+ argument + "\" as a double, but the specified value \""
-					+ value + "\" isn't a double");
+			throw new RuntimeException("Trying to parse the argument \"" + argument
+					+ "\" as a double, but the specified value \"" + value + "\" isn't a double");
 		}
 	}
 
@@ -380,8 +377,7 @@ public class CIArguments implements Serializable {
 	 *            default value returned in case the argument is not defined.
 	 * @return the value of the argument or null if the argument does not exist.
 	 */
-	public String getArgumentAsStringOrSetDefault(String argument,
-			String defaultValue) {
+	public String getArgumentAsStringOrSetDefault(String argument, String defaultValue) {
 		String value = getArgumentValue(argument);
 		if (value == null) {
 			value = defaultValue;
@@ -400,11 +396,11 @@ public class CIArguments implements Serializable {
 		for (int i = 0; i < arguments.size(); i++) {
 			if (sb.length() > 0)
 				sb.append(",");
-			
+
 			sb.append(arguments.get(i));
 			if (values.get(i).length() > 0) {
-				if(values.get(i).contains("=") || values.get(i).contains(","))
-					sb.append("=(" + values.get(i)+")");
+				if (values.get(i).contains("=") || values.get(i).contains(","))
+					sb.append("=(" + values.get(i) + ")");
 				else
 					sb.append("=" + values.get(i));
 			}
@@ -425,7 +421,7 @@ public class CIArguments implements Serializable {
 	 * Check if all arguments have been queried. This should be called after
 	 * anyone interested in querying the arguments have had the chance. In case
 	 * not all of the arguments have been queried, the method
-	 * {@link #getUnqueiredArgument} can be used to figure out which arguments
+	 * {@link #getUnqueriedArgument()} can be used to figure out which arguments
 	 * have not been queried.
 	 * 
 	 * @return true if all the arguments have been queried, false otherwise.
@@ -499,11 +495,8 @@ public class CIArguments implements Serializable {
 		String value = getArgumentValue(argument);
 		if (value == null) {
 			return false;
-		} else if (value.equalsIgnoreCase("true")
-				|| value.equalsIgnoreCase("on")
-				|| value.equalsIgnoreCase("enable")
-				|| value.equalsIgnoreCase("enabled")
-				|| value.equalsIgnoreCase("yes") || value.equalsIgnoreCase("1")) {
+		} else if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("on") || value.equalsIgnoreCase("enable")
+				|| value.equalsIgnoreCase("enabled") || value.equalsIgnoreCase("yes") || value.equalsIgnoreCase("1")) {
 			return true;
 		} else {
 			return false;
@@ -527,31 +520,25 @@ public class CIArguments implements Serializable {
 		String value = getArgumentValue(argument);
 		if (value == null) {
 			return false;
-		} else if (value.equalsIgnoreCase("false")
-				|| value.equalsIgnoreCase("off")
-				|| value.equalsIgnoreCase("disable")
-				|| value.equalsIgnoreCase("disabled")
-				|| value.equalsIgnoreCase("no") || value.equalsIgnoreCase("0")) {
+		} else if (value.equalsIgnoreCase("false") || value.equalsIgnoreCase("off") || value.equalsIgnoreCase("disable")
+				|| value.equalsIgnoreCase("disabled") || value.equalsIgnoreCase("no") || value.equalsIgnoreCase("0")) {
 			return true;
 		} else {
 			return false;
 		}
 	}
-	
-	public static String[] readOptionsFromFile(String filename)
-			throws IOException {
+
+	public static String[] readOptionsFromFile(String filename) throws IOException {
 		String oldString = readContentFromFile(filename);
 		return readOptionsFromString(oldString);
 	}
 
-	public static String readContentFromFile(String filename)
-			throws IOException {
+	public static String readContentFromFile(String filename) throws IOException {
 		BufferedReader bufferedReader;
 		StringBuffer sb = new StringBuffer();
 		String nextLine;
-		
-		bufferedReader = new BufferedReader(new InputStreamReader(
-				new DataInputStream(new FileInputStream(filename))));
+
+		bufferedReader = new BufferedReader(new InputStreamReader(new DataInputStream(new FileInputStream(filename))));
 
 		while ((nextLine = bufferedReader.readLine()) != null) {
 			int index = nextLine.indexOf('#');
@@ -564,6 +551,8 @@ public class CIArguments implements Serializable {
 
 			sb.append(nextLine + " ");
 		}
+
+		bufferedReader.close();
 
 		return sb.toString();
 	}
@@ -583,144 +572,146 @@ public class CIArguments implements Serializable {
 
 		return newString.trim().split(" ");
 	}
-	
+
 	public static CIArguments createOrPrependArguments(CIArguments previous, String newArgumentString) {
 		try {
-			return createOrPrependArguments(previous, newArgumentString,false);
-		} catch(Exception e){e.printStackTrace();}
+			return createOrPrependArguments(previous, newArgumentString, false);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 
-	private static CIArguments createOrPrependArguments(CIArguments previous,String newArgumentString, boolean translateArguments) throws ClassNotFoundException {
+	private static CIArguments createOrPrependArguments(CIArguments previous, String newArgumentString,
+			boolean translateArguments) throws ClassNotFoundException {
 		if (newArgumentString.charAt(0) == '+') {
 			if (previous != null) {
-				return new CIArguments(newArgumentString.substring(1,
-						newArgumentString.length())
-						+ ","
+				return new CIArguments(newArgumentString.substring(1, newArgumentString.length()) + ","
 						+ previous.getCompleteArgumentString());
 			} else {
-				return new CIArguments(newArgumentString.substring(1,
-						newArgumentString.length()));
+				return new CIArguments(newArgumentString.substring(1, newArgumentString.length()));
 			}
 		} else {
 			return new CIArguments(newArgumentString);
 		}
 	}
 
+	@Override
 	public String toString() {
 		return getCompleteArgumentString();
 	}
-	
+
 	public Vector<String> getArguments() {
 		return arguments;
 	}
-	
+
 	public Vector<String> getValues() {
 		return values;
 	}
-	
+
 	public static String beautifyString(String s) {
-		
+
 		int nParenthesis = 0;
 		String newString = "\t";
-		
-		for(int i = 0 ; i < s.length(); i++) {
+
+		for (int i = 0; i < s.length(); i++) {
 			char c = s.charAt(i);
-			
-			switch(c) {
-				case ',':
-					newString+=",\n";
-					newString+=repeatString("\t", nParenthesis+1);
-					break;
-				case '(':
-					nParenthesis++;
-					newString+="(\n";
-					newString+=repeatString("\t", nParenthesis+1);
-					break;
-				case ')':
-					nParenthesis--;
-					newString+="\n";
-					newString+=repeatString("\t", nParenthesis+1);
-					newString+=")";
-					break;
-				default:
-					newString+=c;
+
+			switch (c) {
+			case ',':
+				newString += ",\n";
+				newString += repeatString("\t", nParenthesis + 1);
+				break;
+			case '(':
+				nParenthesis++;
+				newString += "(\n";
+				newString += repeatString("\t", nParenthesis + 1);
+				break;
+			case ')':
+				nParenthesis--;
+				newString += "\n";
+				newString += repeatString("\t", nParenthesis + 1);
+				newString += ")";
+				break;
+			default:
+				newString += c;
 			}
 		}
 		return newString;
 	}
-	
+
 	public static String repeatString(String s, int n) {
 		String newString = "";
-		
-		for(int i = 0 ; i < n ; i++)
-			newString+=s;
-		
+
+		for (int i = 0; i < n; i++)
+			newString += s;
+
 		return newString;
 	}
-	
+
 	public void removeArgument(String key) {
 		int index = arguments.indexOf(key);
-		
-		if(index >= 0) {
+
+		if (index >= 0) {
 			arguments.remove(index);
 			values.remove(index);
 		}
 	}
-	
+
 	private String translateClasses(String arg) {
 		Pattern p = Pattern.compile("classname=\\w*(\\.\\w*)*");
-	 	Matcher m = p.matcher(arg);
-	 	
-	 	LinkedList<String> strings = new LinkedList<String>();
-		while(m.find()) {
+		Matcher m = p.matcher(arg);
+
+		LinkedList<String> strings = new LinkedList<String>();
+		while (m.find()) {
 			String found = m.group();
 			String[] split = found.split("=");
 			strings.add(split[1]);
 			arg = m.replaceFirst("__PLACEHOLDER__");
 			m = p.matcher(arg);
-	 	}
-		
-		for(int i = 0 ; i < strings.size() ; i++) {
+		}
+
+		for (int i = 0; i < strings.size(); i++) {
 			List<String> names = ClassSearchUtils.searchFullNameInPath(strings.get(i));
 			if (names.size() == 0) {
 				String[] split = strings.get(i).split("\\.");
-				names = ClassSearchUtils.searchFullNameInPath(split[split.length-1]);
-				
+				names = ClassSearchUtils.searchFullNameInPath(split[split.length - 1]);
+
 				if (names.size() == 0) {
-					
-					//We're really sorry for this crappy code, but we needed this for legacy support :( authors: Miguel and Tiago
-					if(strings.get(i).endsWith("NNInput")) {
+
+					// We're really sorry for this crappy code, but we needed
+					// this for legacy support :( authors: Miguel and Tiago
+					if (strings.get(i).endsWith("NNInput")) {
 						List<String> sensorinputnames = ClassSearchUtils.searchFullNameInPath("SensorNNInput");
 						strings.set(i, sensorinputnames.get(0));
 						continue;
-					} if(strings.get(i).contains("Simple") && strings.get(i).contains("Sensor")) {
+					}
+					if (strings.get(i).contains("Simple") && strings.get(i).contains("Sensor")) {
 						String currentString = strings.get(i);
 						currentString = currentString.replace("Simple", "");
 						List<String> sensorinputnames = ClassSearchUtils.searchFullNameInPath(currentString);
 						strings.set(i, sensorinputnames.get(0));
 						continue;
 					} else {
-						throw new RuntimeException("Class not found "+ strings.get(i));
+						throw new RuntimeException("Class not found " + strings.get(i));
 					}
 				}
 			} else if (names.size() > 1) {
-				throw new RuntimeException("Multiple implementations of class: "+ strings.get(i) + " - " + names);
+				throw new RuntimeException("Multiple implementations of class: " + strings.get(i) + " - " + names);
 			}
 			strings.set(i, names.get(0));
 		}
-		
-		for(String s : strings)
-			arg = arg.replaceFirst("__PLACEHOLDER__", CLASS_NAME_TAG+"="+s);
+
+		for (String s : strings)
+			arg = arg.replaceFirst("__PLACEHOLDER__", CLASS_NAME_TAG + "=" + s);
 		return arg;
 	}
-	
-	public static HashMap<String, CIArguments> parseArgs(String[] args)
-			throws IOException, ClassNotFoundException {
+
+	public static HashMap<String, CIArguments> parseArgs(String[] args) throws IOException, ClassNotFoundException {
 		String optionsFilename = null;
-		
-//		 for(String s : args)
-//			 System.out.println(s);
+
+		// for(String s : args)
+		// System.out.println(s);
 
 		int currentIndex = 0;
 
@@ -731,7 +722,7 @@ public class CIArguments implements Serializable {
 		// System.out.println(Util.usageToString());
 		// System.exit(0);
 		// }
-		
+
 		if (args[0].charAt(0) != '-') {
 			optionsFilename = args[0];
 			String[] argsFromFile = readOptionsFromFile(optionsFilename);
@@ -756,60 +747,56 @@ public class CIArguments implements Serializable {
 
 		while (currentIndex < args.length) {
 			if (currentIndex + 1 == args.length) {
-				throw new RuntimeException(("Error: " + args[currentIndex]
-						+ " misses an argument"));
+				throw new RuntimeException(("Error: " + args[currentIndex] + " misses an argument"));
 			}
 
-			if (!args[currentIndex].equalsIgnoreCase("--random-seed")
-					&& args[currentIndex + 1].charAt(0) == '-') {
+			if (!args[currentIndex].equalsIgnoreCase("--random-seed") && args[currentIndex + 1].charAt(0) == '-') {
 				throw new RuntimeException("Error: Argument for " + args[currentIndex]
-				                                 						+ " cannot start with a '-' (and therefore cannot be "
-				                                						+ args[currentIndex + 1] + ")");
+						+ " cannot start with a '-' (and therefore cannot be " + args[currentIndex + 1] + ")");
 			}
 
 			String key = args[currentIndex].toLowerCase();
 			// this replaces the big ol' if then
-			// System.out.println(args[currentIndex]+" # "+args[currentIndex+1]);
-			result.put(
-					key,
-					createOrPrependArguments(result.get(key),
-							args[currentIndex + 1],true));
+			// System.out.println(args[currentIndex]+" #
+			// "+args[currentIndex+1]);
+			result.put(key, createOrPrependArguments(result.get(key), args[currentIndex + 1], true));
 
 			currentIndex += 2;
 		}
 
-		String commandLine = "";
+		// String commandLine = "";
+		//
+		// for (String s : args) {
+		// if (s.startsWith("--"))
+		// commandLine += "\n";
+		// commandLine += s + " ";
+		// }
 
-		for (String s : args) {
-			if (s.startsWith("--"))
-				commandLine += "\n";
-			commandLine += s + " ";
-		}
-		
-//		Arguments commandLineArguments = new Arguments(commandLine.trim(),true);
-//		result.put("commandline",result);
-		
-		if(optionsFilename != null && result.get("--output") != null) {
+		// Arguments commandLineArguments = new
+		// Arguments(commandLine.trim(),true);
+		// result.put("commandline",result);
+
+		if (optionsFilename != null && result.get("--output") != null) {
 			String pop = null;
-			
-			if(result.containsKey("--population")){
+
+			if (result.containsKey("--population")) {
 				pop = result.get("--population").getCompleteArgumentString();
-			}else{
+			} else {
 				pop = result.get("--populationa").getCompleteArgumentString();
 			}
-			
-			if(pop != null && pop.contains("load")) {
+
+			if (pop != null && pop.contains("load")) {
 				String output = result.get("--output").getCompleteArgumentString();
-				
+
 				String parent = new File(optionsFilename).getParent();
-				
-				if(!parent.equals(output)) {
+
+				if (!parent.equals(output)) {
 					result.put("--output", new CIArguments(parent));
 				}
 			}
 		}
-		
+
 		return result;
 	}
-	
+
 }

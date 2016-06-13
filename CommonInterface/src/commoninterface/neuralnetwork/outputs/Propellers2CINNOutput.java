@@ -4,8 +4,7 @@ import commoninterface.RobotCI;
 import commoninterface.utils.CIArguments;
 
 public class Propellers2CINNOutput extends CINNOutput {
-
-	
+	private static final long serialVersionUID = 5498566181613871678L;
 	private double yaw = 0;
 	private double speed = 0;
 	

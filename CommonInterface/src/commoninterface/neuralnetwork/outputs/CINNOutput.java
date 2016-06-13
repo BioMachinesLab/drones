@@ -8,7 +8,7 @@ import commoninterface.RobotCI;
 import commoninterface.utils.CIArguments;
 
 public abstract class CINNOutput implements Serializable {
-
+	private static final long serialVersionUID = 5750342201335679811L;
 	protected RobotCI robot;
 	protected String label;
 

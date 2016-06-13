@@ -2,6 +2,7 @@ package commoninterface.messageproviders;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+
 import commoninterface.CIBehavior;
 import commoninterface.RobotCI;
 import commoninterface.network.messages.BehaviorMessage;
@@ -23,30 +24,28 @@ public class BehaviorMessageProvider implements MessageProvider {
 
 		if (m instanceof BehaviorMessage) {
 			BehaviorMessage bm = (BehaviorMessage) m;
-			
+
 			if (bm.getSelectedStatus()) {
 				try {
 
-					ArrayList<Class<?>> classes = ClassLoadHelper
-							.findRelatedClasses(bm.getSelectedBehavior());
+					ArrayList<Class<?>> classes = ClassLoadHelper.findRelatedClasses(bm.getSelectedBehavior());
 
 					if (classes == null || classes.isEmpty()) {
 						return null;
 					}
-					
+
 					Class<CIBehavior> chosenClass = null;
-					
-					for(Object b : classes) {
+
+					for (Object b : classes) {
+						@SuppressWarnings("unchecked")
 						Class<CIBehavior> ci = (Class<CIBehavior>) b;
-						if(ci.getCanonicalName().endsWith("."+bm.getSelectedBehavior()))
+						if (ci.getCanonicalName().endsWith("." + bm.getSelectedBehavior()))
 							chosenClass = ci;
 					}
-					
 					Constructor<CIBehavior> constructor = chosenClass
-							.getConstructor(new Class[] { CIArguments.class,
-									RobotCI.class });
-					CIBehavior ctArgs = constructor.newInstance(new Object[] {
-							new CIArguments(bm.getArguments()), robot });
+							.getConstructor(new Class[] { CIArguments.class, RobotCI.class });
+					CIBehavior ctArgs = constructor
+							.newInstance(new Object[] { new CIArguments(bm.getArguments()), robot });
 					robot.startBehavior(ctArgs);
 				} catch (ReflectiveOperationException e) {
 					e.printStackTrace();
@@ -54,8 +53,8 @@ public class BehaviorMessageProvider implements MessageProvider {
 			} else {
 				robot.stopActiveBehavior();
 			}
-			Message response = new BehaviorMessage(bm.getSelectedBehavior(),
-					"", bm.getSelectedStatus(), robot.getNetworkAddress());
+			Message response = new BehaviorMessage(bm.getSelectedBehavior(), "", bm.getSelectedStatus(),
+					robot.getNetworkAddress());
 			return response;
 		}
 

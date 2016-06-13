@@ -1,6 +1,7 @@
 package commoninterface.utils.jcoord;
 
 import java.io.Serializable;
+
 import net.jafama.FastMath;
 
 /**
@@ -16,54 +17,56 @@ import net.jafama.FastMath;
  */
 class Util implements Serializable {
 
-  /**
-   * Calculate sin^2(x).
-   * 
-   * @param x
-   *          x
-   * @return sin^2(x)
-   * @since 1.0
-   */
-  protected static double sinSquared(double x) {
-    return FastMath.sin(x) * FastMath.sin(x);
-  }
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3308171950557095720L;
 
+	/**
+	 * Calculate sin^2(x).
+	 * 
+	 * @param x
+	 *            x
+	 * @return sin^2(x)
+	 * @since 1.0
+	 */
+	protected static double sinSquared(double x) {
+		return FastMath.sin(x) * FastMath.sin(x);
+	}
 
-  /**
-   * Calculate cos^2(x).
-   * 
-   * @param x
-   *          x
-   * @return cos^2(x)
-   * @since 1.0
-   */
-  protected static double cosSquared(double x) {
-    return FastMath.cos(x) * FastMath.cos(x);
-  }
+	/**
+	 * Calculate cos^2(x).
+	 * 
+	 * @param x
+	 *            x
+	 * @return cos^2(x)
+	 * @since 1.0
+	 */
+	protected static double cosSquared(double x) {
+		return FastMath.cos(x) * FastMath.cos(x);
+	}
 
+	/**
+	 * Calculate tan^2(x).
+	 * 
+	 * @param x
+	 *            x
+	 * @return tan^2(x)
+	 * @since 1.0
+	 */
+	protected static double tanSquared(double x) {
+		return FastMath.tan(x) * FastMath.tan(x);
+	}
 
-  /**
-   * Calculate tan^2(x).
-   * 
-   * @param x
-   *          x
-   * @return tan^2(x)
-   * @since 1.0
-   */
-  protected static double tanSquared(double x) {
-    return FastMath.tan(x) * FastMath.tan(x);
-  }
-
-
-  /**
-   * Calculate sec(x).
-   * 
-   * @param x
-   *          x
-   * @return sec(x)
-   * @since 1.0
-   */
-  protected static double sec(double x) {
-    return 1.0 / FastMath.cos(x);
-  }
+	/**
+	 * Calculate sec(x).
+	 * 
+	 * @param x
+	 *            x
+	 * @return sec(x)
+	 * @since 1.0
+	 */
+	protected static double sec(double x) {
+		return 1.0 / FastMath.cos(x);
+	}
 }

@@ -1,22 +1,20 @@
 package commoninterface.sensors;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
 import commoninterface.ThymioCI;
-import commoninterface.entities.Entity;
 import commoninterface.utils.CIArguments;
 
 public class RealThymioIRCISensor extends CISensor {
-
+	private static final long serialVersionUID = 6777475864983691578L;
 	private ThymioCI thymio;
 	private List<Short> readings;
-	
+
 	public RealThymioIRCISensor(int id, RobotCI robot, CIArguments args) {
 		super(id, robot, args);
-		thymio = (ThymioCI)robot;
+		thymio = (ThymioCI) robot;
 	}
 
 	@Override

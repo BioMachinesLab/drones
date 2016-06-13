@@ -6,7 +6,7 @@ import commoninterface.RobotCI;
 import commoninterface.utils.CIArguments;
 
 public class CompassCISensor extends CISensor {
-
+	private static final long serialVersionUID = 5905690640976490331L;
 	private AquaticDroneCI drone;
 	private double reading = 0;
 	private boolean normalize = false;

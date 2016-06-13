@@ -1,6 +1,7 @@
 package commoninterface.utils.jcoord;
 
 import java.io.Serializable;
+
 import net.jafama.FastMath;
 
 /**
@@ -17,6 +18,11 @@ import net.jafama.FastMath;
 public class UTMRef implements Serializable {
 
   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1499801258284297663L;
+
+/**
    * Easting
    */
   private double easting;
@@ -190,7 +196,8 @@ public class UTMRef implements Serializable {
    * @return a String representation of this UTM reference
    * @since 1.0
    */
-  public String toString() {
+  @Override
+public String toString() {
     return lngZone + Character.toString(latZone) + " " + easting + " "
         + northing;
   }

@@ -10,7 +10,7 @@ import commoninterface.RobotCI;
 import commoninterface.utils.CIArguments;
 
 public abstract class CINNInput implements Serializable {
-
+	private static final long serialVersionUID = 4600272381367575839L;
 	protected CISensor sensor;
 	protected String label;
 

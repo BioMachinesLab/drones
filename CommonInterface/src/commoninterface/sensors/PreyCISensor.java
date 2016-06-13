@@ -7,9 +7,9 @@ import commoninterface.entities.VirtualEntity;
 import commoninterface.utils.CIArguments;
 
 public class PreyCISensor extends ThymioConeTypeCISensor {
-
+	private static final long serialVersionUID = -3272144400158577245L;
 	private boolean share = false;
-	
+
 	public PreyCISensor(int id, RobotCI robot, CIArguments args) {
 		super(id, robot, args);
 		share = args.getFlagIsTrue("share");
@@ -19,15 +19,15 @@ public class PreyCISensor extends ThymioConeTypeCISensor {
 	public boolean validEntity(Object e) {
 		return e instanceof PreyEntity;
 	}
-	
+
 	@Override
 	protected void sensedEntity(VirtualEntity ve) {
-		if(share && ve instanceof PreyEntity) {
-			PreyEntity pe = (PreyEntity)ve;
+		if (share && ve instanceof PreyEntity) {
+			PreyEntity pe = (PreyEntity) ve;
 			ThymioSharedEntity tse = new ThymioSharedEntity(pe.getName(), robot.getNetworkAddress(), pe.getPosition());
-			tse.setTimestepReceived((long)(robot.getTimeSinceStart()*10));
+			tse.setTimestepReceived((long) (robot.getTimeSinceStart() * 10));
 			robot.replaceEntity(tse);
 		}
 	}
-	
+
 }
