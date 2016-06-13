@@ -21,9 +21,6 @@ public class InfiniteTargetCISensor extends WaypointCISensor {
 	private boolean stabilize = false;
 	private boolean normalize = false;
 
-	// XXX
-	private boolean alternative = false;
-
 	private double range = 100;
 	private int historySize = 10;
 	private Target[] lastSeenTargets;
@@ -39,9 +36,6 @@ public class InfiniteTargetCISensor extends WaypointCISensor {
 		historySize = args.getArgumentAsIntOrSetDefault("historySize", historySize);
 		range = args.getArgumentAsDoubleOrSetDefault("range", range);
 		normalize = args.getArgumentAsIntOrSetDefault("normalize", 0) == 1;
-
-		// XXX
-		alternative = args.getArgumentAsIntOrSetDefault("normalize", 0) == 1;
 
 		lastSeenTargets = new Target[historySize];
 		for (int i = 0; i < lastSeenTargets.length; i++) {
@@ -133,24 +127,14 @@ public class InfiniteTargetCISensor extends WaypointCISensor {
 			if (ent instanceof Target) {
 				Vector2d pos = CoordinateUtilities.GPSToCartesian(((Target) ent).getLatLon());
 
-				// XXX
-				if (alternative) {
-					if (((Target) ent).isOccupied() && robotPosition.distanceTo(pos) <= ((Target) ent).getRadius()
-							&& robotPosition.distanceTo(pos) < minDistance) {
+				if (((Target) ent).isOccupied() && robotPosition.distanceTo(pos) <= ((Target) ent).getRadius()
+						&& robotPosition.distanceTo(pos) < minDistance) {
+					minDistance = robotPosition.distanceTo(pos);
+					closest = (Target) ent;
+				} else {
+					if (!((Target) ent).isOccupied() && robotPosition.distanceTo(pos) < minDistance) {
 						minDistance = robotPosition.distanceTo(pos);
 						closest = (Target) ent;
-					} else {
-						if (!((Target) ent).isOccupied() && robotPosition.distanceTo(pos) < minDistance) {
-							minDistance = robotPosition.distanceTo(pos);
-							closest = (Target) ent;
-						}
-					}
-				} else {
-					if (!excludeOccupied || (excludeOccupied && !((Target) ent).isOccupied())) {
-						if (robotPosition.distanceTo(pos) < minDistance) {
-							minDistance = robotPosition.distanceTo(pos);
-							closest = (Target) ent;
-						}
 					}
 				}
 			}
