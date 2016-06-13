@@ -16,7 +16,7 @@ public class Formation extends GeoEntity {
 	private ArrayList<Target> targets;
 	private HashMap<Target, Vector2d> targetsRelativePositions;
 
-	private MotionData formationMotionData = null;
+	private MotionData motionData = null;
 	private FormationType formationType;
 	private int targetQnt;
 	private double targetRadius;
@@ -52,11 +52,11 @@ public class Formation extends GeoEntity {
 	}
 
 	public MotionData getMotionData() {
-		return formationMotionData;
+		return motionData;
 	}
 
-	public void setMotionData(MotionData formationMotionData) {
-		this.formationMotionData = formationMotionData;
+	public void setMotionData(MotionData motionData) {
+		this.motionData = motionData;
 	}
 
 	public void setRandom(Random random) {
@@ -234,13 +234,13 @@ public class Formation extends GeoEntity {
 	}
 
 	private void placeTargets(Vector2d[] positions) {
-		Vector2d[] transformedPositons = transformPositions(positions, initialRotation, initialTranslation);
+		Vector2d[] transformedPositions = transformPositions(positions, initialRotation, initialTranslation);
 		targets = new ArrayList<Target>();
 		targetsRelativePositions = new HashMap<Target, Vector2d>();
 
-		for (int i = 0; i < transformedPositons.length; i++) {
+		for (int i = 0; i < transformedPositions.length; i++) {
 			Target target = new Target("formation_target_" + i,
-					CoordinateUtilities.cartesianToGPS(transformedPositons[i]), targetRadius);
+					CoordinateUtilities.cartesianToGPS(transformedPositions[i]), targetRadius);
 			target.setFormation(this);
 			targets.add(target);
 			targetsRelativePositions.put(target, positions[i]);
