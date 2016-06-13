@@ -16,14 +16,16 @@ public class Target extends GeoEntity {
 	private boolean occupied = false;
 	private RobotCI occupant = null;
 	private boolean inFormation = false;
+	private LatLon originalPosition;
 
 	public Target(String name, LatLon latLon, double radius) {
 		super(name, latLon);
 		this.radius = radius;
+		originalPosition = new LatLon(latLon);
 	}
 
 	public void step(double time) {
-		setLatLon(motionData.calculatePosition(time));
+		setLatLon(getTargetMotionData().calculatePosition(time));
 	}
 
 	/*
@@ -43,9 +45,15 @@ public class Target extends GeoEntity {
 
 	public MotionData getTargetMotionData() {
 		if (inFormation) {
-			MixedMotionData m = new MixedMotionData(this);
-			m.addMotionData(motionData);
-			m.addMotionData(formation.getMotionData());
+			MixedMotionData m = new MixedMotionData(this, originalPosition);
+
+			if (motionData != null) {
+				m.addMotionData(motionData);
+			}
+
+			if (formation.getMotionData() != null) {
+				m.addMotionData(formation.getMotionData());
+			}
 
 			return m;
 		} else {
