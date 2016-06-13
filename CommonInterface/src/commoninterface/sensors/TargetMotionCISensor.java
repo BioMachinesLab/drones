@@ -6,8 +6,10 @@ import java.util.HashMap;
 import commoninterface.AquaticDroneCI;
 import commoninterface.CISensor;
 import commoninterface.RobotCI;
+import commoninterface.entities.Entity;
+import commoninterface.entities.RobotLocation;
 import commoninterface.entities.target.Target;
-import commoninterface.entities.target.motion.LinearMotionData;
+import commoninterface.entities.target.motion.MotionData;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
@@ -42,11 +44,12 @@ public class TargetMotionCISensor extends CISensor {
 
 	@Override
 	public void update(double time, Object[] entities) {
-		Target target = getClosestTarget(excludeOccupied, entities);
+		ArrayList<Target> targets = getTargetsOccupancy(entities);
+		Target target = getClosestTarget(excludeOccupied, targets);
 		if (target != null) {
 			Vector2d vel = target.getTargetMotionData().getVelocityVector(time);
 			readings[0] = vel.getAngle() / Math.PI / 2;
-			readings[1] = vel.length();
+			readings[1] = vel.length()*MotionData.UPDATE_RATE;
 
 			// Move the readings to the positive side of the scale
 			if (readings[0] < 0) {
@@ -58,7 +61,7 @@ public class TargetMotionCISensor extends CISensor {
 			if (robot instanceof AquaticDroneCI) {
 				// Is the sensed target inside the sensor range?
 				double distance = ((AquaticDroneCI) robot).getGPSLatLon().distanceInMeters(target.getLatLon());
-				if (target.getTargetMotionData() instanceof LinearMotionData && distance < range) {
+				if (distance < range) {
 					if (normalize) {
 						readings[0] /= (FastMath.PI * 2);
 					}
@@ -84,7 +87,7 @@ public class TargetMotionCISensor extends CISensor {
 		return readings.length;
 	}
 
-	private Target getClosestTarget(boolean excludeOccupied, Object[] entities) {
+	private Target getClosestTarget(boolean excludeOccupied, ArrayList<Target> targets) {
 		// Get robot location
 		Vector2d robotPosition = null;
 		if (robot instanceof AquaticDroneCI) {
@@ -96,18 +99,16 @@ public class TargetMotionCISensor extends CISensor {
 		// Get the closest target
 		Target closest = null;
 		double minDistance = Double.MAX_VALUE;
-		for (Object ent : ((AquaticDroneCI) robot).getEntities()) {
-			if (ent instanceof Target) {
-				Vector2d pos = CoordinateUtilities.GPSToCartesian(((Target) ent).getLatLon());
-				if (((Target) ent).isOccupied() && robotPosition.distanceTo(pos) <= ((Target) ent).getRadius()
-						&& robotPosition.distanceTo(pos) < minDistance) {
+		for (Target ent : targets) {
+			Vector2d pos = CoordinateUtilities.GPSToCartesian(ent.getLatLon());
+			if (ent.isOccupied() && robotPosition.distanceTo(pos) <= ent.getRadius()
+					&& robotPosition.distanceTo(pos) < minDistance) {
+				minDistance = robotPosition.distanceTo(pos);
+				closest = ent;
+			} else {
+				if (!ent.isOccupied() && robotPosition.distanceTo(pos) < minDistance) {
 					minDistance = robotPosition.distanceTo(pos);
-					closest = (Target) ent;
-				} else {
-					if (!((Target) ent).isOccupied() && robotPosition.distanceTo(pos) < minDistance) {
-						minDistance = robotPosition.distanceTo(pos);
-						closest = (Target) ent;
-					}
+					closest = ent;
 				}
 			}
 		}
@@ -165,5 +166,59 @@ public class TargetMotionCISensor extends CISensor {
 
 	private Target getMostCommonTarget() {
 		return getMostCommonTarget(historySize);
+	}
+
+	private ArrayList<Target> getTargetsOccupancy(Object[] entities) {
+		ArrayList<RobotLocation> rls = new ArrayList<RobotLocation>();
+		ArrayList<Target> targets = new ArrayList<Target>();
+
+		for (Object ent : entities) {
+			if (ent instanceof RobotLocation) {
+				rls.add((RobotLocation) ent);
+			}
+		}
+
+		for (Entity ent : ((AquaticDroneCI) robot).getEntities()) {
+			if (ent instanceof Target) {
+				targets.add((Target) ent);
+			}
+		}
+
+		for (Target t : targets) {
+			RobotLocation robot = getClosestRobotToTarget(t, rls);
+			if (isInsideTarget(robot, t)) {
+				t.setOccupantID(robot.getName());
+				t.setOccupied(true);
+			}
+		}
+
+		return targets;
+	}
+
+	private RobotLocation getClosestRobotToTarget(Target target, ArrayList<RobotLocation> rls) {
+		double minDistance = Double.MAX_VALUE;
+		RobotLocation closestRobot = null;
+
+		Vector2d targetPosition = CoordinateUtilities.GPSToCartesian(target.getLatLon());
+		for (RobotLocation robot : rls) {
+			Vector2d robotPosition = CoordinateUtilities.GPSToCartesian(robot.getLatLon());
+			double distance = FastMath.abs(targetPosition.distanceTo(robotPosition));
+
+			if (distance < minDistance) {
+				closestRobot = robot;
+				minDistance = distance;
+			}
+		}
+
+		return closestRobot;
+	}
+
+	private boolean isInsideTarget(RobotLocation robot, Target target) {
+		if (robot == null) {
+			return false;
+		}
+
+		Vector2d pos = CoordinateUtilities.GPSToCartesian(target.getLatLon());
+		return pos.distanceTo(CoordinateUtilities.GPSToCartesian(robot.getLatLon())) <= target.getRadius();
 	}
 }

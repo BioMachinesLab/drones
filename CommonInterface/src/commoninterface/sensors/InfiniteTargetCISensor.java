@@ -5,6 +5,8 @@ import java.util.HashMap;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
+import commoninterface.entities.Entity;
+import commoninterface.entities.RobotLocation;
 import commoninterface.entities.target.Target;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CIArguments;
@@ -56,7 +58,8 @@ public class InfiniteTargetCISensor extends WaypointCISensor {
 	public void update(double time, Object[] entities) {
 
 		LatLon robotLatLon = ((AquaticDroneCI) robot).getGPSLatLon();
-		Target target = getClosestTarget(excludeOccupied, entities);
+		ArrayList<Target> targets = getTargetsOccupancy(entities);
+		Target target = getClosestTarget(excludeOccupied, targets);
 
 		LatLon latLon = null;
 		double distance = -1;
@@ -106,7 +109,7 @@ public class InfiniteTargetCISensor extends WaypointCISensor {
 		}
 	}
 
-	private Target getClosestTarget(boolean excludeOccupied, Object[] entities) {
+	private Target getClosestTarget(boolean excludeOccupied, ArrayList<Target> targets) {
 		// Get robot location
 		Vector2d robotPosition = null;
 		if (robot instanceof AquaticDroneCI) {
@@ -118,19 +121,16 @@ public class InfiniteTargetCISensor extends WaypointCISensor {
 		// Get the closest target
 		Target closest = null;
 		double minDistance = Double.MAX_VALUE;
-		for (Object ent : ((AquaticDroneCI) robot).getEntities()) {
-			if (ent instanceof Target) {
-				Vector2d pos = CoordinateUtilities.GPSToCartesian(((Target) ent).getLatLon());
-
-				if (((Target) ent).isOccupied() && robotPosition.distanceTo(pos) <= ((Target) ent).getRadius()
-						&& robotPosition.distanceTo(pos) < minDistance) {
+		for (Target ent : targets) {
+			Vector2d pos = CoordinateUtilities.GPSToCartesian(ent.getLatLon());
+			if (ent.isOccupied() && robotPosition.distanceTo(pos) <= ent.getRadius()
+					&& robotPosition.distanceTo(pos) < minDistance) {
+				minDistance = robotPosition.distanceTo(pos);
+				closest = ent;
+			} else {
+				if (!ent.isOccupied() && robotPosition.distanceTo(pos) < minDistance) {
 					minDistance = robotPosition.distanceTo(pos);
-					closest = (Target) ent;
-				} else {
-					if (!((Target) ent).isOccupied() && robotPosition.distanceTo(pos) < minDistance) {
-						minDistance = robotPosition.distanceTo(pos);
-						closest = (Target) ent;
-					}
+					closest = ent;
 				}
 			}
 		}
@@ -188,5 +188,59 @@ public class InfiniteTargetCISensor extends WaypointCISensor {
 
 	private Target getMostCommonTarget() {
 		return getMostCommonTarget(historySize);
+	}
+
+	private ArrayList<Target> getTargetsOccupancy(Object[] entities) {
+		ArrayList<RobotLocation> rls = new ArrayList<RobotLocation>();
+		ArrayList<Target> targets = new ArrayList<Target>();
+
+		for (Object ent : entities) {
+			if (ent instanceof RobotLocation) {
+				rls.add((RobotLocation) ent);
+			}
+		}
+
+		for (Entity ent : ((AquaticDroneCI) robot).getEntities()) {
+			if (ent instanceof Target) {
+				targets.add((Target) ent);
+			}
+		}
+
+		for (Target t : targets) {
+			RobotLocation robot = getClosestRobotToTarget(t, rls);
+			if (isInsideTarget(robot, t)) {
+				t.setOccupantID(robot.getName());
+				t.setOccupied(true);
+			}
+		}
+
+		return targets;
+	}
+
+	private RobotLocation getClosestRobotToTarget(Target target, ArrayList<RobotLocation> rls) {
+		double minDistance = Double.MAX_VALUE;
+		RobotLocation closestRobot = null;
+
+		Vector2d targetPosition = CoordinateUtilities.GPSToCartesian(target.getLatLon());
+		for (RobotLocation robot : rls) {
+			Vector2d robotPosition = CoordinateUtilities.GPSToCartesian(robot.getLatLon());
+			double distance = FastMath.abs(targetPosition.distanceTo(robotPosition));
+
+			if (distance < minDistance) {
+				closestRobot = robot;
+				minDistance = distance;
+			}
+		}
+
+		return closestRobot;
+	}
+
+	private boolean isInsideTarget(RobotLocation robot, Target target) {
+		if (robot == null) {
+			return false;
+		}
+
+		Vector2d pos = CoordinateUtilities.GPSToCartesian(target.getLatLon());
+		return pos.distanceTo(CoordinateUtilities.GPSToCartesian(robot.getLatLon())) <= target.getRadius();
 	}
 }
