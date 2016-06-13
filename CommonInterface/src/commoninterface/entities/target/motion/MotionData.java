@@ -10,7 +10,7 @@ public abstract class MotionData {
 		LINEAR, ROTATIONAL, MIXED;
 	}
 
-	protected static final int UPDATE_RATE = 10; // Assuming 100ms simulation
+	public static final int UPDATE_RATE = 10; // Assuming 100ms simulation
 													// steps
 
 	protected LatLon originalPosition;
