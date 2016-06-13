@@ -1,8 +1,10 @@
 package environment.target;
 
 import java.awt.Color;
+import java.util.ArrayList;
 
 import commoninterface.AquaticDroneCI;
+import commoninterface.entities.Entity;
 import commoninterface.entities.target.Formation;
 import commoninterface.entities.target.Formation.FormationType;
 import commoninterface.entities.target.Target;
@@ -74,7 +76,7 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 		LightPole center = new LightPole(simulator, "center", 0, 0, 1);
 		center.setColor(Color.MAGENTA);
 		addMarker(center);
-		
+
 		if (onePerOneRobotTarget) {
 			targetsQuantity = robots.size();
 		}
@@ -134,6 +136,14 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 		}
 
 		setup = true;
+	}
+
+	public static ArrayList<Entity> cloneEntities(ArrayList<Entity> list) {
+		ArrayList<Entity> clone = new ArrayList<Entity>(list.size());
+		for (Entity item : list) {
+			clone.add(item.clone());
+		}
+		return clone;
 	}
 
 	private void generateFormation(FormationType formationType) {
