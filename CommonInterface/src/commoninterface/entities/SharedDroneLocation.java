@@ -39,4 +39,8 @@ public class SharedDroneLocation extends GeoEntity {
 		return droneLocations;
 	}
 
+	@Override
+	public SharedDroneLocation clone() {
+		return new SharedDroneLocation(observerAddress, observerAddress, new LatLon(latLon), type);
+	}
 }

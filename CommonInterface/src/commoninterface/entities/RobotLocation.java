@@ -47,4 +47,9 @@ public class RobotLocation extends GeoEntity {
 		return LogCodex.encodeLog(LogType.ENTITIES,
 				new EntityManipulation(EntityManipulation.Operation.ADD, entities, this.getClass().getSimpleName()));
 	}
+
+	@Override
+	public RobotLocation clone() {
+		return new RobotLocation(name, new LatLon(latLon), orientation, type);
+	}
 }

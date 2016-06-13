@@ -53,4 +53,14 @@ public class MixedMotionData extends MotionData {
 
 		return velocityVector;
 	}
+
+	@Override
+	public MixedMotionData clone() {
+		MixedMotionData m = new MixedMotionData(entity.clone(), new LatLon(originalPosition));
+
+		for (MotionData motion : motionData) {
+			m.addMotionData(motion.clone());
+		}
+		return m;
+	}
 }

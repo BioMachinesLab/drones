@@ -23,4 +23,8 @@ public class VirtualEntity extends Entity {
 		return position.y;
 	}
 
+	@Override
+	public VirtualEntity clone() {
+		return new VirtualEntity(name, new Vector2d(position));
+	}
 }

@@ -46,4 +46,8 @@ public class ObstacleLocation extends GeoEntity {
 				new EntityManipulation(EntityManipulation.Operation.ADD, entities, this.getClass().getSimpleName()));
 	}
 
+	@Override
+	public ObstacleLocation clone() {
+		return new ObstacleLocation(name, new LatLon(latLon), radius);
+	}
 }

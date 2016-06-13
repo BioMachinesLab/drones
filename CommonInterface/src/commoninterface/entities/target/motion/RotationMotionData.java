@@ -56,7 +56,7 @@ public class RotationMotionData extends MotionData {
 		// y= y + dy
 		finalPosition.x += rotationCenter.x;
 		finalPosition.y += rotationCenter.y;
-		
+
 		finalPosition.sub(initialRelativePosition);
 		return finalPosition;
 	}
@@ -116,5 +116,13 @@ public class RotationMotionData extends MotionData {
 
 	public Vector2d getRotationCenter() {
 		return rotationCenter;
+	}
+
+	@Override
+	public MotionData clone() {
+		RotationMotionData rmd = new RotationMotionData(entity.clone(), rotationCenter, angularVelocity,
+				rotationDirection);
+		rmd.setRotate(rotate);
+		return rmd;
 	}
 }

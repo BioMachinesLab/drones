@@ -42,7 +42,6 @@ public class Target extends GeoEntity {
 			occupantID = null;
 			occupied = false;
 		}
-
 	}
 
 	/*
@@ -103,7 +102,9 @@ public class Target extends GeoEntity {
 	}
 
 	public void setOccupantID(String occupantID) {
-		entered = true;
+		if (!(occupantID == null && this.occupantID == null)) {
+			entered = true;
+		}
 		this.occupantID = occupantID;
 	}
 
@@ -117,7 +118,8 @@ public class Target extends GeoEntity {
 
 	public void setFormation(Formation formation) {
 		this.formation = formation;
-		inFormation = true;
+
+		inFormation = (formation != null);
 	}
 
 	public boolean isInFormation() {
@@ -144,5 +146,17 @@ public class Target extends GeoEntity {
 			return "[Target] " + super.toString() + "\tHash: " + System.identityHashCode(this) + "\tName: "
 					+ name.substring(6) + "\tOccupied: " + occupied;
 		}
+	}
+
+	@Override
+	public Target clone() {
+		Target t = new Target(occupantID, new LatLon(originalPosition), radius);
+		t.setOccupantID(occupantID);
+		t.setOccupied(occupied);
+		t.setFormation(formation);
+		t.setHisteresysTime(histeresysTime);
+		t.setMotionData(motionData.clone());
+
+		return t;
 	}
 }

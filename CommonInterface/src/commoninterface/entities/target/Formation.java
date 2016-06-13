@@ -275,4 +275,19 @@ public class Formation extends GeoEntity {
 			t.step(time);
 		}
 	}
+
+	@Override
+	public Formation clone() {
+		Formation form = new Formation(name, new LatLon(latLon));
+		form.setRandom(random);
+		form.setMotionData(motionData.clone());
+		form.setVariateFormationParameters(variateFormationParameters);
+		form.setLineFormationDelta(lineFormationDelta);
+		form.setLineFormationDelta(lineFormationDelta);
+		form.setInitialRotation(initialRotation);
+		form.setArrowFormationDeltas(new Vector2d(arrowFormation_xDelta, arrowFormation_yDelta));
+		form.buildFormation(targetQnt, formationType, targetRadius);
+
+		return form;
+	}
 }

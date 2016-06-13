@@ -11,7 +11,7 @@ public abstract class MotionData {
 	}
 
 	public static final int UPDATE_RATE = 10; // Assuming 100ms simulation
-													// steps
+												// steps
 
 	protected LatLon originalPosition;
 	protected GeoEntity entity;
@@ -19,9 +19,9 @@ public abstract class MotionData {
 	protected MovementType motionType;
 
 	public MotionData(GeoEntity entity, MovementType motionType) {
-		this(entity,entity.getLatLon(),motionType);
+		this(entity, entity.getLatLon(), motionType);
 	}
-	
+
 	public MotionData(GeoEntity entity, LatLon position, MovementType motionType) {
 		this.entity = entity;
 		this.originalPosition = new LatLon(position);
@@ -42,4 +42,7 @@ public abstract class MotionData {
 	public abstract LatLon calculatePosition(double step);
 
 	public abstract Vector2d calculateTranslationVector(double step);
+
+	@Override
+	public abstract MotionData clone();
 }

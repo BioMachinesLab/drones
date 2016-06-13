@@ -74,4 +74,12 @@ public class LinearMotionData extends MotionData {
 	public void setMovementVelocity(double targetMovementVelocity) {
 		this.movementVelocity = targetMovementVelocity;
 	}
+
+	@Override
+	public LinearMotionData clone() {
+		LinearMotionData lmd = new LinearMotionData(entity.clone(), originalPosition, movementVelocity,
+				movementAzimuth);
+		lmd.setMove(move);
+		return lmd;
+	}
 }

@@ -8,15 +8,15 @@ import commoninterface.utils.logger.LogCodex;
 import commoninterface.utils.logger.LogCodex.LogType;
 
 public abstract class GeoEntity extends Entity {
-	
+
 	private static final long serialVersionUID = -2730857744364736763L;
 	protected LatLon latLon;
-	
+
 	public GeoEntity(String name, LatLon latLon) {
 		super(name);
 		this.latLon = latLon;
 	}
-	
+
 	public LatLon getLatLon() {
 		return latLon;
 	}
@@ -24,19 +24,20 @@ public abstract class GeoEntity extends Entity {
 	public String getLogMessage() {
 		ArrayList<Entity> entities = new ArrayList<Entity>();
 		entities.add(this);
-		
+
 		return LogCodex.encodeLog(LogType.ENTITIES,
-				new EntityManipulation(
-						EntityManipulation.Operation.ADD, entities,
-						this.getClass().getSimpleName()));
+				new EntityManipulation(EntityManipulation.Operation.ADD, entities, this.getClass().getSimpleName()));
 	}
-	
+
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName()+";"+getLatLon().getLat()+";"+getLatLon().getLon()+";";
+		return this.getClass().getSimpleName() + ";" + getLatLon().getLat() + ";" + getLatLon().getLon() + ";";
 	}
-	
+
 	public void setLatLon(LatLon latLon) {
 		this.latLon = latLon;
 	}
+
+	@Override
+	public abstract GeoEntity clone();
 }

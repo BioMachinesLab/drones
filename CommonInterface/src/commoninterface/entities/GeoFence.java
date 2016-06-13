@@ -66,4 +66,17 @@ public class GeoFence extends Entity {
 		return s;
 	}
 
+	@Override
+	public GeoFence clone() {
+		GeoFence geo = new GeoFence(name, cloneEntities(waypoints));
+		return geo;
+	}
+
+	private static LinkedList<Waypoint> cloneEntities(LinkedList<Waypoint> list) {
+		LinkedList<Waypoint> clone = new LinkedList<Waypoint>();
+		for (Waypoint item : list) {
+			clone.add(item.clone());
+		}
+		return clone;
+	}
 }

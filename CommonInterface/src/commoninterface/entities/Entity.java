@@ -53,4 +53,6 @@ public abstract class Entity implements Serializable {
 		return name;
 	}
 
+	@Override
+	public abstract Entity clone();
 }
