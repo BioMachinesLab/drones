@@ -1,6 +1,5 @@
 package commoninterface.entities.target;
 
-import commoninterface.RobotCI;
 import commoninterface.entities.GeoEntity;
 import commoninterface.entities.target.motion.MixedMotionData;
 import commoninterface.entities.target.motion.MotionData;
@@ -14,7 +13,7 @@ public class Target extends GeoEntity {
 	private Formation formation = null;
 	private MotionData motionData = null;
 	private boolean occupied = false;
-	private RobotCI occupant = null;
+	private String occupantID = null;
 	private boolean inFormation = false;
 	private LatLon originalPosition;
 
@@ -40,7 +39,7 @@ public class Target extends GeoEntity {
 		}
 
 		if (occupied && (time - enterTime >= histeresysTime)) {
-			occupant = null;
+			occupantID = null;
 			occupied = false;
 		}
 
@@ -103,13 +102,13 @@ public class Target extends GeoEntity {
 		return occupied;
 	}
 
-	public void setOccupant(RobotCI occupant) {
+	public void setOccupantID(String occupantID) {
 		entered = true;
-		this.occupant = occupant;
+		this.occupantID = occupantID;
 	}
 
-	public RobotCI getOccupant() {
-		return occupant;
+	public String getOccupantID() {
+		return occupantID;
 	}
 
 	public Formation getFormation() {
