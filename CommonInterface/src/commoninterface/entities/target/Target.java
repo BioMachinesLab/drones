@@ -10,13 +10,17 @@ public class Target extends GeoEntity {
 	private static final long serialVersionUID = -8376280695329140274L;
 
 	private double radius;
-
 	private Formation formation = null;
 	private MotionData motionData = null;
 	private boolean occupied = false;
 	private RobotCI occupant = null;
 	private boolean inFormation = false;
 	private LatLon originalPosition;
+
+	private double hysteresisTime=0;// In miliseconds
+	private double releaseTime = 0;
+	private boolean toRelease = false;
+	private boolean inProcess = false;
 
 	public Target(String name, LatLon latLon, double radius) {
 		super(name, latLon);
@@ -26,19 +30,42 @@ public class Target extends GeoEntity {
 
 	public void step(double time) {
 		setLatLon(getTargetMotionData().calculatePosition(time));
+
+		if (toRelease && !inProcess) {
+			releaseTime = time;
+			inProcess = true;
+		}
+
+		if (occupant != null || (toRelease && inProcess && (time - releaseTime < hysteresisTime))) {
+			occupied = true;
+		} else {
+			occupant = null;
+			occupied = false;
+			toRelease = false;
+			inProcess = false;
+		}
 	}
 
 	/*
 	 * Getters and setters
 	 */
 	public void setOccupied(boolean occupied) {
-		this.occupied = occupied;
-
-		if (!occupied) {
-			occupant = null;
+		if (occupied) {
+			this.occupied = true;
+			toRelease = false;
+			inProcess = false;
+		} else {
+			if (occupant != null && !inProcess) {
+				occupant = null;
+				toRelease = true;
+			}
 		}
 	}
 
+	public void setHysteresisTime(double hysteresisTime) {
+		this.hysteresisTime = hysteresisTime;
+	}
+	
 	public void setMotionData(MotionData motionData) {
 		this.motionData = motionData;
 	}
@@ -74,8 +101,15 @@ public class Target extends GeoEntity {
 	}
 
 	public void setOccupant(RobotCI occupant) {
+		if (occupant == null && this.occupant != null) {
+			toRelease = true;
+		} else if (occupant != null) {
+			occupied = true;
+			toRelease = false;
+			inProcess = false;
+		}
+
 		this.occupant = occupant;
-		occupied = (occupant != null);
 	}
 
 	public RobotCI getOccupant() {
