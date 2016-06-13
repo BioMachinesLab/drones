@@ -17,6 +17,7 @@ import commoninterface.dataobjects.GPSData;
 import commoninterface.entities.Entity;
 import commoninterface.entities.RobotLocation;
 import commoninterface.entities.Waypoint;
+import commoninterface.entities.target.Target;
 import commoninterface.instincts.AvoidDronesInstinct;
 import commoninterface.instincts.AvoidObstaclesInstinct;
 import commoninterface.messageproviders.BehaviorMessageProvider;
@@ -153,6 +154,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 								started = true;
 							}
 
+							updateEntities(behaviorTimestep);
 							current.step(behaviorTimestep++);
 
 							for (CIBehavior b : alwaysActiveBehaviors) {
@@ -186,6 +188,14 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			timestep++;
 		}
 
+	}
+
+	private void updateEntities(double time) {
+		for (Entity ent : entities) {
+			if (ent instanceof Target) {
+				((Target) ent).step(time);
+			}
+		}
 	}
 
 	private void addShutdownHooks() {
