@@ -1,11 +1,9 @@
 package commoninterface.mathutils;
 
-import java.io.Serializable;
-
 import net.jafama.FastMath;
 
-public class Vector2d extends Point2d implements Serializable {
-
+public class Vector2d extends Point2d {
+	private static final long serialVersionUID = 870190008808982607L;
 	private double ay;
 	private double ax;
 	private double angle;
@@ -19,7 +17,12 @@ public class Vector2d extends Point2d implements Serializable {
 	}
 
 	public Vector2d(Vector2d v) {
-		super(v.x, v.y);
+		super();
+		double xVal = v.getX();
+		double yVal = v.getY();
+
+		super.setX(xVal);
+		super.setY(yVal);
 	}
 
 	/**
@@ -28,7 +31,7 @@ public class Vector2d extends Point2d implements Serializable {
 	 * @return the length of this vector
 	 */
 	public final double length() {
-		return Math.sqrt(this.x * this.x + this.y * this.y);
+		return FastMath.sqrt(this.x * this.x + this.y * this.y);
 	}
 
 	/**
@@ -41,8 +44,8 @@ public class Vector2d extends Point2d implements Serializable {
 	}
 
 	public void rotate(double angle) {
-		double xTemp = x * Math.cos(angle) - y * Math.sin(angle);
-		y = x * Math.sin(angle) + y * Math.cos(angle);
+		double xTemp = x * FastMath.cos(angle) - y * FastMath.sin(angle);
+		y = x * FastMath.sin(angle) + y * FastMath.cos(angle);
 		x = xTemp;
 		// if(Double.isNaN(x)||Double.isNaN(y))
 		// System.out.println("ERROR");
@@ -92,7 +95,7 @@ public class Vector2d extends Point2d implements Serializable {
 	public double getAngle() {
 		// double a= Math.atan2(y, x) ;
 		if (ax != x || ay != y) {
-			angle = Math.atan2(y, x);
+			angle = FastMath.atan2(y, x);
 			ax = x;
 			ay = y;
 		}
@@ -114,7 +117,7 @@ public class Vector2d extends Point2d implements Serializable {
 			vDot = -1.0;
 		if (vDot > 1.0)
 			vDot = 1.0;
-		return ((Math.acos(vDot)));
+		return ((FastMath.acos(vDot)));
 
 	}
 
@@ -136,7 +139,7 @@ public class Vector2d extends Point2d implements Serializable {
 	public double distanceTo(Vector2d position) {
 		double x = position.x - this.x;
 		double y = position.y - this.y;
-		return Math.sqrt(x * x + y * y);
+		return FastMath.sqrt(x * x + y * y);
 	}
 
 	@Override
