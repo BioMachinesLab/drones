@@ -13,6 +13,7 @@ import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
 
 public class DroneNeuralNetworkController extends Controller implements FixedLenghtGenomeEvolvableController {
+	private static final long serialVersionUID = -6938294613191709589L;
 
 	protected CINeuralNetwork neuralNetwork;
 	

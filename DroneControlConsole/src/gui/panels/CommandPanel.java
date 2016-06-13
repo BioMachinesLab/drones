@@ -570,8 +570,11 @@ public class CommandPanel extends UpdatePanel {
 				BufferedReader br = new BufferedReader(new FileReader(scripts));
 				String line = null;
 				while ((line = br.readLine()) != null) {
+					@SuppressWarnings("rawtypes")
 					Class c = Class.forName(line);
+					@SuppressWarnings("rawtypes")
 					Constructor[] constr = c.getDeclaredConstructors();
+
 					JButton b = new JButton(c.getSimpleName());
 					b.setForeground(Color.BLUE);
 					b.addActionListener(new ActionListener() {

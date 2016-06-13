@@ -50,6 +50,7 @@ import simulation.util.ArgumentsAnnotation;
 
 public class AquaticDrone extends DifferentialDriveRobot implements AquaticDroneCI {
 
+	private static final long serialVersionUID = 3186251965433910794L;
 	private Simulator simulator;
 	private Arguments args;
 	private ArrayList<Entity> entities = new ArrayList<Entity>();

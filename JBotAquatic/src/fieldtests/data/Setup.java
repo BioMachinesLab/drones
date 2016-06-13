@@ -1,22 +1,9 @@
 package fieldtests.data;
 
-import evolutionaryrobotics.JBotEvolver;
-import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
-import gui.renderer.CITwoDRenderer;
-import gui.renderer.Renderer;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
-
-import mathutils.Vector2d;
-import simulation.Simulator;
-import simulation.Updatable;
-import simulation.robot.AquaticDrone;
-import simulation.robot.Robot;
-import simulation.util.Arguments;
-import updatables.WaterCurrent;
 
 import commoninterface.entities.Entity;
 import commoninterface.entities.GeoFence;
@@ -25,6 +12,15 @@ import commoninterface.entities.Waypoint;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
 import commoninterface.utils.logger.LogData;
+import evolutionaryrobotics.JBotEvolver;
+import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
+import gui.renderer.CITwoDRenderer;
+import gui.renderer.Renderer;
+import mathutils.Vector2d;
+import simulation.Simulator;
+import simulation.robot.AquaticDrone;
+import simulation.robot.Robot;
+import simulation.util.Arguments;
 
 class Setup {
 	

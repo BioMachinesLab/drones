@@ -124,13 +124,6 @@ public class ClassSearchUtils implements Serializable {
 			jarFile = new JarFile(archive);
 		} catch (IOException e) {
 			return;
-		} finally {
-			try {
-				if (jarFile != null) {
-					jarFile.close();
-				}
-			} catch (IOException e) {
-			}
 		}
 
 		@SuppressWarnings("rawtypes")
@@ -153,6 +146,14 @@ public class ClassSearchUtils implements Serializable {
 				} catch (Throwable e) {
 				}
 			}
+		}
+
+		try {
+			if (jarFile != null) {
+				jarFile.close();
+			}
+		} catch (IOException e) {
+			return;
 		}
 	}
 }
