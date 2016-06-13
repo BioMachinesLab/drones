@@ -1,5 +1,7 @@
 package environment.target;
 
+import java.awt.Color;
+
 import commoninterface.AquaticDroneCI;
 import commoninterface.entities.target.Formation;
 import commoninterface.entities.target.Formation.FormationType;
@@ -10,6 +12,7 @@ import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CoordinateUtilities;
 import net.jafama.FastMath;
 import simulation.Simulator;
+import simulation.physicalobjects.LightPole;
 import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
@@ -68,23 +71,24 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 	public void setup(Simulator simulator) {
 		super.setup(simulator);
 
-		int definedTargetsQuantity = 0;
+		LightPole center = new LightPole(simulator, "center", 0, 0, 1);
+		center.setColor(Color.MAGENTA);
+		addMarker(center);
+		
 		if (onePerOneRobotTarget) {
-			definedTargetsQuantity = robots.size();
-		} else {
-			definedTargetsQuantity = targetsQuantity;
+			targetsQuantity = robots.size();
 		}
 
 		if (variateTargetsQuantity) {
-			definedTargetsQuantity += definedTargetsQuantity * simulator.getRandom().nextDouble() * 3;
-			if (definedTargetsQuantity == 0) {
-				definedTargetsQuantity = 1;
+			targetsQuantity += targetsQuantity * simulator.getRandom().nextDouble() * 3;
+			if (targetsQuantity == 0) {
+				targetsQuantity = 1;
 			}
 		}
 
-		if (definedTargetsQuantity <= 0) {
+		if (targetsQuantity <= 0) {
 			throw new IllegalArgumentException(
-					"Targets quantity needs to be equal or greater than 1 (currently " + definedTargetsQuantity + ")");
+					"Targets quantity needs to be equal or greater than 1 (currently " + targetsQuantity + ")");
 		}
 
 		FormationType formationType = FormationType.valueOf(formationShape);
@@ -135,8 +139,8 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 	private void generateFormation(FormationType formationType) {
 		double radius = radiusOfObjPositioning * simulator.getRandom().nextDouble();
 		double orientation = (simulator.getRandom().nextDouble() * FastMath.PI * 2) % 360;
-		Vector2d position = new Vector2d(radius * FastMath.cos(orientation), radius * FastMath.sin(orientation));
 
+		Vector2d position = new Vector2d(radius * FastMath.cos(orientation), radius * FastMath.sin(orientation));
 		double initialRotationAngle = simulator.getRandom().nextDouble() * 2 * FastMath.PI;
 
 		formation = new Formation("formation", CoordinateUtilities.cartesianToGPS(position));
@@ -175,7 +179,8 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 		if (rotateFormation) {
 			for (Target t : formation.getTargets()) {
 
-				RotationMotionData rmd = new RotationMotionData(t, formation.getLatLon(), angularVelocity, direction);
+				RotationMotionData rmd = new RotationMotionData(t,
+						CoordinateUtilities.GPSToCartesian(formation.getLatLon()), angularVelocity, direction);
 				t.setMotionData(rmd);
 			}
 		}
@@ -184,6 +189,10 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 			LinearMotionData lmd = new LinearMotionData(formation, formation.getLatLon(), targetsVelocity,
 					targetsAzimuth);
 			formation.setMotionData(lmd);
+
+			// RotationMotionData rmd = new RotationMotionData(formation, new
+			// Vector2d(0, 0), angularVelocity, direction);
+			// formation.setMotionData(rmd);
 		}
 	}
 
