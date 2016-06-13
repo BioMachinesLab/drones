@@ -194,6 +194,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		for (Entity ent : entities) {
 			if (ent instanceof Target) {
 				((Target) ent).step(time);
+				logger.logMessage(((Target) ent).getLogMessage());
 			}
 		}
 	}
