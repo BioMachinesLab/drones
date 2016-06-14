@@ -18,8 +18,8 @@ public class ReversableESCManagerOutput extends Thread implements
 	private final static boolean DEBUG = false;
 
 	private final static Pin SWITCH_PIN = RaspiPin.GPIO_13;
-	private final static int LEFT_ESC = 0;
-	private final static int RIGHT_ESC = 1;
+	private final static int LEFT_ESC = 1;
+	private final static int RIGHT_ESC = 2;
 
 	private final static int CENTRAL_VALUE_LEFT = 150;
 	private final static int CENTRAL_VALUE_RIGHT = 150;
