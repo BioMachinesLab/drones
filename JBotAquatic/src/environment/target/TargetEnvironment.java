@@ -17,6 +17,7 @@ import simulation.util.Arguments;
 public abstract class TargetEnvironment extends Environment {
 	private static final long serialVersionUID = -1681466103802101133L;
 	protected Simulator simulator;
+	protected Arguments args;
 	protected boolean moveTargets = false;
 	protected double radiusOfObjPositioning = 20;
 	protected double safetyDistance = 1;
@@ -33,6 +34,7 @@ public abstract class TargetEnvironment extends Environment {
 
 	public TargetEnvironment(Simulator simulator, Arguments args) {
 		super(simulator, args);
+		this.args=args;
 		this.simulator = simulator;
 		radiusOfObjPositioning = args.getArgumentAsDoubleOrSetDefault("radiusOfObjectPositioning",
 				radiusOfObjPositioning);
