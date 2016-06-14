@@ -17,6 +17,7 @@ import commoninterface.entities.RobotLocation;
 import commoninterface.entities.SharedDroneLocation;
 import commoninterface.entities.VirtualEntity;
 import commoninterface.entities.Waypoint;
+import commoninterface.entities.target.Formation;
 import commoninterface.entities.target.Target;
 import commoninterface.entities.target.motion.MotionData;
 import commoninterface.mathutils.Vector2d;
@@ -49,7 +50,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 	protected Color[] lineColors = new Color[] { Color.RED, Color.BLUE, Color.GREEN };
 	protected int colorIndex = 0;
 
-	private ArrayList<Target> drawTargets = new ArrayList<Target>();
+	private ArrayList<Formation> drawTargets = new ArrayList<Formation>();
 
 	public CITwoDRenderer(Arguments args) {
 		super(args);
@@ -170,47 +171,50 @@ public class CITwoDRenderer extends TwoDRenderer {
 			for (Object o : entities) {
 				Entity entity = (Entity) o;
 				if (entity instanceof GeoEntity) {
-					if (entity instanceof Target && !drawTargets.contains(entity)) {
-						Target t = (Target) entity;
+					if (entity instanceof Formation && !drawTargets.contains(entity)) {
+						Formation formation = (Formation) entity;
 
-						if (t.isOccupied()) {
-							graphics.setColor(Color.GREEN);
-						} else {
-							graphics.setColor(Color.ORANGE);
-						}
+						for (Target t : formation.getTargets()) {
+							if (t.isOccupied()) {
+								graphics.setColor(Color.GREEN);
+							} else {
+								graphics.setColor(Color.ORANGE);
+							}
 
-						Vector2d pos = CoordinateUtilities.GPSToCartesian(t.getLatLon());
-						int diam = (int) (t.getRadius() * 2 * scale);
-						int x = transformX(pos.x) - diam / 2;
-						int y = transformY(pos.y) - diam / 2;
-						graphics.fillOval(x, y, diam, diam);
-						drawTargetId(graphics, t);
-						if (showVelocityVectors && ((Target) entity).getTargetMotionData() != null) {
-							MotionData motionData = (t.getTargetMotionData());
-							Vector2d targetPos = CoordinateUtilities.GPSToCartesian(t.getLatLon());
-							Vector2d velocityVector = new Vector2d(motionData.getVelocityVector(simulator.getTime()));
+							Vector2d pos = CoordinateUtilities.GPSToCartesian(t.getLatLon());
+							int diam = (int) (t.getRadius() * 2 * scale);
+							int x = transformX(pos.x) - diam / 2;
+							int y = transformY(pos.y) - diam / 2;
+							graphics.fillOval(x, y, diam, diam);
+							drawTargetId(graphics, t);
+							if (showVelocityVectors && ((Target) entity).getTargetMotionData() != null) {
+								MotionData motionData = (t.getTargetMotionData());
+								Vector2d targetPos = CoordinateUtilities.GPSToCartesian(t.getLatLon());
+								Vector2d velocityVector = new Vector2d(
+										motionData.getVelocityVector(simulator.getTime()));
 
-							if (velocityVector.length() > 0) {
-								velocityVector.setLength(velocityVector.length() * 100);
-								velocityVector.add(targetPos);
+								if (velocityVector.length() > 0) {
+									velocityVector.setLength(velocityVector.length() * 100);
+									velocityVector.add(targetPos);
 
-								graphics.setColor(Color.BLACK);
-								graphics.drawLine(transformX(targetPos.x), transformY(targetPos.y),
-										transformX(velocityVector.x), transformY(velocityVector.y));
+									graphics.setColor(Color.BLACK);
+									graphics.drawLine(transformX(targetPos.x), transformY(targetPos.y),
+											transformX(velocityVector.x), transformY(velocityVector.y));
 
-								Color color = graphics.getColor();
-								graphics.setColor(Color.RED);
+									Color color = graphics.getColor();
+									graphics.setColor(Color.RED);
 
-								int radius = diam / 10;
-								int x_pos = transformX(velocityVector.x) - radius;
-								int y_pos = transformY(velocityVector.y) - radius;
+									int radius = diam / 10;
+									int x_pos = transformX(velocityVector.x) - radius;
+									int y_pos = transformY(velocityVector.y) - radius;
 
-								graphics.fillOval(x_pos, y_pos, radius * 2, radius * 2);
-								graphics.setColor(color);
+									graphics.fillOval(x_pos, y_pos, radius * 2, radius * 2);
+									graphics.setColor(color);
+								}
 							}
 						}
 
-						drawTargets.add(t);
+						drawTargets.add(formation);
 					} else {
 						if (entity instanceof SharedDroneLocation)
 							graphics.setColor(Color.BLUE.darker());
@@ -250,8 +254,9 @@ public class CITwoDRenderer extends TwoDRenderer {
 		g.setColor(Color.WHITE);
 		g.fillRect(x, y - 10, 8, 10);
 
+		String name = target.getName().replace("formation_target_", "t");
 		g.setColor(Color.BLACK);
-		g.drawString(String.valueOf(target.getName()), x, y);
+		g.drawString(name, x, y);
 	}
 
 	protected void drawGeoFence(GeoFence geo, Color c) {
