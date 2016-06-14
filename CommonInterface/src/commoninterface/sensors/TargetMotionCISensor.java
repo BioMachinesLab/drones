@@ -8,6 +8,7 @@ import commoninterface.CISensor;
 import commoninterface.RobotCI;
 import commoninterface.entities.Entity;
 import commoninterface.entities.RobotLocation;
+import commoninterface.entities.target.Formation;
 import commoninterface.entities.target.Target;
 import commoninterface.entities.target.motion.MotionData;
 import commoninterface.mathutils.Vector2d;
@@ -179,8 +180,9 @@ public class TargetMotionCISensor extends CISensor {
 		}
 
 		for (Entity ent : ((AquaticDroneCI) robot).getEntities()) {
-			if (ent instanceof Target) {
-				targets.add((Target) ent);
+			if (ent instanceof Formation) {
+				targets.addAll(((Formation) ent).getTargets());
+				break;
 			}
 		}
 
