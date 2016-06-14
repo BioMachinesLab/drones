@@ -17,7 +17,7 @@ import commoninterface.dataobjects.GPSData;
 import commoninterface.entities.Entity;
 import commoninterface.entities.RobotLocation;
 import commoninterface.entities.Waypoint;
-import commoninterface.entities.target.Target;
+import commoninterface.entities.target.Formation;
 import commoninterface.instincts.AvoidDronesInstinct;
 import commoninterface.instincts.AvoidObstaclesInstinct;
 import commoninterface.messageproviders.BehaviorMessageProvider;
@@ -149,12 +149,12 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 								.isAfter(((ControllerCIBehavior) activeBehavior).getStartDate())) {
 							if (!started) {
 								logger.logMessage("Started experiment at "
-										+ ((ControllerCIBehavior) activeBehavior).getStartDate() + " with "
+										+ ((ControllerCIBehavior) activeBehavior).getStartDate() + " with controller "
 										+ activeBehavior.getClass().getName());
 								started = true;
 							}
 
-							updateEntities(behaviorTimestep);
+							updateLocalEntities(behaviorTimestep);
 							current.step(behaviorTimestep++);
 
 							for (CIBehavior b : alwaysActiveBehaviors) {
@@ -190,11 +190,12 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	}
 
-	private void updateEntities(double time) {
+	@Override
+	public void updateLocalEntities(double time) {
 		for (Entity ent : entities) {
-			if (ent instanceof Target) {
-				((Target) ent).step(time);
-				logger.logMessage(((Target) ent).getLogMessage());
+			if (ent instanceof Formation) {
+				((Formation) ent).step(time);
+				logger.logMessage(((Formation) ent).getLogMessage());
 			}
 		}
 	}

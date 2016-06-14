@@ -11,6 +11,7 @@ import commoninterface.CISensor;
 import commoninterface.entities.Entity;
 import commoninterface.entities.RobotLocation;
 import commoninterface.entities.Waypoint;
+import commoninterface.entities.target.Formation;
 import commoninterface.instincts.AvoidDronesInstinct;
 import commoninterface.instincts.AvoidObstaclesInstinct;
 import commoninterface.messageproviders.BehaviorMessageProvider;
@@ -175,7 +176,8 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 
 	@Override
 	public void updateSensors(double simulationStep, ArrayList<PhysicalObject> teleported) {
-
+		updateLocalEntities(simulationStep);
+		
 		if (!configuredSensors) {
 			sensors.add(new CompassSensor(simulator, sensors.size() + 1, this, new Arguments("")));
 			configuredSensors = true;
@@ -627,5 +629,15 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 
 	public boolean hasFault() {
 		return fault;
+	}
+	
+	@Override
+	public void updateLocalEntities(double time) {
+		for (Entity ent : entities) {
+			if (ent instanceof Formation) {
+				((Formation) ent).step(time);
+				logger.logMessage(((Formation) ent).getLogMessage());
+			}
+		}
 	}
 }

@@ -59,4 +59,6 @@ public interface AquaticDroneCI extends RobotCI {
 	public void setRudder(double heading, double speed);
 
 	public double getMotorSpeedsInPercentage();
+
+	public void updateLocalEntities(double step);
 }
