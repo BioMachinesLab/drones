@@ -904,7 +904,6 @@ public class MapPanel extends UpdatePanel {
 		FormationParametersPane builder = new FormationParametersPane(null);
 		builder.triggerPane();
 		addFormation(builder.buildFormation(c));
-		formationUpdater.setActive(true);
 	}
 
 	public synchronized void addFormation(Formation formation) {
@@ -1226,7 +1225,6 @@ public class MapPanel extends UpdatePanel {
 		private boolean active = false;
 		private double time;
 		private Formation form;
-		private double teste = 0;
 
 		public FormationUpdater(double time, Formation form) {
 			this.time = time;
@@ -1252,51 +1250,46 @@ public class MapPanel extends UpdatePanel {
 				}
 
 				if (active) {
-					if (time > 50) {
-						System.out.println("entered");
-						teste = time - 50;
-						form.step(teste);
+					form.step(time);
 
-						Layer layer = null;
-						for (Layer l : treeMap.getLayers()) {
-							if (l.getName().equals("formation")) {
-								layer = l;
-								break;
-							}
+					Layer layer = null;
+					for (Layer l : treeMap.getLayers()) {
+						if (l.getName().equals("formation")) {
+							layer = l;
+							break;
 						}
+					}
 
-						for (MapMarker m : targetMarkers) {
-							treeMap.removeFromLayer(m);
-							getMap().removeMapMarker(m);
-						}
+					for (MapMarker m : targetMarkers) {
+						treeMap.removeFromLayer(m);
+						getMap().removeMapMarker(m);
+					}
 
-						if (formationCenterMarker != null) {
-							treeMap.removeFromLayer(formationCenterMarker);
-							getMap().removeMapMarker(formationCenterMarker);
-						}
+					if (formationCenterMarker != null) {
+						treeMap.removeFromLayer(formationCenterMarker);
+						getMap().removeMapMarker(formationCenterMarker);
+					}
 
-						targetMarkers.clear();
+					targetMarkers.clear();
 
-						for (Target t : form.getTargets()) {
-							Coordinate position = new Coordinate(t.getLatLon().getLat(), t.getLatLon().getLon());
-							String name = t.getName().replace("formation_target_", "");
+					for (Target t : form.getTargets()) {
+						Coordinate position = new Coordinate(t.getLatLon().getLat(), t.getLatLon().getLon());
+						String name = t.getName().replace("formation_target_", "");
 
-							MapMarker marker = new MapMarkerWaypoint(layer, name, position, Color.BLUE);
-							layer.add(marker);
-							targetMarkers.add(marker);
-							getMap().addMapMarker(marker);
-						}
+						MapMarker marker = new MapMarkerWaypoint(layer, name, position, Color.BLUE);
+						layer.add(marker);
+						targetMarkers.add(marker);
+						getMap().addMapMarker(marker);
+					}
 
-						formationCenterMarker = new MapMarkerObstacle(layer, "",
-								new Coordinate(form.getLatLon().getLat(), form.getLatLon().getLon()));
-						layer.add(formationCenterMarker);
-						getMap().addMapMarker(formationCenterMarker);
+					formationCenterMarker = new MapMarkerObstacle(layer, "",
+							new Coordinate(form.getLatLon().getLat(), form.getLatLon().getLon()));
+					layer.add(formationCenterMarker);
+					getMap().addMapMarker(formationCenterMarker);
 
-						synchronized (this) {
-							targets.addAll(form.getTargets());
-							updateCommandPanel();
-						}
-
+					synchronized (this) {
+						targets.addAll(form.getTargets());
+						updateCommandPanel();
 					}
 
 					time++;
