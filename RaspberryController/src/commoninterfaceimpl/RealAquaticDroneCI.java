@@ -154,7 +154,9 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 								started = true;
 							}
 
-							updateLocalEntities(behaviorTimestep);
+							if (((ControllerCIBehavior) activeBehavior).updateEntities()) {
+								updateLocalEntities(behaviorTimestep);
+							}
 							current.step(behaviorTimestep++);
 
 							for (CIBehavior b : alwaysActiveBehaviors) {
