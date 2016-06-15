@@ -154,19 +154,13 @@ public class FormationParametersPane {
 				moveTarget = moveTargetsCheckBox.isSelected();
 				variateTargetsSpeed = variateTargetTranslationSpeedCheckBox.isSelected();
 				variateTargetsAzimuth = variateTargetAzimuthCheckBox.isSelected();
-//
-//				rotationVelocity = Double.parseDouble(rotationVelocityVelocityTextField.getText());
-//				rotateFormation = rotateTargetsCheckBox.isSelected();
-//				variateRotationVelocity = variateTargetRotationSpeedCheckBox.isSelected();
-//				rotationDirection = targetsRotateDirectionCheckBox.isSelected();
-//				variateRotationDirection = variateTargetRotationDirectionCheckBox.isSelected();
-
-				rotationVelocity = 0;
-				rotateFormation =true;
-				variateRotationVelocity = false;
-				rotationDirection =false;
-				variateRotationDirection = false;
-
+				
+				rotationVelocity = Double.parseDouble(rotationVelocityVelocityTextField.getText());
+				rotateFormation = rotateTargetsCheckBox.isSelected();
+				variateRotationVelocity = variateTargetRotationSpeedCheckBox.isSelected();
+				rotationDirection = targetsRotateDirectionCheckBox.isSelected();
+				variateRotationDirection = variateTargetRotationDirectionCheckBox.isSelected();
+				
 				// Movement patch
 				formationMovementType = (MovementType) formationMovementTypeComboBox.getSelectedItem();
 				targetMovementType = (MovementType) targetMovementTypeComboBox.getSelectedItem();
@@ -202,7 +196,8 @@ public class FormationParametersPane {
 		}
 		if (extraArgs != null) {
 			if (extraArgs.get("formationShape") != null) {
-				index = FormationType.valueOf(args.get("formationShape")).ordinal();
+				index = FormationType.valueOf(extraArgs.get("formationShape")).ordinal();
+				formationTypeComboBox.setSelectedIndex(index);
 				formationTypeComboBox.setEnabled(false);
 			}
 		}
@@ -418,7 +413,7 @@ public class FormationParametersPane {
 		}
 		if (extraArgs != null) {
 			if (extraArgs.get("formationMovementType") != null) {
-				index = MovementType.valueOf(args.get("formationMovementType")).ordinal();
+				index = MovementType.valueOf(extraArgs.get("formationMovementType")).ordinal();
 				formationMovementTypeComboBox.setEnabled(false);
 			}
 		}
@@ -436,7 +431,7 @@ public class FormationParametersPane {
 		}
 		if (extraArgs != null) {
 			if (extraArgs.get("targetMovementType") != null) {
-				index = MovementType.valueOf(args.get("targetMovementType")).ordinal();
+				index = MovementType.valueOf(extraArgs.get("targetMovementType")).ordinal();
 				targetMovementTypeComboBox.setEnabled(false);
 			}
 		}
@@ -491,9 +486,9 @@ public class FormationParametersPane {
 			formation.buildFormation(targetQuantity, formationType, targetRadius);
 
 			setMotionData(formation, formationMovementType);
-
+			
 			for (Target t : formation.getTargets()) {
-				setMotionData(t, targetMovementType);
+				setMotionData(t, targetMovementType,formation.getLatLon());
 			}
 
 			return formation;
@@ -502,18 +497,18 @@ public class FormationParametersPane {
 		}
 	}
 
-	public void setMotionData(GeoEntity entity, MovementType type) {
+	public void setMotionData(GeoEntity entity, MovementType type, LatLon...rotationCenter ) {
 		MotionData motionData = null;
 		switch (type) {
 		case LINEAR:
 			motionData = generateLinearMotionData(entity);
 			break;
 		case ROTATIONAL:
-			motionData = generateRotationalMotionData(entity);
+			motionData = generateRotationalMotionData(entity,rotationCenter[0]);
 			break;
 		case MIXED:
 			MotionData linearMotionData = generateLinearMotionData(entity);
-			MotionData rotationalMotionData = generateRotationalMotionData(entity);
+			MotionData rotationalMotionData = generateRotationalMotionData(entity,rotationCenter[0]);
 
 			motionData = new MixedMotionData(entity);
 			if (linearMotionData != null) {
@@ -544,6 +539,7 @@ public class FormationParametersPane {
 			targetsAzimuth = random.nextDouble() * Math.PI * 2;
 		}
 
+		
 		if (moveTarget) {
 			return new LinearMotionData(entity, entity.getLatLon(), targetsVelocity, targetsAzimuth);
 		} else {
@@ -551,7 +547,7 @@ public class FormationParametersPane {
 		}
 	}
 
-	private RotationMotionData generateRotationalMotionData(GeoEntity entity) {
+	private RotationMotionData generateRotationalMotionData(GeoEntity entity, LatLon rotationCenter) {
 		double angularVelocity = rotationVelocity;
 		if (variateRotationVelocity) {
 			angularVelocity = 0.1 * rotationVelocity + random.nextDouble() * rotationVelocity * 1.5;
@@ -563,7 +559,7 @@ public class FormationParametersPane {
 		}
 
 		if (rotateFormation) {
-			return new RotationMotionData(entity, CoordinateUtilities.GPSToCartesian(entity.getLatLon()),
+			return new RotationMotionData(entity, CoordinateUtilities.GPSToCartesian(rotationCenter),
 					angularVelocity, direction);
 		} else {
 			return null;
