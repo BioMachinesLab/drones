@@ -582,7 +582,7 @@ public class MapPanel extends UpdatePanel {
 				}
 			}
 		}
-		
+
 		if (l == null) {
 			l = treeMap.addLayer(name);
 		}
@@ -645,7 +645,7 @@ public class MapPanel extends UpdatePanel {
 		System.out.println("Hello, it is Adele calling to say that you should implement this! TODO MapPanel");
 	}
 
-	public void displayData(RobotLocation di) {
+	public synchronized void displayData(RobotLocation di) {
 		LatLon latLon = di.getLatLon();
 
 		if (latLon != null) {
@@ -1032,7 +1032,7 @@ public class MapPanel extends UpdatePanel {
 				if (ge instanceof ObstacleLocation)
 					addObstacle(latLonToCoord(ge.getLatLon().getLat(), ge.getLatLon().getLon()));
 				if (ge instanceof Formation)
-					addFormation(latLonToCoord(ge.getLatLon().getLat(), ge.getLatLon().getLon()));
+					addFormation((Formation) ge);
 				if (ge instanceof Target)
 					addTarget(latLonToCoord(ge.getLatLon().getLat(), ge.getLatLon().getLon()), ge.getName(),
 							((Target) ge).getRadius());
