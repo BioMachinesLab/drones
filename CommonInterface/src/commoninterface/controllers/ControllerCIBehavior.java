@@ -56,6 +56,9 @@ public class ControllerCIBehavior extends CIBehavior {
 		}
 
 		updateEntities = args.getArgumentAsIntOrSetDefault("updateEntities", 0) == 1;
+		
+		System.out.println("Start Date: " + startDate + "\t Current: " + new LocalDateTime());
+		System.out.println("Update entities: "+updateEntities);
 	}
 
 	protected void initSensors(CIArguments args) {
