@@ -8,6 +8,7 @@ import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
 
 public class MixedMotionData extends MotionData {
+	private static final long serialVersionUID = -9079816490525272672L;
 	private ArrayList<MotionData> motionData = new ArrayList<MotionData>();
 
 	public MixedMotionData(GeoEntity entity) {

@@ -1,11 +1,15 @@
 package commoninterface.entities.target.motion;
 
+import java.io.Serializable;
+
 import commoninterface.entities.GeoEntity;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
 
-public abstract class MotionData {
+public abstract class MotionData implements Serializable {
+	private static final long serialVersionUID = -7143870830419053233L;
+
 	public static enum MovementType {
 		LINEAR, ROTATIONAL, MIXED;
 	}

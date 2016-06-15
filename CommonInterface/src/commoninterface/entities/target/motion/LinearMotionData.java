@@ -6,6 +6,8 @@ import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
 
 public class LinearMotionData extends MotionData {
+	private static final long serialVersionUID = -5074482521400228147L;
+
 	private boolean move = true;
 
 	private double movementVelocity;
@@ -33,7 +35,6 @@ public class LinearMotionData extends MotionData {
 
 		Vector2d walkedVector = new Vector2d(0, 0);
 		walkedVector.setPolarCoordinates(walkedDistance, azimuth);
-
 		return walkedVector;
 	}
 

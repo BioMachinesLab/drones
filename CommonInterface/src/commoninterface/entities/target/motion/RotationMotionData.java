@@ -58,6 +58,7 @@ public class RotationMotionData extends MotionData {
 		finalPosition.y += rotationCenter.y;
 
 		finalPosition.sub(initialRelativePosition);
+		System.out.println("Translation (Rot): "+finalPosition);
 		return finalPosition;
 	}
 
