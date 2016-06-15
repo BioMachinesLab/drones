@@ -18,13 +18,14 @@ import javax.swing.JTextField;
 
 import org.joda.time.LocalDateTime;
 
+import commoninterface.dataobjects.GPSData;
 import commoninterface.utils.jcoord.LatLon;
 import gui.DroneGUI;
 import network.GPSTimeProviderClient;
 
 public class GPSTimePanel extends JPanel {
 	private static final long serialVersionUID = 3310464759362205768L;
-	private final static String SERVER_IP = "127.0.0.1";
+	private final static String SERVER_IP = "192.168.1.118";
 	private final static int SERVER_PORT = 9190;
 	private GPSTimeProviderClient gpsTimeProviderClient = null;
 
@@ -195,21 +196,24 @@ public class GPSTimePanel extends JPanel {
 				}
 
 				if (gpsTimeProviderClient.getGPSData() != null) {
-					LocalDateTime date = gpsTimeProviderClient.getGPSData().getDate();
-					int sateliteCount = gpsTimeProviderClient.getGPSData().getNumberOfSatellitesInView();
+					GPSData data = gpsTimeProviderClient.getGPSData();
+					LocalDateTime date = data.getDate();
+					int sateliteCount = data.getNumberOfSatellitesInView();
 					timeTextField.setText(date.getHourOfDay() + ":" + date.getMinuteOfHour() + ":"
 							+ date.getSecondOfMinute() + "," + date.getSecondOfMinute());
-					satelitesTextField.setText(Integer.toString(sateliteCount));
 
-					if (gpsTimeProviderClient.getGPSData().isFix()) {
-						LatLon latLon = new LatLon(gpsTimeProviderClient.getGPSData().getLatitudeDecimal(),
-								gpsTimeProviderClient.getGPSData().getLongitudeDecimal());
+					if (data.getFixType() == -10000) {
+						satelitesTextField.setText("Server time");
+					} else {
+						satelitesTextField.setText(Integer.toString(sateliteCount));
+					}
+
+					if (data.isFix()) {
+						LatLon latLon = new LatLon(data.getLatitudeDecimal(), data.getLongitudeDecimal());
 						gui.getMapPanel().setBaseStation(latLon);
 
-						latitudeTextField
-								.setText(Double.toString(gpsTimeProviderClient.getGPSData().getLatitudeDecimal()));
-						longitudeTextField
-								.setText(Double.toString(gpsTimeProviderClient.getGPSData().getLongitudeDecimal()));
+						latitudeTextField.setText(Double.toString(data.getLatitudeDecimal()));
+						longitudeTextField.setText(Double.toString(data.getLongitudeDecimal()));
 						hasFixTextField.setText("YES");
 						hasFixTextField.setBackground(Color.GREEN);
 					} else {
@@ -223,7 +227,7 @@ public class GPSTimePanel extends JPanel {
 					LocalDateTime date = new LocalDateTime();
 					timeTextField.setText(date.getHourOfDay() + ":" + date.getMinuteOfHour() + ":"
 							+ date.getSecondOfMinute() + "," + date.getSecondOfMinute());
-					satelitesTextField.setText("Server time");
+					satelitesTextField.setText("Local time");
 					gui.getMapPanel().clearBaseStation();
 					latitudeTextField.setText("N/A");
 					longitudeTextField.setText("N/A");
