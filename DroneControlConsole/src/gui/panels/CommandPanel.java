@@ -213,7 +213,7 @@ public class CommandPanel extends UpdatePanel {
 		statusMessage = new JLabel("");
 		statusMessage.setPreferredSize(new Dimension(10, 20));
 
-		JPanel actionsPanel = new JPanel(new GridLayout(2, 2));
+		JPanel actionsPanel = new JPanel(new GridLayout(0, 2));
 
 		if (dronePanel) {
 			entitiesButton = new JButton("Deploy Entities");
