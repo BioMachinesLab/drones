@@ -125,7 +125,8 @@ public class EntitiesBroadcastMessage extends BroadcastMessage {
 						Target t = new Target(targetName,
 								new LatLon(Double.parseDouble(targetLat), Double.parseDouble(targetLon)),
 								Double.parseDouble(radius));
-
+						t.setInFormation(Boolean.parseBoolean(inFormation));
+						t.setOccupied(Boolean.parseBoolean(isOccupied));
 						entities.add(t);
 					}
 				}
