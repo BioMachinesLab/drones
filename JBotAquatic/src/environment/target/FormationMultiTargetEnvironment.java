@@ -33,6 +33,7 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 	private AquaticDrone faultyRobot = null;
 	private int faultDuration = 100;
 	private int timestepToInjectFaults;
+	private double initialRotationAngle = 0;
 
 	private double rotationVelocity = 0.05;
 	private boolean rotateFormation = false;
@@ -61,6 +62,10 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 
 		formationShape = args.getArgumentAsStringOrSetDefault("formationShape", null);
 		variateFormationParameters = args.getArgumentAsIntOrSetDefault("variateFormationParameters", 0) == 1;
+
+		if (args.getArgumentIsDefined("initialFormationRotation")) {
+			initialRotationAngle = args.getArgumentAsDouble("initialFormationRotation") * Math.PI / 180;
+		}
 
 		lineFormationDelta = args.getArgumentAsDoubleOrSetDefault("lineFormation_xDelta", lineFormationDelta);
 		circleFormation_radius = args.getArgumentAsDoubleOrSetDefault("circleFormation_radius", circleFormation_radius);
@@ -111,7 +116,7 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 			} while (!safeForRobot(r, simulator));
 
 			if (r instanceof AquaticDroneCI) {
-				((AquaticDroneCI) r).getEntities().addAll(targets);
+				((AquaticDroneCI) r).getEntities().add(formation);
 			}
 		}
 
@@ -151,7 +156,13 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 		double orientation = (simulator.getRandom().nextDouble() * FastMath.PI * 2) % 360;
 
 		Vector2d position = new Vector2d(radius * FastMath.cos(orientation), radius * FastMath.sin(orientation));
-		double initialRotationAngle = simulator.getRandom().nextDouble() * 2 * FastMath.PI;
+
+		double initialRotationAngle = 0;
+		if (!args.getArgumentIsDefined("initialFormationRotation")) {
+			initialRotationAngle = simulator.getRandom().nextDouble() * 2 * FastMath.PI;
+		} else {
+			initialRotationAngle = this.initialRotationAngle;
+		}
 
 		formation = new Formation("formation", CoordinateUtilities.cartesianToGPS(position));
 		formation.setLineFormationDelta(lineFormationDelta);
@@ -208,7 +219,7 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 
 	@Override
 	public void update(double time) {
-		formation.step(time);
+		//formation.step(time);
 
 		if (injectFaults) {
 			// Time to recover from fault?

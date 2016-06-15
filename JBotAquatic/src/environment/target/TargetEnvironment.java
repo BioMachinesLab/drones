@@ -128,11 +128,11 @@ public abstract class TargetEnvironment extends Environment {
 
 	@Override
 	public void update(double time) {
-		for (Target target : targets) {
-			if (moveTargets) {
-				target.step(time);
-			}
-		}
+//		for (Target target : targets) {
+//			if (moveTargets) {
+//				target.step(time);
+//			}
+//		}
 	}
 
 	public double getRadiusOfObjPositioning() {
