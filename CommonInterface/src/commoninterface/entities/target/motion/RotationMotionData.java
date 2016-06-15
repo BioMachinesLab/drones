@@ -23,9 +23,8 @@ public class RotationMotionData extends MotionData {
 		this.angularVelocity = angularVelocity;
 		this.rotationDirection = rotationDirection;
 
-		double x_rel_position_to_center = originalPositionCartesian.x - rotationCenter.x;
-		double y_rel_position_to_center = originalPositionCartesian.y - rotationCenter.y;
-		initialRelativePosition = new Vector2d(x_rel_position_to_center, y_rel_position_to_center);
+		initialRelativePosition = originalPositionCartesian;
+		initialRelativePosition.sub(rotationCenter);
 	}
 
 	@Override
@@ -42,28 +41,24 @@ public class RotationMotionData extends MotionData {
 			currentAngle = -currentAngle;
 		}
 
-		// Rotation given by a 2D rotation matrix:
-		// x= x.cos(tetha) - y.sin(tetha)
-		// Y= x.sin(tetha) + y.cos(tetha)
-		double cos = FastMath.cos(currentAngle);
-		double sin = FastMath.sin(currentAngle);
-		Vector2d finalPosition = new Vector2d(0, 0);
-		finalPosition.x = initialRelativePosition.x * cos - initialRelativePosition.y * sin;
-		finalPosition.y = initialRelativePosition.x * sin + initialRelativePosition.y * cos;
-
-		// Translation given by a 2D translation matrix:
-		// x= x + dx
-		// y= y + dy
-		finalPosition.x += rotationCenter.x;
-		finalPosition.y += rotationCenter.y;
-
-		finalPosition.sub(initialRelativePosition);
-		System.out.println("Translation (Rot): "+finalPosition);
-		return finalPosition;
+		currentAngle %= (2 * FastMath.PI);
+		
+		double distanceToCenter = initialRelativePosition.length();
+		double initialAngle = initialRelativePosition.getAngle();
+		
+		
+		
+		Vector2d finalVector = new Vector2d(0,0);
+		finalVector.x=distanceToCenter*FastMath.cos(currentAngle+initialAngle);
+		finalVector.y=distanceToCenter*FastMath.sin(currentAngle+initialAngle);
+	
+		finalVector.sub(initialRelativePosition);
+		return finalVector;
 	}
 
 	@Override
 	public Vector2d getVelocityVector(double step) {
+		System.out.println("getVelocity vector on rotation");
 		if (!rotate) {
 			return new Vector2d(0, 0);
 		} else {
