@@ -27,7 +27,7 @@ public class PositionBroadcastMessage extends BroadcastMessage {
 					latLon.getLat()+MESSAGE_SEPARATOR+
 					latLon.getLon()+MESSAGE_SEPARATOR+
 					orientation+MESSAGE_SEPARATOR+
-					drone.getDroneType().name();
+					drone.getDroneType().toString();
 		}
 		return null;
 	}

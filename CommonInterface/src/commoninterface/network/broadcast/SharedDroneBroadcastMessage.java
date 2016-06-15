@@ -31,7 +31,7 @@ public class SharedDroneBroadcastMessage extends BroadcastMessage {
 					currentLocation.getObserverAddress()+MESSAGE_SEPARATOR+
 					latLon.getLat()+MESSAGE_SEPARATOR+
 					latLon.getLon()+MESSAGE_SEPARATOR+
-					currentLocation.getDroneType().name();
+					currentLocation.getDroneType().toString();
 		}
 		return null;
 	}

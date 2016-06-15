@@ -357,7 +357,7 @@ public class LogCodex {
 		String data = "";
 		data += (logData.ip != null) ? IP_ADDR_SEP + logData.ip + MAIN_SEPARATOR : "";
 		data += (logData.timestep >= 0) ? TIMESTEP_SEP + Integer.toString(logData.timestep) + MAIN_SEPARATOR : "";
-		data += (logData.droneType.name() != null) ? DRONE_TYPE_SEP + logData.droneType.name() + MAIN_SEPARATOR : "";
+		data += (logData.droneType.toString() != null) ? DRONE_TYPE_SEP + logData.droneType.toString() + MAIN_SEPARATOR : "";
 		data += (logData.systemTime != null) ? SYS_TIME_SEP + logData.systemTime + MAIN_SEPARATOR : "";
 
 		if (logData.latLon != null) {

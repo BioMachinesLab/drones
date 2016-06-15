@@ -51,7 +51,7 @@ public class EntitiesBroadcastMessage extends BroadcastMessage {
 			result += form.getLatLon().getLat() + MESSAGE_SEPARATOR;
 			result += form.getLatLon().getLon() + MESSAGE_SEPARATOR;
 			result += form.getTargetQuantity() + MESSAGE_SEPARATOR;
-			// result += form.getFormationType().name() + MESSAGE_SEPARATOR;
+			// result += form.getFormationType().toString() + MESSAGE_SEPARATOR;
 
 			for (Target t : form.getTargets()) {
 				result += t.getName() + MESSAGE_SEPARATOR;
