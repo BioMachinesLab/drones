@@ -10,6 +10,7 @@ import commoninterface.entities.GeoEntity;
 import commoninterface.entities.GeoFence;
 import commoninterface.entities.ObstacleLocation;
 import commoninterface.entities.Waypoint;
+import commoninterface.entities.target.Formation;
 import commoninterface.network.messages.EntitiesMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
@@ -64,6 +65,9 @@ public class EntitiesMessageProvider implements MessageProvider{
 					log(ge.getLogMessage());
 				} else if(e instanceof GeoFence) {
 					GeoFence gf = (GeoFence)e;
+					log(gf.getLogMessage());
+				}else if (e instanceof Formation){
+					Formation gf = (Formation)e;
 					log(gf.getLogMessage());
 				}
 			}
