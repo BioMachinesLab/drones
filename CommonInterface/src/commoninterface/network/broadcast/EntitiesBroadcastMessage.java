@@ -51,18 +51,16 @@ public class EntitiesBroadcastMessage extends BroadcastMessage {
 			result += form.getLatLon().getLat() + MESSAGE_SEPARATOR;
 			result += form.getLatLon().getLon() + MESSAGE_SEPARATOR;
 			result += form.getTargetQuantity() + MESSAGE_SEPARATOR;
-			//result += form.getFormationType().name() + MESSAGE_SEPARATOR;
+			// result += form.getFormationType().name() + MESSAGE_SEPARATOR;
 
 			for (Target t : form.getTargets()) {
-				result += getLogString(t);
+				result += t.getName() + MESSAGE_SEPARATOR;
+				result += t.isInFormation() + MESSAGE_SEPARATOR;
+				result += t.isOccupied() + MESSAGE_SEPARATOR;
+				result += t.getRadius() + MESSAGE_SEPARATOR;
+				result += t.getLatLon().getLat() + MESSAGE_SEPARATOR;
+				result += t.getLatLon().getLon() + MESSAGE_SEPARATOR;
 			}
-		} else if (e instanceof Target) {
-			Target t = (Target) e;
-			result += t.isInFormation() + MESSAGE_SEPARATOR;
-			result += t.isOccupied() + MESSAGE_SEPARATOR;
-			result += t.getRadius() + MESSAGE_SEPARATOR;
-			result += t.getLatLon().getLat() + MESSAGE_SEPARATOR;
-			result += t.getLatLon().getLon() + MESSAGE_SEPARATOR;
 		} else if (e instanceof GeoEntity) {
 			GeoEntity ge = (GeoEntity) e;
 			result += ge.getLatLon().getLat() + MESSAGE_SEPARATOR;
@@ -116,18 +114,20 @@ public class EntitiesBroadcastMessage extends BroadcastMessage {
 
 					entities.add(
 							new ObstacleLocation(name, new LatLon(Double.parseDouble(lat), Double.parseDouble(lon))));
+					System.out.println("Targets: "+targetsQuantity);
 					for (int i = 0; i < targetsQuantity; i++) {
-						s.next();// class
 						String targetName = s.next();
-						boolean inFormation = s.nextBoolean();
-						boolean isOccupied = s.nextBoolean();
-						double radius = s.nextDouble();
-						double targetLat = s.nextDouble();
-						double targetLon = s.nextDouble();
+						String inFormation = s.next();
+						String isOccupied = s.next();
+						String radius = s.next();
+						String targetLat = s.next();
+						String targetLon = s.next();
 
-						Target t = new Target(targetName, new LatLon(targetLat, targetLon), radius);
-						t.setOccupied(isOccupied);
-						t.setInFormation(inFormation);
+						Target t = new Target(targetName,
+								new LatLon(Double.parseDouble(targetLat), Double.parseDouble(targetLon)),
+								Double.parseDouble(radius));
+						t.setOccupied(Boolean.parseBoolean(isOccupied));
+						t.setInFormation(Boolean.parseBoolean(inFormation));
 
 						entities.add(t);
 					}
