@@ -424,7 +424,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	}
 
 	@Override
-	public ArrayList<Entity> getEntities() {
+	public synchronized ArrayList<Entity> getEntities() {
 		return entities;
 	}
 
