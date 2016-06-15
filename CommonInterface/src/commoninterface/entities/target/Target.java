@@ -30,7 +30,7 @@ public class Target extends GeoEntity {
 	}
 
 	public void step(double time) {
-		setLatLon(getTargetMotionData().calculatePosition(time));
+		setLatLon(getMotionData().calculatePosition(time));
 
 		if (entered) {
 			enterTime = time;
@@ -71,7 +71,7 @@ public class Target extends GeoEntity {
 		}
 	}
 
-	public MotionData getTargetMotionData() {
+	public MotionData getMotionData() {
 		if (inFormation) {
 			MixedMotionData m = new MixedMotionData(this, originalPosition);
 
@@ -120,6 +120,10 @@ public class Target extends GeoEntity {
 		this.formation = formation;
 
 		inFormation = (formation != null);
+	}
+	
+	public void setInFormation(boolean inFormation) {
+		this.inFormation = inFormation;
 	}
 
 	public boolean isInFormation() {
