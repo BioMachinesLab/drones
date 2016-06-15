@@ -22,6 +22,7 @@ public class ControllerCIBehavior extends CIBehavior {
 	private String description = "";
 	private boolean logInputsOutputs = false;
 	private LocalDateTime startDate = null;
+	private boolean updateEntities = false;
 
 	public ControllerCIBehavior(CIArguments args, RobotCI robot) {
 		super(args, robot);
@@ -54,6 +55,7 @@ public class ControllerCIBehavior extends CIBehavior {
 			startDate = new LocalDateTime(year, monthOfYear, dayOfMonth, hourOfDay, minuteOfHour, secondOfMinute);
 		}
 
+		updateEntities = args.getArgumentAsIntOrSetDefault("updateEntities", 0) == 1;
 	}
 
 	protected void initSensors(CIArguments args) {
@@ -170,4 +172,7 @@ public class ControllerCIBehavior extends CIBehavior {
 		return super.toString() + description;
 	}
 
+	public boolean updateEntities() {
+		return updateEntities;
+	}
 }
