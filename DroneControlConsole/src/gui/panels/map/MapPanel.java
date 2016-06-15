@@ -90,6 +90,8 @@ public class MapPanel extends UpdatePanel {
 	private GeoFence geoFence = new GeoFence("geofence");
 	protected Formation formation = null;
 	protected MapMarker formationCenterMarker = null;
+	private LinkedList<Target> formationTargets = new LinkedList<Target>();
+	private LinkedList<MapMarker> formationTargetMarkers = new LinkedList<MapMarker>();
 	private LinkedList<Target> targets = new LinkedList<Target>();
 	private LinkedList<MapMarker> targetMarkers = new LinkedList<MapMarker>();
 	private LinkedList<Waypoint> waypoints = new LinkedList<Waypoint>();
@@ -834,6 +836,35 @@ public class MapPanel extends UpdatePanel {
 		}
 	}
 
+	public synchronized void addTarget(Coordinate c, String name, double radius) {
+		String layerName = "targets";
+		Layer l = null;
+
+		for (Layer layer : treeMap.getLayers()) {
+			if (layer.getName().equals(layerName)) {
+				l = layer;
+			}
+		}
+		if (l == null) {
+			l = treeMap.addLayer(layerName);
+		}
+
+		String markerName = name.substring(name.length() - 3, name.length());
+		MapMarker m = new MapMarkerWaypoint(l, markerName, c, Color.BLUE);
+
+		l.add(m);
+		targetMarkers.add(m);
+
+		getMap().addMapMarker(m);
+
+		synchronized (this) {
+			Target t = new Target(name, new LatLon(c.getLat(), c.getLon()), radius);
+			targets.add(t);
+			updateCommandPanel();
+			// notifyAll();
+		}
+	}
+
 	private synchronized void addToGeoFence(Coordinate coord) {
 		MapMarker marker = new MapMarkerDot(coord);
 		geoFence.addWaypoint(new LatLon(coord.getLat(), coord.getLon()));
@@ -941,12 +972,12 @@ public class MapPanel extends UpdatePanel {
 
 				MapMarker marker = new MapMarkerWaypoint(layer, name, position, Color.BLUE);
 				layer.add(marker);
-				targetMarkers.add(marker);
+				formationTargetMarkers.add(marker);
 				getMap().addMapMarker(marker);
 			}
 
 			putFormationCenterMarker(new Coordinate(formation.getLatLon().getLat(), formation.getLatLon().getLon()));
-			targets.addAll(formation.getTargets());
+			formationTargets.addAll(formation.getTargets());
 			updateCommandPanel();
 
 			currentTime = 0;
@@ -989,6 +1020,7 @@ public class MapPanel extends UpdatePanel {
 		clearGeoFence();
 		clearWaypoints();
 		clearFormation();
+		clearTargets();
 
 		for (Entity e : entities) {
 			if (e instanceof GeoEntity) {
@@ -999,6 +1031,9 @@ public class MapPanel extends UpdatePanel {
 					addObstacle(latLonToCoord(ge.getLatLon().getLat(), ge.getLatLon().getLon()));
 				if (ge instanceof Formation)
 					addFormation(latLonToCoord(ge.getLatLon().getLat(), ge.getLatLon().getLon()));
+				if (ge instanceof Target)
+					addTarget(latLonToCoord(ge.getLatLon().getLat(), ge.getLatLon().getLon()), ge.getName(),
+							((Target) ge).getRadius());
 			}
 			if (e instanceof GeoFence) {
 				addGeoFence((GeoFence) e);
@@ -1042,6 +1077,7 @@ public class MapPanel extends UpdatePanel {
 		clearGeoFence();
 		clearWaypoints();
 		clearFormation();
+		clearTargets();
 		updateCommandPanel();
 	}
 
@@ -1057,12 +1093,24 @@ public class MapPanel extends UpdatePanel {
 		updateCommandPanel();
 	}
 
+	public void clearTargets() {
+		for (MapMarker m : targetMarkers) {
+			treeMap.removeFromLayer(m);
+			getMap().removeMapMarker(m);
+		}
+
+		targets.clear();
+		targetMarkers.clear();
+
+		updateCommandPanel();
+	}
+
 	public void clearFormation() {
 		if (formationUpdater != null) {
 			formationUpdater.interrupt();
 		}
 
-		for (MapMarker m : targetMarkers) {
+		for (MapMarker m : formationTargetMarkers) {
 			treeMap.removeFromLayer(m);
 			getMap().removeMapMarker(m);
 		}
@@ -1073,8 +1121,8 @@ public class MapPanel extends UpdatePanel {
 			formationCenterMarker = null;
 		}
 
-		targets.clear();
-		targetMarkers.clear();
+		formationTargets.clear();
+		formationTargetMarkers.clear();
 		formation = null;
 		updateCommandPanel();
 	}
@@ -1269,12 +1317,12 @@ public class MapPanel extends UpdatePanel {
 						}
 					}
 
-					for (MapMarker m : targetMarkers) {
+					for (MapMarker m : formationTargetMarkers) {
 						treeMap.removeFromLayer(m);
 						getMap().removeMapMarker(m);
 					}
 
-					targetMarkers.clear();
+					formationTargetMarkers.clear();
 
 					for (Target t : formation.getTargets()) {
 						Coordinate position = new Coordinate(t.getLatLon().getLat(), t.getLatLon().getLon());
@@ -1282,7 +1330,7 @@ public class MapPanel extends UpdatePanel {
 
 						MapMarker marker = new MapMarkerWaypoint(layer, name, position, Color.BLUE);
 						layer.add(marker);
-						targetMarkers.add(marker);
+						formationTargetMarkers.add(marker);
 						getMap().addMapMarker(marker);
 					}
 
@@ -1290,7 +1338,7 @@ public class MapPanel extends UpdatePanel {
 							new Coordinate(formation.getLatLon().getLat(), formation.getLatLon().getLon()));
 
 					synchronized (this) {
-						targets.addAll(formation.getTargets());
+						formationTargets.addAll(formation.getTargets());
 						updateCommandPanel();
 					}
 
