@@ -330,7 +330,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	}
 
 	@Override
-	public ArrayList<Entity> getEntities() {
+	public synchronized ArrayList<Entity> getEntities() {
 		return entities;
 	}
 
