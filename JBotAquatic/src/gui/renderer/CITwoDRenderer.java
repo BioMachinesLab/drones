@@ -39,6 +39,7 @@ import simulation.util.Arguments;
 
 public class CITwoDRenderer extends TwoDRenderer {
 
+	private static final long serialVersionUID = 2466224727957228802L;
 	private static final double ENTITY_DIAMETER = 1.08;
 	protected int droneID;
 	protected boolean seeSensors;
@@ -50,7 +51,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 	protected Color[] lineColors = new Color[] { Color.RED, Color.BLUE, Color.GREEN };
 	protected int colorIndex = 0;
 
-	private ArrayList<Formation> drawTargets = new ArrayList<Formation>();
+	private ArrayList<Target> drawTargets = new ArrayList<Target>();
 
 	public CITwoDRenderer(Arguments args) {
 		super(args);
@@ -171,50 +172,52 @@ public class CITwoDRenderer extends TwoDRenderer {
 			for (Object o : entities) {
 				Entity entity = (Entity) o;
 				if (entity instanceof GeoEntity) {
-					if (entity instanceof Formation && !drawTargets.contains(entity)) {
+					if (entity instanceof Formation) {
 						Formation formation = (Formation) entity;
-
 						for (Target t : formation.getTargets()) {
-							if (t.isOccupied()) {
-								graphics.setColor(Color.GREEN);
-							} else {
-								graphics.setColor(Color.ORANGE);
-							}
+							if (!drawTargets.contains(t)) {
 
-							Vector2d pos = CoordinateUtilities.GPSToCartesian(t.getLatLon());
-							int diam = (int) (t.getRadius() * 2 * scale);
-							int x = transformX(pos.x) - diam / 2;
-							int y = transformY(pos.y) - diam / 2;
-							graphics.fillOval(x, y, diam, diam);
-							drawTargetId(graphics, t);
-							if (showVelocityVectors && ((Target) entity).getTargetMotionData() != null) {
-								MotionData motionData = (t.getTargetMotionData());
-								Vector2d targetPos = CoordinateUtilities.GPSToCartesian(t.getLatLon());
-								Vector2d velocityVector = new Vector2d(
-										motionData.getVelocityVector(simulator.getTime()));
-
-								if (velocityVector.length() > 0) {
-									velocityVector.setLength(velocityVector.length() * 100);
-									velocityVector.add(targetPos);
-
-									graphics.setColor(Color.BLACK);
-									graphics.drawLine(transformX(targetPos.x), transformY(targetPos.y),
-											transformX(velocityVector.x), transformY(velocityVector.y));
-
-									Color color = graphics.getColor();
-									graphics.setColor(Color.RED);
-
-									int radius = diam / 10;
-									int x_pos = transformX(velocityVector.x) - radius;
-									int y_pos = transformY(velocityVector.y) - radius;
-
-									graphics.fillOval(x_pos, y_pos, radius * 2, radius * 2);
-									graphics.setColor(color);
+								if (t.isOccupied()) {
+									graphics.setColor(Color.GREEN);
+								} else {
+									graphics.setColor(Color.ORANGE);
 								}
+
+								Vector2d pos = CoordinateUtilities.GPSToCartesian(t.getLatLon());
+								int diam = (int) (t.getRadius() * 2 * scale);
+								int x = transformX(pos.x) - diam / 2;
+								int y = transformY(pos.y) - diam / 2;
+								graphics.fillOval(x, y, diam, diam);
+								drawTargetId(graphics, t);
+								if (showVelocityVectors && ((Target) entity).getMotionData() != null) {
+									MotionData motionData = (t.getMotionData());
+									Vector2d targetPos = CoordinateUtilities.GPSToCartesian(t.getLatLon());
+									Vector2d velocityVector = new Vector2d(
+											motionData.getVelocityVector(simulator.getTime()));
+
+									if (velocityVector.length() > 0) {
+										velocityVector.setLength(velocityVector.length() * 100);
+										velocityVector.add(targetPos);
+
+										graphics.setColor(Color.BLACK);
+										graphics.drawLine(transformX(targetPos.x), transformY(targetPos.y),
+												transformX(velocityVector.x), transformY(velocityVector.y));
+
+										Color color = graphics.getColor();
+										graphics.setColor(Color.RED);
+
+										int radius = diam / 10;
+										int x_pos = transformX(velocityVector.x) - radius;
+										int y_pos = transformY(velocityVector.y) - radius;
+
+										graphics.fillOval(x_pos, y_pos, radius * 2, radius * 2);
+										graphics.setColor(color);
+									}
+								}
+								drawTargets.add(t);
 							}
 						}
 
-						drawTargets.add(formation);
 					} else {
 						if (entity instanceof SharedDroneLocation)
 							graphics.setColor(Color.BLUE.darker());
