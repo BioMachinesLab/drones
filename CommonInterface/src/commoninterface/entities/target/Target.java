@@ -121,7 +121,7 @@ public class Target extends GeoEntity {
 
 		inFormation = (formation != null);
 	}
-	
+
 	public void setInFormation(boolean inFormation) {
 		this.inFormation = inFormation;
 	}
@@ -143,12 +143,17 @@ public class Target extends GeoEntity {
 
 	@Override
 	public String toString() {
-		if (formation != null) {
-			return "[Formation Target] Formation: " + formation.getName() + "\t" + super.toString() + "\tHash: "
-					+ System.identityHashCode(this) + "\tName: " + name.substring(6) + "\tOccupied: " + occupied;
+		if (inFormation) {
+			if (formation == null) {
+				return "[Formation Target] Formation: null\t" + super.toString() + "\tHash: "
+						+ System.identityHashCode(this) + "\tName: " + name.substring(6) + "\tOccupied: " + occupied;
+			} else {
+				return "[Formation Target] Formation: " + formation.getName() + "\t" + super.toString() + "\tHash: "
+						+ System.identityHashCode(this) + "\tName: " + name.substring(6) + "\tOccupied: " + occupied;
+			}
 		} else {
 			return "[Target] " + super.toString() + "\tHash: " + System.identityHashCode(this) + "\tName: "
-					+ name.substring(6) + "\tOccupied: " + occupied;
+					+ name + "\tOccupied: " + occupied;
 		}
 	}
 
