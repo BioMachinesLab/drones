@@ -274,6 +274,10 @@ public class Formation extends GeoEntity {
 		for (Target t : targets) {
 			t.step(time);
 		}
+
+		if (getMotionData() != null) {
+			setLatLon(getMotionData().calculatePosition(time));
+		}
 	}
 
 	@Override

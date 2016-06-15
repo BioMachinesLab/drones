@@ -48,7 +48,7 @@ public class TargetMotionCISensor extends CISensor {
 		ArrayList<Target> targets = getTargetsOccupancy(entities);
 		Target target = getClosestTarget(excludeOccupied, targets);
 		if (target != null) {
-			Vector2d vel = target.getTargetMotionData().getVelocityVector(time);
+			Vector2d vel = target.getMotionData().getVelocityVector(time);
 			readings[0] = vel.getAngle() / Math.PI / 2;
 			readings[1] = vel.length()*MotionData.UPDATE_RATE;
 
