@@ -152,6 +152,8 @@ public class FormationFieldTestScript extends FieldTestScript {
 
 			addEntityToMap(formations.get(0));
 			deployMapEntities(new ArrayList<String>(Arrays.asList(ips)));
+			((DroneGUI) console.getGUI()).getMapPanel().setFormationUpdate(false);
+			
 			/*
 			 * Ask for permission to start
 			 */
@@ -214,6 +216,7 @@ public class FormationFieldTestScript extends FieldTestScript {
 
 							addEntityToMap(formations.get(i));
 							deployMapEntities(new ArrayList<String>(Arrays.asList(ips)));
+							((DroneGUI) console.getGUI()).getMapPanel().setFormationUpdate(false);
 
 							if (JOptionPane.showConfirmDialog(console.getGUI(),
 									"Yes to start formation experiment, no to kill ("
@@ -274,6 +277,7 @@ public class FormationFieldTestScript extends FieldTestScript {
 			args.setArgument("startDate", str);
 			args.setArgument("updateEntities", 1);
 			System.out.println(args);
+
 			startControllers(ips, args);
 
 			System.out.printf("Starting experiments in %d seconds (%s)\n", experimentsStartDelay,
