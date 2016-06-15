@@ -571,16 +571,18 @@ public class MapPanel extends UpdatePanel {
 			robotPositionsUpdate.put(name, System.currentTimeMillis());
 		}
 
-		Iterator<MapMarker> i = getMap().getMapMarkerList().iterator();
+		synchronized (this) {
+			Iterator<MapMarker> i = getMap().getMapMarkerList().iterator();
 
-		while (i.hasNext()) {
-			MapMarker m = i.next();
-			if (m.getLayer() != null && m.getLayer().getName().equals(name)) {
-				l = m.getLayer();
-				break;
+			while (i.hasNext()) {
+				MapMarker m = i.next();
+				if (m.getLayer() != null && m.getLayer().getName().equals(name)) {
+					l = m.getLayer();
+					break;
+				}
 			}
 		}
-
+		
 		if (l == null) {
 			l = treeMap.addLayer(name);
 		}
