@@ -84,6 +84,7 @@ public class CommandPanel extends UpdatePanel {
 	public JButton deploy;
 	public JButton stopAll;
 	public JButton entitiesButton;
+	public JButton startTargetMotion;
 
 	private JTextField gpsCoordinate = new JTextField("Latitude/ Longitude", 15);
 	private JButton setWaypointButton = new JButton("Set waypoint");
@@ -187,6 +188,25 @@ public class CommandPanel extends UpdatePanel {
 			}
 		});
 
+		if (gui instanceof DroneGUI) {
+			startTargetMotion = new JButton("Start motion");
+			startTargetMotion.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					if (((DroneGUI) gui).getMapPanel().getFormation() != null) {
+
+						if (startTargetMotion.getText().equals("Start motion")) {
+							((DroneGUI) gui).getMapPanel().setFormationUpdate(true);
+							startTargetMotion.setText("Stop motion");
+						} else {
+							((DroneGUI) gui).getMapPanel().setFormationUpdate(false);
+							startTargetMotion.setText("Start motion");
+						}
+					}
+				}
+			});
+		}
+
 		config = new JTextArea(7, 8);
 		config.setFont(new Font("Monospaced", Font.PLAIN, 11));
 
@@ -216,6 +236,9 @@ public class CommandPanel extends UpdatePanel {
 		}
 
 		actionsPanel.add(stopAll);
+
+		if (startTargetMotion != null)
+			actionsPanel.add(startTargetMotion);
 
 		JButton placeDronesButton = new JButton("Place Drones Randomly");
 		placeDronesButton.addActionListener(new ActionListener() {
