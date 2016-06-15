@@ -79,7 +79,6 @@ public class EntitiesBroadcastMessage extends BroadcastMessage {
 			s.next();
 
 			while (s.hasNext()) {
-
 				String className = s.next();
 				String name = s.next();
 
@@ -114,7 +113,7 @@ public class EntitiesBroadcastMessage extends BroadcastMessage {
 
 					entities.add(
 							new ObstacleLocation(name, new LatLon(Double.parseDouble(lat), Double.parseDouble(lon))));
-					System.out.println("Targets: "+targetsQuantity);
+
 					for (int i = 0; i < targetsQuantity; i++) {
 						String targetName = s.next();
 						String inFormation = s.next();
@@ -126,8 +125,6 @@ public class EntitiesBroadcastMessage extends BroadcastMessage {
 						Target t = new Target(targetName,
 								new LatLon(Double.parseDouble(targetLat), Double.parseDouble(targetLon)),
 								Double.parseDouble(radius));
-						t.setOccupied(Boolean.parseBoolean(isOccupied));
-						t.setInFormation(Boolean.parseBoolean(inFormation));
 
 						entities.add(t);
 					}
