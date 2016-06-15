@@ -1,9 +1,5 @@
 package fieldtests;
 
-import gui.DroneGUI;
-import gui.panels.CommandPanel;
-import gui.panels.map.MapPanel;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -11,10 +7,12 @@ import java.util.LinkedList;
 import java.util.Random;
 import java.util.Scanner;
 
-import main.DroneControlConsole;
-import network.CommandSender;
-import network.mobileAppServer.shared.dataObjects.DroneData;
-import network.mobileAppServer.shared.dataObjects.DronesSet;
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
 import commoninterface.entities.Entity;
 import commoninterface.entities.GeoFence;
 import commoninterface.entities.Waypoint;
@@ -27,12 +25,13 @@ import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.Line;
 import commoninterface.utils.jcoord.LatLon;
-
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import gui.DroneGUI;
+import gui.panels.CommandPanel;
+import gui.panels.map.MapPanel;
+import main.DroneControlConsole;
+import network.CommandSender;
+import network.mobileAppServer.shared.dataObjects.DroneData;
+import network.mobileAppServer.shared.dataObjects.DronesSet;
 
 public abstract class FieldTestScript extends Thread{
 
@@ -62,7 +61,8 @@ public abstract class FieldTestScript extends Thread{
      * Console's map)
      *
      */
-    public void run() {
+    @Override
+	public void run() {
     	this.mapPanel = ((DroneGUI)console.getGUI()).getMapPanel();
     }
 
@@ -225,7 +225,7 @@ public abstract class FieldTestScript extends Thread{
         return list;
     }
 
-    private void deploy(Message m, ArrayList<String> ips) {
+    protected void deploy(Message m, ArrayList<String> ips) {
         new CommandSender(m, ips, commandPanel, false).start();
     }
 
