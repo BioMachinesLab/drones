@@ -14,4 +14,6 @@ public interface GPSTimeProviderServerObserver {
 	public void setErrorMessage(String message);
 
 	public void updateStatus();
+	
+	public boolean serverUMTSummerCompensationActive();
 }

@@ -7,6 +7,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.joda.time.LocalDateTime;
+
 import commoninterface.dataobjects.GPSData;
 
 public class GPSTimeProviderServer implements GPSTimeProviderServerObservated {
@@ -108,6 +110,9 @@ public class GPSTimeProviderServer implements GPSTimeProviderServerObservated {
 		if (gpsModuleInput != null && gpsModuleInput.isAvailable()) {
 			gpsModuleInput.stopService();
 			gpsModuleInput = null;
+
+			observer.setOfflineGPSModule();
+			observer.setMessage("GPS module is now offline!");
 		} else {
 			observer.setErrorMessage("GPS module already offline!");
 		}
@@ -209,7 +214,17 @@ public class GPSTimeProviderServer implements GPSTimeProviderServerObservated {
 		if (gpsModuleInput != null) {
 			return gpsModuleInput.getGPSData();
 		} else {
-			return null;
+			GPSData data = new GPSData();
+			data.setFix(false);
+			data.setNumberOfSatellitesInView(0);
+			data.setFixType(-10000);
+
+			if (observer.serverUMTSummerCompensationActive()) {
+				data.setDate(new LocalDateTime().minusHours(1));
+			}else{
+				data.setDate(new LocalDateTime());
+			}
+			return data;
 		}
 	}
 

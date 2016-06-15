@@ -23,7 +23,8 @@ public class GPSModuleInput {
 
 	private final static int DEFAULT_BAUD_RATE = 4800;
 	private final static String COM_PORT_WINDOWS = "COM4";
-	private final static String COM_PORT_LINUX = "/dev/tty0";
+	private final static String COM_PORT_LINUX = "/dev/ttyUSB0";
+	private final static String COM_PORT_MAC = "";
 	private String port;
 
 	private SerialPort serialPort;
@@ -224,6 +225,17 @@ public class GPSModuleInput {
 
 		while (identifiers.hasMoreElements()) {
 			identifiersStrings.add(identifiers.nextElement().getName());
+		}
+
+		if (identifiersStrings.isEmpty()) {
+			if (System.getProperty("os.name").toLowerCase().startsWith("windows")) {
+				identifiersStrings.add(COM_PORT_WINDOWS);
+			} else if (System.getProperty("os.name").toLowerCase().startsWith("linux")) {
+				identifiersStrings.add(COM_PORT_LINUX);
+			} else if (System.getProperty("os.name").toLowerCase().startsWith("mac")) {
+				// identifiersStrings.add(COM_PORT_MAC);
+				throw new UnsatisfiedLinkError("Input not implemented for this OS");
+			}
 		}
 
 		return identifiersStrings.toArray(new String[identifiersStrings.size()]);
