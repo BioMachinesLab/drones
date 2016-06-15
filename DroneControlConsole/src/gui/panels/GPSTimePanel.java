@@ -106,7 +106,7 @@ public class GPSTimePanel extends JPanel {
 	}
 
 	private void toggleButton() {
-		if (gpsTimeProviderClient.connectionOK()) {
+		if (gpsTimeProviderClient!=null && gpsTimeProviderClient.connectionOK()) {
 			stopClient();
 		} else {
 			startClient();
