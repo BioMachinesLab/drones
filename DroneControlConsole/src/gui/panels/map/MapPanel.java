@@ -253,6 +253,7 @@ public class MapPanel extends UpdatePanel {
 						addToGeoFence(getMap().getPosition(e.getPoint()));
 					} else if (status.equals(MapStatus.FORMATION)) {
 						addFormation(getMap().getPosition(e.getPoint()));
+						clearStatus();
 					} else {
 						addWaypoint(getMap().getPosition(e.getPoint()));
 					}
@@ -637,7 +638,7 @@ public class MapPanel extends UpdatePanel {
 
 	public void displayData(EntityMessage message) {
 		// TODO
-		System.out.println("TODO MapPanel");
+		System.out.println("Hello, it is Adele calling to say that you should implement this! TODO MapPanel");
 	}
 
 	public void displayData(RobotLocation di) {
@@ -872,7 +873,7 @@ public class MapPanel extends UpdatePanel {
 		updateCommandPanel();
 	}
 
-	public synchronized void addFormation(Coordinate c) {
+	public void putFormationCenterMarker(Coordinate c) {
 		if (formationCenterMarker != null) {
 			treeMap.removeFromLayer(formationCenterMarker);
 			getMap().removeMapMarker(formationCenterMarker);
@@ -897,19 +898,29 @@ public class MapPanel extends UpdatePanel {
 		layer.add(formationCenterMarker);
 		getMap().addMapMarker(formationCenterMarker);
 
-		synchronized (this) {
-			updateCommandPanel();
-		}
+		updateCommandPanel();
+	}
+
+	public synchronized void addFormation(Coordinate c) {
+		putFormationCenterMarker(c);
 
 		FormationParametersPane builder = new FormationParametersPane(null);
 		builder.triggerPane();
-		addFormation(builder.buildFormation(c));
+
+		Formation form = builder.buildFormation(c);
+		if (form != null) {
+			addFormation(form);
+		} else {
+			treeMap.removeFromLayer(formationCenterMarker);
+			getMap().removeMapMarker(formationCenterMarker);
+			formationCenterMarker = null;
+		}
 	}
 
-	public synchronized void addFormation(Formation formation) {
-		this.formation = formation;
-		if (formation != null) {
+	public void addFormation(Formation formation) {
+		synchronized (this) {
 			clearFormation();
+			this.formation = formation;
 			String layerName = "formation";
 			Layer layer = null;
 
@@ -924,8 +935,6 @@ public class MapPanel extends UpdatePanel {
 				layer = treeMap.addLayer(layerName);
 			}
 
-			clearFormation();
-
 			for (Target t : formation.getTargets()) {
 				Coordinate position = new Coordinate(t.getLatLon().getLat(), t.getLatLon().getLon());
 				String name = t.getName().replace("formation_target_", "");
@@ -936,16 +945,14 @@ public class MapPanel extends UpdatePanel {
 				getMap().addMapMarker(marker);
 			}
 
-			synchronized (this) {
-				targets.addAll(formation.getTargets());
-				updateCommandPanel();
-			}
+			putFormationCenterMarker(new Coordinate(formation.getLatLon().getLat(), formation.getLatLon().getLon()));
+			targets.addAll(formation.getTargets());
+			updateCommandPanel();
 
 			currentTime = 0;
-			formationUpdater = new FormationUpdater(currentTime, formation);
+			formationUpdater = new FormationUpdater(currentTime);
 			formationUpdater.start();
 		}
-		setFormationUpdate(true);
 	}
 
 	private void addObstacle(Coordinate c) {
@@ -1069,7 +1076,6 @@ public class MapPanel extends UpdatePanel {
 		targets.clear();
 		targetMarkers.clear();
 		formation = null;
-
 		updateCommandPanel();
 	}
 
@@ -1221,19 +1227,20 @@ public class MapPanel extends UpdatePanel {
 	}
 
 	protected class FormationUpdater extends Thread {
-		private final int UPDATE_RATE = 10; // 10 ms updates
 		private boolean active = false;
 		private double time;
-		private Formation form;
 
-		public FormationUpdater(double time, Formation form) {
+		public FormationUpdater(double time) {
 			this.time = time;
-			this.form = form;
 		}
 
-		private synchronized void setActive(boolean active) {
+		public synchronized void setActive(boolean active) {
 			this.active = active;
 			notify();
+		}
+
+		public synchronized boolean isActive() {
+			return active;
 		}
 
 		@Override
@@ -1241,16 +1248,18 @@ public class MapPanel extends UpdatePanel {
 			boolean exit = false;
 
 			while (!exit) {
-				while (!active) {
-					try {
-						wait();
-					} catch (InterruptedException e) {
-						exit = true;
+				synchronized (this) {
+					while (!isActive()) {
+						try {
+							wait();
+						} catch (InterruptedException e) {
+							exit = true;
+						}
 					}
 				}
 
 				if (active) {
-					form.step(time);
+					formation.step(time);
 
 					Layer layer = null;
 					for (Layer l : treeMap.getLayers()) {
@@ -1265,14 +1274,9 @@ public class MapPanel extends UpdatePanel {
 						getMap().removeMapMarker(m);
 					}
 
-					if (formationCenterMarker != null) {
-						treeMap.removeFromLayer(formationCenterMarker);
-						getMap().removeMapMarker(formationCenterMarker);
-					}
-
 					targetMarkers.clear();
 
-					for (Target t : form.getTargets()) {
+					for (Target t : formation.getTargets()) {
 						Coordinate position = new Coordinate(t.getLatLon().getLat(), t.getLatLon().getLon());
 						String name = t.getName().replace("formation_target_", "");
 
@@ -1282,20 +1286,18 @@ public class MapPanel extends UpdatePanel {
 						getMap().addMapMarker(marker);
 					}
 
-					formationCenterMarker = new MapMarkerObstacle(layer, "",
-							new Coordinate(form.getLatLon().getLat(), form.getLatLon().getLon()));
-					layer.add(formationCenterMarker);
-					getMap().addMapMarker(formationCenterMarker);
+					putFormationCenterMarker(
+							new Coordinate(formation.getLatLon().getLat(), formation.getLatLon().getLon()));
 
 					synchronized (this) {
-						targets.addAll(form.getTargets());
+						targets.addAll(formation.getTargets());
 						updateCommandPanel();
 					}
 
 					time++;
 					currentTime = time;
 					try {
-						Thread.sleep(UPDATE_RATE);
+						Thread.sleep(SLEEP_TIME);
 					} catch (InterruptedException e) {
 						exit = true;
 					}
