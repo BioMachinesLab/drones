@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -26,6 +27,8 @@ import javax.swing.text.StyleConstants;
 
 import org.joda.time.LocalDateTime;
 
+import commoninterface.dataobjects.GPSData;
+
 public class GPSTimeProviderServerGUI extends JFrame implements GPSTimeProviderServerObserver {
 	private static final long serialVersionUID = 1902399582928274879L;
 	private JTextField serverPortTextField;
@@ -37,6 +40,7 @@ public class GPSTimeProviderServerGUI extends JFrame implements GPSTimeProviderS
 	private JTextField latitudeTextField;
 	private JTextField longitudeTextField;
 	private JTextField satelitesTextField;
+	private JCheckBox serverUMTSummerCompensationCheckBox;
 	private JComboBox<String> serialPortComboBox;
 	private JButton gpsModuleActionButton;
 
@@ -60,6 +64,9 @@ public class GPSTimeProviderServerGUI extends JFrame implements GPSTimeProviderS
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		this.setLocation(dim.width / 2 - this.getSize().width / 2, dim.height / 2 - this.getSize().height / 2);
 
+		gpsDataUpdater = new GPSDataUpdater();
+		gpsDataUpdater.start();
+
 		setVisible(true);
 	}
 
@@ -81,41 +88,42 @@ public class GPSTimeProviderServerGUI extends JFrame implements GPSTimeProviderS
 		connectedClientsTextField.setEditable(false);
 		serverPanel.add(connectedClientsTextField);
 
-		JPanel gpsModulePanel = new JPanel(new GridLayout(0, 2));
+		JPanel gpsModulePanel = new JPanel(new BorderLayout());
 		gpsModulePanel.setBorder(BorderFactory.createTitledBorder("GPS Module"));
 
-		gpsModulePanel.add(new JLabel("Time:"));
+		JPanel gpsModulePanelWrapper = new JPanel(new GridLayout(0, 2));
+		gpsModulePanelWrapper.add(new JLabel("Time:"));
 		timeTextField = new JTextField("N/A");
 		timeTextField.setHorizontalAlignment(JTextField.CENTER);
 		timeTextField.setEditable(false);
-		gpsModulePanel.add(timeTextField);
+		gpsModulePanelWrapper.add(timeTextField);
 
-		gpsModulePanel.add(new JLabel("Has fix:"));
+		gpsModulePanelWrapper.add(new JLabel("Has fix:"));
 		hasFixTextField = new JTextField("NO");
 		hasFixTextField.setBackground(Color.RED);
 		hasFixTextField.setHorizontalAlignment(JTextField.CENTER);
 		hasFixTextField.setEditable(false);
-		gpsModulePanel.add(hasFixTextField);
+		gpsModulePanelWrapper.add(hasFixTextField);
 
-		gpsModulePanel.add(new JLabel("Latitude:"));
+		gpsModulePanelWrapper.add(new JLabel("Latitude:"));
 		latitudeTextField = new JTextField("N/A");
 		latitudeTextField.setHorizontalAlignment(JTextField.CENTER);
 		latitudeTextField.setEditable(false);
-		gpsModulePanel.add(latitudeTextField);
+		gpsModulePanelWrapper.add(latitudeTextField);
 
-		gpsModulePanel.add(new JLabel("Longitude:"));
+		gpsModulePanelWrapper.add(new JLabel("Longitude:"));
 		longitudeTextField = new JTextField("N/A");
 		longitudeTextField.setHorizontalAlignment(JTextField.CENTER);
 		longitudeTextField.setEditable(false);
-		gpsModulePanel.add(longitudeTextField);
+		gpsModulePanelWrapper.add(longitudeTextField);
 
-		gpsModulePanel.add(new JLabel("Satelites:"));
+		gpsModulePanelWrapper.add(new JLabel("Satelites:"));
 		satelitesTextField = new JTextField("N/A");
 		satelitesTextField.setHorizontalAlignment(JTextField.CENTER);
 		satelitesTextField.setEditable(false);
-		gpsModulePanel.add(satelitesTextField);
+		gpsModulePanelWrapper.add(satelitesTextField);
 
-		gpsModulePanel.add(new JLabel("Serial port:"));
+		gpsModulePanelWrapper.add(new JLabel("Serial port:"));
 		serialPortComboBox = new JComboBox<String>(server.getSerialPortIdentifiers());
 		if (server.getSerialPortIdentifiers().length > 0) {
 			serialPortComboBox.setSelectedItem(0);
@@ -123,9 +131,13 @@ public class GPSTimeProviderServerGUI extends JFrame implements GPSTimeProviderS
 		DefaultListCellRenderer dlcr = new DefaultListCellRenderer();
 		dlcr.setHorizontalAlignment(DefaultListCellRenderer.CENTER);
 		serialPortComboBox.setRenderer(dlcr);
-		gpsModulePanel.add(serialPortComboBox);
+		gpsModulePanelWrapper.add(serialPortComboBox);
 		serialPortListUpdater = new SerialPortListUpdater();
 		serialPortListUpdater.start();
+
+		serverUMTSummerCompensationCheckBox = new JCheckBox("Compensate local summer hour");
+		gpsModulePanel.add(gpsModulePanelWrapper, BorderLayout.CENTER);
+		gpsModulePanel.add(serverUMTSummerCompensationCheckBox, BorderLayout.SOUTH);
 
 		serverActionButton = new JButton("Start server");
 		serverActionButton.setBackground(Color.RED);
@@ -165,8 +177,8 @@ public class GPSTimeProviderServerGUI extends JFrame implements GPSTimeProviderS
 		buttonsPanel.add(gpsModuleActionButton);
 
 		JPanel allStuff = new JPanel(new BorderLayout());
-		allStuff.add(topPanel,BorderLayout.CENTER);
-		allStuff.add(buttonsPanel,BorderLayout.SOUTH);
+		allStuff.add(topPanel, BorderLayout.CENTER);
+		allStuff.add(buttonsPanel, BorderLayout.SOUTH);
 
 		panel.add(allStuff, BorderLayout.NORTH);
 		panel.add(messagesAreaScrollPanel, BorderLayout.CENTER);
@@ -197,6 +209,13 @@ public class GPSTimeProviderServerGUI extends JFrame implements GPSTimeProviderS
 	}
 
 	private class SerialPortListUpdater extends Thread {
+		private boolean stop = false;
+
+		public synchronized void stop(boolean stop) {
+			this.stop = stop;
+			notify();
+		}
+
 		@Override
 		public void run() {
 			boolean exit = false;
@@ -205,6 +224,16 @@ public class GPSTimeProviderServerGUI extends JFrame implements GPSTimeProviderS
 					sleep(5000);
 				} catch (InterruptedException e) {
 					exit = true;
+				}
+
+				synchronized (this) {
+					while (stop) {
+						try {
+							wait();
+						} catch (InterruptedException e) {
+							exit = true;
+						}
+					}
 				}
 
 				serialPortComboBox.removeAllItems();
@@ -223,7 +252,7 @@ public class GPSTimeProviderServerGUI extends JFrame implements GPSTimeProviderS
 			boolean exit = false;
 			boolean printedAcquired = false;
 			boolean printedLost = false;
-			
+
 			while (!exit) {
 				try {
 					sleep(1000);
@@ -232,22 +261,37 @@ public class GPSTimeProviderServerGUI extends JFrame implements GPSTimeProviderS
 				}
 
 				if (server.getGPSData() != null) {
-					LocalDateTime date = server.getGPSData().getDate();
-					int sateliteCount = server.getGPSData().getNumberOfSatellitesInView();
-					timeTextField.setText(date.getHourOfDay() + ":" + date.getMinuteOfHour() + ":"
-							+ date.getSecondOfMinute() + "," + date.getSecondOfMinute());
-					satelitesTextField.setText(Integer.toString(sateliteCount));
+					GPSData data = server.getGPSData();
+					LocalDateTime date = data.getDate();
 
-					if (server.getGPSData().isFix()) {
-						latitudeTextField.setText(Double.toString(server.getGPSData().getLatitudeDecimal()));
-						longitudeTextField.setText(Double.toString(server.getGPSData().getLongitudeDecimal()));
+					String str = "";
+					if (serverUMTSummerCompensationCheckBox.isSelected() && data.getFixType() == -10000) {
+						str = "(-1h) " + date.getHourOfDay() + ":" + date.getMinuteOfHour() + ":"
+								+ date.getSecondOfMinute() + "," + date.getSecondOfMinute();
+					} else {
+						str = date.getHourOfDay() + ":" + date.getMinuteOfHour() + ":" + date.getSecondOfMinute() + ","
+								+ date.getSecondOfMinute();
+					}
+
+					int sateliteCount = data.getNumberOfSatellitesInView();
+					timeTextField.setText(str);
+
+					if (!data.isFix() && data.getFixType() == -10000) {
+						satelitesTextField.setText("Server time");
+					} else {
+						satelitesTextField.setText(Integer.toString(sateliteCount));
+					}
+
+					if (data.isFix()) {
+						latitudeTextField.setText(Double.toString(data.getLatitudeDecimal()));
+						longitudeTextField.setText(Double.toString(data.getLongitudeDecimal()));
 						hasFixTextField.setText("YES");
 						hasFixTextField.setBackground(Color.GREEN);
 
 						if (!printedAcquired) {
 							setMessage("Acquired GPS fix");
 							printedAcquired = true;
-							printedLost=false;
+							printedLost = false;
 						}
 					} else {
 						latitudeTextField.setText("N/A");
@@ -257,24 +301,9 @@ public class GPSTimeProviderServerGUI extends JFrame implements GPSTimeProviderS
 
 						if (!printedLost) {
 							setMessage("Waiting for GPS fix");
-							printedLost=true;
+							printedLost = true;
 							printedAcquired = false;
 						}
-					}
-				} else {
-					LocalDateTime date = new LocalDateTime();
-					timeTextField.setText(date.getHourOfDay() + ":" + date.getMinuteOfHour() + ":"
-							+ date.getSecondOfMinute() + "," + date.getSecondOfMinute());
-					satelitesTextField.setText("Local time");
-					latitudeTextField.setText("N/A");
-					longitudeTextField.setText("N/A");
-					hasFixTextField.setText("NO");
-					hasFixTextField.setBackground(Color.RED);
-
-					if (!printedLost) {
-						setMessage("Waiting for GPS fix");
-						printedLost=true;
-						printedAcquired = false;
 					}
 				}
 			}
@@ -304,11 +333,7 @@ public class GPSTimeProviderServerGUI extends JFrame implements GPSTimeProviderS
 
 		serialPortComboBox.setEnabled(true);
 		serialPortComboBox.removeAllItems();
-		for (String port : server.getSerialPortIdentifiers()) {
-			serialPortComboBox.addItem(port);
-		}
-
-		gpsDataUpdater.interrupt();
+		serialPortListUpdater.stop(false);
 	}
 
 	@Override
@@ -316,8 +341,7 @@ public class GPSTimeProviderServerGUI extends JFrame implements GPSTimeProviderS
 		gpsModuleActionButton.setText("Stop GPS module");
 		gpsModuleActionButton.setBackground(Color.GREEN);
 		serialPortComboBox.setEnabled(false);
-		gpsDataUpdater = new GPSDataUpdater();
-		gpsDataUpdater.start();
+		serialPortListUpdater.stop(true);
 	}
 
 	@Override
@@ -362,5 +386,9 @@ public class GPSTimeProviderServerGUI extends JFrame implements GPSTimeProviderS
 	@Override
 	public void updateStatus() {
 		connectedClientsTextField.setText(Integer.toString(server.getConnectedClientsQuantity()));
+	}
+
+	public boolean serverUMTSummerCompensationActive() {
+		return serverUMTSummerCompensationCheckBox.isSelected();
 	}
 }
