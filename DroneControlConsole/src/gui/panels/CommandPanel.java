@@ -48,6 +48,7 @@ import commoninterface.network.broadcast.EntitiesBroadcastMessage;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.network.messages.EntitiesMessage;
 import commoninterface.network.messages.Message;
+import commoninterface.network.messages.TargetMessage;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.Line;
@@ -198,9 +199,12 @@ public class CommandPanel extends UpdatePanel {
 						if (startTargetMotion.getText().equals("Start motion")) {
 							((DroneGUI) gui).getMapPanel().setFormationUpdate(true);
 							startTargetMotion.setText("Stop motion");
+							
+							deploy(new TargetMessage(true, 0, myHostname));
 						} else {
 							((DroneGUI) gui).getMapPanel().setFormationUpdate(false);
 							startTargetMotion.setText("Start motion");
+							deploy(new TargetMessage(false, 0, myHostname));
 						}
 					}
 				}

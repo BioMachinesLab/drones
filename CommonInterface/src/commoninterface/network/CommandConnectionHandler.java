@@ -10,6 +10,7 @@ import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.network.messages.EntitiesMessage;
 import commoninterface.network.messages.LogMessage;
 import commoninterface.network.messages.Message;
+import commoninterface.network.messages.TargetMessage;
 
 public class CommandConnectionHandler extends ConnectionHandler {
 	
@@ -32,7 +33,7 @@ public class CommandConnectionHandler extends ConnectionHandler {
 		
 		if (message instanceof BehaviorMessage ||
 				message instanceof LogMessage ||
-				message instanceof EntitiesMessage) {
+				message instanceof EntitiesMessage || message instanceof TargetMessage) {
 			robot.processInformationRequest(message, this);
 		}
 	}
@@ -49,6 +50,7 @@ public class CommandConnectionHandler extends ConnectionHandler {
 				+ ") connected");
 	}
 	
+	@Override
 	public synchronized void sendData(Object data) {
 		super.sendData(data);
 		//We only need to reply that we executed the Behavior,

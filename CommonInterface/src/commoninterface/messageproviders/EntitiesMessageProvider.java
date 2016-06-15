@@ -47,6 +47,11 @@ public class EntitiesMessageProvider implements MessageProvider {
 							|| e instanceof Formation) {
 						entitiesToRemove.add(e);
 						i.remove();
+						
+						if(e instanceof Formation && robot instanceof AquaticDroneCI){
+							((AquaticDroneCI) robot).setUpdateEntitiesStep(0);
+							((AquaticDroneCI) robot).setUpdateEntities(false);
+						}
 					}
 				}
 

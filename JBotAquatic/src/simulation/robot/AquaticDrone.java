@@ -20,6 +20,7 @@ import commoninterface.messageproviders.EntitiesMessageProvider;
 import commoninterface.messageproviders.EntityMessageProvider;
 import commoninterface.messageproviders.LogMessageProvider;
 import commoninterface.messageproviders.NeuralActivationsMessageProvider;
+import commoninterface.messageproviders.TargetMessageProvider;
 import commoninterface.network.ConnectionHandler;
 import commoninterface.network.broadcast.BroadcastHandler;
 import commoninterface.network.broadcast.BroadcastMessage;
@@ -102,6 +103,9 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	protected double speedOffset = 0;
 	private boolean configuredSensors = false;
 	protected boolean fault = false;
+	
+	private boolean updateEntities = false;
+	private double entitiesStep=0;
 
 	public AquaticDrone(Simulator simulator, Arguments args) {
 		super(simulator, args);
@@ -182,6 +186,16 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 			configuredSensors = true;
 		}
 
+		if (activeBehavior != null && activeBehavior instanceof ControllerCIBehavior
+				&& ((ControllerCIBehavior) activeBehavior).updateEntities()) {
+			updateEntities = ((ControllerCIBehavior) activeBehavior).updateEntities();
+		}
+
+		if (updateEntities) {
+			
+			updateLocalEntities(entitiesStep++);
+		}
+
 		updatePhysicalSensors();
 
 		super.updateSensors(simulationStep, teleported);
@@ -191,7 +205,16 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		} else if (getController() instanceof DummyController) {
 			setMotorSpeeds(0, 0);
 		}
+	}
 
+	@Override
+	public void setUpdateEntitiesStep(double timeStep) {
+		entitiesStep = timeStep;
+	}
+
+	@Override
+	public void setUpdateEntities(boolean updateEntities) {
+		this.updateEntities = updateEntities;
 	}
 
 	@Override
@@ -276,10 +299,6 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		this.previousPosition = new Vector2d(position);
 
 		for (CIBehavior b : alwaysActiveBehaviors) {
-			if(b instanceof ControllerCIBehavior && ((ControllerCIBehavior) b).updateEntities()){
-				updateLocalEntities(time);
-			}
-			
 			b.step(time);
 		}
 
@@ -403,6 +422,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		messageProviders.add(new BehaviorMessageProvider(this));
 		messageProviders.add(new NeuralActivationsMessageProvider(this));
 		messageProviders.add(new LogMessageProvider(this));
+		messageProviders.add(new TargetMessageProvider(this));
 	}
 
 	@Override

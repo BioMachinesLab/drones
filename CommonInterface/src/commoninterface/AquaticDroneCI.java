@@ -61,4 +61,8 @@ public interface AquaticDroneCI extends RobotCI {
 	public double getMotorSpeedsInPercentage();
 
 	public void updateLocalEntities(double step);
+	
+	public void setUpdateEntities(boolean updateEntities);
+
+	public void setUpdateEntitiesStep(double timeStep);
 }

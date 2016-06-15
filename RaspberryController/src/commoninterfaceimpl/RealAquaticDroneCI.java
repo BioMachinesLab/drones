@@ -25,6 +25,7 @@ import commoninterface.messageproviders.EntitiesMessageProvider;
 import commoninterface.messageproviders.EntityMessageProvider;
 import commoninterface.messageproviders.LogMessageProvider;
 import commoninterface.messageproviders.NeuralActivationsMessageProvider;
+import commoninterface.messageproviders.TargetMessageProvider;
 import commoninterface.network.CommandConnectionListener;
 import commoninterface.network.ConnectionHandler;
 import commoninterface.network.ConnectionListener;
@@ -100,6 +101,9 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	private double rudderHeading = 0;
 	private double rudderSpeed = 0;
 
+	private boolean updateEntities = false;
+	private double entitiesStep = 0;
+
 	@Override
 	public void begin(HashMap<String, CIArguments> args) {
 		this.startTimeInMillis = System.currentTimeMillis();
@@ -134,16 +138,17 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 				// Vasco: I know, this can be compressed in one IF condition,
 				// But this way is more clear
 				if (current != null) {
+					if (activeBehavior instanceof ControllerCIBehavior
+							&& (((ControllerCIBehavior) activeBehavior).getStartDate() == null || new LocalDateTime()
+									.isAfter(((ControllerCIBehavior) activeBehavior).getStartDate()))) {
+						updateEntities = ((ControllerCIBehavior) activeBehavior).updateEntities();
+					}
+
+					if (updateEntities)
+						updateLocalEntities(entitiesStep++);
+
 					if (!(activeBehavior instanceof ControllerCIBehavior)) {
 						current.step(behaviorTimestep++);
-
-						for (CIBehavior b : alwaysActiveBehaviors) {
-							b.step(timestep);
-						}
-
-						if (current.getTerminateBehavior()) {
-							stopActiveBehavior();
-						}
 					} else {
 						if (((ControllerCIBehavior) activeBehavior).getStartDate() == null || new LocalDateTime()
 								.isAfter(((ControllerCIBehavior) activeBehavior).getStartDate())) {
@@ -151,22 +156,22 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 								logger.logMessage("Started experiment at "
 										+ ((ControllerCIBehavior) activeBehavior).getStartDate() + " with controller "
 										+ activeBehavior.getClass().getName());
+								System.out.println("Started experiment at "
+										+ ((ControllerCIBehavior) activeBehavior).getStartDate() + " with controller "
+										+ activeBehavior.getClass().getName());
 								started = true;
 							}
 
-							if (((ControllerCIBehavior) activeBehavior).updateEntities()) {
-								updateLocalEntities(behaviorTimestep);
-							}
 							current.step(behaviorTimestep++);
-
-							for (CIBehavior b : alwaysActiveBehaviors) {
-								b.step(timestep);
-							}
-
-							if (current.getTerminateBehavior()) {
-								stopActiveBehavior();
-							}
 						}
+					}
+
+					for (CIBehavior b : alwaysActiveBehaviors) {
+						b.step(timestep);
+					}
+
+					if (current.getTerminateBehavior()) {
+						stopActiveBehavior();
 					}
 				}
 			} catch (Exception e) {
@@ -190,6 +195,16 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			timestep++;
 		}
 
+	}
+
+	@Override
+	public void setUpdateEntitiesStep(double timeStep) {
+		entitiesStep = timeStep;
+	}
+
+	@Override
+	public void setUpdateEntities(boolean updateEntities) {
+		this.updateEntities = updateEntities;
 	}
 
 	@Override
@@ -322,6 +337,8 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		System.out.println("\tNeuralActivationsMessageProvider");
 		messageProviders.add(new LogMessageProvider(this));
 		System.out.println("\tLogMessageProvider");
+		messageProviders.add(new TargetMessageProvider(this));
+		System.out.println("\tTargetMessageProvider");
 	}
 
 	// Behaviors

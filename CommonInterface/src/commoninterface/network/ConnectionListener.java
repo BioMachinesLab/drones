@@ -32,12 +32,12 @@ public class ConnectionListener extends Thread {
 
 		try {
 			if (System.getProperty("os.name").equals("Linux") && System.getProperty("os.arch").equals("arm")) {
-				System.out.printf("[%s] Connection Handler Initialized on %s:%d\n".getClass().getName(),
+				System.out.printf("[%s] Connection Handler Initialized on %s:%d\n",getClass().getName(),
 						InetAddress.getLocalHost().getHostAddress(), port);
-				System.out.printf("[%s] Connection Handler Initialized on %s:%d\n".getClass().getName(),
+				System.out.printf("[%s] Connection Handler Initialized on %s:%d\n",getClass().getName(),
 						NetworkUtils.getAddress("wlan0"), port);
 			} else {
-				System.out.printf("[%s] Connection Handler Initialized on %s:%d\n".getClass().getName(),
+				System.out.printf("[%s] Connection Handler Initialized on %s:%d\n",getClass().getName(),
 						InetAddress.getLocalHost().getHostAddress(), port);
 			}
 
