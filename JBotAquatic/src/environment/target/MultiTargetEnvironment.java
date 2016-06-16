@@ -66,6 +66,10 @@ public class MultiTargetEnvironment extends TargetEnvironment {
 			} while (!safeForRobot(r, simulator));
 
 			((AquaticDroneCI) r).getEntities().addAll(targets);
+			
+			if(moveTargets){
+				((AquaticDroneCI) r).setUpdateEntities(true);
+			}
 		}
 
 		setup = true;

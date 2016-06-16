@@ -43,6 +43,10 @@ public class MonoTargetEnvironment extends TargetEnvironment {
 			} while (!safeForRobot(r, simulator));
 
 			((AquaticDroneCI) r).getEntities().add(targets.get(0));
+			
+			if(moveTargets){
+				((AquaticDroneCI) r).setUpdateEntities(true);
+			}
 		}
 
 		setup = true;

@@ -117,9 +117,10 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 
 			if (r instanceof AquaticDroneCI) {
 				((AquaticDroneCI) r).getEntities().add(formation);
+				((AquaticDroneCI) r).setUpdateEntities(true);
 			}
 		}
-
+		
 		if (injectFaults) {
 			if (varyFaultDuration) {
 				// If faultDuration=100, the varied fault duration is in
