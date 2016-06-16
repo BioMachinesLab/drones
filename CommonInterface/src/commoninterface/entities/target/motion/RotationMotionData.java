@@ -58,7 +58,6 @@ public class RotationMotionData extends MotionData {
 
 	@Override
 	public Vector2d getVelocityVector(double step) {
-		System.out.println("getVelocity vector on rotation");
 		if (!rotate) {
 			return new Vector2d(0, 0);
 		} else {

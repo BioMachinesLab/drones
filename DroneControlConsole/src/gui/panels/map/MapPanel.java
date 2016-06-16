@@ -1347,7 +1347,7 @@ public class MapPanel extends UpdatePanel {
 					time++;
 					currentTime = time;
 					try {
-						Thread.sleep(SLEEP_TIME);
+						Thread.sleep(100);
 					} catch (InterruptedException e) {
 						exit = true;
 					}

@@ -70,6 +70,7 @@ public class GamePad extends Thread {
 			double middleRZ = jinputGamepad.getMiddleRZ();
 
 			boolean osX = isPlatformOsx();
+			boolean linux = isPlatformLinux();
 
 			try {
 
@@ -78,10 +79,10 @@ public class GamePad extends Thread {
 					if (index == HISTORY_SIZE)
 						index = 0;
 
-					readingsXHistory[index] = osX && type == GamePadType.LOGITECH ? -jinputGamepad.getXAxisValue()
-							: jinputGamepad.getXAxisValue();
-					readingsRZHistory[index] = osX && type == GamePadType.GAMEPAD ? jinputGamepad.getZAxisValue()
-							: jinputGamepad.getRZAxisValue();
+					readingsXHistory[index] = (osX || linux) && type == GamePadType.LOGITECH
+							? -jinputGamepad.getXAxisValue() : jinputGamepad.getXAxisValue();
+					readingsRZHistory[index] = (osX || linux) && type == GamePadType.GAMEPAD
+							? jinputGamepad.getZAxisValue() : jinputGamepad.getRZAxisValue();
 
 					double xValue = 0;
 					double rzValue = 0;
@@ -156,6 +157,11 @@ public class GamePad extends Thread {
 	public static boolean isPlatformOsx() {
 		String os = System.getProperty("os.name");
 		return os != null && os.toLowerCase().startsWith("mac os x");
+	}
+
+	public static boolean isPlatformLinux() {
+		String os = System.getProperty("os.name");
+		return os != null && os.toLowerCase().startsWith("linux");
 	}
 
 	public void stopExecuting() {
