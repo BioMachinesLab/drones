@@ -25,7 +25,7 @@ import network.GPSTimeProviderClient;
 
 public class GPSTimePanel extends JPanel {
 	private static final long serialVersionUID = 3310464759362205768L;
-	private final static String SERVER_IP = "192.168.1.118";
+	private final static String SERVER_IP = "127.0.0.1";
 	private final static int SERVER_PORT = 9190;
 	private GPSTimeProviderClient gpsTimeProviderClient = null;
 
