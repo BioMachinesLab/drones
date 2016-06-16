@@ -180,7 +180,7 @@ public class FormationFieldTestScript extends FieldTestScript {
 
 				// GO GO GO Experiments running!
 				((DroneGUI) console.getGUI()).getMapPanel().setFormationUpdate(true);
-				System.out.printf("Experiments started! Description: %s\tFormation: %s\n", description,
+				System.out.printf("Experiments started! Description: %s\tFormation: %s%n", description,
 						formations.get(0).getFormationType());
 				Thread.sleep(time * 1000);
 
@@ -237,7 +237,7 @@ public class FormationFieldTestScript extends FieldTestScript {
 
 								// GO GO GO Experiments running!
 								((DroneGUI) console.getGUI()).getMapPanel().setFormationUpdate(true);
-								System.out.printf("Experiments started! Description: %s\tFormation: %s\n", description,
+								System.out.printf("Experiments started! Description: %s\tFormation: %s%n", description,
 										formations.get(i).getFormationType());
 								Thread.sleep(time * 1000);
 
@@ -281,7 +281,7 @@ public class FormationFieldTestScript extends FieldTestScript {
 
 			startControllers(ips, args);
 
-			System.out.printf("Starting experiments in %d seconds (%s)\n", experimentsStartDelay,
+			System.out.printf("Starting experiments in %d seconds (%s)%n", experimentsStartDelay,
 					newStartTime.toString());
 		} catch (Exception e) {
 			e.printStackTrace();

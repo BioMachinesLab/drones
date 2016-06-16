@@ -10,12 +10,12 @@ public class CIStdOutLogger implements CILogger
 	
 	@Override
 	public void logMessage(String message) {
-		System.out.printf("%6.2s: %s\n", droneCI.getTimeSinceStart(), message);
+		System.out.printf("%6.2s: %s%n", droneCI.getTimeSinceStart(), message);
 	}
 
 	@Override
 	public void logError(String error) {
-		System.err.printf("%6.2s: %s\n", droneCI.getTimeSinceStart(), error);
+		System.err.printf("%6.2s: %s%n", droneCI.getTimeSinceStart(), error);
 	}
 	
 	@Override

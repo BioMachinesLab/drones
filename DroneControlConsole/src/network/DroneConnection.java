@@ -55,11 +55,11 @@ public abstract class DroneConnection extends Thread {
 				out.writeObject(data);
 				out.flush();
 				if (DEBUG)
-					System.out.printf("[%s] [SEND] Sent %s\n", this.getClass().getName(),
+					System.out.printf("[%s] [SEND] Sent %s%n", this.getClass().getName(),
 							data.getClass().getSimpleName());
 			}
 		} catch (IOException e) {
-			System.err.printf("[%s] Unable to send data... is there an open connection?\n", this.getClass().getName());
+			System.err.printf("[%s] Unable to send data... is there an open connection?%n", this.getClass().getName());
 			e.printStackTrace();
 		}
 	}
@@ -81,10 +81,10 @@ public abstract class DroneConnection extends Thread {
 			}
 
 		} catch (IOException e) {
-			System.out.printf("[%s] Drone Controller closed the connection with %s (%s:%d)\n", this.getClass().getName(), destHostName,
+			System.out.printf("[%s] Drone Controller closed the connection with %s (%s:%d)%n", this.getClass().getName(), destHostName,
 					destHost.getHostAddress(), port);
 		} catch (ClassNotFoundException e) {
-			System.err.printf("[%s] I didn't reveived a correct name from %s\n", this.getClass().getName(),
+			System.err.printf("[%s] I didn't reveived a correct name from %s%n", this.getClass().getName(),
 					socket.getInetAddress().getHostAddress());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -98,7 +98,7 @@ public abstract class DroneConnection extends Thread {
 		out.flush();
 
 		destHostName = (String) in.readObject();
-		System.out.printf("[%s] Connected to %s (%s:%d)\n", this.getClass().getName(), destHostName,
+		System.out.printf("[%s] Connected to %s (%s:%d)%n", this.getClass().getName(), destHostName,
 				destHost.getHostAddress(), port);
 
 		ready = true;
@@ -108,11 +108,11 @@ public abstract class DroneConnection extends Thread {
 		try {
 			Message message = (Message) in.readObject();
 			if (DEBUG)
-				System.out.printf("[%s] [RECEIVED] Received %s\n", this.getClass().getName(),
+				System.out.printf("[%s] [RECEIVED] Received %s%n", this.getClass().getName(),
 						message.getClass().getSimpleName());
 			console.processMessage(message);
 		} catch (ClassNotFoundException e) {
-			System.err.printf("[%s] Received class of unknown type from %s, so it was discarded....\n",
+			System.err.printf("[%s] Received class of unknown type from %s, so it was discarded....%n",
 					this.getClass().getName(), destHostName);
 		}
 	}
@@ -127,7 +127,7 @@ public abstract class DroneConnection extends Thread {
 
 	public synchronized void closeConnection() {
 		if (socket != null && !socket.isClosed()) {
-			System.out.printf("[%s] Closing Connection with %s (%s:%d)\n", this.getClass().getName(), destHostName,
+			System.out.printf("[%s] Closing Connection with %s (%s:%d)%n", this.getClass().getName(), destHostName,
 					destHost.getHostAddress(), port);
 			try {
 				this.interrupt();
@@ -135,7 +135,7 @@ public abstract class DroneConnection extends Thread {
 				in.close();
 				out.close();
 			} catch (IOException e) {
-				System.err.printf("[%s] Unable to close connection with %s (%s:%d)... is there an open connection?\n",
+				System.err.printf("[%s] Unable to close connection with %s (%s:%d)... is there an open connection?%n",
 						this.getClass().getName(), destHostName, destHost.getHostAddress(), port);
 			}
 		}

@@ -457,15 +457,15 @@ public class FormationParametersPane {
 				line = br.readLine();
 			}
 		} catch (FileNotFoundException e) {
-			System.err.printf("[%s] File %s not found!\n", getClass().getName(), fileName);
+			System.err.printf("[%s] File %s not found!%n", getClass().getName(), fileName);
 		} catch (IOException e) {
-			System.err.printf("[%s] Error reading file %s!\n", getClass().getName(), fileName);
+			System.err.printf("[%s] Error reading file %s!%n", getClass().getName(), fileName);
 		} finally {
 			if (br != null) {
 				try {
 					br.close();
 				} catch (IOException e) {
-					System.err.printf("[%s] Error closing file %s\n%s\n", getClass().getName(), fileName,
+					System.err.printf("[%s] Error closing file %s%n%s%n", getClass().getName(), fileName,
 							e.getMessage());
 				}
 			}

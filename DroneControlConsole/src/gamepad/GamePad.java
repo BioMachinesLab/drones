@@ -56,7 +56,7 @@ public class GamePad extends Thread {
 		}
 
 		if (type == null)
-			System.out.printf("[%s] Gamepad not available!\n", getClass().getName());
+			System.out.printf("[%s] Gamepad not available!%n", getClass().getName());
 	}
 
 	@Override

@@ -47,10 +47,10 @@ public class GPSTimePanel extends JPanel {
 			if (InetAddress.getByName(SERVER_IP).isReachable(5 * 1000)) {
 				gpsTimeProviderClient = new GPSTimeProviderClient(InetAddress.getByName(SERVER_IP), SERVER_PORT);
 			} else {
-				System.err.printf("[%s] Unreachable GPS time provider server\n", getClass().getName());
+				System.err.printf("[%s] Unreachable GPS time provider server%n", getClass().getName());
 			}
 		} catch (IOException e) {
-			System.err.printf("[%s] Error resolving server address -> %s\n", getClass().getName(), e.getMessage());
+			System.err.printf("[%s] Error resolving server address -> %s%n", getClass().getName(), e.getMessage());
 		}
 	}
 
@@ -125,10 +125,10 @@ public class GPSTimePanel extends JPanel {
 						gpsTimeProviderClient = new GPSTimeProviderClient(InetAddress.getByName(SERVER_IP),
 								SERVER_PORT);
 					} else {
-						System.err.printf("[%s] Unreachable GPS time provider server\n", getClass().getName());
+						System.err.printf("[%s] Unreachable GPS time provider server%n", getClass().getName());
 					}
 				} catch (IOException e) {
-					System.err.printf("[%s] Error resolving server address -> %s\n", getClass().getName(),
+					System.err.printf("[%s] Error resolving server address -> %s%n", getClass().getName(),
 							e.getMessage());
 				}
 			}
@@ -143,12 +143,12 @@ public class GPSTimePanel extends JPanel {
 				updater = new Updater();
 				updater.start();
 			} else {
-				System.err.printf("[%s] Error initializing GPS time provider client\n", getClass().getName());
+				System.err.printf("[%s] Error initializing GPS time provider client%n", getClass().getName());
 				JOptionPane.showMessageDialog(this, "Error initializing GPS time provider client!", "Error",
 						JOptionPane.ERROR_MESSAGE);
 			}
 		} catch (IOException e) {
-			System.err.printf("[%s] Error initializing GPS time provider client -> %s\n", getClass().getName(),
+			System.err.printf("[%s] Error initializing GPS time provider client -> %s%n", getClass().getName(),
 					e.getMessage());
 			JOptionPane.showMessageDialog(this, "Error initializing GPS time provider client!\n " + e.getMessage(),
 					"Error", JOptionPane.ERROR_MESSAGE);
@@ -191,7 +191,7 @@ public class GPSTimePanel extends JPanel {
 
 					if (errors == 5) {
 						exit = true;
-						System.err.printf("[%s] GPS time provider server is down!\n", getClass().getName());
+						System.err.printf("[%s] GPS time provider server is down!%n", getClass().getName());
 					}
 				}
 

@@ -357,7 +357,8 @@ public class LogCodex {
 		String data = "";
 		data += (logData.ip != null) ? IP_ADDR_SEP + logData.ip + MAIN_SEPARATOR : "";
 		data += (logData.timestep >= 0) ? TIMESTEP_SEP + Integer.toString(logData.timestep) + MAIN_SEPARATOR : "";
-		data += (logData.droneType.toString() != null) ? DRONE_TYPE_SEP + logData.droneType.toString() + MAIN_SEPARATOR : "";
+		data += (logData.droneType.toString() != null) ? DRONE_TYPE_SEP + logData.droneType.toString() + MAIN_SEPARATOR
+				: "";
 		data += (logData.systemTime != null) ? SYS_TIME_SEP + logData.systemTime + MAIN_SEPARATOR : "";
 
 		if (logData.latLon != null) {
@@ -446,18 +447,19 @@ public class LogCodex {
 						data += ARRAY_SEPARATOR + ((Target) ent.get(i)).isInFormation();
 						data += ARRAY_SEPARATOR + ((Target) ent.get(i)).isOccupied();
 						data += ARRAY_SEPARATOR + ((Target) ent.get(i)).getOccupantID();
-					}else if(ent.get(i) instanceof Formation){
-						data += ARRAY_SEPARATOR+((Formation)ent.get(i)).getName();
-						data += ARRAY_SEPARATOR+((Formation)ent.get(i)).getTargetQuantity();
-						data += ARRAY_SEPARATOR+((Formation)ent.get(i)).getFormationType();
-						data += ARRAY_SEPARATOR;
-						for(Target t : ((Formation)ent.get(i)).getTargets()){
+					} else if (ent.get(i) instanceof Formation) {
+						data += ARRAY_SEPARATOR + ((Formation) ent.get(i)).getName();
+						data += ARRAY_SEPARATOR + ((Formation) ent.get(i)).getTargetQuantity();
+						data += ARRAY_SEPARATOR + ((Formation) ent.get(i)).getFormationType();
+						for (Target t : ((Formation) ent.get(i)).getTargets()) {
 							data += ARRAY_SEPARATOR + t.getName();
+							data += ARRAY_SEPARATOR + t.getLatLon().getLat();
+							data += ARRAY_SEPARATOR + t.getLatLon().getLon();
 							data += ARRAY_SEPARATOR + t.getRadius();
 							data += ARRAY_SEPARATOR + t.isInFormation();
 							data += ARRAY_SEPARATOR + t.isOccupied();
 							data += ARRAY_SEPARATOR + t.getOccupantID();
-						}	
+						}
 					}
 
 					data += ENTITY_INFORMATION_END;

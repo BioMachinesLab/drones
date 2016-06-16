@@ -51,7 +51,7 @@ public class GPSModuleInput {
 		} else if (System.getProperty("os.name").toLowerCase().startsWith("linux")) {
 			port = COM_PORT_LINUX;
 		} else {
-			// System.err.printf("[%s] Input not implemented for this OS\n",
+			// System.err.printf("[%s] Input not implemented for this OS%n",
 			// getClass().getName());
 			throw new UnsatisfiedLinkError("Input not implemented for this OS");
 		}
@@ -61,7 +61,7 @@ public class GPSModuleInput {
 
 	public boolean init(String port) throws UnsatisfiedLinkError, IOException {
 		this.port = port;
-		// System.out.printf("[%s] Initializing GPS!\n", getClass().getName());
+		// System.out.printf("[%s] Initializing GPS!%n", getClass().getName());
 
 		messageParser = new MessageParser();
 		messageParser.start();
@@ -79,7 +79,7 @@ public class GPSModuleInput {
 			CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(port);
 
 			if (portIdentifier.isCurrentlyOwned()) {
-				// System.out.printf("[%s] Error: Port is currently in use\n",
+				// System.out.printf("[%s] Error: Port is currently in use%n",
 				// getClass().getName());
 				throw new IOException("Port is currently in use");
 			} else {
@@ -99,25 +99,25 @@ public class GPSModuleInput {
 				} else {
 					commPort.close();
 					// System.out.printf("[%s] Error: Only serial ports are
-					// handled\n", getClass().getName());
+					// handled%n", getClass().getName());
 					throw new IOException("Only serial ports are handled");
 				}
 			}
 		} catch (NoSuchPortException e) {
-			// System.err.printf("[%s] GPS was not found on the %s port\n",
+			// System.err.printf("[%s] GPS was not found on the %s port%n",
 			// getClass().getName(), port);
 			throw new IOException("GPS module was not found on " + port + " port");
 		} catch (IOException e) {
-			// System.err.printf("[%s] Error on input/output streams\n%s\n",
+			// System.err.printf("[%s] Error on input/output streams%n%s%n",
 			// getClass().getName(), e.getMessage());
 			throw new IOException("Error establishing input/output streams");
 		} catch (UnsupportedCommOperationException e) {
 			// System.err.printf("[%s] Error on setting up comm port
-			// parameters\n%s\n", getClass().getName(),
+			// parameters%n%s%n", getClass().getName(),
 			// e.getMessage());
 			throw new IOException("Error on setting up comm port parameters");
 		} catch (PortInUseException e) {
-			System.err.printf("[%s] Error acquiring comm port\n%s\n", getClass().getName(), e.getMessage());
+			System.err.printf("[%s] Error acquiring comm port%n%s%n", getClass().getName(), e.getMessage());
 			throw new IOException("Error acquiring comm port");
 		}
 
@@ -173,7 +173,7 @@ public class GPSModuleInput {
 						}
 					}
 				} catch (IOException e) {
-					System.err.printf("[%s] Error while reading line from serial\n", getClass().getName());
+					System.err.printf("[%s] Error while reading line from serial%n", getClass().getName());
 				}
 			}
 		}

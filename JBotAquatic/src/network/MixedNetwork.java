@@ -149,7 +149,7 @@ public class MixedNetwork extends Network {
 							receive(packet.getAddress().getHostAddress(), message);
 						}
 					} catch (SocketException e) {
-						System.err.printf("[%s] Error: %s\n", getClass().getName(), e.getMessage());
+						System.err.printf("[%s] Error: %s%n", getClass().getName(), e.getMessage());
 					}
 				}
 

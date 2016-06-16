@@ -45,7 +45,7 @@ public class ConsoleBroadcastHandler {
 			sender = new BroadcastSender();
 			receiver.start();
 		} catch (IOException e) {
-			System.err.printf("[%s] Error initializing handlers! -> %s\n", getClass().getName(), e.getMessage());
+			System.err.printf("[%s] Error initializing handlers! -> %s%n", getClass().getName(), e.getMessage());
 		}
 	}
 
@@ -79,14 +79,14 @@ public class ConsoleBroadcastHandler {
 				broadcastAddress = NetworkUtils.getBroadcastAddress(ownAddress);
 				socket = new DatagramSocket(PORT + 1, ownInetAddress);
 				socket.setBroadcast(true);
-				System.out.printf("[%s] SENDER %s\n", getClass().getName(), ownInetAddress);
+				System.out.printf("[%s] SENDER %s%n", getClass().getName(), ownInetAddress);
 
 				if (retransmit) {
 					retransmitSocket = new DatagramSocket(RETRANSMIT_PORT - 1, ownInetAddress);
 					retransmitSocket.setBroadcast(true);
 				}
 			} catch (BindException e) {
-				System.err.printf("[%s] Socket already in use!\n", getClass().getName());
+				System.err.printf("[%s] Socket already in use!%n", getClass().getName());
 			} catch (SocketException | UnknownHostException e) {
 				e.printStackTrace();
 			}
@@ -154,7 +154,7 @@ public class ConsoleBroadcastHandler {
 			}
 			break;
 		default:
-			System.out.printf("[%s] Uncategorized message > %s < from %s\n", getClass().getName(), message, address);
+			System.out.printf("[%s] Uncategorized message > %s < from %s%n", getClass().getName(), message, address);
 		}
 
 		if (retransmit)
@@ -189,7 +189,7 @@ public class ConsoleBroadcastHandler {
 					drone.setOrientation(((RobotLocation) obj).getOrientation());
 					break;
 				default:
-					System.out.printf("[%s] Uncategorized message type to update on drone data, from %s at %s\n",
+					System.out.printf("[%s] Uncategorized message type to update on drone data, from %s at %s%n",
 							getClass().getName(), name, address);
 				}
 
@@ -197,7 +197,7 @@ public class ConsoleBroadcastHandler {
 					dronesSet.addDrone(drone);
 				}
 			} catch (UnknownHostException e) {
-				System.err.printf("[%s] UnknownHostException on ConsoleBroadcastHandler....\n%s\n",
+				System.err.printf("[%s] UnknownHostException on ConsoleBroadcastHandler....%n%s%n",
 						getClass().getName(), e.getMessage());
 			}
 
@@ -213,10 +213,10 @@ public class ConsoleBroadcastHandler {
 			try {
 				socket = new DatagramSocket(PORT, InetAddress.getByName("0.0.0.0"));
 				socket.setBroadcast(true);
-				System.out.printf("[%s] RECEIVER %s, port: %d\n", getClass().getName(),
+				System.out.printf("[%s] RECEIVER %s, port: %d%n", getClass().getName(),
 						InetAddress.getByName("0.0.0.0").toString(), PORT);
 			} catch (BindException e) {
-				System.err.printf("[%s] Socket already in use!\n", getClass().getName());
+				System.err.printf("[%s] Socket already in use!%n", getClass().getName());
 				throw e;
 			} catch (SocketException | UnknownHostException e) {
 				throw e;

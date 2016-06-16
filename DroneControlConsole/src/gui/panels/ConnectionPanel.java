@@ -98,6 +98,8 @@ public class ConnectionPanel extends UpdatePanel {
 		});
 		
 		list.setCellRenderer(new DefaultListCellRenderer(){
+			private static final long serialVersionUID = -2635016418487319531L;
+
 			@Override
 			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 				Component c = super.getListCellRendererComponent(list, value, index, isSelected,cellHasFocus);

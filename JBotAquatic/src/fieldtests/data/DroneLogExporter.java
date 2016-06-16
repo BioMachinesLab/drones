@@ -1,12 +1,8 @@
 package fieldtests.data;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Scanner;
 
 import org.joda.time.DateTime;
@@ -16,7 +12,6 @@ import org.joda.time.format.DateTimeFormatter;
 import commoninterface.entities.Entity;
 import commoninterface.utils.logger.DecodedLog;
 import commoninterface.utils.logger.LogCodex;
-import commoninterface.utils.logger.LogCodex.LogType;
 import commoninterface.utils.logger.LogData;
 
 public class DroneLogExporter {
