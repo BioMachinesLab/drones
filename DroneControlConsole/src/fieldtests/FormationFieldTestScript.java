@@ -44,7 +44,7 @@ public class FormationFieldTestScript extends FieldTestScript {
 					new String[] { "Controller", "Distance (meters) ", "Radius of positioning: ", "Drones Quantity",
 							"Walking time (seconds)", "Execute after (seconds)", "IPs", "Seed" },
 					lastOptions != null ? lastOptions
-							: new String[] { "preset_simple_controller0", "0", "15", "3", "120", "20",
+							: new String[] { "preset_simple_controller0", "0", "15", "3", "240", "20",
 									listToString(getSelectedIPs()), "1" });
 			if (options == null) {
 				return;
@@ -83,7 +83,7 @@ public class FormationFieldTestScript extends FieldTestScript {
 			for (Waypoint wp : startWPs) {
 				addEntityToMap(wp);
 			}
-			addEntityToMap(startWP);
+			// addEntityToMap(startWP);
 			addEntityToMap(startFence);
 
 			/*
@@ -148,12 +148,9 @@ public class FormationFieldTestScript extends FieldTestScript {
 			System.out.println("Heading to start positions!");
 			for (int i = 0; i < robots.size(); i++) {
 				goToWaypoint(singletonList(robots.get(i)), startWPs.get(i));
+				System.out.println("Robot ID=" + robots.get(i) + "\t WP=" + startWPs.get(i));
 			}
 
-			addEntityToMap(formations.get(0));
-			deployMapEntities(new ArrayList<String>(Arrays.asList(ips)));
-			((DroneGUI) console.getGUI()).getMapPanel().setFormationUpdate(false);
-			
 			/*
 			 * Ask for permission to start
 			 */
@@ -162,6 +159,10 @@ public class FormationFieldTestScript extends FieldTestScript {
 							+ " formation)",
 					"Confirm when ready", JOptionPane.YES_NO_OPTION,
 					JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+
+				addEntityToMap(formations.get(0));
+				deployMapEntities(new ArrayList<String>(Arrays.asList(ips)));
+				((DroneGUI) console.getGUI()).getMapPanel().setFormationUpdate(false);
 
 				String description = super.startExperimentTimer(controller);
 
@@ -214,15 +215,15 @@ public class FormationFieldTestScript extends FieldTestScript {
 								goToWaypoint(singletonList(robots.get(j)), startWPs.get(j));
 							}
 
-							addEntityToMap(formations.get(i));
-							deployMapEntities(new ArrayList<String>(Arrays.asList(ips)));
-							((DroneGUI) console.getGUI()).getMapPanel().setFormationUpdate(false);
-
 							if (JOptionPane.showConfirmDialog(console.getGUI(),
 									"Yes to start formation experiment, no to kill ("
 											+ formations.get(i).getFormationType().name() + " formation)",
 									"Confirm when ready", JOptionPane.YES_NO_OPTION,
 									JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+								addEntityToMap(formations.get(i));
+								deployMapEntities(new ArrayList<String>(Arrays.asList(ips)));
+								((DroneGUI) console.getGUI()).getMapPanel().setFormationUpdate(false);
+
 								// First formation
 								description = super.startExperimentTimer(controller);
 								System.out.println("Started controller. Waiting for start time!");
