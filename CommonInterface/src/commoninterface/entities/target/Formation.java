@@ -39,6 +39,7 @@ public class Formation extends GeoEntity {
 	public Formation(String name, LatLon latLon) {
 		super(name, latLon);
 		initialTranslation = CoordinateUtilities.GPSToCartesian(latLon);
+		initialTranslation = new Vector2d(0, 0);
 	}
 
 	/*
@@ -54,7 +55,7 @@ public class Formation extends GeoEntity {
 
 	public void setTargets(ArrayList<Target> targets) {
 		this.targets = targets;
-		this.targetQnt=targets.size();
+		this.targetQnt = targets.size();
 	}
 
 	public MotionData getMotionData() {
@@ -118,7 +119,7 @@ public class Formation extends GeoEntity {
 	public FormationType getFormationType() {
 		return formationType;
 	}
-	
+
 	public void setFormationType(FormationType formationType) {
 		this.formationType = formationType;
 	}
@@ -126,7 +127,7 @@ public class Formation extends GeoEntity {
 	public double getTargetRadius() {
 		return targetRadius;
 	}
-	
+
 	public void setTargetRadius(double targetRadius) {
 		this.targetRadius = targetRadius;
 	}
@@ -211,8 +212,8 @@ public class Formation extends GeoEntity {
 		int vertice;
 		if (targetQnt % 2 == 0) {
 			start_x = -(xDelta + targetRadius) * (targetQnt / 2) + (xDelta + targetRadius) / 2;
-			start_y = -(yDelta + targetRadius) * (targetQnt / 2) + (yDelta + targetRadius) / 2;
-			vertice = targetQnt / 2;
+			start_y = -(yDelta + targetRadius) * (targetQnt / 2) + (yDelta + targetRadius);
+			vertice = (targetQnt / 2);
 		} else {
 			start_x = -(xDelta + targetRadius) * ((targetQnt - 1) / 2);
 			start_y = -(yDelta + targetRadius) * ((targetQnt - 1) / 2);
@@ -232,11 +233,23 @@ public class Formation extends GeoEntity {
 		int factor = 1;
 		for (int i = 0; i < targetQnt; i++) {
 			if (i == vertice && targetQnt % 2 == 0) {
-				factor = -factor;
-			}
+				positions[i] = new Vector2d(start_x + i * (xDelta + targetRadius),
+						(start_y + (i - 1) * (yDelta + targetRadius)) * factor);
 
-			positions[i] = new Vector2d(start_x + i * (xDelta + targetRadius),
-					(start_y + i * (yDelta + targetRadius)) * factor);
+				factor = -factor;
+
+				if (targetQnt > 2) {
+					positions[i + 1] = new Vector2d(start_x + (i + 1) * (xDelta + targetRadius),
+							(start_y + i * (yDelta + targetRadius)) * factor);
+					i++;
+				}
+			} else if (i > vertice && targetQnt % 2 == 0) {
+				positions[i] = new Vector2d(start_x + i * (xDelta + targetRadius),
+						(start_y + (i - 1) * (yDelta + targetRadius)) * factor);
+			} else {
+				positions[i] = new Vector2d(start_x + i * (xDelta + targetRadius),
+						(start_y + i * (yDelta + targetRadius)) * factor);
+			}
 
 			if (i == vertice && targetQnt % 2 != 0) {
 				factor = -factor;
