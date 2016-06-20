@@ -1,13 +1,9 @@
 package commoninterface.entities;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
 import commoninterface.RobotCI;
 import commoninterface.utils.jcoord.LatLon;
-import commoninterface.utils.logger.EntityManipulation;
-import commoninterface.utils.logger.LogCodex;
-import commoninterface.utils.logger.LogCodex.LogType;
 
 public class ObstacleLocation extends GeoEntity {
 	private static final long serialVersionUID = -1089260825776015322L;
@@ -38,16 +34,11 @@ public class ObstacleLocation extends GeoEntity {
 	}
 
 	@Override
-	public String getLogMessage() {
-		ArrayList<Entity> entities = new ArrayList<Entity>();
-		entities.add(this);
-
-		return LogCodex.encodeLog(LogType.ENTITIES,
-				new EntityManipulation(EntityManipulation.Operation.ADD, entities, this.getClass().getSimpleName()));
-	}
-
-	@Override
 	public ObstacleLocation clone() {
 		return new ObstacleLocation(name, new LatLon(latLon), radius);
+	}
+	
+	public void setRadius(double radius) {
+		this.radius = radius;
 	}
 }

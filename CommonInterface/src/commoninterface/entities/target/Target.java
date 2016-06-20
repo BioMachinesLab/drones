@@ -30,7 +30,9 @@ public class Target extends GeoEntity {
 	}
 
 	public void step(double time) {
-		setLatLon(getMotionData().calculatePosition(time));
+		if (getMotionData() != null) {
+			setLatLon(getMotionData().calculatePosition(time));
+		}
 
 		if (entered) {
 			enterTime = time;
@@ -102,9 +104,9 @@ public class Target extends GeoEntity {
 	}
 
 	public void setOccupantID(String occupantID) {
-		if (!(occupantID == null && this.occupantID == null)) {
-			entered = true;
-		}
+		// if (!(occupantID == null && this.occupantID == null)) {
+		entered = true;
+		// }
 		this.occupantID = occupantID;
 	}
 
@@ -152,8 +154,8 @@ public class Target extends GeoEntity {
 						+ System.identityHashCode(this) + "\tName: " + name + "\tOccupied: " + occupied;
 			}
 		} else {
-			return "[Target] " + super.toString() + "\tHash: " + System.identityHashCode(this) + "\tName: "
-					+ name + "\tOccupied: " + occupied;
+			return "[Target] " + super.toString() + "\tHash: " + System.identityHashCode(this) + "\tName: " + name
+					+ "\tOccupied: " + occupied;
 		}
 	}
 

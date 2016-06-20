@@ -21,6 +21,7 @@ public class Formation extends GeoEntity {
 	private int targetQnt;
 	private double targetRadius;
 	private Random random = null;
+	private long randomSeed;
 
 	// Flags and settings
 	private boolean variateFormationParameters = false;
@@ -43,12 +44,17 @@ public class Formation extends GeoEntity {
 	/*
 	 * Getters and setters
 	 */
+	public int getTargetQuantity() {
+		return targets.size();
+	}
+
 	public ArrayList<Target> getTargets() {
 		return targets;
 	}
 
-	public int getTargetQuantity() {
-		return targetQnt;
+	public void setTargets(ArrayList<Target> targets) {
+		this.targets = targets;
+		this.targetQnt=targets.size();
 	}
 
 	public MotionData getMotionData() {
@@ -59,24 +65,49 @@ public class Formation extends GeoEntity {
 		this.motionData = motionData;
 	}
 
-	public void setRandom(Random random) {
-		this.random = random;
+	public long getRandomSeed() {
+		return randomSeed;
+	}
+
+	public void setRandomSeed(long seed) {
+		this.random = new Random(seed);
+		this.randomSeed = seed;
+	}
+
+	public boolean getVariateFormationParameters() {
+		return variateFormationParameters;
 	}
 
 	public void setVariateFormationParameters(boolean variateFormationParameters) {
 		this.variateFormationParameters = variateFormationParameters;
 	}
 
+	public double getLineFormationDelta() {
+		return lineFormationDelta;
+	}
+
 	public void setLineFormationDelta(double lineFormationDelta) {
 		this.lineFormationDelta = lineFormationDelta;
+	}
+
+	public double getCircleFormationRadius() {
+		return circleFormation_radius;
 	}
 
 	public void setCircleFormationRadius(double circleFormation_radius) {
 		this.circleFormation_radius = circleFormation_radius;
 	}
 
+	public double getInitialRotation() {
+		return initialRotation;
+	}
+
 	public void setInitialRotation(double initialRotation) {
 		this.initialRotation = initialRotation;
+	}
+
+	public Vector2d getArrowFormationDeltas() {
+		return new Vector2d(arrowFormation_xDelta, arrowFormation_yDelta);
 	}
 
 	public void setArrowFormationDeltas(Vector2d deltas) {
@@ -86,6 +117,18 @@ public class Formation extends GeoEntity {
 
 	public FormationType getFormationType() {
 		return formationType;
+	}
+	
+	public void setFormationType(FormationType formationType) {
+		this.formationType = formationType;
+	}
+
+	public double getTargetRadius() {
+		return targetRadius;
+	}
+	
+	public void setTargetRadius(double targetRadius) {
+		this.targetRadius = targetRadius;
 	}
 
 	/*
@@ -106,6 +149,21 @@ public class Formation extends GeoEntity {
 		str.append(")");
 
 		return str.toString();
+	}
+
+	@Override
+	public Formation clone() {
+		Formation form = new Formation(name, new LatLon(latLon));
+		form.setRandomSeed(randomSeed);
+		form.setMotionData(motionData.clone());
+		form.setVariateFormationParameters(variateFormationParameters);
+		form.setLineFormationDelta(lineFormationDelta);
+		form.setLineFormationDelta(lineFormationDelta);
+		form.setInitialRotation(initialRotation);
+		form.setArrowFormationDeltas(new Vector2d(arrowFormation_xDelta, arrowFormation_yDelta));
+		form.buildFormation(targetQnt, formationType, targetRadius);
+
+		return form;
 	}
 
 	/*
@@ -278,20 +336,5 @@ public class Formation extends GeoEntity {
 		if (getMotionData() != null) {
 			setLatLon(getMotionData().calculatePosition(time));
 		}
-	}
-
-	@Override
-	public Formation clone() {
-		Formation form = new Formation(name, new LatLon(latLon));
-		form.setRandom(random);
-		form.setMotionData(motionData.clone());
-		form.setVariateFormationParameters(variateFormationParameters);
-		form.setLineFormationDelta(lineFormationDelta);
-		form.setLineFormationDelta(lineFormationDelta);
-		form.setInitialRotation(initialRotation);
-		form.setArrowFormationDeltas(new Vector2d(arrowFormation_xDelta, arrowFormation_yDelta));
-		form.buildFormation(targetQnt, formationType, targetRadius);
-
-		return form;
 	}
 }

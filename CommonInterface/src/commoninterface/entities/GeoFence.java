@@ -5,9 +5,6 @@ import java.util.LinkedList;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.utils.jcoord.LatLon;
-import commoninterface.utils.logger.EntityManipulation;
-import commoninterface.utils.logger.LogCodex;
-import commoninterface.utils.logger.LogCodex.LogType;
 
 public class GeoFence extends Entity {
 	private static final long serialVersionUID = 4262661106635625238L;
@@ -49,13 +46,6 @@ public class GeoFence extends Entity {
 		}
 
 		return geoFences;
-	}
-
-	public String getLogMessage() {
-		ArrayList<Entity> entities = new ArrayList<Entity>(getWaypoints());
-
-		return LogCodex.encodeLog(LogType.ENTITIES,
-				new EntityManipulation(EntityManipulation.Operation.ADD, entities, this.getClass().getSimpleName()));
 	}
 
 	@Override

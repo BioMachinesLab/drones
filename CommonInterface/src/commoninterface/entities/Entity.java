@@ -1,6 +1,11 @@
 package commoninterface.entities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+
+import commoninterface.utils.logger.EntityManipulation;
+import commoninterface.utils.logger.LogCodex;
+import commoninterface.utils.logger.LogCodex.LogType;
 
 public abstract class Entity implements Serializable {
 	private static final long serialVersionUID = -4849725760482295389L;
@@ -51,6 +56,14 @@ public abstract class Entity implements Serializable {
 	@Override
 	public String toString() {
 		return name;
+	}
+
+	public String getLogMessage(EntityManipulation.Operation operation) {
+		ArrayList<Entity> entities = new ArrayList<Entity>();
+		entities.add(this);
+
+		return LogCodex.encodeLog(LogType.ENTITIES,
+				new EntityManipulation(operation, entities, getClass().getSimpleName()));
 	}
 
 	@Override

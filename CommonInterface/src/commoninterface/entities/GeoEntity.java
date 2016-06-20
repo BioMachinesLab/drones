@@ -1,11 +1,6 @@
 package commoninterface.entities;
 
-import java.util.ArrayList;
-
 import commoninterface.utils.jcoord.LatLon;
-import commoninterface.utils.logger.EntityManipulation;
-import commoninterface.utils.logger.LogCodex;
-import commoninterface.utils.logger.LogCodex.LogType;
 
 public abstract class GeoEntity extends Entity {
 
@@ -19,14 +14,6 @@ public abstract class GeoEntity extends Entity {
 
 	public LatLon getLatLon() {
 		return latLon;
-	}
-
-	public String getLogMessage() {
-		ArrayList<Entity> entities = new ArrayList<Entity>();
-		entities.add(this);
-
-		return LogCodex.encodeLog(LogType.ENTITIES,
-				new EntityManipulation(EntityManipulation.Operation.ADD, entities, this.getClass().getSimpleName()));
 	}
 
 	@Override

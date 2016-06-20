@@ -5,9 +5,6 @@ import java.util.ArrayList;
 import commoninterface.AquaticDroneCI;
 import commoninterface.RobotCI;
 import commoninterface.utils.jcoord.LatLon;
-import commoninterface.utils.logger.EntityManipulation;
-import commoninterface.utils.logger.LogCodex;
-import commoninterface.utils.logger.LogCodex.LogType;
 
 public class RobotLocation extends GeoEntity {
 	private static final long serialVersionUID = 3994455159701222432L;
@@ -37,15 +34,6 @@ public class RobotLocation extends GeoEntity {
 		}
 
 		return droneLocations;
-	}
-
-	@Override
-	public String getLogMessage() {
-		ArrayList<Entity> entities = new ArrayList<Entity>();
-		entities.add(this);
-
-		return LogCodex.encodeLog(LogType.ENTITIES,
-				new EntityManipulation(EntityManipulation.Operation.ADD, entities, this.getClass().getSimpleName()));
 	}
 
 	@Override
