@@ -4,6 +4,7 @@ import commoninterface.CIBehavior;
 import commoninterface.RobotCI;
 import commoninterface.entities.RobotLocation;
 import commoninterface.utils.CIArguments;
+import commoninterface.utils.logger.EntityManipulation.Operation;
 import commoninterfaceimpl.RealAquaticDroneCI;
 
 public class LogDronesCIBehavior extends CIBehavior {
@@ -18,7 +19,7 @@ public class LogDronesCIBehavior extends CIBehavior {
 	@Override
 	public void step(double time) {
 		for(RobotLocation r : RobotLocation.getDroneLocations(drone)) {
-			drone.log(r.getLogMessage());
+			drone.log(r.getLogMessage(Operation.MOVE));
 		}
 	}
 	
