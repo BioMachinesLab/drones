@@ -142,13 +142,29 @@ public class Vector2d extends Point2d {
 		return FastMath.sqrt(x * x + y * y);
 	}
 
+	public void setPolarCoordinates(double length, double tetha) {
+		this.x = length * FastMath.cos(tetha);
+		this.y = length * FastMath.sin(tetha);
+	}
+
 	@Override
 	public String toString() {
 		return "[angle=" + angle + ", x=" + x + ", y=" + y + "]";
 	}
 
-	public void setPolarCoordinates(double length, double tetha) {
-		this.x = length * FastMath.cos(tetha);
-		this.y = length * FastMath.sin(tetha);
+	public static Vector2d parseVector2d(String string) {
+		String str = string.replace("[", "").replace("]", "");
+		String[] split = str.split(",");
+
+		double x = Double.parseDouble(split[1].trim().substring(2));
+		double y = Double.parseDouble(split[2].trim().substring(2));
+
+		return new Vector2d(x, y);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof Vector2d && ((Vector2d) obj).getX() == getX() && ((Vector2d) obj).getY() == getY()
+				&& ((Vector2d) obj).getAngle() == getAngle();
 	}
 }
