@@ -11,13 +11,11 @@ import commoninterface.entities.GeoFence;
 import commoninterface.entities.ObstacleLocation;
 import commoninterface.entities.Waypoint;
 import commoninterface.entities.target.Formation;
+import commoninterface.entities.target.Target;
 import commoninterface.network.messages.EntitiesMessage;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
-import commoninterface.utils.logger.EntityManipulation;
 import commoninterface.utils.logger.EntityManipulation.Operation;
-import commoninterface.utils.logger.LogCodex;
-import commoninterface.utils.logger.LogCodex.LogType;
 
 public class EntitiesMessageProvider implements MessageProvider {
 
@@ -47,8 +45,8 @@ public class EntitiesMessageProvider implements MessageProvider {
 							|| e instanceof Formation) {
 						entitiesToRemove.add(e);
 						i.remove();
-						
-						if(e instanceof Formation && robot instanceof AquaticDroneCI){
+
+						if (e instanceof Formation && robot instanceof AquaticDroneCI) {
 							((AquaticDroneCI) robot).setUpdateEntitiesStep(0);
 							((AquaticDroneCI) robot).setUpdateEntities(false);
 						}
@@ -56,9 +54,9 @@ public class EntitiesMessageProvider implements MessageProvider {
 				}
 
 				if (!entitiesToRemove.isEmpty()) {
-					EntityManipulation msg = new EntityManipulation(Operation.REMOVE, entitiesToRemove,
-							GeoEntity.class.getSimpleName());
-					log(LogCodex.encodeLog(LogType.ENTITIES, msg));
+					for (Entity entity : entitiesToRemove) {
+						log(entity.getLogMessage(Operation.REMOVE));
+					}
 				}
 
 				robot.getEntities().addAll(entities);
@@ -68,13 +66,16 @@ public class EntitiesMessageProvider implements MessageProvider {
 				System.out.println("ADDED " + e.getClass().getSimpleName());
 				if (e instanceof GeoEntity) {
 					GeoEntity ge = (GeoEntity) e;
-					log(ge.getLogMessage());
+					log(ge.getLogMessage(Operation.ADD));
 				} else if (e instanceof GeoFence) {
 					GeoFence gf = (GeoFence) e;
-					log(gf.getLogMessage());
+					log(gf.getLogMessage(Operation.ADD));
 				} else if (e instanceof Formation) {
 					Formation gf = (Formation) e;
-					log(gf.getLogMessage());
+					log(gf.getLogMessage(Operation.ADD));
+				} else if (e instanceof Target) {
+					Target t = (Target) e;
+					log(t.getLogMessage(Operation.ADD));
 				}
 			}
 

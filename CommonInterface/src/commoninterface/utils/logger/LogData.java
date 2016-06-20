@@ -49,6 +49,7 @@ public class LogData implements Comparable<LogData>, Serializable {
 	}
 
 	@Override
+	// Missing entities comparison :P
 	public boolean equals(Object obj) {
 		if (obj instanceof LogData) {
 			LogData object = (LogData) obj;
@@ -71,8 +72,10 @@ public class LogData implements Comparable<LogData>, Serializable {
 					|| inputNeuronStates.equals(object.inputNeuronStates);
 			boolean o = (outputNeuronStates == null && object.outputNeuronStates == null)
 					|| outputNeuronStates.equals(object.outputNeuronStates);
+			boolean p = (entities == null && object.entities == null)
+					|| entities.equals(object.entities);
 
-			return a && b && c && d && e && f && g && h && i && j && k && l && m && n && o;
+			return a && b && c && d && e && f && g && h && i && j && k && l && m && n && o && p;
 		} else {
 			return false;
 		}

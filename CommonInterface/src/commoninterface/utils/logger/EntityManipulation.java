@@ -1,12 +1,13 @@
 package commoninterface.utils.logger;
 
 import java.util.ArrayList;
+
 import commoninterface.entities.Entity;
 
 public class EntityManipulation {
 
 	public static enum Operation {
-		ADD, REMOVE
+		ADD, REMOVE, MOVE
 	}
 
 	ArrayList<Entity> entities;
