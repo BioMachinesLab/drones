@@ -39,7 +39,6 @@ public class Formation extends GeoEntity {
 	public Formation(String name, LatLon latLon) {
 		super(name, latLon);
 		initialTranslation = CoordinateUtilities.GPSToCartesian(latLon);
-		initialTranslation = new Vector2d(0, 0);
 	}
 
 	/*
