@@ -110,6 +110,16 @@ public class InfiniteTargetCISensor extends WaypointCISensor {
 		}
 	}
 
+	@Override
+	public double getSensorReading(int sensorNumber) {
+		return readings[sensorNumber];
+	}
+
+	@Override
+	public int getNumberOfSensors() {
+		return readings.length;
+	}
+
 	private Target getClosestTarget(boolean excludeOccupied, ArrayList<Target> targets) {
 		// Get robot location
 		Vector2d robotPosition = null;
@@ -124,10 +134,13 @@ public class InfiniteTargetCISensor extends WaypointCISensor {
 		double minDistance = Double.MAX_VALUE;
 		for (Target ent : targets) {
 			Vector2d pos = CoordinateUtilities.GPSToCartesian(ent.getLatLon());
-			if (ent.isOccupied() && robotPosition.distanceTo(pos) <= ent.getRadius()
-					&& robotPosition.distanceTo(pos) < minDistance) {
+			if (ent.isOccupied() && ent.getOccupantID().equals(robot.getNetworkAddress())
+			// && robotPosition.distanceTo(pos) <= ent.getRadius()
+			// && robotPosition.distanceTo(pos) < minDistance
+			) {
 				minDistance = robotPosition.distanceTo(pos);
 				closest = ent;
+				break;
 			} else {
 				if (!ent.isOccupied() && robotPosition.distanceTo(pos) < minDistance) {
 					minDistance = robotPosition.distanceTo(pos);
@@ -208,9 +221,14 @@ public class InfiniteTargetCISensor extends WaypointCISensor {
 			}
 		}
 
+		RobotLocation myLocation = new RobotLocation(((AquaticDroneCI) robot).getNetworkAddress(),
+				((AquaticDroneCI) robot).getGPSLatLon(), ((AquaticDroneCI) robot).getCompassOrientationInDegrees(),
+				((AquaticDroneCI) robot).getDroneType());
+		rls.add(myLocation);
+
 		for (Target t : targets) {
 			RobotLocation robot = getClosestRobotToTarget(t, rls);
-			if (isInsideTarget(robot, t)) {
+			if (!t.isOccupied() && isInsideTarget(robot, t)) {
 				t.setOccupantID(robot.getName());
 				t.setOccupied(true);
 			}
@@ -224,11 +242,16 @@ public class InfiniteTargetCISensor extends WaypointCISensor {
 		RobotLocation closestRobot = null;
 
 		Vector2d targetPosition = CoordinateUtilities.GPSToCartesian(target.getLatLon());
+		String occupiedID = null;
 		for (RobotLocation robot : rls) {
 			Vector2d robotPosition = CoordinateUtilities.GPSToCartesian(robot.getLatLon());
 			double distance = FastMath.abs(targetPosition.distanceTo(robotPosition));
 
-			if (distance < minDistance) {
+			if (distance < target.getRadius() && (occupiedID == null || robot.getName().compareTo(occupiedID) > 0)) {
+				closestRobot = robot;
+				minDistance = distance;
+				occupiedID = robot.getName();
+			} else if (distance < minDistance) {
 				closestRobot = robot;
 				minDistance = distance;
 			}

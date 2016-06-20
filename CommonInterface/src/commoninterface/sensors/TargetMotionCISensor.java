@@ -28,6 +28,12 @@ public class TargetMotionCISensor extends CISensor {
 	private Target[] lastSeenTargets;
 	private int pointer = 0;
 
+	private Target consideringTarget = null;
+
+	public Target getConsideringTarget() {
+		return consideringTarget;
+	}
+
 	public TargetMotionCISensor(int id, RobotCI robot, CIArguments args) {
 		super(id, robot, args);
 
@@ -48,9 +54,10 @@ public class TargetMotionCISensor extends CISensor {
 		ArrayList<Target> targets = getTargetsOccupancy(entities);
 		Target target = getClosestTarget(excludeOccupied, targets);
 		if (target != null) {
+			this.consideringTarget = target;
 			Vector2d vel = target.getMotionData().getVelocityVector(time);
 			readings[0] = vel.getAngle() / Math.PI / 2;
-			readings[1] = vel.length()*MotionData.UPDATE_RATE;
+			readings[1] = vel.length() * MotionData.UPDATE_RATE;
 
 			// Move the readings to the positive side of the scale
 			if (readings[0] < 0) {
@@ -102,10 +109,13 @@ public class TargetMotionCISensor extends CISensor {
 		double minDistance = Double.MAX_VALUE;
 		for (Target ent : targets) {
 			Vector2d pos = CoordinateUtilities.GPSToCartesian(ent.getLatLon());
-			if (ent.isOccupied() && robotPosition.distanceTo(pos) <= ent.getRadius()
-					&& robotPosition.distanceTo(pos) < minDistance) {
+			if (ent.isOccupied() && ent.getOccupantID().equals(robot.getNetworkAddress())
+			// && robotPosition.distanceTo(pos) <= ent.getRadius()
+			// && robotPosition.distanceTo(pos) < minDistance
+			) {
 				minDistance = robotPosition.distanceTo(pos);
 				closest = ent;
+				break;
 			} else {
 				if (!ent.isOccupied() && robotPosition.distanceTo(pos) < minDistance) {
 					minDistance = robotPosition.distanceTo(pos);
@@ -186,9 +196,14 @@ public class TargetMotionCISensor extends CISensor {
 			}
 		}
 
+		RobotLocation myLocation = new RobotLocation(((AquaticDroneCI) robot).getNetworkAddress(),
+				((AquaticDroneCI) robot).getGPSLatLon(), ((AquaticDroneCI) robot).getCompassOrientationInDegrees(),
+				((AquaticDroneCI) robot).getDroneType());
+		rls.add(myLocation);
+
 		for (Target t : targets) {
 			RobotLocation robot = getClosestRobotToTarget(t, rls);
-			if (isInsideTarget(robot, t)) {
+			if (!t.isOccupied() && isInsideTarget(robot, t)) {
 				t.setOccupantID(robot.getName());
 				t.setOccupied(true);
 			}
@@ -202,11 +217,16 @@ public class TargetMotionCISensor extends CISensor {
 		RobotLocation closestRobot = null;
 
 		Vector2d targetPosition = CoordinateUtilities.GPSToCartesian(target.getLatLon());
+		String occupiedID = null;
 		for (RobotLocation robot : rls) {
 			Vector2d robotPosition = CoordinateUtilities.GPSToCartesian(robot.getLatLon());
 			double distance = FastMath.abs(targetPosition.distanceTo(robotPosition));
 
-			if (distance < minDistance) {
+			if (distance < target.getRadius() && (occupiedID == null || robot.getName().compareTo(occupiedID) > 0)) {
+				closestRobot = robot;
+				minDistance = distance;
+				occupiedID = robot.getName();
+			} else if (distance < minDistance) {
 				closestRobot = robot;
 				minDistance = distance;
 			}
