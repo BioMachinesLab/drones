@@ -62,7 +62,7 @@ public class GPSTimeProviderServerGUI extends JFrame implements GPSTimeProviderS
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-		this.setLocation(dim.width / 2 - this.getSize().width / 2, dim.height / 2 - this.getSize().height / 2);
+		setLocation(dim.width / 2 - this.getSize().width / 2, dim.height / 2 - this.getSize().height / 2);
 
 		gpsDataUpdater = new GPSDataUpdater();
 		gpsDataUpdater.start();
@@ -388,6 +388,7 @@ public class GPSTimeProviderServerGUI extends JFrame implements GPSTimeProviderS
 		connectedClientsTextField.setText(Integer.toString(server.getConnectedClientsQuantity()));
 	}
 
+	@Override
 	public boolean serverUMTSummerCompensationActive() {
 		return serverUMTSummerCompensationCheckBox.isSelected();
 	}
