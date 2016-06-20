@@ -34,6 +34,7 @@ import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.RobotKalman;
 import commoninterface.utils.RobotLogger;
 import commoninterface.utils.jcoord.LatLon;
+import commoninterface.utils.logger.EntityManipulation.Operation;
 import commoninterface.utils.logger.LogCodex;
 import commoninterface.utils.logger.LogCodex.LogType;
 import controllers.DummyController;
@@ -661,7 +662,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 				((Formation) ent).step(time);
 
 				if (logger != null) {
-					logger.logMessage(((Formation) ent).getLogMessage());
+					logger.logMessage(((Formation) ent).getLogMessage(Operation.MOVE));
 				}
 			}
 		}

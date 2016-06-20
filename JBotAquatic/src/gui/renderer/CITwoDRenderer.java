@@ -22,6 +22,7 @@ import commoninterface.entities.target.Target;
 import commoninterface.entities.target.motion.MotionData;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.sensors.ConeTypeCISensor;
+import commoninterface.sensors.TargetMotionCISensor;
 import commoninterface.sensors.ThymioConeTypeCISensor;
 import commoninterface.utils.CoordinateUtilities;
 import environment.GridBoundaryEnvironment;
@@ -31,6 +32,9 @@ import kn.uni.voronoitreemap.j2d.PolygonSimple;
 import kn.uni.voronoitreemap.j2d.Site;
 import net.jafama.FastMath;
 import simulation.physicalobjects.Line;
+import simulation.physicalobjects.PhysicalObject;
+import simulation.robot.AquaticDrone;
+import simulation.robot.CISensorWrapper;
 import simulation.robot.Robot;
 import simulation.robot.sensor.GridSensor;
 import simulation.robot.sensors.ConeTypeSensor;
@@ -74,6 +78,29 @@ public class CITwoDRenderer extends TwoDRenderer {
 		drawTargets.clear();
 		super.drawFrame();
 		drawEnvironment();
+
+		for (PhysicalObject m : simulator.getEnvironment().getAllObjects()) {
+			switch (m.getType()) {
+			case ROBOT:
+
+				TargetMotionCISensor sensor = (TargetMotionCISensor) ((CISensorWrapper) ((AquaticDrone) m)
+						.getSensorWithId(2)).getCisensor();
+				Robot robot = (Robot) m;
+
+				if (sensor.getConsideringTarget() != null) {
+					int x = transformX(robot.getPosition().x + robot.getRadius() + (bigRobots ? 1 : 0));
+					int y = transformY(robot.getPosition().y - robot.getDiameter() - (bigRobots ? 1 : 0));
+
+					graphics.setColor(Color.WHITE);
+					graphics.fillRect(x, y-22, 105, 12);
+
+					graphics.setColor(Color.BLACK);
+					graphics.drawString(sensor.getConsideringTarget().getName(), x, y-12);
+				}
+			default:
+				break;
+			}
+		}
 	}
 
 	protected void drawEnvironment() {
@@ -189,7 +216,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 								int y = transformY(pos.y) - diam / 2;
 								graphics.fillOval(x, y, diam, diam);
 								drawTargetId(graphics, t);
-								if (showVelocityVectors && ((Target) entity).getMotionData() != null) {
+								if (showVelocityVectors && t.getMotionData() != null) {
 									MotionData motionData = (t.getMotionData());
 									Vector2d targetPos = CoordinateUtilities.GPSToCartesian(t.getLatLon());
 									Vector2d velocityVector = new Vector2d(
@@ -258,6 +285,11 @@ public class CITwoDRenderer extends TwoDRenderer {
 		g.fillRect(x, y - 10, 8, 10);
 
 		String name = target.getName().replace("formation_target_", "t");
+
+		if (target.getOccupantID() != null) {
+			name += " (" + target.getOccupantID().substring(target.getOccupantID().length() - 3) + ")";
+		}
+
 		g.setColor(Color.BLACK);
 		g.drawString(name, x, y);
 	}

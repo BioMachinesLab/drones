@@ -44,6 +44,7 @@ import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.RobotKalman;
 import commoninterface.utils.RobotLogger;
 import commoninterface.utils.jcoord.LatLon;
+import commoninterface.utils.logger.EntityManipulation.Operation;
 import commoninterface.utils.logger.LogCodex;
 import commoninterface.utils.logger.LogCodex.LogType;
 import io.IOManager;
@@ -212,7 +213,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		for (Entity ent : entities) {
 			if (ent instanceof Formation) {
 				((Formation) ent).step(time);
-				logger.logMessage(((Formation) ent).getLogMessage());
+				logger.logMessage(((Formation) ent).getLogMessage(Operation.MOVE));
 			}
 		}
 	}

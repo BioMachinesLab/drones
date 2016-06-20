@@ -31,7 +31,7 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 	private boolean injectFaults = false;
 	private boolean varyFaultDuration = true;
 	private AquaticDrone faultyRobot = null;
-	private int faultDuration = 100;
+	private int faultDuration = 500;
 	private int timestepToInjectFaults;
 	private double initialRotationAngle = 0;
 
@@ -72,6 +72,7 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 		arrowFormation_xDelta = args.getArgumentAsDoubleOrSetDefault("arrowFormation_xDelta", arrowFormation_xDelta);
 		arrowFormation_yDelta = args.getArgumentAsDoubleOrSetDefault("arrowFormation_yDelta", arrowFormation_yDelta);
 		injectFaults = args.getArgumentAsIntOrSetDefault("injectFaults", 0) == 1;
+		faultDuration = args.getArgumentAsIntOrSetDefault("faultDuration", faultDuration);
 	}
 
 	@Override
@@ -110,21 +111,18 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 		generateFormationMotionData();
 
 		for (Robot r : robots) {
-			do {
-				positionDroneInRandomPos((AquaticDrone) r, simulator);
-				updateCollisions(0);
-			} while (!safeForRobot(r, simulator));
+			positionDroneInRandomPos((AquaticDrone) r, simulator);
 
 			if (r instanceof AquaticDroneCI) {
 				((AquaticDroneCI) r).getEntities().add(formation);
 				((AquaticDroneCI) r).setUpdateEntities(true);
 			}
 		}
-		
+
 		if (injectFaults) {
 			if (varyFaultDuration) {
-				// If faultDuration=100, the varied fault duration is in
-				// [50,150] range
+				// If faultDuration=500, the varied fault duration is in
+				// [250,750] range
 				faultDuration += (simulator.getRandom().nextDouble() - 0.5) * faultDuration;
 			}
 
@@ -154,7 +152,7 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 
 	private void generateFormation(FormationType formationType) {
 		double radius = radiusOfObjPositioning * simulator.getRandom().nextDouble();
-		double orientation = (simulator.getRandom().nextDouble() * FastMath.PI * 2) % 360;
+		double orientation = (simulator.getRandom().nextDouble() * FastMath.PI * 2) % (FastMath.PI * 2);
 
 		Vector2d position = new Vector2d(radius * FastMath.cos(orientation), radius * FastMath.sin(orientation));
 
@@ -171,7 +169,7 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 		formation.setCircleFormationRadius(circleFormation_radius);
 		formation.setVariateFormationParameters(variateFormationParameters);
 		formation.setInitialRotation(initialRotationAngle);
-		formation.setRandom(simulator.getRandom());
+		formation.setRandomSeed(simulator.getRandomSeed());
 		formation.buildFormation(targetsQuantity, formationType, targetRadius);
 
 		targets.addAll(formation.getTargets());
@@ -201,8 +199,7 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 		if (rotateFormation) {
 			for (Target t : formation.getTargets()) {
 
-				RotationMotionData rmd = new RotationMotionData(t,
-						CoordinateUtilities.GPSToCartesian(formation.getLatLon()), angularVelocity, direction);
+				RotationMotionData rmd = new RotationMotionData(t, formation.getLatLon(), angularVelocity, direction);
 				t.setMotionData(rmd);
 			}
 		}
@@ -220,7 +217,7 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 
 	@Override
 	public void update(double time) {
-		//formation.step(time);
+		// formation.step(time);
 
 		if (injectFaults) {
 			// Time to recover from fault?

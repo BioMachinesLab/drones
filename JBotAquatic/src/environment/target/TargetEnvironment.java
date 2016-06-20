@@ -34,7 +34,7 @@ public abstract class TargetEnvironment extends Environment {
 
 	public TargetEnvironment(Simulator simulator, Arguments args) {
 		super(simulator, args);
-		this.args=args;
+		this.args = args;
 		this.simulator = simulator;
 		radiusOfObjPositioning = args.getArgumentAsDoubleOrSetDefault("radiusOfObjectPositioning",
 				radiusOfObjPositioning);
@@ -99,13 +99,16 @@ public abstract class TargetEnvironment extends Environment {
 	}
 
 	protected void positionDroneInRandomPos(AquaticDrone drone, Simulator simulator) {
-		double radius = radiusOfObjPositioning * simulator.getRandom().nextDouble();
-		double orientation = (simulator.getRandom().nextDouble() * FastMath.PI * 2) % 360;
+		do {
+			double radius = radiusOfObjPositioning * simulator.getRandom().nextDouble();
+			double orientation = (simulator.getRandom().nextDouble() * FastMath.PI * 2) % 360;
 
-		double x = radius * FastMath.cos(orientation);
-		double y = radius * FastMath.sin(orientation);
-		drone.setPosition(x, y);
-		drone.setOrientation(simulator.getRandom().nextDouble() * Math.PI * 2);
+			double x = radius * FastMath.cos(orientation);
+			double y = radius * FastMath.sin(orientation);
+			drone.setPosition(x, y);
+			drone.setOrientation(simulator.getRandom().nextDouble() * Math.PI * 2);
+			updateCollisions(simulator.getTime());
+		} while (!safeForRobot(drone, simulator));
 	}
 
 	protected void positionTargetInRandomPos(Target target, Simulator simulator) {
@@ -128,11 +131,11 @@ public abstract class TargetEnvironment extends Environment {
 
 	@Override
 	public void update(double time) {
-//		for (Target target : targets) {
-//			if (moveTargets) {
-//				target.step(time);
-//			}
-//		}
+		// for (Target target : targets) {
+		// if (moveTargets) {
+		// target.step(time);
+		// }
+		// }
 	}
 
 	public double getRadiusOfObjPositioning() {
