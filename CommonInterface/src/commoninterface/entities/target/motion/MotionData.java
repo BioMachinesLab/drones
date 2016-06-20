@@ -43,6 +43,10 @@ public abstract class MotionData implements Serializable {
 		return originalPosition;
 	}
 
+	public GeoEntity getEntity() {
+		return entity;
+	}
+
 	public abstract LatLon calculatePosition(double step);
 
 	public abstract Vector2d calculateTranslationVector(double step);

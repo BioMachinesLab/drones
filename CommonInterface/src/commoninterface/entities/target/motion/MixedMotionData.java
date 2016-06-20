@@ -43,6 +43,10 @@ public class MixedMotionData extends MotionData {
 		motionData.add(m);
 	}
 
+	public ArrayList<MotionData> getMotionDataComponents() {
+		return motionData;
+	}
+
 	@Override
 	public Vector2d getVelocityVector(double step) {
 		Vector2d velocityVector = new Vector2d(0, 0);
@@ -63,5 +67,24 @@ public class MixedMotionData extends MotionData {
 			m.addMotionData(motion.clone());
 		}
 		return m;
+	}
+
+	
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof MixedMotionData && motionType == ((MixedMotionData) obj).getMotionType()
+				&& originalPosition.equals(((MixedMotionData) obj).getOriginalPosition())) {
+
+			for (MotionData motion : ((MixedMotionData) obj).getMotionDataComponents()) {
+				if (!motionData.contains(motion)) {
+					return false;
+				}
+			}
+
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

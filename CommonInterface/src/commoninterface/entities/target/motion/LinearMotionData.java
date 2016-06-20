@@ -52,12 +52,12 @@ public class LinearMotionData extends MotionData {
 		}
 	}
 
-	public GeoEntity getEntity() {
-		return entity;
-	}
-
 	public void setMove(boolean move) {
 		this.move = move;
+	}
+
+	public boolean isMoving() {
+		return move;
 	}
 
 	public double getMovementVelocity() {
@@ -82,5 +82,17 @@ public class LinearMotionData extends MotionData {
 				movementAzimuth);
 		lmd.setMove(move);
 		return lmd;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof LinearMotionData) {
+			LinearMotionData lmd = (LinearMotionData) obj;
+			return motionType.equals(lmd.getMotionType()) && entity.equals(lmd.getEntity()) && move == lmd.isMoving()
+					&& movementAzimuth == lmd.getMovementAzimuth() && movementVelocity == lmd.getMovementVelocity()
+					&& originalPosition.equals(lmd.getOriginalPosition());
+		} else {
+			return false;
+		}
 	}
 }

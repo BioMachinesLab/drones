@@ -7,24 +7,27 @@ import commoninterface.utils.jcoord.LatLon;
 import net.jafama.FastMath;
 
 public class RotationMotionData extends MotionData {
+	private static final long serialVersionUID = -6168333864512168808L;
 	private boolean rotate = true;
 	private boolean rotationDirection = false; // false for counter-clockwise
 	// and true for clockwise
 
 	private double angularVelocity; // In rad/sec
-	private Vector2d rotationCenter;
+	private LatLon rotationCenter;
+	private Vector2d rotationCenterCartesian;
 	private Vector2d initialRelativePosition;
 
-	public RotationMotionData(GeoEntity entity, Vector2d rotationCenter, double angularVelocity,
+	public RotationMotionData(GeoEntity entity, LatLon rotationCenter, double angularVelocity,
 			boolean rotationDirection) {
 		super(entity, MovementType.ROTATIONAL);
 
 		this.rotationCenter = rotationCenter;
+		this.rotationCenterCartesian = CoordinateUtilities.GPSToCartesian(rotationCenter);
 		this.angularVelocity = angularVelocity;
 		this.rotationDirection = rotationDirection;
 
 		initialRelativePosition = originalPositionCartesian;
-		initialRelativePosition.sub(rotationCenter);
+		initialRelativePosition.sub(rotationCenterCartesian);
 	}
 
 	@Override
@@ -40,18 +43,15 @@ public class RotationMotionData extends MotionData {
 		if (rotationDirection) {
 			currentAngle = -currentAngle;
 		}
-
 		currentAngle %= (2 * FastMath.PI);
-		
+
 		double distanceToCenter = initialRelativePosition.length();
 		double initialAngle = initialRelativePosition.getAngle();
-		
-		
-		
-		Vector2d finalVector = new Vector2d(0,0);
-		finalVector.x=distanceToCenter*FastMath.cos(currentAngle+initialAngle);
-		finalVector.y=distanceToCenter*FastMath.sin(currentAngle+initialAngle);
-	
+
+		Vector2d finalVector = new Vector2d(0, 0);
+		finalVector.x = distanceToCenter * FastMath.cos(currentAngle + initialAngle);
+		finalVector.y = distanceToCenter * FastMath.sin(currentAngle + initialAngle);
+
 		finalVector.sub(initialRelativePosition);
 		return finalVector;
 	}
@@ -109,7 +109,11 @@ public class RotationMotionData extends MotionData {
 		this.rotate = rotate;
 	}
 
-	public Vector2d getRotationCenter() {
+	public boolean isRotating() {
+		return rotate;
+	}
+
+	public LatLon getRotationCenter() {
 		return rotationCenter;
 	}
 
@@ -119,5 +123,19 @@ public class RotationMotionData extends MotionData {
 				rotationDirection);
 		rmd.setRotate(rotate);
 		return rmd;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof RotationMotionData) {
+			RotationMotionData rmd = (RotationMotionData) obj;
+			return motionType.equals(rmd.getMotionType()) && entity.equals(rmd.getEntity())
+					&& rotate == rmd.isRotating() && rotationDirection == rmd.getRotationDirection()
+					&& angularVelocity == rmd.getAngularVelocity()
+					&& rotationCenter.equals(rmd.getRotationCenter())
+					&& originalPosition.equals(rmd.getOriginalPosition());
+		} else {
+			return false;
+		}
 	}
 }
