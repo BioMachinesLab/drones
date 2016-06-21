@@ -170,6 +170,8 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 		formation.setVariateFormationParameters(variateFormationParameters);
 		formation.setInitialRotation(initialRotationAngle);
 		formation.setRandomSeed(simulator.getRandomSeed());
+		formation.setSafetyDistance(safetyDistance);
+		formation.setRadiusOfObjPositioning(radiusOfObjPositioning);
 		formation.buildFormation(targetsQuantity, formationType, targetRadius);
 
 		targets.addAll(formation.getTargets());
