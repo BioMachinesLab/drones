@@ -31,9 +31,11 @@ public class Formation extends GeoEntity {
 	private double arrowFormation_yDelta = lineFormationDelta;
 	private Vector2d initialTranslation = null;
 	private double initialRotation = 0;
+	private double safetyDistance = 0;
+	private double radiusOfObjPositioning = 0;
 
 	public enum FormationType {
-		line, circle, arrow, mix
+		line, circle, arrow, random, mix
 	}
 
 	public Formation(String name, LatLon latLon) {
@@ -131,6 +133,22 @@ public class Formation extends GeoEntity {
 		this.targetRadius = targetRadius;
 	}
 
+	public double getSafetyDistance() {
+		return safetyDistance;
+	}
+
+	public void setSafetyDistance(double safetyDistance) {
+		this.safetyDistance = safetyDistance;
+	}
+
+	public double getRadiusOfObjPositioning() {
+		return radiusOfObjPositioning;
+	}
+
+	public void setRadiusOfObjPositioning(double radiusOfObjPositioning) {
+		this.radiusOfObjPositioning = radiusOfObjPositioning;
+	}
+
 	/*
 	 * Default methods
 	 */
@@ -190,6 +208,9 @@ public class Formation extends GeoEntity {
 			break;
 		case line:
 			generateLineFormation();
+			break;
+		case random:
+			generateRandomFormation();
 			break;
 		default:
 			throw new IllegalArgumentException("[" + getClass().getName() + "] Non defined shape!");
@@ -301,6 +322,48 @@ public class Formation extends GeoEntity {
 		}
 
 		placeTargets(positions);
+	}
+
+	private void generateRandomFormation() {
+		Vector2d[] positions = new Vector2d[targetQnt];
+		for (int i = 0; i < targetQnt; i++) {
+			positions[i] = null;
+		}
+
+		for (int i = 0; i < targetQnt; i++) {
+			Vector2d position = null;
+			do {
+				double radius = radiusOfObjPositioning;
+				if (variateFormationParameters) {
+					radius *= random.nextDouble();
+				}
+
+				double orientation = (random.nextDouble() * FastMath.PI * 2) % 360;
+
+				double x = radius * FastMath.cos(orientation);
+				double y = radius * FastMath.sin(orientation);
+				position = new Vector2d(x, y);
+
+			} while (!safeForTarget(position, positions));
+
+			positions[i] = position;
+		}
+		
+		placeTargets(positions);
+	}
+
+	private boolean safeForTarget(Vector2d position, Vector2d[] positions) {
+		for (Vector2d p : positions) {
+			if (p == null) {
+				continue;
+			}
+
+			if ((position.distanceTo(p) - targetRadius * 2) - safetyDistance <= 0) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	private void placeTargets(Vector2d[] positions) {
