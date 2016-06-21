@@ -91,6 +91,10 @@ public class Target extends GeoEntity {
 		}
 	}
 
+	public MotionData getOwnMotionData() {
+		return motionData;
+	}
+
 	public double getRadius() {
 		return radius;
 	}
