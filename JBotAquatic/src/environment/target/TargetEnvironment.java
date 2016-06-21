@@ -85,7 +85,7 @@ public abstract class TargetEnvironment extends Environment {
 		Vector2d position = CoordinateUtilities.GPSToCartesian(target.getLatLon());
 
 		for (Target t : targets) {
-			if (t == null) {
+			if (t == null || target.equals(t)) {
 				continue;
 			}
 
@@ -112,12 +112,16 @@ public abstract class TargetEnvironment extends Environment {
 	}
 
 	protected void positionTargetInRandomPos(Target target, Simulator simulator) {
-		double radius = radiusOfObjPositioning * simulator.getRandom().nextDouble();
-		double orientation = (simulator.getRandom().nextDouble() * FastMath.PI * 2) % 360;
+		do {
+			double radius = radiusOfObjPositioning * simulator.getRandom().nextDouble();
+			double orientation = (simulator.getRandom().nextDouble() * FastMath.PI * 2) % 360;
 
-		double x = radius * FastMath.cos(orientation);
-		double y = radius * FastMath.sin(orientation);
-		target.setLatLon(CoordinateUtilities.cartesianToGPS(x, y));
+			double x = radius * FastMath.cos(orientation);
+			double y = radius * FastMath.sin(orientation);
+			target.setLatLon(CoordinateUtilities.cartesianToGPS(x, y));
+			updateCollisions(simulator.getTime());
+
+		} while (!safeForTarget(target, simulator));
 	}
 
 	public void addMarker(LightPole lp) {
