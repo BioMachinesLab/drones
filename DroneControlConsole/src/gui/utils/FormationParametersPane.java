@@ -224,7 +224,7 @@ public class FormationParametersPane {
 			circleFormationRadiusTextField.setText(args.get("circleFormation_radius"));
 		}
 		topPanel.add(circleFormationRadiusTextField);
-		
+
 		topPanel.add(new JLabel("Safety random position distance (m):"));
 		safetyDistanceTextField = new JTextField(10);
 		safetyDistanceTextField.setHorizontalAlignment(JTextField.CENTER);
@@ -232,7 +232,7 @@ public class FormationParametersPane {
 			safetyDistanceTextField.setText(args.get("safetyRandomPositionDistance"));
 		}
 		topPanel.add(safetyDistanceTextField);
-		
+
 		topPanel.add(new JLabel("Radius of object positioning (m):"));
 		radiusOfObjPositioningTextField = new JTextField(10);
 		radiusOfObjPositioningTextField.setHorizontalAlignment(JTextField.CENTER);
@@ -563,7 +563,7 @@ public class FormationParametersPane {
 		}
 
 		if (moveTarget) {
-			return new LinearMotionData(entity, entity.getLatLon(), targetsVelocity, targetsAzimuth);
+			return new LinearMotionData(entity, targetsVelocity, targetsAzimuth);
 		} else {
 			return null;
 		}

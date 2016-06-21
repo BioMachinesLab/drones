@@ -31,8 +31,7 @@ public class MonoTargetEnvironment extends TargetEnvironment {
 		targets.add(new Target("target", latLon, targetRadius));
 
 		if (moveTargets) {
-			LinearMotionData lmd = new LinearMotionData(targets.get(0), targets.get(0).getLatLon(), movementVelocity,
-					movementAzimuth);
+			LinearMotionData lmd = new LinearMotionData(targets.get(0), movementVelocity, movementAzimuth);
 			targets.get(0).setMotionData(lmd);
 		}
 
@@ -43,8 +42,8 @@ public class MonoTargetEnvironment extends TargetEnvironment {
 			} while (!safeForRobot(r, simulator));
 
 			((AquaticDroneCI) r).getEntities().add(targets.get(0));
-			
-			if(moveTargets){
+
+			if (moveTargets) {
 				((AquaticDroneCI) r).setUpdateEntities(true);
 			}
 		}

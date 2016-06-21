@@ -53,7 +53,7 @@ public class MultiTargetEnvironment extends TargetEnvironment {
 
 			if (moveTargets) {
 				for (Target t : targets) {
-					LinearMotionData lmd = new LinearMotionData(t, t.getLatLon(), movementVelocity, movementAzimuth);
+					LinearMotionData lmd = new LinearMotionData(t, movementVelocity, movementAzimuth);
 					t.setMotionData(lmd);
 				}
 			}
@@ -66,8 +66,8 @@ public class MultiTargetEnvironment extends TargetEnvironment {
 			} while (!safeForRobot(r, simulator));
 
 			((AquaticDroneCI) r).getEntities().addAll(targets);
-			
-			if(moveTargets){
+
+			if (moveTargets) {
 				((AquaticDroneCI) r).setUpdateEntities(true);
 			}
 		}

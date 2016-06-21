@@ -207,8 +207,7 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 		}
 
 		if (moveTargets) {
-			LinearMotionData lmd = new LinearMotionData(formation, formation.getLatLon(), targetsVelocity,
-					targetsAzimuth);
+			LinearMotionData lmd = new LinearMotionData(formation, targetsVelocity, targetsAzimuth);
 			formation.setMotionData(lmd);
 
 			// RotationMotionData rmd = new RotationMotionData(formation, new

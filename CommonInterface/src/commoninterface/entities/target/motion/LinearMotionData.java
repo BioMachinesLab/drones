@@ -13,8 +13,7 @@ public class LinearMotionData extends MotionData {
 	private double movementVelocity;
 	private double movementAzimuth;
 
-	public LinearMotionData(GeoEntity entity, LatLon originalPosition, double movementVelocity,
-			double movementAzimuth) {
+	public LinearMotionData(GeoEntity entity, double movementVelocity, double movementAzimuth) {
 		super(entity, MovementType.LINEAR);
 
 		this.movementAzimuth = movementAzimuth;
@@ -78,8 +77,7 @@ public class LinearMotionData extends MotionData {
 
 	@Override
 	public LinearMotionData clone() {
-		LinearMotionData lmd = new LinearMotionData(entity.clone(), originalPosition, movementVelocity,
-				movementAzimuth);
+		LinearMotionData lmd = new LinearMotionData(entity.clone(), movementVelocity, movementAzimuth);
 		lmd.setMove(move);
 		return lmd;
 	}
