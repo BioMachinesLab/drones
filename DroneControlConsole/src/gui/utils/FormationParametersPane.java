@@ -58,19 +58,23 @@ public class FormationParametersPane {
 	private JCheckBox variateFormationParametersCheckBox;
 	private JTextField initialRotationTextField;
 	private JTextField targetRadiusTextField;
+	private JTextField safetyDistanceTextField;
+	private JTextField radiusOfObjPositioningTextField;
 	private JTextField randomSeedTextField;
 
 	// Parameters
-	int targetQuantity;
-	double lineFormationDelta;
-	double arrowFormationXDelta;
-	double arrowFormationYDelta;
-	double circleFormationRadius;
-	boolean variateFormationParameters;
-	double initialRotation;
-	double targetRadius;
-	Long randomSeed;
-	FormationType formationType;
+	private int targetQuantity;
+	private double lineFormationDelta;
+	private double arrowFormationXDelta;
+	private double arrowFormationYDelta;
+	private double circleFormationRadius;
+	private boolean variateFormationParameters;
+	private double initialRotation;
+	private double targetRadius;
+	private double safetyDistance;
+	private double radiusOfObjPositioning;
+	private Long randomSeed;
+	private FormationType formationType;
 
 	/*
 	 * Motion options panel
@@ -88,16 +92,16 @@ public class FormationParametersPane {
 	private JCheckBox variateTargetRotationDirectionCheckBox;
 
 	// Parameters
-	double targetMovementVelocity;
-	double targetMovementAzimuth;
-	boolean moveTarget;
-	boolean variateTargetsSpeed;
-	boolean variateTargetsAzimuth;
-	double rotationVelocity;
-	boolean rotateFormation;
-	boolean variateRotationVelocity;
-	boolean rotationDirection;
-	boolean variateRotationDirection;
+	private double targetMovementVelocity;
+	private double targetMovementAzimuth;
+	private boolean moveTarget;
+	private boolean variateTargetsSpeed;
+	private boolean variateTargetsAzimuth;
+	private double rotationVelocity;
+	private boolean rotateFormation;
+	private boolean variateRotationVelocity;
+	private boolean rotationDirection;
+	private boolean variateRotationDirection;
 
 	/*
 	 * Motion patch
@@ -143,6 +147,8 @@ public class FormationParametersPane {
 				variateFormationParameters = variateFormationParametersCheckBox.isSelected();
 				initialRotation = Double.parseDouble(initialRotationTextField.getText());
 				targetRadius = Double.parseDouble(targetRadiusTextField.getText());
+				safetyDistance = Double.parseDouble(safetyDistanceTextField.getText());
+				radiusOfObjPositioning = Double.parseDouble(radiusOfObjPositioningTextField.getText());
 				randomSeed = Long.parseLong(randomSeedTextField.getText());
 				random = new Random(randomSeed);
 				formationType = (FormationType) formationTypeComboBox.getSelectedItem();
@@ -175,7 +181,7 @@ public class FormationParametersPane {
 		formationOptionsPanel.setBorder(BorderFactory.createTitledBorder("Formation options"));
 		formationOptionsPanel.setLayout(new BoxLayout(formationOptionsPanel, BoxLayout.Y_AXIS));
 
-		JPanel topPanel = new JPanel(new GridLayout(4, 2));
+		JPanel topPanel = new JPanel(new GridLayout(6, 2));
 		topPanel.add(new JLabel("Targets quantity:"));
 		targetsQuantityTextField = new JTextField(10);
 		targetsQuantityTextField.setHorizontalAlignment(JTextField.CENTER);
@@ -218,6 +224,22 @@ public class FormationParametersPane {
 			circleFormationRadiusTextField.setText(args.get("circleFormation_radius"));
 		}
 		topPanel.add(circleFormationRadiusTextField);
+		
+		topPanel.add(new JLabel("Safety random position distance (m):"));
+		safetyDistanceTextField = new JTextField(10);
+		safetyDistanceTextField.setHorizontalAlignment(JTextField.CENTER);
+		if (args.get("safetyRandomPositionDistance") != null) {
+			safetyDistanceTextField.setText(args.get("safetyRandomPositionDistance"));
+		}
+		topPanel.add(safetyDistanceTextField);
+		
+		topPanel.add(new JLabel("Radius of object positioning (m):"));
+		radiusOfObjPositioningTextField = new JTextField(10);
+		radiusOfObjPositioningTextField.setHorizontalAlignment(JTextField.CENTER);
+		if (args.get("radiusOfObjectPositioning") != null) {
+			radiusOfObjPositioningTextField.setText(args.get("radiusOfObjectPositioning"));
+		}
+		topPanel.add(radiusOfObjPositioningTextField);
 		formationOptionsPanel.add(topPanel);
 
 		JPanel deltasPanel = new JPanel(new GridLayout(2, 2));
@@ -482,6 +504,8 @@ public class FormationParametersPane {
 			formation.setVariateFormationParameters(variateFormationParameters);
 			formation.setInitialRotation(initialRotation * Math.PI / 180);
 			formation.setRandomSeed(randomSeed);
+			formation.setSafetyDistance(safetyDistance);
+			formation.setRadiusOfObjPositioning(radiusOfObjPositioning);
 			formation.buildFormation(targetQuantity, formationType, targetRadius);
 
 			setMotionData(formation, formationMovementType);
