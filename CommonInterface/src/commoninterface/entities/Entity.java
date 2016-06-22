@@ -58,12 +58,17 @@ public abstract class Entity implements Serializable {
 		return name;
 	}
 
-	public String getLogMessage(EntityManipulation.Operation operation) {
+	public String getLogMessage(EntityManipulation.Operation operation, double... timestep) {
 		ArrayList<Entity> entities = new ArrayList<Entity>();
 		entities.add(this);
 
-		return LogCodex.encodeLog(LogType.ENTITIES,
-				new EntityManipulation(operation, entities, getClass().getSimpleName()));
+		if (timestep.length > 0) {
+			return LogCodex.encodeLog(LogType.ENTITIES,
+					new EntityManipulation(operation, entities, getClass().getSimpleName(), timestep[0]));
+		} else {
+			return LogCodex.encodeLog(LogType.ENTITIES,
+					new EntityManipulation(operation, entities, getClass().getSimpleName()));
+		}
 	}
 
 	@Override

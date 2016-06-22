@@ -10,26 +10,35 @@ public class EntityManipulation {
 		ADD, REMOVE, MOVE
 	}
 
-	ArrayList<Entity> entities;
-	Operation op;
-	String entitiesClass;
+	private ArrayList<Entity> entities;
+	private Operation operation;
+	private String entitiesClass;
+	private double timestep;
 
-	public EntityManipulation(Operation op, ArrayList<Entity> entities,
-			String entitiesClass) {
+	public EntityManipulation(Operation op, ArrayList<Entity> entities, String entitiesClass) {
+		this(op, entities, entitiesClass, -1);
+	}
+
+	public EntityManipulation(Operation op, ArrayList<Entity> entities, String entitiesClass, double timestep) {
 		this.entities = entities;
-		this.op = op;
+		this.operation = op;
 		this.entitiesClass = entitiesClass;
+		this.timestep = timestep;
 	}
 
 	public ArrayList<Entity> getEntities() {
 		return entities;
 	}
 
-	public Operation operation() {
-		return op;
+	public Operation getOperation() {
+		return operation;
 	}
 
 	public String getEntitiesClass() {
 		return entitiesClass;
+	}
+
+	public double getTimestep() {
+		return timestep;
 	}
 }
