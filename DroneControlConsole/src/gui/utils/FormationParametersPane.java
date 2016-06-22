@@ -239,6 +239,11 @@ public class FormationParametersPane {
 		if (args.get("radiusOfObjectPositioning") != null) {
 			radiusOfObjPositioningTextField.setText(args.get("radiusOfObjectPositioning"));
 		}
+		if (extraArgs != null) {
+			if (extraArgs.get("radiusOfObjectPositioning") != null) {
+				radiusOfObjPositioningTextField.setText(args.get("radiusOfObjectPositioning"));
+			}
+		}
 		topPanel.add(radiusOfObjPositioningTextField);
 		formationOptionsPanel.add(topPanel);
 
@@ -497,7 +502,7 @@ public class FormationParametersPane {
 
 	public Formation buildFormation(Coordinate c) {
 		if (paneAnswer == JOptionPane.OK_OPTION) {
-			Formation formation = new Formation("formation", new LatLon(c.getLat(), c.getLon()));
+			Formation formation = new Formation("formation_" + formationType, new LatLon(c.getLat(), c.getLon()));
 			formation.setLineFormationDelta(lineFormationDelta);
 			formation.setArrowFormationDeltas(new Vector2d(arrowFormationXDelta, arrowFormationYDelta));
 			formation.setCircleFormationRadius(circleFormationRadius);
