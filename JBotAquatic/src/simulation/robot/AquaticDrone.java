@@ -199,7 +199,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		}
 
 		updatePhysicalSensors();
-		updateSensors(simulationStep, teleported);
+		super.updateSensors(simulationStep, teleported);
 
 		if (activeBehavior != null) {
 			activeBehavior.step(activeBehaviorStep++);
