@@ -132,29 +132,32 @@ public class LogCodexTester {
 	private final String expectedWaypointLogString = LogCodex.LOG_TYPE + LogCodex.LogType.ENTITIES
 			+ LogCodex.MAIN_SEPARATOR + LogCodex.ENTITY_OP_SEP + EntityManipulation.Operation.ADD
 			+ LogCodex.MAIN_SEPARATOR + LogCodex.ENTITY_TYPE_SEP + WAYPOINT.getClass().getSimpleName()
-			+ LogCodex.MAIN_SEPARATOR + LogCodex.ENTITY_INFORMATION_BEGIN + WP_NAME + LogCodex.ARRAY_SEPARATOR
-			+ LATLON.getLat() + LogCodex.ARRAY_SEPARATOR + LATLON.getLon() + LogCodex.ENTITY_INFORMATION_END
-			+ LogCodex.LINE_SEPARATOR;
+			+ LogCodex.MAIN_SEPARATOR + LogCodex.TIMESTEP_SEP + (double) TIMESTEP + LogCodex.MAIN_SEPARATOR
+			+ LogCodex.ENTITY_INFORMATION_BEGIN + WP_NAME + LogCodex.ARRAY_SEPARATOR + LATLON.getLat()
+			+ LogCodex.ARRAY_SEPARATOR + LATLON.getLon() + LogCodex.ENTITY_INFORMATION_END + LogCodex.LINE_SEPARATOR;
 
 	private final String expectedObstacleLogString = LogCodex.LOG_TYPE + LogCodex.LogType.ENTITIES
 			+ LogCodex.MAIN_SEPARATOR + LogCodex.ENTITY_OP_SEP + EntityManipulation.Operation.ADD
 			+ LogCodex.MAIN_SEPARATOR + LogCodex.ENTITY_TYPE_SEP + OBSTACLE.getClass().getSimpleName()
-			+ LogCodex.MAIN_SEPARATOR + LogCodex.ENTITY_INFORMATION_BEGIN + OBST_NAME + LogCodex.ARRAY_SEPARATOR
-			+ LATLON.getLat() + LogCodex.ARRAY_SEPARATOR + LATLON.getLon() + LogCodex.ARRAY_SEPARATOR + OBST_RADIUS
+			+ LogCodex.MAIN_SEPARATOR + LogCodex.TIMESTEP_SEP + (double) TIMESTEP + LogCodex.MAIN_SEPARATOR
+			+ LogCodex.ENTITY_INFORMATION_BEGIN + OBST_NAME + LogCodex.ARRAY_SEPARATOR + LATLON.getLat()
+			+ LogCodex.ARRAY_SEPARATOR + LATLON.getLon() + LogCodex.ARRAY_SEPARATOR + OBST_RADIUS
 			+ LogCodex.ENTITY_INFORMATION_END + LogCodex.LINE_SEPARATOR;
 
 	private final String expectedRobotLocationLogString = LogCodex.LOG_TYPE + LogCodex.LogType.ENTITIES
 			+ LogCodex.MAIN_SEPARATOR + LogCodex.ENTITY_OP_SEP + EntityManipulation.Operation.ADD
 			+ LogCodex.MAIN_SEPARATOR + LogCodex.ENTITY_TYPE_SEP + ROBOT_LOC.getClass().getSimpleName()
-			+ LogCodex.MAIN_SEPARATOR + LogCodex.ENTITY_INFORMATION_BEGIN + ROBOT_LOC_NAME + LogCodex.ARRAY_SEPARATOR
-			+ LATLON.getLat() + LogCodex.ARRAY_SEPARATOR + LATLON.getLon() + LogCodex.ARRAY_SEPARATOR + ROBOT_ORIENT
+			+ LogCodex.MAIN_SEPARATOR + LogCodex.TIMESTEP_SEP + (double) TIMESTEP + LogCodex.MAIN_SEPARATOR
+			+ LogCodex.ENTITY_INFORMATION_BEGIN + ROBOT_LOC_NAME + LogCodex.ARRAY_SEPARATOR + LATLON.getLat()
+			+ LogCodex.ARRAY_SEPARATOR + LATLON.getLon() + LogCodex.ARRAY_SEPARATOR + ROBOT_ORIENT
 			+ LogCodex.ARRAY_SEPARATOR + DRONE_TYPE + LogCodex.ENTITY_INFORMATION_END + LogCodex.LINE_SEPARATOR;
 
 	private final String expectedTargetLogString = LogCodex.LOG_TYPE + LogCodex.LogType.ENTITIES
 			+ LogCodex.MAIN_SEPARATOR + LogCodex.ENTITY_OP_SEP + EntityManipulation.Operation.ADD
 			+ LogCodex.MAIN_SEPARATOR + LogCodex.ENTITY_TYPE_SEP + TARGET.getClass().getSimpleName()
-			+ LogCodex.MAIN_SEPARATOR + LogCodex.ENTITY_INFORMATION_BEGIN + TARGET_NAME + LogCodex.ARRAY_SEPARATOR
-			+ LATLON.getLat() + LogCodex.ARRAY_SEPARATOR + LATLON.getLon() + LogCodex.ARRAY_SEPARATOR + TARGET_RADIUS
+			+ LogCodex.MAIN_SEPARATOR + LogCodex.TIMESTEP_SEP + (double) TIMESTEP + LogCodex.MAIN_SEPARATOR
+			+ LogCodex.ENTITY_INFORMATION_BEGIN + TARGET_NAME + LogCodex.ARRAY_SEPARATOR + LATLON.getLat()
+			+ LogCodex.ARRAY_SEPARATOR + LATLON.getLon() + LogCodex.ARRAY_SEPARATOR + TARGET_RADIUS
 			+ LogCodex.ARRAY_SEPARATOR + TARGET_BELONGSTOFORMATION + LogCodex.ARRAY_SEPARATOR + TARGET_OCCUPIED
 			+ LogCodex.ARRAY_SEPARATOR + TARGET_OCCUPANT_ID + LogCodex.ARRAY_SEPARATOR
 			+ LogCodex.encodeMotionData(TARGET_MOTIONDATA) + LogCodex.ENTITY_INFORMATION_END + LogCodex.LINE_SEPARATOR;
@@ -207,7 +210,8 @@ public class LogCodexTester {
 		// Build log string
 		expectedFormationLogString = LogCodex.LOG_TYPE + LogCodex.LogType.ENTITIES + LogCodex.MAIN_SEPARATOR
 				+ LogCodex.ENTITY_OP_SEP + EntityManipulation.Operation.ADD + LogCodex.MAIN_SEPARATOR
-				+ LogCodex.ENTITY_TYPE_SEP + FORMATION.getClass().getSimpleName() + LogCodex.MAIN_SEPARATOR;
+				+ LogCodex.ENTITY_TYPE_SEP + FORMATION.getClass().getSimpleName() + LogCodex.MAIN_SEPARATOR
+				+ LogCodex.TIMESTEP_SEP + (double)TIMESTEP + LogCodex.MAIN_SEPARATOR;
 
 		expectedFormationLogString += LogCodex.ENTITY_INFORMATION_BEGIN + FORMATION_NAME + LogCodex.ARRAY_SEPARATOR
 				+ LATLON.getLat() + LogCodex.ARRAY_SEPARATOR + LATLON.getLon() + LogCodex.ARRAY_SEPARATOR
@@ -313,7 +317,7 @@ public class LogCodexTester {
 
 		DecodedLog logDataDecoded = LogCodex.decodeLog(logStr);
 		LogData fullDecodedLogData = ((LogData) logDataDecoded.getPayload());
-		assertEquals(LogType.LOGDATA, logDataDecoded.payloadType());
+		assertEquals(LogType.LOGDATA, logDataDecoded.getPayloadType());
 		assertEquals(TIMESTEP, fullDecodedLogData.timestep);
 		assertEquals(SENTENCE, fullDecodedLogData.comment);
 		assertEquals(DRONE_TYPE, fullDecodedLogData.droneType);
@@ -328,6 +332,7 @@ public class LogCodexTester {
 		assertArrayEquals(MOT_SPEEDS, fullDecodedLogData.motorSpeeds, 0);
 		assertArrayEquals(INPUT_NN, fullDecodedLogData.inputNeuronStates, 0);
 		assertArrayEquals(OUTPUT_NN, fullDecodedLogData.outputNeuronStates, 0);
+		assertTrue(TIMESTEP == logDataDecoded.getTimeStep());
 	}
 
 	@Test
@@ -337,7 +342,7 @@ public class LogCodexTester {
 
 		DecodedLog errMsgDecoded = LogCodex.decodeLog(errStr);
 		String fullDecodedErrMsg = ((String) errMsgDecoded.getPayload());
-		assertEquals(LogType.ERROR, errMsgDecoded.payloadType());
+		assertEquals(LogType.ERROR, errMsgDecoded.getPayloadType());
 		assertEquals(SENTENCE, fullDecodedErrMsg);
 	}
 
@@ -348,13 +353,13 @@ public class LogCodexTester {
 
 		DecodedLog messageMsgDecoded = LogCodex.decodeLog(messageStr);
 		String fullDecodedMessageMsg = ((String) messageMsgDecoded.getPayload());
-		assertEquals(LogType.MESSAGE, messageMsgDecoded.payloadType());
+		assertEquals(LogType.MESSAGE, messageMsgDecoded.getPayloadType());
 		assertEquals(SENTENCE, fullDecodedMessageMsg);
 	}
 
 	@Test
 	public void TestWaypointDataCodex() {
-		String wpStr = WAYPOINT.getLogMessage(Operation.ADD);
+		String wpStr = WAYPOINT.getLogMessage(Operation.ADD, (double) TIMESTEP);
 		assertEquals(expectedWaypointLogString, wpStr);
 
 		DecodedLog messageMsgDecoded = LogCodex.decodeLog(wpStr);
@@ -371,7 +376,7 @@ public class LogCodexTester {
 
 	@Test
 	public void TestObstacleDataCodex() {
-		String obstacleStr = OBSTACLE.getLogMessage(Operation.ADD);
+		String obstacleStr = OBSTACLE.getLogMessage(Operation.ADD, (double) TIMESTEP);
 		assertEquals(expectedObstacleLogString, obstacleStr);
 
 		DecodedLog messageMsgDecoded = LogCodex.decodeLog(obstacleStr);
@@ -389,7 +394,7 @@ public class LogCodexTester {
 
 	@Test
 	public void TestRobotLocationDataCodex() {
-		String robotLocationStr = ROBOT_LOC.getLogMessage(Operation.ADD);
+		String robotLocationStr = ROBOT_LOC.getLogMessage(Operation.ADD, (double) TIMESTEP);
 		assertEquals(expectedRobotLocationLogString, robotLocationStr);
 
 		DecodedLog messageMsgDecoded = LogCodex.decodeLog(robotLocationStr);
@@ -408,7 +413,7 @@ public class LogCodexTester {
 
 	@Test
 	public void TestTargetDataCodex() {
-		String targetStr = TARGET.getLogMessage(Operation.ADD);
+		String targetStr = TARGET.getLogMessage(Operation.ADD, (double) TIMESTEP);
 		assertEquals(expectedTargetLogString, targetStr);
 
 		DecodedLog messageMsgDecoded = LogCodex.decodeLog(targetStr);
@@ -431,7 +436,7 @@ public class LogCodexTester {
 
 	@Test
 	public void TestFormationDataCodex() {
-		String formationStr = FORMATION.getLogMessage(Operation.ADD);
+		String formationStr = FORMATION.getLogMessage(Operation.ADD, (double) TIMESTEP);
 		assertEquals(expectedFormationLogString, formationStr);
 
 		DecodedLog messageMsgDecoded = LogCodex.decodeLog(formationStr);

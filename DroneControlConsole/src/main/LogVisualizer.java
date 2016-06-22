@@ -269,7 +269,7 @@ public class LogVisualizer extends JFrame {
 						if(decodedData == null)
 							continue;
 
-						switch (decodedData.payloadType()) {
+						switch (decodedData.getPayloadType()) {
 						case ENTITIES:
 							currentEntities = (ArrayList<Entity>) LogCodex
 									.decodeLog(l, currentEntities).getPayload();

@@ -19,7 +19,7 @@ public class LogDronesCIBehavior extends CIBehavior {
 	@Override
 	public void step(double time) {
 		for(RobotLocation r : RobotLocation.getDroneLocations(drone)) {
-			drone.log(r.getLogMessage(Operation.MOVE));
+			drone.log(r.getLogMessage(Operation.MOVE,time));
 		}
 	}
 	

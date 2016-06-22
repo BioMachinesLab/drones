@@ -118,7 +118,7 @@ public class LogCodex {
 
 			switch (logType) {
 			case ENTITIES:
-				if (infoBlocks.length == 4) {
+				if (infoBlocks.length == 5) {
 					String[] blocks1 = new String[infoBlocks.length - 1];
 
 					for (int i = 0; i < blocks1.length; i++) {
@@ -131,12 +131,12 @@ public class LogCodex {
 					} else {
 						entities = new ArrayList<Entity>();
 					}
-					decodeEntities(blocks1, entities);
+					double timeStep = decodeEntities(blocks1, entities);
 
 					ArrayList<Entity> currentEntities = new ArrayList<Entity>();
 					currentEntities.addAll(entities);
 
-					decodedLog = new DecodedLog(LogType.ENTITIES, currentEntities);
+					decodedLog = new DecodedLog(LogType.ENTITIES, currentEntities, timeStep);
 				}
 				break;
 
@@ -148,7 +148,7 @@ public class LogCodex {
 				}
 
 				LogData logData = decodeLogData(blocks2);
-				decodedLog = new DecodedLog(LogType.LOGDATA, logData);
+				decodedLog = new DecodedLog(LogType.LOGDATA, logData, logData.timestep);
 				break;
 			case ERROR:
 				if (infoBlocks[1].substring(0, 3).equals(SENTENCE_SEP)) {
@@ -171,12 +171,37 @@ public class LogCodex {
 	}
 
 	// Decoders
-	private static void decodeEntities(String[] blocks, ArrayList<Entity> entities) {
+	private static double decodeEntities(String[] blocks, ArrayList<Entity> entities) {
+		double timeStep = -1;
+		Operation event = null;
+		String className = null;
+		String data = null;
 
-		Operation event = Operation.valueOf(blocks[0].split("=")[1]);
-		String className = blocks[1].split("=")[1];
-		String data = blocks[2];
+		for (String d : blocks) {
+			String information = d.substring(3, d.length());
+			switch (d.substring(0, 3)) {
+			case ENTITY_TYPE_SEP:
+				className = information;
+				break;
+			case TIMESTEP_SEP:
+				timeStep = Double.parseDouble(information);
+				break;
+			case ENTITY_OP_SEP:
+				event = Operation.valueOf(information);
+				break;
+			default:
+				data = d;
+				break;
+			}
+		}
 
+		if (data != null && event != null && className != null) {
+			decodeEntity(data, entities, event, className);
+		}
+		return timeStep;
+	}
+
+	private static void decodeEntity(String data, ArrayList<Entity> entities, Operation event, String className) {
 		switch (event) {
 		case MOVE:
 		case ADD:
@@ -279,10 +304,10 @@ public class LogCodex {
 			String[] split = data.split(ARRAY_SEPARATOR);
 
 			Iterator<Entity> i = entities.iterator();
-			while (i.hasNext()) {
+			whilecicle: while (i.hasNext()) {
 				if (i.next().getName().equals(split[0])) {
 					i.remove();
-					break;
+					break whilecicle;
 				}
 			}
 			break;
@@ -320,7 +345,7 @@ public class LogCodex {
 		f.setTargetRadius(targetsRadius);
 		f.setSafetyDistance(safetyDistance);
 		f.setRadiusOfObjPositioning(radiusOfObjPositioning);
-		
+
 		MotionData formationMotionData = decodeMotionData(split[5], f);
 		f.setMotionData(formationMotionData);
 
@@ -551,6 +576,7 @@ public class LogCodex {
 
 			data += ENTITY_OP_SEP + entities.getOperation() + MAIN_SEPARATOR;
 			data += ENTITY_TYPE_SEP + className + MAIN_SEPARATOR;
+			data += TIMESTEP_SEP + entities.getTimestep() + MAIN_SEPARATOR;
 
 			ArrayList<Entity> ent = entities.getEntities();
 			for (int i = 0; i < ent.size(); i++) {

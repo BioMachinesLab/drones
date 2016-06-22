@@ -670,7 +670,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		for (Entity ent : entities) {
 			if (ent instanceof Formation) {
 				((Formation) ent).step(time);
-				logEntity(ent.getLogMessage(Operation.MOVE));
+				logEntity(ent.getLogMessage(Operation.MOVE, time));
 			}
 		}
 	}

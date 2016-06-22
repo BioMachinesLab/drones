@@ -75,7 +75,7 @@ public class DroneLogExporter {
 					if(decodedData == null)
 						continue;
 
-					switch (decodedData.payloadType()) {
+					switch (decodedData.getPayloadType()) {
 					case ENTITIES:
 						
 						//TODO there is a bug in the logging of new entities. the old ones are not being logged when they are REMOVED!
@@ -176,7 +176,7 @@ public class DroneLogExporter {
 					if(decodedData == null)
 						continue;
 
-					switch (decodedData.payloadType()) {
+					switch (decodedData.getPayloadType()) {
 					case ENTITIES:
 						
 						if(prevNormalLog)

@@ -137,7 +137,7 @@ public class MissionController extends CIBehavior {
 					drone.setActiveWaypoint(wp);
 
 					if (robot.getEntityLogger() != null)
-						robot.getEntityLogger().logMessage(wp.getLogMessage(Operation.ADD));
+						robot.getEntityLogger().logMessage(wp.getLogMessage(Operation.ADD,timestep));
 				}
 			}
 
