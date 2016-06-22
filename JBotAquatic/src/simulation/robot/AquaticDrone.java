@@ -84,6 +84,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	private DroneType droneType = DroneType.DRONE;
 
 	private RobotLogger logger;
+	private RobotLogger entityLogger;
 
 	private double leftPercentage = 0;
 	private double rightPercentage = 0;
@@ -104,9 +105,9 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	protected double speedOffset = 0;
 	private boolean configuredSensors = false;
 	protected boolean fault = false;
-	
+
 	private boolean updateEntities = false;
-	private double entitiesStep=0;
+	private double entitiesStep = 0;
 
 	public AquaticDrone(Simulator simulator, Arguments args) {
 		super(simulator, args);
@@ -193,13 +194,12 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		}
 
 		if (updateEntities) {
-			
+
 			updateLocalEntities(entitiesStep++);
 		}
 
 		updatePhysicalSensors();
-
-		super.updateSensors(simulationStep, teleported);
+		updateSensors(simulationStep, teleported);
 
 		if (activeBehavior != null) {
 			activeBehavior.step(activeBehaviorStep++);
@@ -402,6 +402,11 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	}
 
 	@Override
+	public RobotLogger getEntityLogger() {
+		return entityLogger;
+	}
+
+	@Override
 	public List<MessageProvider> getMessageProviders() {
 
 		// We only do this here because messageProviders might not be necessary
@@ -465,6 +470,11 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	private void log(String msg) {
 		if (logger != null)
 			logger.logMessage(msg);
+	}
+
+	private void logEntity(String msg) {
+		if (entityLogger != null)
+			entityLogger.logMessage(msg);
 	}
 
 	@Override
@@ -660,10 +670,7 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 		for (Entity ent : entities) {
 			if (ent instanceof Formation) {
 				((Formation) ent).step(time);
-
-				if (logger != null) {
-					logger.logMessage(((Formation) ent).getLogMessage(Operation.MOVE));
-				}
+				logEntity(ent.getLogMessage(Operation.MOVE));
 			}
 		}
 	}
