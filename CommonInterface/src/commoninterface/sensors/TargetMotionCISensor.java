@@ -21,7 +21,6 @@ public class TargetMotionCISensor extends CISensor {
 	protected double[] readings = { 0, 0 };
 	private boolean excludeOccupied = false;
 	private boolean stabilize = false;
-	private boolean normalize = false;
 
 	private double range = 100;
 	private int historySize = 10;
@@ -41,7 +40,6 @@ public class TargetMotionCISensor extends CISensor {
 		stabilize = args.getArgumentAsIntOrSetDefault("stabilize", 0) == 1;
 		historySize = args.getArgumentAsIntOrSetDefault("historySize", historySize);
 		range = args.getArgumentAsDoubleOrSetDefault("range", range);
-		normalize = args.getArgumentAsIntOrSetDefault("normalize", 0) == 1;
 
 		lastSeenTargets = new Target[historySize];
 		for (int i = 0; i < lastSeenTargets.length; i++) {
@@ -55,31 +53,54 @@ public class TargetMotionCISensor extends CISensor {
 		Target target = getClosestTarget(excludeOccupied, targets);
 		if (target != null) {
 			this.consideringTarget = target;
+
 			Vector2d vel = target.getMotionData().getVelocityVector(time);
-			readings[0] = vel.getAngle() / Math.PI / 2;
+
+			double orientation = vel.getAngle();
+
+			// Original value comes in [0,180] with alpha on [0,180] degrees and
+			// [-180,0] with alpha [180,360]. Convert it to [0,360] on [0,360]
+			if (orientation < 0) {
+				orientation = (FastMath.PI * 2) + orientation;
+			}
+
+			// Rotate the referential 1 quadrant
+			orientation += 3 * FastMath.PI / 2;
+			orientation %= FastMath.PI * 2;
+
+			// Invert the scale
+			orientation = (FastMath.PI * 2) - orientation;
+			orientation = Math.toDegrees(orientation);
+
+			double robotOrientation = ((AquaticDroneCI) robot).getCompassOrientationInDegrees();
+			double difference = robotOrientation - orientation;
+
+			if (robotOrientation < 0)
+				robotOrientation += 360;
+
+			if (difference < 0)
+				difference += 360;
+
+			robotOrientation %= 360;
+			difference %= 360;
+
+			if (difference > 180) {
+				difference = -((180 - difference) + 180);
+			}
+
+			readings[0] = difference / 360.0 + 0.5;
 			readings[1] = vel.length() * MotionData.UPDATE_RATE;
 
-			// Move the readings to the positive side of the scale
-			if (readings[0] < 0) {
-				readings[0] += FastMath.PI * 2;
-			}
-			readings[0] %= FastMath.PI * 2;
-
-			// Normalization and detection range
+			// Detection range
 			if (robot instanceof AquaticDroneCI) {
 				// Is the sensed target inside the sensor range?
 				double distance = ((AquaticDroneCI) robot).getGPSLatLon().distanceInMeters(target.getLatLon());
-				if (distance < range) {
-					if (normalize) {
-						readings[0] /= (FastMath.PI * 2);
-					}
-					// In case the target is outside the range
-				} else {
-					readings[0] = 0;
+				if (distance > range) {
+					readings[0] = 0.5;
 					readings[1] = 0;
 				}
 			} else {
-				readings[0] = 0;
+				readings[0] = 0.5;
 				readings[1] = 0;
 			}
 		}
@@ -109,10 +130,7 @@ public class TargetMotionCISensor extends CISensor {
 		double minDistance = Double.MAX_VALUE;
 		for (Target ent : targets) {
 			Vector2d pos = CoordinateUtilities.GPSToCartesian(ent.getLatLon());
-			if (ent.isOccupied() && ent.getOccupantID().equals(robot.getNetworkAddress())
-			// && robotPosition.distanceTo(pos) <= ent.getRadius()
-			// && robotPosition.distanceTo(pos) < minDistance
-			) {
+			if (ent.isOccupied() && ent.getOccupantID().equals(robot.getNetworkAddress())) {
 				minDistance = robotPosition.distanceTo(pos);
 				closest = ent;
 				break;
