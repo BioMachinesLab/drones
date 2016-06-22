@@ -17,12 +17,11 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import utils.FileLogger;
-
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialDataEvent;
 import com.pi4j.io.serial.SerialDataEventListener;
 import com.pi4j.io.serial.SerialFactory;
+
 import commoninterface.RobotCI;
 import commoninterface.dataobjects.GPSData;
 import commoninterface.network.messages.GPSMessage;
@@ -31,12 +30,13 @@ import commoninterface.network.messages.Message;
 import commoninterface.network.messages.MessageProvider;
 import commoninterface.network.messages.SystemStatusMessage;
 import commoninterface.utils.NMEAUtils;
+import utils.FileLogger;
 
 public class GPSModuleInput implements ControllerInput, MessageProvider,
 		Serializable {
 	private static final long serialVersionUID = -5443358826645386873L;
 
-	private final static String FILE_NAME = FileLogger.LOGS_FOLDER + "GPSLog_";
+	private final static String LOG_FILE_NAME = FileLogger.LOGS_FOLDER + "GPSLog_";
 	private boolean localLog = false;
 	private PrintWriter localLogPrintWriterOut;
 	private RobotCI robotCI;
@@ -360,6 +360,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				System.err.println(str);
 	}
 
+	@Override
 	public Message getMessage(Message request) {
 		if (request instanceof InformationRequest
 				&& ((InformationRequest) request).getMessageTypeQuery() == InformationRequest.MessageType.GPS) {
@@ -517,8 +518,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				System.out.println("[GPSModuleInput] Created Logs Folder");
 			}
 
-			localLogPrintWriterOut = new PrintWriter(FILE_NAME
-					+ sdf.format(cal.getTime()) + ".log");
+			localLogPrintWriterOut = new PrintWriter(LOG_FILE_NAME
+					+ sdf.format(cal.getTime()) +FileLogger.LOG_FILE_EXTENSION);
 			localLog = true;
 		} catch (FileNotFoundException e) {
 			System.err.println("[GPSModuleInput] Unable to start local log");

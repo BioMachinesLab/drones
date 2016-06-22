@@ -13,87 +13,92 @@ import commoninterface.neuralnetwork.CINeuralNetwork;
 import commoninterface.utils.RobotLogger;
 import commoninterfaceimpl.RealThymioCI;
 
-public class ThymioFileLogger extends Thread implements RobotLogger  {
-	
+public class ThymioFileLogger extends Thread implements RobotLogger {
+
 	private final static long SLEEP_TIME = 100;
-	
+
 	private String fileName = "";
 	private RealThymioCI thymio;
 	private String extraLog = "";
-	private DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("d-M-Y_H:m:s.S");
-	private DateTimeFormatter hourFormatter = DateTimeFormat.forPattern("H:m:s.S");
-	
+	private static final DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("d-M-Y_H:m:s.S");
+	private static final DateTimeFormatter hourFormatter = DateTimeFormat.forPattern("H:m:s.S");
+
 	public ThymioFileLogger(RealThymioCI thymio) {
-		this.thymio = thymio;
-		fileName = new LocalDateTime().toString(dateFormatter);
+		this(thymio, new LocalDateTime().toString(dateFormatter));
 	}
-	
+
+	public ThymioFileLogger(RealThymioCI thymio, String fileName) {
+		this.thymio = thymio;
+		this.fileName = fileName;
+	}
+
 	@Override
 	public void run() {
-		
+
 		BufferedWriter bw = null;
-		
+
 		try {
-		
-			FileWriter fw = new FileWriter(new File("logs/values_"+fileName+".log"));
+
+			FileWriter fw = new FileWriter(new File("logs/values_" + fileName + ".log"));
 			bw = new BufferedWriter(fw);
-			
-			while(true) {
+
+			while (true) {
 				try {
-					
-					if(!extraLog.isEmpty()) {
+
+					if (!extraLog.isEmpty()) {
 						bw.write(extraLog);
 						extraLog = "";
 					}
-					
+
 					bw.write(getLogString());
 					bw.flush();
-				} catch(Exception e) {
-					//ignore :)
+				} catch (Exception e) {
+					// ignore :)
 				}
 				Thread.sleep(SLEEP_TIME);
 			}
-			
-		} catch(InterruptedException e) {
-			//this will happen when the program exits
-		} catch(Exception e) {
+
+		} catch (InterruptedException e) {
+			// this will happen when the program exits
+		} catch (Exception e) {
 			e.printStackTrace();
-		} finally { 
+		} finally {
 			try {
-			if(bw != null)
-				bw.close();
-			}catch(Exception e) {
+				if (bw != null)
+					bw.close();
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
-	
+
 	private String getLogString() {
-		
-		String result = new LocalDateTime().toString(hourFormatter)+"\t";
-		
-		result+=thymio.getVirtualPosition().x+"\t"+thymio.getVirtualPosition().y+"\t"+thymio.getVirtualOrientation();
-		
-		if(thymio.getActiveBehavior() instanceof ControllerCIBehavior) {
-			ControllerCIBehavior controller = (ControllerCIBehavior)thymio.getActiveBehavior();
-			
+
+		String result = new LocalDateTime().toString(hourFormatter) + "\t";
+
+		result += thymio.getVirtualPosition().x + "\t" + thymio.getVirtualPosition().y + "\t"
+				+ thymio.getVirtualOrientation();
+
+		if (thymio.getActiveBehavior() instanceof ControllerCIBehavior) {
+			ControllerCIBehavior controller = (ControllerCIBehavior) thymio.getActiveBehavior();
+
 			CINeuralNetwork network = controller.getNeuralNetwork();
-			
-			if(network != null) {
-				
-				result+="network\t";
-				
+
+			if (network != null) {
+
+				result += "network\t";
+
 				double[] in = network.getInputNeuronStates();
 				double[] out = network.getOutputNeuronStates();
-				
-				for(double d : in)
-					result+=d+"\t";
-				for(double d : out)
-					result+=d+"\t";
+
+				for (double d : in)
+					result += d + "\t";
+				for (double d : out)
+					result += d + "\t";
 			}
-			
+
 		}
-		return result+"\n";
+		return result + "\n";
 	}
 
 	@Override
@@ -103,11 +108,11 @@ public class ThymioFileLogger extends Thread implements RobotLogger  {
 
 	@Override
 	public void logMessage(String string) {
-		this.extraLog+= "#"+string+"\n";
+		this.extraLog += "#" + string + "\n";
 	}
 
 	@Override
 	public void logError(String string) {
-		this.extraLog+="ERROR: "+string;
+		this.extraLog += "ERROR: " + string;
 	}
 }

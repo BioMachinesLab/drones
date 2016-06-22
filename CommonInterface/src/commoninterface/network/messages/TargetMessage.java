@@ -26,6 +26,6 @@ public class TargetMessage extends Message {
 
 	@Override
 	public String toString() {
-		return "move=" + move + ";timestep=" + timeStep;
+		return getClass().getSimpleName() + ";move=" + move + ";timestep=" + timeStep;
 	}
 }

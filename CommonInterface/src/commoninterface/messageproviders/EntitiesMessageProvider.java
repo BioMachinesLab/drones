@@ -42,7 +42,7 @@ public class EntitiesMessageProvider implements MessageProvider {
 					Entity e = i.next();
 					System.out.println("REMOVING " + e.getClass().getSimpleName());
 					if (e instanceof GeoFence || e instanceof Waypoint || e instanceof ObstacleLocation
-							|| e instanceof Formation) {
+							|| e instanceof Formation || e instanceof Target) {
 						entitiesToRemove.add(e);
 						i.remove();
 
@@ -93,7 +93,9 @@ public class EntitiesMessageProvider implements MessageProvider {
 	}
 
 	private void log(String msg) {
-		if (robot.getLogger() != null) {
+		if (robot.getEntityLogger() != null) {
+			robot.getEntityLogger().logMessage(msg);
+		}else if (robot.getLogger() != null) {
 			robot.getLogger().logMessage(msg);
 		}
 	}

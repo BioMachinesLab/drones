@@ -89,6 +89,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	private ArrayList<CIBehavior> alwaysActiveBehaviors = new ArrayList<CIBehavior>();
 
 	private RobotLogger logger;
+	private RobotLogger entityLogger;
 
 	private double currentOrientation = 0;
 	private double currentGPSOrientation = 0;
@@ -154,9 +155,10 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 						if (((ControllerCIBehavior) activeBehavior).getStartDate() == null || new LocalDateTime()
 								.isAfter(((ControllerCIBehavior) activeBehavior).getStartDate())) {
 							if (!started) {
-								logger.logMessage("Started experiment at "
-										+ ((ControllerCIBehavior) activeBehavior).getStartDate() + " with controller "
-										+ activeBehavior.getClass().getName());
+								log(LogCodex.encodeLog(LogType.MESSAGE,
+										"Started experiment at "
+												+ ((ControllerCIBehavior) activeBehavior).getStartDate()
+												+ " with controller " + activeBehavior.getClass().getName()));
 								System.out.println("Started experiment at "
 										+ ((ControllerCIBehavior) activeBehavior).getStartDate() + " with controller "
 										+ activeBehavior.getClass().getName());
@@ -213,7 +215,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 		for (Entity ent : entities) {
 			if (ent instanceof Formation) {
 				((Formation) ent).step(time);
-				logger.logMessage(((Formation) ent).getLogMessage(Operation.MOVE));
+				logEntity(ent.getLogMessage(Operation.MOVE, time));
 			}
 		}
 	}
@@ -386,9 +388,8 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 					break;
 				}
 			} else {
-				if (logger != null)
-					logger.logError("Invalid led index: " + index + ", must be >= 0 and < "
-							+ ioManager.getDebugLeds().getNumberOfOutputs());
+				log(LogCodex.encodeLog(LogType.ERROR, "Invalid led index: " + index + ", must be >= 0 and < "
+						+ ioManager.getDebugLeds().getNumberOfOutputs()));
 			}
 		}
 	}
@@ -529,9 +530,13 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	}
 
 	public void startLogger() {
-		FileLogger fileLogger = new FileLogger(this);
-		fileLogger.start();
-		this.logger = fileLogger;
+		FileLogger fileLogger_1 = new FileLogger(this);
+		fileLogger_1.start();
+		this.logger = fileLogger_1;
+
+		FileLogger fileLogger_2 = new FileLogger(this, "entity");
+		fileLogger_2.start();
+		this.entityLogger = fileLogger_2;
 	}
 
 	@Override
@@ -549,9 +554,19 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			logger.logMessage(msg);
 	}
 
+	public void logEntity(String msg) {
+		if (entityLogger != null)
+			entityLogger.logMessage(msg);
+	}
+
 	@Override
 	public RobotLogger getLogger() {
 		return logger;
+	}
+
+	@Override
+	public RobotLogger getEntityLogger() {
+		return entityLogger;
 	}
 
 	@Override
@@ -570,7 +585,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			setProperty("dronetype", args.getArgumentAsString("dronetype"));
 
 		if (args.getFlagIsTrue("filelogger"))
-			this.startLogger();
+			startLogger();
 
 		if (args.getArgumentIsDefined("compassoffset") && ioManager.getCompassModule() != null)
 			ioManager.getCompassModule().setOffset(args.getArgumentAsInt("compassoffset"));
@@ -603,7 +618,9 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	public void replaceEntity(Entity e) {
 		synchronized (entities) {
 			entities.remove(e);
+			logEntity(e.getLogMessage(Operation.REMOVE));
 			entities.add(e);
+			logEntity(e.getLogMessage(Operation.ADD));
 		}
 	}
 

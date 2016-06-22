@@ -68,7 +68,7 @@ public interface RobotCI {
 	 * @return the list with all the current entities.
 	 */
 	public ArrayList<Entity> getEntities();
-	
+
 	public void setEntities(ArrayList<Entity> entities);
 
 	/**
@@ -101,8 +101,7 @@ public interface RobotCI {
 	/**
 	 * Process a request that has been sent via the network
 	 */
-	public void processInformationRequest(Message request,
-			ConnectionHandler conn);
+	public void processInformationRequest(Message request, ConnectionHandler conn);
 
 	/**
 	 * Gets the status message of the robot's initialization procedure.
@@ -142,7 +141,8 @@ public interface RobotCI {
 	/**
 	 * Starts a specific behavior.
 	 * 
-	 * @param behavior that will control the robot
+	 * @param behavior
+	 *            that will control the robot
 	 */
 	public void startBehavior(CIBehavior behavior);
 
@@ -152,12 +152,19 @@ public interface RobotCI {
 	public void stopActiveBehavior();
 
 	/**
-	 * Gets the robot's logger.
+	 * Gets the robot's main logger.
 	 * 
 	 * @return the logger
 	 */
 	public RobotLogger getLogger();
-	
+
+	/**
+	 * Gets the robot's secondary logger.
+	 * 
+	 * @return the logger
+	 */
+	public RobotLogger getEntityLogger();
+
 	/**
 	 * Allows the change of a configuration during runtime
 	 */

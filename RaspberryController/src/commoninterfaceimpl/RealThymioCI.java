@@ -70,6 +70,7 @@ public class RealThymioCI extends Thread implements ThymioCI {
 	private Double virtualOrientation;
 
 	private RobotLogger logger;
+	private RobotLogger entityLogger;
 
 	@Override
 	public void begin(HashMap<String, CIArguments> args) {
@@ -143,6 +144,9 @@ public class RealThymioCI extends Thread implements ThymioCI {
 
 		if (logger != null)
 			logger.stopLogging();
+		
+		if (entityLogger != null)
+			entityLogger.stopLogging();
 
 		ioManager.shutdown();
 
@@ -323,9 +327,13 @@ public class RealThymioCI extends Thread implements ThymioCI {
 	}
 
 	public void startLogger() {
-		ThymioFileLogger fileLogger = new ThymioFileLogger(this);
-		fileLogger.start();
-		this.logger = fileLogger;
+		ThymioFileLogger fileLogger_1 = new ThymioFileLogger(this);
+		fileLogger_1.start();
+		this.logger = fileLogger_1;
+
+		ThymioFileLogger fileLogger_2 = new ThymioFileLogger(this, "entities");
+		fileLogger_2.start();
+		this.entityLogger = fileLogger_2;
 	}
 
 	@Override
@@ -362,6 +370,11 @@ public class RealThymioCI extends Thread implements ThymioCI {
 	}
 
 	@Override
+	public RobotLogger getEntityLogger() {
+		return entityLogger;
+	}
+
+	@Override
 	public double getLeftMotorSpeed() {
 		return leftSpeed;
 	}
@@ -376,6 +389,7 @@ public class RealThymioCI extends Thread implements ThymioCI {
 		synchronized (entities) {
 			entities.remove(e);
 			entities.add(e);
+
 		}
 	}
 
