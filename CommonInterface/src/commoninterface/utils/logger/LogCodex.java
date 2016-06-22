@@ -11,8 +11,16 @@ import commoninterface.entities.ObstacleLocation;
 import commoninterface.entities.RobotLocation;
 import commoninterface.entities.Waypoint;
 import commoninterface.entities.target.Formation;
+import commoninterface.entities.target.Formation.FormationType;
 import commoninterface.entities.target.Target;
+import commoninterface.entities.target.motion.LinearMotionData;
+import commoninterface.entities.target.motion.MixedMotionData;
+import commoninterface.entities.target.motion.MotionData;
+import commoninterface.entities.target.motion.MotionData.MovementType;
+import commoninterface.entities.target.motion.RotationMotionData;
+import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.jcoord.LatLon;
+import commoninterface.utils.logger.EntityManipulation.Operation;
 
 public class LogCodex {
 	public enum LogType {
@@ -29,6 +37,7 @@ public class LogCodex {
 	public static final String SENTENCE_SEP = "SN=";
 	public static final String SENTENCE_DELIMITATOR = "\"";
 	public static final String SENTENCE_ESCAPE = "\\" + SENTENCE_DELIMITATOR;
+	public static final String NULL_VALUE = "NULL";
 
 	// Drone informations Separators
 	public static final String LAT_LON_SEP = "LL=";
@@ -48,10 +57,21 @@ public class LogCodex {
 	public static final String NEURAL_NET_OUT_SEP = "NO=";
 
 	// Entities Informations Separators
-	public static final String ENTITY_CLASS_SEP = "ET=";
-	public static final String ENTITY_INFORMATION_BEGIN = "{";
-	public static final String ENTITY_INFORMATION_END = "}";
+	public static final String ENTITY_TYPE_SEP = "ET=";
+	public static final char ENTITY_INFORMATION_BEGIN = '{';
+	public static final char ENTITY_INFORMATION_END = '}';
 	public static final String ENTITY_OP_SEP = "EO=";
+
+	// Motion Data Informations Separators
+	public static final String MOTION_DATA_ARGUMENTS_SEPARATOR = "!";
+	public static final char MOTION_DATA_INFORMATION_BEGIN = '[';
+	public static final char MOTION_DATA_INFORMATION_END = ']';
+	public static final String MOTION_DATA_TYPE_SEP = "MDTS=";
+	public static final String MOTION_DATA_POS_SEP = "MDPO=";
+	public static final String MOTION_DATA_VELOCITY_SEP = "MDVL=";
+
+	public static final String MOTION_DATA_ROTATION_DIRECTION_SEP = "MDRD=";
+	public static final String MOTION_DATA_TRANSLATION_AZIMUTH_SEP = "MDTA=";
 
 	// Main methods
 	public static String encodeLog(LogType type, Object object) {
@@ -83,12 +103,13 @@ public class LogCodex {
 		return data;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static DecodedLog decodeLog(String logLine, Object... objs) {
 		String[] infoBlocks = logLine.split(MAIN_SEPARATOR);
 		DecodedLog decodedLog = null;
 
 		if (logLine.startsWith("[") || logLine.startsWith("\"")) {
-			// System.out.println("Ignoring this line:" +logLine);
+			System.out.println("Ignoring this line:" + logLine);
 			return null;
 		}
 
@@ -97,15 +118,19 @@ public class LogCodex {
 
 			switch (logType) {
 			case ENTITIES:
-				if (objs.length > 0 && infoBlocks.length == 4) {
+				if (infoBlocks.length == 4) {
 					String[] blocks1 = new String[infoBlocks.length - 1];
 
 					for (int i = 0; i < blocks1.length; i++) {
 						blocks1[i] = infoBlocks[i + 1];
 					}
 
-					@SuppressWarnings("unchecked")
-					ArrayList<Entity> entities = (ArrayList<Entity>) objs[0];
+					ArrayList<Entity> entities;
+					if (objs.length > 0) {
+						entities = (ArrayList<Entity>) objs[0];
+					} else {
+						entities = new ArrayList<Entity>();
+					}
 					decodeEntities(blocks1, entities);
 
 					ArrayList<Entity> currentEntities = new ArrayList<Entity>();
@@ -148,60 +173,110 @@ public class LogCodex {
 	// Decoders
 	private static void decodeEntities(String[] blocks, ArrayList<Entity> entities) {
 
-		String event = blocks[0].split("=")[1];
+		Operation event = Operation.valueOf(blocks[0].split("=")[1]);
 		String className = blocks[1].split("=")[1];
 		String data = blocks[2];
 
-		if (event.equals("ADD")) {
-
+		switch (event) {
+		case MOVE:
+		case ADD:
 			if (className.equals(GeoFence.class.getSimpleName())) {
-
 				String[] split = data.split("\\};\\{");
-
 				GeoFence fence = new GeoFence("geofence");
 
 				for (String s : split) {
+					String str = s.replace(ENTITY_INFORMATION_BEGIN, ' ').trim();
+					str = str.replace(ENTITY_INFORMATION_END, ' ').trim();
+					String[] splitArray = str.split(ARRAY_SEPARATOR);
 
-					Waypoint wp = getWaypoint(s);
-					fence.addWaypoint(wp);
+					String name = splitArray[0];
+					double lat = Double.parseDouble(splitArray[1]);
+					double lon = Double.parseDouble(splitArray[2]);
 
+					fence.addWaypoint(new Waypoint(name, new LatLon(lat, lon)));
 				}
 
 				entities.remove(fence);
 				entities.add(fence);
 
-				// GeoFence fence = new GeoFence(name);
-				//
-				// int number = s.nextInt();
-				//
-				// for (int i = 0; i < number; i++) {
-				// double lat = s.nextDouble();
-				// double lon = s.nextDouble();
-				// fence.addWaypoint(new LatLon(lat, lon));
-				// }
-				// entities.add(fence);
 			} else if (className.equals(Waypoint.class.getSimpleName())) {
+				String str = data.replace(ENTITY_INFORMATION_BEGIN, ' ').trim();
+				str = str.replace(ENTITY_INFORMATION_END, ' ').trim();
+				String[] split = str.split(ARRAY_SEPARATOR);
 
-				Waypoint wp = getWaypoint(data);
+				String name = split[0];
+				double lat = Double.parseDouble(split[1]);
+				double lon = Double.parseDouble(split[2]);
+
+				Waypoint wp = new Waypoint(name, new LatLon(lat, lon));
 				entities.remove(wp);
 				entities.add(wp);
 
 			} else if (className.equals(ObstacleLocation.class.getSimpleName())) {
+				String str = data.replace(ENTITY_INFORMATION_BEGIN, ' ').trim();
+				str = str.replace(ENTITY_INFORMATION_END, ' ').trim();
+				String[] split = str.split(ARRAY_SEPARATOR);
 
-				// TODO
-				// double lat = s.nextDouble();
-				// double lon = s.nextDouble();
-				//
-				// double radius = s.nextDouble();
-				// entities.add(new ObstacleLocation(name, new LatLon(lat, lon),
-				// radius));
+				String name = split[0];
+				double lat = Double.parseDouble(split[1]);
+				double lon = Double.parseDouble(split[2]);
+				double radius = Double.parseDouble(split[3]);
+
+				ObstacleLocation ol = new ObstacleLocation(name, new LatLon(lat, lon), radius);
+				entities.remove(ol);
+				entities.add(ol);
+
+			} else if (className.equals(RobotLocation.class.getSimpleName())) {
+				String str = data.replace(ENTITY_INFORMATION_BEGIN, ' ').trim();
+				str = str.replace(ENTITY_INFORMATION_END, ' ').trim();
+				String[] split = str.split(ARRAY_SEPARATOR);
+
+				String name = split[0];
+				double lat = Double.parseDouble(split[1]);
+				double lon = Double.parseDouble(split[2]);
+				double orientation = Double.parseDouble(split[3]);
+				AquaticDroneCI.DroneType droneType = AquaticDroneCI.DroneType.valueOf(split[4]);
+
+				RobotLocation rl = new RobotLocation(name, new LatLon(lat, lon), orientation, droneType);
+				entities.remove(rl);
+				entities.add(rl);
+
+			} else if (className.equals(Target.class.getSimpleName())) {
+				String str = data.replace(ENTITY_INFORMATION_BEGIN, ' ').trim();
+				str = str.replace(ENTITY_INFORMATION_END, ' ').trim();
+				String[] split = str.split(ARRAY_SEPARATOR);
+
+				String name = split[0];
+				double lat = Double.parseDouble(split[1]);
+				double lon = Double.parseDouble(split[2]);
+				double radius = Double.parseDouble(split[3]);
+				boolean inFormation = Boolean.parseBoolean(split[4]);
+				boolean isOccupied = Boolean.parseBoolean(split[5]);
+				String occupantID = split[6];
+
+				if (occupantID.equals(LogCodex.NULL_VALUE)) {
+					occupantID = null;
+				}
+
+				Target target = new Target(name, new LatLon(lat, lon), radius);
+				target.setInFormation(inFormation);
+				target.setOccupied(isOccupied);
+				target.setOccupantID(occupantID);
+				target.step(0);
+				target.setMotionData(decodeMotionData(split[7], target));
+				entities.remove(target);
+				entities.add(target);
+
+			} else if (className.equals(Formation.class.getSimpleName())) {
+				Formation f = getFormation(data);
+				entities.remove(f);
+				entities.add(f);
 			}
-			//
-		} else if (event.equals("REMOVE")) {
-
-			data = data.replace('{', ' ').trim();
-			data = data.replace('}', ' ').trim();
-			String[] split = data.split(";");
+			break;
+		case REMOVE:
+			data = data.replace(ENTITY_INFORMATION_BEGIN, ' ').trim();
+			data = data.replace(ENTITY_INFORMATION_END, ' ').trim();
+			String[] split = data.split(ARRAY_SEPARATOR);
 
 			Iterator<Entity> i = entities.iterator();
 			while (i.hasNext()) {
@@ -210,27 +285,76 @@ public class LogCodex {
 					break;
 				}
 			}
+			break;
 		}
-
 	}
 
-	private static Waypoint getWaypoint(String s) {
-		s = s.replace('{', ' ').trim();
-		s = s.replace('}', ' ').trim();
-		String[] split = s.split(";");
+	private static Formation getFormation(String data) {
+		String str = data.replace(ENTITY_INFORMATION_BEGIN, ' ').trim();
+		str = str.replace(ENTITY_INFORMATION_END, ' ').trim();
+		String[] split = str.split(ARRAY_SEPARATOR);
 
-		String name = split[0];
-		double lat = Double.parseDouble(split[1]);
-		double lon = Double.parseDouble(split[2]);
-		return new Waypoint(name, new LatLon(lat, lon));
+		String formationName = split[0];
+		double formationLat = Double.parseDouble(split[1]);
+		double formationLon = Double.parseDouble(split[2]);
+		int targetsQnt = Integer.parseInt(split[3]);
+		FormationType formationType = FormationType.valueOf(split[4]);
+		double lineFormationDelta = Double.parseDouble(split[6]);
+		Vector2d arrowFormationDeltas = Vector2d.parseVector2d(split[7]);
+		double circleFormationRadius = Double.parseDouble(split[8]);
+		long randomSeed = Long.parseLong(split[9]);
+		boolean variateFormationParameters = Boolean.parseBoolean(split[10]);
+		double initialFormationRotation = Double.parseDouble(split[11]);
+		double targetsRadius = Double.parseDouble(split[12]);
+		double safetyDistance = Double.parseDouble(split[13]);
+		double radiusOfObjPositioning = Double.parseDouble(split[14]);
+
+		Formation f = new Formation(formationName, new LatLon(formationLat, formationLon));
+		f.setLineFormationDelta(lineFormationDelta);
+		f.setArrowFormationDeltas(arrowFormationDeltas);
+		f.setCircleFormationRadius(circleFormationRadius);
+		f.setRandomSeed(randomSeed);
+		f.setVariateFormationParameters(variateFormationParameters);
+		f.setInitialRotation(initialFormationRotation);
+		f.setFormationType(formationType);
+		f.setTargetRadius(targetsRadius);
+		f.setSafetyDistance(safetyDistance);
+		f.setRadiusOfObjPositioning(radiusOfObjPositioning);
+		
+		MotionData formationMotionData = decodeMotionData(split[5], f);
+		f.setMotionData(formationMotionData);
+
+		ArrayList<Target> targets = new ArrayList<Target>();
+		for (int i = 0; i < targetsQnt; i++) {
+			String name = split[15 + i * 8];
+			double lat = Double.parseDouble(split[16 + i * 8]);
+			double lon = Double.parseDouble(split[17 + i * 8]);
+			double radius = Double.parseDouble(split[18 + i * 8]);
+			boolean inFormation = Boolean.parseBoolean(split[19 + i * 8]);
+			boolean isOccupied = Boolean.parseBoolean(split[20 + i * 8]);
+			String occupantID = split[21 + i * 8];
+
+			if (occupantID.equals(LogCodex.NULL_VALUE)) {
+				occupantID = null;
+			}
+
+			Target target = new Target(name, new LatLon(lat, lon), radius);
+			target.setInFormation(inFormation);
+			target.setOccupied(isOccupied);
+			target.setOccupantID(occupantID);
+			target.setFormation(f);
+			target.setMotionData(decodeMotionData(split[22 + i * 8], target));
+			targets.add(target);
+		}
+
+		f.setTargets(targets);
+		return f;
 	}
 
 	private static LogData decodeLogData(String[] infoBlocks) {
-
 		LogData logData = new LogData();
 
 		try {
-
 			for (int i = 0; i < infoBlocks.length; i++) {
 				String information = infoBlocks[i].substring(3, infoBlocks[i].length());
 
@@ -328,10 +452,10 @@ public class LogCodex {
 		return logData;
 	}
 
-	// Coders
+	// Encoders
 	private static String escapeComment(String str) {
 		if (str.contains(SENTENCE_DELIMITATOR)) {
-			str = str.replaceAll(SENTENCE_DELIMITATOR, SENTENCE_ESCAPE);
+			str = str.replace(SENTENCE_DELIMITATOR, SENTENCE_ESCAPE);
 		}
 
 		return SENTENCE_DELIMITATOR + str + SENTENCE_DELIMITATOR;
@@ -426,7 +550,7 @@ public class LogCodex {
 			String className = entities.getEntitiesClass();
 
 			data += ENTITY_OP_SEP + entities.operation() + MAIN_SEPARATOR;
-			data += ENTITY_CLASS_SEP + className + MAIN_SEPARATOR;
+			data += ENTITY_TYPE_SEP + className + MAIN_SEPARATOR;
 
 			ArrayList<Entity> ent = entities.getEntities();
 			for (int i = 0; i < ent.size(); i++) {
@@ -446,19 +570,44 @@ public class LogCodex {
 						data += ARRAY_SEPARATOR + ((Target) ent.get(i)).getRadius();
 						data += ARRAY_SEPARATOR + ((Target) ent.get(i)).isInFormation();
 						data += ARRAY_SEPARATOR + ((Target) ent.get(i)).isOccupied();
-						data += ARRAY_SEPARATOR + ((Target) ent.get(i)).getOccupantID();
+
+						if (((Target) ent.get(i)).getOccupantID() == null) {
+							data += ARRAY_SEPARATOR + LogCodex.NULL_VALUE;
+						} else {
+							data += ARRAY_SEPARATOR + ((Target) ent.get(i)).getOccupantID();
+						}
+
+						data += ARRAY_SEPARATOR + encodeMotionData(((Target) ent.get(i)).getMotionData());
 					} else if (ent.get(i) instanceof Formation) {
-						data += ARRAY_SEPARATOR + ((Formation) ent.get(i)).getName();
-						data += ARRAY_SEPARATOR + ((Formation) ent.get(i)).getTargetQuantity();
-						data += ARRAY_SEPARATOR + ((Formation) ent.get(i)).getFormationType();
-						for (Target t : ((Formation) ent.get(i)).getTargets()) {
+						Formation f = ((Formation) ent.get(i));
+
+						data += ARRAY_SEPARATOR + f.getTargetQuantity();
+						data += ARRAY_SEPARATOR + f.getFormationType();
+						data += ARRAY_SEPARATOR + encodeMotionData(f.getMotionData());
+						data += ARRAY_SEPARATOR + f.getLineFormationDelta();
+						data += ARRAY_SEPARATOR + f.getArrowFormationDeltas();
+						data += ARRAY_SEPARATOR + f.getCircleFormationRadius();
+						data += ARRAY_SEPARATOR + f.getRandomSeed();
+						data += ARRAY_SEPARATOR + f.getVariateFormationParameters();
+						data += ARRAY_SEPARATOR + f.getInitialRotation();
+						data += ARRAY_SEPARATOR + f.getTargetRadius();
+						data += ARRAY_SEPARATOR + f.getSafetyDistance();
+						data += ARRAY_SEPARATOR + f.getRadiusOfObjPositioning();
+
+						for (Target t : f.getTargets()) {
 							data += ARRAY_SEPARATOR + t.getName();
 							data += ARRAY_SEPARATOR + t.getLatLon().getLat();
 							data += ARRAY_SEPARATOR + t.getLatLon().getLon();
 							data += ARRAY_SEPARATOR + t.getRadius();
 							data += ARRAY_SEPARATOR + t.isInFormation();
 							data += ARRAY_SEPARATOR + t.isOccupied();
-							data += ARRAY_SEPARATOR + t.getOccupantID();
+
+							if (t.getOccupantID() == null) {
+								data += ARRAY_SEPARATOR + NULL_VALUE;
+							} else {
+								data += ARRAY_SEPARATOR + t.getOccupantID();
+							}
+							data += ARRAY_SEPARATOR + encodeMotionData(t.getOwnMotionData());
 						}
 					}
 
@@ -476,4 +625,92 @@ public class LogCodex {
 		return data;
 	}
 
+	public static String encodeMotionData(MotionData data) {
+		String str = MOTION_DATA_INFORMATION_BEGIN + "";
+
+		if (data != null) {
+			str += MOTION_DATA_TYPE_SEP + data.getMotionType().toString();
+
+			if (data instanceof LinearMotionData) {
+				str += MOTION_DATA_ARGUMENTS_SEPARATOR + MOTION_DATA_TRANSLATION_AZIMUTH_SEP
+						+ ((LinearMotionData) data).getMovementAzimuth();
+				str += MOTION_DATA_ARGUMENTS_SEPARATOR + MOTION_DATA_VELOCITY_SEP
+						+ ((LinearMotionData) data).getMovementVelocity();
+			} else if (data instanceof RotationMotionData) {
+				str += MOTION_DATA_ARGUMENTS_SEPARATOR + MOTION_DATA_POS_SEP
+						+ ((RotationMotionData) data).getRotationCenter();
+				str += MOTION_DATA_ARGUMENTS_SEPARATOR + MOTION_DATA_ROTATION_DIRECTION_SEP
+						+ ((RotationMotionData) data).getRotationDirection();
+				str += MOTION_DATA_ARGUMENTS_SEPARATOR + MOTION_DATA_VELOCITY_SEP
+						+ ((RotationMotionData) data).getAngularVelocity();
+			} else if (data instanceof MixedMotionData) {
+
+			}
+
+		} else {
+			str += MOTION_DATA_TYPE_SEP + NULL_VALUE;
+		}
+
+		return str + MOTION_DATA_INFORMATION_END;
+	}
+
+	public static MotionData decodeMotionData(String data, GeoEntity entity) {
+		String[] args = data.replace(MOTION_DATA_INFORMATION_BEGIN, ' ').replace(MOTION_DATA_INFORMATION_END, ' ')
+				.trim().split(MOTION_DATA_ARGUMENTS_SEPARATOR);
+
+		if (args.length == 1 && args[0].substring(5, args[0].length()).equals(NULL_VALUE)) {
+			return null;
+		}
+
+		MovementType motionDataType = null;
+		LatLon position = null;
+		double velocity = 0;
+		double translationAzimuth = 0;
+		boolean rotationDirection = false;
+		for (String arg : args) {
+			String information = arg.substring(5, arg.length());
+			switch (arg.substring(0, 5)) {
+			case MOTION_DATA_TYPE_SEP:
+				motionDataType = MovementType.valueOf(information);
+				break;
+
+			case MOTION_DATA_POS_SEP:
+				String[] latLon = information.replace("(", "").replace(")", "").split(",");
+				double lat = Double.parseDouble(latLon[0]);
+				double lon = Double.parseDouble(latLon[1]);
+				position = new LatLon(lat, lon);
+				break;
+
+			case MOTION_DATA_VELOCITY_SEP:
+				velocity = Double.parseDouble(information);
+				break;
+
+			case MOTION_DATA_ROTATION_DIRECTION_SEP:
+				rotationDirection = Boolean.parseBoolean(information);
+				break;
+
+			case MOTION_DATA_TRANSLATION_AZIMUTH_SEP:
+				translationAzimuth = Double.parseDouble(information);
+				break;
+			}
+		}
+
+		if (motionDataType != null && entity != null) {
+			MotionData motionData = null;
+			switch (motionDataType) {
+			case LINEAR:
+				motionData = new LinearMotionData(entity, velocity, translationAzimuth);
+				break;
+			case ROTATIONAL:
+				motionData = new RotationMotionData(entity, position, velocity, rotationDirection);
+				break;
+			case MIXED:
+				throw new IllegalArgumentException("Not implemented!");
+			}
+
+			return motionData;
+		} else {
+			return null;
+		}
+	}
 }
