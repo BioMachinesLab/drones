@@ -549,7 +549,7 @@ public class LogCodex {
 		if (entities != null && !entities.getEntities().isEmpty()) {
 			String className = entities.getEntitiesClass();
 
-			data += ENTITY_OP_SEP + entities.operation() + MAIN_SEPARATOR;
+			data += ENTITY_OP_SEP + entities.getOperation() + MAIN_SEPARATOR;
 			data += ENTITY_TYPE_SEP + className + MAIN_SEPARATOR;
 
 			ArrayList<Entity> ent = entities.getEntities();
