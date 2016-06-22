@@ -86,9 +86,22 @@ public class LinearMotionData extends MotionData {
 	public boolean equals(Object obj) {
 		if (obj instanceof LinearMotionData) {
 			LinearMotionData lmd = (LinearMotionData) obj;
-			return motionType.equals(lmd.getMotionType()) && entity.equals(lmd.getEntity()) && move == lmd.isMoving()
-					&& movementAzimuth == lmd.getMovementAzimuth() && movementVelocity == lmd.getMovementVelocity()
-					&& originalPosition.equals(lmd.getOriginalPosition());
+
+			boolean a = motionType.equals(lmd.getMotionType());
+			boolean b = move == lmd.isMoving();
+			boolean c = movementAzimuth == lmd.getMovementAzimuth();
+			boolean d = movementVelocity == lmd.getMovementVelocity();
+			boolean e = originalPosition.equals(lmd.getOriginalPosition());
+			boolean f = entity.equals(lmd.getEntity());
+
+//			System.out.println("a=" + a);
+//			System.out.println("b=" + b);
+//			System.out.println("c=" + c);
+//			System.out.println("d=" + d);
+//			System.out.println("e=" + e);
+//			System.out.println("f=" + f);
+			
+			return a && b && c && d && e && f;
 		} else {
 			return false;
 		}

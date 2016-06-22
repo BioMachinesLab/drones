@@ -184,6 +184,44 @@ public class Formation extends GeoEntity {
 		return form;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof Formation) {
+			Formation form = (Formation) obj;
+
+			HashMap<String, Target> ts = new HashMap<String, Target>();
+			for (Target t : targets) {
+				ts.put(t.getName(), t);
+			}
+
+			for (Target t : form.getTargets()) {
+				if (!ts.get(t.getName()).equals(t)) {
+					return false;
+				}
+			}
+
+			boolean b = form.getFormationType().equals(formationType);
+			boolean c = form.getName().equals(name);
+			boolean d = form.getTargetQuantity() == targetQnt;
+			boolean e = form.getTargetRadius() == targetRadius;
+			boolean f = form.getRandomSeed() == randomSeed;
+			boolean g = form.getVariateFormationParameters() == variateFormationParameters;
+			boolean h = form.getLineFormationDelta() == lineFormationDelta;
+			boolean i = form.getCircleFormationRadius() == circleFormation_radius;
+			boolean j = form.getArrowFormationDeltas().getX() == arrowFormation_xDelta;
+			boolean k = form.getArrowFormationDeltas().getY() == arrowFormation_yDelta;
+			boolean l = form.getLatLon().equals(latLon);
+			boolean m = form.getInitialRotation() == initialRotation;
+			boolean n = form.getSafetyDistance() == safetyDistance;
+			boolean o = form.getRadiusOfObjPositioning() == radiusOfObjPositioning;
+			boolean p = form.getTargets().size() == targets.size();
+
+			return b && c && d && e && f && g && h && i && j && k && l && m && n && o && p;
+		} else {
+			return false;
+		}
+	}
+
 	/*
 	 * Build formation
 	 */
@@ -348,7 +386,7 @@ public class Formation extends GeoEntity {
 
 			positions[i] = position;
 		}
-		
+
 		placeTargets(positions);
 	}
 
