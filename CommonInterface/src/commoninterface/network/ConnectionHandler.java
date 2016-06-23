@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+
 import commoninterface.RobotCI;
 import commoninterface.network.messages.Message;
 import commoninterface.network.messages.SystemStatusMessage;
@@ -20,8 +21,7 @@ public class ConnectionHandler extends Thread {
 	protected String clientName = null;
 	protected ConnectionListener connectionListener;
 
-	public ConnectionHandler(Socket socket, RobotCI robot,
-			ConnectionListener connectionListener) {
+	public ConnectionHandler(Socket socket, RobotCI robot, ConnectionListener connectionListener) {
 		this.socket = socket;
 		this.robot = robot;
 		this.connectionListener = connectionListener;
@@ -39,23 +39,21 @@ public class ConnectionHandler extends Thread {
 					processMessage(message);
 
 				} catch (ClassNotFoundException e) {
-					System.out
-							.println("[CONNECTION HANDLER] Received class of unknown type from "
-									+ clientName + ", so it was discarded....");
+					System.out.printf("[%s] Received class of unknown type from %s, so it was discarded%n",
+							getClass().getName(), clientName);
 				} catch (ClassCastException e) {
-					System.out
-							.println("[CONNECTION HANDLER] Received class of different type (other than Message) from "
-									+ clientName + ", so it was discarded....");
+					System.out.printf(
+							"[%s] Received class of different type (other than Message) from %s, so it was discarded%n",
+							getClass().getName(), clientName);
 				}
 			}
 
 		} catch (IOException e) {
-			System.out.println("Client "
-					+ socket.getInetAddress().getHostAddress() + " ("
-					+ clientName + ") disconnected");
+			System.out.printf("[%s] Client %s (%s) disconnected%n", getClass().getName(),
+					socket.getInetAddress().getHostAddress(), clientName);
 		} catch (ClassNotFoundException e) {
-			System.out.println("I didn't reveived a correct name from "
-					+ socket.getInetAddress().getHostAddress());
+			System.out.printf("[%s] I didn't reveived a correct name from %s%n", getClass().getName(),
+					socket.getInetAddress().getHostAddress());
 			e.printStackTrace();
 		} finally {
 			// always shutdown the handler when something goes wrong
@@ -72,9 +70,8 @@ public class ConnectionHandler extends Thread {
 
 	protected void processMessage(Message message) {
 		if (DEBUG)
-			System.out
-					.println("[CONNECTION HANDLER] Information Request Message ("
-							+ message.getClass().getSimpleName() + ")");
+			System.out.printf("[%s] Information Request Message (%s)%n", getClass().getName(),
+					message.getClass().getSimpleName());
 		robot.processInformationRequest(message, this);
 	}
 
@@ -89,18 +86,15 @@ public class ConnectionHandler extends Thread {
 
 		clientName = (String) in.readObject();
 
-		System.out.println("[CONNECTION HANDLER] Client "
-				+ socket.getInetAddress().getHostAddress() + " (" + clientName
-				+ ") connected");
+		System.out.printf("[%s] Client %s (%s) connected%n", getClass().getName(),
+				socket.getInetAddress().getHostAddress(), clientName);
 
 		// controller.processInformationRequest(new
 		// InformationRequest(MessageType.SYSTEM_STATUS), this);
 		if (robot.getNetworkAddress() != null) {
-			sendData(new SystemStatusMessage(robot.getInitMessages(),
-					robot.getNetworkAddress()));
+			sendData(new SystemStatusMessage(robot.getInitMessages(), robot.getNetworkAddress()));
 		} else {
-			sendData(new SystemStatusMessage(robot.getInitMessages(),
-					"<virtual host>"));
+			sendData(new SystemStatusMessage(robot.getInitMessages(), "<virtual host>"));
 		}
 	}
 
@@ -113,9 +107,8 @@ public class ConnectionHandler extends Thread {
 				in.close();
 			}
 		} catch (IOException e) {
-			System.out
-					.println("[CONNECTION HANDLER] Unable to close connection to "
-							+ clientName + "... there is an open connection?");
+			System.out.printf("[%s] Unable to close connection to %s... is there an open connection?%n",
+					getClass().getName(), clientName);
 		}
 	}
 
@@ -127,9 +120,8 @@ public class ConnectionHandler extends Thread {
 				in.close();
 			}
 		} catch (IOException e) {
-			System.out
-					.println("[CONNECTION HANDLER] Unable to close connection to "
-							+ clientName + "... there is an open connection?");
+			System.out.printf("[%s] Unable to close connection to %s... is there an open connection?%n",
+					getClass().getName(), clientName);
 		}
 	}
 
@@ -139,11 +131,10 @@ public class ConnectionHandler extends Thread {
 			out.writeObject(data);
 			out.flush();
 			if (DEBUG)
-				System.out.println("[CONNECTION HANDLER] Sent Data ("
-						+ data.getClass().getSimpleName() + ")");
+				System.out.printf("[%s] Sent Data (%s)%n", getClass().getName(), data.getClass().getSimpleName());
 		} catch (IOException e) {
-			System.out
-					.println("[CONNECTION HANDLER] Unable to send data... there is an open connection?");
+			System.out.printf("[%s] Unable to close connection to %s... is there an open connection?%n",
+					getClass().getName(), clientName);
 		}
 	}
 

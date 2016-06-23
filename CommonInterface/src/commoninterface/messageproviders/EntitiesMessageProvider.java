@@ -40,7 +40,8 @@ public class EntitiesMessageProvider implements MessageProvider {
 				ArrayList<Entity> entitiesToRemove = new ArrayList<Entity>();
 				while (i.hasNext()) {
 					Entity e = i.next();
-					System.out.println("REMOVING " + e.getClass().getSimpleName());
+					System.out.printf("[%s] REMOVING %s %s%n", getClass().getName(), e.getClass().getSimpleName(),
+							e.getName());
 					if (e instanceof GeoFence || e instanceof Waypoint || e instanceof ObstacleLocation
 							|| e instanceof Formation || e instanceof Target) {
 						entitiesToRemove.add(e);
@@ -63,7 +64,8 @@ public class EntitiesMessageProvider implements MessageProvider {
 			}
 
 			for (Entity e : entities) {
-				System.out.println("ADDED " + e.getClass().getSimpleName());
+				System.out.printf("[%s] ADDING %s %s%n", getClass().getName(), e.getClass().getSimpleName(),
+						e.getName());
 				if (e instanceof GeoEntity) {
 					GeoEntity ge = (GeoEntity) e;
 					log(ge.getLogMessage(Operation.ADD));
@@ -84,7 +86,7 @@ public class EntitiesMessageProvider implements MessageProvider {
 
 				if (!wps.isEmpty()) {
 					((AquaticDroneCI) robot).setActiveWaypoint(wps.get(wm.getActiveId()));
-					System.out.println("Active waypoint is " + wm.getActiveId());
+					System.out.printf("[%s] Active waypoint is now %s%n", getClass().getName(), wm.getActiveId());
 				}
 			}
 			return m;
