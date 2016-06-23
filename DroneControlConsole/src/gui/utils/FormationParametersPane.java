@@ -1,5 +1,6 @@
 package gui.utils;
 
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -132,7 +133,14 @@ public class FormationParametersPane {
 		all.add(movementPatchPanel);
 
 		JScrollPane scrollPane = new JScrollPane(all, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER) {
+			private static final long serialVersionUID = -3320931902102462641L;
+
+			@Override
+			public Dimension getPreferredSize() {
+				return new Dimension(550, 500);
+			}
+		};
 
 		mainPanel.add(scrollPane);
 	}
