@@ -89,7 +89,7 @@ public class CommandSender extends Thread {
 					Object o = in.readObject();
 
 					if (o == null || !(o instanceof Message)) {
-						System.out.println("[CommandSender] Didn't receive the right confirmation!");
+						System.out.printf("[%s] Didn't receive the right confirmation!", getClass().getName());
 					}
 				}
 
@@ -98,7 +98,7 @@ public class CommandSender extends Thread {
 				socket.close();
 
 			} catch (Exception e) {
-				System.out.println("PROBLEM IN IP " + ip);
+				System.out.printf("[%s] PROBLEM IN IP %s%n", getClass().getName(), ip);
 				e.printStackTrace();
 			} finally {
 				try {
