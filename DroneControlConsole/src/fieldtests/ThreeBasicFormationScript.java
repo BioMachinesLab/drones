@@ -174,7 +174,7 @@ public class ThreeBasicFormationScript extends FieldTestScript {
 				new String[] { "Controller", "Radius of positioning: ", "Drones Quantity",
 						"Experiments duration (seconds)", "Execute after (seconds)", "IPs", "Seed" },
 				lastOptions != null ? lastOptions
-						: new String[] { "rendition0", "15", "5", "240", "20", "1,2,3,4,5", "1" });
+						: new String[] { "preset_rendition0", "15", "5", "240", "20", "1,2,3,4,5", "1" });
 		if (options == null) {
 			return;
 		}
@@ -191,7 +191,7 @@ public class ThreeBasicFormationScript extends FieldTestScript {
 		robots = new ArrayList<String>();
 		for (int i = 0; i < ips.length; i++) {
 			robots.add("192.168.3." + ips[i]);
-			// robots.add("192.168.1." + ips[i]);
+			ips[i] = "192.168.3." + ips[i];
 		}
 	}
 
@@ -302,7 +302,7 @@ public class ThreeBasicFormationScript extends FieldTestScript {
 
 		// Wait for start time
 		// while (new LocalDateTime().minusHours(1).isBefore(startTime)) {
-		while (new LocalDateTime().isBefore(startTime)) {
+		while (console.getGPSTime().isBefore(startTime)) {
 			System.out.print(".");
 			try {
 				Thread.sleep(100);
