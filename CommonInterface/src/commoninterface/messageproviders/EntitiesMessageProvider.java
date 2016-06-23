@@ -95,7 +95,7 @@ public class EntitiesMessageProvider implements MessageProvider {
 	private void log(String msg) {
 		if (robot.getEntityLogger() != null) {
 			robot.getEntityLogger().logMessage(msg);
-		}else if (robot.getLogger() != null) {
+		} else if (robot.getLogger() != null) {
 			robot.getLogger().logMessage(msg);
 		}
 	}
