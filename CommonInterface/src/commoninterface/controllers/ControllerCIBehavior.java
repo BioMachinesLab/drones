@@ -83,6 +83,10 @@ public class ControllerCIBehavior extends CIBehavior {
 	public LocalDateTime getStartDate() {
 		return startDate;
 	}
+	
+	public String getDescription() {
+		return description;
+	}
 
 	@Override
 	public void step(double timestep) {
