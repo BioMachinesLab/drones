@@ -100,7 +100,6 @@ public class LineFormationScript extends FieldTestScript {
 			for (Waypoint wp : startingWaypoints) {
 				addEntityToMap(wp);
 			}
-			deployMapEntities(new ArrayList<String>(Arrays.asList(ips)));
 
 			for (int i = 0; i < robots.size(); i++) {
 				goToWaypoint(singletonList(robots.get(i)), startingWaypoints.get(i));
@@ -141,7 +140,6 @@ public class LineFormationScript extends FieldTestScript {
 						for (Waypoint wp : startingWaypoints) {
 							addEntityToMap(wp);
 						}
-						deployMapEntities(new ArrayList<String>(Arrays.asList(ips)));
 
 						for (int i = 0; i < robots.size(); i++) {
 							goToWaypoint(singletonList(robots.get(i)), startingWaypoints.get(i));
