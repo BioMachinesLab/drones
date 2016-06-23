@@ -38,16 +38,18 @@ public class FileLogger extends Thread implements RobotLogger {
 	private int logs = 0;
 	private String ipAddr;
 	private ArrayList<String> toLog;
+	private boolean logData;
 
-	public FileLogger(RealAquaticDroneCI drone, String fileName) {
-		this(drone);
+	public FileLogger(RealAquaticDroneCI drone, boolean logData, String fileName) {
+		this(drone, logData);
 		this.fileName = fileName + (fileName.endsWith("_") ? "" : "_");
 	}
 
-	public FileLogger(RealAquaticDroneCI drone) {
+	public FileLogger(RealAquaticDroneCI drone, boolean logData) {
 		this.drone = drone;
 		ipAddr = drone.getNetworkAddress();
 		toLog = new ArrayList<String>();
+		this.logData = logData;
 	}
 
 	public BufferedWriter setupWriter() throws IOException {
@@ -80,9 +82,11 @@ public class FileLogger extends Thread implements RobotLogger {
 				}
 
 				try {
-					String logLine = LogCodex.encodeLog(LogType.LOGDATA, getLogData());
-					bw.write(logLine);
-					bw.flush();
+					if (logData) {
+						String logLine = LogCodex.encodeLog(LogType.LOGDATA, getLogData());
+						bw.write(logLine);
+						bw.flush();
+					}
 
 					synchronized (toLog) {
 						if (!toLog.isEmpty()) {

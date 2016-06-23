@@ -530,11 +530,11 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	}
 
 	public void startLogger() {
-		FileLogger fileLogger_1 = new FileLogger(this);
+		FileLogger fileLogger_1 = new FileLogger(this, true);
 		fileLogger_1.start();
 		this.logger = fileLogger_1;
 
-		FileLogger fileLogger_2 = new FileLogger(this, "entity");
+		FileLogger fileLogger_2 = new FileLogger(this, false, "entity");
 		fileLogger_2.start();
 		this.entityLogger = fileLogger_2;
 	}
