@@ -302,7 +302,7 @@ public class ThreeBasicFormationScript extends FieldTestScript {
 
 		// Wait for start time
 		// while (new LocalDateTime().minusHours(1).isBefore(startTime)) {
-		while (console.getGPSTime().isBefore(startTime)) {
+		while (startTime.isAfter(console.getGPSTime())) {
 			System.out.print(".");
 			try {
 				Thread.sleep(100);
@@ -313,7 +313,7 @@ public class ThreeBasicFormationScript extends FieldTestScript {
 
 		// GO GO GO Experiments running!
 		((DroneGUI) console.getGUI()).getMapPanel().setFormationUpdate(true);
-		System.out.printf("Experiments started! Description: %s%n", description);
+		System.out.printf("Experiments started at %s . Description: %s%n", console.getGPSTime().toString(),description);
 		try {
 			Thread.sleep(experimentsDuration * 1000);
 		} catch (InterruptedException e) {
