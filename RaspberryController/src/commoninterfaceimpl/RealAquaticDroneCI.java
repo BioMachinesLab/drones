@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.joda.time.LocalDateTime;
-
 import commoninterface.AquaticDroneCI;
 import commoninterface.CIBehavior;
 import commoninterface.CISensor;
@@ -141,8 +139,9 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 				// But this way is more clear
 				if (current != null) {
 					if (activeBehavior instanceof ControllerCIBehavior
-							&& (((ControllerCIBehavior) activeBehavior).getStartDate() == null || new LocalDateTime()
-									.isAfter(((ControllerCIBehavior) activeBehavior).getStartDate()))) {
+							&& (((ControllerCIBehavior) activeBehavior).getStartDate() == null
+									|| ioManager.getGpsModule().getReadings().getDate()
+											.isAfter(((ControllerCIBehavior) activeBehavior).getStartDate()))) {
 						updateEntities = ((ControllerCIBehavior) activeBehavior).updateEntities();
 					}
 
@@ -152,8 +151,9 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 					if (!(activeBehavior instanceof ControllerCIBehavior)) {
 						current.step(behaviorTimestep++);
 					} else {
-						if (((ControllerCIBehavior) activeBehavior).getStartDate() == null || new LocalDateTime()
-								.isAfter(((ControllerCIBehavior) activeBehavior).getStartDate())) {
+						if (((ControllerCIBehavior) activeBehavior).getStartDate() == null
+								|| ioManager.getGpsModule().getReadings().getDate()
+										.isAfter(((ControllerCIBehavior) activeBehavior).getStartDate())) {
 							if (!started) {
 								log(LogCodex.encodeLog(LogType.MESSAGE,
 										"Started experiment at "
