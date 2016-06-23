@@ -1,14 +1,11 @@
 package fieldtests;
 
-import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Random;
 
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 
 import org.joda.time.LocalDateTime;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
@@ -16,23 +13,20 @@ import org.openstreetmap.gui.jmapviewer.Coordinate;
 import commoninterface.entities.GeoFence;
 import commoninterface.entities.Waypoint;
 import commoninterface.entities.target.Formation;
-import commoninterface.entities.target.Formation.FormationType;
 import commoninterface.entities.target.motion.MotionData.MovementType;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CIArguments;
-import commoninterface.utils.CoordinateUtilities;
-import commoninterface.utils.jcoord.LatLon;
 import gui.DroneGUI;
 import gui.panels.CommandPanel;
 import gui.utils.FormationParametersPane;
 import main.DroneControlConsole;
-import network.mobileAppServer.shared.dataObjects.DroneData;
-import network.mobileAppServer.shared.dataObjects.DronesSet;
 
-public class ThreeBasicFormationScript extends FieldTestScript {
+public class FaultInjectionFormationScript extends FieldTestScript {
 	private Vector2d INIT_FENCE_SIZE = new Vector2d(40, 40);
 	private double WAYPOINTS_MIN_DISTANCE = 3.5;
 	private double WAYPOINTS_MAX_DISTANCE = 40;
+	private int FAULT_DURATION = 50; // In seconds
+	private boolean VARY_FAULT_DURATION = true;
 
 	private static String[] lastOptions = null;
 	private LocalDateTime startTime = null;
@@ -47,11 +41,16 @@ public class ThreeBasicFormationScript extends FieldTestScript {
 	private ArrayList<String> robots;
 
 	private Waypoint centralPoint;
-	private int nextFormation;
-	private ArrayList<Formation> formations;
+	private Formation formation;
 	private ArrayList<Waypoint> startingWaypoints;
 
-	public ThreeBasicFormationScript(DroneControlConsole console, CommandPanel commandPanel) {
+	private int secondToInjectFault;
+	private Random random;
+	private String faultyRobot;
+
+	private double faultDuration;
+
+	public FaultInjectionFormationScript(DroneControlConsole console, CommandPanel commandPanel) {
 		super(console, commandPanel);
 	}
 
@@ -60,10 +59,24 @@ public class ThreeBasicFormationScript extends FieldTestScript {
 
 		try {
 			super.run();
-			boolean firstRun = true;
 
 			System.out.println("Getting options!");
 			readUserOptions();
+
+			/*
+			 * Choose the drone and set the time step to initiate fault
+			 * condition
+			 */
+			random = new Random(randomSeed);
+			if (VARY_FAULT_DURATION) {
+				// If faultDuration=500, the varied fault duration is in
+				// [250,750] range
+				faultDuration = (random.nextDouble() - 0.5) * FAULT_DURATION;
+			}
+
+			secondToInjectFault = (int) (random.nextDouble() * (experimentsDuration - faultDuration));
+			faultyRobot = ips[random.nextInt(ips.length)];
+			System.out.println("Robot " + faultyRobot + " will fail at time=" + secondToInjectFault);
 
 			/*
 			 * Generate initial positions
@@ -85,13 +98,6 @@ public class ThreeBasicFormationScript extends FieldTestScript {
 			System.out.println("Calculating formation positions...");
 			generateFormations();
 
-			nextFormation = selectStartingFormation();
-			if (nextFormation == -1) {
-				clearMapEntities();
-				addEntityToMap(centralPoint);
-				return;
-			}
-
 			/*
 			 * Go to starting positions
 			 */
@@ -111,55 +117,14 @@ public class ThreeBasicFormationScript extends FieldTestScript {
 			/*
 			 * Run experiments
 			 */
-			do {
-				if (JOptionPane.showConfirmDialog(console.getGUI(),
-						"Start formation " + formations.get(nextFormation).getFormationType().name() + " experiment?",
-						"Confirm when ready", JOptionPane.YES_NO_OPTION,
-						JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
-
-					if (!firstRun) {
-						System.out.println("Generating starting positions!");
-
-						clearMapEntities();
-						centralPoint.setLatLon(getCentralPointAmongRobots());
-
-						generateInitialPositions(false);
-
-						ready = JOptionPane.showConfirmDialog(console.getGUI(), "Agree with start positions?",
-								"Position check", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-						if (ready != JOptionPane.YES_OPTION) {
-							clearMapEntities();
-							addEntityToMap(centralPoint);
-							return;
-						}
-
-						/*
-						 * Go to starting positions
-						 */
-						System.out.println("Heading to start positions!");
-						clearMapEntities();
-						for (Waypoint wp : startingWaypoints) {
-							addEntityToMap(wp);
-						}
-						deployMapEntities(new ArrayList<String>(Arrays.asList(ips)));
-
-						for (int i = 0; i < robots.size(); i++) {
-							goToWaypoint(singletonList(robots.get(i)), startingWaypoints.get(i));
-							// System.out.println("Robot ID=" + robots.get(i) +
-							// "\t WP=" + startingWaypoints.get(i));
-						}
-
-						firstRun = false;
-					}
-
-					startExperiment(nextFormation);
-				} else {
-					stopControllers(new ArrayList<String>(Arrays.asList(ips)),
-							"failed" + formations.get(nextFormation).getFormationType().name() + " three basic formations experiment");
-				}
-
-				nextFormation++;
-			} while (nextFormation < formations.size());
+			if (JOptionPane.showConfirmDialog(console.getGUI(),
+					"Start formation " + formation.getFormationType().name() + " experiment?", "Confirm when ready",
+					JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+				startExperiment();
+			} else {
+				stopControllers(new ArrayList<String>(Arrays.asList(ips)),
+						"failed" + formation.getFormationType().name() + " fault injection experiment");
+			}
 
 			clearMapEntities();
 			addEntityToMap(centralPoint);
@@ -216,87 +181,31 @@ public class ThreeBasicFormationScript extends FieldTestScript {
 	private void generateFormations() {
 		Coordinate center = new Coordinate(centralPoint.getLatLon().getLat(), centralPoint.getLatLon().getLon());
 
-		// Create a formation per shape
-		formations = new ArrayList<Formation>();
-		for (FormationType type : FormationType.values()) {
-			if (type != FormationType.mix && type != FormationType.random) {
+		HashMap<String, String> args = new HashMap<String, String>();
+		args.put("randomSeed", Long.toString(randomSeed));
+		args.put("targetMovementType", MovementType.ROTATIONAL.name());
+		args.put("formationMovementType", MovementType.LINEAR.name());
+		args.put("radiusOfObjectPositioning", Double.toString(radiusOfPositioning));
 
-				HashMap<String, String> args = new HashMap<String, String>();
-				args.put("formationShape", type.toString());
-				args.put("lockFormationShape", "1");
-				args.put("randomSeed", Long.toString(randomSeed));
-				args.put("targetMovementType", MovementType.ROTATIONAL.name());
-				args.put("formationMovementType", MovementType.LINEAR.name());
-				args.put("radiusOfObjectPositioning", Double.toString(radiusOfPositioning));
+		FormationParametersPane builder = new FormationParametersPane(args);
+		builder.triggerPane();
+		formation = builder.buildFormation(center);
 
-				FormationParametersPane builder = new FormationParametersPane(args);
-				builder.triggerPane();
-				Formation formation = builder.buildFormation(center);
-				formations.add(formation);
-
-				clearMapEntities();
-				addEntityToMap(centralPoint);
-				addEntityToMap(formation);
-
-				System.out.println("> Generated " + type.toString() + " formation");
-			}
-		}
-
-		if (formations.isEmpty()) {
-			return;
-		}
-	}
-
-	private int selectStartingFormation() {
-		ArrayList<String> names = new ArrayList<String>();
-		for (Formation f : formations) {
-			names.add(f.getName());
-		}
-
-		JPanel panel = new JPanel(new GridLayout(1, 2));
-		panel.add(new JLabel("Starting formation:"));
-
-		JComboBox<String> checkBox = new JComboBox<String>(names.toArray(new String[names.size()]));
-		checkBox.setSelectedIndex(0);
-		panel.add(checkBox);
-
-		String[] options = { "Ok", "Cancel" };
-		int response = JOptionPane.showOptionDialog(console.getGUI(), panel, "Choose starting formation",
-				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-		if (response == 0) {
-			return checkBox.getSelectedIndex();
-		} else {
-			return -1;
-		}
-	}
-
-	private LatLon getCentralPointAmongRobots() {
-		Vector2d position = new Vector2d(0, 0);
-		DronesSet set = console.getDronesSet();
-
-		for (String ip : ips) {
-			DroneData d = set.getDrone(ip);
-			LatLon latLon = new LatLon(d.getGPSData().getLatitudeDecimal(), d.getGPSData().getLongitudeDecimal());
-			Vector2d pos = CoordinateUtilities.GPSToCartesian(latLon);
-
-			position.x += pos.getX();
-			position.y += pos.getY();
-		}
-
-		position.x /= ips.length;
-		position.y /= ips.length;
-
-		return CoordinateUtilities.cartesianToGPS(position);
-	}
-
-	private void startExperiment(int formationIndex) {
 		clearMapEntities();
-		addEntityToMap(formations.get(formationIndex));
+		addEntityToMap(centralPoint);
+		addEntityToMap(formation);
+
+		System.out.println("> Generated " + formation.getFormationType() + " formation");
+	}
+
+	private void startExperiment() {
+		clearMapEntities();
+		addEntityToMap(formation);
 		deployMapEntities(new ArrayList<String>(Arrays.asList(ips)));
 
 		((DroneGUI) console.getGUI()).getMapPanel().setFormationUpdate(false);
-		
-		String description = startExperimentTimer(controller + "_" + formations.get(0).getFormationType()+"_3basic");
+
+		String description = startExperimentTimer(controller + "_" + formation.getFormationType() + "_faultinjection");
 		startControllers(robots, controller, description, experimentsStartDelay);
 
 		// Wait for start time
@@ -315,7 +224,15 @@ public class ThreeBasicFormationScript extends FieldTestScript {
 		((DroneGUI) console.getGUI()).getMapPanel().setFormationUpdate(true);
 		System.out.printf("Experiments started at %s. Description: %s%n", console.getGPSTime().toString(), description);
 		try {
-			Thread.sleep(experimentsDuration * 1000);
+			Thread.sleep(secondToInjectFault * 1000);
+		} catch (InterruptedException e) {
+			System.err.println(e.getMessage());
+		}
+		System.out.println("Injecting faults on " + faultyRobot + " robot");
+		stopControllers(singletonList(faultyRobot), description);
+
+		try {
+			Thread.sleep((experimentsDuration - secondToInjectFault) * 1000);
 		} catch (InterruptedException e) {
 			System.err.println(e.getMessage());
 		}
@@ -346,8 +263,8 @@ public class ThreeBasicFormationScript extends FieldTestScript {
 
 			startControllers(ips, args);
 
-			System.out.printf("Starting experiments in %d seconds (%s). Waiting for start time!%n", experimentsStartDelay,
-					startTime.toString());
+			System.out.printf("Starting experiments in %d seconds (%s). Waiting for start time!%n",
+					experimentsStartDelay, startTime.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

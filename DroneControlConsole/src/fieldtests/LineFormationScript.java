@@ -155,7 +155,7 @@ public class LineFormationScript extends FieldTestScript {
 					startExperiment(nextFormation);
 				} else {
 					stopControllers(new ArrayList<String>(Arrays.asList(ips)),
-							"failed" + formations.get(nextFormation).getFormationType().name() + " experiment");
+							"failed" + formations.get(nextFormation).getFormationType().name() + " line experiment");
 				}
 
 				nextFormation++;
@@ -337,7 +337,7 @@ public class LineFormationScript extends FieldTestScript {
 
 		((DroneGUI) console.getGUI()).getMapPanel().setFormationUpdate(false);
 
-		String description = startExperimentTimer(controller + "_" + formations.get(0).getFormationType());
+		String description = startExperimentTimer(controller + "_" + formations.get(0).getFormationType()+"linetypes");
 		startControllers(robots, controller, description, experimentsStartDelay);
 
 		// Wait for start time
