@@ -147,12 +147,10 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 						if (!startedBehaviour) {
 							log(LogCodex.encodeLog(LogType.MESSAGE,
 									"Started experiment at " + ioManager.getGpsModule().getReadings().getDate()
-											+ " with controller " + activeBehavior.getClass().getName())
-									+ " (" + ((ControllerCIBehavior) activeBehavior).getDescription() + ")");
+											+ " with controller " + activeBehavior.getClass().getName()));
 							System.out
 									.println("Started experiment at " + ioManager.getGpsModule().getReadings().getDate()
-											+ " with controller " + activeBehavior.getClass().getName() + " ("
-											+ ((ControllerCIBehavior) activeBehavior).getDescription() + ")");
+											+ " with controller " + activeBehavior.getClass().getName());
 							startedBehaviour = true;
 						}
 
