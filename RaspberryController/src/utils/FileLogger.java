@@ -30,7 +30,8 @@ public class FileLogger extends Thread implements RobotLogger {
 	private final static String FILENAME = "values_";
 	public final static String LOG_FILE_EXTENSION = ".log";
 
-	private String fileName = FILENAME;
+	private String baseFileName = FILENAME;
+	private String fileName = null;
 	private RealAquaticDroneCI drone;
 	private DateTimeFormatter fileFormatter = DateTimeFormat.forPattern("dd-MM-YY_HH-mm-ss");
 	private DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("dd-MM-YY_HH:mm:ss.SS");
@@ -42,7 +43,7 @@ public class FileLogger extends Thread implements RobotLogger {
 
 	public FileLogger(RealAquaticDroneCI drone, boolean logData, String fileName) {
 		this(drone, logData);
-		this.fileName = fileName + (fileName.endsWith("_") ? "" : "_");
+		this.baseFileName = fileName + (fileName.endsWith("_") ? "" : "_");
 	}
 
 	public FileLogger(RealAquaticDroneCI drone, boolean logData) {
@@ -53,7 +54,7 @@ public class FileLogger extends Thread implements RobotLogger {
 	}
 
 	public BufferedWriter setupWriter() throws IOException {
-		fileName += new LocalDateTime().toString(fileFormatter);
+		fileName = baseFileName + new LocalDateTime().toString(fileFormatter);
 
 		File dir = new File(LOGS_FOLDER);
 		if (!dir.exists()) {
