@@ -889,7 +889,7 @@ public class MapPanel extends UpdatePanel {
 		ArrayList<Coordinate> coords = new ArrayList<Coordinate>();
 
 		for (Waypoint wp : geo.getWaypoints()) {
-			System.out.println("GEOFENCE " + wp);
+			//System.out.println("GEOFENCE " + wp);
 			Coordinate coord = latLonToCoord(wp.getLatLon().getLat(), wp.getLatLon().getLon());
 
 			MapMarker marker = new MapMarkerDot(coord);
