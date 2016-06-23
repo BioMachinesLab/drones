@@ -7,6 +7,7 @@ import java.awt.GridLayout;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -127,7 +128,9 @@ public class DroneGUI extends RobotGUI {
 		gpsTimePanel = new GPSTimePanel(this);
 		leftPanel.add(gpsTimePanel, BorderLayout.SOUTH);
 
-		add(leftPanel, BorderLayout.WEST);
+		JScrollPane scrollPane = new JScrollPane(leftPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		
+		add(scrollPane, BorderLayout.WEST);
 	}
 
 	public void hideRightPanel() {

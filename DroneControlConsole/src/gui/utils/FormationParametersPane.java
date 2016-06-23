@@ -16,6 +16,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import org.openstreetmap.gui.jmapviewer.Coordinate;
@@ -129,7 +130,11 @@ public class FormationParametersPane {
 		all.add(formationOptionsPanel);
 		all.add(motionOptionsPanel);
 		all.add(movementPatchPanel);
-		mainPanel.add(all);
+
+		JScrollPane scrollPane = new JScrollPane(all, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+		mainPanel.add(scrollPane);
 	}
 
 	public void triggerPane() {
