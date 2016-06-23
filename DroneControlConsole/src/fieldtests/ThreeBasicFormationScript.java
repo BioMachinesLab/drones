@@ -295,10 +295,9 @@ public class ThreeBasicFormationScript extends FieldTestScript {
 		deployMapEntities(new ArrayList<String>(Arrays.asList(ips)));
 
 		((DroneGUI) console.getGUI()).getMapPanel().setFormationUpdate(false);
+		
 		String description = startExperimentTimer(controller + "_" + formations.get(0).getFormationType());
-
 		startControllers(robots, controller, description, experimentsStartDelay);
-		System.out.println("Started controller. Waiting for start time!");
 
 		// Wait for start time
 		// while (new LocalDateTime().minusHours(1).isBefore(startTime)) {
@@ -311,9 +310,10 @@ public class ThreeBasicFormationScript extends FieldTestScript {
 			}
 		}
 
+		System.out.println();
 		// GO GO GO Experiments running!
 		((DroneGUI) console.getGUI()).getMapPanel().setFormationUpdate(true);
-		System.out.printf("Experiments started at %s . Description: %s%n", console.getGPSTime().toString(),description);
+		System.out.printf("Experiments started at %s. Description: %s%n", console.getGPSTime().toString(), description);
 		try {
 			Thread.sleep(experimentsDuration * 1000);
 		} catch (InterruptedException e) {
@@ -331,15 +331,14 @@ public class ThreeBasicFormationScript extends FieldTestScript {
 			CIArguments args = readConfigurationFile(behavior);
 			args.setArgument("description", description);
 
-			startTime = console.getGPSTime();
-			LocalDateTime newStartTime = startTime.plusSeconds(experimentsStartDelay);
+			startTime = new LocalDateTime(console.getGPSTime()).plusSeconds(experimentsStartDelay);
 
-			String str = "year=" + newStartTime.getYear() + ",";
-			str += "monthOfYear=" + newStartTime.getMonthOfYear() + ",";
-			str += "dayOfMonth=" + newStartTime.getDayOfMonth() + ",";
-			str += "hourOfDay=" + newStartTime.getHourOfDay() + ",";
-			str += "minuteOfHour=" + newStartTime.getMinuteOfHour() + ",";
-			str += "secondOfMinute=" + newStartTime.getSecondOfMinute();
+			String str = "year=" + startTime.getYear() + ",";
+			str += "monthOfYear=" + startTime.getMonthOfYear() + ",";
+			str += "dayOfMonth=" + startTime.getDayOfMonth() + ",";
+			str += "hourOfDay=" + startTime.getHourOfDay() + ",";
+			str += "minuteOfHour=" + startTime.getMinuteOfHour() + ",";
+			str += "secondOfMinute=" + startTime.getSecondOfMinute();
 
 			args.setArgument("startDate", str);
 			args.setArgument("updateEntities", 1);
@@ -347,8 +346,8 @@ public class ThreeBasicFormationScript extends FieldTestScript {
 
 			startControllers(ips, args);
 
-			System.out.printf("Starting experiments in %d seconds (%s)%n", experimentsStartDelay,
-					newStartTime.toString());
+			System.out.printf("Starting experiments in %d seconds (%s). Waiting for start time!%n", experimentsStartDelay,
+					startTime.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
