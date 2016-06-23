@@ -142,30 +142,11 @@ public class CommandPanel extends UpdatePanel {
 
 		selectedDrones = new JTextPane();
 		selectedDrones.setText("Drones IDs");
-		selectedDrones.setForeground(selectedDrones.getDisabledTextColor());
 		StyledDocument doc = (StyledDocument) selectedDrones.getDocument();
 		SimpleAttributeSet center = new SimpleAttributeSet();
 		StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
 		doc.setParagraphAttributes(0, doc.getLength(), center, false);
-		selectedDrones.addFocusListener(new FocusListener() {
-
-			@Override
-			public void focusLost(FocusEvent e) {
-				if (selectedDrones.getText() == null || selectedDrones.getText().isEmpty()
-						|| selectedDrones.getText().length() == 0) {
-					selectedDrones.setText("Drones IDs");
-					selectedDrones.setForeground(selectedDrones.getDisabledTextColor());
-				}
-			}
-
-			@Override
-			public void focusGained(FocusEvent e) {
-				if (selectedDrones.getText().contains("Drones IDs")) {
-					selectedDrones.setText("");
-				}
-				selectedDrones.setForeground(Color.BLACK);
-			}
-		});
+		selectedDrones.setText("");
 		JScrollPane selectDronesScroll = new JScrollPane(selectedDrones);
 
 		JPanel selectedPanel = new JPanel(new BorderLayout());
@@ -199,7 +180,7 @@ public class CommandPanel extends UpdatePanel {
 						if (startTargetMotion.getText().equals("Start motion")) {
 							((DroneGUI) gui).getMapPanel().setFormationUpdate(true);
 							startTargetMotion.setText("Stop motion");
-							
+
 							deploy(new TargetMessage(true, 0, myHostname));
 						} else {
 							((DroneGUI) gui).getMapPanel().setFormationUpdate(false);
