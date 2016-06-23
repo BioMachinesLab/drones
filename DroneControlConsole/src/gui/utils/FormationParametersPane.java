@@ -199,12 +199,10 @@ public class FormationParametersPane {
 		if (args.get("formationShape") != null) {
 			index = FormationType.valueOf(args.get("formationShape")).ordinal();
 		}
-		if (extraArgs != null) {
-			if (extraArgs.get("formationShape") != null) {
-				index = FormationType.valueOf(extraArgs.get("formationShape")).ordinal();
-				formationTypeComboBox.setSelectedIndex(index);
-				formationTypeComboBox.setEnabled(false);
-			}
+		if (extraArgs != null && extraArgs.get("formationShape") != null) {
+			index = FormationType.valueOf(extraArgs.get("formationShape")).ordinal();
+			formationTypeComboBox.setSelectedIndex(index);
+			formationTypeComboBox.setEnabled(false);
 		}
 		formationTypeComboBox.setSelectedIndex(index);
 		topPanel.add(formationTypeComboBox);
@@ -239,10 +237,8 @@ public class FormationParametersPane {
 		if (args.get("radiusOfObjectPositioning") != null) {
 			radiusOfObjPositioningTextField.setText(args.get("radiusOfObjectPositioning"));
 		}
-		if (extraArgs != null) {
-			if (extraArgs.get("radiusOfObjectPositioning") != null) {
-				radiusOfObjPositioningTextField.setText(args.get("radiusOfObjectPositioning"));
-			}
+		if (extraArgs != null && extraArgs.get("radiusOfObjectPositioning") != null) {
+			radiusOfObjPositioningTextField.setText(extraArgs.get("radiusOfObjectPositioning"));
 		}
 		topPanel.add(radiusOfObjPositioningTextField);
 		formationOptionsPanel.add(topPanel);
@@ -276,6 +272,10 @@ public class FormationParametersPane {
 		if (args.get("initialRotation") != null) {
 			initialRotationTextField.setText(args.get("initialRotation"));
 		}
+		if (extraArgs != null && extraArgs.get("initialRotation") != null) {
+			initialRotationTextField.setText(extraArgs.get("initialRotation"));
+			initialRotationTextField.setEditable(false);
+		}
 		bottomPanel.add(initialRotationTextField);
 
 		bottomPanel.add(new JLabel("Target radius (m):"));
@@ -293,7 +293,7 @@ public class FormationParametersPane {
 			randomSeedTextField.setText(args.get("randomSeed"));
 		}
 		if (extraArgs != null && extraArgs.get("randomSeed") != null) {
-			randomSeedTextField.setText(args.get("randomSeed"));
+			randomSeedTextField.setText(extraArgs.get("randomSeed"));
 			randomSeedTextField.setEditable(false);
 		}
 		bottomPanel.add(randomSeedTextField);
@@ -437,11 +437,9 @@ public class FormationParametersPane {
 		if (args.get("formationMovementType") != null) {
 			index = MovementType.valueOf(args.get("formationMovementType")).ordinal();
 		}
-		if (extraArgs != null) {
-			if (extraArgs.get("formationMovementType") != null) {
-				index = MovementType.valueOf(extraArgs.get("formationMovementType")).ordinal();
-				formationMovementTypeComboBox.setEnabled(false);
-			}
+		if (extraArgs != null && extraArgs.get("formationMovementType") != null) {
+			index = MovementType.valueOf(extraArgs.get("formationMovementType")).ordinal();
+			formationMovementTypeComboBox.setEnabled(false);
 		}
 		formationMovementTypeComboBox.setSelectedIndex(index);
 		movementPatchPanel.add(formationMovementTypeComboBox);
@@ -455,11 +453,9 @@ public class FormationParametersPane {
 		if (args.get("targetMovementType") != null) {
 			index = MovementType.valueOf(args.get("targetMovementType")).ordinal();
 		}
-		if (extraArgs != null) {
-			if (extraArgs.get("targetMovementType") != null) {
-				index = MovementType.valueOf(extraArgs.get("targetMovementType")).ordinal();
-				targetMovementTypeComboBox.setEnabled(false);
-			}
+		if (extraArgs != null && extraArgs.get("targetMovementType") != null) {
+			index = MovementType.valueOf(extraArgs.get("targetMovementType")).ordinal();
+			targetMovementTypeComboBox.setEnabled(false);
 		}
 		targetMovementTypeComboBox.setSelectedIndex(index);
 		movementPatchPanel.add(targetMovementTypeComboBox);
