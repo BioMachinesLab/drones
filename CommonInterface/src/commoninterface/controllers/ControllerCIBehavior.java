@@ -56,9 +56,17 @@ public class ControllerCIBehavior extends CIBehavior {
 		}
 
 		updateEntities = args.getArgumentAsIntOrSetDefault("updateEntities", 0) == 1;
-		
+
 		System.out.println("Start Date: " + startDate + "\t Current: " + new LocalDateTime());
-		System.out.println("Update entities: "+updateEntities);
+		System.out.println("Update entities: " + updateEntities);
+	}
+
+	public boolean isTimeToStart(LocalDateTime time) {
+		if (startDate == null) {
+			return true;
+		} else {
+			return time.isAfter(startDate);
+		}
 	}
 
 	protected void initSensors(CIArguments args) {

@@ -135,38 +135,27 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			CIBehavior current = activeBehavior;
 
 			try {
-				// Vasco: I know, this can be compressed in one IF condition,
-				// But this way is more clear
 				if (current != null) {
-					if (activeBehavior instanceof ControllerCIBehavior
-							&& (((ControllerCIBehavior) activeBehavior).getStartDate() == null
-									|| ioManager.getGpsModule().getReadings().getDate()
-											.isAfter(((ControllerCIBehavior) activeBehavior).getStartDate()))) {
-						updateEntities = ((ControllerCIBehavior) activeBehavior).updateEntities();
-					}
+					if (activeBehavior instanceof ControllerCIBehavior && (((ControllerCIBehavior) activeBehavior)
+							.isTimeToStart(ioManager.getGpsModule().getReadings().getDate()))) {
 
-					if (updateEntities)
-						updateLocalEntities(entitiesStep++);
-
-					if (!(activeBehavior instanceof ControllerCIBehavior)) {
-						current.step(behaviorTimestep++);
-					} else {
-						if (((ControllerCIBehavior) activeBehavior).getStartDate() == null
-								|| ioManager.getGpsModule().getReadings().getDate()
-										.isAfter(((ControllerCIBehavior) activeBehavior).getStartDate())) {
-							if (!started) {
-								log(LogCodex.encodeLog(LogType.MESSAGE,
-										"Started experiment at "
-												+ ((ControllerCIBehavior) activeBehavior).getStartDate()
-												+ " with controller " + activeBehavior.getClass().getName()));
-								System.out.println("Started experiment at "
-										+ ((ControllerCIBehavior) activeBehavior).getStartDate() + " with controller "
-										+ activeBehavior.getClass().getName());
-								started = true;
-							}
-
-							current.step(behaviorTimestep++);
+						if (((ControllerCIBehavior) activeBehavior).updateEntities()) {
+							updateLocalEntities(entitiesStep++);
 						}
+
+						if (!started) {
+							log(LogCodex.encodeLog(LogType.MESSAGE,
+									"Started experiment at " + ((ControllerCIBehavior) activeBehavior).getStartDate()
+											+ " with controller " + activeBehavior.getClass().getName()));
+							System.out.println(
+									"Started experiment at " + ((ControllerCIBehavior) activeBehavior).getStartDate()
+											+ " with controller " + activeBehavior.getClass().getName());
+							started = true;
+						}
+
+						current.step(behaviorTimestep++);
+					} else if (!(activeBehavior instanceof ControllerCIBehavior)) {
+						current.step(behaviorTimestep++);
 					}
 
 					for (CIBehavior b : alwaysActiveBehaviors) {
@@ -175,6 +164,10 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 					if (current.getTerminateBehavior()) {
 						stopActiveBehavior();
+					}
+				} else {
+					if (updateEntities) {
+						updateLocalEntities(timestep);
 					}
 				}
 			} catch (Exception e) {
