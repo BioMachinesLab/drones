@@ -103,6 +103,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	private boolean updateEntities = false;
 	private double entitiesStep = 0;
+	private boolean startedBehaviour = false;
 
 	@Override
 	public void begin(HashMap<String, CIArguments> args) {
@@ -143,14 +144,14 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 							updateLocalEntities(entitiesStep++);
 						}
 
-						if (!started) {
+						if (!startedBehaviour) {
 							log(LogCodex.encodeLog(LogType.MESSAGE,
-									"Started experiment at " + ((ControllerCIBehavior) activeBehavior).getStartDate()
+									"Started experiment at " + ioManager.getGpsModule().getReadings().getDate()
 											+ " with controller " + activeBehavior.getClass().getName()));
-							System.out.println(
-									"Started experiment at " + ((ControllerCIBehavior) activeBehavior).getStartDate()
+							System.out
+									.println("Started experiment at " + ioManager.getGpsModule().getReadings().getDate()
 											+ " with controller " + activeBehavior.getClass().getName());
-							started = true;
+							startedBehaviour = true;
 						}
 
 						current.step(behaviorTimestep++);
@@ -244,6 +245,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 			activeBehavior.cleanUp();
 			activeBehavior = null;
 			ioManager.setMotorSpeeds(leftSpeed, rightSpeed);
+			startedBehaviour = false;
 		}
 		try {
 			// make sure that the current control step is processed
@@ -342,6 +344,7 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	public void startBehavior(CIBehavior b) {
 		stopActiveBehavior();
 		activeBehavior = b;
+		startedBehaviour = false;
 		behaviorTimestep = 0;
 		activeBehavior.start();
 
