@@ -100,6 +100,7 @@ public class LineFormationScript extends FieldTestScript {
 			for (Waypoint wp : startingWaypoints) {
 				addEntityToMap(wp);
 			}
+			deployMapEntities(new ArrayList<String>(Arrays.asList(ips)));
 
 			for (int i = 0; i < robots.size(); i++) {
 				goToWaypoint(singletonList(robots.get(i)), startingWaypoints.get(i));
@@ -140,6 +141,7 @@ public class LineFormationScript extends FieldTestScript {
 						for (Waypoint wp : startingWaypoints) {
 							addEntityToMap(wp);
 						}
+						deployMapEntities(new ArrayList<String>(Arrays.asList(ips)));
 
 						for (int i = 0; i < robots.size(); i++) {
 							goToWaypoint(singletonList(robots.get(i)), startingWaypoints.get(i));
@@ -172,7 +174,7 @@ public class LineFormationScript extends FieldTestScript {
 				new String[] { "Controller", "Radius of positioning: ", "Drones Quantity",
 						"Experiments duration (seconds)", "Execute after (seconds)", "IPs", "Seed" },
 				lastOptions != null ? lastOptions
-						: new String[] { "rendition0", "15", "5", "240", "20", "1,2,3,4,5", "1" });
+						: new String[] { "preset_rendition0", "15", "5", "240", "20", "1,2,3,4,5", "1" });
 		if (options == null) {
 			return;
 		}
@@ -189,7 +191,7 @@ public class LineFormationScript extends FieldTestScript {
 		robots = new ArrayList<String>();
 		for (int i = 0; i < ips.length; i++) {
 			robots.add("192.168.3." + ips[i]);
-			// robots.add("192.168.1." + ips[i]);
+			ips[i] = "192.168.3." + ips[i];
 		}
 	}
 
@@ -214,40 +216,76 @@ public class LineFormationScript extends FieldTestScript {
 	private void generateFormations() {
 		Coordinate center = new Coordinate(centralPoint.getLatLon().getLat(), centralPoint.getLatLon().getLon());
 
-		// Create a formation per shape
 		formations = new ArrayList<Formation>();
+
+		// Column
+		HashMap<String, String> args = new HashMap<String, String>();
+		args.put("formationShape", FormationType.line.toString());
+		args.put("lockFormationShape", "1");
+		args.put("randomSeed", Long.toString(randomSeed));
+		args.put("targetMovementType", MovementType.ROTATIONAL.name());
+		args.put("rotateFormation", Integer.toString(0));
+		args.put("formationMovementType", MovementType.LINEAR.name());
+		args.put("radiusOfObjectPositioning", Double.toString(radiusOfPositioning));
+		args.put("initialRotation", Integer.toString(0));
+
+		FormationParametersPane builder = new FormationParametersPane(args);
+		builder.triggerPane();
+		builder.setInitialRotation(builder.getTargetMovementAzimuth());
+		Formation formation_1 = builder.buildFormation(center);
+		formations.add(formation_1);
+
+		clearMapEntities();
+		addEntityToMap(centralPoint);
+		addEntityToMap(formation_1);
+
+		System.out.println("> Generated column formation");
 		
-		// generate the two line formations!
+		// Line abreast
+		args = new HashMap<String, String>();
+		args.put("formationShape", FormationType.line.toString());
+		args.put("lockFormationShape", "1");
+		args.put("randomSeed", Long.toString(randomSeed));
+		args.put("targetMovementType", MovementType.ROTATIONAL.name());
+		args.put("rotateFormation", Integer.toString(0));
+		args.put("formationMovementType", MovementType.LINEAR.name());
+		args.put("radiusOfObjectPositioning", Double.toString(radiusOfPositioning));
+		args.put("initialRotation", Integer.toString(90));
+
+		builder = new FormationParametersPane(args);
+		builder.triggerPane();
+		builder.setInitialRotation(builder.getTargetMovementAzimuth()+90);
+		Formation formation_2 = builder.buildFormation(center);
+		formations.add(formation_2);
+
+		clearMapEntities();
+		addEntityToMap(centralPoint);
+		addEntityToMap(formation_2);
+
+		System.out.println("> Generated line abreast formation");
 		
-		
-		
-		for (FormationType type : FormationType.values()) {
-			if (type != FormationType.mix && type != FormationType.random) {
+		// Line of bearing
+		args = new HashMap<String, String>();
+		args.put("formationShape", FormationType.line.toString());
+		args.put("lockFormationShape", "1");
+		args.put("randomSeed", Long.toString(randomSeed));
+		args.put("targetMovementType", MovementType.ROTATIONAL.name());
+		args.put("rotateFormation", Integer.toString(0));
+		args.put("formationMovementType", MovementType.LINEAR.name());
+		args.put("radiusOfObjectPositioning", Double.toString(radiusOfPositioning));
+		args.put("initialRotation", Integer.toString(135));
 
-				HashMap<String, String> args = new HashMap<String, String>();
-				args.put("formationShape", type.toString());
-				args.put("lockFormationShape", "1");
-				args.put("randomSeed", Long.toString(randomSeed));
-				args.put("targetMovementType", MovementType.ROTATIONAL.name());
-				args.put("formationMovementType", MovementType.LINEAR.name());
-				args.put("radiusOfObjectPositioning", Double.toString(radiusOfPositioning));
+		builder = new FormationParametersPane(args);
+		builder.triggerPane();
+		builder.setInitialRotation(builder.getTargetMovementAzimuth()+135);
+		Formation formation_3 = builder.buildFormation(center);
+		formations.add(formation_3);
 
-				FormationParametersPane builder = new FormationParametersPane(args);
-				builder.triggerPane();
-				Formation formation = builder.buildFormation(center);
-				formations.add(formation);
+		clearMapEntities();
+		addEntityToMap(centralPoint);
+		addEntityToMap(formation_3);
 
-				clearMapEntities();
-				addEntityToMap(centralPoint);
-				addEntityToMap(formation);
-
-				System.out.println("> Generated " + type.toString() + " formation");
-			}
-		}
-
-		if (formations.isEmpty()) {
-			return;
-		}
+		System.out.println("> Generated line of bearing formation");
 	}
 
 	private int selectStartingFormation() {
@@ -255,13 +293,11 @@ public class LineFormationScript extends FieldTestScript {
 		for (Formation f : formations) {
 			names.add(f.getName());
 		}
-		
-		// Use different name!
 
 		JPanel panel = new JPanel(new GridLayout(1, 2));
 		panel.add(new JLabel("Starting formation:"));
 
-		JComboBox<String> checkBox = new JComboBox<String>(names.toArray(new String[names.size()]));
+		JComboBox<String> checkBox = new JComboBox<String>(new String[] { "Column", "Line abreast", "Line of bearing" });
 		checkBox.setSelectedIndex(0);
 		panel.add(checkBox);
 
@@ -300,14 +336,13 @@ public class LineFormationScript extends FieldTestScript {
 		deployMapEntities(new ArrayList<String>(Arrays.asList(ips)));
 
 		((DroneGUI) console.getGUI()).getMapPanel().setFormationUpdate(false);
-		String description = startExperimentTimer(controller + "_" + formations.get(0).getFormationType());
 
+		String description = startExperimentTimer(controller + "_" + formations.get(0).getFormationType());
 		startControllers(robots, controller, description, experimentsStartDelay);
-		System.out.println("Started controller. Waiting for start time!");
 
 		// Wait for start time
 		// while (new LocalDateTime().minusHours(1).isBefore(startTime)) {
-		while (new LocalDateTime().isBefore(startTime)) {
+		while (startTime.isAfter(console.getGPSTime())) {
 			System.out.print(".");
 			try {
 				Thread.sleep(100);
@@ -316,9 +351,10 @@ public class LineFormationScript extends FieldTestScript {
 			}
 		}
 
+		System.out.println();
 		// GO GO GO Experiments running!
 		((DroneGUI) console.getGUI()).getMapPanel().setFormationUpdate(true);
-		System.out.printf("Experiments started! Description: %s%n", description);
+		System.out.printf("Experiments started at %s. Description: %s%n", console.getGPSTime().toString(), description);
 		try {
 			Thread.sleep(experimentsDuration * 1000);
 		} catch (InterruptedException e) {
@@ -336,15 +372,14 @@ public class LineFormationScript extends FieldTestScript {
 			CIArguments args = readConfigurationFile(behavior);
 			args.setArgument("description", description);
 
-			startTime = console.getGPSTime();
-			LocalDateTime newStartTime = startTime.plusSeconds(experimentsStartDelay);
+			startTime = new LocalDateTime(console.getGPSTime()).plusSeconds(experimentsStartDelay);
 
-			String str = "year=" + newStartTime.getYear() + ",";
-			str += "monthOfYear=" + newStartTime.getMonthOfYear() + ",";
-			str += "dayOfMonth=" + newStartTime.getDayOfMonth() + ",";
-			str += "hourOfDay=" + newStartTime.getHourOfDay() + ",";
-			str += "minuteOfHour=" + newStartTime.getMinuteOfHour() + ",";
-			str += "secondOfMinute=" + newStartTime.getSecondOfMinute();
+			String str = "year=" + startTime.getYear() + ",";
+			str += "monthOfYear=" + startTime.getMonthOfYear() + ",";
+			str += "dayOfMonth=" + startTime.getDayOfMonth() + ",";
+			str += "hourOfDay=" + startTime.getHourOfDay() + ",";
+			str += "minuteOfHour=" + startTime.getMinuteOfHour() + ",";
+			str += "secondOfMinute=" + startTime.getSecondOfMinute();
 
 			args.setArgument("startDate", str);
 			args.setArgument("updateEntities", 1);
@@ -352,8 +387,8 @@ public class LineFormationScript extends FieldTestScript {
 
 			startControllers(ips, args);
 
-			System.out.printf("Starting experiments in %d seconds (%s)%n", experimentsStartDelay,
-					newStartTime.toString());
+			System.out.printf("Starting experiments in %d seconds (%s). Waiting for start time!%n",
+					experimentsStartDelay, startTime.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -403,6 +403,10 @@ public class FormationParametersPane {
 		} else {
 			rotateTargetsCheckBox.setSelected(false);
 		}
+		if (extraArgs != null && extraArgs.get("rotateFormation") != null) {
+			rotateTargetsCheckBox.setSelected(extraArgs.get("rotateFormation").equals(1));
+			rotateTargetsCheckBox.setEnabled(false);
+		}
 		rotationCheckBoxesPanel.add(rotateTargetsCheckBox);
 
 		variateTargetRotationSpeedCheckBox = new JCheckBox("Add noise to rotation velocity");
@@ -600,6 +604,21 @@ public class FormationParametersPane {
 			return null;
 		}
 
+	}
+
+	/*
+	 * Getters
+	 */
+	public double getInitialRotation() {
+		return initialRotation;
+	}
+
+	public void setInitialRotation(double initialRotation) {
+		this.initialRotation = initialRotation;
+	}
+
+	public double getTargetMovementAzimuth() {
+		return targetMovementAzimuth;
 	}
 
 	public static void main(String[] args) {
