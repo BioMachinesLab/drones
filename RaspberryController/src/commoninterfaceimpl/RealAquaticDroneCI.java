@@ -206,10 +206,12 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	@Override
 	public void updateLocalEntities(double time) {
-		for (Entity ent : entities) {
-			if (ent instanceof Formation) {
-				((Formation) ent).step(time);
-				logEntity(ent.getLogMessage(Operation.MOVE, time));
+		synchronized (activeBehavior) {
+			for (Entity ent : entities) {
+				if (ent instanceof Formation) {
+					((Formation) ent).step(time);
+					logEntity(ent.getLogMessage(Operation.MOVE, time));
+				}
 			}
 		}
 	}
