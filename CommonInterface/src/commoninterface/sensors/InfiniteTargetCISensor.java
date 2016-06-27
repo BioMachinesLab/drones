@@ -40,9 +40,11 @@ public class InfiniteTargetCISensor extends WaypointCISensor {
 		range = args.getArgumentAsDoubleOrSetDefault("range", range);
 		normalize = args.getArgumentAsIntOrSetDefault("normalize", 0) == 1;
 
-		lastSeenTargets = new Target[historySize];
-		for (int i = 0; i < lastSeenTargets.length; i++) {
-			lastSeenTargets[i] = null;
+		if (normalize) {
+			lastSeenTargets = new Target[historySize];
+			for (int i = 0; i < lastSeenTargets.length; i++) {
+				lastSeenTargets[i] = null;
+			}
 		}
 	}
 
