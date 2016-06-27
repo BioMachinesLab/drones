@@ -10,6 +10,7 @@ import simulation.robot.actuators.Actuator;
 import simulation.util.Arguments;
 
 public class RudderActuator extends Actuator {
+	private static final long serialVersionUID = 382936688810273745L;
 
 	public float NOISESTDEV = 0.05f;
 
@@ -20,7 +21,6 @@ public class RudderActuator extends Actuator {
 	protected double heading = 0;
 	protected double speed = 0;
 	protected Random random;
-	private double timeDelta = 0.1;
 	private double prevSpeed = 0;
 	
 	private int indexDelay = 0;
@@ -35,7 +35,6 @@ public class RudderActuator extends Actuator {
 	public RudderActuator(Simulator simulator, int id, Arguments arguments) {
 		super(simulator, id, arguments);
 		this.random = simulator.getRandom();
-		timeDelta = simulator.getTimeDelta();
 		
 		oldDynamics = arguments.getFlagIsTrue("olddynamics");
 		
@@ -203,7 +202,7 @@ public class RudderActuator extends Actuator {
 		return 0.7 * speed + 0.3;
 	}
 
-	private double getForwardSpeedInMs(double percentage) {
+	public double getForwardSpeedInMs(double percentage) {
 		return 153.99 * Math.pow(percentage, 0.3663) / 100.0;
 	}
 
