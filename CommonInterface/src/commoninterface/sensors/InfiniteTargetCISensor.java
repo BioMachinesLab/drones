@@ -22,7 +22,6 @@ public class InfiniteTargetCISensor extends WaypointCISensor {
 	private boolean excludeOccupied = false;
 	private boolean linear = false;
 	private boolean stabilize = false;
-	private boolean normalize = false;
 
 	private double range = 100;
 	private int historySize = 10;
@@ -38,9 +37,8 @@ public class InfiniteTargetCISensor extends WaypointCISensor {
 		stabilize = args.getArgumentAsIntOrSetDefault("stabilize", 0) == 1;
 		historySize = args.getArgumentAsIntOrSetDefault("historySize", historySize);
 		range = args.getArgumentAsDoubleOrSetDefault("range", range);
-		normalize = args.getArgumentAsIntOrSetDefault("normalize", 0) == 1;
 
-		if (normalize) {
+		if (stabilize) {
 			lastSeenTargets = new Target[historySize];
 			for (int i = 0; i < lastSeenTargets.length; i++) {
 				lastSeenTargets[i] = null;
@@ -74,41 +72,26 @@ public class InfiniteTargetCISensor extends WaypointCISensor {
 		if (target != null && distance > -1 && latLon != null && distance <= range) {
 			double currentOrientation = ((AquaticDroneCI) robot).getCompassOrientationInDegrees();
 			double coordinatesAngle = CoordinateUtilities.angleInDegrees(robotLatLon, latLon);
-			double orientationDifference = currentOrientation - coordinatesAngle + 180;
 
-			if (normalize) {
-				orientationDifference %= 360;
-				orientationDifference /= 360;
-			} else {
-				orientationDifference %= 360;
-				if (orientationDifference > 180) {
-					orientationDifference = -((180 - orientationDifference) + 180);
-				}
+			double orientationDifference = currentOrientation - coordinatesAngle;
+
+			orientationDifference %= 360;
+
+			if (orientationDifference > 180) {
+				orientationDifference = -((180 - orientationDifference) + 180);
 			}
 
-			readings[0] = orientationDifference;
+			orientationDifference /= 360;
+			readings[0] = orientationDifference + 0.5;
 
 			if (linear) {
-				if (normalize) {
-					readings[1] = distance / range;
-				} else {
-					readings[1] = distance;
-				}
+				readings[1] = distance / range;
 			} else {
-				if (normalize) {
-					readings[1] = (FastMath.exp(-distance / expFactor)) / range;
-				} else {
-					readings[1] = (FastMath.exp(-distance / expFactor));
-				}
+				readings[1] = (FastMath.exp(-distance / expFactor)) / range;
 			}
 		} else {
 			readings[0] = 0;
-
-			if (normalize) {
-				readings[1] = 1;
-			} else {
-				readings[1] = range;
-			}
+			readings[1] = 1;
 		}
 	}
 
