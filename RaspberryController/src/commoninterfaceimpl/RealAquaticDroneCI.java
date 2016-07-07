@@ -127,7 +127,6 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	@Override
 	public void run() {
-		boolean started = false;
 		while (run) {
 
 			updateSensors();
@@ -206,10 +205,12 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 
 	@Override
 	public void updateLocalEntities(double time) {
-		for (Entity ent : entities) {
-			if (ent instanceof Formation) {
-				((Formation) ent).step(time);
-				logEntity(ent.getLogMessage(Operation.MOVE, time));
+		synchronized (activeBehavior) {
+			for (Entity ent : entities) {
+				if (ent instanceof Formation) {
+					((Formation) ent).step(time);
+					logEntity(ent.getLogMessage(Operation.MOVE, time));
+				}
 			}
 		}
 	}
@@ -779,5 +780,15 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	@Override
 	public void setEntities(ArrayList<Entity> entities) {
 		this.entities = entities;
+	}
+
+	@Override
+	public double getRobotSpeedMs() {
+		if (ioManager.getGpsModule().isAvailable() && ioManager.getGpsModule().getReadings() != null
+				&& ioManager.getGpsModule().getReadings().isFix()) {
+			return ioManager.getGpsModule().getReadings().getGroundSpeedKmh() * 1000.0 / 3600.0;
+		} else {
+			return 0;
+		}
 	}
 }

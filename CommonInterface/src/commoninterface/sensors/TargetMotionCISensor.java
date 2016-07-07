@@ -10,7 +10,6 @@ import commoninterface.entities.Entity;
 import commoninterface.entities.RobotLocation;
 import commoninterface.entities.target.Formation;
 import commoninterface.entities.target.Target;
-import commoninterface.entities.target.motion.MotionData;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
@@ -18,6 +17,7 @@ import net.jafama.FastMath;
 
 public class TargetMotionCISensor extends CISensor {
 	private static final long serialVersionUID = 6221903809782922861L;
+	private static double SPEED_NORMALIZATION_CEELING = 2.0;
 	protected double[] readings = { 0, 0 };
 	private boolean excludeOccupied = false;
 	private boolean stabilize = false;
@@ -51,12 +51,15 @@ public class TargetMotionCISensor extends CISensor {
 	public void update(double time, Object[] entities) {
 		ArrayList<Target> targets = getTargetsOccupancy(entities);
 		Target target = getClosestTarget(excludeOccupied, targets);
+
 		if (target != null) {
-			this.consideringTarget = target;
+			consideringTarget = target;
+			Vector2d velocityVector = target.getMotionData().getVelocityVector(time);
 
-			Vector2d vel = target.getMotionData().getVelocityVector(time);
-
-			double orientation = vel.getAngle();
+			/*
+			 * Deal with orientation
+			 */
+			double orientation = velocityVector.getAngle();
 
 			// Original value comes in [0,180] with alpha on [0,180] degrees and
 			// [-180,0] with alpha [180,360]. Convert it to [0,360] on [0,360]
@@ -73,36 +76,39 @@ public class TargetMotionCISensor extends CISensor {
 			orientation = Math.toDegrees(orientation);
 
 			double robotOrientation = ((AquaticDroneCI) robot).getCompassOrientationInDegrees();
-			double difference = robotOrientation - orientation;
+			double orientationDifference = robotOrientation - orientation;
 
 			if (robotOrientation < 0)
 				robotOrientation += 360;
 
-			if (difference < 0)
-				difference += 360;
+			if (orientationDifference < 0)
+				orientationDifference += 360;
 
 			robotOrientation %= 360;
-			difference %= 360;
+			orientationDifference %= 360;
 
-			if (difference > 180) {
-				difference = -((180 - difference) + 180);
+			if (orientationDifference > 180) {
+				orientationDifference = -((180 - orientationDifference) + 180);
 			}
 
-			readings[0] = difference / 360.0 + 0.5;
-			readings[1] = vel.length() * MotionData.UPDATE_RATE;
+			/*
+			 * Deal with velocity
+			 */
+			double targetVelocity = velocityVector.length();
+			double robotVelocity = ((AquaticDroneCI) robot).getRobotSpeedMs();
+			double diff = robotVelocity - targetVelocity;
+			diff /= SPEED_NORMALIZATION_CEELING*2;
 
-			// Detection range
-			if (robot instanceof AquaticDroneCI) {
-				// Is the sensed target inside the sensor range?
-				double distance = ((AquaticDroneCI) robot).getGPSLatLon().distanceInMeters(target.getLatLon());
-				if (distance > range) {
-					readings[0] = 0.5;
-					readings[1] = 0;
-				}
-			} else {
+			readings[0] = orientationDifference / 360.0 + 0.5;
+			readings[1] = diff + 0.5;
+
+			// Is the sensed target inside the sensor range?
+			double distance = ((AquaticDroneCI) robot).getGPSLatLon().distanceInMeters(target.getLatLon());
+			if (distance > range) {
 				readings[0] = 0.5;
-				readings[1] = 0;
+				readings[1] = 0.5;
 			}
+
 		}
 	}
 

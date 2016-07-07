@@ -674,4 +674,13 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 			}
 		}
 	}
+
+	@Override
+	public double getRobotSpeedMs() {
+		if (rudder) {
+			return rudderActuator.getForwardSpeedInMs(rudderActuator.getSpeed());
+		} else {
+			return propellers.getSpeedInMs(propellers.getSpeed()[0] + propellers.getSpeed()[1]);
+		}
+	}
 }
