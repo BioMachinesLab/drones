@@ -27,6 +27,7 @@ public class InfiniteTargetCISensor extends WaypointCISensor {
 	private int historySize = 10;
 	private Target[] lastSeenTargets;
 	private int pointer = 0;
+	private Target consideringTarget;
 
 	public InfiniteTargetCISensor(int id, RobotCI robot, CIArguments args) {
 		super(id, robot, args);
@@ -67,30 +68,31 @@ public class InfiniteTargetCISensor extends WaypointCISensor {
 		if (target != null) {
 			latLon = target.getLatLon();
 			distance = CoordinateUtilities.distanceInMeters(robotLatLon, latLon);
-		}
 
-		if (target != null && distance > -1 && latLon != null && distance <= range) {
-			double currentOrientation = ((AquaticDroneCI) robot).getCompassOrientationInDegrees();
-			double coordinatesAngle = CoordinateUtilities.angleInDegrees(robotLatLon, latLon);
+			if (distance > -1 && latLon != null && distance <= range) {
+				consideringTarget = target;
+				double currentOrientation = ((AquaticDroneCI) robot).getCompassOrientationInDegrees();
+				double coordinatesAngle = CoordinateUtilities.angleInDegrees(robotLatLon, latLon);
 
-			double orientationDifference = currentOrientation - coordinatesAngle;
+				double orientationDifference = currentOrientation - coordinatesAngle;
 
-			orientationDifference %= 360;
+				orientationDifference %= 360;
 
-			if (orientationDifference > 180) {
-				orientationDifference = -((180 - orientationDifference) + 180);
-			}
+				if (orientationDifference > 180) {
+					orientationDifference = -((180 - orientationDifference) + 180);
+				}
 
-			orientationDifference /= 360;
-			readings[0] = orientationDifference + 0.5;
+				orientationDifference /= 360;
+				readings[0] = orientationDifference + 0.5;
 
-			if (linear) {
-				readings[1] = distance / range;
-			} else {
-				readings[1] = (FastMath.exp(-distance / expFactor)) / range;
+				if (linear) {
+					readings[1] = distance / range;
+				} else {
+					readings[1] = (FastMath.exp(-distance / expFactor)) / range;
+				}
 			}
 		} else {
-			readings[0] = 0;
+			readings[0] = 0.5;
 			readings[1] = 1;
 		}
 	}
@@ -98,6 +100,10 @@ public class InfiniteTargetCISensor extends WaypointCISensor {
 	@Override
 	public double getSensorReading(int sensorNumber) {
 		return readings[sensorNumber];
+	}
+
+	public Target getConsideringTarget() {
+		return consideringTarget;
 	}
 
 	@Override
