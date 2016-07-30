@@ -11,8 +11,8 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/CommonInterface/lib/joda-time-2.4-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/JBotSim/BaseClient.jar"/>
 	<classpathentry kind="lib" path="voronoi.jar"/>
 	<classpathentry kind="lib" path="/CommonInterface/lib/jafama.jar"/>
+	<classpathentry kind="lib" path="/JBotSim/lib/BaseClient.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
