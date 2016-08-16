@@ -8,9 +8,12 @@ public class RudderCINNOutput extends CINNOutput {
 	private static final long serialVersionUID = -6786816191708652763L;
 	private double heading;
 	private double speed;
+	private boolean bottomLimit;
 
 	public RudderCINNOutput(RobotCI robot, CIArguments args) {
 		super(robot, args);
+		bottomLimit=args.getArgumentAsIntOrSetDefault("bottomLimit", 0)==1;
+		
 	}
 
 	@Override
@@ -23,7 +26,15 @@ public class RudderCINNOutput extends CINNOutput {
 		if (output == 0) {
 			heading = value;
 		} else {
-			speed = value;
+			if (bottomLimit) {
+				if (value < 0.1) {
+					speed = 0;
+				} else {
+					speed = value;
+				}
+			} else {
+				speed = value;
+			}
 		}
 	}
 

@@ -1,9 +1,9 @@
 package commoninterface.sensors;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import commoninterface.AquaticDroneCI;
+import commoninterface.CISensor;
 import commoninterface.RobotCI;
 import commoninterface.entities.Entity;
 import commoninterface.entities.RobotLocation;
@@ -15,50 +15,25 @@ import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
 import net.jafama.FastMath;
 
-public class InfiniteTargetCISensor extends WaypointCISensor {
-	private static final long serialVersionUID = 490158787475877489L;
-	private double expFactor = 30;
-	// private double linearFactor = -0.009;
+public class TargetComboCISensor extends CISensor {
+	private static final long serialVersionUID = -8416969087882860806L;
+	private static double SPEED_NORMALIZATION_CEELING = 2.0;
+	protected double[] readings = { 0, 0, 0 };
 	private boolean excludeOccupied = false;
-	private boolean linear = false;
-	private boolean stabilize = false;
-
 	private double range = 100;
-	private int historySize = 10;
-	private Target[] lastSeenTargets;
-	private int pointer = 0;
-	private Target consideringTarget;
+	private Target consideringTarget = null;
+	private double distanceToCommute = 2.5;
 
-	public InfiniteTargetCISensor(int id, RobotCI robot, CIArguments args) {
+	public TargetComboCISensor(int id, RobotCI robot, CIArguments args) {
 		super(id, robot, args);
 
-		expFactor = args.getArgumentAsDoubleOrSetDefault("expFactor", expFactor);
 		excludeOccupied = args.getArgumentAsIntOrSetDefault("excludeOccupied", 0) == 1;
-		linear = args.getArgumentAsIntOrSetDefault("linear", 0) == 1;
-		stabilize = args.getArgumentAsIntOrSetDefault("stabilize", 0) == 1;
-		historySize = args.getArgumentAsIntOrSetDefault("historySize", historySize);
 		range = args.getArgumentAsDoubleOrSetDefault("range", range);
-
-		if (stabilize) {
-			lastSeenTargets = new Target[historySize];
-			for (int i = 0; i < lastSeenTargets.length; i++) {
-				lastSeenTargets[i] = null;
-			}
-		}
+		distanceToCommute = args.getArgumentAsDoubleOrSetDefault("distanceToCommute", distanceToCommute);
 	}
 
-	/**
-	 * Sets the sensor reading in the readings array. The first element of the
-	 * array corresponds to the difference between the robot orientation and the
-	 * azimut to target. The second element corresponds to the distance from
-	 * robot to the target
-	 * 
-	 * Return: readings[0] = difference between robot orientation an the azimuth
-	 * to target, readings[1] = distance to target (in meters)
-	 */
 	@Override
 	public void update(double time, Object[] entities) {
-
 		LatLon robotLatLon = ((AquaticDroneCI) robot).getGPSLatLon();
 		ArrayList<Target> targets = getTargetsOccupancy(entities);
 		Target target = getClosestTarget(excludeOccupied, targets);
@@ -66,44 +41,97 @@ public class InfiniteTargetCISensor extends WaypointCISensor {
 		LatLon latLon = null;
 		double distance = -1;
 		if (target != null) {
+			consideringTarget = target;
 			latLon = target.getLatLon();
 			distance = CoordinateUtilities.distanceInMeters(robotLatLon, latLon);
 
 			if (distance > -1 && latLon != null && distance <= range) {
-				consideringTarget = target;
-				double currentOrientation = ((AquaticDroneCI) robot).getCompassOrientationInDegrees();
-				double coordinatesAngle = CoordinateUtilities.angleInDegrees(robotLatLon, latLon);
+				double robotOrientation = ((AquaticDroneCI) robot).getCompassOrientationInDegrees();
 
-				double orientationDifference = currentOrientation - coordinatesAngle;
+				/*
+				 * Target velocity
+				 */
+				Vector2d velocityVector = target.getMotionData().getVelocityVector(time);
+				double targetVelocity = velocityVector.length();
+				double robotVelocity = ((AquaticDroneCI) robot).getRobotSpeedMs();
+				double velocityDifference = robotVelocity - targetVelocity;
+				velocityDifference /= SPEED_NORMALIZATION_CEELING * 2;
 
-				orientationDifference %= 360;
-
-				if (orientationDifference > 180) {
-					orientationDifference = -((180 - orientationDifference) + 180);
-				}
-
-				orientationDifference /= 360;
-				readings[0] = orientationDifference + 0.5;
-
-				if (linear) {
-					readings[1] = distance / range;
+				double orientationDifference = 0;
+				if (distance > distanceToCommute) {
+					/*
+					 * Relative orientation based on target's geographic
+					 * coordinates (Used when further than 2.5 from target)
+					 */
+					double coordinatesAngle = CoordinateUtilities.angleInDegrees(robotLatLon, latLon);
+					orientationDifference = robotOrientation - coordinatesAngle;
+					orientationDifference %= 360;
+					if (orientationDifference > 180) {
+						orientationDifference = -((180 - orientationDifference) + 180);
+					}
 				} else {
-					readings[1] = (FastMath.exp(-distance / expFactor)) / range;
+					/*
+					 * Relative orientation based on target's velocity vector
+					 */
+
+					double orientation = velocityVector.getAngle();
+					// Original value comes in [0,180] with alpha on [0,180]
+					// degrees and [-180,0] with alpha [180,360]. Convert it to
+					// [0,360] on [0,360]
+					if (orientation < 0) {
+						orientation = (FastMath.PI * 2) + orientation;
+					}
+
+					// Rotate the referential 1 quadrant
+					orientation += 3 * FastMath.PI / 2;
+					orientation %= FastMath.PI * 2;
+
+					// Invert the scale
+					orientation = (FastMath.PI * 2) - orientation;
+					orientation = Math.toDegrees(orientation);
+
+					orientationDifference = robotOrientation - orientation;
+
+					if (robotOrientation < 0)
+						robotOrientation += 360;
+
+					if (orientationDifference < 0)
+						orientationDifference += 360;
+
+					robotOrientation %= 360;
+					orientationDifference %= 360;
+
+					if (orientationDifference > 180) {
+						orientationDifference = -((180 - orientationDifference) + 180);
+					}
 				}
+
+				// [0] - Relative orientation (dependent from the distance to
+				// target
+				// [1] - Distance to target
+				// [2] - Target velocity
+				readings[0] = (orientationDifference / 360.0) + 0.5;
+				readings[1] = distance / range;
+				readings[2] = velocityDifference + 0.5;
+			} else {
+				readings[0] = 0.5;
+				readings[1] = 1;
+				readings[2] = 0.5;
 			}
 		} else {
 			readings[0] = 0.5;
 			readings[1] = 1;
+			readings[2] = 0.5;
 		}
+	}
+
+	public Target getConsideringTarget() {
+		return consideringTarget;
 	}
 
 	@Override
 	public double getSensorReading(int sensorNumber) {
 		return readings[sensorNumber];
-	}
-
-	public Target getConsideringTarget() {
-		return consideringTarget;
 	}
 
 	@Override
@@ -125,10 +153,7 @@ public class InfiniteTargetCISensor extends WaypointCISensor {
 		double minDistance = Double.MAX_VALUE;
 		for (Target ent : targets) {
 			Vector2d pos = CoordinateUtilities.GPSToCartesian(ent.getLatLon());
-			if (ent.isOccupied() && ent.getOccupantID().equals(robot.getNetworkAddress())
-			// && robotPosition.distanceTo(pos) <= ent.getRadius()
-			// && robotPosition.distanceTo(pos) < minDistance
-			) {
+			if (ent.isOccupied() && ent.getOccupantID().equals(robot.getNetworkAddress())) {
 				minDistance = robotPosition.distanceTo(pos);
 				closest = ent;
 				break;
@@ -140,59 +165,7 @@ public class InfiniteTargetCISensor extends WaypointCISensor {
 			}
 		}
 
-		// Return either the most seen or the closest
-		if (stabilize) {
-			int pos = (pointer++) % historySize;
-			lastSeenTargets[pos] = closest;
-
-			if (pos < historySize) {
-				return getMostCommonTarget(pos);
-			} else {
-				return getMostCommonTarget();
-			}
-		} else {
-			return closest;
-		}
-	}
-
-	private Target getMostCommonTarget(int endIndex) {
-		// Create a map of target positions in a count table
-		HashMap<Target, Integer> positions = new HashMap<Target, Integer>();
-		ArrayList<Target> targets = new ArrayList<Target>();
-
-		int counter = 0;
-		targets.add(null);
-		positions.put(null, counter++);
-		for (Object ent : ((AquaticDroneCI) robot).getEntities()) {
-			if (ent instanceof Target) {
-				positions.put((Target) ent, counter++);
-				targets.add((Target) ent);
-			}
-		}
-
-		// Table to count the occurrences
-		int[] count = new int[positions.size()];
-
-		// Count each target occurrence
-		for (int i = 0; i < endIndex; i++) {
-			int positionInArray = positions.get(lastSeenTargets[i]);
-			count[positionInArray]++;
-		}
-
-		// Get the most common one
-		int maxValue = Integer.MIN_VALUE;
-		Target target = null;
-		for (int i = 0; i < count.length; i++) {
-			if (count[i] > maxValue) {
-				target = targets.get(i);
-			}
-		}
-
-		return target;
-	}
-
-	private Target getMostCommonTarget() {
-		return getMostCommonTarget(historySize);
+		return closest;
 	}
 
 	private ArrayList<Target> getTargetsOccupancy(Object[] entities) {

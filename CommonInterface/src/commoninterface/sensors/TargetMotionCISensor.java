@@ -26,12 +26,7 @@ public class TargetMotionCISensor extends CISensor {
 	private int historySize = 10;
 	private Target[] lastSeenTargets;
 	private int pointer = 0;
-
 	private Target consideringTarget = null;
-
-	public Target getConsideringTarget() {
-		return consideringTarget;
-	}
 
 	public TargetMotionCISensor(int id, RobotCI robot, CIArguments args) {
 		super(id, robot, args);
@@ -54,6 +49,7 @@ public class TargetMotionCISensor extends CISensor {
 
 		if (target != null) {
 			consideringTarget = target;
+
 			Vector2d velocityVector = target.getMotionData().getVelocityVector(time);
 
 			/*
@@ -97,7 +93,7 @@ public class TargetMotionCISensor extends CISensor {
 			double targetVelocity = velocityVector.length();
 			double robotVelocity = ((AquaticDroneCI) robot).getRobotSpeedMs();
 			double diff = robotVelocity - targetVelocity;
-			diff /= SPEED_NORMALIZATION_CEELING*2;
+			diff /= SPEED_NORMALIZATION_CEELING * 2;
 
 			readings[0] = orientationDifference / 360.0 + 0.5;
 			readings[1] = diff + 0.5;
@@ -108,7 +104,6 @@ public class TargetMotionCISensor extends CISensor {
 				readings[0] = 0.5;
 				readings[1] = 0.5;
 			}
-
 		}
 	}
 
@@ -161,6 +156,10 @@ public class TargetMotionCISensor extends CISensor {
 		} else {
 			return closest;
 		}
+	}
+
+	public Target getConsideringTarget() {
+		return consideringTarget;
 	}
 
 	private Target getMostCommonTarget(int endIndex) {

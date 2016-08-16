@@ -22,7 +22,7 @@ import commoninterface.entities.target.Target;
 import commoninterface.entities.target.motion.MotionData;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.sensors.ConeTypeCISensor;
-import commoninterface.sensors.TargetMotionCISensor;
+import commoninterface.sensors.TargetComboCISensor;
 import commoninterface.sensors.ThymioConeTypeCISensor;
 import commoninterface.utils.CoordinateUtilities;
 import environment.GridBoundaryEnvironment;
@@ -83,8 +83,10 @@ public class CITwoDRenderer extends TwoDRenderer {
 			switch (m.getType()) {
 			case ROBOT:
 
-				TargetMotionCISensor sensor = (TargetMotionCISensor) ((CISensorWrapper) ((AquaticDrone) m)
-						.getSensorWithId(2)).getCisensor();
+//				TargetMotionCISensor sensor = (TargetMotionCISensor) ((CISensorWrapper) ((AquaticDrone) m)
+//						.getSensorWithId(2)).getCisensor();
+				TargetComboCISensor sensor = (TargetComboCISensor) ((CISensorWrapper) ((AquaticDrone) m)
+						.getSensorWithId(1)).getCisensor();
 				Robot robot = (Robot) m;
 
 				if (sensor.getConsideringTarget() != null) {
