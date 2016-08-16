@@ -12,11 +12,8 @@ import simulation.util.Arguments;
 public class RudderActuator extends Actuator {
 	private static final long serialVersionUID = 382936688810273745L;
 
+	//noise in the speeds
 	public float NOISESTDEV = 0.05f;
-
-	private double NEW_ANGLE = 1; //DEFAULT=1
-
-	private double ANGLE_DECAY = 0; //DEFAULT=0
 
 	protected double heading = 0;
 	protected double speed = 0;
@@ -28,16 +25,15 @@ public class RudderActuator extends Actuator {
 
 	private double angle;
 	
-	private double a = 0;
+	private double currentOrientation = 0;
 	private double inertia = 0;
-	private boolean oldDynamics = false;
 	
 	public RudderActuator(Simulator simulator, int id, Arguments arguments) {
 		super(simulator, id, arguments);
 		this.random = simulator.getRandom();
 		
-		oldDynamics = arguments.getFlagIsTrue("olddynamics");
-		
+		//We observed a delay of roughly 500ms between actuation and turning of the robot, which 
+		//we tried to model in simulation by putting the heading values in a qeue
 		int delay = arguments.getArgumentAsIntOrSetDefault("delay", 5);
 		
 		if(delay == 0) {
@@ -46,9 +42,9 @@ public class RudderActuator extends Actuator {
 			this.delay = new double[delay];
 		}
 	}
-
-	public void setHeading(double value) {
-		delay[indexDelay] = value;
+	
+	public void setHeading(double currentHeading) {
+		delay[indexDelay] = currentHeading;
 		indexDelay++;
 		indexDelay%=delay.length;
 		this.heading = delay[indexDelay];
@@ -62,24 +58,8 @@ public class RudderActuator extends Actuator {
 	@Override
 	public void apply(Robot drone, double timeDelta) {
 		
-//		if(drone.getId()==0 && heading != 0)
-//			System.out.println(heading);
-		
-//		double angleInDegrees = getTurningAngleFromHeading(heading)*-1;
-		double angleInDegrees = Math.max(-9, Math.min(9, angle + (getTurningAngleFromHeading(heading) * -1) * NEW_ANGLE));
-		
-//		if(angle < 0 && angleInDegrees > angle) {
-//			angleInDegrees = Math.max(-9, Math.min(9, angle + (getTurningAngleFromHeading(heading) * -1) * NEW_ANGLE));
-//		} else if(angle > 0 && angleInDegrees < angle) {
-//			angleInDegrees = Math.max(-9, Math.min(9, angle + (getTurningAngleFromHeading(heading) * -1) * NEW_ANGLE));
-//		}
-		
-		// 
-//		if(drone.getId()==0 && heading != 0) {
-//			System.out.println(getTurningAngleFromHeading(heading)*-1);
-//			System.out.println(angleInDegrees);
-//			System.out.println();
-//		}
+		//the robot's measured max turning speed is 9 degrees per second   
+		double angleInDegrees = Math.max(-9, Math.min(9, angle + (getTurningAngleFromHeading(heading) * -1)));
 		
 		double motorDifference = 0;
 		double forwardComponent = 0;
@@ -87,17 +67,23 @@ public class RudderActuator extends Actuator {
 		double turningSpeed = 0;
 		double forwardSpeed = 0;
 
-		double maxIncrementUp = 1.0 / (1.0 * 10.0); // 1 second to accel to full
-													// speed
+		double maxIncrementUp = 1.0 / (1.0 * 10.0); // 1 second to accel to full speed
 		double maxIncrementDown = 1.0 / (5.0 * 10.0); // 5 seconds to stop
 
 		double desiredSpeed = speed;
 
+		//limit how much the robot can accelerate at any given moment
 		if (speed > prevSpeed + maxIncrementUp)
 			speed = prevSpeed + maxIncrementUp;
 		else if (speed < prevSpeed - maxIncrementDown)
 			speed = prevSpeed - maxIncrementDown;
-		if (Math.abs(heading) >= 0.9/* || Math.abs(heading) < 0.1 */) {
+		
+		//Heading varies between [-1,1]. If the value is very close to the extremes (<-0.9 or > 0.9),
+		//we simplify by turning off one of the motors completely. if the value is very close to the center (~0),
+		//we simplify by saying that the robot wants to go in a straight line.
+		if (Math.abs(heading) >= 0.9) {
+			
+			//the robot is either turning abruptly (one motor stopped), or moving forward.
 
 			if (Math.abs(heading) >= 0.9)
 				heading = 1.0 * Math.signum(heading);
@@ -105,11 +91,19 @@ public class RudderActuator extends Actuator {
 			if (Math.abs(heading) <= 0.1)
 				heading = 0;
 
-			angleInDegrees = Math.max(-9, Math.min(9, angle 
-					+ (getTurningAngleFromHeading(heading) * -1) * NEW_ANGLE));
-			motorDifference = getMotorDifferenceFromTurningAngle(Math
-					.abs(angleInDegrees));
+			angleInDegrees = Math.max(-9, Math.min(9, angle + (getTurningAngleFromHeading(heading) * -1)));
+			
+			//The motor difference reflects how much one of the motors has more power than the other.
+			//If the motor difference is 1.0, then one of the motors is stopped and the other is is running at full speed.
+			motorDifference = getMotorDifferenceFromTurningAngle(Math.abs(angleInDegrees));
 
+			//The new speed and angle is calculated using these 2 components: forward and turning.
+			//It is trivial to model the robot's dynamics when one of the motor is stopped (maximum turning speed),
+			//or when both motors are running at the same speed (0 turning speed). We therefore combined both in a single model,
+			//where there is a forward component and a turning component.
+			//
+			//When going forward, the motor difference is 0 (both running at the same speed).
+			//When turning at the maximum turning speed, the motor difference
 			forwardComponent = 1.0 - motorDifference;
 			turningComponent = 1.0 - forwardComponent;
 
@@ -118,25 +112,21 @@ public class RudderActuator extends Actuator {
 
 			turningSpeed = getTurningSpeedFromDifferenceOneStoppedMotor(turningComponent);
 			forwardSpeed = getForwardSpeedInMs(forwardComponent);
-			angleInDegrees = Math.max(-9, Math.min(9, angle
-					+
-					getTurningAngleFromTurningSpeed(turningSpeed)
-					* Math.signum(angleInDegrees) *NEW_ANGLE));
+			angleInDegrees = Math.max(-9, Math.min(9, angle + getTurningAngleFromTurningSpeed(turningSpeed) * Math.signum(angleInDegrees)));
 
 		} else {
-			motorDifference = getMotorDifferenceFromAngleOneFullMotor(Math
-					.abs(angleInDegrees));
-			turningSpeed = getTurningSpeedFromMotorDifferenceOneMotorFull(motorDifference)
-					* translateSpeedReduction(speed);
+			//the robot is turning moderately, which means that both motors are turning and different speeds
+			
+			motorDifference = getMotorDifferenceFromAngleOneFullMotor(Math.abs(angleInDegrees));
+			turningSpeed = getTurningSpeedFromMotorDifferenceOneMotorFull(motorDifference) * translateSpeedReduction(speed);
 		}
-
-		// turningSpeed*=.5;
 
 		double x = drone.getPosition().getX();
 		double y = drone.getPosition().getY();
 		double o = drone.getOrientation();
 
 		if (speed < 0.01) {
+			//allow the robot to come to a halt if the speed is very low
 			turningSpeed = 0;
 			forwardSpeed = 0;
 		}
@@ -148,49 +138,39 @@ public class RudderActuator extends Actuator {
 		y = y + (turningSpeed + forwardSpeed) * timeDelta * Math.sin(o);
 
 		if (desiredSpeed >= 0.01) {
-			double newOrientation = a + Math.toRadians(angleInDegrees);
+			double newOrientation = currentOrientation + Math.toRadians(angleInDegrees);
 			
-			if(oldDynamics) {
-				newOrientation = MathUtils.modPI2(newOrientation);
-				drone.setOrientation(newOrientation);
-				a = newOrientation;
-			} else {
-				
-				newOrientation = a + Math.toRadians(angleInDegrees*1.5);
+			newOrientation = currentOrientation + Math.toRadians(angleInDegrees*1.5);
 
-				double diff = newOrientation - a;
-				
-				if(a == 0)
-					a = drone.getOrientation();
-				
-				// 1.0 7
-				
-				double change = diff*1.0;
-				double maxChange = Math.toRadians(7);
-				
-				if(change > maxChange)
-					change = maxChange;
-				if(change < -maxChange)
-					change = -maxChange;
-				
-				double inertiaDiff = heading-inertia;
-				inertia+= inertiaDiff*0.35; //0.35
-				
-				inertiaDiff = (heading-inertia);
-				
-				a+=change*(1-Math.abs(inertiaDiff));
-				
-				a = MathUtils.modPI2(a);
-				drone.setOrientation(a);
-				
-			}
+			double orientationDifference = newOrientation - currentOrientation;
+			
+			if(currentOrientation == 0)
+				currentOrientation = drone.getOrientation();
+			
+			double change = orientationDifference*1.0;
+			double maxChange = Math.toRadians(7);
+			
+			if(change > maxChange)
+				change = maxChange;
+			if(change < -maxChange)
+				change = -maxChange;
+			
+			double inertiaDiff = heading-inertia;
+			inertia+= inertiaDiff*0.35; 
+			
+			inertiaDiff = (heading-inertia);
+			
+			currentOrientation+=change*(1-Math.abs(inertiaDiff));
+			
+			currentOrientation = MathUtils.modPI2(currentOrientation);
+			drone.setOrientation(currentOrientation);
 			
 		}
 
 		drone.setPosition(new Vector2d(x, y));
 
 		prevSpeed = speed;
-		angle = angleInDegrees*ANGLE_DECAY;
+		angle = angleInDegrees;
 	}
 
 	@Override
@@ -206,27 +186,23 @@ public class RudderActuator extends Actuator {
 		return 153.99 * Math.pow(percentage, 0.3663) / 100.0;
 	}
 
-	private double getTurningSpeedFromDifferenceOneStoppedMotor(
-			double speedDifference) {
+	private double getTurningSpeedFromDifferenceOneStoppedMotor(double speedDifference) {
 
 		if (speedDifference == 0)
 			return 0;
 
-		return (-35.322 * Math.pow(speedDifference, 2) + 133.59
-				* speedDifference + 18.964) / 100.0;
+		return (-35.322 * Math.pow(speedDifference, 2) + 133.59 * speedDifference + 18.964) / 100.0;
 	}
 
 	private double getMotorDifferenceFromAngleOneFullMotor(double angle) {
 		return -0.0068 * Math.pow(angle, 2) + 0.1614 * angle + 0.0903;
 	}
 
-	public double getTurningAngleFromDifferenceOneMotorFull(
-			double speedDifference) {
+	public double getTurningAngleFromDifferenceOneMotorFull(double speedDifference) {
 		return 10.564 * speedDifference - 2.0412;
 	}
 
-	public double getTurningSpeedFromMotorDifferenceOneMotorFull(
-			double difference) {
+	public double getTurningSpeedFromMotorDifferenceOneMotorFull(double difference) {
 		return (-28.958 * difference + 139.88) / 100.0;
 	}
 
@@ -238,6 +214,13 @@ public class RudderActuator extends Actuator {
 		return 7.6401 * turningSpeed;
 	}
 
+	/**
+	 * This function maps the desired heading to a rotational speed, in degrees per second
+	 * 
+	 * @param heading in percentage
+	 * @return rotational speed in degrees per second
+	 * 
+	 */
 	private double getTurningAngleFromHeading(double heading) {
 		return 9 * heading;
 	}
