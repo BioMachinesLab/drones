@@ -21,12 +21,17 @@ import org.joda.time.LocalDateTime;
 import commoninterface.dataobjects.GPSData;
 import commoninterface.utils.jcoord.LatLon;
 import gui.DroneGUI;
+import gui.utils.GetIPFromUser;
 import network.GPSTimeProviderClient;
 
 public class GPSTimePanel extends JPanel {
 	private static final long serialVersionUID = 3310464759362205768L;
-	private final static String SERVER_IP = "127.0.0.1";
-	private final static int SERVER_PORT = 9190;
+	private final static boolean ASK_FOR_SERVER_IP = true;
+	private final static String DEFAULT_SERVER_IP = "127.0.0.1";
+	private final static int DEFAULT_SERVER_PORT = 9190;
+
+	private String serverIP;
+	private int serverPort;
 	private GPSTimeProviderClient gpsTimeProviderClient = null;
 
 	private DroneGUI gui;
@@ -42,16 +47,6 @@ public class GPSTimePanel extends JPanel {
 	public GPSTimePanel(DroneGUI gui) {
 		this.gui = gui;
 		buildPanel();
-
-		try {
-			if (InetAddress.getByName(SERVER_IP).isReachable(5 * 1000)) {
-				gpsTimeProviderClient = new GPSTimeProviderClient(InetAddress.getByName(SERVER_IP), SERVER_PORT);
-			} else {
-				System.err.printf("[%s] Unreachable GPS time provider server%n", getClass().getName());
-			}
-		} catch (IOException e) {
-			System.err.printf("[%s] Error resolving server address -> %s%n", getClass().getName(), e.getMessage());
-		}
 	}
 
 	private void buildPanel() {
@@ -106,10 +101,39 @@ public class GPSTimePanel extends JPanel {
 	}
 
 	private void toggleButton() {
-		if (gpsTimeProviderClient!=null && gpsTimeProviderClient.connectionOK()) {
+		if (gpsTimeProviderClient != null && gpsTimeProviderClient.connectionOK()) {
 			stopClient();
 		} else {
-			startClient();
+			boolean toConnect = true;
+			if (ASK_FOR_SERVER_IP) {
+				GetIPFromUser getIPFromUser = new GetIPFromUser("Insert server address", DEFAULT_SERVER_PORT + "",
+						DEFAULT_SERVER_IP);
+
+				if (getIPFromUser.getPressedButton() == JOptionPane.OK_OPTION) {
+					serverIP = getIPFromUser.getIpAddressAsString();
+					serverPort = getIPFromUser.getPortNumber();
+				} else {
+					toConnect = false;
+				}
+			} else {
+				serverIP = DEFAULT_SERVER_IP;
+				serverPort = DEFAULT_SERVER_PORT;
+			}
+
+			if (toConnect) {
+				try {
+					if (InetAddress.getByName(serverIP).isReachable(5 * 1000)) {
+						gpsTimeProviderClient = new GPSTimeProviderClient(InetAddress.getByName(serverIP), serverPort);
+					} else {
+						System.err.printf("[%s] Unreachable GPS time provider server%n", getClass().getName());
+					}
+				} catch (IOException e) {
+					System.err.printf("[%s] Error resolving server address -> %s%n", getClass().getName(),
+							e.getMessage());
+				}
+
+				startClient();
+			}
 		}
 	}
 
@@ -121,9 +145,8 @@ public class GPSTimePanel extends JPanel {
 
 			if (!gpsTimeProviderClient.isAlive() && gpsTimeProviderClient.exited()) {
 				try {
-					if (InetAddress.getByName(SERVER_IP).isReachable(5 * 1000)) {
-						gpsTimeProviderClient = new GPSTimeProviderClient(InetAddress.getByName(SERVER_IP),
-								SERVER_PORT);
+					if (InetAddress.getByName(serverIP).isReachable(5 * 1000)) {
+						gpsTimeProviderClient = new GPSTimeProviderClient(InetAddress.getByName(serverIP), serverPort);
 					} else {
 						System.err.printf("[%s] Unreachable GPS time provider server%n", getClass().getName());
 					}
