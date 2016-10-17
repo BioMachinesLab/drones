@@ -17,9 +17,8 @@ import net.jafama.FastMath;
 
 public class TargetComboCISensor extends CISensor {
 	private static final long serialVersionUID = -8416969087882860806L;
-	private static double SPEED_NORMALIZATION_CEELING = 2.0;
+	private static double SPEED_NORMALIZATION_CEELING = 2.5;
 	protected double[] readings = { 0, 0, 0 };
-	private boolean excludeOccupied = false;
 	private double range = 100;
 	private Target consideringTarget = null;
 	private double distanceToCommute = 2.5;
@@ -27,7 +26,6 @@ public class TargetComboCISensor extends CISensor {
 	public TargetComboCISensor(int id, RobotCI robot, CIArguments args) {
 		super(id, robot, args);
 
-		excludeOccupied = args.getArgumentAsIntOrSetDefault("excludeOccupied", 0) == 1;
 		range = args.getArgumentAsDoubleOrSetDefault("range", range);
 		distanceToCommute = args.getArgumentAsDoubleOrSetDefault("distanceToCommute", distanceToCommute);
 	}
@@ -36,7 +34,7 @@ public class TargetComboCISensor extends CISensor {
 	public void update(double time, Object[] entities) {
 		LatLon robotLatLon = ((AquaticDroneCI) robot).getGPSLatLon();
 		ArrayList<Target> targets = getTargetsOccupancy(entities);
-		Target target = getClosestTarget(excludeOccupied, targets);
+		Target target = getClosestTarget( targets);
 
 		LatLon latLon = null;
 		double distance = -1;
@@ -139,7 +137,7 @@ public class TargetComboCISensor extends CISensor {
 		return readings.length;
 	}
 
-	private Target getClosestTarget(boolean excludeOccupied, ArrayList<Target> targets) {
+	private Target getClosestTarget(ArrayList<Target> targets) {
 		// Get robot location
 		Vector2d robotPosition = null;
 		if (robot instanceof AquaticDroneCI) {
