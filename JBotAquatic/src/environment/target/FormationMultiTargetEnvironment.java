@@ -180,7 +180,13 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 	private void generateFormationMotionData() {
 		double targetsVelocity = movementVelocity;
 		if (variateTargetVelocity) {
-			targetsVelocity = 0.1 * movementVelocity + simulator.getRandom().nextDouble() * movementVelocity * 2;
+			// targetsVelocity = 0.1 * movementVelocity +
+			// simulator.getRandom().nextDouble() * movementVelocity * 2;
+
+			// Hardcode stuff
+			double bottomLimit = 0.15;
+			double upperLimit = 0.4;
+			targetsVelocity = bottomLimit + simulator.getRandom().nextDouble() * (upperLimit - bottomLimit);
 		}
 
 		double targetsAzimuth = movementAzimuth;
@@ -190,7 +196,13 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 
 		double angularVelocity = rotationVelocity;
 		if (variateRotationVelocity) {
-			angularVelocity = 0.1 * rotationVelocity + simulator.getRandom().nextDouble() * rotationVelocity * 1.5;
+			// angularVelocity = 0.1 * rotationVelocity +
+			// simulator.getRandom().nextDouble() * rotationVelocity * 1.5;
+
+			// Hardcode stuff
+			double bottomLimit = 0.015;
+			double upperLimit = 0.02;
+			angularVelocity = bottomLimit+simulator.getRandom().nextDouble() *(upperLimit-bottomLimit);
 		}
 
 		boolean direction = rotationDirection;

@@ -76,49 +76,51 @@ public class CIResultViewerGui extends ResultViewerGui {
 	protected JPanel initRightWrapperPanel() {
 		JPanel panel = super.initRightWrapperPanel();
 
-		extraOptionsPanel.setLayout(new GridLayout(3, 1));
-		velocityVectorsCheckbox = new JCheckBox("Show targets velocity vectors");
-		velocityVectorsCheckbox.setAlignmentX(Component.CENTER_ALIGNMENT);
-		extraOptionsPanel.add(velocityVectorsCheckbox);
+		if (enableDebugOptions) {
+			extraOptionsPanel.setLayout(new GridLayout(3, 1));
+			velocityVectorsCheckbox = new JCheckBox("Show targets velocity vectors");
+			velocityVectorsCheckbox.setAlignmentX(Component.CENTER_ALIGNMENT);
+			extraOptionsPanel.add(velocityVectorsCheckbox);
 
-		// A Informations panel
-		JPanel sensorsPanel = new JPanel(new GridLayout(2, 1));
-		sensorsPanel.setBorder(BorderFactory.createTitledBorder("Sensors Options"));
+			// A Informations panel
+			JPanel sensorsPanel = new JPanel(new GridLayout(2, 1));
+			sensorsPanel.setBorder(BorderFactory.createTitledBorder("Sensors Options"));
 
-		JPanel optionBoxesPanel = new JPanel(new GridLayout(2, 1));
-		seeEntitiesJCheckBox = new JCheckBox("See entities");
-		seeEntitiesJCheckBox.setHorizontalAlignment(JTextField.CENTER);
-		seeEntitiesJCheckBox.setSelected(((CITwoDRenderer) renderer).isSeeEntitiesEnabled());
-		optionBoxesPanel.add(seeEntitiesJCheckBox);
+			JPanel optionBoxesPanel = new JPanel(new GridLayout(2, 1));
+			seeEntitiesJCheckBox = new JCheckBox("See entities");
+			seeEntitiesJCheckBox.setHorizontalAlignment(JTextField.CENTER);
+			seeEntitiesJCheckBox.setSelected(((CITwoDRenderer) renderer).isSeeEntitiesEnabled());
+			optionBoxesPanel.add(seeEntitiesJCheckBox);
 
-		seeSensorJCheckBox = new JCheckBox("See sensors");
-		seeSensorJCheckBox.setHorizontalAlignment(JTextField.CENTER);
-		seeSensorJCheckBox.setSelected(((CITwoDRenderer) renderer).isSeeSensorEnabled());
-		optionBoxesPanel.add(seeSensorJCheckBox);
-		sensorsPanel.add(optionBoxesPanel);
+			seeSensorJCheckBox = new JCheckBox("See sensors");
+			seeSensorJCheckBox.setHorizontalAlignment(JTextField.CENTER);
+			seeSensorJCheckBox.setSelected(((CITwoDRenderer) renderer).isSeeSensorEnabled());
+			optionBoxesPanel.add(seeSensorJCheckBox);
+			sensorsPanel.add(optionBoxesPanel);
 
-		JPanel textfieldsPanel = new JPanel(new GridLayout(3, 2));
-		textfieldsPanel.add(new JLabel("Drone ID:"));
-		droneIDTextField = new JTextField("0");
-		droneIDTextField.setHorizontalAlignment(JTextField.CENTER);
-		textfieldsPanel.add(droneIDTextField);
+			JPanel textfieldsPanel = new JPanel(new GridLayout(3, 2));
+			textfieldsPanel.add(new JLabel("Drone ID:"));
+			droneIDTextField = new JTextField("0");
+			droneIDTextField.setHorizontalAlignment(JTextField.CENTER);
+			textfieldsPanel.add(droneIDTextField);
 
-		textfieldsPanel.add(new JLabel("Sensor ID:"));
-		coneSensorIdTextField = new JTextField("3");
-		coneSensorIdTextField.setHorizontalAlignment(JTextField.CENTER);
-		textfieldsPanel.add(coneSensorIdTextField);
+			textfieldsPanel.add(new JLabel("Sensor ID:"));
+			coneSensorIdTextField = new JTextField("2");
+			coneSensorIdTextField.setHorizontalAlignment(JTextField.CENTER);
+			textfieldsPanel.add(coneSensorIdTextField);
 
-		textfieldsPanel.add(new JLabel("Cone Transparence:"));
-		coneTransparenceTextField = new JTextField("35");
-		coneTransparenceTextField.setHorizontalAlignment(JTextField.CENTER);
-		textfieldsPanel.add(coneTransparenceTextField);
-		sensorsPanel.add(textfieldsPanel);
+			textfieldsPanel.add(new JLabel("Cone Transparence:"));
+			coneTransparenceTextField = new JTextField("35");
+			coneTransparenceTextField.setHorizontalAlignment(JTextField.CENTER);
+			textfieldsPanel.add(coneTransparenceTextField);
+			sensorsPanel.add(textfieldsPanel);
 
-		debugOptions.add(sensorsPanel);
+			debugOptions.add(sensorsPanel);
 
-		SpringUtilities.makeGrid(debugOptions, 3, 1, // rows, cols
-				0, 0, // initialX, initialY
-				10, 10);
+			SpringUtilities.makeGrid(debugOptions, 3, 1, // rows, cols
+					0, 0, // initialX, initialY
+					10, 10);
+		}
 
 		return panel;
 	}
