@@ -18,7 +18,7 @@ import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
 import commoninterface.utils.logger.LogCodex;
-import commoninterface.utils.logger.LogData;
+import commoninterface.utils.logger.ToLogData;
 import gui.renderer.Renderer;
 import gui.renderer.TwoDRenderer;
 import mathutils.Vector2d;
@@ -169,7 +169,7 @@ public class PositionPlot extends Thread {
 		Environment env = sim.getEnvironment();
 
 		commoninterface.utils.logger.DecodedLog dld = LogCodex.decodeLog(lines.get(0));
-		LogData l = (LogData) dld.getPayload();
+		ToLogData l = (ToLogData) dld.getPayload();
 
 		double lat = l.latLon.getLat();
 		double lon = l.latLon.getLon();
@@ -191,7 +191,7 @@ public class PositionPlot extends Thread {
 		for (int i = 0; i < lines.size(); i++) {
 
 			dld = LogCodex.decodeLog(lines.get(i));
-			l = (LogData) dld.getPayload();
+			l = (ToLogData) dld.getPayload();
 
 			if (pause) {
 				i--;

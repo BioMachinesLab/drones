@@ -32,7 +32,7 @@ import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.logger.DecodedLog;
 import commoninterface.utils.logger.LogCodex;
-import commoninterface.utils.logger.LogData;
+import commoninterface.utils.logger.ToLogData;
 
 import evaluation.AggregateFitness;
 import evolutionaryrobotics.JBotEvolver;

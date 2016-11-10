@@ -15,7 +15,7 @@ import org.joda.time.DateTime;
 
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
-import commoninterface.utils.logger.LogData;
+import commoninterface.utils.logger.ToLogData;
 
 public class FieldTest {
 	
@@ -73,7 +73,7 @@ public class FieldTest {
 	static PrintWriter writer;
 
 	private ArrayList<Experiment> experiments = new ArrayList<Experiment>();
-	private HashMap<Integer,ArrayList<LogData>> completeLogs = new HashMap<Integer, ArrayList<LogData>>();
+	private HashMap<Integer,ArrayList<ToLogData>> completeLogs = new HashMap<Integer, ArrayList<ToLogData>>();
 	private int[] robots = new int[]{1,2,3,4,5,6,7,8,9,10};
 	private int nSamples = 10;
 	
@@ -275,7 +275,7 @@ public class FieldTest {
 			System.out.println("]");
 		}
 		
-		ArrayList<LogData> allData = new ArrayList<LogData>();
+		ArrayList<ToLogData> allData = new ArrayList<ToLogData>();
 		
 		for(int i : participatingRobots) {
 			allData.addAll(DroneLogExporter.getLogs(completeLogs.get(i), startTime, endTime));

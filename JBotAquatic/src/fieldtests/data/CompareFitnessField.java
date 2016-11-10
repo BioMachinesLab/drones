@@ -21,7 +21,7 @@ import commoninterface.entities.RobotLocation;
 import commoninterface.network.broadcast.PositionBroadcastMessage;
 import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.utils.CoordinateUtilities;
-import commoninterface.utils.logger.LogData;
+import commoninterface.utils.logger.ToLogData;
 import evolutionaryrobotics.JBotEvolver;
 import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
 import gui.renderer.Renderer;
@@ -52,9 +52,9 @@ public class CompareFitnessField extends Thread {
 		this.frame = frame;
 	}
 
-	private ArrayList<LogData> getData(String experiment, int controller, int robots, int sample) {
+	private ArrayList<ToLogData> getData(String experiment, int controller, int robots, int sample) {
 
-		ArrayList<LogData> data = new ArrayList<LogData>();
+		ArrayList<ToLogData> data = new ArrayList<ToLogData>();
 
 		try {
 
@@ -64,7 +64,7 @@ public class CompareFitnessField extends Thread {
 			while (sBcast.hasNextLine()) {
 				String line = sBcast.nextLine();
 				if (!line.startsWith("#") && !line.isEmpty()) {
-					LogData d = new LogData();
+					ToLogData d = new ToLogData();
 
 					String[] split = line.split(" ");
 					String msg = split[1];
@@ -106,7 +106,7 @@ public class CompareFitnessField extends Thread {
 		return data;
 	}
 
-	private RobotLocation getRobotLocation(LogData d) {
+	private RobotLocation getRobotLocation(ToLogData d) {
 		String[] split = d.ip.split("\\.");
 		return new RobotLocation(split[split.length - 1], d.latLon, d.compassOrientation, d.droneType);
 	}
@@ -133,7 +133,7 @@ public class CompareFitnessField extends Thread {
 		Setup real = new Setup();
 		Setup sim = new Setup();
 
-		ArrayList<LogData> data = getData(experiment, controller, robots, sample);
+		ArrayList<ToLogData> data = getData(experiment, controller, robots, sample);
 
 		hash.put("--environment",
 				new Arguments("classname=EmptyEnvironment,width=150,height=150,steps=" + (int) maxSteps, true));
@@ -143,7 +143,7 @@ public class CompareFitnessField extends Thread {
 
 		HashMap<Integer, Integer> robotList = new HashMap<Integer, Integer>();
 
-		for (LogData d : data) {
+		for (ToLogData d : data) {
 			RobotLocation rl = getRobotLocation(d);
 			int id = Integer.parseInt(rl.getName());
 			robotList.put(id, 0);
@@ -179,7 +179,7 @@ public class CompareFitnessField extends Thread {
 		commoninterface.mathutils.Vector2d firstPos = CoordinateUtilities.GPSToCartesian(firstRL.getLatLon());
 
 		for (Integer id : robotList.keySet()) {
-			for (LogData d : data) {
+			for (ToLogData d : data) {
 
 				RobotLocation rl = getRobotLocation(d);
 				int logId = Integer.parseInt(rl.getName());
@@ -231,7 +231,7 @@ public class CompareFitnessField extends Thread {
 
 		sim.sim.addCallback(new WaterCurrent(new Arguments("maxspeed=0.1,fixedspeed=1,angle=-45")));
 
-		for (LogData d : data) {
+		for (ToLogData d : data) {
 
 			RobotLocation rl = getRobotLocation(d);
 

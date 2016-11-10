@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 import org.joda.time.DateTime;
 
-import commoninterface.utils.logger.LogData;
+import commoninterface.utils.logger.ToLogData;
 
 public class Experiment implements Serializable{
 	
@@ -16,7 +16,7 @@ public class Experiment implements Serializable{
 	public int controllerNumber;
 	public ArrayList<Integer> robots = new ArrayList<Integer>();
 	public int sample;
-	public ArrayList<LogData> logs = new ArrayList<LogData>();
+	public ArrayList<ToLogData> logs = new ArrayList<ToLogData>();
 	public int activeRobot = -1;
 	
 	@Override
