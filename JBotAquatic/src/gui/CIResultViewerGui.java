@@ -1,6 +1,8 @@
 package gui;
 
 import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,6 +11,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import commoninterface.neat.core.NEATNeuralNet;
@@ -73,8 +76,8 @@ public class CIResultViewerGui extends ResultViewerGui {
 	}
 
 	@Override
-	protected JPanel initRightWrapperPanel() {
-		JPanel panel = super.initRightWrapperPanel();
+	protected Container initRightWrapperPanel() {
+		Container panel = super.initRightWrapperPanel();
 
 		if (enableDebugOptions) {
 			extraOptionsPanel.setLayout(new GridLayout(3, 1));
@@ -122,7 +125,9 @@ public class CIResultViewerGui extends ResultViewerGui {
 					10, 10);
 		}
 
-		return panel;
+		// @vasco: 1000 Pixels is a hardcoded value and 300 came from super class
+		panel.setPreferredSize(new Dimension(300, 1000));
+		return new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 	}
 
 	@Override
