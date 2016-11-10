@@ -80,7 +80,7 @@ public class LogCodex {
 		switch (type) {
 		case LOGDATA:
 			data += LOG_TYPE + LogType.LOGDATA + MAIN_SEPARATOR;
-			data += encodeLogData((LogData) object);
+			data += encodeLogData((ToLogData) object);
 			break;
 
 		case ENTITIES:
@@ -108,7 +108,7 @@ public class LogCodex {
 		String[] infoBlocks = logLine.split(MAIN_SEPARATOR);
 		DecodedLog decodedLog = null;
 
-		if (logLine.startsWith("[") || logLine.startsWith("\"")) {
+		if (logLine.startsWith("[") || logLine.startsWith("\"") || logLine.isEmpty()) {
 			System.out.println("Ignoring this line:" + logLine);
 			return null;
 		}
@@ -147,7 +147,7 @@ public class LogCodex {
 					blocks2[i] = infoBlocks[i + 1];
 				}
 
-				LogData logData = decodeLogData(blocks2);
+				ToLogData logData = decodeLogData(blocks2);
 				decodedLog = new DecodedLog(LogType.LOGDATA, logData, logData.timestep);
 				break;
 			case ERROR:
@@ -376,8 +376,8 @@ public class LogCodex {
 		return f;
 	}
 
-	private static LogData decodeLogData(String[] infoBlocks) {
-		LogData logData = new LogData();
+	private static ToLogData decodeLogData(String[] infoBlocks) {
+		ToLogData logData = new ToLogData();
 
 		try {
 			for (int i = 0; i < infoBlocks.length; i++) {
@@ -502,7 +502,7 @@ public class LogCodex {
 		}
 	}
 
-	private static String encodeLogData(LogData logData) {
+	private static String encodeLogData(ToLogData logData) {
 		String data = "";
 		data += (logData.ip != null) ? IP_ADDR_SEP + logData.ip + MAIN_SEPARATOR : "";
 		data += (logData.timestep >= 0) ? TIMESTEP_SEP + Integer.toString(logData.timestep) + MAIN_SEPARATOR : "";

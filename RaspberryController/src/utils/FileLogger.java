@@ -17,7 +17,7 @@ import commoninterface.neuralnetwork.CINeuralNetwork;
 import commoninterface.utils.RobotLogger;
 import commoninterface.utils.logger.LogCodex;
 import commoninterface.utils.logger.LogCodex.LogType;
-import commoninterface.utils.logger.LogData;
+import commoninterface.utils.logger.ToLogData;
 import commoninterfaceimpl.RealAquaticDroneCI;
 import io.input.ControllerInput;
 import io.input.GPSModuleInput;
@@ -122,9 +122,9 @@ public class FileLogger extends Thread implements RobotLogger {
 		}
 	}
 
-	private LogData getLogData() {
+	private ToLogData getLogData() {
 
-		LogData data = new LogData();
+		ToLogData data = new ToLogData();
 
 		if (drone.getGPSLatLon() != null) {
 			data.latLon = drone.getGPSLatLon();

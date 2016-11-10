@@ -46,14 +46,14 @@ import commoninterface.entities.Waypoint;
 import commoninterface.utils.jcoord.LatLon;
 import commoninterface.utils.logger.DecodedLog;
 import commoninterface.utils.logger.LogCodex;
-import commoninterface.utils.logger.LogData;
+import commoninterface.utils.logger.ToLogData;
 
 public class LogVisualizer extends JFrame {
 
 	private static String FOLDER = "logs";
 	private MapPanel map;
 	private JSlider slider;
-	private ArrayList<LogData> allData;
+	private ArrayList<ToLogData> allData;
 	private int currentStep = 0;
 	private PlayThread playThread;
 	private JLabel currentStepLabel;
@@ -79,7 +79,7 @@ public class LogVisualizer extends JFrame {
 			allData = readFile();
 			Collections.sort(allData);
 			
-			for(LogData d : allData) {
+			for(ToLogData d : allData) {
 				System.out.println(d.temperatures[1]+" "+d.GPSspeed+" "+d.temperatures[0]);
 			}
 
@@ -191,7 +191,7 @@ public class LogVisualizer extends JFrame {
 		map.clearHistory();
 
 		for (int i = 0; i < step; i++) {
-			LogData d = allData.get(i);
+			ToLogData d = allData.get(i);
 
 			map.displayData(new RobotLocation(d.ip, d.latLon,
 					d.compassOrientation, d.droneType));
@@ -219,7 +219,7 @@ public class LogVisualizer extends JFrame {
 		if (lastIncrementStep == currentStep) {
 			currentStep++;
 			slider.setValue(currentStep);
-			LogData d = allData.get(currentStep);
+			ToLogData d = allData.get(currentStep);
 
 			map.displayData(new RobotLocation(d.ip, d.latLon,
 					d.compassOrientation, d.droneType));
@@ -238,7 +238,7 @@ public class LogVisualizer extends JFrame {
 		lastIncrementStep = currentStep;
 	}
 
-	private ArrayList<LogData> readFile() throws IOException {
+	private ArrayList<ToLogData> readFile() throws IOException {
 
 		File folder = new File(FOLDER);
 		if (!folder.exists()) {
@@ -249,7 +249,7 @@ public class LogVisualizer extends JFrame {
 		if (!parserVersion) {
 			return parseOldLog(folder);
 		} else {
-			ArrayList<LogData> result = new ArrayList<LogData>();
+			ArrayList<ToLogData> result = new ArrayList<ToLogData>();
 
 			for (String file : folder.list()) {
 				if (!file.contains(".log"))
@@ -276,7 +276,7 @@ public class LogVisualizer extends JFrame {
 							break;
 
 						case LOGDATA:
-							LogData d = (LogData) decodedData.getPayload();
+							ToLogData d = (ToLogData) decodedData.getPayload();
 							//TODO
 //							d.entities = currentEntities;
 							result.add(d);
@@ -301,9 +301,9 @@ public class LogVisualizer extends JFrame {
 		}
 	}
 
-	private ArrayList<LogData> parseOldLog(File folder)
+	private ArrayList<ToLogData> parseOldLog(File folder)
 			throws FileNotFoundException {
-		ArrayList<LogData> result = new ArrayList<LogData>();
+		ArrayList<ToLogData> result = new ArrayList<ToLogData>();
 		DateTimeFormatter dtf = DateTimeFormat
 				.forPattern("dd-MM-yyyy_HH:mm:ss.SS");
 
@@ -317,7 +317,7 @@ public class LogVisualizer extends JFrame {
 			Scanner s = new Scanner(new File(FOLDER + "/" + file));
 
 			String lastComment = "";
-			ArrayList<LogData> data = new ArrayList<LogData>();
+			ArrayList<ToLogData> data = new ArrayList<ToLogData>();
 
 			int step = 0;
 
@@ -335,7 +335,7 @@ public class LogVisualizer extends JFrame {
 
 					try {
 
-						LogData d = new LogData();
+						ToLogData d = new ToLogData();
 
 						d.systemTime = sl.next();
 
@@ -400,7 +400,7 @@ public class LogVisualizer extends JFrame {
 			
 			if(!ip.isEmpty()) {
 				
-				for(LogData d : data)
+				for(ToLogData d : data)
 					d.ip = ip;
 
 				result.addAll(data);
@@ -473,7 +473,7 @@ public class LogVisualizer extends JFrame {
 	private void updateCurrentStepLabel() {
 
 		if (currentStep < allData.size()) {
-			LogData d = allData.get(currentStep);
+			ToLogData d = allData.get(currentStep);
 
 			String text = "Step: " + currentStep + "/" + allData.size();
 			text += "\t Time: " + d.systemTime + " ("
