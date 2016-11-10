@@ -3,6 +3,7 @@ package environment.target;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import commoninterface.AquaticDroneCI;
 import commoninterface.entities.target.Target;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CoordinateUtilities;
@@ -31,6 +32,7 @@ public abstract class TargetEnvironment extends Environment {
 
 	protected ArrayList<Target> targets = new ArrayList<Target>();
 	protected HashMap<String, LightPole> markers = new HashMap<String, LightPole>();
+	protected HashMap<Target, Vector2d> targetsPositions = new HashMap<Target, Vector2d>();
 
 	public TargetEnvironment(Simulator simulator, Arguments args) {
 		super(simulator, args);
@@ -135,14 +137,40 @@ public abstract class TargetEnvironment extends Environment {
 
 	@Override
 	public void update(double time) {
-		// for (Target target : targets) {
-		// if (moveTargets) {
-		// target.step(time);
-		// }
-		// }
+		// Update the targets positions
+		for (Target target : targets) {
+			Vector2d newPosition = CoordinateUtilities.GPSToCartesian(target.getLatLon());
+			targetsPositions.remove(target);
+			targetsPositions.put(target, newPosition);
+		}
+	}
+
+	@Override
+	public void setup(Simulator simulator) {
+		// Update the targets positions
+		for (Target target : targets) {
+			Vector2d newPosition = CoordinateUtilities.GPSToCartesian(target.getLatLon());
+			targetsPositions.remove(target);
+			targetsPositions.put(target, newPosition);
+		}
 	}
 
 	public double getRadiusOfObjPositioning() {
 		return radiusOfObjPositioning;
+	}
+
+	protected boolean isInsideTarget(AquaticDroneCI robot, Target target) {
+		Vector2d pos = targetsPositions.get(target);
+		return pos.distanceTo(CoordinateUtilities.GPSToCartesian(robot.getGPSLatLon())) <= target.getRadius();
+	}
+
+	protected boolean isInsideTarget(AquaticDroneCI robot) {
+		for (Target target : targets) {
+			if (isInsideTarget(robot, target)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

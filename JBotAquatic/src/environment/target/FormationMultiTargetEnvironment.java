@@ -119,6 +119,13 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 			}
 		}
 
+		// Update the targets positions
+		for (Target target : targets) {
+			Vector2d newPosition = CoordinateUtilities.GPSToCartesian(target.getLatLon());
+			targetsPositions.remove(target);
+			targetsPositions.put(target, newPosition);
+		}
+
 		if (injectFaults) {
 			if (varyFaultDuration) {
 				// If faultDuration=500, the varied fault duration is in
@@ -202,7 +209,7 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 			// Hardcode stuff
 			double bottomLimit = 0.015;
 			double upperLimit = 0.02;
-			angularVelocity = bottomLimit+simulator.getRandom().nextDouble() *(upperLimit-bottomLimit);
+			angularVelocity = bottomLimit + simulator.getRandom().nextDouble() * (upperLimit - bottomLimit);
 		}
 
 		boolean direction = rotationDirection;
@@ -230,7 +237,7 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 
 	@Override
 	public void update(double time) {
-		// formation.step(time);
+		super.update(time);
 
 		if (injectFaults) {
 			// Time to recover from fault?
@@ -242,6 +249,20 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 				}
 			}
 		}
-	}
 
+		// Update the robots status and target occupancy
+		for (Robot robot : robots) {
+			if (robot instanceof AquaticDrone) {
+				if (((AquaticDrone) robot).hasFault()) {
+					((AquaticDrone) robot).setBodyColor(Color.MAGENTA);
+				} else {
+					if (isInsideTarget((AquaticDroneCI) robot)) {
+						((AquaticDrone) robot).setBodyColor(Color.BLUE);
+					} else {
+						((AquaticDrone) robot).setBodyColor(Color.BLACK);
+					}
+				}
+			}
+		}
+	}
 }
