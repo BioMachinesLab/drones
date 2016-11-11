@@ -125,7 +125,8 @@ public class CIResultViewerGui extends ResultViewerGui {
 					10, 10);
 		}
 
-		// @vasco: 1000 Pixels is a hardcoded value and 300 came from super class
+		// @vasco: 1000 Pixels is a hardcoded value and 300 came from super
+		// class
 		panel.setPreferredSize(new Dimension(300, 1000));
 		return new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 	}
@@ -196,21 +197,24 @@ public class CIResultViewerGui extends ResultViewerGui {
 	@Override
 	public Simulator loadSimulator() {
 		Simulator sim = super.loadSimulator();
-		Controller cont = sim.getEnvironment().getRobots().get(0).getController();
 
-		if (cont instanceof DroneNeuralNetworkController) {
-			CINeuralNetwork network = ((DroneNeuralNetworkController) cont).getNeuralNetwork();
+		if (sim != null) {
+			Controller cont = sim.getEnvironment().getRobots().get(0).getController();
 
-			inputNeuronsTextField.setText(Integer.toString(network.getNumberOfInputNeurons()));
-			outputNeuronsTextField.setText(Integer.toString(network.getNumberOfOutputNeurons()));
+			if (cont instanceof DroneNeuralNetworkController) {
+				CINeuralNetwork network = ((DroneNeuralNetworkController) cont).getNeuralNetwork();
 
-			if (network instanceof CINEATNetwork) {
-				NEATNeuralNet net = ((CINEATNetwork) network).getNetwork();
-				totalNeuronsTextField.setText(Integer.toString(net.neurons().length));
-				synapsesTextField.setText(Integer.toString(net.connections().length));
-			} else {
-				totalNeuronsTextField.setText("N/A");
-				synapsesTextField.setText("N/A");
+				inputNeuronsTextField.setText(Integer.toString(network.getNumberOfInputNeurons()));
+				outputNeuronsTextField.setText(Integer.toString(network.getNumberOfOutputNeurons()));
+
+				if (network instanceof CINEATNetwork) {
+					NEATNeuralNet net = ((CINEATNetwork) network).getNetwork();
+					totalNeuronsTextField.setText(Integer.toString(net.neurons().length));
+					synapsesTextField.setText(Integer.toString(net.connections().length));
+				} else {
+					totalNeuronsTextField.setText("N/A");
+					synapsesTextField.setText("N/A");
+				}
 			}
 		}
 
