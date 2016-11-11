@@ -30,7 +30,7 @@ import simulation.Simulator;
 import simulation.util.Arguments;
 
 public class CIResultViewerGui extends ResultViewerGui {
-
+	private static final long serialVersionUID = -8172879163076772847L;
 	private JTextField droneIDTextField;
 	private JTextField coneSensorIdTextField;
 	private JTextField coneTransparenceTextField;
