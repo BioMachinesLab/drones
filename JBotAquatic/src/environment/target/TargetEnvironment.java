@@ -2,6 +2,7 @@ package environment.target;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.entities.target.Target;
@@ -172,5 +173,17 @@ public abstract class TargetEnvironment extends Environment {
 		}
 
 		return false;
+	}
+
+	protected List<AquaticDroneCI> getRobotsInsideTarget(Target target) {
+		List<AquaticDroneCI> insideTarget = new ArrayList<AquaticDroneCI>();
+
+		for (Robot robot : robots) {
+			if (robot instanceof AquaticDroneCI && isInsideTarget((AquaticDroneCI) robot, target)) {
+				insideTarget.add((AquaticDroneCI) robot);
+			}
+		}
+
+		return insideTarget;
 	}
 }
