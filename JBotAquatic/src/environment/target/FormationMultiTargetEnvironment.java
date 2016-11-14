@@ -2,6 +2,7 @@ package environment.target;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.List;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.entities.Entity;
@@ -134,16 +135,6 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 			}
 
 			timestepToInjectFaults = (int) (simulator.getRandom().nextDouble() * (steps - faultDuration));
-
-			boolean choosed = false;
-			while (!choosed) {
-				int position = simulator.getRandom().nextInt(robots.size());
-
-				if (robots.get(position) instanceof AquaticDrone) {
-					faultyRobot = (AquaticDrone) robots.get(position);
-					choosed = true;
-				}
-			}
 		}
 
 		setup = true;
@@ -244,7 +235,31 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 			if (time > timestepToInjectFaults + faultDuration) {
 				faultyRobot.setFault(false);
 			} else {
-				if (simulator.getTime() >= timestepToInjectFaults) {
+				if (simulator.getTime() >= timestepToInjectFaults && faultyRobot == null) {
+					// Check if there is at least one occupied target
+					boolean atLeastOne = false;
+					for (Target target : targets) {
+						List<AquaticDroneCI> robotsInsideTarget = getRobotsInsideTarget(target);
+
+						if (robotsInsideTarget.size() > 0) {
+							atLeastOne = true;
+							break;
+						}
+					}
+
+					if (atLeastOne) {
+						boolean choosed = false;
+						while (!choosed) {
+							int position = simulator.getRandom().nextInt(robots.size());
+
+							Robot robot = robots.get(position);
+							if (robot instanceof AquaticDrone && isInsideTarget(((AquaticDroneCI) robot))) {
+								faultyRobot = (AquaticDrone) robots.get(position);
+								choosed = true;
+							}
+						}
+					}
+
 					faultyRobot.setFault(true);
 				}
 			}
