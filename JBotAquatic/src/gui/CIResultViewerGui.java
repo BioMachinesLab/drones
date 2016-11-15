@@ -13,6 +13,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.JViewport;
+import javax.swing.ViewportLayout;
 
 import commoninterface.neat.core.NEATNeuralNet;
 import commoninterface.neuralnetwork.CINEATNetwork;
@@ -125,10 +127,11 @@ public class CIResultViewerGui extends ResultViewerGui {
 					10, 10);
 		}
 
-		// @vasco: 1000 Pixels is a hardcoded value and 300 came from super
-		// class
-		panel.setPreferredSize(new Dimension(300, 1000));
-		return new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		JScrollPane jScroll = new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		JViewport viewport = jScroll.getViewport();
+		viewport.setLayout(new ConstrainedViewPortLayout());
+		return jScroll;
 	}
 
 	@Override
@@ -219,5 +222,23 @@ public class CIResultViewerGui extends ResultViewerGui {
 		}
 
 		return sim;
+	}
+
+	protected class ConstrainedViewPortLayout extends ViewportLayout {
+		private static final long serialVersionUID = -202343156415781636L;
+
+		@Override
+		public Dimension preferredLayoutSize(Container parent) {
+
+			Dimension preferredViewSize = super.preferredLayoutSize(parent);
+
+			Container viewportContainer = parent.getParent();
+			if (viewportContainer != null) {
+				Dimension parentSize = viewportContainer.getSize();
+				preferredViewSize.height = parentSize.height;
+			}
+
+			return preferredViewSize;
+		}
 	}
 }
