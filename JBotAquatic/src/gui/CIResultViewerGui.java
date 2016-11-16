@@ -26,7 +26,6 @@ import evolutionaryrobotics.JBotEvolver;
 import evolutionaryrobotics.neuralnetworks.NeuralNetworkController;
 import gui.renderer.CITwoDRenderer;
 import gui.util.GraphViz;
-import gui.util.SpringUtilities;
 import simulation.JBotSim;
 import simulation.Simulator;
 import simulation.util.Arguments;
@@ -121,10 +120,6 @@ public class CIResultViewerGui extends ResultViewerGui {
 			sensorsPanel.add(textfieldsPanel);
 
 			debugOptions.add(sensorsPanel);
-
-			SpringUtilities.makeGrid(debugOptions, 3, 1, // rows, cols
-					0, 0, // initialX, initialY
-					10, 10);
 		}
 
 		JScrollPane jScroll = new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
