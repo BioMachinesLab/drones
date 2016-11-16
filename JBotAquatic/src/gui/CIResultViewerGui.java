@@ -156,7 +156,7 @@ public class CIResultViewerGui extends ResultViewerGui {
 						((CITwoDRenderer) renderer).setConeClass(DroneCISensor.class.getName());
 						((CITwoDRenderer) renderer).seeSensors(check.isSelected());
 
-						if (simulationState == STOPPED || simulationState == PAUSED) {
+						if ((simulationState == STOPPED || simulationState == PAUSED) && simulator != null) {
 							renderer.drawFrame();
 						}
 					} catch (NumberFormatException exception) {
@@ -171,7 +171,7 @@ public class CIResultViewerGui extends ResultViewerGui {
 					JCheckBox check = (JCheckBox) e.getSource();
 					((CITwoDRenderer) renderer).seeEntities(check.isSelected());
 
-					if (simulationState == STOPPED || simulationState == PAUSED) {
+					if ((simulationState == STOPPED || simulationState == PAUSED) && simulator != null) {
 						renderer.drawFrame();
 					}
 				}
@@ -184,7 +184,7 @@ public class CIResultViewerGui extends ResultViewerGui {
 					displayVelocityVectors = check.isSelected();
 					((CITwoDRenderer) renderer).displayVelocityVectors(displayVelocityVectors);
 
-					if (simulationState == STOPPED || simulationState == PAUSED) {
+					if ((simulationState == STOPPED || simulationState == PAUSED) && simulator != null) {
 						renderer.drawFrame();
 					}
 				}
