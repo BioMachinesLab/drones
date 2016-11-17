@@ -33,7 +33,7 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 	private boolean varyFaultDuration = true;
 	private AquaticDrone faultyRobot = null;
 	private int faultDuration = 500;
-	private int timestepToInjectFaults;
+	private int timestepToInjectFaults = -1;;
 	private double initialRotationAngle = 0;
 
 	private double rotationVelocity = 0.05;
@@ -258,9 +258,9 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 								choosed = true;
 							}
 						}
-					}
 
-					faultyRobot.setFault(true);
+						faultyRobot.setFault(true);
+					}
 				}
 			}
 		}
@@ -279,5 +279,13 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 				}
 			}
 		}
+	}
+
+	public boolean isFaultInjectionActive() {
+		return injectFaults;
+	}
+
+	public int getTimestepToInjectFaults() {
+		return timestepToInjectFaults;
 	}
 }
