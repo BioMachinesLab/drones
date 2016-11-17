@@ -33,7 +33,7 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 	private boolean varyFaultDuration = true;
 	private AquaticDrone faultyRobot = null;
 	private int faultDuration = 500;
-	private int timestepToInjectFaults = -1;;
+	private int timestepToInjectFaults = -1;
 	private double initialRotationAngle = 0;
 
 	private double rotationVelocity = 0.05;
@@ -134,7 +134,7 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 				faultDuration += (simulator.getRandom().nextDouble() - 0.5) * faultDuration;
 			}
 
-			timestepToInjectFaults = (int) (simulator.getRandom().nextDouble() * (steps - faultDuration));
+			timestepToInjectFaults = Math.max((int) (simulator.getRandom().nextDouble() * (steps - faultDuration)), 0);
 		}
 
 		setup = true;
