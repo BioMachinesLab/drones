@@ -232,7 +232,7 @@ public class FormationMultiTargetEnvironment extends TargetEnvironment {
 
 		if (injectFaults) {
 			// Time to recover from fault?
-			if (time > timestepToInjectFaults + faultDuration) {
+			if (time > timestepToInjectFaults + faultDuration && faultyRobot != null) {
 				faultyRobot.setFault(false);
 			} else {
 				if (simulator.getTime() >= timestepToInjectFaults && faultyRobot == null) {
