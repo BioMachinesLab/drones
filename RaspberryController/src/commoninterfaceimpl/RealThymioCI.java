@@ -144,7 +144,7 @@ public class RealThymioCI extends Thread implements ThymioCI {
 
 		if (logger != null)
 			logger.stopLogging();
-		
+
 		if (entityLogger != null)
 			entityLogger.stopLogging();
 
@@ -283,6 +283,15 @@ public class RealThymioCI extends Thread implements ThymioCI {
 	@Override
 	public ArrayList<CISensor> getCISensors() {
 		return cisensors;
+	}
+
+	@Override
+	public CISensor getCISensorByType(Class<? extends CISensor> sensorClass) {
+		for (CISensor s : cisensors) {
+			if (s.getClass().equals(sensorClass))
+				return s;
+		}
+		return null;
 	}
 
 	@Override

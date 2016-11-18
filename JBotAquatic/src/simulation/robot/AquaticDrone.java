@@ -346,6 +346,15 @@ public class AquaticDrone extends DifferentialDriveRobot implements AquaticDrone
 	}
 
 	@Override
+	public CISensor getCISensorByType(Class<? extends CISensor> sensorClass) {
+		for (CISensor s : cisensors) {
+			if (s.getClass().equals(sensorClass))
+				return s;
+		}
+		return null;
+	}
+
+	@Override
 	public String getNetworkAddress() {
 		return getId() + "." + getId() + "." + getId() + "." + (getId() + 100);
 	}

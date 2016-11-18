@@ -423,6 +423,15 @@ public class RealAquaticDroneCI extends Thread implements AquaticDroneCI {
 	}
 
 	@Override
+	public CISensor getCISensorByType(Class<? extends CISensor> sensorClass) {
+		for (CISensor s : cisensors) {
+			if (s.getClass().equals(sensorClass))
+				return s;
+		}
+		return null;
+	}
+
+	@Override
 	public synchronized ArrayList<Entity> getEntities() {
 		return entities;
 	}

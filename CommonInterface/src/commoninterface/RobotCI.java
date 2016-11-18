@@ -84,6 +84,16 @@ public interface RobotCI {
 	public ArrayList<CISensor> getCISensors();
 
 	/**
+	 * Get the a specific sensor type from the registered sensors
+	 * 
+	 * @param c
+	 *            The class that matches the registered sensor
+	 * @return the instance of the registered sensor or null in case there is no
+	 *         Registered sensor of such type
+	 */
+	public CISensor getCISensorByType(Class<? extends CISensor> c);
+
+	/**
 	 * The network address is the identifier of each drone.
 	 * 
 	 * @return IP address of the drone

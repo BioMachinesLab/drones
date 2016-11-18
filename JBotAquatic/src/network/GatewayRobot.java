@@ -79,6 +79,11 @@ public class GatewayRobot implements RobotCI {
 	}
 
 	@Override
+	public CISensor getCISensorByType(Class<? extends CISensor> c) {
+		return null;
+	}
+
+	@Override
 	public String getNetworkAddress() {
 		return null;
 	}
