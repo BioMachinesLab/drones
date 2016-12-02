@@ -211,7 +211,7 @@ public class LogCodexTester {
 		expectedFormationLogString = LogCodex.LOG_TYPE + LogCodex.LogType.ENTITIES + LogCodex.MAIN_SEPARATOR
 				+ LogCodex.ENTITY_OP_SEP + EntityManipulation.Operation.ADD + LogCodex.MAIN_SEPARATOR
 				+ LogCodex.ENTITY_TYPE_SEP + FORMATION.getClass().getSimpleName() + LogCodex.MAIN_SEPARATOR
-				+ LogCodex.TIMESTEP_SEP + (double)TIMESTEP + LogCodex.MAIN_SEPARATOR;
+				+ LogCodex.TIMESTEP_SEP + (double) TIMESTEP + LogCodex.MAIN_SEPARATOR;
 
 		expectedFormationLogString += LogCodex.ENTITY_INFORMATION_BEGIN + FORMATION_NAME + LogCodex.ARRAY_SEPARATOR
 				+ LATLON.getLat() + LogCodex.ARRAY_SEPARATOR + LATLON.getLon() + LogCodex.ARRAY_SEPARATOR
@@ -316,7 +316,7 @@ public class LogCodexTester {
 		assertEquals(expectedLogDataString, logStr);
 
 		DecodedLog logDataDecoded = LogCodex.decodeLog(logStr);
-		ToLogData fullDecodedLogData = ((ToLogData) logDataDecoded.getPayload());
+		ToLogData fullDecodedLogData = ((ToLogData) logDataDecoded.getPayload()[0]);
 		assertEquals(LogType.LOGDATA, logDataDecoded.getPayloadType());
 		assertEquals(TIMESTEP, fullDecodedLogData.timestep);
 		assertEquals(SENTENCE, fullDecodedLogData.comment);
@@ -341,7 +341,7 @@ public class LogCodexTester {
 		assertEquals(expectedErrorLogString, errStr);
 
 		DecodedLog errMsgDecoded = LogCodex.decodeLog(errStr);
-		String fullDecodedErrMsg = ((String) errMsgDecoded.getPayload());
+		String fullDecodedErrMsg = ((String) errMsgDecoded.getPayload()[0]);
 		assertEquals(LogType.ERROR, errMsgDecoded.getPayloadType());
 		assertEquals(SENTENCE, fullDecodedErrMsg);
 	}
@@ -352,7 +352,7 @@ public class LogCodexTester {
 		assertEquals(expectedMessageLogString, messageStr);
 
 		DecodedLog messageMsgDecoded = LogCodex.decodeLog(messageStr);
-		String fullDecodedMessageMsg = ((String) messageMsgDecoded.getPayload());
+		String fullDecodedMessageMsg = ((String) messageMsgDecoded.getPayload()[0]);
 		assertEquals(LogType.MESSAGE, messageMsgDecoded.getPayloadType());
 		assertEquals(SENTENCE, fullDecodedMessageMsg);
 	}
@@ -364,7 +364,7 @@ public class LogCodexTester {
 
 		DecodedLog messageMsgDecoded = LogCodex.decodeLog(wpStr);
 		@SuppressWarnings("unchecked")
-		ArrayList<Entity> entities = (ArrayList<Entity>) messageMsgDecoded.getPayload();
+		ArrayList<Entity> entities = (ArrayList<Entity>) messageMsgDecoded.getPayload()[0];
 
 		assertEquals(1, entities.size());
 		assertEquals(WAYPOINT.getClass().getSimpleName(), entities.get(0).getClass().getSimpleName());
@@ -381,7 +381,7 @@ public class LogCodexTester {
 
 		DecodedLog messageMsgDecoded = LogCodex.decodeLog(obstacleStr);
 		@SuppressWarnings("unchecked")
-		ArrayList<Entity> entities = (ArrayList<Entity>) messageMsgDecoded.getPayload();
+		ArrayList<Entity> entities = (ArrayList<Entity>) messageMsgDecoded.getPayload()[0];
 
 		assertEquals(1, entities.size());
 		assertEquals(OBSTACLE.getClass().getSimpleName(), entities.get(0).getClass().getSimpleName());
@@ -399,7 +399,7 @@ public class LogCodexTester {
 
 		DecodedLog messageMsgDecoded = LogCodex.decodeLog(robotLocationStr);
 		@SuppressWarnings("unchecked")
-		ArrayList<Entity> entities = (ArrayList<Entity>) messageMsgDecoded.getPayload();
+		ArrayList<Entity> entities = (ArrayList<Entity>) messageMsgDecoded.getPayload()[0];
 
 		assertEquals(1, entities.size());
 		assertEquals(ROBOT_LOC.getClass().getSimpleName(), entities.get(0).getClass().getSimpleName());
@@ -418,7 +418,7 @@ public class LogCodexTester {
 
 		DecodedLog messageMsgDecoded = LogCodex.decodeLog(targetStr);
 		@SuppressWarnings("unchecked")
-		ArrayList<Entity> entities = (ArrayList<Entity>) messageMsgDecoded.getPayload();
+		ArrayList<Entity> entities = (ArrayList<Entity>) messageMsgDecoded.getPayload()[0];
 
 		assertEquals(1, entities.size());
 		assertEquals(TARGET.getClass().getSimpleName(), entities.get(0).getClass().getSimpleName());
@@ -441,7 +441,7 @@ public class LogCodexTester {
 
 		DecodedLog messageMsgDecoded = LogCodex.decodeLog(formationStr);
 		@SuppressWarnings("unchecked")
-		ArrayList<Entity> entities = (ArrayList<Entity>) messageMsgDecoded.getPayload();
+		ArrayList<Entity> entities = (ArrayList<Entity>) messageMsgDecoded.getPayload()[0];
 
 		assertEquals(1, entities.size());
 		assertEquals(FORMATION.getClass().getSimpleName(), entities.get(0).getClass().getSimpleName());

@@ -167,7 +167,7 @@ public class PositionPlot extends Thread {
 		Environment env = sim.getEnvironment();
 
 		commoninterface.utils.logger.DecodedLog dld = LogCodex.decodeLog(lines.get(0));
-		ToLogData l = (ToLogData) dld.getPayload();
+		ToLogData l = (ToLogData) dld.getPayload()[0];
 
 		double lat = l.latLon.getLat();
 		double lon = l.latLon.getLon();
@@ -189,7 +189,7 @@ public class PositionPlot extends Thread {
 		for (int i = 0; i < lines.size(); i++) {
 
 			dld = LogCodex.decodeLog(lines.get(i));
-			l = (ToLogData) dld.getPayload();
+			l = (ToLogData) dld.getPayload()[0];
 
 			if (pause) {
 				i--;

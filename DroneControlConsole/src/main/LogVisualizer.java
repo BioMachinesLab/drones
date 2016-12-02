@@ -268,11 +268,11 @@ public class LogVisualizer extends JFrame {
 
 						switch (decodedData.getPayloadType()) {
 						case ENTITIES:
-							currentEntities = (ArrayList<Entity>) LogCodex.decodeLog(l, currentEntities).getPayload();
+							currentEntities = (ArrayList<Entity>) LogCodex.decodeLog(l, currentEntities).getPayload()[0];
 							break;
 
 						case LOGDATA:
-							ToLogData d = (ToLogData) decodedData.getPayload();
+							ToLogData d = (ToLogData) decodedData.getPayload()[0];
 							// TODO
 							// d.entities = currentEntities;
 							result.add(d);
@@ -280,12 +280,12 @@ public class LogVisualizer extends JFrame {
 
 						case ERROR:
 							messageArea.setForeground(Color.RED);
-							messageArea.setText((String) decodedData.getPayload());
+							messageArea.setText((String) decodedData.getPayload()[0]);
 							break;
 
 						case MESSAGE:
 							messageArea.setForeground(Color.BLACK);
-							messageArea.setText((String) decodedData.getPayload());
+							messageArea.setText((String) decodedData.getPayload()[0]);
 							break;
 						}
 					}

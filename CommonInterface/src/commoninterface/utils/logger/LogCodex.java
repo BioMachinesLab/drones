@@ -109,7 +109,7 @@ public class LogCodex {
 		DecodedLog decodedLog = null;
 
 		if (logLine.startsWith("[") || logLine.startsWith("\"") || logLine.isEmpty()) {
-			//System.out.println("Ignoring this line:" + logLine);
+			// System.out.println("Ignoring this line:" + logLine);
 			return null;
 		}
 
@@ -136,7 +136,8 @@ public class LogCodex {
 					ArrayList<Entity> currentEntities = new ArrayList<Entity>();
 					currentEntities.addAll(entities);
 
-					decodedLog = new DecodedLog(LogType.ENTITIES, currentEntities, timeStep);
+					decodedLog = new DecodedLog(LogType.ENTITIES, currentEntities);
+					decodedLog.setTimeStep(timeStep);
 				}
 				break;
 
@@ -148,7 +149,8 @@ public class LogCodex {
 				}
 
 				ToLogData logData = decodeLogData(blocks2);
-				decodedLog = new DecodedLog(LogType.LOGDATA, logData, logData.timestep);
+				decodedLog = new DecodedLog(LogType.LOGDATA, logData);
+				decodedLog.setTimeStep(logData.timestep);
 				break;
 			case ERROR:
 				if (infoBlocks[1].substring(0, 3).equals(SENTENCE_SEP)) {

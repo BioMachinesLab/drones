@@ -84,7 +84,7 @@ public class DroneLogExporter {
 						if (prevNormalLog)
 							currentEntities.clear();
 
-						currentEntities = (ArrayList<Entity>) LogCodex.decodeLog(l, currentEntities).getPayload();
+						currentEntities = (ArrayList<Entity>) LogCodex.decodeLog(l, currentEntities).getPayload()[0];
 
 						prevNormalLog = false;
 						break;
@@ -118,7 +118,7 @@ public class DroneLogExporter {
 					case MESSAGE:
 
 						ToLogData data = new ToLogData();
-						data.comment = (String) decodedData.getPayload();
+						data.comment = (String) decodedData.getPayload()[0];
 						data.GPSdate = prevDate;
 						result.add(data);
 
@@ -186,7 +186,7 @@ public class DroneLogExporter {
 						if (prevNormalLog)
 							currentEntities.clear();
 
-						currentEntities = (ArrayList<Entity>) LogCodex.decodeLog(l, currentEntities).getPayload();
+						currentEntities = (ArrayList<Entity>) LogCodex.decodeLog(l, currentEntities).getPayload()[0];
 
 						prevNormalLog = false;
 
