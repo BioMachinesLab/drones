@@ -5,11 +5,10 @@ import java.io.FileWriter;
 
 import simulation.Simulator;
 import simulation.Stoppable;
-import simulation.Updatable;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
 
-public class ExportPositions implements Updatable,Stoppable{
+public class ExportPositions implements Stoppable{
 	
 	private int time = 0;
 	private StringBuffer b = new StringBuffer();
