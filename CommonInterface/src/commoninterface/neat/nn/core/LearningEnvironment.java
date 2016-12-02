@@ -12,18 +12,19 @@ import java.util.HashMap;
  *
  */
 public class LearningEnvironment implements Serializable {
-	private HashMap env;
-	
+	private static final long serialVersionUID = -3189475257724110894L;
+	private HashMap<String, Object> env;
+
 	public LearningEnvironment() {
-		this.env = new HashMap();
+		this.env = new HashMap<String, Object>();
 	}
-	
+
 	public void addEnvironmentParameter(String key, Object value) {
 		if (value != null) {
 			this.env.put(key, value);
 		}
 	}
-	
+
 	public Object learningParameter(String key) {
 		return this.env.get(key);
 	}

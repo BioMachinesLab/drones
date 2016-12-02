@@ -14,44 +14,52 @@ import commoninterface.neat.data.core.NetworkOutput;
  *
  */
 public class CSVExpectedOutputSet implements ExpectedOutputSet {
-
-	private ArrayList ops;
+	private static final long serialVersionUID = -8890738684265135411L;
+	private ArrayList<NetworkOutput> ops;
 	private int idx;
-	
-	public CSVExpectedOutputSet(ArrayList eOps) {
+
+	public CSVExpectedOutputSet(ArrayList<NetworkOutput> eOps) {
 		this.idx = 0;
 		this.ops = eOps;
 	}
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.NetworkOutputSet#size()
-	 */
+
+	@Override
 	public int size() {
 		return (this.ops.size());
 	}
 
 	/**
 	 * Wraps round to beginning
-	 * @see org.neat4j.ailibrary.nn.data.NetworkOutputSet#nextOutput()
+	 * 
 	 */
+	@Override
 	public NetworkOutput nextOutput() {
 		this.idx = this.idx % this.size();
-		return ((NetworkOutput)this.ops.get(this.idx++));		
+		return (this.ops.get(this.idx++));
 	}
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.NetworkOutputSet#addNetworkOutput(org.neat4j.ailibrary.nn.core.NetworkOutput)
-	 */
+
+	@Override
 	public void addNetworkOutput(NetworkOutput op) {
 		this.ops.add(op);
 	}
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.neat4j.ailibrary.nn.core.ExpectedOutputSet#outputAt(int)
 	 */
+	@Override
 	public NetworkOutput outputAt(int idx) {
-		return ((NetworkOutput)this.ops.get(idx));		
+		return (this.ops.get(idx));
 	}
-	/* (non-Javadoc)
-	 * @see org.neat4j.ailibrary.nn.data.NetworkOutputSet#removeNetworkOutput(int)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.neat4j.ailibrary.nn.data.NetworkOutputSet#removeNetworkOutput(int)
 	 */
+	@Override
 	public void removeNetworkOutput(int idx) {
 		if (idx < this.size()) {
 			this.ops.remove(idx);

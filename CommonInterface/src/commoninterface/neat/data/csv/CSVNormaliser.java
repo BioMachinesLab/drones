@@ -12,13 +12,9 @@ import commoninterface.neat.data.core.Normaliser;
  *
  */
 public class CSVNormaliser implements Normaliser {
-
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.Normaliser#normalise(org.neat4j.ailibrary.nn.data.NetworkDataSet)
-	 */
 	@Override
 	public NetworkDataSet normalise(NetworkDataSet dataSet) {
-		
+
 		return (dataSet);
 	}
 

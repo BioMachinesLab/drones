@@ -8,6 +8,7 @@ import commoninterface.neat.nn.core.NeuralNet;
  *
  */
 public abstract class NeuralFitnessFunction implements FitnessFunction {
+	private static final long serialVersionUID = -5539856831172867043L;
 	private NeuralNet net;
 	private NetworkDataSet evalDataSet;
 	

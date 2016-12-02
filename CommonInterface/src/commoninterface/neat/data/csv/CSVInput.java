@@ -11,19 +11,20 @@ import commoninterface.neat.data.core.NetworkInput;
  *
  */
 public class CSVInput implements NetworkInput {
+	private static final long serialVersionUID = 3345571811827576504L;
 	private double[] inputPattern;
-	
+
 	public CSVInput(double[] input) {
 		this.inputPattern = new double[input.length];
 		System.arraycopy(input, 0, this.inputPattern, 0, this.inputPattern.length);
 	}
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.NetworkInput#pattern()
-	 */
+
+	@Override
 	public double[] pattern() {
 		return (this.inputPattern);
 	}
-	
+
+	@Override
 	public String toString() {
 		int i;
 		StringBuffer sBuff = new StringBuffer();
@@ -31,7 +32,7 @@ public class CSVInput implements NetworkInput {
 			sBuff.append(this.inputPattern[i]);
 			sBuff.append(",");
 		}
-		
+
 		return (sBuff.toString());
 	}
 }

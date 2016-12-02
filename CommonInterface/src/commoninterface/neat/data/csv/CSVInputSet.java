@@ -14,36 +14,42 @@ import commoninterface.neat.data.core.NetworkInputSet;
  *
  */
 public class CSVInputSet implements NetworkInputSet {
-	private ArrayList inputs;
+	private static final long serialVersionUID = 6777582249712156256L;
+	private ArrayList<NetworkInput> inputs;
 	private int idx;
-	
-	public CSVInputSet(ArrayList inputs) {
+
+	public CSVInputSet(ArrayList<NetworkInput> inputs) {
 		this.inputs = inputs;
 		this.idx = 0;
 	}
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.NetworkInputSet#size()
-	 */
+
+	@Override
 	public int size() {
 		return (this.inputs.size());
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.NetworkInputSet#nextInput()
-	 */
+	@Override
 	public NetworkInput nextInput() {
 		this.idx = this.idx % this.size();
-		return ((NetworkInput)this.inputs.get(idx++));		
+		return (this.inputs.get(idx++));
 	}
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.neat4j.ailibrary.nn.core.NetworkInputSet#inputAt(int)
 	 */
+	@Override
 	public NetworkInput inputAt(int idx) {
-		return ((NetworkInput)this.inputs.get(idx));		
+		return (this.inputs.get(idx));
 	}
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.neat4j.ailibrary.nn.data.NetworkInputSet#removeInputAt(int)
 	 */
+	@Override
 	public void removeInputAt(int idx) {
 		if (idx < this.size()) {
 			this.inputs.remove(idx);

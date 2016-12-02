@@ -14,9 +14,10 @@ import commoninterface.neat.nn.core.Synapse;
 /**
  * @author MSimmerson
  *
- * Specific NEAT neuron
+ *         Specific NEAT neuron
  */
 public class NEATNeuron implements Neuron {
+	private static final long serialVersionUID = 4853092524890493125L;
 	private double lastActivation;
 	private double bias;
 	private double[] weights;
@@ -24,43 +25,44 @@ public class NEATNeuron implements Neuron {
 	private int id;
 	private int type;
 	private int depth;
-	private ArrayList sourceNeurons;
-	private ArrayList incomingSynapses;
+	private ArrayList<NEATNeuron> sourceNeurons;
+	private ArrayList<Synapse> incomingSynapses;
 	private boolean isInput = false;
 
-	public NEATNeuron(ActivationFunction function, int id, int type) {		
+	public NEATNeuron(ActivationFunction function, int id, int type) {
 		this.activationFunction = function;
 		this.id = id;
 		this.type = type;
-		this.sourceNeurons = new ArrayList();
-		this.incomingSynapses = new ArrayList();
+		this.sourceNeurons = new ArrayList<NEATNeuron>();
+		this.incomingSynapses = new ArrayList<Synapse>();
 		this.isInput = (type == NEATNodeGene.INPUT);
 		this.depth = -1;
 	}
-	
+
 	public void addSourceNeuron(NEATNeuron neuron) {
 		this.sourceNeurons.add(neuron);
 	}
-	
+
 	public void addIncomingSynapse(Synapse synapse) {
 		this.incomingSynapses.add(synapse);
 	}
-	
-	public ArrayList incomingSynapses() {
+
+	public ArrayList<Synapse> incomingSynapses() {
 		return (this.incomingSynapses);
 	}
-	
-	public ArrayList sourceNeurons() {
+
+	public ArrayList<NEATNeuron> sourceNeurons() {
 		return (this.sourceNeurons);
 	}
-	
+
 	@Override
 	public double lastActivation() {
 		return (this.lastActivation);
 	}
-	
+
 	/**
-	 * If it is an input neuron, returns the input, else will run through the specified activation function.
+	 * If it is an input neuron, returns the input, else will run through the
+	 * specified activation function.
 	 * 
 	 */
 	@Override
@@ -74,11 +76,11 @@ public class NEATNeuron implements Neuron {
 		// acting as a bias neuron
 		this.lastActivation = -1;
 
-		if (!this.isInput) {			
+		if (!this.isInput) {
 			if (nInputs.length > 0) {
 				for (i = 0; i < nInputs.length; i++) {
 					input = nInputs[i];
-					synapse = (Synapse)incoming[i];
+					synapse = (Synapse) incoming[i];
 					if (synapse.isEnabled()) {
 						weight = synapse.getWeight();
 						neuronIp += (input * weight);
@@ -88,10 +90,10 @@ public class NEATNeuron implements Neuron {
 				this.lastActivation = this.activationFunction.activate(neuronIp);
 			}
 		} else {
-			//neuronIp = nInputs[0];
+			// neuronIp = nInputs[0];
 			this.lastActivation = nInputs[0];
 		}
-		
+
 		return (this.lastActivation);
 	}
 
@@ -130,15 +132,15 @@ public class NEATNeuron implements Neuron {
 	public double lastBiasDelta() {
 		return 0;
 	}
-	
+
 	public int id() {
 		return (this.id);
 	}
-	
+
 	public int neuronType() {
 		return (this.type);
 	}
-	
+
 	public int neuronDepth() {
 		return (this.depth);
 	}

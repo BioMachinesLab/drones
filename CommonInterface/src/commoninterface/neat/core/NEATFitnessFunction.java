@@ -10,11 +10,16 @@ import commoninterface.neat.ga.core.NeuralFitnessFunction;
 import commoninterface.neat.nn.core.NeuralNet;
 
 /**
- * Provides common behaviour for all NEAT Fitness functions which should all extnd this class 
+ * Provides common behavior for all NEAT Fitness functions which should all extend this class 
  * @author MSimmerson
  *
  */
 public abstract class NEATFitnessFunction extends NeuralFitnessFunction {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2938850031735637112L;
+
 	/**
 	 * @param net
 	 * @param dataSet

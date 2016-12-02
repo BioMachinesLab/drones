@@ -16,10 +16,11 @@ import commoninterface.neat.nn.core.NeuralNetType;
 /**
  * @author MSimmerson
  *
- * Describes the structure of the NEAT network
+ *         Describes the structure of the NEAT network
  */
 public class NEATNeuralNetDescriptor implements NeuralNetDescriptor {
-	private ArrayList layerDescriptors = new ArrayList();
+	private static final long serialVersionUID = 5841418156581072968L;
+	private ArrayList<NeuralNetLayerDescriptor> layerDescriptors = new ArrayList<NeuralNetLayerDescriptor>();
 	private static final NEAT netType = new NEAT();
 	private int netInputs;
 	private Learnable learnable;
@@ -28,50 +29,44 @@ public class NEATNeuralNetDescriptor implements NeuralNetDescriptor {
 	public NEATNeuralNetDescriptor(int netInputs, Learnable learnable) {
 		this(netInputs, learnable, false);
 	}
-	
+
 	public NEATNeuralNetDescriptor(int netInputs, Learnable learnable, boolean recurrent) {
 		this.netInputs = netInputs;
 		this.learnable = learnable;
 		this.recurrent = recurrent;
 	}
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.NeuralNetDescriptor#addLayerDescriptor(org.neat4j.ailibrary.nn.core.NeuralNetLayerDescriptor)
-	 */
+
+	@Override
 	public void addLayerDescriptor(NeuralNetLayerDescriptor descriptor) {
 		this.layerDescriptors.add(descriptor);
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.NeuralNetDescriptor#neuralNetType()
-	 */
+	@Override
 	public NeuralNetType neuralNetType() {
 		return (netType);
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.NeuralNetDescriptor#numInputs()
-	 */
+	@Override
 	public int numInputs() {
 		return (this.netInputs);
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.NeuralNetDescriptor#layerDescriptors()
-	 */
-	public Collection layerDescriptors() {
+	@Override
+	public Collection<NeuralNetLayerDescriptor> layerDescriptors() {
 		return (this.layerDescriptors);
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.NeuralNetLayerDescriptor#learnable()
-	 */
+	@Override
 	public Learnable learnable() {
 		return (this.learnable);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.neat4j.ailibrary.nn.core.NeuralNetDescriptor#isRecurrent()
 	 */
+	@Override
 	public boolean isRecurrent() {
 		return (this.recurrent);
 	}

@@ -11,19 +11,20 @@ import commoninterface.neat.data.core.NetworkOutput;
  *
  */
 public class CSVExpectedOutput implements NetworkOutput {
+	private static final long serialVersionUID = 8595259319277713400L;
 	private double[] values;
 	
 	public CSVExpectedOutput(double[] eOut) {
 		this.values = new double[eOut.length];
 		System.arraycopy(eOut, 0, this.values, 0, this.values.length);
 	}
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.NetworkOutput#values()
-	 */
+	
+	@Override
 	public double[] values() {
 		return (this.values);
 	}
 
+	@Override
 	public String toString() {
 		int i;
 		StringBuffer sBuff = new StringBuffer();

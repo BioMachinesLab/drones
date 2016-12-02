@@ -6,6 +6,7 @@ package commoninterface.neat.core;
  *
  */
 public class NEATFeatureGene implements NEATGene {
+	private static final long serialVersionUID = 5652100652243918472L;
 	private Double featureValue;
 	private int innovationNumber;
 	
@@ -14,14 +15,17 @@ public class NEATFeatureGene implements NEATGene {
 		this.innovationNumber = innovationNumber;
 	}
 	
+	@Override
 	public int getInnovationNumber() {
 		return (this.innovationNumber);
 	}
 
+	@Override
 	public Number geneAsNumber() {
 		return (featureValue);
 	}
 
+	@Override
 	public String geneAsString() {
 		return (this.featureValue.toString());
 	}

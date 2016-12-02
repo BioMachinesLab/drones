@@ -16,14 +16,15 @@ import commoninterface.neat.ga.core.CrossOver;
 /**
  * @author MSimmerson
  *
- * Performs GA crossover between 2 individuals based on the NEAT xover algortihm described
- * by Kenneth Stanley 
+ *         Performs GA crossover between 2 individuals based on the NEAT xover
+ *         algortihm described by Kenneth Stanley
  */
 public class NEATCrossover implements CrossOver {
 	private static final long serialVersionUID = 1L;
 	private final Random rand = new Random();
+	@SuppressWarnings("unused")
 	private double pXOver;
-	
+
 	@Override
 	public void setProbability(double prob) {
 		this.pXOver = prob;
@@ -32,7 +33,7 @@ public class NEATCrossover implements CrossOver {
 	@Override
 	public ChromosomeSet crossOver(ChromosomeSet parents) {
 		ChromosomeSet childSet = new ChromosomeSet(false);
-		ArrayList childGenes = new ArrayList();
+		ArrayList<NEATGene> childGenes = new ArrayList<NEATGene>();
 		Chromosome pOne = null;
 		Chromosome pTwo = null;
 		Chromosome best;
@@ -45,7 +46,7 @@ public class NEATCrossover implements CrossOver {
 
 		pOne = parents.nextChromosome();
 		pTwo = parents.nextChromosome();
-		
+
 		// find best parent
 		if (pOne.fitness() == pTwo.fitness()) {
 			if (pOne.genes().length == pTwo.genes().length) {
@@ -65,9 +66,9 @@ public class NEATCrossover implements CrossOver {
 			worst = pOne.fitness() > pTwo.fitness() ? pTwo : pOne;
 		}
 
-		bestGenes = (NEATGene[])best.genes();
-		worstGenes = (NEATGene[])worst.genes();
-		
+		bestGenes = (NEATGene[]) best.genes();
+		worstGenes = (NEATGene[]) worst.genes();
+
 		while (!childBorn) {
 			if (worstIdx >= worstGenes.length) {
 				// copy rest of best
@@ -82,39 +83,40 @@ public class NEATCrossover implements CrossOver {
 				childGenes.add(rand.nextBoolean() ? bestGenes[bestIdx] : worstGenes[worstIdx]);
 				bestIdx++;
 				worstIdx++;
-			} else if (bestGenes[bestIdx].getInnovationNumber() > worstGenes[worstIdx].getInnovationNumber()){
+			} else if (bestGenes[bestIdx].getInnovationNumber() > worstGenes[worstIdx].getInnovationNumber()) {
 				// skip disjoint/excess
 				worstIdx++;
-			} else if (bestGenes[bestIdx].getInnovationNumber() < worstGenes[worstIdx].getInnovationNumber()){
+			} else if (bestGenes[bestIdx].getInnovationNumber() < worstGenes[worstIdx].getInnovationNumber()) {
 				// add best disjoint/excess
 				childGenes.add(bestGenes[bestIdx]);
 				bestIdx++;
 			}
 		}
-		
-                NEATChromosome newC = this.createChromosome(childGenes);
-                newC.setSpecieId(((NEATChromosome) pOne).getSpecieId()); // ADDED
+
+		NEATChromosome newC = this.createChromosome(childGenes);
+		newC.setSpecieId(((NEATChromosome) pOne).getSpecieId()); // ADDED
 		childSet.add(newC);
-                
-                // debug
-                int size = ((NEATChromosome) childSet.get(0)).genes().length;
-                if(size < bestGenes.length && size < worstGenes.length) {
-                    System.out.println("Crossover -- Child: " + size + " ; Parents: " + bestGenes.length + " , " + worstGenes.length);
-                }
-		
+
+		// debug
+		int size = ((NEATChromosome) childSet.get(0)).genes().length;
+		if (size < bestGenes.length && size < worstGenes.length) {
+			System.out.println(
+					"Crossover -- Child: " + size + " ; Parents: " + bestGenes.length + " , " + worstGenes.length);
+		}
+
 		return (childSet);
 	}
-	
-	private NEATChromosome createChromosome(ArrayList genes) {
+
+	private NEATChromosome createChromosome(ArrayList<NEATGene> genes) {
 		NEATChromosome chromo = null;
 		NEATGene[] geneSet = new NEATGene[genes.size()];
 		int i;
-		
+
 		for (i = 0; i < geneSet.length; i++) {
-			geneSet[i] = (NEATGene)genes.get(i);
+			geneSet[i] = genes.get(i);
 		}
 		chromo = new NEATChromosome(geneSet);
-		
+
 		return (chromo);
 	}
 }

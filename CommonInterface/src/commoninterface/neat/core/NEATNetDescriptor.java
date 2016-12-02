@@ -20,6 +20,7 @@ import commoninterface.neat.nn.core.NeuralNetType;
  * Descriptor for a NEAT neural net.
  */
 public class NEATNetDescriptor implements NeuralNetDescriptor {
+	private static final long serialVersionUID = -6322908335011392907L;
 	private int inputSize;
 	private Learnable learnable;
 	private Chromosome structure;
@@ -54,7 +55,7 @@ public class NEATNetDescriptor implements NeuralNetDescriptor {
 	}
 
 	@Override
-	public Collection layerDescriptors() {
+	public Collection<NeuralNetDescriptor> layerDescriptors() {
 		throw new UnsupportedOperationException("layerDescriptors not used in NEAT");
 	}
 

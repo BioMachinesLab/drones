@@ -4,13 +4,13 @@
  */
 package commoninterface.neat.core;
 
-
 /**
  * @author MSimmerson
  * 
- * Link gene for a NEAT network
+ *         Link gene for a NEAT network
  */
 public class NEATLinkGene implements NEATGene {
+	private static final long serialVersionUID = 8690128510608868471L;
 	private int innovationNumber;
 	private boolean enabled;
 	private int fromId;
@@ -18,70 +18,86 @@ public class NEATLinkGene implements NEATGene {
 	private double weight;
 	private boolean selfRecurrent = false;
 	private boolean recurrent = false;
-	
+
 	/**
 	 * @return Returns the recurrent.
 	 */
 	public boolean isRecurrent() {
 		return recurrent;
 	}
+
 	/**
-	 * @param recurrent The recurrent to set.
+	 * @param recurrent
+	 *            The recurrent to set.
 	 */
 	public void setRecurrent(boolean recurrent) {
 		this.recurrent = recurrent;
 	}
+
 	/**
 	 * @return Returns the selfRecurrent.
 	 */
 	public boolean isSelfRecurrent() {
 		return selfRecurrent;
 	}
+
 	/**
-	 * @param selfRecurrent The selfRecurrent to set.
+	 * @param selfRecurrent
+	 *            The selfRecurrent to set.
 	 */
 	public void setSelfRecurrent(boolean selfRecurrent) {
 		this.selfRecurrent = selfRecurrent;
 	}
+
 	/**
-	 * @param enabled The enabled to set.
+	 * @param enabled
+	 *            The enabled to set.
 	 */
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
-		if (this.enabled == false) {			
-			int i = 0;
-		}
+		// if (this.enabled == false) {
+		// int i = 0;
+		// }
 	}
+
 	/**
-	 * @param fromId The fromId to set.
+	 * @param fromId
+	 *            The fromId to set.
 	 */
 	public void setFromId(int fromId) {
 		this.fromId = fromId;
 	}
+
 	/**
-	 * @param toId The toId to set.
+	 * @param toId
+	 *            The toId to set.
 	 */
 	public void setToId(int toId) {
 		this.toId = toId;
 	}
+
 	/**
-	 * @param weight The weight to set.
+	 * @param weight
+	 *            The weight to set.
 	 */
 	public void setWeight(double weight) {
 		this.weight = weight;
 	}
+
 	/**
 	 * @return Returns the enabled.
 	 */
 	public boolean isEnabled() {
 		return enabled;
 	}
+
 	/**
 	 * @return Returns the fromId.
 	 */
 	public int getFromId() {
 		return fromId;
 	}
+
 	/**
 	 * @return Returns the innovationNumber.
 	 */
@@ -89,21 +105,24 @@ public class NEATLinkGene implements NEATGene {
 	public int getInnovationNumber() {
 		return innovationNumber;
 	}
+
 	/**
 	 * @return Returns the toId.
 	 */
 	public int getToId() {
 		return toId;
 	}
+
 	/**
 	 * @return Returns the weight.
 	 */
 	public double getWeight() {
 		return weight;
 	}
-	
+
 	/**
 	 * Creates the gene based on the params
+	 * 
 	 * @param innovationNumber
 	 * @param enabled
 	 * @param fromId
@@ -117,9 +136,9 @@ public class NEATLinkGene implements NEATGene {
 		this.toId = toId;
 		this.weight = weight;
 	}
-	
+
 	/**
-	 * Not used within NEAT.  
+	 * Not used within NEAT.
 	 */
 	@Override
 	public Number geneAsNumber() {
@@ -128,10 +147,6 @@ public class NEATLinkGene implements NEATGene {
 
 	@Override
 	public String geneAsString() {
-		return (this.innovationNumber + ":" + 
-				this.enabled + ":" + 
-				this.fromId + ":" +
-				this.toId + ":" + 
-				this.weight);
+		return (this.innovationNumber + ":" + this.enabled + ":" + this.fromId + ":" + this.toId + ":" + this.weight);
 	}
 }

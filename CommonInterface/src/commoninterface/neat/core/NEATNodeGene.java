@@ -5,13 +5,13 @@
  */
 package commoninterface.neat.core;
 
-
 /**
  * @author MSImmerson
  *
- * Gene that describes a NEAT node (neuron)
+ *         Gene that describes a NEAT node (neuron)
  */
 public class NEATNodeGene implements NEATGene {
+	private static final long serialVersionUID = 2723592430078378574L;
 	private int innovationNumber;
 	private int id;
 	private double sigmoidFactor = -1.0;
@@ -21,7 +21,7 @@ public class NEATNodeGene implements NEATGene {
 	public static final int HIDDEN = 0;
 	public static final int OUTPUT = 1;
 	public static final int INPUT = 2;
-	
+
 	public NEATNodeGene(int innovationNumber, int id, double sigmoidF, int type, double bias) {
 		this.innovationNumber = innovationNumber;
 		this.id = id;
@@ -30,7 +30,7 @@ public class NEATNodeGene implements NEATGene {
 		this.bias = bias;
 		this.initialiseDepth();
 	}
-	
+
 	private void initialiseDepth() {
 		if (this.type == INPUT) {
 			this.depth = 0;
@@ -38,15 +38,17 @@ public class NEATNodeGene implements NEATGene {
 			this.depth = 1;
 		}
 	}
-	
+
 	/**
 	 * @return Returns the depth.
 	 */
 	public double getDepth() {
 		return depth;
 	}
+
 	/**
-	 * @param depth The depth to set.
+	 * @param depth
+	 *            The depth to set.
 	 */
 	public void setDepth(double depth) {
 		this.depth = depth;
@@ -55,7 +57,7 @@ public class NEATNodeGene implements NEATGene {
 	public void setSigmoidFactor(double bias) {
 		this.sigmoidFactor = bias;
 	}
-	
+
 	public int getType() {
 		return type;
 	}
@@ -64,7 +66,7 @@ public class NEATNodeGene implements NEATGene {
 	public int getInnovationNumber() {
 		return (this.innovationNumber);
 	}
-	
+
 	public int id() {
 		return (this.id);
 	}
@@ -72,7 +74,7 @@ public class NEATNodeGene implements NEATGene {
 	public double sigmoidFactor() {
 		return (this.sigmoidFactor);
 	}
-	
+
 	@Override
 	public Number geneAsNumber() {
 		return (new Integer(this.innovationNumber));

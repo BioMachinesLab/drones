@@ -9,6 +9,7 @@ import java.io.Serializable;
  * Used to describe a link between two neurons
  */
 public class Synapse implements Serializable{
+	private static final long serialVersionUID = -4911747365050977178L;
 	private Neuron from;
 	private Neuron to;
 	private double weight;

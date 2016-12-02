@@ -6,7 +6,8 @@ import java.util.ArrayList;
  * @author MSimmerson
  *
  */
-public class ChromosomeSet extends ArrayList {
+public class ChromosomeSet extends ArrayList<Chromosome> {
+	private static final long serialVersionUID = 6716388429458077262L;
 	private boolean isElitistSet;
 	private int idx = 0;
 	
@@ -26,6 +27,6 @@ public class ChromosomeSet extends ArrayList {
 		if (this.idx >= this.size()) {
 			this.idx = 0;
 		}
-		return ((Chromosome)this.get(this.idx++));
+		return (this.get(this.idx++));
 	}
 }

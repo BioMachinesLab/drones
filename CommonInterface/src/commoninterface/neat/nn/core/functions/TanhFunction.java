@@ -11,10 +11,9 @@ import commoninterface.neat.nn.core.ActivationFunction;
  *
  */
 public class TanhFunction implements ActivationFunction {
+	private static final long serialVersionUID = 4598392980233429820L;
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.ActivationFunction#activate(double)
-	 */
+	@Override
 	public double activate(double neuronIp) {
 		double op;
 		if (neuronIp < -20) {
@@ -27,6 +26,7 @@ public class TanhFunction implements ActivationFunction {
 		return (op);
 	}
 
+	@Override
 	public double derivative(double neuronIp) {
 		double deriv = 0;
 		deriv = (1 - Math.pow(neuronIp, 2));

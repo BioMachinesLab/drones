@@ -12,6 +12,7 @@ import commoninterface.neat.nn.core.NeuralNetLayerDescriptor;
  *
  */
 public class NEATNetLayerDescriptor implements NeuralNetLayerDescriptor {
+	private static final long serialVersionUID = -2259756985332431767L;
 	private int layerSize;
 	private int layerInputSize;
 	private int layerId;
@@ -31,36 +32,28 @@ public class NEATNetLayerDescriptor implements NeuralNetLayerDescriptor {
 		this.isOutputLayer = opLayer;
 		this.nodesSelfRecurrent = selfRecurrent;
 	}
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.NeuralNetLayerDescriptor#layerSize()
-	 */
+
+	@Override
 	public int layerSize() {
 		return this.layerSize;
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.NeuralNetLayerDescriptor#layerId()
-	 */
+	@Override
 	public int layerId() {
 		return (this.layerId);
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.NeuralNetLayerDescriptor#activationFunction()
-	 */
+	@Override
 	public ActivationFunction activationFunction() {
 		return (this.function);
 	}
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.NeuralNetLayerDescriptor#inputsIntoLayer()
-	 */
+
+	@Override
 	public int inputsIntoLayer() {
 		return (this.layerInputSize);
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.core.NeuralNetLayerDescriptor#isOutputLayer()
-	 */
+	@Override
 	public boolean isOutputLayer() {
 		return (this.isOutputLayer);
 	}
@@ -68,6 +61,7 @@ public class NEATNetLayerDescriptor implements NeuralNetLayerDescriptor {
 	/* (non-Javadoc)
 	 * @see org.neat4j.ailibrary.nn.core.NeuralNetLayerDescriptor#nodesSelfRecurrent()
 	 */
+	@Override
 	public boolean nodesSelfRecurrent() {
 		return (this.nodesSelfRecurrent);
 	}

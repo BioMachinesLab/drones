@@ -13,27 +13,25 @@ import commoninterface.neat.data.core.NetworkInputSet;
  *
  */
 public class CSVDataSet implements NetworkDataSet {
+	private static final long serialVersionUID = -9173471273009207254L;
 	private NetworkInputSet inputSet;
 	private ExpectedOutputSet expectedOutputSet;
-	
+
 	public CSVDataSet() {
 		// deliberate empty constructor
 	}
-	
+
 	public CSVDataSet(NetworkInputSet inputSet, ExpectedOutputSet expectedOutputSet) {
 		this.inputSet = inputSet;
 		this.expectedOutputSet = expectedOutputSet;
 	}
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.NetworkDataSet#inputSet()
-	 */
+
+	@Override
 	public NetworkInputSet inputSet() {
 		return (this.inputSet);
 	}
 
-	/**
-	 * @see org.neat4j.ailibrary.nn.data.NetworkDataSet#expectedOutputSet()
-	 */
+	@Override
 	public ExpectedOutputSet expectedOutputSet() {
 		return (this.expectedOutputSet);
 	}

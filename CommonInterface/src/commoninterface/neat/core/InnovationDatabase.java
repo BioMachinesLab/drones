@@ -25,20 +25,18 @@ public class InnovationDatabase implements Serializable {
 
 	private static final long serialVersionUID = -1L;
 	private Random ran = new Random();
-	private HashMap innovations;
+	private HashMap<Integer, NEATInnovation> innovations;
 	private int innovationId = 1;
 	private int neuronId = 1;
 	public int hits = 0;
 	public int misses = 0;
 
 	public InnovationDatabase() {
-		this.innovations = new HashMap();
+		this.innovations = new HashMap<Integer, NEATInnovation>();
 	}
 
 	/**
-	 * Singleton accessor
-	 *
-	 * @return
+	 * Singleton access
 	 */
 
 	public static void restoreInnovationDatabase(Object ser) {
@@ -51,7 +49,7 @@ public class InnovationDatabase implements Serializable {
 	}
 
 	public void reset() {
-		this.innovations = new HashMap();
+		this.innovations = new HashMap<Integer, NEATInnovation>();
 		this.innovationId = 1;
 		this.neuronId = 1;
 		this.hits = 0;
@@ -181,17 +179,17 @@ public class InnovationDatabase implements Serializable {
 		NEATNodeInnovation nodeInnovation = new NEATNodeInnovation(linkInnovationId);
 		NEATInnovation databaseEntry = null;
 		boolean found = false;
-		Set keySet;
+		Set<Integer> keySet;
 		Integer key;
-		Iterator it;
+		Iterator<Integer> it;
 
 		if (this.innovations.containsValue(nodeInnovation)) {
 			keySet = this.innovations.keySet();
 			it = keySet.iterator();
 
 			while (it.hasNext() && !found) {
-				key = (Integer) it.next();
-				databaseEntry = (NEATInnovation) this.innovations.get(key);
+				key = it.next();
+				databaseEntry = this.innovations.get(key);
 				if ((databaseEntry instanceof NEATNodeInnovation) && (databaseEntry != null)
 						&& ((((NEATNodeInnovation) databaseEntry)).getLinkInnovationId() == linkInnovationId)) {
 					found = true;
@@ -236,9 +234,9 @@ public class InnovationDatabase implements Serializable {
 	 * Submits a link insertion mutation to the database. If it does not exist,
 	 * it creates it and adds it to the database. It returns the database entry
 	 *
-	 * @param from
+	 * @param fromId
 	 *            - from node identifier
-	 * @param to
+	 * @param toId
 	 *            - to node identifier
 	 * @return - Created link gene
 	 */
@@ -265,17 +263,17 @@ public class InnovationDatabase implements Serializable {
 		NEATLinkInnovation linkInnovation = new NEATLinkInnovation(fromId, toId);
 		NEATInnovation databaseEntry = null;
 		boolean found = false;
-		Set keySet;
+		Set<Integer> keySet;
 		Integer key;
-		Iterator it;
+		Iterator<Integer> it;
 
 		if (this.innovations.containsValue(linkInnovation)) {
 			keySet = this.innovations.keySet();
 			it = keySet.iterator();
 
 			while (it.hasNext() && !found) {
-				key = (Integer) it.next();
-				databaseEntry = (NEATInnovation) this.innovations.get(key);
+				key = it.next();
+				databaseEntry = this.innovations.get(key);
 				if ((databaseEntry instanceof NEATLinkInnovation) && (databaseEntry != null)
 						&& (((NEATLinkInnovation) databaseEntry).getFromId() == fromId)
 						&& (((NEATLinkInnovation) databaseEntry).getToId() == toId)) {

@@ -229,7 +229,7 @@ public class NEATGADescriptor implements GADescriptor {
 		pAddNode = addNode;
 	}
 	/**
-	 * @param disableLink The pDisableLink to set.
+	 * @param toggleLink The toggleLink to set.
 	 */
 	public void setPToggleLink(double toggleLink) {
 		pToggleLink = toggleLink;
