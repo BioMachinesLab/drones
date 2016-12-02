@@ -8,8 +8,8 @@ import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
 
 public class OpenEnvironment extends Environment {
-
-    @ArgumentsAnnotation(name = "distance", defaultValue = "0")
+	private static final long serialVersionUID = -4811468388316430179L;
+	@ArgumentsAnnotation(name = "distance", defaultValue = "0")
     protected double distance = 0;
     protected double maxDistance = 0;
     protected double safetyDistance = 0;

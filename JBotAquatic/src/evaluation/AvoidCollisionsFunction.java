@@ -15,7 +15,7 @@ import simulation.util.Arguments;
  * @author jorge
  */
 public class AvoidCollisionsFunction extends EvaluationFunction {
-
+	private static final long serialVersionUID = -6741702406578375854L;
 	private final double safetyDistance;
 	private double minDistanceOthers = Double.POSITIVE_INFINITY;
 	private boolean kill = false;

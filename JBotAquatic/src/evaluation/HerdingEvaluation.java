@@ -5,8 +5,6 @@
  */
 package evaluation;
 
-import commoninterface.mathutils.Vector2d;
-import commoninterface.utils.CoordinateUtilities;
 import environment.HerdingEnvironment;
 import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
 import simulation.Simulator;
@@ -17,8 +15,8 @@ import simulation.util.Arguments;
  * @author jorge
  */
 public class HerdingEvaluation extends EvaluationFunction {
-
-    private double initialDistance = Double.NaN;
+	private static final long serialVersionUID = -7845139865901681097L;
+	private double initialDistance = Double.NaN;
     private double objectiveDistance;
 
     public HerdingEvaluation(Arguments args) {

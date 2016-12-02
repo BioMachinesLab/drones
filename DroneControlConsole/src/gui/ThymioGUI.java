@@ -1,9 +1,5 @@
 package gui;
 
-import gui.panels.ThymioCapturePanel;
-import gui.panels.ThymioSensorsPanel;
-import gui.panels.ThymioVirtualPositionPanel;
-
 import java.awt.BorderLayout;
 
 import javax.swing.BoxLayout;
@@ -12,11 +8,14 @@ import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import gui.panels.ThymioCapturePanel;
+import gui.panels.ThymioSensorsPanel;
+import gui.panels.ThymioVirtualPositionPanel;
 import main.ThymioControlConsole;
 
 
 public class ThymioGUI extends RobotGUI {
-
+	private static final long serialVersionUID = 4178084911548724511L;
 	private ThymioSensorsPanel readingsPanel;
 	private ThymioCapturePanel capturePanel;
 	private ThymioVirtualPositionPanel virtualPositionPanel;

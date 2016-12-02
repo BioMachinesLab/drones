@@ -26,7 +26,7 @@ import gui.util.GraphPlotter;
 import simulation.Simulator;
 
 public class CIGraphPlotter extends GraphPlotter {
-
+	private static final long serialVersionUID = -726522646568520422L;
 	protected CINeuralNetwork ciNN;
 	protected Vector<CINNInput> ciInputs;
 	protected Vector<CINNOutput> ciOutputs;

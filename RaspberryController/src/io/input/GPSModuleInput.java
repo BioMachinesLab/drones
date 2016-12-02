@@ -32,8 +32,7 @@ import commoninterface.network.messages.SystemStatusMessage;
 import commoninterface.utils.NMEAUtils;
 import utils.FileLogger;
 
-public class GPSModuleInput implements ControllerInput, MessageProvider,
-		Serializable {
+public class GPSModuleInput implements ControllerInput, MessageProvider, Serializable {
 	private static final long serialVersionUID = -5443358826645386873L;
 
 	private final static String LOG_FILE_NAME = FileLogger.LOGS_FOLDER + "GPSLog_";
@@ -65,8 +64,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 	private Serial serial; // Serial connection
 	protected StringBuffer receivedDataBuffer = new StringBuffer();
 	protected GPSData gpsData = new GPSData(); // Contains the obtained info
-	private List<String> ackResponses = Collections
-			.synchronizedList(new ArrayList<String>());
+	private List<String> ackResponses = Collections.synchronizedList(new ArrayList<String>());
 	protected MessageParser messageParser;
 
 	protected boolean available = false;
@@ -96,16 +94,13 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 			available = true;
 			enable = true;
-		} catch (NotActiveException | IllegalArgumentException
-				| InterruptedException e) {
+		} catch (NotActiveException | IllegalArgumentException | InterruptedException e) {
 			e.printStackTrace();
-			System.err.println("[GPS Module] Error initializing GPSModule! ("
-					+ e.getMessage() + ")");
+			System.err.println("[GPS Module] Error initializing GPSModule! (" + e.getMessage() + ")");
 			closeSerial();
 		} catch (Error | Exception e) {
 			e.printStackTrace();
-			System.err.println("[GPS Module] Error initializing GPSModule! ("
-					+ e.getMessage() + ")");
+			System.err.println("[GPS Module] Error initializing GPSModule! (" + e.getMessage() + ")");
 		}
 	}
 
@@ -132,19 +127,13 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 						if (indexFirstDollar >= 0) {
 
-							indexSecondDollar = receivedDataBuffer.indexOf("$",
-									indexFirstDollar + 1);
+							indexSecondDollar = receivedDataBuffer.indexOf("$", indexFirstDollar + 1);
 
-							if (indexSecondDollar >= 0
-									&& indexSecondDollar < receivedDataBuffer
-											.length()) {
+							if (indexSecondDollar >= 0 && indexSecondDollar < receivedDataBuffer.length()) {
 
-								String sub = receivedDataBuffer.substring(
-										indexFirstDollar, indexSecondDollar)
-										.trim();
+								String sub = receivedDataBuffer.substring(indexFirstDollar, indexSecondDollar).trim();
 
-								if (messageParser != null && !sub.isEmpty()
-										&& sub.charAt(0) == '$') {
+								if (messageParser != null && !sub.isEmpty() && sub.charAt(0) == '$') {
 									messageParser.processReceivedData(sub);
 									keepGoing = true;
 								}
@@ -154,8 +143,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
-					System.out.println(indexFirstDollar + " -> "
-							+ indexSecondDollar);
+					System.out.println(indexFirstDollar + " -> " + indexSecondDollar);
 					System.out.println(receivedDataBuffer);
 					receivedDataBuffer.setLength(0);
 				}
@@ -165,9 +153,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		try {
 			serial.open(COM_PORT, baudrate);
 		} catch (IOException e) {
-			System.err
-					.println("[GPS Module] Error while opening serial stream ("
-							+ e.getMessage() + ")");
+			System.err.println("[GPS Module] Error while opening serial stream (" + e.getMessage() + ")");
 		}
 	}
 
@@ -177,8 +163,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				serial.close();
 			}
 		} catch (IOException | IllegalStateException e) {
-			System.err.println("[GPS Module] Error Closing Serial Stream ("
-					+ e.getMessage() + ")");
+			System.err.println("[GPS Module] Error Closing Serial Stream (" + e.getMessage() + ")");
 		}
 	}
 
@@ -188,8 +173,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			if (flush)
 				serial.flush();
 		} catch (IllegalStateException | IOException e) {
-			System.err.println("[GPS Module] Error while writing to device ("
-					+ e.getMessage() + ")");
+			System.err.println("[GPS Module] Error while writing to device (" + e.getMessage() + ")");
 		}
 	}
 
@@ -199,25 +183,21 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 	}
 
 	@SuppressWarnings("unused")
-	private void setupGPSReceiver() throws NotActiveException,
-			InterruptedException, IllegalArgumentException {
-		
+	private void setupGPSReceiver() throws NotActiveException, InterruptedException, IllegalArgumentException {
+
 		if (ECHO_DELAY < 100 || ECHO_DELAY > 10000) {
-			throw new IllegalArgumentException(
-					"[GPS Module] Echo frequency must be in [100,10000] interval!");
+			throw new IllegalArgumentException("[GPS Module] Echo frequency must be in [100,10000] interval!");
 		}
 
 		if (FIX_UPDATE < 200 || FIX_UPDATE > 10000) {
-			throw new IllegalArgumentException(
-					"[GPS Module] Fix update frequency must be in [200,10000] interval!");
+			throw new IllegalArgumentException("[GPS Module] Fix update frequency must be in [200,10000] interval!");
 		}
 
-		
 		createSerial(DEFAULT_BAUD_RATE);
 		Thread.sleep(1000);
-		
+
 		performWarmStart();
-		print("[GPS Module] Warm Start performed!",false);
+		print("[GPS Module] Warm Start performed!", false);
 
 		/*
 		 * Change Baud Rate
@@ -238,8 +218,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 			serial.flush();
 			serial.close();
 		} catch (IOException e) {
-			print("[GPS Module] Error Flushing and/or closing serial stream ("
-					+ e.getMessage() + ")", true);
+			print("[GPS Module] Error Flushing and/or closing serial stream (" + e.getMessage() + ")", true);
 		}
 
 		Thread.sleep(1000);
@@ -254,11 +233,9 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		checksum = nmeaUtils.calculateNMEAChecksum(command);
 		command += checksum;
 		if (sendCommandAndCheckAnswer(command, "$PMTK001,220,3*30")) {
-			print("[GPS Module] OK! Update echo frequency was succefully changed!",
-					false);
+			print("[GPS Module] OK! Update echo frequency was succefully changed!", false);
 		} else {
-			print("[GPS Module] Update echo frequency was NOT succefully changed!",
-					false);
+			print("[GPS Module] Update echo frequency was NOT succefully changed!", false);
 		}
 
 		/*
@@ -268,33 +245,27 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		checksum = nmeaUtils.calculateNMEAChecksum(command);
 		command += checksum;
 		if (sendCommandAndCheckAnswer(command, "$PMTK001,300,3*33")) {
-			print("[GPS Module] OK! Update fix frequency was succefully changed!",
-					false);
+			print("[GPS Module] OK! Update fix frequency was succefully changed!", false);
 		} else {
-			print("[GPS Module] Update fix frequency was NOT succefully changed!",
-					false);
+			print("[GPS Module] Update fix frequency was NOT succefully changed!", false);
 		}
 
 		/*
 		 * Set navigation speed threshold to 0
 		 */
 		if (sendCommandAndCheckAnswer("$PMTK397,0*23", "$PMTK001,397,3*3D")) {
-			print("[GPS Module] OK! Navigation speed threshold was succefully changed!",
-					false);
+			print("[GPS Module] OK! Navigation speed threshold was succefully changed!", false);
 		} else {
-			print("[GPS Module] Navigation speed threshold was NOT succefully changed!",
-					false);
+			print("[GPS Module] Navigation speed threshold was NOT succefully changed!", false);
 		}
 
 		/*
 		 * Disable always locate mode
 		 */
 		if (disableAlwaysLocateStandby()) {
-			print("[GPS Module] OK! Always locate mode was succefully disabled!",
-					false);
+			print("[GPS Module] OK! Always locate mode was succefully disabled!", false);
 		} else {
-			print("[GPS Module] Always locate mode was NOT succefully disabled!",
-					false);
+			print("[GPS Module] Always locate mode was NOT succefully disabled!", false);
 		}
 
 		/*
@@ -320,8 +291,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		ackResponses.clear();
 	}
 
-	private boolean sendCommandAndCheckAnswer(String command, String answer)
-			throws InterruptedException {
+	private boolean sendCommandAndCheckAnswer(String command, String answer) throws InterruptedException {
 		serialWrite(command + "\r\n", false);
 
 		Thread.sleep(1000);
@@ -366,9 +336,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				&& ((InformationRequest) request).getMessageTypeQuery() == InformationRequest.MessageType.GPS) {
 
 			if (!available)
-				return new SystemStatusMessage(
-						"[GPSModule] Unable to send GPS data",
-						robotCI.getNetworkAddress());
+				return new SystemStatusMessage("[GPSModule] Unable to send GPS data", robotCI.getNetworkAddress());
 
 			return new GPSMessage(getReadings(), robotCI.getNetworkAddress());
 		}
@@ -446,8 +414,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 	public boolean standbyGPS() throws InterruptedException {
 		if (enable) {
-			return sendCommandAndCheckAnswer("$PMTK161,0*28",
-					"$PMTK001,161,3*36");
+			return sendCommandAndCheckAnswer("$PMTK161,0*28", "$PMTK001,161,3*36");
 		} else {
 			return true;
 		}
@@ -455,8 +422,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 
 	public boolean wakeUpGPS() throws InterruptedException {
 		if (!enable) {
-			return sendCommandAndCheckAnswer("$PMTK010,002*2D",
-					"$PMTK001,010,3*31");
+			return sendCommandAndCheckAnswer("$PMTK010,002*2D", "$PMTK001,010,3*31");
 		} else {
 			return true;
 		}
@@ -518,8 +484,8 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				System.out.println("[GPSModuleInput] Created Logs Folder");
 			}
 
-			localLogPrintWriterOut = new PrintWriter(LOG_FILE_NAME
-					+ sdf.format(cal.getTime()) +FileLogger.LOG_FILE_EXTENSION);
+			localLogPrintWriterOut = new PrintWriter(
+					LOG_FILE_NAME + sdf.format(cal.getTime()) + FileLogger.LOG_FILE_EXTENSION);
 			localLog = true;
 		} catch (FileNotFoundException e) {
 			System.err.println("[GPSModuleInput] Unable to start local log");
@@ -707,6 +673,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		 * @param params
 		 *            : Parameters extracted from GPGGA sentence
 		 */
+		@SuppressWarnings("unused")
 		private void parseGPGGASentence(String[] params) {
 			if (params.length == 15) {
 				print("[Parsing GPGGA]", false);
@@ -714,8 +681,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 					gpsData.setLatitude(params[2] + params[3]);
 					gpsData.setLongitude(params[4] + params[5]);
 					gpsData.setGPSSourceType(Integer.parseInt(params[6]));
-					gpsData.setNumberOfSatellitesInUse(Integer
-							.parseInt(params[7]));
+					gpsData.setNumberOfSatellitesInUse(Integer.parseInt(params[7]));
 					gpsData.setHDOP(Double.parseDouble(params[8]));
 
 					if (!params[9].isEmpty())
@@ -747,14 +713,12 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 				else
 					gpsData.setFix(true);
 
-				if (!params[15].isEmpty() && !params[16].isEmpty()
-						&& !params[17].isEmpty()) {
+				if (!params[15].isEmpty() && !params[16].isEmpty() && !params[17].isEmpty()) {
 					gpsData.setPDOP(Double.parseDouble(params[15]));
 					gpsData.setHDOP(Double.parseDouble(params[16]));
 
 					if (params[17].length() > 3)
-						gpsData.setVDOP(Double.parseDouble(params[17]
-								.substring(0, params[17].length() - 3)));
+						gpsData.setVDOP(Double.parseDouble(params[17].substring(0, params[17].length() - 3)));
 				}
 
 				// Missing list of satellites in view, used to fix (not parsed
@@ -773,8 +737,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		private void parseGPGSVSentence(String[] params) {
 			if (params.length == 4 && params[3].length() > 3) {
 				print("[Parsing GPGSV]", false);
-				gpsData.setNumberOfSatellitesInView(Integer.parseInt(params[3]
-						.substring(0, params[3].length() - 3)));
+				gpsData.setNumberOfSatellitesInView(Integer.parseInt(params[3].substring(0, params[3].length() - 3)));
 			} else if (params.length > 4) {
 				print("[Parsing GPGSV]", false);
 				gpsData.setNumberOfSatellitesInView(Integer.parseInt(params[3]));
@@ -807,22 +770,16 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 					while (miliseconds > 999)
 						miliseconds /= 10;
 
-					LocalDateTime date = new LocalDateTime(
-							Integer.parseInt(d[2]) + 2000,
-							Integer.parseInt(d[1]), Integer.parseInt(d[0]),
-							Integer.parseInt(t[0]), Integer.parseInt(t[1]),
+					LocalDateTime date = new LocalDateTime(Integer.parseInt(d[2]) + 2000, Integer.parseInt(d[1]),
+							Integer.parseInt(d[0]), Integer.parseInt(t[0]), Integer.parseInt(t[1]),
 							Integer.parseInt(t[2]), miliseconds);
 					gpsData.setDate(date);
 
 					if (!alreadySetDate) {
-						DateTimeFormatter f = DateTimeFormat
-								.forPattern("EEE MMM d HH:mm:ss 'UTC' YYYY");
+						DateTimeFormatter f = DateTimeFormat.forPattern("EEE MMM d HH:mm:ss 'UTC' YYYY");
 						Runtime.getRuntime()
-								.exec(new String[] {
-										"bash",
-										"-c",
-										"sudo date --set \"" + date.toString(f)
-												+ "\";" }).waitFor();
+								.exec(new String[] { "bash", "-c", "sudo date --set \"" + date.toString(f) + "\";" })
+								.waitFor();
 						alreadySetDate = true;
 					}
 
@@ -857,6 +814,7 @@ public class GPSModuleInput implements ControllerInput, MessageProvider,
 		 * @param params
 		 *            : Parameters extracted from GPVTG sentence
 		 */
+		@SuppressWarnings("unused")
 		private void parseGPVTGSentence(String[] params) {
 			if (params.length == 10) {
 				if (!params[1].isEmpty())

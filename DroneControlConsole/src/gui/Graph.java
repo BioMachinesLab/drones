@@ -23,7 +23,7 @@ import javax.swing.JPanel;
 import commoninterface.mathutils.Vector2d;
 
 public class Graph extends JPanel {
-	
+	private static final long serialVersionUID = -1129752770711310430L;
 	public static final int LEGEND_SIZE = 15;
 	public static final int ORIGINAL_PAD_TOP = 20;
 	
@@ -122,6 +122,7 @@ public class Graph extends JPanel {
 		repaint();
 	}
 
+	@Override
 	public void paint(Graphics g) {
 		super.paint(g);
 		Graphics2D g2 = (Graphics2D) g;
@@ -206,7 +207,7 @@ public class Graph extends JPanel {
 		
 		g2.draw(new Line2D.Double(pad, padTop, pad, lh));
 		
-		double divisions = (double) (h - pad - padTop) / (max-min);
+		double divisions = (h - pad - padTop) / (max-min);
 		double yLine = h - pad - divisions * (0 - min);
 		g2.draw(new Line2D.Double(pad, yLine, lw, yLine));
 		
@@ -316,7 +317,7 @@ public class Graph extends JPanel {
 		int h = getHeight();
 
 		xInc = (double) (w - 2 * pad) / (showLast - 1);
-		scale = (double) (h - pad - padTop) / (max-min);
+		scale = (h - pad - padTop) / (max-min);
 		
 		Stroke originalStroke = g2.getStroke();
 		

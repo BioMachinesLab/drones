@@ -1,11 +1,11 @@
 package controllers.inputs;
 
+import evolutionaryrobotics.neuralnetworks.inputs.NNInput;
 import simulation.robot.CISensorWrapper;
 import simulation.robot.sensors.Sensor;
-import evolutionaryrobotics.neuralnetworks.inputs.NNInput;
 
 public class CISensorWrapperNNInput extends NNInput {
-	
+	private static final long serialVersionUID = 5240107236081184300L;
 	protected CISensorWrapper sensor;
 	
 	public CISensorWrapperNNInput(Sensor s) {

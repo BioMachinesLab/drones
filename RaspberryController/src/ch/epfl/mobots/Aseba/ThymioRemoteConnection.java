@@ -133,7 +133,7 @@ public class ThymioRemoteConnection {
 	 * at a frequency of 16 Hz, and generates the acc event after every update.
 	 * Moreover, when a shock is detected, a tap event is emitted
 	 * 
-	 * @return
+	 * @return a list with the accelerometers readings
 	 */
 	public List<Short> getAccelerometer() {
 		return recvInterface.GetVariable(NODE_REF, "acc");

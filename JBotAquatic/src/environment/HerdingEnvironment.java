@@ -20,8 +20,8 @@ import simulation.util.Arguments;
  * @author jorge
  */
 public class HerdingEnvironment extends PredatorPreyEnvironment {
-
-    private double waypointMinDistance;
+	private static final long serialVersionUID = -7261008697308200547L;
+	private double waypointMinDistance;
     private double objectiveDistance;
     private Vector2d objective;
 

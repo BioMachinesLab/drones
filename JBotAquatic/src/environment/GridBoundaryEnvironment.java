@@ -1,13 +1,14 @@
 package environment;
 
 import java.util.ArrayList;
+
+import environment.utils.EnvironmentGrid;
 import simulation.Simulator;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
-import environment.utils.EnvironmentGrid;
 
 public class GridBoundaryEnvironment extends BoundaryEnvironment {
-	
+	private static final long serialVersionUID = -7378304806835524935L;
 	protected ArrayList<EnvironmentGrid> grids = new ArrayList<EnvironmentGrid>();
 	protected double gridResolution = 1.0;
 	protected double gridDistance = 5;

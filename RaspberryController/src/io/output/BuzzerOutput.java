@@ -12,8 +12,6 @@ public class BuzzerOutput extends Thread implements ControllerOutput {
 	// Sound constant
 	private static int BEEP_LENGHT = 10;
 	private static int BEEP_DELAY = 10;
-	private static int ERROR_BEEP_DELAY = 2;
-	private static int ERROR_BEEP_LENGHT = 3;
 	private static int BUZZER_DEFAULT_FREQUENCY = 2000;
 
 	private static final int BUZZER_PIN = 7;

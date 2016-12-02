@@ -13,8 +13,6 @@ public class CalibrationCIBehavior extends CIBehavior {
 	private RealAquaticDroneCI drone;
 	private int timeIncrement = 10;
 	
-	private double speed = 0.2;
-	
 	private boolean first = true;
 	
 	public CalibrationCIBehavior(CIArguments args, RobotCI drone) {

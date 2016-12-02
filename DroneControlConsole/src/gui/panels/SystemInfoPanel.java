@@ -1,7 +1,5 @@
 package gui.panels;
 
-import gui.RobotGUI;
-
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,12 +14,12 @@ import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 
-import threads.UpdateThread;
 import dataObjects.SystemInformationsData;
+import gui.RobotGUI;
+import threads.UpdateThread;
 
 public class SystemInfoPanel extends UpdatePanel {
 	private static final long serialVersionUID = 8457762280133417243L;
-	private RobotGUI gui;
 
 	// Hardware
 	private JPanel hardwareInformationsPanel;
@@ -80,13 +78,12 @@ public class SystemInfoPanel extends UpdatePanel {
 	private JTextField textFieldEMMCFreq;
 	private JTextField textFieldHDMIFreq;
 	private JTextField textFieldDPIFreq;
-	
+
 	private UpdateThread thread;
-	
+
 	private long sleepTime = 10000;
 
 	public SystemInfoPanel(RobotGUI gui) {
-		this.gui = gui;
 		setBorder(BorderFactory.createTitledBorder("System Informations"));
 		setLayout(null);
 		setMinimumSize(new Dimension(500, 500));
@@ -105,7 +102,7 @@ public class SystemInfoPanel extends UpdatePanel {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				if(thread != null)
+				if (thread != null)
 					thread.interrupt();
 			}
 		});
@@ -115,9 +112,8 @@ public class SystemInfoPanel extends UpdatePanel {
 	private void buildHardwareInformationsPanel() {
 		hardwareInformationsPanel = new JPanel();
 		hardwareInformationsPanel.setBounds(10, 16, 181, 305);
-		hardwareInformationsPanel.setBorder(BorderFactory.createTitledBorder(
-				UIManager.getBorder("TitledBorder.border"), "Hardware",
-				TitledBorder.LEFT, TitledBorder.TOP));
+		hardwareInformationsPanel.setBorder(BorderFactory.createTitledBorder(UIManager.getBorder("TitledBorder.border"),
+				"Hardware", TitledBorder.LEFT, TitledBorder.TOP));
 		hardwareInformationsPanel.setLayout(null);
 
 		JLabel lblSerialNumber = new JLabel("Serial Numb.");
@@ -217,9 +213,8 @@ public class SystemInfoPanel extends UpdatePanel {
 	private void buildMemoryInformationsPanel() {
 		memoryInformationsPanel = new JPanel();
 		memoryInformationsPanel.setBounds(201, 16, 181, 305);
-		memoryInformationsPanel.setBorder(BorderFactory.createTitledBorder(
-				UIManager.getBorder("TitledBorder.border"), "Memory",
-				TitledBorder.LEFT, TitledBorder.TOP));
+		memoryInformationsPanel.setBorder(BorderFactory.createTitledBorder(UIManager.getBorder("TitledBorder.border"),
+				"Memory", TitledBorder.LEFT, TitledBorder.TOP));
 		memoryInformationsPanel.setLayout(null);
 
 		JLabel lblTotalMemory = new JLabel("Total Mem.");
@@ -318,9 +313,8 @@ public class SystemInfoPanel extends UpdatePanel {
 	private void buildOSInformationsPanel() {
 		osInformationsPanel = new JPanel();
 		osInformationsPanel.setBounds(10, 332, 181, 180);
-		osInformationsPanel.setBorder(BorderFactory.createTitledBorder(
-				UIManager.getBorder("TitledBorder.border"), "Operative System",
-				TitledBorder.LEFT, TitledBorder.TOP));
+		osInformationsPanel.setBorder(BorderFactory.createTitledBorder(UIManager.getBorder("TitledBorder.border"),
+				"Operative System", TitledBorder.LEFT, TitledBorder.TOP));
 		osInformationsPanel.setLayout(null);
 
 		JLabel lblOSName = new JLabel("OS Name");
@@ -379,9 +373,8 @@ public class SystemInfoPanel extends UpdatePanel {
 	private void buildJavaEnvInformationsPanel() {
 		javaEnvInformationsPanel = new JPanel();
 		javaEnvInformationsPanel.setBounds(201, 332, 181, 180);
-		javaEnvInformationsPanel.setBorder(BorderFactory.createTitledBorder(
-				UIManager.getBorder("TitledBorder.border"), "Java Environment",
-				TitledBorder.LEFT, TitledBorder.TOP));
+		javaEnvInformationsPanel.setBorder(BorderFactory.createTitledBorder(UIManager.getBorder("TitledBorder.border"),
+				"Java Environment", TitledBorder.LEFT, TitledBorder.TOP));
 		javaEnvInformationsPanel.setLayout(null);
 
 		JLabel lblJavaVendor = new JLabel("Java Vendor");
@@ -440,9 +433,8 @@ public class SystemInfoPanel extends UpdatePanel {
 	private void buildNetworkInformationsPanel() {
 		networkInformationsPanel = new JPanel();
 		networkInformationsPanel.setBounds(392, 332, 181, 145);
-		networkInformationsPanel.setBorder(BorderFactory.createTitledBorder(
-				UIManager.getBorder("TitledBorder.border"), "Network",
-				TitledBorder.LEFT, TitledBorder.TOP));
+		networkInformationsPanel.setBorder(BorderFactory.createTitledBorder(UIManager.getBorder("TitledBorder.border"),
+				"Network", TitledBorder.LEFT, TitledBorder.TOP));
 		networkInformationsPanel.setLayout(null);
 
 		JLabel lblHostname = new JLabel("Hostname");
@@ -491,9 +483,8 @@ public class SystemInfoPanel extends UpdatePanel {
 	private void buildClockInformationsPanel() {
 		clockInformationsPanel = new JPanel();
 		clockInformationsPanel.setBounds(392, 16, 181, 305);
-		clockInformationsPanel.setBorder(BorderFactory.createTitledBorder(
-				UIManager.getBorder("TitledBorder.border"), "Clock",
-				TitledBorder.LEFT, TitledBorder.TOP));
+		clockInformationsPanel.setBorder(BorderFactory.createTitledBorder(UIManager.getBorder("TitledBorder.border"),
+				"Clock", TitledBorder.LEFT, TitledBorder.TOP));
 		clockInformationsPanel.setLayout(null);
 
 		JLabel lblARMFreq = new JLabel("ARM Freq.");
@@ -587,31 +578,18 @@ public class SystemInfoPanel extends UpdatePanel {
 		textFieldCPUPartNumb.setText(data.getCpuPart());
 		textFieldCPUTemp.setText(data.getCpuTemperature() + " �C");
 		textFieldCPUVoltage.setText(data.getCpuVoltage() + " Volt");
-		textFieldIsHardFloatAbi
-				.setText(Boolean.toString(data.isHardFloatAbi()));
+		textFieldIsHardFloatAbi.setText(Boolean.toString(data.isHardFloatAbi()));
 		textFieldBoardType.setText(data.getBoardType());
 		textFieldHardwareRevision.setText(data.getHardwareRevision());
 
 		// Memory
 		NumberFormat formatter = new DecimalFormat("#0.00");
-		textFieldTotalMemory.setText(formatter.format(data.getTotalMemory()
-				/ (double) (1024 * 1024))
-				+ " MBytes");
-		textFieldUsedMemory.setText(formatter.format(data.getUsedMemory()
-				/ (double) (1024 * 1024))
-				+ " MBytes");
-		textFieldFreeMemory.setText(formatter.format(data.getFreeMemory()
-				/ (double) (1024 * 1024))
-				+ " MBytes");
-		textFieldSharedMemory.setText(formatter.format(data.getSharedMemory()
-				/ (double) (1024 * 1024))
-				+ " MBytes");
-		textFieldMemoryBuffers.setText(formatter.format(data.getMemoryBuffers()
-				/ (double) (1024 * 1024))
-				+ " MBytes");
-		textFieldCachedMemory.setText(formatter.format(data.getCachedMemory()
-				/ (double) (1024 * 1024))
-				+ " MBytes");
+		textFieldTotalMemory.setText(formatter.format(data.getTotalMemory() / (double) (1024 * 1024)) + " MBytes");
+		textFieldUsedMemory.setText(formatter.format(data.getUsedMemory() / (double) (1024 * 1024)) + " MBytes");
+		textFieldFreeMemory.setText(formatter.format(data.getFreeMemory() / (double) (1024 * 1024)) + " MBytes");
+		textFieldSharedMemory.setText(formatter.format(data.getSharedMemory() / (double) (1024 * 1024)) + " MBytes");
+		textFieldMemoryBuffers.setText(formatter.format(data.getMemoryBuffers() / (double) (1024 * 1024)) + " MBytes");
+		textFieldCachedMemory.setText(formatter.format(data.getCachedMemory() / (double) (1024 * 1024)) + " MBytes");
 		textFieldSDRAM_c_voltage.setText(data.getSdram_c_voltage() + " Volt");
 		textFieldSDRAM_i_voltage.setText(data.getSdram_i_voltage() + " Volt");
 		textFieldSDRAM_p_voltage.setText(data.getSdram_p_voltage() + " Volt");
@@ -665,16 +643,17 @@ public class SystemInfoPanel extends UpdatePanel {
 	public void registerThread(UpdateThread t) {
 		this.thread = t;
 	}
-	
+
 	@Override
 	public void threadWait() {
 		try {
-			synchronized(this){
+			synchronized (this) {
 				wait();
 			}
-		}catch(Exception e) {}
+		} catch (Exception e) {
+		}
 	}
-	
+
 	@Override
 	public long getSleepTime() {
 		return sleepTime;

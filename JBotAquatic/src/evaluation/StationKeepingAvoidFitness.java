@@ -19,8 +19,8 @@ import simulation.util.ArgumentsAnnotation;
  * @author jorge
  */
 public class StationKeepingAvoidFitness extends EvaluationFunction {
-
-    @ArgumentsAnnotation(name = "alloweddistance", defaultValue = "1.5")
+	private static final long serialVersionUID = -167974617979079888L;
+	@ArgumentsAnnotation(name = "alloweddistance", defaultValue = "1.5")
     private double allowedDistance = 1.5;
     private double safetyDistance = 3;
 

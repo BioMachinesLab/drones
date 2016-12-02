@@ -2,6 +2,11 @@ package environment;
 
 import java.util.ArrayList;
 
+import commoninterface.AquaticDroneCI;
+import commoninterface.entities.Waypoint;
+import commoninterface.mathutils.Vector2d;
+import commoninterface.utils.CoordinateUtilities;
+import commoninterface.utils.jcoord.LatLon;
 import simulation.Simulator;
 import simulation.environment.Environment;
 import simulation.physicalobjects.LightPole;
@@ -9,15 +14,10 @@ import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
-import commoninterface.AquaticDroneCI;
-import commoninterface.entities.Waypoint;
-import commoninterface.mathutils.Vector2d;
-import commoninterface.utils.CoordinateUtilities;
-import commoninterface.utils.jcoord.LatLon;
 
 public class WaypointEnvironment extends Environment {
-
-    @ArgumentsAnnotation(name = "numberwaypoints", defaultValue = "1")
+	private static final long serialVersionUID = -958459524525869453L;
+	@ArgumentsAnnotation(name = "numberwaypoints", defaultValue = "1")
     private int nWaypoints = 1;
     @ArgumentsAnnotation(name = "distance", defaultValue = "0")
     private double distance = 0;

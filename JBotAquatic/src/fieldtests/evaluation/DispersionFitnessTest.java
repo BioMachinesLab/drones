@@ -5,22 +5,21 @@
  */
 package fieldtests.evaluation;
 
+import commoninterface.sensors.DroneCISensor;
+import evaluation.AvoidCollisionsFunction;
 import simulation.Simulator;
 import simulation.robot.AquaticDrone;
 import simulation.robot.CISensorWrapper;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
-import commoninterface.sensors.DroneCISensor;
-import commoninterface.utils.CoordinateUtilities;
-import evaluation.AvoidCollisionsFunction;
 
 /**
  *
  * @author jorge
  */
 public class DispersionFitnessTest extends AvoidCollisionsFunction {
-
-    private double meanDistance = 0;
+	private static final long serialVersionUID = 538994501657908680L;
+	private double meanDistance = 0;
     private double margin = 0;
     private boolean config = false;
     private double targetDistance = 0;

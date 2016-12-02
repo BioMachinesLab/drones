@@ -1,13 +1,14 @@
 package fieldtests.updatables;
 
+import drone.MissionController;
+import environment.TestHierarchicalMissionEnvironment;
 import simulation.Simulator;
 import simulation.Updatable;
 import simulation.robot.AquaticDrone;
-import drone.MissionController;
-import environment.TestHierarchicalMissionEnvironment;
 
+@SuppressWarnings("unused")
 public class HierarchicalTestStatistics implements Updatable {
-	
+
 	public long stepsSeeingOne = 0;
 	public long stepsSeeingTwoOrMore = 0;
 	public long stepsInside = 0;
@@ -18,18 +19,18 @@ public class HierarchicalTestStatistics implements Updatable {
 	public boolean currentlyInside = false;
 	public boolean detected = false;
 	public TestHierarchicalMissionEnvironment env;
-	
+
 	private long currentStepsUntilSeeing = 0;
-	
+
 	private int onboardRange = 50;
 	private int printFreq = -1;
-	
+
 	int[] countNumberSeeing = new int[100];
-	
+
 	public HierarchicalTestStatistics(int onboardRange) {
 		this.onboardRange = onboardRange;
 	}
-	
+
 	public HierarchicalTestStatistics(int onboardRange, int printFreq) {
 		this.onboardRange = onboardRange;
 		this.printFreq = printFreq;
@@ -37,90 +38,94 @@ public class HierarchicalTestStatistics implements Updatable {
 
 	@Override
 	public void update(Simulator simulator) {
-		
-		if(printFreq == -1)
-			printFreq = simulator.getEnvironment().getSteps()-1;
-		
-		if(env == null) {
-			env = (TestHierarchicalMissionEnvironment)simulator.getEnvironment();
+
+		if (printFreq == -1)
+			printFreq = simulator.getEnvironment().getSteps() - 1;
+
+		if (env == null) {
+			env = (TestHierarchicalMissionEnvironment) simulator.getEnvironment();
 		}
-		
-		if(intruder == null) {
-			intruder = (AquaticDrone) simulator.getRobots().get(simulator.getRobots().size()-1);
+
+		if (intruder == null) {
+			intruder = (AquaticDrone) simulator.getRobots().get(simulator.getRobots().size() - 1);
 		}
-		
-		if(env.insideBoundary(intruder.getGPSLatLon())) {
-			if(!currentlyInside) {
+
+		if (env.insideBoundary(intruder.getGPSLatLon())) {
+			if (!currentlyInside) {
 				totalIntruders++;
 				currentlyInside = true;
 				detected = false;
 				currentStepsUntilSeeing = 0;
 			}
 			int count = 0;
-			
-			for(int i = 0 ; i < simulator.getRobots().size() - 1 ; i++) {
-				AquaticDrone r = (AquaticDrone)simulator.getRobots().get(i);
-				if(r.isEnabled() && r.getGPSLatLon() != null)
-					if(r.getGPSLatLon().distanceInMeters(intruder.getGPSLatLon()) < onboardRange)
+
+			for (int i = 0; i < simulator.getRobots().size() - 1; i++) {
+				AquaticDrone r = (AquaticDrone) simulator.getRobots().get(i);
+				if (r.isEnabled() && r.getGPSLatLon() != null)
+					if (r.getGPSLatLon().distanceInMeters(intruder.getGPSLatLon()) < onboardRange)
 						count++;
 			}
-			if(count == 1)
+			if (count == 1)
 				stepsSeeingOne++;
-			else if(count > 1)
+			else if (count > 1)
 				stepsSeeingTwoOrMore++;
-			
-			if(count > 0 && !detected) {
+
+			if (count > 0 && !detected) {
 				foundIntruders++;
 				detected = true;
 			}
-			
+
 			countNumberSeeing[count]++;
-			
-			if(currentlyInside && detected && currentStepsUntilSeeing > 0) {
-				stepsUntilSeeing+=currentStepsUntilSeeing;
+
+			if (currentlyInside && detected && currentStepsUntilSeeing > 0) {
+				stepsUntilSeeing += currentStepsUntilSeeing;
 				currentStepsUntilSeeing = 0;
 			}
-			
-			if(currentlyInside && !detected) {
+
+			if (currentlyInside && !detected) {
 				currentStepsUntilSeeing++;
 			}
-			
+
 			stepsInside++;
 		} else {
 			currentlyInside = false;
 		}
-		
-		if(simulator.getTime() > 0 && simulator.getTime() % printFreq == 0) {
-			
+
+		if (simulator.getTime() > 0 && simulator.getTime() % printFreq == 0) {
+
 			int[] states = new int[MissionController.State.values().length];
-			
-			for(int i = 0 ; i < simulator.getRobots().size() - 1 ; i++) {
-				MissionController m = (MissionController) ((AquaticDrone)simulator.getRobots().get(i)).getActiveBehavior();
-				if(m==null)
+
+			for (int i = 0; i < simulator.getRobots().size() - 1; i++) {
+				MissionController m = (MissionController) ((AquaticDrone) simulator.getRobots().get(i))
+						.getActiveBehavior();
+				if (m == null)
 					continue;
 				states[m.getCurrentState().ordinal()]++;
 			}
+
 			String st = "";
-			for(int i = 0 ; i < states.length; i++) {
-				st+=MissionController.State.values()[i]+":"+states[i]+" ";
+			for (int i = 0; i < states.length; i++) {
+				st += MissionController.State.values()[i] + ":" + states[i] + " ";
 			}
-			
+
 			int total = 0;
-			
-			for(int i = 0 ; i < 10 ; i++) {
-				System.out.print(countNumberSeeing[i]+"\t");
-				total+=countNumberSeeing[i];
+
+			for (int i = 0; i < 10; i++) {
+				System.out.print(countNumberSeeing[i] + "\t");
+				total += countNumberSeeing[i];
 			}
-			
+
 			double notSeeing = countNumberSeeing[0];
-			
-			double percentageSeeing = (total-notSeeing) / total;
-			
+
+			double percentageSeeing = (total - notSeeing) / total;
+
 			System.out.print(percentageSeeing);
-			
+
 			System.out.println();
-			
-//			System.out.println(simulator.getTime()+" "+stepsInside+" "+stepsSeeingOne+" "+stepsSeeingTwoOrMore+" "+totalIntruders+" "+foundIntruders+" "+stepsUntilSeeing+" "+st);
+
+			// System.out.println(simulator.getTime()+" "+stepsInside+"
+			// "+stepsSeeingOne+" "+stepsSeeingTwoOrMore+" "+totalIntruders+"
+			// "+foundIntruders+" "+stepsUntilSeeing+" "+st);
 		}
 	}
 }

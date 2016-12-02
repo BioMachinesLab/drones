@@ -32,14 +32,12 @@ import simulation.util.Arguments;
 
 public class PositionPlot extends Thread {
 
-	private String file;
 	private JFrameViewer frame;
 	private ArrayList<String> lines = new ArrayList<String>();
 	private boolean pause = false;
 	private boolean useFile = true;
 
 	public PositionPlot(String file, JFrameViewer frame) {
-		this.file = file;
 		this.frame = frame;
 
 		if (!useFile)

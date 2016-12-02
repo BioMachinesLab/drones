@@ -22,12 +22,12 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import commoninterface.network.messages.NeuralActivationsMessage;
 import threads.UpdateThread;
 import utils.CIGraph;
-import commoninterface.network.messages.NeuralActivationsMessage;
 
 public class NeuralActivationsPanel extends UpdatePanel {
-
+	private static final long serialVersionUID = -1007986325782353224L;
 	private HashMap<String, ArrayList<Double>> inputsMap;
 	private HashMap<String, ArrayList<Double>> outputsMap;
 	
@@ -190,6 +190,7 @@ public class NeuralActivationsPanel extends UpdatePanel {
 		refreshPanel.add(comboBoxUpdateRate, BorderLayout.EAST);
 		
 		comboBoxUpdateRate.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				switch (comboBoxUpdateRate.getSelectedIndex()) {
 				case 0:

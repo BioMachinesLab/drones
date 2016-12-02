@@ -1,45 +1,5 @@
 package fieldtests.data;
 
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Random;
-import java.util.Scanner;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-
-import mathutils.Vector2d;
-
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-
-import simulation.Simulator;
-import simulation.physicalobjects.LightPole;
-import simulation.robot.AquaticDrone;
-import simulation.robot.Robot;
-import simulation.util.Arguments;
-import updatables.WaterCurrent;
-
-import commoninterface.entities.RobotLocation;
-import commoninterface.network.messages.BehaviorMessage;
-import commoninterface.utils.CoordinateUtilities;
-import commoninterface.utils.logger.DecodedLog;
-import commoninterface.utils.logger.LogCodex;
-import commoninterface.utils.logger.ToLogData;
-
-import evaluation.AggregateFitness;
-import evolutionaryrobotics.JBotEvolver;
-import gui.renderer.Renderer;
-import gui.renderer.TwoDRenderer;
-import gui.util.Graph;
-
 public class CompareFitnessOnboard extends Thread{
 	/*	
 	static double maxSteps = 1800;

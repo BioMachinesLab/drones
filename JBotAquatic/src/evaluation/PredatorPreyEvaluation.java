@@ -17,56 +17,56 @@ import simulation.util.Arguments;
  * @author jorge
  */
 public class PredatorPreyEvaluation extends EvaluationFunction {
+	private static final long serialVersionUID = -7517077504178675245L;
+	double initialDist = Double.NaN;
+	double finalDist = 0;
+	public static double CAPTURE_DIST = 2;
 
-    double initialDist = Double.NaN;
-    double finalDist = 0;
-    public static double CAPTURE_DIST = 2;
+	public PredatorPreyEvaluation(Arguments args) {
+		super(args);
+	}
 
-    public PredatorPreyEvaluation(Arguments args) {
-        super(args);
-    }
+	@Override
+	public void update(Simulator simulator) {
+		// get prey
+		AquaticDrone prey = ((PredatorPreyEnvironment) simulator.getEnvironment()).getPreyDrone();
 
-    @Override
-    public void update(Simulator simulator) {
-        // get prey
-        AquaticDrone prey = ((PredatorPreyEnvironment) simulator.getEnvironment()).getPreyDrone();
+		boolean caught = false;
+		finalDist = 0;
+		for (Robot r : simulator.getRobots()) {
+			if (r != prey) {
+				double d = r.getPosition().distanceTo(prey.getPosition());
+				if (d <= CAPTURE_DIST) {
+					caught = true;
+				}
+				finalDist += d;
+			}
+		}
+		finalDist /= (simulator.getRobots().size() - 1);
 
-        boolean caught = false;
-        finalDist = 0;
-        for (Robot r : simulator.getRobots()) {
-            if (r != prey) {
-                double d = r.getPosition().distanceTo(prey.getPosition());
-                if (d <= CAPTURE_DIST) {
-                    caught = true;
-                }
-                finalDist += d;
-            }
-        }
-        finalDist /= (simulator.getRobots().size() - 1);
+		if (Double.isNaN(initialDist)) {
+			initialDist = finalDist;
+		}
 
-        if (Double.isNaN(initialDist)) {
-            initialDist = finalDist;
-        }
+		if (caught) {
+			fitness = 2 - simulator.getTime() / simulator.getEnvironment().getSteps();
+			simulator.stopSimulation();
+		} else {
+			fitness = Math.max(0, (initialDist - finalDist) / simulator.getEnvironment().getWidth());
+		}
 
-        if (caught) {
-            fitness = 2 - simulator.getTime() / simulator.getEnvironment().getSteps();
-            simulator.stopSimulation();
-        } else {
-            fitness = Math.max(0, (initialDist - finalDist) / simulator.getEnvironment().getWidth());
-        }
+		// kill if prey escapes the arena
+		double w = simulator.getEnvironment().getWidth();
+		double h = simulator.getEnvironment().getHeight();
+		if (prey.getPosition().x > w / 2 || prey.getPosition().x < -w / 2 || prey.getPosition().y > h / 2
+				|| prey.getPosition().y < -h / 2) {
+			simulator.stopSimulation();
+		}
+	}
 
-        // kill if prey escapes the arena
-        double w = simulator.getEnvironment().getWidth();
-        double h = simulator.getEnvironment().getHeight();
-        if (prey.getPosition().x > w / 2 || prey.getPosition().x < -w / 2
-                || prey.getPosition().y > h / 2 || prey.getPosition().y < -h / 2) {
-            simulator.stopSimulation();
-        }
-    }
-
-    /*@Override
-    protected boolean checkCollisions(Robot r) {
-        return r != prey;
-    }*/
+	/*
+	 * @Override protected boolean checkCollisions(Robot r) { return r != prey;
+	 * }
+	 */
 
 }

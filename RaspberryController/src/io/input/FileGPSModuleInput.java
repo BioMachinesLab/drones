@@ -6,6 +6,10 @@ import java.util.Scanner;
 
 public class FileGPSModuleInput extends GPSModuleInput {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8791521907909696294L;
 	private static final long INITIAL_SLEEP = 10*1000;
 	private static final long CYCLE_SLEEP = 5;//25
 	private static final String FILENAME = "logs/fakegps.log";

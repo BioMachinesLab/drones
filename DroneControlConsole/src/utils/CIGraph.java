@@ -22,7 +22,7 @@ import java.util.Vector;
 import javax.swing.JPanel;
 
 public class CIGraph extends JPanel {
-	
+	private static final long serialVersionUID = 7452228098718548024L;
 	public static final int LEGEND_SIZE = 15;
 	public static final int ORIGINAL_PAD_TOP = 20;
 	
@@ -121,6 +121,7 @@ public class CIGraph extends JPanel {
 		repaint();
 	}
 
+	@Override
 	public void paint(Graphics g) {
 		super.paint(g);
 		
@@ -207,7 +208,7 @@ public class CIGraph extends JPanel {
 		
 		g2.draw(new Line2D.Double(pad, padTop, pad, lh));
 		
-		double divisions = (double) (h - pad - padTop) / (max-min);
+		double divisions = (h - pad - padTop) / (max-min);
 		double yLine = h - pad - divisions * (0 - min);
 		g2.draw(new Line2D.Double(pad, yLine, lw, yLine));
 		
@@ -313,7 +314,7 @@ public class CIGraph extends JPanel {
 		int h = getHeight();
 
 		xInc = (double) (w - 2 * pad) / (showLast - 1);
-		scale = (double) (h - pad - padTop) / (max-min);
+		scale = (h - pad - padTop) / (max-min);
 		
 		Stroke originalStroke = g2.getStroke();
 		

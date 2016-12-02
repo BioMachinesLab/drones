@@ -13,12 +13,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import threads.UpdateThread;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.network.messages.ThymioVirtualPositionMessage;
+import threads.UpdateThread;
 
 public class ThymioVirtualPositionPanel extends UpdatePanel {
-
+	private static final long serialVersionUID = 857240457083930117L;
 	private UpdateThread thread;
 	private JTextField thymioPosition;
 	private JTextField thymioOrientation;
@@ -62,6 +62,7 @@ public class ThymioVirtualPositionPanel extends UpdatePanel {
 		refreshPanel.add(comboBoxUpdateRate, BorderLayout.EAST);
 		
 		comboBoxUpdateRate.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				switch (comboBoxUpdateRate.getSelectedIndex()) {
 				case 0:

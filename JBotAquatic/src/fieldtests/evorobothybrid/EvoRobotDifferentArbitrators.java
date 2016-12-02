@@ -4,13 +4,12 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 
+import evolutionaryrobotics.JBotEvolver;
 import simulation.util.Arguments;
-import taskexecutor.ConillonTaskExecutor;
 import taskexecutor.ParallelTaskExecutor;
 import taskexecutor.TaskExecutor;
 import taskexecutor.results.PostEvaluationResult;
 import taskexecutor.tasks.SingleSamplePostEvaluationTask;
-import evolutionaryrobotics.JBotEvolver;
 
 public class EvoRobotDifferentArbitrators {
 	

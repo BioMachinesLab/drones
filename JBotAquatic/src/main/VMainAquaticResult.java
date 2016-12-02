@@ -8,6 +8,8 @@ import evolutionaryrobotics.JBotEvolver;
 import gui.Gui;
 
 public class VMainAquaticResult extends JFrame {
+	private static final long serialVersionUID = 8984278754826163943L;
+
 	public static void main(String[] args) {
 		new VMainAquaticResult(
 				new String[] { "--gui",

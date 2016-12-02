@@ -1,7 +1,6 @@
 package network;
 
 import commoninterface.AquaticDroneCI;
-import commoninterface.RobotCI;
 import commoninterface.ThymioCI;
 import simulation.Network;
 import simulation.Simulator;

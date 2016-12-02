@@ -14,11 +14,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import commoninterface.network.messages.CameraCaptureMessage;
-
 import threads.UpdateThread;
 
 public class ThymioCapturePanel extends UpdatePanel{
-
+	private static final long serialVersionUID = 3896180840823928518L;
 	private JPanel capturePanel;
 	private UpdateThread thread;
 	private JLabel picLabel;
@@ -50,6 +49,7 @@ public class ThymioCapturePanel extends UpdatePanel{
 		refreshPanel.add(comboBoxUpdateRate, BorderLayout.EAST);
 		
 		comboBoxUpdateRate.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				switch (comboBoxUpdateRate.getSelectedIndex()) {
 				case 0:

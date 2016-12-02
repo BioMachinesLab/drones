@@ -5,12 +5,13 @@
  */
 package controllers;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 import commoninterface.entities.Entity;
 import commoninterface.entities.RobotLocation;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.jcoord.LatLon;
-import java.util.ArrayList;
-import java.util.Random;
 import simulation.Simulator;
 import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
@@ -21,8 +22,8 @@ import simulation.util.Arguments;
  * @author jorge
  */
 public class PreyController extends Controller {
-
-    private final double speed;
+	private static final long serialVersionUID = 275201634149482784L;
+	private final double speed;
     private final double headingRandom;
     private final Random random;
     

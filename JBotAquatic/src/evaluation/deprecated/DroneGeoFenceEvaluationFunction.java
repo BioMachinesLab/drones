@@ -2,7 +2,7 @@ package evaluation.deprecated;
 
 import java.util.ArrayList;
 
-import commoninterface.utils.CoordinateUtilities;
+import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
 import mathutils.Vector2d;
 import simulation.Simulator;
 import simulation.physicalobjects.Line;
@@ -12,10 +12,9 @@ import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
-import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
 
-public class DroneGeoFenceEvaluationFunction extends EvaluationFunction{
-	
+public class DroneGeoFenceEvaluationFunction extends EvaluationFunction{	
+	private static final long serialVersionUID = 1306073911116995944L;
 	private boolean isSetup = false;
 	private int[][] visited;
 	private double resolution = 1;
@@ -115,6 +114,7 @@ public class DroneGeoFenceEvaluationFunction extends EvaluationFunction{
 //		printGrid();
 	}
 	
+	@SuppressWarnings("unused")
 	private void printGrid() {
 		System.out.println();
 		System.out.println();

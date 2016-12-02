@@ -19,8 +19,8 @@ import simulation.util.Arguments;
  * @author jorge
  */
 public class WaypointFitnessTest extends EvaluationFunction {
-
-    private boolean configured = false;
+	private static final long serialVersionUID = -4075451919968251861L;
+	private boolean configured = false;
     private double startingDistance = 0;
     private double targetDistance = 2;
     private boolean kill = true;

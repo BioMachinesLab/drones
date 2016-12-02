@@ -9,13 +9,13 @@ import commoninterfaceimpl.RealAquaticDroneCI;
 
 public class FakeGPSModuleInput extends GPSModuleInput {
 
+	private static final long serialVersionUID = -2012577428756208477L;
 	private static final long CYCLE_SLEEP = 100;// 100 ms
-	private LatLon currentCoordinates = CoordinateUtilities
-			.cartesianToGPS(new Vector2d(0, 0));
+	private LatLon currentCoordinates = CoordinateUtilities.cartesianToGPS(new Vector2d(0, 0));
 	private RealAquaticDroneCI drone;
 
 	public FakeGPSModuleInput(RealAquaticDroneCI drone) {
-		super(drone,true);
+		super(drone, true);
 		this.drone = drone;
 		FakeInputThread t = new FakeInputThread();
 		t.start();
@@ -56,10 +56,8 @@ public class FakeGPSModuleInput extends GPSModuleInput {
 
 					// +90 because North is up, but cartesian math has the
 					// reference to the right
-					double orientation = Math.toRadians(drone
-							.getCompassOrientationInDegrees() - 90) * -1;
-					Vector2d cartesian = CoordinateUtilities
-							.GPSToCartesian(currentCoordinates);
+					double orientation = Math.toRadians(drone.getCompassOrientationInDegrees() - 90) * -1;
+					Vector2d cartesian = CoordinateUtilities.GPSToCartesian(currentCoordinates);
 
 					double x = cartesian.getX();
 					double y = cartesian.getY();

@@ -15,14 +15,15 @@ import simulation.util.Arguments;
  * @author jorge
  */
 public class ForagingEvaluation extends EvaluationFunction {
+	private static final long serialVersionUID = -8172350897982150772L;
 
-    public ForagingEvaluation(Arguments args) {
-        super(args);
-    }
+	public ForagingEvaluation(Arguments args) {
+		super(args);
+	}
 
-    @Override
-    public void update(Simulator simulator) {
-        ForagingEnvironment environment = (ForagingEnvironment) simulator.getEnvironment();
-        fitness = environment.getCaptureCount();
-    }
+	@Override
+	public void update(Simulator simulator) {
+		ForagingEnvironment environment = (ForagingEnvironment) simulator.getEnvironment();
+		fitness = environment.getCaptureCount();
+	}
 }

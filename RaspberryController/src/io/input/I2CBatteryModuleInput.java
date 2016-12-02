@@ -3,6 +3,7 @@ package io.input;
 import java.io.IOException;
 
 import com.pi4j.io.i2c.I2CBus;
+
 import commoninterface.RobotCI;
 import commoninterface.dataobjects.BatteryStatus;
 import commoninterface.network.messages.BatteryMessage;
@@ -17,6 +18,7 @@ public class I2CBatteryModuleInput extends I2CInput {
 	 * I2C Device variables and settings
 	 */
 	private final static byte CELL1_VOLTAGE_REG = 0x01;
+	@SuppressWarnings("unused")
 	private final static byte CELL1_CALIBRATION_REG = 0x11;
 	private final static byte TEMPERATURE_REG_H = 0x30;
 	private final static byte TEMPERATURE_REG_L = 0x31;

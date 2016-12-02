@@ -1,13 +1,13 @@
 package fieldtests.evaluation;
 
+import environment.TestHierarchicalMissionEnvironment;
+import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
 import simulation.Simulator;
 import simulation.robot.AquaticDrone;
 import simulation.util.Arguments;
-import environment.TestHierarchicalMissionEnvironment;
-import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
 
 public class IntruderStatisticsFitness extends EvaluationFunction {
-	
+	private static final long serialVersionUID = -140853564744355362L;
 	public long stepsSeeingOne = 0;
 	public long stepsSeeingTwoOrMore = 0;
 	public long stepsInside = 0;

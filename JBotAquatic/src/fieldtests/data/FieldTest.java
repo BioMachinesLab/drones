@@ -13,8 +13,6 @@ import java.util.HashMap;
 
 import org.joda.time.DateTime;
 
-import commoninterface.utils.CoordinateUtilities;
-import commoninterface.utils.jcoord.LatLon;
 import commoninterface.utils.logger.ToLogData;
 
 public class FieldTest {

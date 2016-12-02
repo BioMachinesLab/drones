@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import mathutils.Vector2d;
-import commoninterface.entities.Entity;
 import commoninterface.entities.GeoFence;
 import commoninterface.entities.Waypoint;
 import commoninterface.utils.CoordinateUtilities;
+import mathutils.Vector2d;
 import simulation.Simulator;
 import simulation.Updatable;
 import simulation.physicalobjects.Line;

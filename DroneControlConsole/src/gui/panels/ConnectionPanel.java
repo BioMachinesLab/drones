@@ -45,7 +45,6 @@ public class ConnectionPanel extends UpdatePanel {
 	private static final long serialVersionUID = -4874186493593218098L;
 	private static final String START_COMMAND = "killall screen run.sh; cd RaspberryController; screen -d -m -S controller ./run.sh;";
 	private static final String STOP_COMMAND = "screen -S controller -p 0 -X stuff \"q$(printf \\\\r)\"";
-	private static final String DRONE_HOME_FOLDER = "/home/pi/";
 	
 	private static final long SLEEP_TIME = 10 * 1000;
 	private static final long TIME_THRESHOLD = 10 * 1000;
@@ -441,6 +440,7 @@ public class ConnectionPanel extends UpdatePanel {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void executeShellCommand(String[] pCommand, boolean showOutput){
 		try {
 			Runtime run = Runtime.getRuntime();

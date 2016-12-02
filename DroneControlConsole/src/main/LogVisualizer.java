@@ -1,7 +1,5 @@
 package main;
 
-import gui.panels.map.MapPanel;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -47,9 +45,10 @@ import commoninterface.utils.jcoord.LatLon;
 import commoninterface.utils.logger.DecodedLog;
 import commoninterface.utils.logger.LogCodex;
 import commoninterface.utils.logger.ToLogData;
+import gui.panels.map.MapPanel;
 
 public class LogVisualizer extends JFrame {
-
+	private static final long serialVersionUID = 8071524764607579349L;
 	private static String FOLDER = "logs";
 	private MapPanel map;
 	private JSlider slider;
@@ -57,10 +56,7 @@ public class LogVisualizer extends JFrame {
 	private int currentStep = 0;
 	private PlayThread playThread;
 	private JLabel currentStepLabel;
-	private DateTimeFormatter hourFormatter = DateTimeFormat
-			.forPattern("HH:mm:ss.SS");
 	private DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("dd-MM-YY_HH:mm:ss.SS");
-	private String IPforEntities = "1";
 	private int lastIncrementStep = 0;
 	private JTextArea messageArea = new JTextArea();
 
@@ -78,9 +74,9 @@ public class LogVisualizer extends JFrame {
 
 			allData = readFile();
 			Collections.sort(allData);
-			
-			for(ToLogData d : allData) {
-				System.out.println(d.temperatures[1]+" "+d.GPSspeed+" "+d.temperatures[0]);
+
+			for (ToLogData d : allData) {
+				System.out.println(d.temperatures[1] + " " + d.GPSspeed + " " + d.temperatures[0]);
 			}
 
 			playThread = new PlayThread();
@@ -108,6 +104,7 @@ public class LogVisualizer extends JFrame {
 		slider.setPaintLabels(true);
 
 		slider.addChangeListener(new ChangeListener() {
+			@Override
 			public void stateChanged(ChangeEvent e) {
 				currentStep = slider.getValue();
 				slider.setToolTipText("" + slider.getValue());
@@ -118,6 +115,7 @@ public class LogVisualizer extends JFrame {
 
 		JButton playButton = new JButton("Play/Pause");
 		playButton.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				playThread.toggle();
 			}
@@ -128,6 +126,7 @@ public class LogVisualizer extends JFrame {
 
 		JButton slower = new JButton("Speed --");
 		slower.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				playThread.playSlower();
 			}
@@ -135,6 +134,7 @@ public class LogVisualizer extends JFrame {
 
 		JButton faster = new JButton("Speed ++");
 		faster.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				playThread.playFaster();
 			}
@@ -146,13 +146,13 @@ public class LogVisualizer extends JFrame {
 		buttonsPanel.add(slower);
 		buttonsPanel.add(playButton);
 		buttonsPanel.add(faster);
-		
+
 		messageArea = new JTextArea();
 		messageArea.setEditable(false);
 		JScrollPane scrollPane = new JScrollPane(messageArea);
-		//scrollPane.setBounds(10,60,780,500);
+		// scrollPane.setBounds(10,60,780,500);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		
+
 		JPanel southPanel = new JPanel(new GridLayout(2, 1));
 		southPanel.add(buttonsPanel);
 		southPanel.add(scrollPane);
@@ -168,15 +168,13 @@ public class LogVisualizer extends JFrame {
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-		setLocation(dim.width / 2 - getSize().width / 2, dim.height / 2
-				- getSize().height / 2);
+		setLocation(dim.width / 2 - getSize().width / 2, dim.height / 2 - getSize().height / 2);
 
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (ClassNotFoundException | InstantiationException
-				| IllegalAccessException | UnsupportedLookAndFeelException e) {
-			System.err
-					.println("Not able to set LookAndFeel for the current OS");
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException e) {
+			System.err.println("Not able to set LookAndFeel for the current OS");
 		}
 	}
 
@@ -193,18 +191,17 @@ public class LogVisualizer extends JFrame {
 		for (int i = 0; i < step; i++) {
 			ToLogData d = allData.get(i);
 
-			map.displayData(new RobotLocation(d.ip, d.latLon,
-					d.compassOrientation, d.droneType));
-			
-			if(i == step -1)
-				messageArea.setText("WATER TEMP: "+d.temperatures[1]+"\tCPU TEMP: "+d.temperatures[0]);
+			map.displayData(new RobotLocation(d.ip, d.latLon, d.compassOrientation, d.droneType));
 
-			//TODO
-//			if (d.entities != null && d.ip.equals(IPforEntities)) {
-//				map.replaceEntities(d.entities);
-//			}
+			if (i == step - 1)
+				messageArea.setText("WATER TEMP: " + d.temperatures[1] + "\tCPU TEMP: " + d.temperatures[0]);
+
+			// TODO
+			// if (d.entities != null && d.ip.equals(IPforEntities)) {
+			// map.replaceEntities(d.entities);
+			// }
 		}
-		
+
 		updateCurrentStepLabel();
 
 	}
@@ -221,15 +218,14 @@ public class LogVisualizer extends JFrame {
 			slider.setValue(currentStep);
 			ToLogData d = allData.get(currentStep);
 
-			map.displayData(new RobotLocation(d.ip, d.latLon,
-					d.compassOrientation, d.droneType));
-			
-			messageArea.setText("WATER TEMP: "+d.temperatures[1]+"\tCPU TEMP: "+d.temperatures[0]);
+			map.displayData(new RobotLocation(d.ip, d.latLon, d.compassOrientation, d.droneType));
 
-			//TODO
-//			if (d.entities != null && d.ip.equals(IPforEntities)) {
-//				map.replaceEntities(d.entities);
-//			}
+			messageArea.setText("WATER TEMP: " + d.temperatures[1] + "\tCPU TEMP: " + d.temperatures[0]);
+
+			// TODO
+			// if (d.entities != null && d.ip.equals(IPforEntities)) {
+			// map.replaceEntities(d.entities);
+			// }
 			updateCurrentStepLabel();
 		} else {
 			moveTo(currentStep);
@@ -238,6 +234,7 @@ public class LogVisualizer extends JFrame {
 		lastIncrementStep = currentStep;
 	}
 
+	@SuppressWarnings("unchecked")
 	private ArrayList<ToLogData> readFile() throws IOException {
 
 		File folder = new File(FOLDER);
@@ -265,23 +262,22 @@ public class LogVisualizer extends JFrame {
 
 					if (!l.startsWith(LogCodex.COMMENT_CHAR) && !l.isEmpty()) {
 						DecodedLog decodedData = LogCodex.decodeLog(l);
-						
-						if(decodedData == null)
+
+						if (decodedData == null)
 							continue;
 
 						switch (decodedData.getPayloadType()) {
 						case ENTITIES:
-							currentEntities = (ArrayList<Entity>) LogCodex
-									.decodeLog(l, currentEntities).getPayload();
+							currentEntities = (ArrayList<Entity>) LogCodex.decodeLog(l, currentEntities).getPayload();
 							break;
 
 						case LOGDATA:
 							ToLogData d = (ToLogData) decodedData.getPayload();
-							//TODO
-//							d.entities = currentEntities;
+							// TODO
+							// d.entities = currentEntities;
 							result.add(d);
 							break;
-							
+
 						case ERROR:
 							messageArea.setForeground(Color.RED);
 							messageArea.setText((String) decodedData.getPayload());
@@ -301,11 +297,8 @@ public class LogVisualizer extends JFrame {
 		}
 	}
 
-	private ArrayList<ToLogData> parseOldLog(File folder)
-			throws FileNotFoundException {
+	private ArrayList<ToLogData> parseOldLog(File folder) throws FileNotFoundException {
 		ArrayList<ToLogData> result = new ArrayList<ToLogData>();
-		DateTimeFormatter dtf = DateTimeFormat
-				.forPattern("dd-MM-yyyy_HH:mm:ss.SS");
 
 		for (String file : folder.list()) {
 
@@ -328,8 +321,7 @@ public class LogVisualizer extends JFrame {
 			while (s.hasNext()) {
 				String l = s.nextLine();
 
-				if (!l.startsWith("[") && !l.startsWith("#")
-						&& !l.trim().isEmpty()) {
+				if (!l.startsWith("[") && !l.startsWith("#") && !l.trim().isEmpty()) {
 
 					Scanner sl = new Scanner(l);
 
@@ -367,9 +359,9 @@ public class LogVisualizer extends JFrame {
 
 						d.timestep = step++;
 
-						//TODO
-//						d.entities = new ArrayList<Entity>();
-//						d.entities.addAll(currentEntities);
+						// TODO
+						// d.entities = new ArrayList<Entity>();
+						// d.entities.addAll(currentEntities);
 
 						d.file = file;
 						data.add(d);
@@ -394,13 +386,13 @@ public class LogVisualizer extends JFrame {
 			}
 
 			System.out.println(step);
-			
-			if(ip.isEmpty())
+
+			if (ip.isEmpty())
 				ip = "192.168.3.1";
-			
-			if(!ip.isEmpty()) {
-				
-				for(ToLogData d : data)
+
+			if (!ip.isEmpty()) {
+
+				for (ToLogData d : data)
 					d.ip = ip;
 
 				result.addAll(data);
@@ -450,8 +442,7 @@ public class LogVisualizer extends JFrame {
 				double lon = s.nextDouble();
 
 				double radius = s.nextDouble();
-				entities.add(new ObstacleLocation(name, new LatLon(lat, lon),
-						radius));
+				entities.add(new ObstacleLocation(name, new LatLon(lat, lon), radius));
 			}
 
 		} else if (event.equals("removed")) {
@@ -476,8 +467,7 @@ public class LogVisualizer extends JFrame {
 			ToLogData d = allData.get(currentStep);
 
 			String text = "Step: " + currentStep + "/" + allData.size();
-			text += "\t Time: " + d.systemTime + " ("
-					+ (1 / playThread.getMultiplier()) + "x)";
+			text += "\t Time: " + d.systemTime + " (" + (1 / playThread.getMultiplier()) + "x)";
 			currentStepLabel.setText(text);
 		}
 	}
@@ -485,8 +475,8 @@ public class LogVisualizer extends JFrame {
 	private long compareTimeWithNextStep() {
 
 		if (currentStep + 1 < allData.size()) {
-			DateTime d1 = DateTime.parse(allData.get(currentStep).systemTime,dateFormatter);
-			DateTime d2 = DateTime.parse(allData.get(currentStep + 1).systemTime,dateFormatter);
+			DateTime d1 = DateTime.parse(allData.get(currentStep).systemTime, dateFormatter);
+			DateTime d2 = DateTime.parse(allData.get(currentStep + 1).systemTime, dateFormatter);
 			return d2.getMillis() - d1.getMillis();
 		}
 
@@ -561,60 +551,35 @@ public class LogVisualizer extends JFrame {
 			return multiplier;
 		}
 	}
-	
+
 	/*
-	public static LogData convert(commoninterface.utils.logger.LogData data) {
-		
-		LogData log = new LogData();
-		log.time = data.systemTime;
-		log.date = DateTime.parse(data.systemTime,DateTimeFormat.forPattern("dd-MM-YY_HH:mm:ss.SS"));
-		log.file = data.file;
-		log.compassOrientation = data.compassOrientation;
-		log.ip = data.ip;
-		if(data.temperatures != null) {
-			log.cpuTemp = data.temperatures[0];
-			log.waterTemp = data.temperatures[1];
-		}
-		log.timestep = data.timestep;
-		log.latLon = data.latLon;
-		log.GPSorientation = data.GPSorientation;
-		log.GPSspeed = data.GPSspeed;
-		log.leftSpeed = data.motorSpeeds[0];
-		log.rightSpeed = data.motorSpeeds[1];
-		log.lastComment = data.comment;
-		log.droneType = data.droneType;
-		log.inputs = data.inputNeuronStates;
-		log.outputs = data.outputNeuronStates;
-		
-		return log;
-	}
-
-	public static class LogData implements Comparable<LogData> {
-		String time;
-		String file;
-		String ip;
-		int timestep;
-		LatLon latLon;
-		double GPSorientation;
-		double compassOrientation;
-		double GPSspeed;
-		double leftSpeed;
-		double rightSpeed;
-		double cpuTemp;
-		double waterTemp;
-		double[] outputs;
-		double[] inputs;
-		DateTime date;
-		String lastComment;
-		AquaticDroneCI.DroneType droneType;
-		ArrayList<Entity> entities = null;
-
-		@Override
-		public int compareTo(LogData o) {
-			return date.compareTo(o.date);
-		}
-	}
-*/
+	 * public static LogData convert(commoninterface.utils.logger.LogData data)
+	 * {
+	 * 
+	 * LogData log = new LogData(); log.time = data.systemTime; log.date =
+	 * DateTime.parse(data.systemTime,DateTimeFormat.forPattern(
+	 * "dd-MM-YY_HH:mm:ss.SS")); log.file = data.file; log.compassOrientation =
+	 * data.compassOrientation; log.ip = data.ip; if(data.temperatures != null)
+	 * { log.cpuTemp = data.temperatures[0]; log.waterTemp =
+	 * data.temperatures[1]; } log.timestep = data.timestep; log.latLon =
+	 * data.latLon; log.GPSorientation = data.GPSorientation; log.GPSspeed =
+	 * data.GPSspeed; log.leftSpeed = data.motorSpeeds[0]; log.rightSpeed =
+	 * data.motorSpeeds[1]; log.lastComment = data.comment; log.droneType =
+	 * data.droneType; log.inputs = data.inputNeuronStates; log.outputs =
+	 * data.outputNeuronStates;
+	 * 
+	 * return log; }
+	 * 
+	 * public static class LogData implements Comparable<LogData> { String time;
+	 * String file; String ip; int timestep; LatLon latLon; double
+	 * GPSorientation; double compassOrientation; double GPSspeed; double
+	 * leftSpeed; double rightSpeed; double cpuTemp; double waterTemp; double[]
+	 * outputs; double[] inputs; DateTime date; String lastComment;
+	 * AquaticDroneCI.DroneType droneType; ArrayList<Entity> entities = null;
+	 * 
+	 * @Override public int compareTo(LogData o) { return
+	 * date.compareTo(o.date); } }
+	 */
 	private boolean askParserVersion() {
 		JPanel dialogJPane = new JPanel(new GridLayout(2, 1));
 
@@ -632,9 +597,8 @@ public class LogVisualizer extends JFrame {
 		dialogJPane.add(radioButton2);
 
 		Object[] options = { "Ok" };
-		int result = JOptionPane.showOptionDialog(null, dialogJPane,
-				"Please select log parser", JOptionPane.PLAIN_MESSAGE,
-				JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+		int result = JOptionPane.showOptionDialog(null, dialogJPane, "Please select log parser",
+				JOptionPane.PLAIN_MESSAGE, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
 		parserVersion = radioButton2.isSelected();
 

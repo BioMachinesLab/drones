@@ -1,9 +1,8 @@
 package main;
 
-import simpletestbehaviors.TurnToOrientationCIBehavior;
-import commoninterface.CIStdOutLogger;
 import commoninterface.utils.CIArguments;
 import commoninterfaceimpl.RealAquaticDroneCI;
+import simpletestbehaviors.TurnToOrientationCIBehavior;
 
 public class TurnToOrientationCIMain {
 

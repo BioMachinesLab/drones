@@ -7,13 +7,7 @@ package evaluation.deprecated;
 
 import commoninterface.sensors.DroneCISensor;
 import evaluation.AvoidCollisionsFunction;
-import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
-import mathutils.Vector2d;
-
 import simulation.Simulator;
-import simulation.physicalobjects.Line;
-import simulation.physicalobjects.PhysicalObject;
-import simulation.physicalobjects.PhysicalObjectType;
 import simulation.robot.CISensorWrapper;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
@@ -24,7 +18,8 @@ import simulation.util.Arguments;
  */
 public class DispersionFitnessBoundary extends AvoidCollisionsFunction {
 
-    private double meanDistance = 0;
+	private static final long serialVersionUID = -6880696799585318084L;
+	private double meanDistance = 0;
     private double margin = 0;
     private boolean config = false;
     private double targetDistance = 0;

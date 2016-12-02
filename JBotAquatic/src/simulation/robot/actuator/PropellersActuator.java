@@ -4,16 +4,14 @@ import java.util.Random;
 
 import mathutils.MathUtils;
 import mathutils.Vector2d;
-import commoninterface.utils.CoordinateUtilities;
-import commoninterface.utils.jcoord.LatLon;
 import simulation.Simulator;
 import simulation.robot.AquaticDrone;
-import simulation.robot.DifferentialDriveRobot;
 import simulation.robot.Robot;
 import simulation.robot.actuators.Actuator;
 import simulation.util.Arguments;
 
 public class PropellersActuator extends Actuator {
+	private static final long serialVersionUID = 7373881589823748262L;
 
 	public static final float NOISESTDEV = 0.05f;
 

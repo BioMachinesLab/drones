@@ -62,6 +62,7 @@ import network.CommandSender;
 import observers.ForagingMissionMonitor;
 import threads.UpdateThread;
 
+@SuppressWarnings("unused")
 public class CommandPanel extends UpdatePanel {
 	private static final long serialVersionUID = 4038133860317693008L;
 

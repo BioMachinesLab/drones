@@ -12,7 +12,7 @@ import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
 
 public class CISensorWrapper extends Sensor{
-
+	private static final long serialVersionUID = -8025272490973934599L;
 	@ArgumentsAnnotation(name="ci", defaultValue="")
 	private CISensor cisensor;
 	

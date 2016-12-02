@@ -7,11 +7,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Scanner;
 
-import simpletestbehaviors.GoForwardCIBehavior;
-import simulation.Simulator;
-import simulation.robot.AquaticDrone;
-import simulation.robot.Robot;
-import simulation.util.Arguments;
 import commoninterface.AquaticDroneCI.DroneType;
 import commoninterface.entities.GeoFence;
 import commoninterface.entities.Waypoint;
@@ -22,9 +17,14 @@ import commoninterface.utils.Line;
 import commoninterface.utils.jcoord.LatLon;
 import drone.MissionController;
 import fieldtests.updatables.IntruderStatistics;
+import simpletestbehaviors.GoForwardCIBehavior;
+import simulation.Simulator;
+import simulation.robot.AquaticDrone;
+import simulation.robot.Robot;
+import simulation.util.Arguments;
 
 public class LampedusaMissionEnvironment extends BoundaryEnvironment{
-	
+	private static final long serialVersionUID = -3703862577216183704L;
 	public GeoFence fence = null;
 	public double seenSteps = 0;
 	

@@ -11,14 +11,14 @@ import java.net.InetAddress;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-import network.broadcast.ConsoleBroadcastHandler;
-
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-public class BroadcastLoggerViewer extends JFrame {
+import network.broadcast.ConsoleBroadcastHandler;
 
+public class BroadcastLoggerViewer extends JFrame {
+	private static final long serialVersionUID = 3829255316254626108L;
 	private static String FOLDER = "broadcast_logs";
 	private DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("dd-MM-YY_HH-mm-ss");
 	private DateTimeFormatter hourFormatter = DateTimeFormat.forPattern("HH:mm:ss.SS");
@@ -47,6 +47,7 @@ public class BroadcastLoggerViewer extends JFrame {
 		}
 		
 		Runtime.getRuntime().addShutdownHook(new Thread() {
+			@Override
 			public void run() {
 				if(bw != null) {
 					try {

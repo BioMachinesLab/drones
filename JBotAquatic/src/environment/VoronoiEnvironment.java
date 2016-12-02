@@ -1,7 +1,5 @@
 package environment;
 
-import java.util.Random;
-
 import kn.uni.voronoitreemap.datastructure.OpenList;
 import kn.uni.voronoitreemap.diagram.PowerDiagram;
 import kn.uni.voronoitreemap.j2d.PolygonSimple;
@@ -14,6 +12,7 @@ public class VoronoiEnvironment extends BoundaryEnvironment{
 	
 	//Arlind Nocaj, Ulrik Brandes, "Computing Voronoi Treemaps: Faster, Simpler, and Resolution-independent", Computer Graphics Forum, vol. 31, no. 3, June 2012, pp. 855-864
 	
+	private static final long serialVersionUID = -2445092409769734447L;
 	protected PolygonSimple rootPolygon;
 	protected PowerDiagram voronoiDiagram;
 	protected OpenList sites;

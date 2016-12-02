@@ -16,10 +16,10 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import commoninterface.network.messages.ThymioReadingsMessage;
-
 import threads.UpdateThread;
 
 public class ThymioSensorsPanel extends UpdatePanel {
+	private static final long serialVersionUID = 961047278951816536L;
 	private static final int FRONT_SENSORS_NUMBER = 5;
 	private static final int BACK_SENSORS_NUMBER = 2;
 	
@@ -82,6 +82,7 @@ public class ThymioSensorsPanel extends UpdatePanel {
 		refreshPanel.add(comboBoxUpdateRate, BorderLayout.EAST);
 		
 		comboBoxUpdateRate.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				switch (comboBoxUpdateRate.getSelectedIndex()) {
 				case 0:

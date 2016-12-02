@@ -6,14 +6,14 @@ import commoninterface.entities.Entity;
 import commoninterface.entities.Waypoint;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CoordinateUtilities;
+import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
 import simulation.Simulator;
 import simulation.robot.AquaticDrone;
 import simulation.util.Arguments;
 import simulation.util.ArgumentsAnnotation;
-import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
 
 public class DroneWaypointEvaluationFunction extends EvaluationFunction{
-	
+	private static final long serialVersionUID = -2831230741621574615L;
 	private boolean configured = false;
 	private double startingDistance = 0;
 	@ArgumentsAnnotation(name="targetdistance", defaultValue="0.5")

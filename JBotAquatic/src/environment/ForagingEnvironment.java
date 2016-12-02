@@ -5,19 +5,19 @@
  */
 package environment;
 
-import commoninterface.AquaticDroneCI;
-import commoninterface.entities.Waypoint;
-import commoninterface.utils.CoordinateUtilities;
-import commoninterface.utils.jcoord.LatLon;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+
+import commoninterface.AquaticDroneCI;
+import commoninterface.entities.Waypoint;
+import commoninterface.utils.CoordinateUtilities;
+import commoninterface.utils.jcoord.LatLon;
 import mathutils.Vector2d;
 import simulation.Simulator;
 import simulation.physicalobjects.LightPole;
-import simulation.physicalobjects.PhysicalObject;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
 
@@ -26,8 +26,8 @@ import simulation.util.Arguments;
  * @author jorge
  */
 public class ForagingEnvironment extends OpenEnvironment {
-
-    private int numItems = 5;
+	private static final long serialVersionUID = -1148253060971811731L;
+	private int numItems = 5;
     private double spotDistance = 5;
     private double captureDistance = 3;
     private HashMap<Vector2d, LightPole> waypoints;

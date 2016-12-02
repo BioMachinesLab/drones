@@ -1,6 +1,7 @@
 package evaluation;
 
 import java.util.ArrayList;
+
 import environment.GridBoundaryEnvironment;
 import environment.utils.EnvironmentGrid;
 import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
@@ -8,8 +9,9 @@ import simulation.Simulator;
 import simulation.util.Arguments;
 
 public class GridCoverageFitness extends EvaluationFunction {
+	private static final long serialVersionUID = 7814847897935336605L;
 
-    private boolean isSetup = false;
+	private boolean isSetup = false;
 
     private ArrayList<EnvironmentGrid> grids;
     protected double max = 0;
@@ -87,7 +89,8 @@ public class GridCoverageFitness extends EvaluationFunction {
         return 10 + fitness;
     }
     
-    private void printGrid() {
+    @SuppressWarnings("unused")
+	private void printGrid() {
  		System.out.println();
  		System.out.println();
  		

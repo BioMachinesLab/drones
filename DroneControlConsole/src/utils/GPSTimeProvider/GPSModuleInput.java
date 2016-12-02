@@ -24,7 +24,6 @@ public class GPSModuleInput {
 	private final static int DEFAULT_BAUD_RATE = 4800;
 	private final static String COM_PORT_WINDOWS = "COM4";
 	private final static String COM_PORT_LINUX = "/dev/ttyUSB0";
-	private final static String COM_PORT_MAC = "";
 	private String port;
 
 	private SerialPort serialPort;

@@ -16,8 +16,8 @@ import simulation.util.Arguments;
  * @author jorge
  */
 public class PredatorPreyEnvironment extends OpenEnvironment {
-
-    protected double minPreyDistance;
+	private static final long serialVersionUID = 3706755996942991914L;
+	protected double minPreyDistance;
     protected double maxPreyDistance;
     protected double minPreySpeed = 0.5;
     protected double maxPreySpeed = 1;

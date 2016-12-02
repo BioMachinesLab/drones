@@ -1,16 +1,17 @@
 package environment;
 
+import commoninterface.entities.Waypoint;
+import commoninterface.utils.CoordinateUtilities;
 import simulation.Simulator;
 import simulation.environment.Environment;
 import simulation.physicalobjects.LightPole;
 import simulation.robot.AquaticDrone;
 import simulation.util.Arguments;
-import commoninterface.entities.Waypoint;
-import commoninterface.utils.CoordinateUtilities;
 
 public class StationKeepingEnvironment extends Environment {
-    
-    public StationKeepingEnvironment(Simulator simulator, Arguments args) {
+	private static final long serialVersionUID = -5835407836924207113L;
+
+	public StationKeepingEnvironment(Simulator simulator, Arguments args) {
         super(simulator, args);
     }
     

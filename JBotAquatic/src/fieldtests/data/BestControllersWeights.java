@@ -8,11 +8,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
 
-import simulation.util.Arguments;
-import commoninterface.mathutils.Vector2d;
-import commoninterface.utils.CoordinateUtilities;
-import commoninterface.utils.jcoord.LatLon;
 import evolutionaryrobotics.JBotEvolver;
+import simulation.util.Arguments;
 
 public class BestControllersWeights {
 	

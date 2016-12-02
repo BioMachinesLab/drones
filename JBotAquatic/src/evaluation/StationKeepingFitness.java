@@ -19,37 +19,38 @@ import simulation.util.ArgumentsAnnotation;
  * @author jorge
  */
 public class StationKeepingFitness extends EvaluationFunction {
+	private static final long serialVersionUID = 6740653896670266735L;
+	@ArgumentsAnnotation(name = "alloweddistance", defaultValue = "2.5")
+	private double allowedDistance = 2.5;
+	private final double maxDistance;
+	private double energyBonus = 0;
+	private double totalDistance = 0;
 
-    @ArgumentsAnnotation(name = "alloweddistance", defaultValue = "2.5")
-    private double allowedDistance = 2.5;
-    private final double maxDistance;
-    private double energyBonus = 0;
-    private double totalDistance = 0;
+	public StationKeepingFitness(Arguments args) {
+		super(args);
+		allowedDistance = args.getArgumentAsDouble("alloweddistance");
+		maxDistance = allowedDistance * 5;
+	}
 
-    public StationKeepingFitness(Arguments args) {
-        super(args);
-        allowedDistance = args.getArgumentAsDouble("alloweddistance");
-        maxDistance = allowedDistance * 5;
-    }
+	@Override
+	public void update(Simulator simulator) {
+		AquaticDrone drone = (AquaticDrone) simulator.getRobots().get(0);
+		Waypoint wp = drone.getActiveWaypoint();
+		Vector2d wpPos = CoordinateUtilities.GPSToCartesian(wp.getLatLon());
+		double distance = wpPos.distanceTo(new Vector2d(drone.getPosition().x, drone.getPosition().y));
 
-    @Override
-    public void update(Simulator simulator) {
-        AquaticDrone drone = (AquaticDrone) simulator.getRobots().get(0);
-        Waypoint wp = drone.getActiveWaypoint();
-        Vector2d wpPos = CoordinateUtilities.GPSToCartesian(wp.getLatLon());
-        double distance = wpPos.distanceTo(new Vector2d(drone.getPosition().x, drone.getPosition().y));
-        
-        if(distance <= allowedDistance) {
-            energyBonus += 1 - drone.getMotorSpeedsInPercentage();
-        }
-        totalDistance += distance;
+		if (distance <= allowedDistance) {
+			energyBonus += 1 - drone.getMotorSpeedsInPercentage();
+		}
+		totalDistance += distance;
 
-        fitness = (maxDistance - totalDistance / simulator.getTime()) / maxDistance * (energyBonus / simulator.getTime());
-    }
+		fitness = (maxDistance - totalDistance / simulator.getTime()) / maxDistance
+				* (energyBonus / simulator.getTime());
+	}
 
-    @Override
-    public double getFitness() {
-        return Math.max(0, 10 + fitness);
-    }
+	@Override
+	public double getFitness() {
+		return Math.max(0, 10 + fitness);
+	}
 
 }

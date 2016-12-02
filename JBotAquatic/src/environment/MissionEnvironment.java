@@ -1,38 +1,30 @@
 package environment;
 
-import java.awt.Color;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.Scanner;
 
-import simpletestbehaviors.GoToMultiWaypointCIBehavior;
-import simulation.Simulator;
-import simulation.physicalobjects.LightPole;
-import simulation.robot.AquaticDrone;
-import simulation.robot.Robot;
-import simulation.util.Arguments;
 import commoninterface.AquaticDroneCI.DroneType;
 import commoninterface.RobotCI;
 import commoninterface.entities.GeoFence;
 import commoninterface.entities.Waypoint;
-import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
 import drone.MissionController;
+import simpletestbehaviors.GoToMultiWaypointCIBehavior;
+import simulation.Simulator;
+import simulation.robot.AquaticDrone;
+import simulation.robot.Robot;
+import simulation.util.Arguments;
 
 public class MissionEnvironment extends BoundaryEnvironment{
-	
+	private static final long serialVersionUID = -1424181953451243561L;
 	public double enemyDistance = 30;
 	public GeoFence fence = null;
 	public double seenSteps = 0;
 	
 	public boolean lampedusa = false;
-	
-	private ArrayList<Waypoint> bases = new ArrayList<Waypoint>();
 	
 	public MissionEnvironment(Simulator simulator, Arguments args) {
 		super(simulator, args);

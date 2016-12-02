@@ -4,26 +4,20 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 
-import commoninterface.AquaticDroneCI;
-import commoninterface.entities.GeoFence;
-import commoninterface.neat.utils.MathUtils;
-import mathutils.Vector2d;
 import environment.GridBoundaryEnvironment;
 import environment.utils.EnvironmentGrid;
-import evolutionaryrobotics.evolution.neat.NEATNeuralNetwork;
 import gui.renderer.TwoDRenderer;
+import mathutils.Vector2d;
 import simulation.Simulator;
 import simulation.physicalobjects.GeometricInfo;
 import simulation.physicalobjects.PhysicalObject;
 import simulation.physicalobjects.PhysicalObjectDistance;
-import simulation.robot.AquaticDrone;
-import simulation.robot.CISensorWrapper;
 import simulation.robot.Robot;
 import simulation.robot.sensors.ConeTypeSensor;
 import simulation.util.Arguments;
 
 public class GridSensor extends ConeTypeSensor{
-	
+	private static final long serialVersionUID = 8453394662465469915L;
 	protected EnvironmentGrid grid;
 	protected Simulator sim;
 	
@@ -32,6 +26,7 @@ public class GridSensor extends ConeTypeSensor{
 		this.sim = simulator;
 	}
 	
+	@Override
 	public void update(double time, ArrayList<PhysicalObject> teleported) {
 		
 		if(grid == null)

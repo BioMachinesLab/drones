@@ -1,15 +1,15 @@
 package environment;
 
+import commoninterface.AquaticDroneCI.DroneType;
+import commoninterface.entities.GeoFence;
+import controllers.GoToWayPointController;
 import simulation.Simulator;
 import simulation.robot.AquaticDrone;
 import simulation.robot.Robot;
 import simulation.util.Arguments;
-import commoninterface.AquaticDroneCI.DroneType;
-import commoninterface.entities.GeoFence;
-import controllers.GoToWayPointController;
 
 public class EnemyEnvironment extends BoundaryEnvironment{
-	
+	private static final long serialVersionUID = 8562424232426616874L;
 	public double enemyDistance = 30;
 	
 	public EnemyEnvironment(Simulator simulator, Arguments args) {
