@@ -1,22 +1,13 @@
 package drone;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 import commoninterface.AquaticDroneCI;
-import commoninterface.AquaticDroneCI.DroneType;
 import commoninterface.CIBehavior;
 import commoninterface.RobotCI;
 import commoninterface.controllers.ControllerCIBehavior;
-import commoninterface.entities.Entity;
-import commoninterface.entities.GeoFence;
-import commoninterface.entities.SharedDroneLocation;
 import commoninterface.entities.Waypoint;
-import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CIArguments;
-import commoninterface.utils.CoordinateUtilities;
-import commoninterface.utils.Line;
-import commoninterface.utils.jcoord.LatLon;
 
 public class CompositeController extends CIBehavior {
 	
