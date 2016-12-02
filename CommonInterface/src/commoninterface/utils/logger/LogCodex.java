@@ -109,7 +109,7 @@ public class LogCodex {
 		DecodedLog decodedLog = null;
 
 		if (logLine.startsWith("[") || logLine.startsWith("\"") || logLine.isEmpty()) {
-			System.out.println("Ignoring this line:" + logLine);
+			//System.out.println("Ignoring this line:" + logLine);
 			return null;
 		}
 
