@@ -26,6 +26,10 @@ public class EntityManipulation {
 		this.timestep = timestep;
 	}
 
+	public void setTimestep(double timestep) {
+		this.timestep = timestep;
+	}
+
 	public ArrayList<Entity> getEntities() {
 		return entities;
 	}

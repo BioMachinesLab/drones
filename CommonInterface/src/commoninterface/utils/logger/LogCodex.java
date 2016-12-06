@@ -80,7 +80,7 @@ public class LogCodex {
 		switch (type) {
 		case LOGDATA:
 			data += LOG_TYPE + LogType.LOGDATA + MAIN_SEPARATOR;
-			data += encodeLogData((ToLogData) object);
+			data += encodeLogData((LogData) object);
 			break;
 
 		case ENTITIES:
@@ -131,13 +131,13 @@ public class LogCodex {
 					} else {
 						entities = new ArrayList<Entity>();
 					}
-					double timeStep = decodeEntities(blocks1, entities);
+					EntityManipulation entityManipulation = decodeEntities(blocks1, entities);
 
 					ArrayList<Entity> currentEntities = new ArrayList<Entity>();
 					currentEntities.addAll(entities);
 
-					decodedLog = new DecodedLog(LogType.ENTITIES, currentEntities);
-					decodedLog.setTimeStep(timeStep);
+					decodedLog = new DecodedLog(LogType.ENTITIES, currentEntities, entityManipulation);
+					decodedLog.setTimeStep(entityManipulation.getTimestep());
 				}
 				break;
 
@@ -148,7 +148,7 @@ public class LogCodex {
 					blocks2[i] = infoBlocks[i + 1];
 				}
 
-				ToLogData logData = decodeLogData(blocks2);
+				LogData logData = decodeLogData(blocks2);
 				decodedLog = new DecodedLog(LogType.LOGDATA, logData);
 				decodedLog.setTimeStep(logData.timestep);
 				break;
@@ -173,9 +173,9 @@ public class LogCodex {
 	}
 
 	// Decoders
-	private static double decodeEntities(String[] blocks, ArrayList<Entity> entities) {
-		double timeStep = -1;
-		Operation event = null;
+	private static EntityManipulation decodeEntities(String[] blocks, ArrayList<Entity> entities) {
+		double timestep = -1;
+		Operation operation = null;
 		String className = null;
 		String data = null;
 
@@ -186,10 +186,10 @@ public class LogCodex {
 				className = information;
 				break;
 			case TIMESTEP_SEP:
-				timeStep = Double.parseDouble(information);
+				timestep = Double.parseDouble(information);
 				break;
 			case ENTITY_OP_SEP:
-				event = Operation.valueOf(information);
+				operation = Operation.valueOf(information);
 				break;
 			default:
 				data = d;
@@ -197,14 +197,17 @@ public class LogCodex {
 			}
 		}
 
-		if (data != null && event != null && className != null) {
-			decodeEntity(data, entities, event, className);
+		if (data != null && operation != null && className != null) {
+			decodeEntity(data, entities, operation, className);
 		}
-		return timeStep;
+
+		EntityManipulation entityManipulation = new EntityManipulation(operation, entities, className);
+		entityManipulation.setTimestep(timestep);
+		return entityManipulation;
 	}
 
-	private static void decodeEntity(String data, ArrayList<Entity> entities, Operation event, String className) {
-		switch (event) {
+	private static void decodeEntity(String data, ArrayList<Entity> entities, Operation operation, String className) {
+		switch (operation) {
 		case MOVE:
 		case ADD:
 			if (className.equals(GeoFence.class.getSimpleName())) {
@@ -378,8 +381,8 @@ public class LogCodex {
 		return f;
 	}
 
-	private static ToLogData decodeLogData(String[] infoBlocks) {
-		ToLogData logData = new ToLogData();
+	private static LogData decodeLogData(String[] infoBlocks) {
+		LogData logData = new LogData();
 
 		try {
 			for (int i = 0; i < infoBlocks.length; i++) {
@@ -504,7 +507,7 @@ public class LogCodex {
 		}
 	}
 
-	private static String encodeLogData(ToLogData logData) {
+	private static String encodeLogData(LogData logData) {
 		String data = "";
 		data += (logData.ip != null) ? IP_ADDR_SEP + logData.ip + MAIN_SEPARATOR : "";
 		data += (logData.timestep >= 0) ? TIMESTEP_SEP + Integer.toString(logData.timestep) + MAIN_SEPARATOR : "";

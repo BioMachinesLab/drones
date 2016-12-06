@@ -2,6 +2,7 @@ package commoninterface.entities.target;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 import commoninterface.entities.GeoEntity;
@@ -13,7 +14,7 @@ import net.jafama.FastMath;
 
 public class Formation extends GeoEntity {
 	private static final long serialVersionUID = 8538984759821378679L;
-	private ArrayList<Target> targets;
+	private List<Target> targets;
 	private HashMap<Target, Vector2d> targetsRelativePositions;
 
 	private MotionData motionData = null;
@@ -50,7 +51,7 @@ public class Formation extends GeoEntity {
 		return targets.size();
 	}
 
-	public ArrayList<Target> getTargets() {
+	public List<Target> getTargets() {
 		return targets;
 	}
 

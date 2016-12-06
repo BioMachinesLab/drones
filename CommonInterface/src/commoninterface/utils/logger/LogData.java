@@ -11,7 +11,7 @@ import commoninterface.AquaticDroneCI;
 import commoninterface.entities.Entity;
 import commoninterface.utils.jcoord.LatLon;
 
-public class ToLogData implements Comparable<ToLogData>, Serializable {
+public class LogData implements Comparable<LogData>, Serializable {
 	private static final long serialVersionUID = 2335190136349558637L;
 
 	static DateTimeFormatter formatter = DateTimeFormat.forPattern("dd-MM-YY_HH:mm:ss.SS");
@@ -44,15 +44,15 @@ public class ToLogData implements Comparable<ToLogData>, Serializable {
 	public ArrayList<Entity> entities;
 
 	@Override
-	public int compareTo(ToLogData o) {
+	public int compareTo(LogData o) {
 		return DateTime.parse(GPSdate, formatter).compareTo(DateTime.parse(o.GPSdate, formatter));
 	}
 
 	@Override
 	// Missing entities comparison :P
 	public boolean equals(Object obj) {
-		if (obj instanceof ToLogData) {
-			ToLogData object = (ToLogData) obj;
+		if (obj instanceof LogData) {
+			LogData object = (LogData) obj;
 
 			boolean a = (file == null && object.file == null) || file.equals(object.file);
 			boolean b = timestep == object.timestep;

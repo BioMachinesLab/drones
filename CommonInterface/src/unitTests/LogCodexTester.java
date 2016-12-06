@@ -32,7 +32,7 @@ import commoninterface.utils.logger.EntityManipulation;
 import commoninterface.utils.logger.EntityManipulation.Operation;
 import commoninterface.utils.logger.LogCodex;
 import commoninterface.utils.logger.LogCodex.LogType;
-import commoninterface.utils.logger.ToLogData;
+import commoninterface.utils.logger.LogData;
 import net.jafama.FastMath;
 
 public class LogCodexTester {
@@ -180,11 +180,11 @@ public class LogCodexTester {
 
 	private String expectedFormationLogString;
 
-	private ToLogData codedData;
+	private LogData codedData;
 
 	@Before
 	public void setUp() {
-		codedData = new ToLogData();
+		codedData = new LogData();
 
 		// Set data
 		codedData.timestep = TIMESTEP;
@@ -316,7 +316,7 @@ public class LogCodexTester {
 		assertEquals(expectedLogDataString, logStr);
 
 		DecodedLog logDataDecoded = LogCodex.decodeLog(logStr);
-		ToLogData fullDecodedLogData = ((ToLogData) logDataDecoded.getPayload()[0]);
+		LogData fullDecodedLogData = ((LogData) logDataDecoded.getPayload()[0]);
 		assertEquals(LogType.LOGDATA, logDataDecoded.getPayloadType());
 		assertEquals(TIMESTEP, fullDecodedLogData.timestep);
 		assertEquals(SENTENCE, fullDecodedLogData.comment);
