@@ -18,7 +18,7 @@ import commoninterface.network.messages.BehaviorMessage;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
-import commoninterface.utils.logger.ToLogData;
+import commoninterface.utils.logger.LogData;
 import fieldtests.evaluation.CoverageFitnessTest;
 import fieldtests.updatables.Coverage;
 import simulation.robot.AquaticDrone;
@@ -46,7 +46,7 @@ public class AssessFitness {
 		DateTime currentTime;
 		int step = 0;
 
-		for (ToLogData d : exp.logs) {
+		for (LogData d : exp.logs) {
 
 			if (d.comment != null)
 				continue;
@@ -108,7 +108,7 @@ public class AssessFitness {
 
 		startControllers(exp, setup);
 
-		for (ToLogData d : exp.logs) {
+		for (LogData d : exp.logs) {
 
 			if (d.comment != null || d.ip == null)
 				continue;
@@ -294,7 +294,7 @@ public class AssessFitness {
 			double[] totalDistanceSim = new double[8];
 			double[] totalDistanceReal = new double[8];
 
-			for (ToLogData d : exp.logs) {
+			for (LogData d : exp.logs) {
 
 				if (stopRun)
 					break;

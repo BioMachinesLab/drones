@@ -12,7 +12,7 @@ import org.joda.time.format.DateTimeFormatter;
 import commoninterface.entities.Entity;
 import commoninterface.utils.logger.DecodedLog;
 import commoninterface.utils.logger.LogCodex;
-import commoninterface.utils.logger.ToLogData;
+import commoninterface.utils.logger.LogData;
 
 public class DroneLogExporter {
 
@@ -30,9 +30,9 @@ public class DroneLogExporter {
 
 	public static DateTimeFormatter formatter = DateTimeFormat.forPattern("dd-MM-YY_HH:mm:ss.SS");
 
-	public static DateTime getStartTime(ArrayList<ToLogData> data, String description) {
+	public static DateTime getStartTime(ArrayList<LogData> data, String description) {
 
-		for (ToLogData d : data) {
+		for (LogData d : data) {
 			if (d.comment != null) {
 				if (d.comment.contains(description))
 					return DateTime.parse(d.GPSdate, formatter);
@@ -44,10 +44,10 @@ public class DroneLogExporter {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static ArrayList<ToLogData> getCompleteLogs(String f) throws IOException {
+	public static ArrayList<LogData> getCompleteLogs(String f) throws IOException {
 		File folder = new File(f);
 
-		ArrayList<ToLogData> result = new ArrayList<ToLogData>();
+		ArrayList<LogData> result = new ArrayList<LogData>();
 
 		ArrayList<Entity> currentEntities = new ArrayList<Entity>();
 
@@ -96,7 +96,7 @@ public class DroneLogExporter {
 						if (o == null)
 							continue;
 
-						ToLogData d = (ToLogData) o;
+						LogData d = (LogData) o;
 						ArrayList<Entity> cE = new ArrayList<Entity>();
 						cE.addAll(currentEntities);
 						d.entities = cE;
@@ -117,7 +117,7 @@ public class DroneLogExporter {
 
 					case MESSAGE:
 
-						ToLogData data = new ToLogData();
+						LogData data = new LogData();
 						data.comment = (String) decodedData.getPayload()[0];
 						data.GPSdate = prevDate;
 						result.add(data);
@@ -134,12 +134,12 @@ public class DroneLogExporter {
 
 	}
 
-	public static ArrayList<ToLogData> getLogs(ArrayList<ToLogData> data, DateTime start, DateTime end)
+	public static ArrayList<LogData> getLogs(ArrayList<LogData> data, DateTime start, DateTime end)
 			throws IOException {
 
-		ArrayList<ToLogData> result = new ArrayList<ToLogData>();
+		ArrayList<LogData> result = new ArrayList<LogData>();
 
-		for (ToLogData d : data) {
+		for (LogData d : data) {
 			try {
 				DateTime date = DateTime.parse(d.GPSdate, formatter);
 
@@ -154,11 +154,11 @@ public class DroneLogExporter {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static ArrayList<ToLogData> getLogs(String f, DateTime start, DateTime end) throws IOException {
+	public static ArrayList<LogData> getLogs(String f, DateTime start, DateTime end) throws IOException {
 
 		File folder = new File(f);
 
-		ArrayList<ToLogData> result = new ArrayList<ToLogData>();
+		ArrayList<LogData> result = new ArrayList<LogData>();
 
 		boolean prevNormalLog = false;
 
@@ -199,7 +199,7 @@ public class DroneLogExporter {
 						if (o == null)
 							continue;
 
-						ToLogData d = (ToLogData) o;
+						LogData d = (LogData) o;
 						// d.entities = currentEntities;
 
 						if (d != null && d.GPSdate != null) {

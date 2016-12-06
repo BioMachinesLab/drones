@@ -10,7 +10,7 @@ import commoninterface.entities.RobotLocation;
 import commoninterface.entities.Waypoint;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
-import commoninterface.utils.logger.ToLogData;
+import commoninterface.utils.logger.LogData;
 import evolutionaryrobotics.JBotEvolver;
 import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
 import gui.renderer.CITwoDRenderer;
@@ -102,7 +102,7 @@ class Setup {
 
 		HashMap<Integer, Integer> robotList = new HashMap<Integer, Integer>();
 
-		for (ToLogData d : exp.logs) {
+		for (LogData d : exp.logs) {
 			if (d.latLon != null) {
 				RobotLocation rl = getRobotLocation(d);
 				int id = Integer.parseInt(rl.getName());
@@ -118,7 +118,7 @@ class Setup {
 		this.firstPos = CoordinateUtilities.GPSToCartesian(firstRL.getLatLon());
 
 		for (Integer id : robotList.keySet()) {
-			for (ToLogData d : exp.logs) {
+			for (LogData d : exp.logs) {
 
 				if (d.latLon == null)
 					continue;
@@ -145,7 +145,7 @@ class Setup {
 		if (exp.controllerName.contains("hierarchical")) {
 			for (Robot r : robots) {
 				int c = 0;
-				for (ToLogData d : exp.logs) {
+				for (LogData d : exp.logs) {
 					if (d.entities.size() == 2)
 						break;
 					c++;
@@ -197,7 +197,7 @@ class Setup {
 
 	}
 
-	public void updateRobotEntities(ToLogData d, AquaticDrone aq) {
+	public void updateRobotEntities(LogData d, AquaticDrone aq) {
 		Iterator<Entity> i = aq.getEntities().iterator();
 		while (i.hasNext()) {
 			Entity e = i.next();
@@ -228,12 +228,12 @@ class Setup {
 		}
 	}
 
-	public void updateRobotEntities(ToLogData d, String ip) {
+	public void updateRobotEntities(LogData d, String ip) {
 		AquaticDrone aq = (AquaticDrone) getRobot(ip);
 		updateRobotEntities(d, aq);
 	}
 
-	public void updateRobotEntities(ToLogData d) {
+	public void updateRobotEntities(LogData d) {
 		updateRobotEntities(d, d.ip);
 	}
 
@@ -258,7 +258,7 @@ class Setup {
 		return renderer;
 	}
 
-	public static RobotLocation getRobotLocation(ToLogData d) {
+	public static RobotLocation getRobotLocation(LogData d) {
 		String[] split = d.ip.split("\\.");
 		return new RobotLocation(split[split.length - 1], d.latLon, d.compassOrientation, d.droneType);
 	}

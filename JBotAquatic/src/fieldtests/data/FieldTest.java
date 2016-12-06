@@ -13,7 +13,7 @@ import java.util.HashMap;
 
 import org.joda.time.DateTime;
 
-import commoninterface.utils.logger.ToLogData;
+import commoninterface.utils.logger.LogData;
 
 public class FieldTest {
 	
@@ -71,7 +71,7 @@ public class FieldTest {
 	static PrintWriter writer;
 
 	private ArrayList<Experiment> experiments = new ArrayList<Experiment>();
-	private HashMap<Integer,ArrayList<ToLogData>> completeLogs = new HashMap<Integer, ArrayList<ToLogData>>();
+	private HashMap<Integer,ArrayList<LogData>> completeLogs = new HashMap<Integer, ArrayList<LogData>>();
 	private int[] robots = new int[]{1,2,3,4,5,6,7,8,9,10};
 	private int nSamples = 10;
 	
@@ -273,7 +273,7 @@ public class FieldTest {
 			System.out.println("]");
 		}
 		
-		ArrayList<ToLogData> allData = new ArrayList<ToLogData>();
+		ArrayList<LogData> allData = new ArrayList<LogData>();
 		
 		for(int i : participatingRobots) {
 			allData.addAll(DroneLogExporter.getLogs(completeLogs.get(i), startTime, endTime));
