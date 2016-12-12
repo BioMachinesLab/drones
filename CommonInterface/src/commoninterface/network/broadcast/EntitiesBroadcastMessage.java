@@ -8,8 +8,8 @@ import commoninterface.entities.GeoEntity;
 import commoninterface.entities.GeoFence;
 import commoninterface.entities.ObstacleLocation;
 import commoninterface.entities.Waypoint;
-import commoninterface.entities.target.Formation;
-import commoninterface.entities.target.Target;
+import commoninterface.entities.formation.Formation;
+import commoninterface.entities.formation.Target;
 import commoninterface.utils.jcoord.LatLon;
 
 public class EntitiesBroadcastMessage extends BroadcastMessage {

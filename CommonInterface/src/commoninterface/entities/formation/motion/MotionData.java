@@ -1,4 +1,4 @@
-package commoninterface.entities.target.motion;
+package commoninterface.entities.formation.motion;
 
 import java.io.Serializable;
 

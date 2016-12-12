@@ -6,11 +6,11 @@ import java.util.List;
 
 import commoninterface.AquaticDroneCI;
 import commoninterface.entities.Entity;
-import commoninterface.entities.target.Formation;
-import commoninterface.entities.target.Formation.FormationType;
-import commoninterface.entities.target.Target;
-import commoninterface.entities.target.motion.LinearMotionData;
-import commoninterface.entities.target.motion.RotationMotionData;
+import commoninterface.entities.formation.Formation;
+import commoninterface.entities.formation.Target;
+import commoninterface.entities.formation.Formation.FormationType;
+import commoninterface.entities.formation.motion.LinearMotionData;
+import commoninterface.entities.formation.motion.RotationMotionData;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CoordinateUtilities;
 import net.jafama.FastMath;

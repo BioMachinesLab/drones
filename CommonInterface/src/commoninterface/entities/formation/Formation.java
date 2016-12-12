@@ -1,4 +1,4 @@
-package commoninterface.entities.target;
+package commoninterface.entities.formation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import commoninterface.entities.GeoEntity;
-import commoninterface.entities.target.motion.MotionData;
+import commoninterface.entities.formation.motion.MotionData;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;

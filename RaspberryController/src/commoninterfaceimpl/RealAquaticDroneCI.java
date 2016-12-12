@@ -15,7 +15,7 @@ import commoninterface.dataobjects.GPSData;
 import commoninterface.entities.Entity;
 import commoninterface.entities.RobotLocation;
 import commoninterface.entities.Waypoint;
-import commoninterface.entities.target.Formation;
+import commoninterface.entities.formation.Formation;
 import commoninterface.instincts.AvoidDronesInstinct;
 import commoninterface.instincts.AvoidObstaclesInstinct;
 import commoninterface.messageproviders.BehaviorMessageProvider;

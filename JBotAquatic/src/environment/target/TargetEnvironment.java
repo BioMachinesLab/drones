@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import commoninterface.AquaticDroneCI;
-import commoninterface.entities.target.Target;
+import commoninterface.entities.formation.Target;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CoordinateUtilities;
 import net.jafama.FastMath;

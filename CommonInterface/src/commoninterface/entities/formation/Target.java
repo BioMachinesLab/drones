@@ -1,8 +1,8 @@
-package commoninterface.entities.target;
+package commoninterface.entities.formation;
 
 import commoninterface.entities.GeoEntity;
-import commoninterface.entities.target.motion.MixedMotionData;
-import commoninterface.entities.target.motion.MotionData;
+import commoninterface.entities.formation.motion.MixedMotionData;
+import commoninterface.entities.formation.motion.MotionData;
 import commoninterface.utils.jcoord.LatLon;
 
 public class Target extends GeoEntity {

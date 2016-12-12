@@ -1,4 +1,4 @@
-package commoninterface.entities.target.motion;
+package commoninterface.entities.formation.motion;
 
 import commoninterface.entities.GeoEntity;
 import commoninterface.mathutils.Vector2d;

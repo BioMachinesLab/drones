@@ -23,14 +23,14 @@ import javax.swing.JTextField;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 
 import commoninterface.entities.GeoEntity;
-import commoninterface.entities.target.Formation;
-import commoninterface.entities.target.Formation.FormationType;
-import commoninterface.entities.target.Target;
-import commoninterface.entities.target.motion.LinearMotionData;
-import commoninterface.entities.target.motion.MixedMotionData;
-import commoninterface.entities.target.motion.MotionData;
-import commoninterface.entities.target.motion.MotionData.MovementType;
-import commoninterface.entities.target.motion.RotationMotionData;
+import commoninterface.entities.formation.Formation;
+import commoninterface.entities.formation.Target;
+import commoninterface.entities.formation.Formation.FormationType;
+import commoninterface.entities.formation.motion.LinearMotionData;
+import commoninterface.entities.formation.motion.MixedMotionData;
+import commoninterface.entities.formation.motion.MotionData;
+import commoninterface.entities.formation.motion.RotationMotionData;
+import commoninterface.entities.formation.motion.MotionData.MovementType;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.jcoord.LatLon;
 

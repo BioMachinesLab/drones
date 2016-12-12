@@ -15,9 +15,9 @@ import org.openstreetmap.gui.jmapviewer.Coordinate;
 
 import commoninterface.entities.GeoFence;
 import commoninterface.entities.Waypoint;
-import commoninterface.entities.target.Formation;
-import commoninterface.entities.target.Formation.FormationType;
-import commoninterface.entities.target.motion.MotionData.MovementType;
+import commoninterface.entities.formation.Formation;
+import commoninterface.entities.formation.Formation.FormationType;
+import commoninterface.entities.formation.motion.MotionData.MovementType;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CIArguments;
 import commoninterface.utils.CoordinateUtilities;

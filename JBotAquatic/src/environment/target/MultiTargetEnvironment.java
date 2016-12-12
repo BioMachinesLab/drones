@@ -1,8 +1,8 @@
 package environment.target;
 
 import commoninterface.AquaticDroneCI;
-import commoninterface.entities.target.Target;
-import commoninterface.entities.target.motion.LinearMotionData;
+import commoninterface.entities.formation.Target;
+import commoninterface.entities.formation.motion.LinearMotionData;
 import commoninterface.mathutils.Vector2d;
 import commoninterface.utils.CoordinateUtilities;
 import commoninterface.utils.jcoord.LatLon;
