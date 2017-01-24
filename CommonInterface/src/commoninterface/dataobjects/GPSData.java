@@ -14,7 +14,7 @@ import commoninterface.utils.Nmea0183ToDecimalConverter;
  * 
  */
 public class GPSData implements Serializable {
-	private static final long serialVersionUID = -2077018378793167250L;
+	private static final long serialVersionUID = -7397282951343392904L;
 	private final static int NUMBER_OF_PARAMETERS = 15;
 	private long PRINT_NUMBER = 0;
 

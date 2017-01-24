@@ -1,10 +1,12 @@
 package commoninterface.utils.logger;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import commoninterface.entities.Entity;
 
-public class EntityManipulation {
+public class EntityManipulation implements Serializable{
+	private static final long serialVersionUID = 6488093535381587778L;
 
 	public static enum Operation {
 		ADD, REMOVE, MOVE

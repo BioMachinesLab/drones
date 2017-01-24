@@ -30,7 +30,6 @@ public class CIGraphPlotter extends GraphPlotter {
 	protected CINeuralNetwork ciNN;
 	protected Vector<CINNInput> ciInputs;
 	protected Vector<CINNOutput> ciOutputs;
-	protected boolean saveToFile=false;
 
 	public CIGraphPlotter(JBotEvolver jBotEvolver, Simulator simulator) {
 		super();
@@ -93,9 +92,9 @@ public class CIGraphPlotter extends GraphPlotter {
 			saveToFileButton.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					saveToFile = true;
-					plotGraph();
-					saveToFile = false;
+					// saveToFile = true;
+					// plotGraph();
+					// saveToFile = false;
 				}
 			});
 
@@ -115,6 +114,7 @@ public class CIGraphPlotter extends GraphPlotter {
 		}
 	}
 
+	@Override
 	protected void plotGraph() {
 
 		valuesList = new ArrayList<double[][]>();
@@ -186,7 +186,7 @@ public class CIGraphPlotter extends GraphPlotter {
 				}
 			}
 
-			Thread worker = new Thread(new GraphSimulationRunner(simulator, saveToFile));
+			Thread worker = new Thread(new GraphSimulationRunner(simulator));
 			worker.start();
 
 		} catch (Exception e) {
