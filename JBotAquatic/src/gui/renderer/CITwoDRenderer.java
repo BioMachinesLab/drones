@@ -602,4 +602,8 @@ public class CITwoDRenderer extends TwoDRenderer {
 	public void displayVelocityVectors(boolean show) {
 		this.showVelocityVectors = show;
 	}
+
+	public synchronized void resetPositionHistory() {
+		positionsHistory.clear();
+	}
 }

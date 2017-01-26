@@ -253,6 +253,10 @@ public class CIResultViewerGui extends ResultViewerGui {
 			}
 		}
 
+		if(renderer instanceof CITwoDRenderer){
+			((CITwoDRenderer)renderer).resetPositionHistory();
+		}
+		
 		return sim;
 	}
 
