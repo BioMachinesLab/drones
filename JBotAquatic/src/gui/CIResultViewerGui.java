@@ -37,6 +37,8 @@ public class CIResultViewerGui extends ResultViewerGui {
 	private JTextField coneTransparenceTextField;
 	private JCheckBox seeSensorJCheckBox;
 	private JCheckBox seeEntitiesJCheckBox;
+	private JCheckBox seeRobotTargetsJCheckBox;
+	private JCheckBox showRobotsPositionHistoryJCheckBox;
 
 	private JCheckBox velocityVectorsCheckbox;
 	private boolean displayVelocityVectors = true;
@@ -86,15 +88,26 @@ public class CIResultViewerGui extends ResultViewerGui {
 			velocityVectorsCheckbox.setAlignmentX(Component.CENTER_ALIGNMENT);
 			extraOptionsPanel.add(velocityVectorsCheckbox);
 
+			showRobotsPositionHistoryJCheckBox = new JCheckBox("Show robots position history");
+			showRobotsPositionHistoryJCheckBox.setAlignmentX(Component.CENTER_ALIGNMENT);
+			showRobotsPositionHistoryJCheckBox
+					.setSelected(((CITwoDRenderer) renderer).isShowRobotsPositionHistoryEnabled());
+			extraOptionsPanel.add(showRobotsPositionHistoryJCheckBox);
+
 			// A Informations panel
 			JPanel sensorsPanel = new JPanel(new GridLayout(2, 1));
 			sensorsPanel.setBorder(BorderFactory.createTitledBorder("Sensors Options"));
 
-			JPanel optionBoxesPanel = new JPanel(new GridLayout(2, 1));
+			JPanel optionBoxesPanel = new JPanel(new GridLayout(4, 1));
 			seeEntitiesJCheckBox = new JCheckBox("See entities");
-			seeEntitiesJCheckBox.setHorizontalAlignment(JTextField.CENTER);
+			seeEntitiesJCheckBox.setAlignmentX(Component.CENTER_ALIGNMENT);
 			seeEntitiesJCheckBox.setSelected(((CITwoDRenderer) renderer).isSeeEntitiesEnabled());
 			optionBoxesPanel.add(seeEntitiesJCheckBox);
+
+			seeRobotTargetsJCheckBox = new JCheckBox("See robot targets names");
+			seeRobotTargetsJCheckBox.setAlignmentX(Component.CENTER_ALIGNMENT);
+			seeRobotTargetsJCheckBox.setSelected(((CITwoDRenderer) renderer).isSeeRobotTargetsEnabled());
+			optionBoxesPanel.add(seeRobotTargetsJCheckBox);
 
 			seeSensorJCheckBox = new JCheckBox("See sensors");
 			seeSensorJCheckBox.setHorizontalAlignment(JTextField.CENTER);
@@ -183,6 +196,30 @@ public class CIResultViewerGui extends ResultViewerGui {
 					JCheckBox check = (JCheckBox) e.getSource();
 					displayVelocityVectors = check.isSelected();
 					((CITwoDRenderer) renderer).displayVelocityVectors(displayVelocityVectors);
+
+					if ((simulationState == STOPPED || simulationState == PAUSED) && simulator != null) {
+						renderer.drawFrame();
+					}
+				}
+			});
+
+			seeRobotTargetsJCheckBox.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					JCheckBox check = (JCheckBox) e.getSource();
+					((CITwoDRenderer) renderer).setSeeRobotFollowingTarget(check.isSelected());
+
+					if ((simulationState == STOPPED || simulationState == PAUSED) && simulator != null) {
+						renderer.drawFrame();
+					}
+				}
+			});
+
+			showRobotsPositionHistoryJCheckBox.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					JCheckBox check = (JCheckBox) e.getSource();
+					((CITwoDRenderer) renderer).setShowRobotsPositionHistory(check.isSelected());
 
 					if ((simulationState == STOPPED || simulationState == PAUSED) && simulator != null) {
 						renderer.drawFrame();

@@ -1,11 +1,13 @@
 package gui.renderer;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RadialGradientPaint;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 import commoninterface.CISensor;
@@ -48,12 +50,16 @@ public class CITwoDRenderer extends TwoDRenderer {
 	protected int droneID;
 	protected boolean seeSensors;
 	protected boolean seeEntities;
+	protected boolean seeRobotFollowingTarget;
 	protected boolean showVelocityVectors;
+	protected boolean showRobotsPositionHistory;
 	protected int coneSensorId;
 	protected double coneTransparence = .1;
 	protected String coneClass = "";
 	protected Color[] lineColors = new Color[] { Color.RED, Color.BLUE, Color.GREEN };
 	protected int colorIndex = 0;
+
+	private HashMap<Robot, ArrayList<Vector2d>> positionsHistory = new HashMap<Robot, ArrayList<Vector2d>>();
 
 	private ArrayList<Target> drawTargets = new ArrayList<Target>();
 
@@ -61,12 +67,14 @@ public class CITwoDRenderer extends TwoDRenderer {
 		super(args);
 
 		droneID = args.getArgumentAsIntOrSetDefault("droneid", 0);
-		seeSensors = args.getArgumentAsIntOrSetDefault("seesensors", 0) == 1;
-		seeEntities = args.getArgumentAsIntOrSetDefault("seeentities", 1) == 1;
+		seeSensors = args.getArgumentAsIntOrSetDefault("seeSensors", 0) == 1;
+		seeEntities = args.getArgumentAsIntOrSetDefault("seeEntities", 1) == 1;
+		seeRobotFollowingTarget = args.getArgumentAsIntOrSetDefault("seeRobotFollowingTarget", 1) == 1;
 		coneSensorId = args.getArgumentAsIntOrSetDefault("conesensorid", -1);
 		coneTransparence = args.getArgumentAsDoubleOrSetDefault("coneTransparence", coneTransparence);
 		coneClass = args.getArgumentAsStringOrSetDefault("coneclass", "");
 		showVelocityVectors = args.getArgumentAsIntOrSetDefault("showVelocityVectors", 0) == 1;
+		showRobotsPositionHistory = args.getArgumentAsIntOrSetDefault("showRobotsPositionHistory", 0) == 1;
 
 		addMouseListener(this);
 		addMouseMotionListener(this);
@@ -82,26 +90,36 @@ public class CITwoDRenderer extends TwoDRenderer {
 		for (PhysicalObject m : simulator.getEnvironment().getAllObjects()) {
 			switch (m.getType()) {
 			case ROBOT:
+				if (seeEntities && seeRobotFollowingTarget) {
+					TargetComboCISensor sensor = (TargetComboCISensor) ((CISensorWrapper) ((AquaticDrone) m)
+							.getSensorWithId(1)).getCisensor();
+					Robot robot = (Robot) m;
 
-//				TargetMotionCISensor sensor = (TargetMotionCISensor) ((CISensorWrapper) ((AquaticDrone) m)
-//						.getSensorWithId(2)).getCisensor();
-				TargetComboCISensor sensor = (TargetComboCISensor) ((CISensorWrapper) ((AquaticDrone) m)
-						.getSensorWithId(1)).getCisensor();
-				Robot robot = (Robot) m;
+					if (sensor.getConsideringTarget() != null) {
+						int x = transformX(robot.getPosition().x + robot.getRadius() + (bigRobots ? 1 : 0));
+						int y = transformY(robot.getPosition().y - robot.getDiameter() - (bigRobots ? 1 : 0));
 
-				if (sensor.getConsideringTarget() != null) {
-					int x = transformX(robot.getPosition().x + robot.getRadius() + (bigRobots ? 1 : 0));
-					int y = transformY(robot.getPosition().y - robot.getDiameter() - (bigRobots ? 1 : 0));
+						String name = sensor.getConsideringTarget().getName().replace("formation_target_", "t");
+						Font originalFont = graphics.getFont();
 
-					graphics.setColor(Color.WHITE);
-					graphics.fillRect(x, y-22, 105, 12);
+						int width = graphics.getFontMetrics().stringWidth(name);
+						int height = graphics.getFontMetrics().getHeight();
+						graphics.setColor(Color.WHITE);
+						graphics.setFont(originalFont.deriveFont(Font.BOLD));
+						graphics.fillRect(x + 4, y - 20, width + 2, height - 5);
 
-					graphics.setColor(Color.BLACK);
-					graphics.drawString(sensor.getConsideringTarget().getName(), x, y-12);
+						graphics.setColor(Color.BLACK);
+						graphics.drawString(name, x + 5, y - 10);
+						graphics.setFont(originalFont);
+					}
 				}
 			default:
 				break;
 			}
+		}
+
+		if (showRobotsPositionHistory) {
+			drawRobotsPositionHistory();
 		}
 	}
 
@@ -217,6 +235,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 								int x = transformX(pos.x) - diam / 2;
 								int y = transformY(pos.y) - diam / 2;
 								graphics.fillOval(x, y, diam, diam);
+
 								drawTargetId(graphics, t);
 								if (showVelocityVectors && t.getMotionData() != null) {
 									MotionData motionData = (t.getMotionData());
@@ -243,6 +262,7 @@ public class CITwoDRenderer extends TwoDRenderer {
 										graphics.setColor(color);
 									}
 								}
+
 								drawTargets.add(t);
 							}
 						}
@@ -352,6 +372,42 @@ public class CITwoDRenderer extends TwoDRenderer {
 
 			}
 		}
+	}
+
+	@Override
+	protected void drawRobot(Graphics graphics, Robot robot) {
+		super.drawRobot(graphics, robot);
+
+		Vector2d position = new Vector2d(robot.getPosition().x, robot.getPosition().y);
+
+		if (positionsHistory.get(robot) == null) {
+			ArrayList<Vector2d> positions = new ArrayList<Vector2d>();
+			positionsHistory.put(robot, positions);
+		} else {
+			positionsHistory.get(robot).add(position);
+		}
+	};
+
+	protected void drawRobotsPositionHistory() {
+		int circleDiameter = (bigRobots ? (int) Math.max(10, Math.round(ENTITY_DIAMETER * scale))
+				: (int) Math.round(ENTITY_DIAMETER * scale)) / 4;
+		Color originalColor = graphics.getColor();
+
+		for (Robot robot : positionsHistory.keySet()) {
+			ArrayList<Vector2d> positions = positionsHistory.get(robot);
+
+			for (int i = 0; i < positions.size(); i++) {
+				Color color = new Color(Color.DARK_GRAY.getRed(), Color.DARK_GRAY.getGreen(), Color.DARK_GRAY.getBlue(),
+						(int) (i * 150.0 / positions.size()));
+
+				graphics.setColor(color);
+				int x = transformX(positions.get(i).x) - circleDiameter / 2;
+				int y = transformY(positions.get(i).y) - circleDiameter / 2;
+				graphics.fillOval(x, y, circleDiameter, circleDiameter);
+			}
+		}
+
+		graphics.setColor(originalColor);
 	}
 
 	private void paintCones(Graphics graphics, Robot robot, ConeTypeSensor coneSensor) {
@@ -503,12 +559,28 @@ public class CITwoDRenderer extends TwoDRenderer {
 		this.seeEntities = seeEntities;
 	}
 
+	public void setSeeRobotFollowingTarget(boolean seeRobotFollowingTarget) {
+		this.seeRobotFollowingTarget = seeRobotFollowingTarget;
+	}
+
+	public void setShowRobotsPositionHistory(boolean showRobotsPositionHistory) {
+		this.showRobotsPositionHistory = showRobotsPositionHistory;
+	}
+
 	public boolean isSeeSensorEnabled() {
 		return seeSensors;
 	}
 
 	public boolean isSeeEntitiesEnabled() {
 		return seeEntities;
+	}
+
+	public boolean isSeeRobotTargetsEnabled() {
+		return seeRobotFollowingTarget;
+	}
+
+	public boolean isShowRobotsPositionHistoryEnabled() {
+		return showRobotsPositionHistory;
 	}
 
 	public void setDroneID(int droneID) {
